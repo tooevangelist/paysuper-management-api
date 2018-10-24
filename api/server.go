@@ -37,7 +37,7 @@ func NewServer(config *config.Jwt, database dao.Database) (*Api, error) {
 		handlers: make(map[string]interface{}),
 	}
 
-	api.InitHandlers(database)
+	//api.InitHandlers(database)
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
@@ -52,9 +52,9 @@ func NewServer(config *config.Jwt, database dao.Database) (*Api, error) {
 		AllowHeaders: []string{"authorization", "content-type"},
 	}))
 
-	api.InitMerchantRoutes().
+	/*api.InitMerchantRoutes().
 		InitProjectRoutes().
-		InitCurrencyRoutes()
+		InitCurrencyRoutes()*/
 
 	return api, nil
 }
@@ -86,7 +86,7 @@ func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.Hand
 	}
 }
 
-func (api *Api) InitHandlers(database db.Database) {
+/*func (api *Api) InitHandlers(database db.Database) {
 	storage := &handler.Storage{
 		Database: database,
 		Handlers: api.handlers,
@@ -97,4 +97,4 @@ func (api *Api) InitHandlers(database db.Database) {
 	api.handlers[handler.DBCollectionCountry] = &handler.CountryHandler{Storage: storage}
 	api.handlers[handler.DBCollectionMerchant] = &handler.MerchantHandler{Storage: storage}
 	api.handlers[handler.DBCollectionProject] = &handler.ProjectHandler{Storage: storage}
-}
+}*/

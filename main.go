@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/ProtocolONE/p1payments.api/api"
-	"github.com/ProtocolONE/p1payments.api/config"
-	"github.com/ProtocolONE/p1payments.api/database"
+	"github.com/ProtocolONE/p1pay.api/api"
+	"github.com/ProtocolONE/p1pay.api/config"
+	"github.com/ProtocolONE/p1pay.api/database"
 	"log"
 )
 
@@ -21,6 +21,9 @@ func main() {
 	}
 
 	defer db.Close()
+
+	//db.(*mongo).CyrrencyRepository()
+	//return
 
 	server, err := api.NewServer(&conf.Jwt, db)
 

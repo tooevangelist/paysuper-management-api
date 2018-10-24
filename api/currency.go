@@ -1,18 +1,10 @@
 package api
 
-import (
-	"github.com/ProtocolONE/payments.api/handler"
-	"github.com/labstack/echo"
-	"net/http"
-	"strconv"
-)
-
 type CurrencyApiV1 struct {
 	*Api
-	handler *handler.CurrencyHandler
 }
 
-func (api *Api) InitCurrencyRoutes() *Api {
+/*func (api *Api) InitCurrencyRoutes() *Api {
 	cApiV1 := CurrencyApiV1{
 		Api: api,
 		handler: api.handlers[handler.DBCollectionCurrency].(*handler.CurrencyHandler),
@@ -46,4 +38,4 @@ func (cApiV1 *CurrencyApiV1) getAll(c echo.Context) error {
 
 func (cApiV1 *CurrencyApiV1) get(c echo.Context) error {
 	return c.JSON(http.StatusOK, "a")
-}
+}*/

@@ -1,18 +1,18 @@
 package mongo
 
 import (
-	"github.com/ProtocolONE/p1payments.api/database"
+	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"gopkg.in/mgo.v2"
 )
 
 type Source struct {
 	name       string
-	connection database.Connection
+	connection dao.Connection
 	session    *mgo.Session
 	database   *mgo.Database
 }
 
-func Open(settings database.Connection) (database.Database, error) {
+func Open(settings dao.Connection) (dao.Database, error) {
 	d := &Source{}
 
 	if err := d.Open(settings); err != nil {
@@ -23,7 +23,7 @@ func Open(settings database.Connection) (database.Database, error) {
 }
 
 // Open attempts to connect to the database.
-func (s *Source) Open(conn database.Connection) error {
+func (s *Source) Open(conn dao.Connection) error {
 	s.connection = conn
 	return s.open()
 }
@@ -51,7 +51,7 @@ func (s *Source) Close() {
 }
 
 // Clone returns a cloned db.Database session.
-func (s *Source) Clone() (database.Database, error) {
+func (s *Source) Clone() (dao.Database, error) {
 	newSession := s.session.Copy()
 
 	clone := &Source{
@@ -62,4 +62,9 @@ func (s *Source) Clone() (database.Database, error) {
 	}
 
 	return clone, nil
+}
+
+// Source returns specified connection source struct.
+func (s *Source) Source() interface{} {
+	return s
 }
