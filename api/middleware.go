@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/labstack/echo"
+	"net/http"
 	"strconv"
 )
 
@@ -12,6 +13,10 @@ const (
 
 func (api *Api) LimitOffsetMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
+		if ctx.Request().Method != http.MethodGet {
+			return next(ctx)
+		}
+
 		limit, err := strconv.Atoi(ctx.QueryParam("limit"))
 
 		if err != nil {
