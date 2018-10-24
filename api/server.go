@@ -8,6 +8,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -20,24 +21,32 @@ type Merchant struct {
 	Projects   []string
 }
 
+type GetParams struct {
+	limit  int
+	offset int
+}
+
 type Api struct {
 	Http             *echo.Echo
 	config           *config.Config
+	database         dao.Database
+	logger           *zap.SugaredLogger
 	validate         *validator.Validate
 	accessRouteGroup *echo.Group
 	handlers         map[string]interface{}
 
 	Merchant
+	GetParams
 }
 
-func NewServer(config *config.Jwt, database dao.Database) (*Api, error) {
+func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLogger) (*Api, error) {
 	api := &Api{
 		Http:     echo.New(),
+		database: database,
+		logger:   logger,
 		validate: validator.New(),
 		handlers: make(map[string]interface{}),
 	}
-
-	//api.InitHandlers(database)
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
@@ -46,11 +55,15 @@ func NewServer(config *config.Jwt, database dao.Database) (*Api, error) {
 	}))
 	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
 
+	api.Http.Use(api.LimitOffsetMiddleware)
 	api.Http.Use(middleware.Logger())
 	api.Http.Use(middleware.Recover())
 	api.Http.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowHeaders: []string{"authorization", "content-type"},
 	}))
+
+	api.
+		InitCurrencyRoutes()
 
 	/*api.InitMerchantRoutes().
 		InitProjectRoutes().
@@ -85,16 +98,3 @@ func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.Hand
 		return next(c)
 	}
 }
-
-/*func (api *Api) InitHandlers(database db.Database) {
-	storage := &handler.Storage{
-		Database: database,
-		Handlers: api.handlers,
-		Mgo:      api.Mgo,
-	}
-
-	api.handlers[handler.DBCollectionCurrency] = &handler.CurrencyHandler{Storage: storage}
-	api.handlers[handler.DBCollectionCountry] = &handler.CountryHandler{Storage: storage}
-	api.handlers[handler.DBCollectionMerchant] = &handler.MerchantHandler{Storage: storage}
-	api.handlers[handler.DBCollectionProject] = &handler.ProjectHandler{Storage: storage}
-}*/

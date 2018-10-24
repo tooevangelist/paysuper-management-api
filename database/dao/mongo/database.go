@@ -2,14 +2,18 @@ package mongo
 
 import (
 	"github.com/ProtocolONE/p1pay.api/database/dao"
+	"github.com/ProtocolONE/p1pay.api/database/dao/mongo/repository"
 	"gopkg.in/mgo.v2"
+	"sync"
 )
 
 type Source struct {
-	name       string
-	connection dao.Connection
-	session    *mgo.Session
-	database   *mgo.Database
+	name           string
+	connection     dao.Connection
+	session        *mgo.Session
+	repositories   map[string]*repository.Repository
+	database       *mgo.Database
+	repositoriesMu sync.Mutex
 }
 
 func Open(settings dao.Connection) (dao.Database, error) {
@@ -38,6 +42,8 @@ func (s *Source) open() error {
 	}
 
 	s.session.SetMode(mgo.Monotonic, true)
+
+	s.repositories = map[string]*repository.Repository{}
 	s.database = s.session.DB("")
 
 	return nil
@@ -59,12 +65,31 @@ func (s *Source) Clone() (dao.Database, error) {
 		connection: s.connection,
 		session:    newSession,
 		database:   newSession.DB(s.database.Name),
+		repositories: map[string]*repository.Repository{},
 	}
 
 	return clone, nil
 }
 
-// Source returns specified connection source struct.
-func (s *Source) Source() interface{} {
-	return s
+// Repository returns a repository by name.
+func (s *Source) Repository(name string) dao.Repository {
+	s.repositoriesMu.Lock()
+	defer s.repositoriesMu.Unlock()
+
+	var rep *repository.Repository
+	var ok bool
+
+	if rep, ok = s.repositories[name]; !ok {
+		c, err := s.Clone()
+
+		if err != nil {
+			rep = &repository.Repository{ Collection: s.database.C(name)}
+		} else {
+			rep = &repository.Repository{ Collection: c.(*Source).database.C(name)}
+		}
+
+		s.repositories[name] = rep
+	}
+
+	return rep
 }

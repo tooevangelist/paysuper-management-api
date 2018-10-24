@@ -1,41 +1,52 @@
 package api
 
+import (
+	"github.com/ProtocolONE/p1pay.api/manager"
+	"github.com/labstack/echo"
+	"net/http"
+	"strconv"
+)
+
 type CurrencyApiV1 struct {
 	*Api
+	currencyManager *manager.CurrencyManager
 }
 
-/*func (api *Api) InitCurrencyRoutes() *Api {
+func (api *Api) InitCurrencyRoutes() *Api {
 	cApiV1 := CurrencyApiV1{
 		Api: api,
-		handler: api.handlers[handler.DBCollectionCurrency].(*handler.CurrencyHandler),
+		currencyManager: manager.InitCurrencyManager(api.database, api.logger),
 	}
 
 	api.Http.GET("/api/v1/currency", cApiV1.get)
-	api.Http.GET("/api/v1/currency/:limit/:offset", cApiV1.getAll)
 
 	return api
 }
 
-func (cApiV1 *CurrencyApiV1) getAll(c echo.Context) error {
-	limit, err := strconv.Atoi(c.Param("limit"))
+func (cApiV1 *CurrencyApiV1) get(ctx echo.Context) error {
+	code := ctx.QueryParam("code")
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Incorrect limit value")
+	if code != "" {
+		codeInt, err := strconv.Atoi(code)
+
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Incorrect code value")
+		}
+
+		c := cApiV1.currencyManager.FindByCodeInt(codeInt)
+
+		if c == nil {
+			return echo.NewHTTPError(http.StatusNotFound, "Currency not found")
+		}
+
+		return ctx.JSON(http.StatusOK, c)
 	}
 
-	offset, err := strconv.Atoi(c.Param("offset"))
+	name := ctx.QueryParam("name")
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Incorrect offset value")
+	if name != "" {
+		return ctx.JSON(http.StatusOK, cApiV1.currencyManager.FindByName(name))
 	}
 
-	q := c.QueryParam("q")
-
-	err, currencies := cApiV1.handler.GetAll(handler.Conditions{"q": q}, limit, offset)
-
-	return c.JSON(http.StatusOK, currencies)
+	return ctx.JSON(http.StatusOK, cApiV1.currencyManager.FindAll(cApiV1.limit, cApiV1.offset))
 }
-
-func (cApiV1 *CurrencyApiV1) get(c echo.Context) error {
-	return c.JSON(http.StatusOK, "a")
-}*/
