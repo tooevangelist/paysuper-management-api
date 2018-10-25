@@ -6,4 +6,8 @@ type Repository interface {
 	FindCurrencyById(int) (*model.Currency, error)
 	FindCurrenciesByName(string) ([]*model.Currency, error)
 	FindAllCurrencies(int, int) ([]*model.Currency, error)
+
+	FindCountryById(int) (*model.Country, error)
+	FindCountryByName(string) ([]*model.Country, error)
+	FindAllCountries(int, int) ([]*model.Country, error)
 }
