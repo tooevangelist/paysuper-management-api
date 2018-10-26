@@ -9,6 +9,7 @@ const (
 	tableCountry  = "country"
 	tableCurrency = "currency"
 	tableMerchant = "merchant"
+	tableProject  = "project"
 )
 
 type Manager struct {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ProtocolONE/p1pay.api/config"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
+	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -48,6 +49,8 @@ func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLog
 		handlers: make(map[string]interface{}),
 	}
 
+	api.validate.RegisterStructValidation(ProjectStructValidator, model.ProjectScalar{})
+
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningKey:    config.SignatureSecret,
@@ -65,11 +68,8 @@ func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLog
 	api.
 		InitCurrencyRoutes().
 		InitCountryRoutes().
-		InitMerchantRoutes()
-
-	/*api.InitMerchantRoutes().
-		InitProjectRoutes().
-		InitCurrencyRoutes()*/
+		InitMerchantRoutes().
+		InitProjectRoutes()
 
 	return api, nil
 }
