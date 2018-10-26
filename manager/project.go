@@ -176,11 +176,17 @@ func (pm *ProjectManager) Delete(p *model.Project) error {
 }
 
 func (pm *ProjectManager) FindProjectsByMerchantIdAndName(mId bson.ObjectId, pName string) *model.Project {
-	return pm.Database.Repository(tableProject).FindProjectsByMerchantIdAndName(mId, pName)
+	p, err := pm.Database.Repository(tableProject).FindProjectByMerchantIdAndName(mId, pName)
+
+	if err != nil {
+		return nil
+	}
+
+	return p
 }
 
-func (pm *ProjectManager) FindProjectsByMerchantId(mId bson.ObjectId) []*model.Project {
-	p, err := pm.Database.Repository(tableProject).FindProjectsByMerchantId(mId)
+func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int, offset int) []*model.Project {
+	p, err := pm.Database.Repository(tableProject).FindProjectsByMerchantId(bson.ObjectIdHex(mId), limit, offset)
 
 	if err != nil {
 		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableProject, err)

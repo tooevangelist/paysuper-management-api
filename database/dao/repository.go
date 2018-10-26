@@ -20,7 +20,7 @@ type Repository interface {
 
 	InsertProject(p *model.Project) error
 	UpdateProject(p *model.Project) error
-	FindProjectsByMerchantId(id bson.ObjectId) ([]*model.Project, error)
-	FindProjectsByMerchantIdAndName(bson.ObjectId, string) *model.Project
+	FindProjectsByMerchantId(bson.ObjectId, int, int) ([]*model.Project, error)
+	FindProjectByMerchantIdAndName(bson.ObjectId, string) (*model.Project, error)
 	FindProjectById(bson.ObjectId) (*model.Project, error)
 }
