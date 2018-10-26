@@ -10,4 +10,8 @@ type Repository interface {
 	FindCountryById(int) (*model.Country, error)
 	FindCountryByName(string) ([]*model.Country, error)
 	FindAllCountries(int, int) ([]*model.Country, error)
+
+	FindMerchantById(id string) (*model.Merchant, error)
+	InsertMerchant(m *model.Merchant) error
+	UpdateMerchant(m *model.Merchant) error
 }

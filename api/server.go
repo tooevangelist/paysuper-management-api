@@ -64,7 +64,8 @@ func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLog
 
 	api.
 		InitCurrencyRoutes().
-		InitCountryRoutes()
+		InitCountryRoutes().
+		InitMerchantRoutes()
 
 	/*api.InitMerchantRoutes().
 		InitProjectRoutes().

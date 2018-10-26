@@ -8,6 +8,7 @@ import (
 const (
 	tableCountry  = "country"
 	tableCurrency = "currency"
+	tableMerchant = "merchant"
 )
 
 type Manager struct {
