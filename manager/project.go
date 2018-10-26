@@ -197,8 +197,8 @@ func (pm *ProjectManager) FindProjectById(id string) *model.Project {
 	p, err := pm.Database.Repository(tableCurrency).FindProjectById(bson.ObjectIdHex(id))
 
 	if err != nil {
-		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableCurrency, err)
+		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableCurrency, err)
 	}
 
-	return c
+	return p
 }

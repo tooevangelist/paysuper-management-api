@@ -1,6 +1,6 @@
 FROM golang:1.11.1-alpine AS builder
 
-RUN apk add bash ca-certificates git gcc g++ libc-dev
+RUN apk add bash ca-certificates git
 
 WORKDIR /application
 ENV GO111MODULE=on
