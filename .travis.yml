@@ -21,7 +21,7 @@ jobs:
     - docker push $REPO
 after_success:
 - curl -X POST $JURL/job/deploy-p1api/build --user $JENKINS_LOGIN:$TOKEN --data-urlencode
-  json='\{"parameter":\ [\{"name":"CHART_NAME", "value":"p1pay.api"\}\]\}'
+  json='\{"parameter":\ [\{"name":"CHART_NAME", "value":"p1payapi"\}\]\}'
 notifications:
   email: false
   slack:
