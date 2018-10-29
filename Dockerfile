@@ -9,9 +9,6 @@ RUN go mod download
 
 COPY . ./
 RUN CGO_ENABLED=0 GOOS=linux go build -a -o $GOPATH/bin/p1pay_api .
+RUN $GOPATH/bin/p1pay_api -migration=up
 
 ENTRYPOINT $GOPATH/bin/p1pay_api
-
-#FROM alpine AS build
-#WORKDIR /usr/bin
-#COPY --from=builder /go/bin ./
