@@ -3,7 +3,7 @@ package mongo
 import (
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/dao/mongo/repository"
-	"gopkg.in/mgo.v2"
+	"github.com/globalsign/mgo"
 	"sync"
 )
 
@@ -93,3 +93,14 @@ func (s *Source) Repository(name string) dao.Repository {
 
 	return rep
 }
+
+// Driver returns the underlying *mgo.Session instance.
+func (s *Source) Driver() interface{} {
+	return s.session
+}
+
+// Driver returns the underlying *mgo.Database instance.
+func (s *Source) Database() interface{} {
+	return s.database
+}
+

@@ -24,9 +24,9 @@ type MerchantScalar struct {
 type Merchant struct {
 	Id               bson.ObjectId `bson:"_id" json:"id"`
 	ExternalId       string        `bson:"external_id" json:"external_id"`
-	Name             *string        `bson:"name" json:"name"`
+	Name             *string       `bson:"name" json:"name"`
 	Country          *Country      `bson:"country" json:"country"`
-	AccountingPeriod *string        `bson:"accounting_period" json:"accounting_period"`
+	AccountingPeriod *string       `bson:"accounting_period" json:"accounting_period"`
 	Currency         *Currency     `bson:"currency" json:"currency"`
 	Status           int           `bson:"status" json:"status"`
 	CreatedAt        time.Time     `bson:"created_at" json:"created_at"`

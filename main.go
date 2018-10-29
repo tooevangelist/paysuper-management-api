@@ -1,14 +1,19 @@
 package main
 
 import (
+	"flag"
 	"github.com/ProtocolONE/p1pay.api/api"
 	"github.com/ProtocolONE/p1pay.api/config"
 	"github.com/ProtocolONE/p1pay.api/database"
+	"github.com/globalsign/mgo"
 	"go.uber.org/zap"
 	"log"
 )
 
 func main() {
+	migration := flag.String("migration", "", "run database migrations with specified direction")
+	flag.Parse()
+
 	err, conf := config.NewConfig()
 
 	if err != nil {
@@ -22,6 +27,16 @@ func main() {
 	}
 
 	defer db.Close()
+
+	if *migration != "" {
+		err := database.Migrate(db.Database().(*mgo.Database), *migration)
+
+		if err != nil {
+			log.Fatalf("database migration failed with error: %s\n", err)
+		}
+
+		return
+	}
 
 	logger, err := zap.NewProduction()
 

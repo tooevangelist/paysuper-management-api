@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	tableCountry  = "country"
-	tableCurrency = "currency"
-	tableMerchant = "merchant"
-	tableProject  = "project"
+	TableCountry  = "country"
+	TableCurrency = "currency"
+	TableMerchant = "merchant"
+	TableProject  = "project"
 )
 
 type Manager struct {

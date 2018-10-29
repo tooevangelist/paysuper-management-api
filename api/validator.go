@@ -11,4 +11,8 @@ func ProjectStructValidator(sl validator.StructLevel) {
 	if p.SendNotifyEmail == true && len(p.NotifyEmails) <= 0 {
 		sl.ReportError(p.NotifyEmails, "NotifyEmails", "notify_emails", "notify_emails", "")
 	}
+
+	if p.OnlyFixedAmounts != true && len(p.FixedPackage) > 0 {
+		sl.ReportError(p.FixedPackage, "FixedPackage", "fixed_package", "fixed_package", "")
+	}
 }

@@ -78,10 +78,10 @@ func (pm *ProjectManager) Create(ps *model.ProjectScalar) (*model.Project, error
 		p.MaxPaymentAmount = *ps.MaxPaymentAmount
 	}
 
-	err := pm.Database.Repository(tableProject).InsertProject(p)
+	err := pm.Database.Repository(TableProject).InsertProject(p)
 
 	if err != nil {
-		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableProject, err)
+		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableProject, err)
 	}
 
 	return p, err
@@ -160,10 +160,10 @@ func (pm *ProjectManager) Update(p *model.Project, pn *model.ProjectScalar) (*mo
 		p.MaxPaymentAmount = *pn.MaxPaymentAmount
 	}
 
-	err := pm.Database.Repository(tableProject).UpdateProject(p)
+	err := pm.Database.Repository(TableProject).UpdateProject(p)
 
 	if err != nil {
-		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableProject, err)
+		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableProject, err)
 	}
 
 	return p, err
@@ -171,12 +171,13 @@ func (pm *ProjectManager) Update(p *model.Project, pn *model.ProjectScalar) (*mo
 
 func (pm *ProjectManager) Delete(p *model.Project) error {
 	p.IsActive = false
+	p.UpdatedAt = time.Now()
 
-	return pm.Database.Repository(tableProject).UpdateProject(p)
+	return pm.Database.Repository(TableProject).UpdateProject(p)
 }
 
 func (pm *ProjectManager) FindProjectsByMerchantIdAndName(mId bson.ObjectId, pName string) *model.Project {
-	p, err := pm.Database.Repository(tableProject).FindProjectByMerchantIdAndName(mId, pName)
+	p, err := pm.Database.Repository(TableProject).FindProjectByMerchantIdAndName(mId, pName)
 
 	if err != nil {
 		return nil
@@ -186,10 +187,10 @@ func (pm *ProjectManager) FindProjectsByMerchantIdAndName(mId bson.ObjectId, pNa
 }
 
 func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int, offset int) []*model.Project {
-	p, err := pm.Database.Repository(tableProject).FindProjectsByMerchantId(bson.ObjectIdHex(mId), limit, offset)
+	p, err := pm.Database.Repository(TableProject).FindProjectsByMerchantId(bson.ObjectIdHex(mId), limit, offset)
 
 	if err != nil {
-		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableProject, err)
+		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableProject, err)
 	}
 
 	if p == nil {
@@ -200,10 +201,10 @@ func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int, offset
 }
 
 func (pm *ProjectManager) FindProjectById(id string) *model.Project {
-	p, err := pm.Database.Repository(tableCurrency).FindProjectById(bson.ObjectIdHex(id))
+	p, err := pm.Database.Repository(TableCurrency).FindProjectById(bson.ObjectIdHex(id))
 
 	if err != nil {
-		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableCurrency, err)
+		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCurrency, err)
 	}
 
 	return p

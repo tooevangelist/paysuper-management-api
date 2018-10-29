@@ -13,20 +13,20 @@ func InitCurrencyManager(database dao.Database, logger *zap.SugaredLogger) *Curr
 }
 
 func (cm *CurrencyManager) FindByCodeInt(codeInt int) *model.Currency {
-	c, err := cm.Database.Repository(tableCurrency).FindCurrencyById(codeInt)
+	c, err := cm.Database.Repository(TableCurrency).FindCurrencyById(codeInt)
 
 	if err != nil {
-		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableCurrency, err)
+		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCurrency, err)
 	}
 
 	return c
 }
 
 func (cm *CurrencyManager) FindByName(name string) []*model.Currency {
-	c, err := cm.Database.Repository(tableCurrency).FindCurrenciesByName(name)
+	c, err := cm.Database.Repository(TableCurrency).FindCurrenciesByName(name)
 
 	if err != nil {
-		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableCurrency, err)
+		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCurrency, err)
 	}
 
 	if c == nil {
@@ -37,10 +37,10 @@ func (cm *CurrencyManager) FindByName(name string) []*model.Currency {
 }
 
 func (cm *CurrencyManager) FindAll(limit int, offset int) []*model.Currency {
-	c, err := cm.Database.Repository(tableCurrency).FindAllCurrencies(limit, offset)
+	c, err := cm.Database.Repository(TableCurrency).FindAllCurrencies(limit, offset)
 
 	if err != nil {
-		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableCurrency, err)
+		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCurrency, err)
 	}
 
 	if c == nil {

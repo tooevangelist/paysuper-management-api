@@ -13,20 +13,20 @@ func InitCountryManager(database dao.Database, logger *zap.SugaredLogger) *Count
 }
 
 func (cm *CountryManager) FindByCodeInt(codeInt int) *model.Country {
-	c, err := cm.Database.Repository(tableCountry).FindCountryById(codeInt)
+	c, err := cm.Database.Repository(TableCountry).FindCountryById(codeInt)
 
 	if err != nil {
-		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableCountry, err)
+		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCountry, err)
 	}
 
 	return c
 }
 
 func (cm *CountryManager) FindByName(name string) []*model.Country {
-	c, err := cm.Database.Repository(tableCountry).FindCountryByName(name)
+	c, err := cm.Database.Repository(TableCountry).FindCountryByName(name)
 
 	if err != nil {
-		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableCountry, err)
+		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCountry, err)
 	}
 
 	if c == nil {
@@ -37,10 +37,10 @@ func (cm *CountryManager) FindByName(name string) []*model.Country {
 }
 
 func (cm *CountryManager) FindAll(limit int, offset int) []*model.Country {
-	c, err := cm.Database.Repository(tableCountry).FindAllCountries(limit, offset)
+	c, err := cm.Database.Repository(TableCountry).FindAllCountries(limit, offset)
 
 	if err != nil {
-		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", tableCountry, err)
+		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCountry, err)
 	}
 
 	if c == nil {
