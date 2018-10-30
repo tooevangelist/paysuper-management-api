@@ -32,7 +32,7 @@ func (mApiV1 *MerchantApiV1) get(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Merchant not found")
 	}
 
-	return ctx.JSON(http.StatusCreated, m)
+	return ctx.JSON(http.StatusOK, m)
 }
 
 func (mApiV1 *MerchantApiV1) create(ctx echo.Context) error {
