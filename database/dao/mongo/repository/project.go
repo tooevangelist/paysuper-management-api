@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 )
 
 func (rep *Repository) InsertProject(p *model.Project) error {

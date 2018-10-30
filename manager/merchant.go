@@ -3,8 +3,8 @@ package manager
 import (
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/globalsign/mgo/bson"
 	"go.uber.org/zap"
-	"gopkg.in/mgo.v2/bson"
 	"time"
 )
 
@@ -27,6 +27,7 @@ func (mm *MerchantManager) FindById(id string) *model.Merchant {
 func (mm *MerchantManager) Create(ms *model.MerchantScalar) (*model.Merchant, error) {
 	m := &model.Merchant{
 		Id:         bson.NewObjectId(),
+		Email:      *ms.Email,
 		ExternalId: ms.Id,
 		Status:     model.MerchantStatusCreated,
 		CreatedAt:  time.Now(),
@@ -81,6 +82,10 @@ func (mm *MerchantManager) Update(m *model.Merchant, mn *model.MerchantScalar) (
 		if err == nil {
 			m.Country = ctr
 		}
+	}
+
+	if mn.Email != nil && m.Email != *mn.Email {
+		m.Email = *mn.Email
 	}
 
 	if mn.Name != nil && m.Name != mn.Name {

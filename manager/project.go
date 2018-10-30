@@ -3,8 +3,8 @@ package manager
 import (
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/globalsign/mgo/bson"
 	"go.uber.org/zap"
-	"gopkg.in/mgo.v2/bson"
 	"time"
 )
 
@@ -40,6 +40,7 @@ func (pm *ProjectManager) Create(ps *model.ProjectScalar) (*model.Project, error
 		IsAllowDynamicNotifyUrls:   ps.IsAllowDynamicNotifyUrls,
 		IsAllowDynamicRedirectUrls: ps.IsAllowDynamicRedirectUrls,
 		OnlyFixedAmounts:           ps.OnlyFixedAmounts,
+		FixedPackage:               ps.FixedPackage,
 		SecretKey:                  ps.SecretKey,
 		URLCheckAccount:            ps.URLCheckAccount,
 		URLProcessPayment:          ps.URLProcessPayment,

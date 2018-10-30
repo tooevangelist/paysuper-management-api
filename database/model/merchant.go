@@ -1,7 +1,7 @@
 package model
 
 import (
-	"gopkg.in/mgo.v2/bson"
+	"github.com/globalsign/mgo/bson"
 	"time"
 )
 
@@ -14,6 +14,7 @@ const (
 
 type MerchantScalar struct {
 	Id               string  `json:"id" validate:"required"`
+	Email            *string `json:"email" validate:"omitempty,email"`
 	Name             *string `json:"name" validate:"omitempty,min=3,max=255"`
 	Country          *int    `json:"country" validate:"omitempty,numeric"`
 	AccountingPeriod *string `json:"accounting_period" validate:"omitempty,oneof=day week 2week month quarter half-year year"`
@@ -24,6 +25,7 @@ type MerchantScalar struct {
 type Merchant struct {
 	Id               bson.ObjectId `bson:"_id" json:"id"`
 	ExternalId       string        `bson:"external_id" json:"external_id"`
+	Email            string        `bson:"email" json:"email"`
 	Name             *string       `bson:"name" json:"name"`
 	Country          *Country      `bson:"country" json:"country"`
 	AccountingPeriod *string       `bson:"accounting_period" json:"accounting_period"`

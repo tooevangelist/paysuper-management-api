@@ -50,6 +50,10 @@ func (mApiV1 *MerchantApiV1) create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, mApiV1.getFirstValidationError(err))
 	}
 
+	if ms.Email == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Email field is required")
+	}
+
 	m := mApiV1.merchantManager.FindById(ms.Id)
 
 	if m != nil {
