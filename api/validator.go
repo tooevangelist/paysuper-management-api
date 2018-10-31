@@ -12,7 +12,15 @@ func ProjectStructValidator(sl validator.StructLevel) {
 		sl.ReportError(p.NotifyEmails, "NotifyEmails", "notify_emails", "notify_emails", "")
 	}
 
-	if p.OnlyFixedAmounts != true && p.FixedPackage != nil && len(*p.FixedPackage) > 0 {
-		sl.ReportError(p.FixedPackage, "FixedPackage", "fixed_package", "fixed_package", "")
+	if p.OnlyFixedAmounts != true && p.FixedPackage != nil {
+		var counter int
+
+		for _, packages := range *p.FixedPackage {
+			counter += len(packages)
+		}
+
+		if counter > 0 {
+			sl.ReportError(p.FixedPackage, "FixedPackage", "fixed_package", "fixed_package", "")
+		}
 	}
 }

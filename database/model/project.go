@@ -8,16 +8,16 @@ import (
 type ProjectScalar struct {
 	Name                       string                      `json:"name" validate:"required,min=1,max=255"`
 	CallbackCurrency           *int                        `json:"callback_currency,omitempty" validate:"omitempty,numeric"`
-	CallbackProtocol           string                      `json:"callback_protocol" validate:"oneof=default"`
+	CallbackProtocol           string                      `json:"callback_protocol" validate:"required,oneof=default"`
 	CreateInvoiceAllowedUrls   []string                    `json:"create_invoice_allowed_urls" validate:"unique"`
 	IsAllowDynamicNotifyUrls   bool                        `json:"is_allow_dynamic_notify_urls"`
 	IsAllowDynamicRedirectUrls bool                        `json:"is_allow_dynamic_redirect_urls"`
 	LimitsCurrency             *int                        `json:"limits_currency,omitempty" validate:"omitempty,numeric"`
-	MaxPaymentAmount           *float64                    `json:"max_payment_amount,omitempty" validate:"omitempty,numeric,min=0,max=15000"`
-	MinPaymentAmount           *float64                    `json:"min_payment_amount,omitempty" validate:"omitempty,numeric,min=0,max=15000"`
+	MaxPaymentAmount           *float64                    `json:"max_payment_amount,omitempty" validate:"omitempty,numeric,min=0,max=999999"`
+	MinPaymentAmount           *float64                    `json:"min_payment_amount,omitempty" validate:"omitempty,numeric,min=0,max=999999"`
 	NotifyEmails               []string                    `json:"notify_emails" validate:"unique"`
 	OnlyFixedAmounts           bool                        `json:"only_fixed_amounts"`
-	SecretKey                  string                      `json:"secret_key" validate:"required,min=1,max=255"`
+	SecretKey                  string                      `json:"secret_key" validate:"max=255"`
 	SendNotifyEmail            bool                        `json:"send_notify_email"`
 	URLCheckAccount            *string                     `json:"url_check_account,omitempty" validate:"omitempty,url,max=255"`
 	URLProcessPayment          *string                     `json:"url_process_payment,omitempty" validate:"omitempty,url,max=255"`
