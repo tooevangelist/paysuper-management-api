@@ -9,4 +9,5 @@ type FixedPackage struct {
 	IsActive    bool      `bson:"is_active" json:"is_active" validate:"required"`
 	CreatedAt   time.Time `bson:"created_at" json:"created_at"`
 	UpdatedAt   time.Time `bson:"updated_at" json:"-"`
+	Currency    *Currency `json:"currency"`
 }

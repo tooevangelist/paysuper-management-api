@@ -189,7 +189,7 @@ func (pm *ProjectManager) FindProjectsByMerchantIdAndName(mId bson.ObjectId, pNa
 }
 
 func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int, offset int) []*model.Project {
-	p, err := pm.Database.Repository(TableProject).FindProjectsByMerchantId(bson.ObjectIdHex(mId), limit, offset)
+	p, err := pm.Database.Repository(TableProject).FindProjectsByMerchantId(mId, limit, offset)
 
 	if err != nil {
 		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableProject, err)
@@ -203,10 +203,25 @@ func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int, offset
 }
 
 func (pm *ProjectManager) FindProjectById(id string) *model.Project {
-	p, err := pm.Database.Repository(TableCurrency).FindProjectById(bson.ObjectIdHex(id))
+	bId := bson.ObjectIdHex(id)
+	p, err := pm.Database.Repository(TableProject).FindProjectById(bId)
 
 	if err != nil {
-		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCurrency, err)
+		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableProject, err)
+	}
+
+	if len(*p.FixedPackage) <= 0 {
+		return p
+	}
+
+	for _, packages := range *p.FixedPackage {
+		for _, p := range packages {
+			if p.CurrencyInt == 0 {
+				continue
+			}
+
+			p.Currency = pm.currencyManager.FindByCodeInt(p.CurrencyInt)
+		}
 	}
 
 	return p

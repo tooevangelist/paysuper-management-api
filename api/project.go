@@ -89,14 +89,14 @@ func (pApiV1 *ProjectApiV1) update(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Project not found")
 	}
 
-	if p.Merchant.Id.String() != pApiV1.Merchant.Identifier {
+	if p.Merchant.ExternalId != pApiV1.Merchant.Identifier {
 		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
 	}
 
 	ps := &model.ProjectScalar{}
 
 	if err := ctx.Bind(ps); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad request param")
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	if err := pApiV1.validate.Struct(ps); err != nil {
@@ -105,7 +105,7 @@ func (pApiV1 *ProjectApiV1) update(ctx echo.Context) error {
 
 	pf := pApiV1.projectManager.FindProjectsByMerchantIdAndName(p.Merchant.Id, ps.Name)
 
-	if pf != nil {
+	if pf != nil && pf.Id != p.Id {
 		return echo.NewHTTPError(http.StatusBadRequest, "Project with received name already exist")
 	}
 
