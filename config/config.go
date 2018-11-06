@@ -25,7 +25,7 @@ type Jwt struct {
 }
 
 type GeoIP struct {
-	DBPath string
+	DBPath string `envconfig:"MAXMIND_GEOIP_DB_PATH"`
 }
 
 type Config struct {
