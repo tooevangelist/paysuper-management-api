@@ -9,6 +9,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/oschwald/geoip2-golang"
+	"github.com/ttacon/libphonenumber"
 	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -27,6 +29,10 @@ type GetParams struct {
 	offset int
 }
 
+type Order struct {
+	PayerPhone *libphonenumber.PhoneNumber
+}
+
 type Api struct {
 	Http             *echo.Echo
 	config           *config.Config
@@ -35,21 +41,25 @@ type Api struct {
 	validate         *validator.Validate
 	accessRouteGroup *echo.Group
 	handlers         map[string]interface{}
+	geoDbReader      *geoip2.Reader
 
 	Merchant
 	GetParams
+	Order
 }
 
-func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLogger) (*Api, error) {
+func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLogger, geoDbReader *geoip2.Reader) (*Api, error) {
 	api := &Api{
 		Http:     echo.New(),
 		database: database,
 		logger:   logger,
 		validate: validator.New(),
 		handlers: make(map[string]interface{}),
+		geoDbReader: geoDbReader,
 	}
 
 	api.validate.RegisterStructValidation(ProjectStructValidator, model.ProjectScalar{})
+	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
@@ -69,7 +79,8 @@ func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLog
 		InitCurrencyRoutes().
 		InitCountryRoutes().
 		InitMerchantRoutes().
-		InitProjectRoutes()
+		InitProjectRoutes().
+		InitOrderV1Routes()
 
 	return api, nil
 }

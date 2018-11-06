@@ -40,7 +40,7 @@ func (pm *ProjectManager) Create(ps *model.ProjectScalar) (*model.Project, error
 		IsAllowDynamicNotifyUrls:   ps.IsAllowDynamicNotifyUrls,
 		IsAllowDynamicRedirectUrls: ps.IsAllowDynamicRedirectUrls,
 		OnlyFixedAmounts:           ps.OnlyFixedAmounts,
-		FixedPackage:               pm.fixedPackageDates(ps.FixedPackage, true),
+		FixedPackage:               pm.fixedPackageDates(*ps.FixedPackage, true),
 		SecretKey:                  ps.SecretKey,
 		URLCheckAccount:            ps.URLCheckAccount,
 		URLProcessPayment:          ps.URLProcessPayment,
@@ -92,7 +92,7 @@ func (pm *ProjectManager) Update(p *model.Project, pn *model.ProjectScalar) (*mo
 	p.CreateInvoiceAllowedUrls = pn.CreateInvoiceAllowedUrls
 	p.NotifyEmails = pn.NotifyEmails
 	p.UpdatedAt = time.Now()
-	p.FixedPackage = pm.fixedPackageDates(pn.FixedPackage, false)
+	p.FixedPackage = pm.fixedPackageDates(*pn.FixedPackage, false)
 
 	if p.Name != pn.Name {
 		p.Name = pn.Name
@@ -210,11 +210,11 @@ func (pm *ProjectManager) FindProjectById(id string) *model.Project {
 		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableProject, err)
 	}
 
-	if len(*p.FixedPackage) <= 0 {
+	if len(p.FixedPackage) <= 0 {
 		return p
 	}
 
-	for _, packages := range *p.FixedPackage {
+	for _, packages := range p.FixedPackage {
 		for _, p := range packages {
 			if p.CurrencyInt == 0 {
 				continue
@@ -227,8 +227,8 @@ func (pm *ProjectManager) FindProjectById(id string) *model.Project {
 	return p
 }
 
-func (pm *ProjectManager) fixedPackageDates(fixedPackages *map[string][]*model.FixedPackage, isNew bool) *map[string][]*model.FixedPackage {
-	for _, packages := range *fixedPackages {
+func (pm *ProjectManager) fixedPackageDates(fixedPackages map[string][]*model.FixedPackage, isNew bool) map[string][]*model.FixedPackage {
+	for _, packages := range fixedPackages {
 		for _, p := range packages {
 			if isNew == true {
 				p.CreatedAt = time.Now()

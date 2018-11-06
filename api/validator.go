@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/ttacon/libphonenumber"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -22,5 +23,19 @@ func ProjectStructValidator(sl validator.StructLevel) {
 		if counter > 0 {
 			sl.ReportError(p.FixedPackage, "FixedPackage", "fixed_package", "fixed_package", "")
 		}
+	}
+}
+
+func (api *Api) OrderStructValidator(sl validator.StructLevel)  {
+	o := sl.Current().Interface().(model.OrderScalar)
+
+	if o.PayerPhone != nil {
+		num, err := libphonenumber.Parse("+380 58 4162923", "US")
+
+		if err != nil {
+			sl.ReportError(o.PayerPhone, "PayerPhone", "PayerPhone", "PayerPhone", "")
+		}
+
+		api.Order.PayerPhone = num
 	}
 }

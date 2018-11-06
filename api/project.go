@@ -51,7 +51,7 @@ func (pApiV1 *ProjectApiV1) create(ctx echo.Context) error {
 	ps := &model.ProjectScalar{}
 
 	if err := ctx.Bind(ps); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
 
 	if err := pApiV1.validate.Struct(ps); err != nil {

@@ -6,6 +6,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/config"
 	"github.com/ProtocolONE/p1pay.api/database"
 	"github.com/globalsign/mgo"
+	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 	"log"
 )
@@ -43,7 +44,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Application logger initialization failed with error: %s\n", err)
 	}
-
 	defer func() {
 		if err := logger.Sync(); err != nil {
 			return
@@ -51,7 +51,18 @@ func main() {
 	}()
 	sugar := logger.Sugar()
 
-	server, err := api.NewServer(&conf.Jwt, db, sugar)
+	geoDbReader, err := geoip2.Open(conf.GeoIP.DBPath)
+
+	if err != nil {
+		log.Fatalf("geo ip database load failed with error: %s\n", err)
+	}
+	defer func() {
+		if err := geoDbReader.Close(); err != nil {
+			return
+		}
+	}()
+
+	server, err := api.NewServer(&conf.Jwt, db, sugar, geoDbReader)
 
 	if err != nil {
 		log.Fatalf("server crashed on init with error: %s\n", err)

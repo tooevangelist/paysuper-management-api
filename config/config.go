@@ -24,7 +24,12 @@ type Jwt struct {
 	Algorithm             string `envconfig:"JWT_ALGORITHM"`
 }
 
+type GeoIP struct {
+	DBPath string
+}
+
 type Config struct {
+	GeoIP
 	Jwt
 	Database
 }
