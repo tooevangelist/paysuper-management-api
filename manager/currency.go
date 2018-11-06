@@ -22,6 +22,16 @@ func (cm *CurrencyManager) FindByCodeInt(codeInt int) *model.Currency {
 	return c
 }
 
+func (cm *CurrencyManager) FindByCodeA3(codeA3 string) *model.Currency {
+	c, err := cm.Database.Repository(TableCurrency).FindCurrencyByCodeA3(codeA3)
+
+	if err != nil {
+		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCurrency, err)
+	}
+
+	return c
+}
+
 func (cm *CurrencyManager) FindByName(name string) []*model.Currency {
 	c, err := cm.Database.Repository(TableCurrency).FindCurrenciesByName(name)
 

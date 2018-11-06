@@ -37,5 +37,11 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.getFirstValidationError(err))
 	}
 
-	return ctx.JSON(http.StatusOK, order)
+	nOrder, err := oApiV1.orderManager.Process(order)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, nOrder)
 }

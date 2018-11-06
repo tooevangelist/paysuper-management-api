@@ -31,3 +31,10 @@ func (rep *Repository) FindAllCurrencies(limit int, offset int) ([]*model.Curren
 
 	return c, err
 }
+
+func (rep *Repository) FindCurrencyByCodeA3(codeA3 string) (*model.Currency, error) {
+	var c *model.Currency
+	err := rep.Collection.Find(bson.M{"code_a3": codeA3, "is_active": true}).One(&c)
+
+	return c, err
+}

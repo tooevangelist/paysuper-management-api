@@ -70,7 +70,7 @@ func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLog
 
 	api.Http.Use(api.LimitOffsetMiddleware)
 	api.Http.Use(middleware.Logger())
-	api.Http.Use(middleware.Recover())
+	//api.Http.Use(middleware.Recover())
 	api.Http.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowHeaders: []string{"authorization", "content-type"},
 	}))

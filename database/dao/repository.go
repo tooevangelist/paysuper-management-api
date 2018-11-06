@@ -9,6 +9,7 @@ type Repository interface {
 	FindCurrencyById(int) (*model.Currency, error)
 	FindCurrenciesByName(string) ([]*model.Currency, error)
 	FindAllCurrencies(int, int) ([]*model.Currency, error)
+	FindCurrencyByCodeA3(string) (*model.Currency, error)
 
 	FindCountryById(int) (*model.Country, error)
 	FindCountryByName(string) ([]*model.Country, error)
@@ -29,4 +30,7 @@ type Repository interface {
 	FindPaymentMethodById(bson.ObjectId) (*model.PaymentMethod, error)
 
 	FindOrderByProjectOrderId(string) (*model.Order, error)
+	InsertOrder(*model.Order) error
+
+	FindCurrenciesPair(int, int) (*model.CurrencyRate, error)
 }
