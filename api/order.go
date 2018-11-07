@@ -29,6 +29,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 	order := &model.OrderScalar{
 		CreateOrderIp: ctx.RealIP(),
+		IsJsonRequest: false,
 	}
 
 	if err := (&OrderFormBinder{}).Bind(order, ctx); err != nil {
@@ -51,7 +52,35 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 }
 
 func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK, map[string]string{"ip1": ctx.Request().Header.Get(echo.HeaderXForwardedFor), "ip2": ctx.Request().Header.Get(echo.HeaderXRealIP)})
+	order := &model.OrderScalar{
+		IsJsonRequest: true,
+	}
+
+	if err := (&OrderJsonBinder{}).Bind(order, ctx); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
+	}
+
+	if err := oApiV1.validate.Struct(order); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.getFirstValidationError(err))
+	}
+
+	nOrder, err := oApiV1.orderManager.Process(order)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	url := ctx.Request().Host + "/order/" + nOrder.Id.Hex()
+
+	if ctx.Request().TLS != nil {
+		url = "https://" + url
+	} else {
+		url = "http://" + url
+	}
+
+	ou := &model.OrderUrl{OrderUrl: url}
+
+	return ctx.JSON(http.StatusOK, ou)
 }
 
 func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
