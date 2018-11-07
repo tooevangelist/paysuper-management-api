@@ -50,8 +50,8 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 	return ctx.Redirect(http.StatusFound, rUrl)
 }
 
-func (oApiV1 *OrderApiV1) createJson (ctx echo.Context) error {
-	return nil
+func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, map[string]string{"ip1": ctx.Request().Header.Get(echo.HeaderXForwardedFor), "ip2": ctx.Request().Header.Get(echo.HeaderXRealIP)})
 }
 
 func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
@@ -69,8 +69,8 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 
 	return ctx.Render(http.StatusOK, "order.html", map[string]interface{}{
 		"ProjectName": "Test project",
-		"Years": oApiV1.orderManager.GetCardYears(),
-		"Months": oApiV1.orderManager.GetCardMonths(),
-		"Order": o,
+		"Years":       oApiV1.orderManager.GetCardYears(),
+		"Months":      oApiV1.orderManager.GetCardMonths(),
+		"Order":       o,
 	})
 }
