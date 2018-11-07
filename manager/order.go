@@ -89,7 +89,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		return nil, errors.New(orderErrorProjectNotFound)
 	}
 
-	if p.IsActive == true {
+	if p.IsActive == false {
 		return nil, errors.New(orderErrorProjectInactive)
 	}
 
