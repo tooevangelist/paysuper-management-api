@@ -14,13 +14,13 @@ func init() {
 		func(db *mgo.Database) error {
 			p := &model.Project{}
 
-			if err := db.C(manager.TableProject).Find(bson.M{"mame": "Герои Меча и Магии", "merchant.external_id": "5be2c3022b9bb6000765d132"}).One(&p); err != nil {
+			if err := db.C(manager.TableProject).Find(bson.M{"name": "Герои Меча и Магии", "merchant.external_id": "5be2c3022b9bb6000765d132"}).One(&p); err != nil {
 				return err
 			}
 
 			pm := model.PaymentMethod{}
 
-			if err := db.C(manager.TablePaymentSystem).Find(bson.M{"group_alias": "bank_card"}).One(&pm); err != nil {
+			if err := db.C(manager.TablePaymentMethod).Find(bson.M{"group_alias": "bank_card"}).One(&pm); err != nil {
 				return err
 			}
 
@@ -29,7 +29,7 @@ func init() {
 
 			p.PaymentMethods = pms
 
-			return db.C(manager.TableMerchant).UpdateId(p.Id, p)
+			return db.C(manager.TableProject).UpdateId(p.Id, p)
 		},
 		func(db *mgo.Database) error {
 			return nil
