@@ -21,6 +21,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.GET("/order/:id", oApiV1.getOrderForm)
 	api.Http.GET("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/order/create", oApiV1.createFromFormData)
+	api.Http.POST("/api/v1/order", oApiV1.createJson)
 
 	return api
 }
@@ -47,6 +48,10 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 	rUrl := "/order/" + nOrder.Id.Hex()
 
 	return ctx.Redirect(http.StatusFound, rUrl)
+}
+
+func (oApiV1 *OrderApiV1) createJson (ctx echo.Context) error {
+	return nil
 }
 
 func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {

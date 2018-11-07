@@ -3,7 +3,10 @@ FROM golang:1.11.1-alpine AS builder
 RUN apk add bash ca-certificates git
 
 WORKDIR /application
+
 ENV GO111MODULE=on
+ENV MAXMIND_GEOIP_DB_PATH=/application/etc/maxmind/GeoLite2-City.mmdb
+
 COPY go.mod go.sum ./
 RUN go mod download
 
