@@ -18,6 +18,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 		orderManager: manager.InitOrderManager(api.database, api.logger, api.geoDbReader),
 	}
 
+	api.Http.GET("/order/:id", oApiV1.getOrderForm)
 	api.Http.GET("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/order/create", oApiV1.createFromFormData)
 
@@ -43,10 +44,28 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	rUrl := "/order/" + nOrder.Id.Hex()
+
+	return ctx.Redirect(http.StatusFound, rUrl)
+}
+
+func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	if id == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid order id")
+	}
+
+	o := oApiV1.orderManager.FindById(id)
+
+	if o == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Order not found")
+	}
+
 	return ctx.Render(http.StatusOK, "order.html", map[string]interface{}{
 		"ProjectName": "Test project",
 		"Years": oApiV1.orderManager.GetCardYears(),
 		"Months": oApiV1.orderManager.GetCardMonths(),
-		"Order": nOrder,
+		"Order": o,
 	})
 }

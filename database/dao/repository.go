@@ -30,6 +30,7 @@ type Repository interface {
 	FindPaymentMethodById(bson.ObjectId) (*model.PaymentMethod, error)
 
 	FindOrderByProjectOrderId(string) (*model.Order, error)
+	FindOrderById(bson.ObjectId) (*model.Order, error)
 	InsertOrder(*model.Order) error
 
 	FindCurrenciesPair(int, int) (*model.CurrencyRate, error)

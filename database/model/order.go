@@ -105,6 +105,7 @@ type Order struct {
 	CreatedAt                    time.Time         `bson:"created_at" json:"created_at"`
 	UpdatedAt                    time.Time         `bson:"updated_at" json:"created_at"`
 
-	ProjectOutcomeAmountPrintable string `bson:"-" json:"-"`
-	OrderIdPrintable              string `bson:"-" json:"-"`
+	ProjectOutcomeAmountPrintable string   `bson:"-" json:"-"`
+	OrderIdPrintable              string   `bson:"-" json:"-"`
+	ProjectData                   *Project `bson:"-" json:"-"`
 }

@@ -153,10 +153,8 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		return nil, errors.New(orderErrorDynamicRedirectUrlsNotAllowed)
 	}
 
-	id := bson.NewObjectId()
-
 	nOrder := &model.Order{
-		Id:                    id,
+		Id:                    bson.NewObjectId(),
 		ProjectId:             p.Id,
 		ProjectOrderId:        order.OrderId,
 		ProjectAccount:        order.Account,
@@ -171,13 +169,11 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 			Phone:         order.PayerPhone,
 			Email:         order.PayerEmail,
 		},
-		PaymentMethodId:               pm.Id,
-		PaymentMethodOutcomeAmount:    pmOutcomeData.amount,
-		PaymentMethodOutcomeCurrency:  pmOutcomeData.currency,
-		Status:                        model.OrderStatusCreated,
-		CreatedAt:                     time.Now(),
-		ProjectOutcomeAmountPrintable: fmt.Sprintf("%.2f", pmOutcomeData.amount),
-		OrderIdPrintable:              id.Hex(),
+		PaymentMethodId:              pm.Id,
+		PaymentMethodOutcomeAmount:   pmOutcomeData.amount,
+		PaymentMethodOutcomeCurrency: pmOutcomeData.currency,
+		Status:                       model.OrderStatusCreated,
+		CreatedAt:                    time.Now(),
 	}
 
 	if err = om.Database.Repository(TableOrder).InsertOrder(nOrder); err != nil {
@@ -187,6 +183,25 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	}
 
 	return nOrder, nil
+}
+
+func (om *OrderManager) FindById(id string) *model.Order {
+	o, err := om.Database.Repository(TableOrder).FindOrderById(bson.ObjectIdHex(id))
+
+	if err != nil {
+		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)
+	}
+
+	if o != nil {
+		if p := om.projectManager.FindProjectById(o.ProjectId.Hex()); p != nil {
+			o.ProjectData = p
+		}
+
+		o.ProjectOutcomeAmountPrintable = fmt.Sprintf("%.2f", o.PaymentMethodOutcomeAmount)
+		o.OrderIdPrintable = o.Id.Hex()
+	}
+
+	return o
 }
 
 func (om *OrderManager) GetCardYears() []int {
