@@ -372,7 +372,7 @@ func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, error) {
 	fps, ok := c.project.FixedPackage[region]
 
 	if !ok || len(fps) <= 0 {
-		return nil, errors.New(orderErrorFixedPackageForRegionNotFound + " ==== " + region)
+		return nil, errors.New(orderErrorFixedPackageForRegionNotFound + " ==== " + c.order.CreateOrderIp)
 	}
 
 	var ofp *model.FixedPackage
