@@ -3,6 +3,7 @@ package manager
 import (
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
@@ -152,8 +153,10 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		return nil, errors.New(orderErrorDynamicRedirectUrlsNotAllowed)
 	}
 
+	id := bson.NewObjectId()
+
 	nOrder := &model.Order{
-		Id:                    bson.NewObjectId(),
+		Id:                    id,
 		ProjectId:             p.Id,
 		ProjectOrderId:        order.OrderId,
 		ProjectAccount:        order.Account,
@@ -168,11 +171,13 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 			Phone:         order.PayerPhone,
 			Email:         order.PayerEmail,
 		},
-		PaymentMethodId:              pm.Id,
-		PaymentMethodOutcomeAmount:   pmOutcomeData.amount,
-		PaymentMethodOutcomeCurrency: pmOutcomeData.currency,
-		Status:                       model.OrderStatusCreated,
-		CreatedAt:                    time.Now(),
+		PaymentMethodId:               pm.Id,
+		PaymentMethodOutcomeAmount:    pmOutcomeData.amount,
+		PaymentMethodOutcomeCurrency:  pmOutcomeData.currency,
+		Status:                        model.OrderStatusCreated,
+		CreatedAt:                     time.Now(),
+		ProjectOutcomeAmountPrintable: fmt.Sprintf("%.2f", pmOutcomeData.amount),
+		OrderIdPrintable:              id.Hex(),
 	}
 
 	if err = om.Database.Repository(TableOrder).InsertOrder(nOrder); err != nil {
@@ -182,6 +187,36 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	}
 
 	return nOrder, nil
+}
+
+func (om *OrderManager) GetCardYears() []int {
+	var years []int
+
+	start := time.Now().Year()
+	end := start + 10
+
+	for i := start; i < end; i++ {
+		years = append(years, i)
+	}
+
+	return years
+}
+
+func (om *OrderManager) GetCardMonths() map[string]string {
+	return map[string]string{
+		"01": "January",
+		"02": "February",
+		"03": "March",
+		"04": "April",
+		"05": "May",
+		"06": "June",
+		"07": "July",
+		"08": "August",
+		"09": "September",
+		"10": "October",
+		"11": "November",
+		"12": "December",
+	}
 }
 
 func (om *OrderManager) getPaymentMethod(order *model.OrderScalar, pms map[string][]*model.ProjectPaymentModes) (*model.ProjectPaymentModes, error) {

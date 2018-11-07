@@ -13,11 +13,17 @@ import (
 	"github.com/ttacon/libphonenumber"
 	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
+	"html/template"
+	"io"
 )
 
 const (
 	errorMessage = "Field validation for '%s' failed on the '%s' tag"
 )
+
+type Template struct {
+	templates *template.Template
+}
 
 type Merchant struct {
 	Identifier string
@@ -58,6 +64,12 @@ func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLog
 		geoDbReader: geoDbReader,
 	}
 
+	renderer := &Template{
+		templates: template.Must(template.New("").ParseGlob("web/template/*.html")),
+	}
+	api.Http.Renderer = renderer
+	api.Http.Static("/", "web/static")
+
 	api.validate.RegisterStructValidation(ProjectStructValidator, model.ProjectScalar{})
 	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
 
@@ -70,7 +82,7 @@ func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLog
 
 	api.Http.Use(api.LimitOffsetMiddleware)
 	api.Http.Use(middleware.Logger())
-	//api.Http.Use(middleware.Recover())
+	api.Http.Use(middleware.Recover())
 	api.Http.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowHeaders: []string{"authorization", "content-type"},
 	}))
@@ -110,4 +122,8 @@ func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.Hand
 
 		return next(c)
 	}
+}
+
+func (t *Template) Render(w io.Writer, name string, data interface{}, ctx echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
 }

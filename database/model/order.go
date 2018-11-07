@@ -104,4 +104,7 @@ type Order struct {
 	Status                       int               `bson:"status" json:"status"`
 	CreatedAt                    time.Time         `bson:"created_at" json:"created_at"`
 	UpdatedAt                    time.Time         `bson:"updated_at" json:"created_at"`
+
+	ProjectOutcomeAmountPrintable string `bson:"-" json:"-"`
+	OrderIdPrintable              string `bson:"-" json:"-"`
 }

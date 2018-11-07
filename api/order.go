@@ -43,5 +43,10 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return ctx.JSON(http.StatusOK, nOrder)
+	return ctx.Render(http.StatusOK, "order.html", map[string]interface{}{
+		"ProjectName": "Test project",
+		"Years": oApiV1.orderManager.GetCardYears(),
+		"Months": oApiV1.orderManager.GetCardMonths(),
+		"Order": nOrder,
+	})
 }

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment order form</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,100' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script type="text/javascript" src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+    <meta name="robots" content="noindex,follow" />
+    
+    <script type="text/javascript">
+        $(function() {
+            $(".card_number, #cvv").keyup(function () {
+                $(this).val($(this).val().replace(/\D/g,''));
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <form class="pp_order_form">
+        <div class="header">
+            <h4 class="title">Order detail</h4>
+        </div>
+
+        <div class="body">
+            <div class="order_details">
+                <div class="item title">{{.ProjectName}}</div>
+                <div class="item">
+                    <div class="item__label">
+                        <label>Amount</label>
+                    </div>
+                    <div class="item__data">
+                        {{ .Order.ProjectOutcomeAmountPrintable }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item__label">
+                        <label>Order #</label>
+                    </div>
+                    <div class="item__data">{{ .Order.OrderIdPrintable }}</div>
+                </div>
+                <div class="item">
+                    <div class="item__label">
+                        <label>Payer Account</label>
+                    </div>
+                    <div class="item__data">{{ .Order.ProjectAccount }}</div>
+                </div>
+            </div>
+
+            <input type="text" class="card_number" name="pan" placeholder="Card Number">
+            <div class="date-field">
+                <div class="month">
+                    <select name="month">
+                        {{ range $i, $v := .Months }}
+                            <option value="{{ $i }}">{{ $v }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                <div class="year">
+                    <select name="year">
+                        {{ range $i := .Years }}
+                            <option value="{{ $i }}">{{ $i }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+            </div>
+            <div class="card-verification">
+                <div class="cvv-input">
+                    <input type="password" id="cvv" name="cvv" placeholder="CVV">
+                </div>
+                <div class="cvv-details">
+                    <p>3 or 4 digits usually found <br> on the signature strip</p>
+                </div>
+            </div>
+
+            <button type="submit" class="proceed-btn"><a href="#">Proceed</a></button>
+        </div>
+    </form>
+</body>
+
+</html>
