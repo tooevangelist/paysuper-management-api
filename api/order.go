@@ -4,6 +4,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/labstack/echo"
+	"net"
 	"net/http"
 )
 
@@ -22,6 +23,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.GET("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/api/v1/order", oApiV1.createJson)
+	api.Http.POST("/order/test", oApiV1.test)
 
 	return api
 }
@@ -96,4 +98,15 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		"Months":      oApiV1.orderManager.GetCardMonths(),
 		"Order":       o,
 	})
+}
+
+func (oApiV1 *OrderApiV1) test(ctx echo.Context) error  {
+	ip := net.ParseIP(ctx.RealIP())
+	gRecord, err := oApiV1.geoDbReader.City(ip)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, err)
+	}
+
+	return ctx.JSON(http.StatusOK, gRecord.Country.IsoCode)
 }
