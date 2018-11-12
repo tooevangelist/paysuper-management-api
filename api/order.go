@@ -108,5 +108,5 @@ func (oApiV1 *OrderApiV1) test(ctx echo.Context) error  {
 		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
 
-	return ctx.JSON(http.StatusOK, gRecord.Country.IsoCode)
+	return ctx.JSON(http.StatusOK, gRecord.Country.IsoCode + " =>>>> " + ctx.RealIP())
 }
