@@ -20,7 +20,7 @@
 </head>
 
 <body>
-    <form class="pp_order_form">
+    <form class="pp_order_form {{ if .Order.IsJsonRequest }} no-margin {{ end }}">
         <div class="header">
             <h4 class="title">Order detail</h4>
         </div>

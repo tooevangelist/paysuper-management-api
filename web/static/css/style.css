@@ -25,6 +25,10 @@ body {
     box-shadow: 1px 2px 3px 0 rgba(0, 0, 0, 0.10);
 }
 
+.pp_order_form.no-margin {
+    margin: 0;
+}
+
 .pp_order_form .header {
     height: 60px;
     padding: 20px 30px 0;

@@ -102,10 +102,11 @@ type Order struct {
 	PaymentMethodIncomeAmount    float64                `bson:"pm_income_amount" json:"pm_income_amount"`
 	PaymentMethodIncomeCurrency  *Currency              `bson:"pm_income_currency" json:"pm_income_currency"`
 	PaymentMethodFee             float64                `bson:"pm_fee" json:"pm_fee"`
-	PaymentMethodOrderClosedAt   time.Time              `bson:"pm_order_close_dat" json:"pm_order_close_dat"`
+	PaymentMethodOrderClosedAt   time.Time              `bson:"pm_order_close_date" json:"pm_order_close_date"`
 	Status                       int                    `bson:"status" json:"status"`
 	CreatedAt                    time.Time              `bson:"created_at" json:"created_at"`
 	UpdatedAt                    time.Time              `bson:"updated_at" json:"created_at"`
+	IsJsonRequest                bool                   `bson:"created_by_json" json:"created_by_json"`
 
 	ProjectOutcomeAmountPrintable string   `bson:"-" json:"-"`
 	OrderIdPrintable              string   `bson:"-" json:"-"`

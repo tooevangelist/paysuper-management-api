@@ -174,6 +174,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		PaymentMethodOutcomeCurrency: pmOutcomeData.currency,
 		Status:                       model.OrderStatusCreated,
 		CreatedAt:                    time.Now(),
+		IsJsonRequest:                order.IsJsonRequest,
 	}
 
 	if err = om.Database.Repository(TableOrder).InsertOrder(nOrder); err != nil {

@@ -40,7 +40,7 @@ func (pm *ProjectManager) Create(ps *model.ProjectScalar) (*model.Project, error
 		IsAllowDynamicNotifyUrls:   ps.IsAllowDynamicNotifyUrls,
 		IsAllowDynamicRedirectUrls: ps.IsAllowDynamicRedirectUrls,
 		OnlyFixedAmounts:           ps.OnlyFixedAmounts,
-		FixedPackage:               pm.fixedPackageDates(*ps.FixedPackage, true),
+		FixedPackage:               pm.processFixedPackages(*ps.FixedPackage, true),
 		SecretKey:                  ps.SecretKey,
 		URLCheckAccount:            ps.URLCheckAccount,
 		URLProcessPayment:          ps.URLProcessPayment,
@@ -92,7 +92,7 @@ func (pm *ProjectManager) Update(p *model.Project, pn *model.ProjectScalar) (*mo
 	p.CreateInvoiceAllowedUrls = pn.CreateInvoiceAllowedUrls
 	p.NotifyEmails = pn.NotifyEmails
 	p.UpdatedAt = time.Now()
-	p.FixedPackage = pm.fixedPackageDates(*pn.FixedPackage, false)
+	p.FixedPackage = pm.processFixedPackages(*pn.FixedPackage, false)
 
 	if p.Name != pn.Name {
 		p.Name = pn.Name
@@ -227,7 +227,7 @@ func (pm *ProjectManager) FindProjectById(id string) *model.Project {
 	return p
 }
 
-func (pm *ProjectManager) fixedPackageDates(fixedPackages map[string][]*model.FixedPackage, isNew bool) map[string][]*model.FixedPackage {
+func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model.FixedPackage, isNew bool) map[string][]*model.FixedPackage {
 	for _, packages := range fixedPackages {
 		for _, p := range packages {
 			if isNew == true {
@@ -235,6 +235,12 @@ func (pm *ProjectManager) fixedPackageDates(fixedPackages map[string][]*model.Fi
 			}
 
 			p.UpdatedAt = time.Now()
+
+			if p.CurrencyInt > 0 {
+				if c := pm.currencyManager.FindByCodeInt(p.CurrencyInt); c != nil {
+					p.Currency = c
+				}
+			}
 		}
 	}
 
