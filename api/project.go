@@ -29,6 +29,17 @@ func (api *Api) InitProjectRoutes() *Api {
 	return api
 }
 
+// @Summary Get project
+// @Description "Get data about project"
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param data path string true "Project identifier"
+// @Success 200 {object} model.Project "OK"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 404 {object} model.Error "Project not found"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/s/project/{id} [get]
 func (pApiV1 *ProjectApiV1) get(ctx echo.Context) error {
 	id := ctx.Param("id")
 
@@ -41,12 +52,32 @@ func (pApiV1 *ProjectApiV1) get(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, p)
 }
 
+// @Summary List projects
+// @Description Get list of project for authenticated merchant
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Success 200 {array} model.Project "OK"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/s/project [get]
 func (pApiV1 *ProjectApiV1) getAll(ctx echo.Context) error {
 	p := pApiV1.projectManager.FindProjectsByMerchantId(pApiV1.Merchant.Identifier, pApiV1.limit, pApiV1.offset)
 
 	return ctx.JSON(http.StatusOK, p)
 }
 
+// @Summary Create project
+// @Description Create new project for authenticated merchant
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param data body model.ProjectScalar true "Creating project data"
+// @Success 201 {object} model.Project "OK"
+// @Failure 400 {object} model.Error "Invalid request data"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/s/project [post]
 func (pApiV1 *ProjectApiV1) create(ctx echo.Context) error {
 	ps := &model.ProjectScalar{}
 
@@ -81,7 +112,20 @@ func (pApiV1 *ProjectApiV1) create(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, p)
 }
 
-
+// @Summary Update project
+// @Description Update project for authenticated merchant
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param data body model.ProjectScalar true "Project object with new data"
+// @Param id path string true "Project identifier"
+// @Success 200 {object} model.Project "OK"
+// @Failure 400 {object} model.Error "Invalid request data"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 403 {object} model.Error "Access denied"
+// @Failure 404 {object} model.Error "Not found"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/s/project/{id} [put]
 func (pApiV1 *ProjectApiV1) update(ctx echo.Context) error {
 	p := pApiV1.projectManager.FindProjectById(ctx.Param("id"))
 
@@ -118,6 +162,18 @@ func (pApiV1 *ProjectApiV1) update(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, p)
 }
 
+// @Summary Delete project
+// @Description Delete project for authenticated merchant
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param id path string true "Project identifier"
+// @Success 200 {string} string "OK"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 403 {object} model.Error "Access denied"
+// @Failure 404 {object} model.Error "Not found"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/s/project/{id} [delete]
 func (pApiV1 *ProjectApiV1) delete(ctx echo.Context) error {
 	p := pApiV1.projectManager.FindProjectById(ctx.Param("id"))
 

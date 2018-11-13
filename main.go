@@ -11,6 +11,16 @@ import (
 	"log"
 )
 
+// @title Protocol One payment solution swagger documentation
+// @version 1.0
+// @description This is a Protocol One payment solution service.
+// @termsOfService http://swagger.io/terms/
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @host p1payapi.tst.protocol.one
 func main() {
 	migration := flag.String("migration", "", "run database migrations with specified direction")
 	flag.Parse()

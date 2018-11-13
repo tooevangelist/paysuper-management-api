@@ -40,7 +40,7 @@ func (pm *ProjectManager) Create(ps *model.ProjectScalar) (*model.Project, error
 		IsAllowDynamicNotifyUrls:   ps.IsAllowDynamicNotifyUrls,
 		IsAllowDynamicRedirectUrls: ps.IsAllowDynamicRedirectUrls,
 		OnlyFixedAmounts:           ps.OnlyFixedAmounts,
-		FixedPackage:               pm.processFixedPackages(*ps.FixedPackage, true),
+		FixedPackage:               pm.processFixedPackages(ps.FixedPackage, true),
 		SecretKey:                  ps.SecretKey,
 		URLCheckAccount:            ps.URLCheckAccount,
 		URLProcessPayment:          ps.URLProcessPayment,
@@ -92,7 +92,7 @@ func (pm *ProjectManager) Update(p *model.Project, pn *model.ProjectScalar) (*mo
 	p.CreateInvoiceAllowedUrls = pn.CreateInvoiceAllowedUrls
 	p.NotifyEmails = pn.NotifyEmails
 	p.UpdatedAt = time.Now()
-	p.FixedPackage = pm.processFixedPackages(*pn.FixedPackage, false)
+	p.FixedPackage = pm.processFixedPackages(pn.FixedPackage, false)
 
 	if p.Name != pn.Name {
 		p.Name = pn.Name

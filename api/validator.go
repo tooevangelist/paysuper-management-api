@@ -16,7 +16,7 @@ func ProjectStructValidator(sl validator.StructLevel) {
 	if p.OnlyFixedAmounts != true && p.FixedPackage != nil {
 		var counter int
 
-		for _, packages := range *p.FixedPackage {
+		for _, packages := range p.FixedPackage {
 			counter += len(packages)
 		}
 

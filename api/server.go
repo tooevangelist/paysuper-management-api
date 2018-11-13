@@ -15,6 +15,7 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	"html/template"
 	"io"
+	"net/http"
 )
 
 const (
@@ -93,6 +94,10 @@ func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLog
 		InitMerchantRoutes().
 		InitProjectRoutes().
 		InitOrderV1Routes()
+
+	api.Http.GET("/docs", func(ctx echo.Context) error {
+		return ctx.Render(http.StatusOK, "docs.html", map[string]interface{}{})
+	})
 
 	return api, nil
 }

@@ -2,7 +2,10 @@ module github.com/ProtocolONE/p1pay.api
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
+	github.com/go-openapi/jsonreference v0.17.2 // indirect
+	github.com/go-openapi/spec v0.17.2 // indirect
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/golang/protobuf v1.2.0 // indirect
@@ -13,8 +16,10 @@ require (
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/oschwald/geoip2-golang v1.2.1
 	github.com/oschwald/maxminddb-golang v1.3.0 // indirect
+	github.com/swaggo/swag v1.3.2 // indirect
 	github.com/ttacon/builder v0.0.0-20170518171403-c099f663e1c2 // indirect
 	github.com/ttacon/libphonenumber v1.0.0
+	github.com/urfave/cli v1.20.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v0.0.0-20170224212429-dcecefd839c4 // indirect
 	github.com/xakep666/mongo-migrate v0.1.0

@@ -24,6 +24,15 @@ func (api *Api) InitCurrencyRoutes() *Api {
 	return api
 }
 
+// @Summary Get list of currencies
+// @Description Get full list of currencies or get list of currencies filtered by name
+// @Tags Currency
+// @Accept json
+// @Produce json
+// @Param name query string false "name or symbolic ISO 4217 code of currency"
+// @Success 200 {array} model.Currency "OK"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/currency [get]
 func (cApiV1 *CurrencyApiV1) get(ctx echo.Context) error {
 	name := ctx.QueryParam("name")
 
@@ -34,6 +43,17 @@ func (cApiV1 *CurrencyApiV1) get(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, cApiV1.currencyManager.FindAll(cApiV1.limit, cApiV1.offset))
 }
 
+// @Summary Get currency by numeric ISO 4217 code
+// @Description Get currency object by numeric ISO 4217 code
+// @Tags Currency
+// @Accept json
+// @Produce json
+// @Param id path int true "numeric ISO 4217 currency code"
+// @Success 200 {object} model.Currency "OK"
+// @Failure 400 {object} model.Error "Invalid request data"
+// @Failure 404 {object} model.Error "Not found"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/currency/{id} [get]
 func (cApiV1 *CurrencyApiV1) getById(ctx echo.Context) error {
 	codeInt, err := strconv.Atoi(ctx.Param("id"))
 

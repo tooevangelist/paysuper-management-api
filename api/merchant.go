@@ -21,10 +21,21 @@ func (api *Api) InitMerchantRoutes() *Api {
 	api.accessRouteGroup.GET("/merchant", mApiV1.get)
 	api.accessRouteGroup.POST("/merchant", mApiV1.create)
 	api.accessRouteGroup.PUT("/merchant", mApiV1.update)
+	api.accessRouteGroup.DELETE("/merchant", mApiV1.delete)
 
 	return api
 }
 
+// @Summary Get merchant
+// @Description Get full data about merchant
+// @Tags Merchant
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.Merchant "OK"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 404 {object} model.Error "Not found"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/s/merchant/{id} [get]
 func (mApiV1 *MerchantApiV1) get(ctx echo.Context) error {
 	m := mApiV1.merchantManager.FindById(mApiV1.Merchant.Identifier)
 
@@ -35,6 +46,17 @@ func (mApiV1 *MerchantApiV1) get(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, m)
 }
 
+// @Summary Create merchant
+// @Description Create new merchant
+// @Tags Merchant
+// @Accept json
+// @Produce json
+// @Param data body model.MerchantScalar true "Creating merchant data"
+// @Success 201 {object} model.Merchant "OK"
+// @Failure 400 {object} model.Error "Invalid request data"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/s/merchant [post]
 func (mApiV1 *MerchantApiV1) create(ctx echo.Context) error {
 	ms := &model.MerchantScalar{Id: mApiV1.Merchant.Identifier}
 
@@ -69,6 +91,18 @@ func (mApiV1 *MerchantApiV1) create(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, m)
 }
 
+// @Summary Update merchant
+// @Description Update merchant data
+// @Tags Merchant
+// @Accept json
+// @Produce json
+// @Param data body model.MerchantScalar true "Merchant object with new data"
+// @Success 200 {object} model.Merchant "OK"
+// @Failure 400 {object} model.Error "Invalid request data"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 404 {object} model.Error "Not found"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/s/merchant [put]
 func (mApiV1 *MerchantApiV1) update(ctx echo.Context) error {
 	ms := &model.MerchantScalar{}
 
@@ -101,6 +135,16 @@ func (mApiV1 *MerchantApiV1) update(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, m)
 }
 
+// @Summary Delete merchant
+// @Description Mark merchant as deleted
+// @Tags Merchant
+// @Accept json
+// @Produce json
+// @Success 200 {string} string "OK"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 404 {object} model.Error "Not found"
+// @Failure 500 {object} model.Error "Some unknown error"
+// @Router /api/v1/s/merchant [delete]
 func (mApiV1 *MerchantApiV1) delete(ctx echo.Context) error {
 	m := mApiV1.merchantManager.FindById(mApiV1.Merchant.Identifier)
 
