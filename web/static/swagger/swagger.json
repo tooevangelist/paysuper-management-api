@@ -1024,27 +1024,27 @@
             "type": "object",
             "properties": {
                 "code_a2": {
-                    "description": "CodeA2 2 chars ISO 3166-1 country code\n",
+                    "description": "2 chars ISO 3166-1 country code\n",
                     "type": "string"
                 },
                 "code_a3": {
-                    "description": "CodeA3 3 chars ISO 3166-1 country code\n",
+                    "description": "3 chars ISO 3166-1 country code\n",
                     "type": "string"
                 },
                 "code_int": {
-                    "description": "CodeInt numeric ISO 3166-1 country code\n",
+                    "description": "numeric ISO 3166-1 country code\n",
                     "type": "integer"
                 },
                 "created_at": {
-                    "description": "CreatedAt date of create country in system\n",
+                    "description": "date of create country in system\n",
                     "type": "string"
                 },
                 "is_active": {
-                    "description": "IsActive is country active\n",
+                    "description": "is country active\n",
                     "type": "boolean"
                 },
                 "name": {
-                    "description": "Name list of country names\n",
+                    "description": "list of country names\n",
                     "type": "object",
                     "$ref": "#/definitions/model.Name"
                 }
@@ -1054,23 +1054,23 @@
             "type": "object",
             "properties": {
                 "code_a3": {
-                    "description": "CodeA3 3 chars ISO 4217 currency code\n",
+                    "description": "3 chars ISO 4217 currency code\n",
                     "type": "string"
                 },
                 "code_int": {
-                    "description": "CodeInt numeric ISO 4217 currency code\n",
+                    "description": "numeric ISO 4217 currency code\n",
                     "type": "integer"
                 },
                 "created_at": {
-                    "description": "CreatedAt date of create currency in system8\n",
+                    "description": "date of create currency in system8\n",
                     "type": "string"
                 },
                 "is_active": {
-                    "description": "IsActive is currency active\n",
+                    "description": "is currency active\n",
                     "type": "boolean"
                 },
                 "name": {
-                    "description": "Name list of currency names\n",
+                    "description": "list of currency names\n",
                     "type": "object",
                     "$ref": "#/definitions/model.Name"
                 }
@@ -1080,7 +1080,7 @@
             "type": "object",
             "properties": {
                 "message": {
-                    "description": "Message Text error description\n",
+                    "description": "text error description\n",
                     "type": "string"
                 }
             }
@@ -1089,41 +1089,41 @@
             "type": "object",
             "properties": {
                 "accounting_period": {
-                    "description": "AccountingPeriod period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year\n",
+                    "description": "period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year\n",
                     "type": "string"
                 },
                 "country": {
-                    "description": "Country full object of country where merchant company registered\n",
+                    "description": "full object of country where merchant company registered\n",
                     "type": "object",
                     "$ref": "#/definitions/model.Country"
                 },
                 "created_at": {
-                    "description": "CreatedAt date of create merchant in system\n",
+                    "description": "date of create merchant in system\n",
                     "type": "string"
                 },
                 "currency": {
-                    "description": "Country full object describes merchant's accounting currency\n",
+                    "description": "full object describes merchant's accounting currency\n",
                     "type": "object",
                     "$ref": "#/definitions/model.Currency"
                 },
                 "email": {
-                    "description": "Email merchant email\n",
+                    "description": "merchant email\n",
                     "type": "string"
                 },
                 "external_id": {
-                    "description": "ExternalId unique merchant identifier in auth system\n",
+                    "description": "unique merchant identifier in auth system\n",
                     "type": "string"
                 },
                 "id": {
-                    "description": "Id unique merchant identifier\n",
+                    "description": "unique merchant identifier\n",
                     "type": "string"
                 },
                 "name": {
-                    "description": "Name merchant company legal name\n",
+                    "description": "merchant company legal name\n",
                     "type": "string"
                 },
                 "status": {
-                    "description": "Status merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted\n",
+                    "description": "merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted\n",
                     "type": "integer"
                 }
             }
@@ -1135,31 +1135,31 @@
             ],
             "properties": {
                 "accounting_period": {
-                    "description": "AccountingPeriod period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year\n",
+                    "description": "period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year\n",
                     "type": "string"
                 },
                 "country": {
-                    "description": "Country numeric ISO 3166-1 country code\n",
+                    "description": "numeric ISO 3166-1 country code\n",
                     "type": "integer"
                 },
                 "currency": {
-                    "description": "Currency numeric ISO 4217 currency code describes merchant's accounting currency\n",
+                    "description": "numeric ISO 4217 currency code describes merchant's accounting currency\n",
                     "type": "integer"
                 },
                 "email": {
-                    "description": "Email merchant email\n",
+                    "description": "merchant email\n",
                     "type": "string"
                 },
                 "id": {
-                    "description": "Id unique merchant identifier in auth system\n",
+                    "description": "unique merchant identifier in auth system\n",
                     "type": "string"
                 },
                 "name": {
-                    "description": "Name merchant company legal name\n",
+                    "description": "merchant company legal name\n",
                     "type": "string"
                 },
                 "status": {
-                    "description": "Status merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted\n",
+                    "description": "merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted\n",
                     "type": "integer"
                 }
             }
@@ -1168,11 +1168,11 @@
             "type": "object",
             "properties": {
                 "en": {
-                    "description": "EN english name\n",
+                    "description": "english name\n",
                     "type": "string"
                 },
                 "ru": {
-                    "description": "EN russian name\n",
+                    "description": "russian name\n",
                     "type": "string"
                 }
             }
@@ -1180,77 +1180,77 @@
         "model.OrderScalar": {
             "type": "object",
             "required": [
-                "amount",
                 "project",
-                "account"
+                "account",
+                "amount"
             ],
             "properties": {
                 "account": {
-                    "description": "Account User unique account in project\n",
+                    "description": "user unique account in project\n",
                     "type": "string"
                 },
                 "amount": {
-                    "description": "Amount Order amount\n",
+                    "description": "order amount\n",
                     "type": "number"
                 },
                 "currency": {
-                    "description": "Currency Order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency\n",
+                    "description": "order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency\n",
                     "type": "string"
                 },
                 "description": {
-                    "description": "Description Order description. If this field not send in request, then we're create standard order description\n",
+                    "description": "order description. If this field not send in request, then we're create standard order description\n",
                     "type": "string"
                 },
                 "order_id": {
-                    "description": "OrderId Unique order identifier in project. This field not required, BUT we're recommend send this field always\n",
+                    "description": "unique order identifier in project. This field not required, BUT we're recommend send this field always\n",
                     "type": "string"
                 },
                 "other": {
-                    "description": "Other Object with any fields on the project side that do not match the names of the reserved fields\n",
+                    "description": "object with any fields on the project side that do not match the names of the reserved fields\n",
                     "type": "object"
                 },
                 "payer_email": {
-                    "description": "PayerEmail User (payer) email\n",
+                    "description": "user (payer) email\n",
                     "type": "string"
                 },
                 "payer_ip": {
-                    "description": "CreateOrderIp User (payer) ip\n",
+                    "description": "user (payer) ip\n",
                     "type": "string"
                 },
                 "payer_phone": {
-                    "description": "PayerPhone User (payer) phone\n",
+                    "description": "user (payer) phone\n",
                     "type": "string"
                 },
                 "payment_method": {
-                    "description": "PaymentMethod Payment method identifier in Protocol One payment solution\n",
+                    "description": "payment method identifier in Protocol One payment solution\n",
                     "type": "string"
                 },
                 "project": {
-                    "description": "ProjectId Project unique identifier in Protocol One payment solution\n",
+                    "description": "project unique identifier in Protocol One payment solution\n",
                     "type": "string"
                 },
                 "region": {
-                    "description": "Region User (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip\n",
+                    "description": "user (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip\n",
                     "type": "string"
                 },
                 "signature": {
-                    "description": "Signature Signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always\n",
+                    "description": "signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always\n",
                     "type": "string"
                 },
                 "url_fail": {
-                    "description": "UrlFail URL for redirect user after failed payment. This field can be send if it allowed in project admin panel\n",
+                    "description": "URL for redirect user after failed payment. This field can be send if it allowed in project admin panel\n",
                     "type": "string"
                 },
                 "url_notify": {
-                    "description": "UrlNotify URL for payment notification request to project. This field can be send if it allowed in project admin panel\n",
+                    "description": "URL for payment notification request to project. This field can be send if it allowed in project admin panel\n",
                     "type": "string"
                 },
                 "url_success": {
-                    "description": "UrlSuccess URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel\n",
+                    "description": "URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel\n",
                     "type": "string"
                 },
                 "url_verify": {
-                    "description": "UrlVerify URL for payment data verification request to project. This field can be send if it allowed in project admin panel\n",
+                    "description": "URL for payment data verification request to project. This field can be send if it allowed in project admin panel\n",
                     "type": "string"
                 }
             }
@@ -1259,6 +1259,7 @@
             "type": "object",
             "properties": {
                 "order_url": {
+                    "description": "link for user to payment confirmation form\n",
                     "type": "string"
                 }
             }
@@ -1267,99 +1268,99 @@
             "type": "object",
             "properties": {
                 "callback_currency": {
-                    "description": "CallbackCurrency full object of currency which described currency to send payment notification\n",
+                    "description": "full object of currency which described currency to send payment notification\n",
                     "type": "object",
                     "$ref": "#/definitions/model.Currency"
                 },
                 "callback_protocol": {
-                    "description": "CallbackProtocol protocol identifier to send payment notification. Now available: default\n",
+                    "description": "protocol identifier to send payment notification. Now available: default\n",
                     "type": "string"
                 },
                 "create_invoice_allowed_urls": {
-                    "description": "CreateInvoiceAllowedUrls list of urls rom which you can send a request to create an order\n",
+                    "description": "list of urls rom which you can send a request to create an order\n",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "created_at": {
-                    "description": "CreatedAt date of create project\n",
+                    "description": "date of create project\n",
                     "type": "string"
                 },
                 "fixed_package": {
-                    "description": "FixedPackage list of project's fixed packages\n",
+                    "description": "list of project's fixed packages\n",
                     "type": "object"
                 },
                 "id": {
-                    "description": "Id unique project identifier\n",
+                    "description": "unique project identifier\n",
                     "type": "string"
                 },
                 "is_active": {
-                    "description": "IsActive is project active\n",
+                    "description": "is project active\n",
                     "type": "boolean"
                 },
                 "is_allow_dynamic_notify_urls": {
-                    "description": "IsAllowDynamicNotifyUrls is allow send dynamic notification urls in request to create an order\n",
+                    "description": "is allow send dynamic notification urls in request to create an order\n",
                     "type": "boolean"
                 },
                 "is_allow_dynamic_redirect_urls": {
-                    "description": "IsAllowDynamicRedirectUrls is allow send dynamic user's redirect urls in request to create an order\n",
+                    "description": "is allow send dynamic user's redirect urls in request to create an order\n",
                     "type": "boolean"
                 },
                 "limits_currency": {
-                    "description": "LimitsCurrency full object of currency which describes currency for amount's limit\n",
+                    "description": "full object of currency which describes currency for amount's limit\n",
                     "type": "object",
                     "$ref": "#/definitions/model.Currency"
                 },
                 "max_payment_amount": {
-                    "description": "MaxPaymentAmount maximal amount allowed for create order\n",
+                    "description": "maximal amount allowed for create order\n",
                     "type": "number"
                 },
                 "min_payment_amount": {
-                    "description": "MinPaymentAmount minimal amount allowed for create order\n",
+                    "description": "minimal amount allowed for create order\n",
                     "type": "number"
                 },
                 "name": {
-                    "description": "Name project name\n",
+                    "description": "project name\n",
                     "type": "string"
                 },
                 "notify_emails": {
-                    "description": "NotifyEmails list of emails to send notifications about successfully completed payment operations\n",
+                    "description": "list of emails to send notifications about successfully completed payment operations\n",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "only_fixed_amounts": {
-                    "description": "OnlyFixedAmounts is allow create order only with amounts from fixed packages list\n",
+                    "description": "is allow create order only with amounts from fixed packages list\n",
                     "type": "boolean"
                 },
                 "payment_methods": {
-                    "description": "FixedPackage list of payment methods allowed to project\n",
+                    "description": "list of payment methods allowed to project\n",
                     "type": "object"
                 },
                 "secret_key": {
-                    "description": "SecretKey secret key for create check hash for request about order statuses changes\n",
+                    "description": "secret key for create check hash for request about order statuses changes\n",
                     "type": "string"
                 },
                 "send_notify_email": {
-                    "description": "SendNotifyEmail is allow send notifications about successfully completed payment operations to user's emails\n",
+                    "description": "is allow send notifications about successfully completed payment operations to user's emails\n",
                     "type": "boolean"
                 },
                 "url_check_account": {
-                    "description": "URLCheckAccount default url to send request for verification payment data to project\n",
+                    "description": "default url to send request for verification payment data to project\n",
                     "type": "string"
                 },
                 "url_process_payment": {
-                    "description": "URLProcessPayment default url to send request for notification about successfully completed payment to project\n",
+                    "description": "default url to send request for notification about successfully completed payment to project\n",
                     "type": "string"
                 },
                 "url_redirect_fail": {
-                    "description": "URLRedirectFail default url to redirect user after failed payment\n",
+                    "description": "default url to redirect user after failed payment\n",
                     "type": "string"
                 },
                 "url_redirect_success": {
-                    "description": "URLRedirectSuccess default url to redirect user after successfully completed payment\n",
+                    "description": "default url to redirect user after successfully completed payment\n",
                     "type": "string"
                 }
             }
@@ -1372,88 +1373,95 @@
             ],
             "properties": {
                 "callback_currency": {
-                    "description": "CallbackCurrency ISO 4217 numeric currency code to send payment notification\n",
+                    "description": "ISO 4217 numeric currency code to send payment notification\n",
                     "type": "integer"
                 },
                 "callback_protocol": {
-                    "description": "CallbackProtocol protocol identifier to send payment notification. Now available: default\n",
+                    "description": "protocol identifier to send payment notification. Now available: default\n",
                     "type": "string"
                 },
                 "create_invoice_allowed_urls": {
-                    "description": "CreateInvoiceAllowedUrls list of urls rom which you can send a request to create an order\n",
+                    "description": "list of urls rom which you can send a request to create an order\n",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "fixed_package": {
-                    "description": "FixedPackage list of project's fixed packages\n",
+                    "description": "list of project's fixed packages\n",
                     "type": "object"
                 },
                 "is_active": {
-                    "description": "IsActive is project active\n",
+                    "description": "is project active\n",
                     "type": "boolean"
                 },
                 "is_allow_dynamic_notify_urls": {
-                    "description": "IsAllowDynamicNotifyUrls is allow send dynamic notification urls in request to create an order\n",
+                    "description": "is allow send dynamic notification urls in request to create an order\n",
                     "type": "boolean"
                 },
                 "is_allow_dynamic_redirect_urls": {
-                    "description": "IsAllowDynamicRedirectUrls is allow send dynamic user's redirect urls in request to create an order\n",
+                    "description": "is allow send dynamic user's redirect urls in request to create an order\n",
                     "type": "boolean"
                 },
                 "limits_currency": {
-                    "description": "LimitsCurrency ISO 4217 numeric currency code for limit amounts\n",
+                    "description": "ISO 4217 numeric currency code for limit amounts\n",
                     "type": "integer"
                 },
                 "max_payment_amount": {
-                    "description": "MaxPaymentAmount maximal amount allowed for create order\n",
+                    "description": "maximal amount allowed for create order\n",
                     "type": "number"
                 },
                 "min_payment_amount": {
-                    "description": "MinPaymentAmount minimal amount allowed for create order\n",
+                    "description": "minimal amount allowed for create order\n",
                     "type": "number"
                 },
                 "name": {
-                    "description": "Name project name\n",
+                    "description": "project name\n",
                     "type": "string"
                 },
                 "notify_emails": {
-                    "description": "NotifyEmails list of emails to send notifications about successfully completed payment operations\n",
+                    "description": "list of emails to send notifications about successfully completed payment operations\n",
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "only_fixed_amounts": {
-                    "description": "OnlyFixedAmounts is allow create order only with amounts from fixed packages list\n",
+                    "description": "is allow create order only with amounts from fixed packages list\n",
                     "type": "boolean"
                 },
                 "secret_key": {
-                    "description": "SecretKey secret key for create check hash for request about order statuses changes\n",
+                    "description": "secret key for create check hash for request about order statuses changes\n",
                     "type": "string"
                 },
                 "send_notify_email": {
-                    "description": "SendNotifyEmail is allow send notifications about successfully completed payment operations to user's emails\n",
+                    "description": "is allow send notifications about successfully completed payment operations to user's emails\n",
                     "type": "boolean"
                 },
                 "url_check_account": {
-                    "description": "URLCheckAccount default url to send request for verification payment data to project\n",
+                    "description": "default url to send request for verification payment data to project\n",
                     "type": "string"
                 },
                 "url_process_payment": {
-                    "description": "URLProcessPayment default url to send request for notification about successfully completed payment to project\n",
+                    "description": "default url to send request for notification about successfully completed payment to project\n",
                     "type": "string"
                 },
                 "url_redirect_fail": {
-                    "description": "URLRedirectFail default url to redirect user after failed payment\n",
+                    "description": "default url to redirect user after failed payment\n",
                     "type": "string"
                 },
                 "url_redirect_success": {
-                    "description": "URLRedirectSuccess default url to redirect user after successfully completed payment\n",
+                    "description": "default url to redirect user after successfully completed payment\n",
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

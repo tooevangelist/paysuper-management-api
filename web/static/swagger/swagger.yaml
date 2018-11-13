@@ -3,131 +3,131 @@ definitions:
     properties:
       code_a2:
         description: |
-          CodeA2 2 chars ISO 3166-1 country code
+          2 chars ISO 3166-1 country code
         type: string
       code_a3:
         description: |
-          CodeA3 3 chars ISO 3166-1 country code
+          3 chars ISO 3166-1 country code
         type: string
       code_int:
         description: |
-          CodeInt numeric ISO 3166-1 country code
+          numeric ISO 3166-1 country code
         type: integer
       created_at:
         description: |
-          CreatedAt date of create country in system
+          date of create country in system
         type: string
       is_active:
         description: |
-          IsActive is country active
+          is country active
         type: boolean
       name:
         $ref: '#/definitions/model.Name'
         description: |
-          Name list of country names
+          list of country names
         type: object
     type: object
   model.Currency:
     properties:
       code_a3:
         description: |
-          CodeA3 3 chars ISO 4217 currency code
+          3 chars ISO 4217 currency code
         type: string
       code_int:
         description: |
-          CodeInt numeric ISO 4217 currency code
+          numeric ISO 4217 currency code
         type: integer
       created_at:
         description: |
-          CreatedAt date of create currency in system8
+          date of create currency in system8
         type: string
       is_active:
         description: |
-          IsActive is currency active
+          is currency active
         type: boolean
       name:
         $ref: '#/definitions/model.Name'
         description: |
-          Name list of currency names
+          list of currency names
         type: object
     type: object
   model.Error:
     properties:
       message:
         description: |
-          Message Text error description
+          text error description
         type: string
     type: object
   model.Merchant:
     properties:
       accounting_period:
         description: |
-          AccountingPeriod period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year
+          period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year
         type: string
       country:
         $ref: '#/definitions/model.Country'
         description: |
-          Country full object of country where merchant company registered
+          full object of country where merchant company registered
         type: object
       created_at:
         description: |
-          CreatedAt date of create merchant in system
+          date of create merchant in system
         type: string
       currency:
         $ref: '#/definitions/model.Currency'
         description: |
-          Country full object describes merchant's accounting currency
+          full object describes merchant's accounting currency
         type: object
       email:
         description: |
-          Email merchant email
+          merchant email
         type: string
       external_id:
         description: |
-          ExternalId unique merchant identifier in auth system
+          unique merchant identifier in auth system
         type: string
       id:
         description: |
-          Id unique merchant identifier
+          unique merchant identifier
         type: string
       name:
         description: |
-          Name merchant company legal name
+          merchant company legal name
         type: string
       status:
         description: |
-          Status merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
+          merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
         type: integer
     type: object
   model.MerchantScalar:
     properties:
       accounting_period:
         description: |
-          AccountingPeriod period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year
+          period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year
         type: string
       country:
         description: |
-          Country numeric ISO 3166-1 country code
+          numeric ISO 3166-1 country code
         type: integer
       currency:
         description: |
-          Currency numeric ISO 4217 currency code describes merchant's accounting currency
+          numeric ISO 4217 currency code describes merchant's accounting currency
         type: integer
       email:
         description: |
-          Email merchant email
+          merchant email
         type: string
       id:
         description: |
-          Id unique merchant identifier in auth system
+          unique merchant identifier in auth system
         type: string
       name:
         description: |
-          Name merchant company legal name
+          merchant company legal name
         type: string
       status:
         description: |
-          Status merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
+          merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
         type: integer
     required:
     - id
@@ -136,91 +136,93 @@ definitions:
     properties:
       en:
         description: |
-          EN english name
+          english name
         type: string
       ru:
         description: |
-          EN russian name
+          russian name
         type: string
     type: object
   model.OrderScalar:
     properties:
       account:
         description: |
-          Account User unique account in project
+          user unique account in project
         type: string
       amount:
         description: |
-          Amount Order amount
+          order amount
         type: number
       currency:
         description: |
-          Currency Order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency
+          order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency
         type: string
       description:
         description: |
-          Description Order description. If this field not send in request, then we're create standard order description
+          order description. If this field not send in request, then we're create standard order description
         type: string
       order_id:
         description: |
-          OrderId Unique order identifier in project. This field not required, BUT we're recommend send this field always
+          unique order identifier in project. This field not required, BUT we're recommend send this field always
         type: string
       other:
         description: |
-          Other Object with any fields on the project side that do not match the names of the reserved fields
+          object with any fields on the project side that do not match the names of the reserved fields
         type: object
       payer_email:
         description: |
-          PayerEmail User (payer) email
+          user (payer) email
         type: string
       payer_ip:
         description: |
-          CreateOrderIp User (payer) ip
+          user (payer) ip
         type: string
       payer_phone:
         description: |
-          PayerPhone User (payer) phone
+          user (payer) phone
         type: string
       payment_method:
         description: |
-          PaymentMethod Payment method identifier in Protocol One payment solution
+          payment method identifier in Protocol One payment solution
         type: string
       project:
         description: |
-          ProjectId Project unique identifier in Protocol One payment solution
+          project unique identifier in Protocol One payment solution
         type: string
       region:
         description: |
-          Region User (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip
+          user (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip
         type: string
       signature:
         description: |
-          Signature Signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always
+          signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always
         type: string
       url_fail:
         description: |
-          UrlFail URL for redirect user after failed payment. This field can be send if it allowed in project admin panel
+          URL for redirect user after failed payment. This field can be send if it allowed in project admin panel
         type: string
       url_notify:
         description: |
-          UrlNotify URL for payment notification request to project. This field can be send if it allowed in project admin panel
+          URL for payment notification request to project. This field can be send if it allowed in project admin panel
         type: string
       url_success:
         description: |
-          UrlSuccess URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel
+          URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel
         type: string
       url_verify:
         description: |
-          UrlVerify URL for payment data verification request to project. This field can be send if it allowed in project admin panel
+          URL for payment data verification request to project. This field can be send if it allowed in project admin panel
         type: string
     required:
-    - amount
     - project
     - account
+    - amount
     type: object
   model.OrderUrl:
     properties:
       order_url:
+        description: |
+          link for user to payment confirmation form
         type: string
     type: object
   model.Project:
@@ -228,179 +230,179 @@ definitions:
       callback_currency:
         $ref: '#/definitions/model.Currency'
         description: |
-          CallbackCurrency full object of currency which described currency to send payment notification
+          full object of currency which described currency to send payment notification
         type: object
       callback_protocol:
         description: |
-          CallbackProtocol protocol identifier to send payment notification. Now available: default
+          protocol identifier to send payment notification. Now available: default
         type: string
       create_invoice_allowed_urls:
         description: |
-          CreateInvoiceAllowedUrls list of urls rom which you can send a request to create an order
+          list of urls rom which you can send a request to create an order
         items:
           type: string
         type: array
       created_at:
         description: |
-          CreatedAt date of create project
+          date of create project
         type: string
       fixed_package:
         description: |
-          FixedPackage list of project's fixed packages
+          list of project's fixed packages
         type: object
       id:
         description: |
-          Id unique project identifier
+          unique project identifier
         type: string
       is_active:
         description: |
-          IsActive is project active
+          is project active
         type: boolean
       is_allow_dynamic_notify_urls:
         description: |
-          IsAllowDynamicNotifyUrls is allow send dynamic notification urls in request to create an order
+          is allow send dynamic notification urls in request to create an order
         type: boolean
       is_allow_dynamic_redirect_urls:
         description: |
-          IsAllowDynamicRedirectUrls is allow send dynamic user's redirect urls in request to create an order
+          is allow send dynamic user's redirect urls in request to create an order
         type: boolean
       limits_currency:
         $ref: '#/definitions/model.Currency'
         description: |
-          LimitsCurrency full object of currency which describes currency for amount's limit
+          full object of currency which describes currency for amount's limit
         type: object
       max_payment_amount:
         description: |
-          MaxPaymentAmount maximal amount allowed for create order
+          maximal amount allowed for create order
         type: number
       min_payment_amount:
         description: |
-          MinPaymentAmount minimal amount allowed for create order
+          minimal amount allowed for create order
         type: number
       name:
         description: |
-          Name project name
+          project name
         type: string
       notify_emails:
         description: |
-          NotifyEmails list of emails to send notifications about successfully completed payment operations
+          list of emails to send notifications about successfully completed payment operations
         items:
           type: string
         type: array
       only_fixed_amounts:
         description: |
-          OnlyFixedAmounts is allow create order only with amounts from fixed packages list
+          is allow create order only with amounts from fixed packages list
         type: boolean
       payment_methods:
         description: |
-          FixedPackage list of payment methods allowed to project
+          list of payment methods allowed to project
         type: object
       secret_key:
         description: |
-          SecretKey secret key for create check hash for request about order statuses changes
+          secret key for create check hash for request about order statuses changes
         type: string
       send_notify_email:
         description: |
-          SendNotifyEmail is allow send notifications about successfully completed payment operations to user's emails
+          is allow send notifications about successfully completed payment operations to user's emails
         type: boolean
       url_check_account:
         description: |
-          URLCheckAccount default url to send request for verification payment data to project
+          default url to send request for verification payment data to project
         type: string
       url_process_payment:
         description: |
-          URLProcessPayment default url to send request for notification about successfully completed payment to project
+          default url to send request for notification about successfully completed payment to project
         type: string
       url_redirect_fail:
         description: |
-          URLRedirectFail default url to redirect user after failed payment
+          default url to redirect user after failed payment
         type: string
       url_redirect_success:
         description: |
-          URLRedirectSuccess default url to redirect user after successfully completed payment
+          default url to redirect user after successfully completed payment
         type: string
     type: object
   model.ProjectScalar:
     properties:
       callback_currency:
         description: |
-          CallbackCurrency ISO 4217 numeric currency code to send payment notification
+          ISO 4217 numeric currency code to send payment notification
         type: integer
       callback_protocol:
         description: |
-          CallbackProtocol protocol identifier to send payment notification. Now available: default
+          protocol identifier to send payment notification. Now available: default
         type: string
       create_invoice_allowed_urls:
         description: |
-          CreateInvoiceAllowedUrls list of urls rom which you can send a request to create an order
+          list of urls rom which you can send a request to create an order
         items:
           type: string
         type: array
       fixed_package:
         description: |
-          FixedPackage list of project's fixed packages
+          list of project's fixed packages
         type: object
       is_active:
         description: |
-          IsActive is project active
+          is project active
         type: boolean
       is_allow_dynamic_notify_urls:
         description: |
-          IsAllowDynamicNotifyUrls is allow send dynamic notification urls in request to create an order
+          is allow send dynamic notification urls in request to create an order
         type: boolean
       is_allow_dynamic_redirect_urls:
         description: |
-          IsAllowDynamicRedirectUrls is allow send dynamic user's redirect urls in request to create an order
+          is allow send dynamic user's redirect urls in request to create an order
         type: boolean
       limits_currency:
         description: |
-          LimitsCurrency ISO 4217 numeric currency code for limit amounts
+          ISO 4217 numeric currency code for limit amounts
         type: integer
       max_payment_amount:
         description: |
-          MaxPaymentAmount maximal amount allowed for create order
+          maximal amount allowed for create order
         type: number
       min_payment_amount:
         description: |
-          MinPaymentAmount minimal amount allowed for create order
+          minimal amount allowed for create order
         type: number
       name:
         description: |
-          Name project name
+          project name
         type: string
       notify_emails:
         description: |
-          NotifyEmails list of emails to send notifications about successfully completed payment operations
+          list of emails to send notifications about successfully completed payment operations
         items:
           type: string
         type: array
       only_fixed_amounts:
         description: |
-          OnlyFixedAmounts is allow create order only with amounts from fixed packages list
+          is allow create order only with amounts from fixed packages list
         type: boolean
       secret_key:
         description: |
-          SecretKey secret key for create check hash for request about order statuses changes
+          secret key for create check hash for request about order statuses changes
         type: string
       send_notify_email:
         description: |
-          SendNotifyEmail is allow send notifications about successfully completed payment operations to user's emails
+          is allow send notifications about successfully completed payment operations to user's emails
         type: boolean
       url_check_account:
         description: |
-          URLCheckAccount default url to send request for verification payment data to project
+          default url to send request for verification payment data to project
         type: string
       url_process_payment:
         description: |
-          URLProcessPayment default url to send request for notification about successfully completed payment to project
+          default url to send request for notification about successfully completed payment to project
         type: string
       url_redirect_fail:
         description: |
-          URLRedirectFail default url to redirect user after failed payment
+          default url to redirect user after failed payment
         type: string
       url_redirect_success:
         description: |
-          URLRedirectSuccess default url to redirect user after successfully completed payment
+          default url to redirect user after successfully completed payment
         type: string
     required:
     - name
@@ -1126,4 +1128,9 @@ paths:
       summary: Create order with HTML form
       tags:
       - Payment Order
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

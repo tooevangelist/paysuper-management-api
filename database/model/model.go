@@ -1,6 +1,6 @@
 package model
 
 type Error struct {
-	// Message Text error description
+	// text error description
 	Message string `json:"message"`
 }
