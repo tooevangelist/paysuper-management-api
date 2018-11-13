@@ -1,0 +1,1459 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a Protocol One payment solution service.",
+        "title": "Protocol One payment solution swagger documentation",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "p1payapi.tst.protocol.one",
+    "paths": {
+        "/api/v1/country": {
+            "get": {
+                "description": "Get full list of currencies or get list of currencies filtered by name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Country"
+                ],
+                "summary": "Get list of countries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name or symbolic ISO 3166-1 code of country",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Country"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/country/{id}": {
+            "get": {
+                "description": "Get country object by numeric ISO 3166-1 code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Country"
+                ],
+                "summary": "Get country by numeric ISO 3166-1 code",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "numeric ISO 3166-1 country code",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Country"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/currency": {
+            "get": {
+                "description": "Get full list of currencies or get list of currencies filtered by name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Currency"
+                ],
+                "summary": "Get list of currencies",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name or symbolic ISO 4217 code of currency",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Currency"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/currency/{id}": {
+            "get": {
+                "description": "Get currency object by numeric ISO 4217 code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Currency"
+                ],
+                "summary": "Get currency by numeric ISO 4217 code",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "numeric ISO 4217 currency code",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Currency"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/order": {
+            "post": {
+                "description": "Create a payment order use POST JSON request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment Order"
+                ],
+                "summary": "Create order with json request",
+                "parameters": [
+                    {
+                        "description": "Order create data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.OrderScalar"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Object with url to form entering payment requisites",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.OrderUrl"
+                        }
+                    },
+                    "400": {
+                        "description": "Object with error message",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Object with error message",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/s/merchant": {
+            "put": {
+                "description": "Update merchant data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Merchant"
+                ],
+                "summary": "Update merchant",
+                "parameters": [
+                    {
+                        "description": "Merchant object with new data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.MerchantScalar"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Merchant"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create new merchant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Merchant"
+                ],
+                "summary": "Create merchant",
+                "parameters": [
+                    {
+                        "description": "Creating merchant data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.MerchantScalar"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Merchant"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Mark merchant as deleted",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Merchant"
+                ],
+                "summary": "Delete merchant",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/s/merchant/{id}": {
+            "get": {
+                "description": "Get full data about merchant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Merchant"
+                ],
+                "summary": "Get merchant",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Merchant"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/s/project": {
+            "get": {
+                "description": "Get list of project for authenticated merchant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "List projects",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Project"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create new project for authenticated merchant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Create project",
+                "parameters": [
+                    {
+                        "description": "Creating project data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.ProjectScalar"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Project"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/s/project/{id}": {
+            "get": {
+                "description": "\"Get data about project\"",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Get project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project identifier",
+                        "name": "data",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Project"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Project not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update project for authenticated merchant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Update project",
+                "parameters": [
+                    {
+                        "description": "Project object with new data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.ProjectScalar"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project identifier",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Project"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete project for authenticated merchant",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Delete project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project identifier",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Some unknown error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/order/create": {
+            "get": {
+                "description": "Create a payment order use GET or POST HTML form",
+                "consumes": [
+                    "multipart/form-data",
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "Payment Order"
+                ],
+                "summary": "Create order with HTML form",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project unique identifier in Protocol One payment solution",
+                        "name": "PP_PROJECT_ID",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Order amount",
+                        "name": "PP_AMOUNT",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User unique account in project",
+                        "name": "PP_ACCOUNT",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Unique order identifier in project. This field not required, BUT we're recommend send this field always",
+                        "name": "PP_ORDER_ID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Payment method identifier in Protocol One payment solution",
+                        "name": "PP_PAYMENT_METHOD",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order description. If this field not send in request, then we're create standard order description",
+                        "name": "PP_DESCRIPTION",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency",
+                        "name": "PP_CURRENCY",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip",
+                        "name": "PP_REGION",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User (payer) email",
+                        "name": "PP_PAYER_EMAIL",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User (payer) phone",
+                        "name": "PP_PAYER_PHONE",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "URL for payment data verification request to project. This field can be send if it allowed in project admin panel",
+                        "name": "PP_URL_VERIFY",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "URL for payment notification request to project. This field can be send if it allowed in project admin panel",
+                        "name": "PP_URL_NOTIFY",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel",
+                        "name": "PP_URL_SUCCESS",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "URL for redirect user after failed payment. This field can be send if it allowed in project admin panel",
+                        "name": "PP_URL_FAIL",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always",
+                        "name": "PP_SIGNATURE",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Any fields on the project side that do not match the names of the reserved fields",
+                        "name": "Other",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect user to form entering payment requisites",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Redirect user to page with error description",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Redirect user to page with error description",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a payment order use GET or POST HTML form",
+                "consumes": [
+                    "multipart/form-data",
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "Payment Order"
+                ],
+                "summary": "Create order with HTML form",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Project unique identifier in Protocol One payment solution",
+                        "name": "PP_PROJECT_ID",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Order amount",
+                        "name": "PP_AMOUNT",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User unique account in project",
+                        "name": "PP_ACCOUNT",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Unique order identifier in project. This field not required, BUT we're recommend send this field always",
+                        "name": "PP_ORDER_ID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Payment method identifier in Protocol One payment solution",
+                        "name": "PP_PAYMENT_METHOD",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order description. If this field not send in request, then we're create standard order description",
+                        "name": "PP_DESCRIPTION",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency",
+                        "name": "PP_CURRENCY",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip",
+                        "name": "PP_REGION",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User (payer) email",
+                        "name": "PP_PAYER_EMAIL",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "User (payer) phone",
+                        "name": "PP_PAYER_PHONE",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "URL for payment data verification request to project. This field can be send if it allowed in project admin panel",
+                        "name": "PP_URL_VERIFY",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "URL for payment notification request to project. This field can be send if it allowed in project admin panel",
+                        "name": "PP_URL_NOTIFY",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel",
+                        "name": "PP_URL_SUCCESS",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "URL for redirect user after failed payment. This field can be send if it allowed in project admin panel",
+                        "name": "PP_URL_FAIL",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always",
+                        "name": "PP_SIGNATURE",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Any fields on the project side that do not match the names of the reserved fields",
+                        "name": "Other",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Redirect user to form entering payment requisites",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Redirect user to page with error description",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Redirect user to page with error description",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.Country": {
+            "type": "object",
+            "properties": {
+                "code_a2": {
+                    "description": "CodeA2 2 chars ISO 3166-1 country code\n",
+                    "type": "string"
+                },
+                "code_a3": {
+                    "description": "CodeA3 3 chars ISO 3166-1 country code\n",
+                    "type": "string"
+                },
+                "code_int": {
+                    "description": "CodeInt numeric ISO 3166-1 country code\n",
+                    "type": "integer"
+                },
+                "created_at": {
+                    "description": "CreatedAt date of create country in system\n",
+                    "type": "string"
+                },
+                "is_active": {
+                    "description": "IsActive is country active\n",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "Name list of country names\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.Name"
+                }
+            }
+        },
+        "model.Currency": {
+            "type": "object",
+            "properties": {
+                "code_a3": {
+                    "description": "CodeA3 3 chars ISO 4217 currency code\n",
+                    "type": "string"
+                },
+                "code_int": {
+                    "description": "CodeInt numeric ISO 4217 currency code\n",
+                    "type": "integer"
+                },
+                "created_at": {
+                    "description": "CreatedAt date of create currency in system8\n",
+                    "type": "string"
+                },
+                "is_active": {
+                    "description": "IsActive is currency active\n",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "Name list of currency names\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.Name"
+                }
+            }
+        },
+        "model.Error": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Message Text error description\n",
+                    "type": "string"
+                }
+            }
+        },
+        "model.Merchant": {
+            "type": "object",
+            "properties": {
+                "accounting_period": {
+                    "description": "AccountingPeriod period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year\n",
+                    "type": "string"
+                },
+                "country": {
+                    "description": "Country full object of country where merchant company registered\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.Country"
+                },
+                "created_at": {
+                    "description": "CreatedAt date of create merchant in system\n",
+                    "type": "string"
+                },
+                "currency": {
+                    "description": "Country full object describes merchant's accounting currency\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.Currency"
+                },
+                "email": {
+                    "description": "Email merchant email\n",
+                    "type": "string"
+                },
+                "external_id": {
+                    "description": "ExternalId unique merchant identifier in auth system\n",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Id unique merchant identifier\n",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name merchant company legal name\n",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted\n",
+                    "type": "integer"
+                }
+            }
+        },
+        "model.MerchantScalar": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "accounting_period": {
+                    "description": "AccountingPeriod period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year\n",
+                    "type": "string"
+                },
+                "country": {
+                    "description": "Country numeric ISO 3166-1 country code\n",
+                    "type": "integer"
+                },
+                "currency": {
+                    "description": "Currency numeric ISO 4217 currency code describes merchant's accounting currency\n",
+                    "type": "integer"
+                },
+                "email": {
+                    "description": "Email merchant email\n",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Id unique merchant identifier in auth system\n",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name merchant company legal name\n",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted\n",
+                    "type": "integer"
+                }
+            }
+        },
+        "model.Name": {
+            "type": "object",
+            "properties": {
+                "en": {
+                    "description": "EN english name\n",
+                    "type": "string"
+                },
+                "ru": {
+                    "description": "EN russian name\n",
+                    "type": "string"
+                }
+            }
+        },
+        "model.OrderScalar": {
+            "type": "object",
+            "required": [
+                "amount",
+                "project",
+                "account"
+            ],
+            "properties": {
+                "account": {
+                    "description": "Account User unique account in project\n",
+                    "type": "string"
+                },
+                "amount": {
+                    "description": "Amount Order amount\n",
+                    "type": "number"
+                },
+                "currency": {
+                    "description": "Currency Order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency\n",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description Order description. If this field not send in request, then we're create standard order description\n",
+                    "type": "string"
+                },
+                "order_id": {
+                    "description": "OrderId Unique order identifier in project. This field not required, BUT we're recommend send this field always\n",
+                    "type": "string"
+                },
+                "other": {
+                    "description": "Other Object with any fields on the project side that do not match the names of the reserved fields\n",
+                    "type": "object"
+                },
+                "payer_email": {
+                    "description": "PayerEmail User (payer) email\n",
+                    "type": "string"
+                },
+                "payer_ip": {
+                    "description": "CreateOrderIp User (payer) ip\n",
+                    "type": "string"
+                },
+                "payer_phone": {
+                    "description": "PayerPhone User (payer) phone\n",
+                    "type": "string"
+                },
+                "payment_method": {
+                    "description": "PaymentMethod Payment method identifier in Protocol One payment solution\n",
+                    "type": "string"
+                },
+                "project": {
+                    "description": "ProjectId Project unique identifier in Protocol One payment solution\n",
+                    "type": "string"
+                },
+                "region": {
+                    "description": "Region User (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip\n",
+                    "type": "string"
+                },
+                "signature": {
+                    "description": "Signature Signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always\n",
+                    "type": "string"
+                },
+                "url_fail": {
+                    "description": "UrlFail URL for redirect user after failed payment. This field can be send if it allowed in project admin panel\n",
+                    "type": "string"
+                },
+                "url_notify": {
+                    "description": "UrlNotify URL for payment notification request to project. This field can be send if it allowed in project admin panel\n",
+                    "type": "string"
+                },
+                "url_success": {
+                    "description": "UrlSuccess URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel\n",
+                    "type": "string"
+                },
+                "url_verify": {
+                    "description": "UrlVerify URL for payment data verification request to project. This field can be send if it allowed in project admin panel\n",
+                    "type": "string"
+                }
+            }
+        },
+        "model.OrderUrl": {
+            "type": "object",
+            "properties": {
+                "order_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Project": {
+            "type": "object",
+            "properties": {
+                "callback_currency": {
+                    "description": "CallbackCurrency full object of currency which described currency to send payment notification\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.Currency"
+                },
+                "callback_protocol": {
+                    "description": "CallbackProtocol protocol identifier to send payment notification. Now available: default\n",
+                    "type": "string"
+                },
+                "create_invoice_allowed_urls": {
+                    "description": "CreateInvoiceAllowedUrls list of urls rom which you can send a request to create an order\n",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "created_at": {
+                    "description": "CreatedAt date of create project\n",
+                    "type": "string"
+                },
+                "fixed_package": {
+                    "description": "FixedPackage list of project's fixed packages\n",
+                    "type": "object"
+                },
+                "id": {
+                    "description": "Id unique project identifier\n",
+                    "type": "string"
+                },
+                "is_active": {
+                    "description": "IsActive is project active\n",
+                    "type": "boolean"
+                },
+                "is_allow_dynamic_notify_urls": {
+                    "description": "IsAllowDynamicNotifyUrls is allow send dynamic notification urls in request to create an order\n",
+                    "type": "boolean"
+                },
+                "is_allow_dynamic_redirect_urls": {
+                    "description": "IsAllowDynamicRedirectUrls is allow send dynamic user's redirect urls in request to create an order\n",
+                    "type": "boolean"
+                },
+                "limits_currency": {
+                    "description": "LimitsCurrency full object of currency which describes currency for amount's limit\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.Currency"
+                },
+                "max_payment_amount": {
+                    "description": "MaxPaymentAmount maximal amount allowed for create order\n",
+                    "type": "number"
+                },
+                "min_payment_amount": {
+                    "description": "MinPaymentAmount minimal amount allowed for create order\n",
+                    "type": "number"
+                },
+                "name": {
+                    "description": "Name project name\n",
+                    "type": "string"
+                },
+                "notify_emails": {
+                    "description": "NotifyEmails list of emails to send notifications about successfully completed payment operations\n",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "only_fixed_amounts": {
+                    "description": "OnlyFixedAmounts is allow create order only with amounts from fixed packages list\n",
+                    "type": "boolean"
+                },
+                "payment_methods": {
+                    "description": "FixedPackage list of payment methods allowed to project\n",
+                    "type": "object"
+                },
+                "secret_key": {
+                    "description": "SecretKey secret key for create check hash for request about order statuses changes\n",
+                    "type": "string"
+                },
+                "send_notify_email": {
+                    "description": "SendNotifyEmail is allow send notifications about successfully completed payment operations to user's emails\n",
+                    "type": "boolean"
+                },
+                "url_check_account": {
+                    "description": "URLCheckAccount default url to send request for verification payment data to project\n",
+                    "type": "string"
+                },
+                "url_process_payment": {
+                    "description": "URLProcessPayment default url to send request for notification about successfully completed payment to project\n",
+                    "type": "string"
+                },
+                "url_redirect_fail": {
+                    "description": "URLRedirectFail default url to redirect user after failed payment\n",
+                    "type": "string"
+                },
+                "url_redirect_success": {
+                    "description": "URLRedirectSuccess default url to redirect user after successfully completed payment\n",
+                    "type": "string"
+                }
+            }
+        },
+        "model.ProjectScalar": {
+            "type": "object",
+            "required": [
+                "name",
+                "callback_protocol"
+            ],
+            "properties": {
+                "callback_currency": {
+                    "description": "CallbackCurrency ISO 4217 numeric currency code to send payment notification\n",
+                    "type": "integer"
+                },
+                "callback_protocol": {
+                    "description": "CallbackProtocol protocol identifier to send payment notification. Now available: default\n",
+                    "type": "string"
+                },
+                "create_invoice_allowed_urls": {
+                    "description": "CreateInvoiceAllowedUrls list of urls rom which you can send a request to create an order\n",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "fixed_package": {
+                    "description": "FixedPackage list of project's fixed packages\n",
+                    "type": "object"
+                },
+                "is_active": {
+                    "description": "IsActive is project active\n",
+                    "type": "boolean"
+                },
+                "is_allow_dynamic_notify_urls": {
+                    "description": "IsAllowDynamicNotifyUrls is allow send dynamic notification urls in request to create an order\n",
+                    "type": "boolean"
+                },
+                "is_allow_dynamic_redirect_urls": {
+                    "description": "IsAllowDynamicRedirectUrls is allow send dynamic user's redirect urls in request to create an order\n",
+                    "type": "boolean"
+                },
+                "limits_currency": {
+                    "description": "LimitsCurrency ISO 4217 numeric currency code for limit amounts\n",
+                    "type": "integer"
+                },
+                "max_payment_amount": {
+                    "description": "MaxPaymentAmount maximal amount allowed for create order\n",
+                    "type": "number"
+                },
+                "min_payment_amount": {
+                    "description": "MinPaymentAmount minimal amount allowed for create order\n",
+                    "type": "number"
+                },
+                "name": {
+                    "description": "Name project name\n",
+                    "type": "string"
+                },
+                "notify_emails": {
+                    "description": "NotifyEmails list of emails to send notifications about successfully completed payment operations\n",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "only_fixed_amounts": {
+                    "description": "OnlyFixedAmounts is allow create order only with amounts from fixed packages list\n",
+                    "type": "boolean"
+                },
+                "secret_key": {
+                    "description": "SecretKey secret key for create check hash for request about order statuses changes\n",
+                    "type": "string"
+                },
+                "send_notify_email": {
+                    "description": "SendNotifyEmail is allow send notifications about successfully completed payment operations to user's emails\n",
+                    "type": "boolean"
+                },
+                "url_check_account": {
+                    "description": "URLCheckAccount default url to send request for verification payment data to project\n",
+                    "type": "string"
+                },
+                "url_process_payment": {
+                    "description": "URLProcessPayment default url to send request for notification about successfully completed payment to project\n",
+                    "type": "string"
+                },
+                "url_redirect_fail": {
+                    "description": "URLRedirectFail default url to redirect user after failed payment\n",
+                    "type": "string"
+                },
+                "url_redirect_success": {
+                    "description": "URLRedirectSuccess default url to redirect user after successfully completed payment\n",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
