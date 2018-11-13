@@ -1180,8 +1180,8 @@
         "model.OrderScalar": {
             "type": "object",
             "required": [
-                "project",
                 "account",
+                "project",
                 "amount"
             ],
             "properties": {
@@ -1368,8 +1368,8 @@
         "model.ProjectScalar": {
             "type": "object",
             "required": [
-                "name",
-                "callback_protocol"
+                "callback_protocol",
+                "name"
             ],
             "properties": {
                 "callback_currency": {
@@ -1455,13 +1455,6 @@
                     "type": "string"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "ApiKeyAuth": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }
