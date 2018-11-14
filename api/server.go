@@ -19,7 +19,10 @@ import (
 )
 
 const (
-	errorMessage = "Field validation for '%s' failed on the '%s' tag"
+	errorMessage                      = "Field validation for '%s' failed on the '%s' tag"
+	responseMessageInvalidRequestData = "Invalid request data"
+	responseMessageAccessDenied       = "Access denied"
+	responseMessageNotFound           = "Not found"
 )
 
 type Template struct {
@@ -28,7 +31,6 @@ type Template struct {
 
 type Merchant struct {
 	Identifier string
-	Projects   []string
 }
 
 type GetParams struct {
@@ -57,11 +59,11 @@ type Api struct {
 
 func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLogger, geoDbReader *geoip2.Reader) (*Api, error) {
 	api := &Api{
-		Http:     echo.New(),
-		database: database,
-		logger:   logger,
-		validate: validator.New(),
-		handlers: make(map[string]interface{}),
+		Http:        echo.New(),
+		database:    database,
+		logger:      logger,
+		validate:    validator.New(),
+		handlers:    make(map[string]interface{}),
 		geoDbReader: geoDbReader,
 	}
 

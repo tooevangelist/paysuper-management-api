@@ -10,7 +10,9 @@ import (
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 	"net"
+	"net/url"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -163,7 +165,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		ProjectParams:         order.Other,
 		PayerData: &model.PayerData{
 			Ip:            order.CreateOrderIp,
-			CountryCodeA3: gRecord.Country.IsoCode,
+			CountryCodeA2: gRecord.Country.IsoCode,
 			City:          gRecord.City.Names["en"],
 			Timezone:      gRecord.Location.TimeZone,
 			Phone:         order.PayerPhone,
@@ -416,4 +418,105 @@ func (om *OrderManager) checkSignature(check *check) error {
 	}
 
 	return nil
+}
+
+func (om *OrderManager) FindAll(values url.Values, fp []bson.ObjectId, limit int, offset int) []*model.Order {
+	var filter = make(bson.M)
+
+	if len(fp) > 0 {
+		filter["project_id"] = bson.M{"$in": fp}
+	}
+
+	if len(values) > 0 {
+		filter = om.processFilters(values, filter)
+	}
+
+	o, err := om.Database.Repository(TableOrder).FindAllOrders(filter, limit, offset)
+
+	if err != nil {
+		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)
+	}
+
+	return o
+}
+
+func (om *OrderManager) processFilters(values url.Values, filter bson.M) bson.M {
+	if id, ok := values[model.OrderFilterFieldId]; ok {
+		filter["_id"] = bson.ObjectIdHex(id[0])
+	}
+
+	if pms, ok := values[model.OrderFilterFieldPaymentMethods]; ok {
+		var fPms []bson.ObjectId
+
+		for _, pm := range pms {
+			fPms = append(fPms, bson.ObjectIdHex(pm))
+		}
+
+		filter["pm_id"] = bson.M{"$in": fPms}
+	}
+
+	if cs, ok := values[model.OrderFilterFieldCountries]; ok {
+		filter["payer_data.country_code_a2"] = bson.M{"$in": cs}
+	}
+
+	if ss, ok := values[model.OrderFilterFieldStatuses]; ok {
+		var ssi []int
+
+		for _, s := range ss {
+			si, err := strconv.Atoi(s)
+
+			if err != nil {
+				continue
+			}
+
+			ssi = append(ssi, si)
+		}
+
+		if len(ssi) > 0 {
+			filter["status"] = bson.M{"$in": ssi}
+		}
+	}
+
+	if a, ok := values[model.OrderFilterFieldAccount]; ok {
+		ar := bson.RegEx{Pattern: ".*" + a[0] + ".*", Options: "i"}
+		filter["$or"] = bson.M{"project_account": ar, "pm_account": ar, "payer_data.phone": ar, "payer_data.email": ar}
+	}
+
+	pmDates := make(bson.M)
+
+	if pmDateFrom, ok := values[model.OrderFilterFieldPSDateFrom]; ok {
+		if ts, err := strconv.ParseInt(pmDateFrom[0], 10, 64); err != nil {
+			pmDates["$gte"] = ts
+		}
+	}
+
+	if pmDateTo, ok := values[model.OrderFilterFieldPSDateTo]; ok {
+		if ts, err := strconv.ParseInt(pmDateTo[0], 10, 64); err != nil {
+			pmDates["$lte"] = ts
+		}
+	}
+
+	if len(pmDates) > 0 {
+		filter["pm_order_close_date"] = pmDates
+	}
+
+	prjDates := make(bson.M)
+
+	if prjDateFrom, ok := values[model.OrderFilterFieldProjectDateFrom]; ok {
+		if ts, err := strconv.ParseInt(prjDateFrom[0], 10, 64); err != nil {
+			prjDates["$gte"] = ts
+		}
+	}
+
+	if prjDateTo, ok := values[model.OrderFilterFieldProjectDateTo]; ok {
+		if ts, err := strconv.ParseInt(prjDateTo[0], 10, 64); err != nil {
+			prjDates["$lte"] = ts
+		}
+	}
+
+	if len(prjDates) > 0 {
+		filter["pm_order_close_date"] = prjDates
+	}
+
+	return filter
 }

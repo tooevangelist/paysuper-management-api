@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"errors"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
@@ -11,6 +12,9 @@ import (
 const (
 	minPaymentAmount float64 = 0
 	maxPaymentAmount float64 = 15000
+
+	projectErrorMerchantNotHaveProjects = "merchant not have projects"
+	projectErrorAccessDeniedToProject = "one or more projects in filter are not a projects of merchant"
 )
 
 type ProjectManager struct {
@@ -245,4 +249,34 @@ func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model
 	}
 
 	return fixedPackages
+}
+
+func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) ([]bson.ObjectId, error) {
+	mProjects := pm.FindProjectsByMerchantId(mId, model.DefaultLimit, model.DefaultOffset)
+
+	if len(mProjects) <= 0 {
+		return nil, errors.New(projectErrorMerchantNotHaveProjects)
+	}
+
+	var prjObjectIds []bson.ObjectId
+	var fp = make(map[string]bool)
+
+	for _, p := range mProjects {
+		prjObjectIds = append(prjObjectIds, p.Id)
+		fp[p.Id.Hex()] = true
+	}
+
+	if len(fProjects) <= 0 {
+		return prjObjectIds, nil
+	}
+
+	for _, p := range fProjects {
+		if _, ok := fp[p]; ok {
+			continue
+		}
+
+		return nil, errors.New(projectErrorAccessDeniedToProject)
+	}
+
+	return prjObjectIds, nil
 }

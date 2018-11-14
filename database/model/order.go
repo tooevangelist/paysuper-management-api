@@ -24,6 +24,17 @@ const (
 
 	OrderStatusCreated  = 0
 	OrderStatusComplete = 10
+
+	OrderFilterFieldProjects        = "projects"
+	OrderFilterFieldId              = "id"
+	OrderFilterFieldPaymentMethods  = "payment_methods"
+	OrderFilterFieldCountries       = "countries"
+	OrderFilterFieldStatuses        = "statuses"
+	OrderFilterFieldAccount         = "account"
+	OrderFilterFieldPSDateFrom      = "ps_date_from"
+	OrderFilterFieldPSDateTo        = "ps_date_to"
+	OrderFilterFieldProjectDateFrom = "project_date_from"
+	OrderFilterFieldProjectDateTo   = "project_date_to"
 )
 
 var OrderReservedWords = map[string]bool{
@@ -50,12 +61,18 @@ var OrderStatusesDescription = map[int]string{
 }
 
 type PayerData struct {
-	Ip            string
-	CountryCodeA3 string
-	City          string
-	Timezone      string
-	Phone         *string
-	Email         *string
+	// payer ip from create order request
+	Ip string `bson:"ip" json:"ip"`
+	// payer country code by ISO 3166-1 from create order request
+	CountryCodeA2 string `bson:"country_code_a2" json:"country_code_a2"`
+	// payer city name, get from ip geo location
+	City string `bson:"city" json:"city"`
+	// payer timezone name, get from ip geo location
+	Timezone string `bson:"timezone" json:"timezone"`
+	// payer phone from create order request
+	Phone *string `bson:"phone,omitempty" json:"phone,omitempty"`
+	// payer email from create order request
+	Email *string `bson:"email,omitempty" json:"email,omitempty"`
 }
 
 type OrderScalar struct {

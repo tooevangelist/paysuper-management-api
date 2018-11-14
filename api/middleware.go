@@ -1,14 +1,10 @@
 package api
 
 import (
+	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/labstack/echo"
 	"net/http"
 	"strconv"
-)
-
-const (
-	defaultLimit  = 100
-	defaultOffset = 0
 )
 
 func (api *Api) LimitOffsetMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
@@ -20,13 +16,13 @@ func (api *Api) LimitOffsetMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		limit, err := strconv.Atoi(ctx.QueryParam("limit"))
 
 		if err != nil {
-			limit = defaultLimit
+			limit = model.DefaultLimit
 		}
 
 		offset, err := strconv.Atoi(ctx.QueryParam("offset"))
 
 		if err != nil {
-			offset = defaultOffset
+			offset = model.DefaultOffset
 		}
 
 		api.limit = limit

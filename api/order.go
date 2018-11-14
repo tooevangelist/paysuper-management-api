@@ -7,9 +7,14 @@ import (
 	"net/http"
 )
 
+const (
+	orderFormTemplateName = "order.html"
+)
+
 type OrderApiV1 struct {
 	*Api
-	orderManager *manager.OrderManager
+	orderManager   *manager.OrderManager
+	projectManager *manager.ProjectManager
 }
 
 // @Summary Create order with HTML form
@@ -40,14 +45,18 @@ type OrderApiV1 struct {
 // @Router /order/create [get]
 func (api *Api) InitOrderV1Routes() *Api {
 	oApiV1 := OrderApiV1{
-		Api:          api,
-		orderManager: manager.InitOrderManager(api.database, api.logger, api.geoDbReader),
+		Api:            api,
+		orderManager:   manager.InitOrderManager(api.database, api.logger, api.geoDbReader),
+		projectManager: manager.InitProjectManager(api.database, api.logger),
 	}
 
 	api.Http.GET("/order/:id", oApiV1.getOrderForm)
 	api.Http.GET("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/api/v1/order", oApiV1.createJson)
+
+	api.accessRouteGroup.GET("/order", oApiV1.getOrders)
+	api.accessRouteGroup.GET("/order/:id", oApiV1.getOrderJson)
 
 	return api
 }
@@ -152,10 +161,93 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Order not found")
 	}
 
-	return ctx.Render(http.StatusOK, "order.html", map[string]interface{}{
-		"ProjectName": "Test project",
-		"Years":       oApiV1.orderManager.GetCardYears(),
-		"Months":      oApiV1.orderManager.GetCardMonths(),
-		"Order":       o,
-	})
+	return ctx.Render(
+		http.StatusOK,
+		orderFormTemplateName,
+		map[string]interface{}{
+			"Years":  oApiV1.orderManager.GetCardYears(),
+			"Months": oApiV1.orderManager.GetCardMonths(),
+			"Order":  o,
+		},
+	)
+}
+
+// @Summary Get order data
+// @Description Get full object with order data
+// @Tags Payment Order
+// @Accept json
+// @Produce json
+// @Param id path string true "Order unique identifier"
+// @Success 200 {object} model.Order "OK"
+// @Failure 400 {object} model.Error "Invalid request data"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 403 {object} model.Error "Access denied"
+// @Failure 404 {object} model.Error "Not found"
+// @Failure 500 {object} model.Error "Object with error message"
+// @Router /api/v1/s/order/{id} [get]
+func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	if id == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, responseMessageInvalidRequestData)
+	}
+
+	o := oApiV1.orderManager.FindById(id)
+
+	if o == nil {
+		return echo.NewHTTPError(http.StatusNotFound, responseMessageNotFound)
+	}
+
+	if o.ProjectData.Merchant.ExternalId != oApiV1.Merchant.Identifier {
+		return echo.NewHTTPError(http.StatusForbidden, responseMessageAccessDenied)
+	}
+
+	return ctx.JSON(http.StatusOK, o)
+}
+
+// @Summary Get orders
+// @Description Get orders list
+// @Tags Payment Order
+// @Accept json
+// @Produce json
+// @Param id query string false "order unique identifier"
+// @Param projects query array false "list of projects to get orders filtered by they"
+// @Param payment_methods query array false "list of payment methods to get orders filtered by they"
+// @Param countries query array false "list of payer countries to get orders filtered by they"
+// @Param statuses query array false "list of orders statuses to get orders filtered by they"
+// @Param account query string false "payer account on the any side of payment process. for example it may be account in project, account in payment system, payer email and etc"
+// @Param ps_date_from query integer false "start date when payment was closed to get orders filtered by they"
+// @Param ps_date_to query integer false "end date when payment was closed to get orders filtered by they"
+// @Param project_date_from query integer false "start date when payment was created to get orders filtered by they"
+// @Param project_date_to query integer false "end date when payment was closed in project to get orders filtered by they"
+// @Param limit query integer true "maximum number of returning orders. default value is 100"
+// @Param offset query integer true "offset from which you want to return the list of orders. default value is 0"
+// @Success 200 {object} model.Order "OK"
+// @Failure 404 {object} model.Error "Invalid request data"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 404 {object} model.Error "Not found"
+// @Failure 500 {object} model.Error "Object with error message"
+// @Router /api/v1/s/order [get]
+func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
+	values := ctx.QueryParams()
+
+	var fp []string
+
+	if fProjects, ok := values[model.OrderFilterFieldProjects]; ok {
+		fp = fProjects
+	}
+
+	p, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, fp)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, err)
+	}
+
+	o := oApiV1.orderManager.FindAll(values, p, oApiV1.GetParams.limit, oApiV1.GetParams.offset)
+
+	if o == nil {
+		return echo.NewHTTPError(http.StatusNotFound, responseMessageNotFound)
+	}
+
+	return ctx.JSON(http.StatusOK, o)
 }

@@ -143,6 +143,130 @@ definitions:
           russian name
         type: string
     type: object
+  model.Order:
+    properties:
+      amount_merchant_accounting_currency:
+        description: |
+          operation amount in project owner (merchant) accounting currency
+        type: number
+      amount_ps_accounting_currency:
+        description: |
+          operation amount in payment system accounting currency
+        type: number
+      amount_psp_accounting_currency:
+        description: |
+          operation amount in accounting currency of PSP
+        type: number
+      created_at:
+        description: |
+          date of last update order data
+        type: string
+      created_by_json:
+        description: |
+          is order create by json request
+        type: boolean
+      id:
+        description: |
+          unique order identifier in Protocol One
+        type: string
+      payer_data:
+        $ref: '#/definitions/model.PayerData'
+        description: |
+          information about payer, for example: ip, email,phone and etc
+        type: object
+      pm_account:
+        description: |
+          account of payer in payment system
+        type: string
+      pm_fee:
+        description: |
+          payment system fee for payment operation
+        type: number
+      pm_id:
+        description: |
+          payment method unique identifier
+        type: string
+      pm_income_amount:
+        description: |
+          order amount received from payment system in notification request
+        type: number
+      pm_income_currency:
+        $ref: '#/definitions/model.Currency'
+        description: |
+          order currency received from payment system in notification request
+        type: object
+      pm_order_close_date:
+        description: |
+          date of ended payment operation in payment system
+        type: string
+      pm_order_id:
+        description: |
+          unique order id in payment system
+        type: string
+      pm_outcome_amount:
+        description: |
+          order amount send to payment system
+        type: number
+      pm_outcome_currency:
+        $ref: '#/definitions/model.Currency'
+        description: |
+          order currency send to payment system
+        type: object
+      pm_terminal_id:
+        description: |
+          identifier of terminal for process payment in payment system side
+        type: string
+      pm_txn_params:
+        description: |
+          any params received in request of payment system about payment
+        type: object
+      project_account:
+        description: |
+          user unique account in project
+        type: string
+      project_fee:
+        description: |
+          fee is charged with the project for the operation
+        type: number
+      project_id:
+        description: |
+          project unique identifier in Protocol One payment solution
+        type: string
+      project_income_amount:
+        description: |
+          order amount received from project
+        type: number
+      project_income_currency:
+        $ref: '#/definitions/model.Currency'
+        description: |
+          order currency received from project
+        type: object
+      project_last_requested_at:
+        description: |
+          date of last notification request to project
+        type: string
+      project_order_id:
+        description: |
+          unique order identifier in project. if was send in create order process
+        type: string
+      project_outcome_amount:
+        description: |
+          order amount send to project in notification request
+        type: number
+      project_outcome_currency:
+        $ref: '#/definitions/model.Currency'
+        description: |
+          order currency send to project in notification request
+        type: object
+      project_params:
+        description: |
+          any project params which received from project in request of create of order
+        type: object
+      status:
+        description: |
+          order status
+        type: integer
+    type: object
   model.OrderScalar:
     properties:
       account:
@@ -223,6 +347,33 @@ definitions:
       order_url:
         description: |
           link for user to payment confirmation form
+        type: string
+    type: object
+  model.PayerData:
+    properties:
+      city:
+        description: |
+          payer city name, get from ip geo location
+        type: string
+      country_code_a2:
+        description: |
+          payer country code by ISO 3166-1 from create order request
+        type: string
+      email:
+        description: |
+          payer email from create order request
+        type: string
+      ip:
+        description: |
+          payer ip from create order request
+        type: string
+      phone:
+        description: |
+          payer phone from create order request
+        type: string
+      timezone:
+        description: |
+          payer timezone name, get from ip geo location
         type: string
     type: object
   model.Project:
@@ -728,6 +879,141 @@ paths:
       summary: Get merchant
       tags:
       - Merchant
+  /api/v1/s/order:
+    get:
+      consumes:
+      - application/json
+      description: Get orders list
+      parameters:
+      - description: order unique identifier
+        in: query
+        name: id
+        type: string
+      - description: list of projects to get orders filtered by they
+        in: query
+        name: projects
+        type: array
+      - description: list of payment methods to get orders filtered by they
+        in: query
+        name: payment_methods
+        type: array
+      - description: list of payer countries to get orders filtered by they
+        in: query
+        name: countries
+        type: array
+      - description: list of orders statuses to get orders filtered by they
+        in: query
+        name: statuses
+        type: array
+      - description: payer account on the any side of payment process. for example
+          it may be account in project, account in payment system, payer email and
+          etc
+        in: query
+        name: account
+        type: string
+      - description: start date when payment was closed to get orders filtered by
+          they
+        in: query
+        name: ps_date_from
+        type: integer
+      - description: end date when payment was closed to get orders filtered by they
+        in: query
+        name: ps_date_to
+        type: integer
+      - description: start date when payment was created to get orders filtered by
+          they
+        in: query
+        name: project_date_from
+        type: integer
+      - description: end date when payment was closed in project to get orders filtered
+          by they
+        in: query
+        name: project_date_to
+        type: integer
+      - description: maximum number of returning orders. default value is 100
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: offset from which you want to return the list of orders. default
+          value is 0
+        in: query
+        name: offset
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Order'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+      summary: Get orders
+      tags:
+      - Payment Order
+  /api/v1/s/order/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get full object with order data
+      parameters:
+      - description: Order unique identifier
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Order'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+      summary: Get order data
+      tags:
+      - Payment Order
   /api/v1/s/project:
     get:
       consumes:

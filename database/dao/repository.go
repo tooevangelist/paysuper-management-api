@@ -31,6 +31,7 @@ type Repository interface {
 
 	FindOrderByProjectOrderId(string) (*model.Order, error)
 	FindOrderById(bson.ObjectId) (*model.Order, error)
+	FindAllOrders(bson.M, int, int) ([]*model.Order, error)
 	InsertOrder(*model.Order) error
 
 	FindCurrenciesPair(int, int) (*model.CurrencyRate, error)
