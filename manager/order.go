@@ -65,6 +65,14 @@ type pmOutcomeData struct {
 	currency *model.Currency
 }
 
+type FindAll struct {
+	Values   url.Values
+	Projects map[bson.ObjectId]string
+	Merchant *model.Merchant
+	Limit    int
+	Offset   int
+}
+
 func InitOrderManager(database dao.Database, logger *zap.SugaredLogger, geoDbReader *geoip2.Reader) *OrderManager {
 	om := &OrderManager{
 		Manager:              &Manager{Database: database, Logger: logger},
@@ -83,6 +91,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	var pm *model.PaymentMethod
 	var pmOutcomeData *pmOutcomeData
 	var gRecord *geoip2.City
+	var ofp *model.OrderFixedPackage
 	var err error
 
 	p := om.projectManager.FindProjectById(order.ProjectId)
@@ -126,7 +135,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	check.paymentMethod = pm
 
 	if p.OnlyFixedAmounts == true {
-		gRecord, err = om.getOrderFixedPackage(check)
+		gRecord, ofp, err = om.getOrderFixedPackage(check)
 
 		if err != nil {
 			return nil, err
@@ -155,28 +164,33 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		return nil, errors.New(orderErrorDynamicRedirectUrlsNotAllowed)
 	}
 
+	mACAmount, _ := om.currencyRateManager.convert(oCurrency.CodeInt, p.Merchant.Currency.CodeInt, order.Amount)
+
 	nOrder := &model.Order{
-		Id:                    bson.NewObjectId(),
-		ProjectId:             p.Id,
-		ProjectOrderId:        order.OrderId,
-		ProjectAccount:        order.Account,
-		ProjectIncomeAmount:   order.Amount,
-		ProjectIncomeCurrency: oCurrency,
-		ProjectParams:         order.Other,
+		Id:                     bson.NewObjectId(),
+		ProjectId:              p.Id,
+		ProjectOrderId:         order.OrderId,
+		ProjectAccount:         order.Account,
+		ProjectIncomeAmount:    order.Amount,
+		ProjectIncomeCurrency:  oCurrency,
+		ProjectParams:          order.Other,
 		PayerData: &model.PayerData{
 			Ip:            order.CreateOrderIp,
 			CountryCodeA2: gRecord.Country.IsoCode,
-			City:          gRecord.City.Names["en"],
+			CountryName:   &model.Name{EN: gRecord.Country.Names["en"], RU: gRecord.Country.Names["ru"]},
+			City:          &model.Name{EN: gRecord.City.Names["en"], RU: gRecord.City.Names["ru"]},
 			Timezone:      gRecord.Location.TimeZone,
 			Phone:         order.PayerPhone,
 			Email:         order.PayerEmail,
 		},
-		PaymentMethodId:              pm.Id,
-		PaymentMethodOutcomeAmount:   pmOutcomeData.amount,
-		PaymentMethodOutcomeCurrency: pmOutcomeData.currency,
-		Status:                       model.OrderStatusCreated,
-		CreatedAt:                    time.Now(),
-		IsJsonRequest:                order.IsJsonRequest,
+		PaymentMethodId:                    pm.Id,
+		PaymentMethodOutcomeAmount:         pmOutcomeData.amount,
+		PaymentMethodOutcomeCurrency:       pmOutcomeData.currency,
+		Status:                             model.OrderStatusCreated,
+		CreatedAt:                          time.Now(),
+		IsJsonRequest:                      order.IsJsonRequest,
+		FixedPackage:                       ofp,
+		AmountInMerchantAccountingCurrency: mACAmount,
 	}
 
 	if err = om.Database.Repository(TableOrder).InsertOrder(nOrder); err != nil {
@@ -354,7 +368,7 @@ func (om *OrderManager) checkPaymentMethod(c *check) (*model.PaymentMethod, erro
 	return pm, nil
 }
 
-func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, error) {
+func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, *model.OrderFixedPackage, error) {
 	var region string
 
 	if c.order.Region != nil {
@@ -365,7 +379,7 @@ func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, error) {
 	gRecord, err := om.geoDbReader.City(ip)
 
 	if err != nil {
-		return nil, errors.New(orderErrorPayerRegionUnknown)
+		return nil, nil, errors.New(orderErrorPayerRegionUnknown)
 	}
 
 	if region == "" {
@@ -375,24 +389,34 @@ func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, error) {
 	fps, ok := c.project.FixedPackage[region]
 
 	if !ok || len(fps) <= 0 {
-		return nil, errors.New(orderErrorFixedPackageForRegionNotFound)
+		return nil, nil, errors.New(orderErrorFixedPackageForRegionNotFound)
 	}
 
 	var ofp *model.FixedPackage
+	var ofpId int
 
-	for _, fp := range fps {
+	for i, fp := range fps {
 		if fp.Price != c.order.Amount || fp.Currency.CodeA3 != *c.order.Currency {
 			continue
 		}
 
 		ofp = fp
+		ofpId = i
 	}
 
 	if ofp == nil {
-		return nil, errors.New(orderErrorFixedPackageNotFound)
+		return nil, nil, errors.New(orderErrorFixedPackageNotFound)
 	}
 
-	return gRecord, nil
+	orderFp := &model.OrderFixedPackage{
+		Id:          ofpId,
+		Region:      region,
+		Name:        ofp.Name,
+		CurrencyInt: ofp.CurrencyInt,
+		Price:       ofp.Price,
+	}
+
+	return gRecord, orderFp, nil
 }
 
 func (om *OrderManager) checkSignature(check *check) error {
@@ -420,27 +444,129 @@ func (om *OrderManager) checkSignature(check *check) error {
 	return nil
 }
 
-func (om *OrderManager) FindAll(values url.Values, fp []bson.ObjectId, limit int, offset int) []*model.Order {
+func (om *OrderManager) FindAll(params *FindAll) ([]*model.OrderSimple, error) {
 	var filter = make(bson.M)
+	var f bson.M
+	var pFilter []bson.ObjectId
 
-	if len(fp) > 0 {
-		filter["project_id"] = bson.M{"$in": fp}
+	for k := range params.Projects {
+		pFilter = append(pFilter, k)
 	}
 
-	if len(values) > 0 {
-		filter = om.processFilters(values, filter)
+	filter["project_id"] = bson.M{"$in": pFilter}
+
+	if len(params.Values) > 0 {
+		f = om.ProcessFilters(params.Values, filter)
 	}
 
-	o, err := om.Database.Repository(TableOrder).FindAllOrders(filter, limit, offset)
+	o, err := om.Database.Repository(TableOrder).FindAllOrders(f, params.Limit, params.Offset)
 
 	if err != nil {
 		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)
 	}
 
-	return o
+	var ot []*model.OrderSimple
+
+	if o != nil && len(o) > 0 {
+		ot, err = om.transformOrders(o, params)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return ot, nil
 }
 
-func (om *OrderManager) processFilters(values url.Values, filter bson.M) bson.M {
+func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) ([]*model.OrderSimple, error) {
+	var tOrders []*model.OrderSimple
+
+	pms, err := om.paymentMethodManager.FindAllWithPaymentSystemAsMap()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, oValue := range orders {
+		tOrder := &model.OrderSimple{
+			Id: oValue.Id,
+			Project: &model.SimpleItem{
+				Id:   oValue.ProjectId,
+				Name: params.Projects[oValue.ProjectId],
+			},
+			Account:        oValue.ProjectAccount,
+			ProjectOrderId: oValue.ProjectOrderId,
+			PayerData:      oValue.PayerData,
+			PaymentMethod: &model.SimpleItem{
+				Id:   oValue.PaymentMethodId,
+				Name: pms[oValue.PaymentMethodId].Name,
+			},
+			ProjectTechnicalIncome: &model.OrderSimpleAmountObject{
+				Amount: oValue.ProjectIncomeAmount,
+				Currency: &model.SimpleCurrency{
+					CodeInt: oValue.ProjectIncomeCurrency.CodeInt,
+					CodeA3:  oValue.ProjectIncomeCurrency.CodeA3,
+					Name:    oValue.ProjectIncomeCurrency.Name,
+				},
+			},
+			ProjectAccountingIncome: &model.OrderSimpleAmountObject{
+				Amount: oValue.AmountInMerchantAccountingCurrency,
+				Currency: &model.SimpleCurrency{
+					CodeInt: params.Merchant.Currency.CodeInt,
+					CodeA3:  params.Merchant.Currency.CodeA3,
+					Name:    params.Merchant.Currency.Name,
+				},
+			},
+			FixedPackage: oValue.FixedPackage,
+			Status: &model.Status{
+				Status:      oValue.Status,
+				Description: model.OrderStatusesDescription[oValue.Status],
+			},
+			CreatedAt:   oValue.CreatedAt,
+			ConfirmedAt: oValue.PaymentMethodOrderClosedAt,
+			ClosedAt:    oValue.ProjectLastRequestedAt,
+		}
+
+		if oValue.AmountInPaymentSystemAccountingCurrency > 0 {
+			tOrder.PaymentSystemTechnicalIncome = &model.OrderSimpleAmountObject{
+				Amount: oValue.AmountInPaymentSystemAccountingCurrency,
+				Currency: &model.SimpleCurrency{
+					CodeInt: pms[oValue.PaymentMethodId].PaymentSystem.AccountingCurrency.CodeInt,
+					CodeA3:  pms[oValue.PaymentMethodId].PaymentSystem.AccountingCurrency.CodeA3,
+					Name:    pms[oValue.PaymentMethodId].PaymentSystem.AccountingCurrency.Name,
+				},
+			}
+		}
+
+		if oValue.AmountOutMerchantAccountingCurrency > 0 {
+			tOrder.ProjectAccountingOutcome = &model.OrderSimpleAmountObject{
+				Amount: oValue.AmountOutMerchantAccountingCurrency,
+				Currency: &model.SimpleCurrency{
+					CodeInt: params.Merchant.Currency.CodeInt,
+					CodeA3:  params.Merchant.Currency.CodeA3,
+					Name:    params.Merchant.Currency.Name,
+				},
+			}
+		}
+
+		if oValue.ProjectOutcomeAmount > 0 {
+			tOrder.ProjectTechnicalOutcome = &model.OrderSimpleAmountObject{
+				Amount: oValue.ProjectOutcomeAmount,
+				Currency: &model.SimpleCurrency{
+					CodeInt: oValue.ProjectOutcomeCurrency.CodeInt,
+					CodeA3:  oValue.ProjectOutcomeCurrency.CodeA3,
+					Name:    oValue.ProjectOutcomeCurrency.Name,
+				},
+			}
+		}
+
+		tOrders = append(tOrders, tOrder)
+	}
+
+	return tOrders, nil
+}
+
+func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M {
 	if id, ok := values[model.OrderFilterFieldId]; ok {
 		filter["_id"] = bson.ObjectIdHex(id[0])
 	}
@@ -484,15 +610,15 @@ func (om *OrderManager) processFilters(values url.Values, filter bson.M) bson.M 
 
 	pmDates := make(bson.M)
 
-	if pmDateFrom, ok := values[model.OrderFilterFieldPSDateFrom]; ok {
-		if ts, err := strconv.ParseInt(pmDateFrom[0], 10, 64); err != nil {
-			pmDates["$gte"] = ts
+	if pmDateFrom, ok := values[model.OrderFilterFieldPMDateFrom]; ok {
+		if ts, err := strconv.ParseInt(pmDateFrom[0], 10, 64); err == nil {
+			pmDates["$gte"] = time.Unix(ts, 0)
 		}
 	}
 
-	if pmDateTo, ok := values[model.OrderFilterFieldPSDateTo]; ok {
-		if ts, err := strconv.ParseInt(pmDateTo[0], 10, 64); err != nil {
-			pmDates["$lte"] = ts
+	if pmDateTo, ok := values[model.OrderFilterFieldPMDateTo]; ok {
+		if ts, err := strconv.ParseInt(pmDateTo[0], 10, 64); err == nil {
+			pmDates["$lte"] = time.Unix(ts, 0)
 		}
 	}
 
@@ -503,14 +629,14 @@ func (om *OrderManager) processFilters(values url.Values, filter bson.M) bson.M 
 	prjDates := make(bson.M)
 
 	if prjDateFrom, ok := values[model.OrderFilterFieldProjectDateFrom]; ok {
-		if ts, err := strconv.ParseInt(prjDateFrom[0], 10, 64); err != nil {
-			prjDates["$gte"] = ts
+		if ts, err := strconv.ParseInt(prjDateFrom[0], 10, 64); err == nil {
+			prjDates["$gte"] = time.Unix(ts, 0)
 		}
 	}
 
 	if prjDateTo, ok := values[model.OrderFilterFieldProjectDateTo]; ok {
-		if ts, err := strconv.ParseInt(prjDateTo[0], 10, 64); err != nil {
-			prjDates["$lte"] = ts
+		if ts, err := strconv.ParseInt(prjDateTo[0], 10, 64); err == nil {
+			prjDates["$lte"] = time.Unix(ts, 0)
 		}
 	}
 

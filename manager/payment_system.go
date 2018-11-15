@@ -28,3 +28,13 @@ func (psm *PaymentSystemManager) FindById(id bson.ObjectId) *model.PaymentSystem
 
 	return ps
 }
+
+func (psm *PaymentSystemManager) FindAll() []*model.PaymentSystem {
+	pss, err := psm.Database.Repository(TablePaymentSystem).FindAllPaymentSystem()
+
+	if err != nil {
+		psm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TablePaymentSystem, err)
+	}
+
+	return pss
+}

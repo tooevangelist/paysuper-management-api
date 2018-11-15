@@ -26,8 +26,10 @@ type Repository interface {
 	FindProjectById(bson.ObjectId) (*model.Project, error)
 
 	FindPaymentSystemById(bson.ObjectId) (*model.PaymentSystem, error)
+	FindAllPaymentSystem() ([]*model.PaymentSystem, error)
 
 	FindPaymentMethodById(bson.ObjectId) (*model.PaymentMethod, error)
+	FindAllPaymentMethods() ([]*model.PaymentMethod, error)
 
 	FindOrderByProjectOrderId(string) (*model.Order, error)
 	FindOrderById(bson.ObjectId) (*model.Order, error)

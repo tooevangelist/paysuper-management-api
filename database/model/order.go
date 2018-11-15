@@ -31,8 +31,8 @@ const (
 	OrderFilterFieldCountries       = "countries"
 	OrderFilterFieldStatuses        = "statuses"
 	OrderFilterFieldAccount         = "account"
-	OrderFilterFieldPSDateFrom      = "ps_date_from"
-	OrderFilterFieldPSDateTo        = "ps_date_to"
+	OrderFilterFieldPMDateFrom      = "pm_date_from"
+	OrderFilterFieldPMDateTo        = "pm_date_to"
 	OrderFilterFieldProjectDateFrom = "project_date_from"
 	OrderFilterFieldProjectDateTo   = "project_date_to"
 )
@@ -65,8 +65,10 @@ type PayerData struct {
 	Ip string `bson:"ip" json:"ip"`
 	// payer country code by ISO 3166-1 from create order request
 	CountryCodeA2 string `bson:"country_code_a2" json:"country_code_a2"`
-	// payer city name, get from ip geo location
-	City string `bson:"city" json:"city"`
+	// payer country names
+	CountryName *Name `bson:"country_name" json:"country_name"`
+	// payer city names, get from ip geo location
+	City *Name `bson:"city" json:"city"`
 	// payer timezone name, get from ip geo location
 	Timezone string `bson:"timezone" json:"timezone"`
 	// payer phone from create order request
@@ -135,7 +137,7 @@ type Order struct {
 	// fee is charged with the project for the operation
 	ProjectFee float64 `bson:"project_fee" json:"project_fee"`
 	// date of last notification request to project
-	ProjectLastRequestedAt time.Time `bson:"project_last_requested_at" json:"project_last_requested_at"`
+	ProjectLastRequestedAt *time.Time `bson:"project_last_requested_at" json:"project_last_requested_at,omitempty"`
 	// any project params which received from project in request of create of order
 	ProjectParams map[string]interface{} `bson:"project_params" json:"project_params"`
 	// information about payer, for example: ip, email,phone and etc
@@ -157,25 +159,29 @@ type Order struct {
 	// payment system fee for payment operation
 	PaymentMethodFee float64 `bson:"pm_fee" json:"pm_fee"`
 	// date of ended payment operation in payment system
-	PaymentMethodOrderClosedAt time.Time `bson:"pm_order_close_date" json:"pm_order_close_date"`
+	PaymentMethodOrderClosedAt *time.Time `bson:"pm_order_close_date" json:"pm_order_close_date,omitempty"`
 	// order status
 	Status int `bson:"status" json:"status"`
 	// date of create order
 	CreatedAt time.Time `bson:"created_at" json:"created_at"`
 	// date of last update order data
-	UpdatedAt time.Time `bson:"updated_at" json:"created_at"`
+	UpdatedAt *time.Time `bson:"updated_at" json:"created_at,omitempty"`
 	// is order create by json request
 	IsJsonRequest bool `bson:"created_by_json" json:"created_by_json"`
 	// operation amount in accounting currency of PSP
 	AmountInPSPAccountingCurrency float64 `bson:"amount_psp_ac" json:"amount_psp_accounting_currency"`
-	// operation amount in project owner (merchant) accounting currency
-	AmountInMerchantAccountingCurrency float64 `bson:"amount_merchant_ac" json:"amount_merchant_accounting_currency"`
+	// received from project operation amount in project owner (merchant) accounting currency
+	AmountInMerchantAccountingCurrency float64 `bson:"amount_in_merchant_ac" json:"amount_in_merchant_accounting_currency"`
+	// received from payment system operation amount in project owner (merchant) accounting currency
+	AmountOutMerchantAccountingCurrency float64 `bson:"amount_out_merchant_ac" json:"amount_out_merchant_accounting_currency"`
 	// operation amount in payment system accounting currency
 	AmountInPaymentSystemAccountingCurrency float64 `bson:"amount_ps_ac" json:"amount_ps_accounting_currency"`
 	// account of payer in payment system
 	PaymentMethodPayerAccount string `bson:"pm_account" json:"pm_account"`
 	// any params received in request of payment system about payment
 	PaymentMethodTxnParams map[string]interface{} `bson:"pm_txn_params" json:"pm_txn_params"`
+	// fixed package which buy payer
+	FixedPackage *OrderFixedPackage `bson:"fixed_package" json:"fixed_package"`
 
 	ProjectOutcomeAmountPrintable string   `bson:"-" json:"-"`
 	OrderIdPrintable              string   `bson:"-" json:"-"`
@@ -185,4 +191,39 @@ type Order struct {
 type OrderUrl struct {
 	// link for user to payment confirmation form
 	OrderUrl string `json:"order_url"`
+}
+
+type OrderSimple struct {
+	// unique order identifier in Protocol One
+	Id bson.ObjectId `json:"id"`
+	// object which contains main information about project
+	Project *SimpleItem `json:"project"`
+	// user account in project
+	Account string `json:"account"`
+	// unique order identifier in project
+	ProjectOrderId *string `json:"order_id,omitempty"`
+	// data about payer, for example: country, city, ip and etc
+	PayerData *PayerData `json:"payer_data"`
+	// object which contains main information about payment method
+	PaymentMethod *SimpleItem `json:"payment_method"`
+	// object which contains main information about technical finances of project which received of project
+	ProjectTechnicalIncome *OrderSimpleAmountObject `json:"project_technical_income,omitempty"`
+	// object which contains main information about technical finances of project which will send to project
+	ProjectTechnicalOutcome *OrderSimpleAmountObject `json:"project_technical_outcome,omitempty"`
+	// object which contains main information about technical finances of payment system which received of payment system
+	PaymentSystemTechnicalIncome *OrderSimpleAmountObject `json:"ps_technical_income,omitempty"`
+	// object which contains main information about accounting finances of project which received of project
+	ProjectAccountingIncome *OrderSimpleAmountObject `json:"project_accounting_income,omitempty"`
+	// object which contains main information about accounting finances of project which will send to project
+	ProjectAccountingOutcome *OrderSimpleAmountObject `json:"project_accounting_outcome,omitempty"`
+	// object which contains main information about fixed package which was buy
+	FixedPackage *OrderFixedPackage `json:"fixed_package"`
+	// object which contains main information about payment status
+	Status *Status `json:"status"`
+	// date when payment created
+	CreatedAt time.Time `json:"created_at"`
+	// date when payment was confirmed from payment system side
+	ConfirmedAt *time.Time `json:"confirmed_at"`
+	// date when project was notification about payment
+	ClosedAt *time.Time `json:"confirmed_at"`
 }

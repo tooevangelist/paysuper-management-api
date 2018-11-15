@@ -141,7 +141,7 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	url := "https://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
+	url := "http://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
 
 	ou := &model.OrderUrl{OrderUrl: url}
 
@@ -216,12 +216,12 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 // @Param countries query array false "list of payer countries to get orders filtered by they"
 // @Param statuses query array false "list of orders statuses to get orders filtered by they"
 // @Param account query string false "payer account on the any side of payment process. for example it may be account in project, account in payment system, payer email and etc"
-// @Param ps_date_from query integer false "start date when payment was closed to get orders filtered by they"
-// @Param ps_date_to query integer false "end date when payment was closed to get orders filtered by they"
+// @Param pm_date_from query integer false "start date when payment was closed to get orders filtered by they"
+// @Param pm_date_to query integer false "end date when payment was closed to get orders filtered by they"
 // @Param project_date_from query integer false "start date when payment was created to get orders filtered by they"
 // @Param project_date_to query integer false "end date when payment was closed in project to get orders filtered by they"
-// @Param limit query integer true "maximum number of returning orders. default value is 100"
-// @Param offset query integer true "offset from which you want to return the list of orders. default value is 0"
+// @Param limit query integer false "maximum number of returning orders. default value is 100"
+// @Param offset query integer false "offset from which you want to return the list of orders. default value is 0"
 // @Success 200 {object} model.Order "OK"
 // @Failure 404 {object} model.Error "Invalid request data"
 // @Failure 401 {object} model.Error "Unauthorized"
@@ -237,13 +237,25 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 		fp = fProjects
 	}
 
-	p, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, fp)
+	p, merchant, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, fp)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, err)
 	}
 
-	o := oApiV1.orderManager.FindAll(values, p, oApiV1.GetParams.limit, oApiV1.GetParams.offset)
+	params := &manager.FindAll{
+		Values: values,
+		Projects: p,
+		Merchant: merchant,
+		Limit: oApiV1.GetParams.limit,
+		Offset: oApiV1.GetParams.offset,
+	}
+
+	o, err := oApiV1.orderManager.FindAll(params)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 
 	if o == nil {
 		return echo.NewHTTPError(http.StatusNotFound, responseMessageNotFound)

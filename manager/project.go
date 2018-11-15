@@ -251,32 +251,30 @@ func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model
 	return fixedPackages
 }
 
-func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) ([]bson.ObjectId, error) {
+func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) (map[bson.ObjectId]string, *model.Merchant, error) {
 	mProjects := pm.FindProjectsByMerchantId(mId, model.DefaultLimit, model.DefaultOffset)
 
 	if len(mProjects) <= 0 {
-		return nil, errors.New(projectErrorMerchantNotHaveProjects)
+		return nil, nil, errors.New(projectErrorMerchantNotHaveProjects)
 	}
 
-	var prjObjectIds []bson.ObjectId
-	var fp = make(map[string]bool)
+	var fp = make(map[bson.ObjectId]string)
 
 	for _, p := range mProjects {
-		prjObjectIds = append(prjObjectIds, p.Id)
-		fp[p.Id.Hex()] = true
+		fp[p.Id] = p.Name
 	}
 
 	if len(fProjects) <= 0 {
-		return prjObjectIds, nil
+		return fp, mProjects[0].Merchant, nil
 	}
 
 	for _, p := range fProjects {
-		if _, ok := fp[p]; ok {
+		if _, ok := fp[bson.ObjectIdHex(p)]; ok {
 			continue
 		}
 
-		return nil, errors.New(projectErrorAccessDeniedToProject)
+		return nil, nil, errors.New(projectErrorAccessDeniedToProject)
 	}
 
-	return prjObjectIds, nil
+	return fp, mProjects[0].Merchant, nil
 }

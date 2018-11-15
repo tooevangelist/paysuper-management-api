@@ -11,3 +11,10 @@ func (rep *Repository) FindPaymentSystemById(id bson.ObjectId) (*model.PaymentSy
 
 	return ps, err
 }
+
+func (rep *Repository) FindAllPaymentSystem() ([]*model.PaymentSystem, error) {
+	var pss []*model.PaymentSystem
+	err := rep.Collection.Find(bson.M{}).All(&pss)
+
+	return pss, err
+}

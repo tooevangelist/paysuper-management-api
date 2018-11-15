@@ -11,3 +11,10 @@ func (rep *Repository) FindPaymentMethodById(id bson.ObjectId) (*model.PaymentMe
 
 	return pm, err
 }
+
+func (rep *Repository) FindAllPaymentMethods() ([]*model.PaymentMethod, error) {
+	var pms []*model.PaymentMethod
+	err := rep.Collection.Find(bson.M{}).All(&pms)
+
+	return pms, err
+}
