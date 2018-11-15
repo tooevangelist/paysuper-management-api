@@ -555,7 +555,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/model.Paginate"
+                            "$ref": "#/definitions/model.OrderPaginate"
                         }
                     },
                     "401": {
@@ -1519,11 +1519,27 @@
                 }
             }
         },
+        "model.OrderPaginate": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "total count of selected orders\n",
+                    "type": "integer"
+                },
+                "items": {
+                    "description": "array of selected orders\n",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.OrderSimple"
+                    }
+                }
+            }
+        },
         "model.OrderScalar": {
             "type": "object",
             "required": [
-                "amount",
                 "project",
+                "amount",
                 "account"
             ],
             "properties": {
@@ -1597,28 +1613,101 @@
                 }
             }
         },
+        "model.OrderSimple": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "description": "user account in project\n",
+                    "type": "string"
+                },
+                "confirmed_at": {
+                    "description": "date when project was notification about payment\n",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "date when payment created\n",
+                    "type": "string"
+                },
+                "fixed_package": {
+                    "description": "object which contains main information about fixed package which was buy\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderFixedPackage"
+                },
+                "id": {
+                    "description": "unique order identifier in Protocol One\n",
+                    "type": "string"
+                },
+                "order_id": {
+                    "description": "unique order identifier in project\n",
+                    "type": "string"
+                },
+                "payer_data": {
+                    "description": "data about payer, for example: country, city, ip and etc\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.PayerData"
+                },
+                "payment_method": {
+                    "description": "object which contains main information about payment method\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.SimpleItem"
+                },
+                "project": {
+                    "description": "object which contains main information about project\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.SimpleItem"
+                },
+                "project_accounting_income": {
+                    "description": "object which contains main information about accounting finances of project which received of project\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderSimpleAmountObject"
+                },
+                "project_accounting_outcome": {
+                    "description": "object which contains main information about accounting finances of project which will send to project\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderSimpleAmountObject"
+                },
+                "project_technical_income": {
+                    "description": "object which contains main information about technical finances of project which received of project\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderSimpleAmountObject"
+                },
+                "project_technical_outcome": {
+                    "description": "object which contains main information about technical finances of project which will send to project\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderSimpleAmountObject"
+                },
+                "ps_technical_income": {
+                    "description": "object which contains main information about technical finances of payment system which received of payment system\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderSimpleAmountObject"
+                },
+                "status": {
+                    "description": "object which contains main information about payment status\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.Status"
+                }
+            }
+        },
+        "model.OrderSimpleAmountObject": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "description": "amount value\n",
+                    "type": "number"
+                },
+                "currency": {
+                    "description": "object which contains main information about currency\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.SimpleCurrency"
+                }
+            }
+        },
         "model.OrderUrl": {
             "type": "object",
             "properties": {
                 "order_url": {
                     "description": "link for user to payment confirmation form\n",
                     "type": "string"
-                }
-            }
-        },
-        "model.Paginate": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "description": "total count of selected items\n",
-                    "type": "integer"
-                },
-                "items": {
-                    "description": "array of selected items\n",
-                    "type": "array",
-                    "items": {
-                        "type": "\u0026{%!s(token.Pos=311) %!s(*ast.FieldList=\u0026{320 [] 321}) %!s(bool=false)}"
-                    }
                 }
             }
         },
@@ -1761,8 +1850,8 @@
         "model.ProjectScalar": {
             "type": "object",
             "required": [
-                "name",
-                "callback_protocol"
+                "callback_protocol",
+                "name"
             ],
             "properties": {
                 "callback_currency": {
@@ -1846,6 +1935,50 @@
                 "url_redirect_success": {
                     "description": "default url to redirect user after successfully completed payment\n",
                     "type": "string"
+                }
+            }
+        },
+        "model.SimpleCurrency": {
+            "type": "object",
+            "properties": {
+                "code_a3": {
+                    "description": "3 chars ISO 4217 currency code\n",
+                    "type": "string"
+                },
+                "code_int": {
+                    "description": "numeric ISO 4217 currency code\n",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "list of currency names\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.Name"
+                }
+            }
+        },
+        "model.SimpleItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "unique identifier of item\n",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "item name\n",
+                    "type": "string"
+                }
+            }
+        },
+        "model.Status": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "text description\n",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "numeric status code\n",
+                    "type": "integer"
                 }
             }
         }

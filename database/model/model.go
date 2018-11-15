@@ -12,13 +12,6 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-type Paginate struct {
-	// total count of selected items
-	Count int `json:"count"`
-	// array of selected items
-	Items []interface{} `json:"items"`
-}
-
 type SimpleItem struct {
 	// unique identifier of item
 	Id bson.ObjectId `json:"id"`

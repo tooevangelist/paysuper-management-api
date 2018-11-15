@@ -222,7 +222,7 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 // @Param project_date_to query integer false "end date when payment was closed in project to get orders filtered by they"
 // @Param limit query integer false "maximum number of returning orders. default value is 100"
 // @Param offset query integer false "offset from which you want to return the list of orders. default value is 0"
-// @Success 200 {object} model.Paginate "OK"
+// @Success 200 {object} model.OrderPaginate "OK"
 // @Failure 404 {object} model.Error "Invalid request data"
 // @Failure 401 {object} model.Error "Unauthorized"
 // @Failure 404 {object} model.Error "Not found"

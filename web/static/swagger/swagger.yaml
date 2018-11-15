@@ -289,6 +289,19 @@ definitions:
       region:
         type: string
     type: object
+  model.OrderPaginate:
+    properties:
+      count:
+        description: |
+          total count of selected orders
+        type: integer
+      items:
+        description: |
+          array of selected orders
+        items:
+          $ref: '#/definitions/model.OrderSimple'
+        type: array
+    type: object
   model.OrderScalar:
     properties:
       account:
@@ -360,9 +373,94 @@ definitions:
           URL for payment data verification request to project. This field can be send if it allowed in project admin panel
         type: string
     required:
-    - amount
     - project
+    - amount
     - account
+    type: object
+  model.OrderSimple:
+    properties:
+      account:
+        description: |
+          user account in project
+        type: string
+      confirmed_at:
+        description: |
+          date when project was notification about payment
+        type: string
+      created_at:
+        description: |
+          date when payment created
+        type: string
+      fixed_package:
+        $ref: '#/definitions/model.OrderFixedPackage'
+        description: |
+          object which contains main information about fixed package which was buy
+        type: object
+      id:
+        description: |
+          unique order identifier in Protocol One
+        type: string
+      order_id:
+        description: |
+          unique order identifier in project
+        type: string
+      payer_data:
+        $ref: '#/definitions/model.PayerData'
+        description: |
+          data about payer, for example: country, city, ip and etc
+        type: object
+      payment_method:
+        $ref: '#/definitions/model.SimpleItem'
+        description: |
+          object which contains main information about payment method
+        type: object
+      project:
+        $ref: '#/definitions/model.SimpleItem'
+        description: |
+          object which contains main information about project
+        type: object
+      project_accounting_income:
+        $ref: '#/definitions/model.OrderSimpleAmountObject'
+        description: |
+          object which contains main information about accounting finances of project which received of project
+        type: object
+      project_accounting_outcome:
+        $ref: '#/definitions/model.OrderSimpleAmountObject'
+        description: |
+          object which contains main information about accounting finances of project which will send to project
+        type: object
+      project_technical_income:
+        $ref: '#/definitions/model.OrderSimpleAmountObject'
+        description: |
+          object which contains main information about technical finances of project which received of project
+        type: object
+      project_technical_outcome:
+        $ref: '#/definitions/model.OrderSimpleAmountObject'
+        description: |
+          object which contains main information about technical finances of project which will send to project
+        type: object
+      ps_technical_income:
+        $ref: '#/definitions/model.OrderSimpleAmountObject'
+        description: |
+          object which contains main information about technical finances of payment system which received of payment system
+        type: object
+      status:
+        $ref: '#/definitions/model.Status'
+        description: |
+          object which contains main information about payment status
+        type: object
+    type: object
+  model.OrderSimpleAmountObject:
+    properties:
+      amount:
+        description: |
+          amount value
+        type: number
+      currency:
+        $ref: '#/definitions/model.SimpleCurrency'
+        description: |
+          object which contains main information about currency
+        type: object
     type: object
   model.OrderUrl:
     properties:
@@ -370,19 +468,6 @@ definitions:
         description: |
           link for user to payment confirmation form
         type: string
-    type: object
-  model.Paginate:
-    properties:
-      count:
-        description: |
-          total count of selected items
-        type: integer
-      items:
-        description: |
-          array of selected items
-        items:
-          type: '&{%!s(token.Pos=311) %!s(*ast.FieldList=&{320 [] 321}) %!s(bool=false)}'
-        type: array
     type: object
   model.PayerData:
     properties:
@@ -597,8 +682,46 @@ definitions:
           default url to redirect user after successfully completed payment
         type: string
     required:
-    - name
     - callback_protocol
+    - name
+    type: object
+  model.SimpleCurrency:
+    properties:
+      code_a3:
+        description: |
+          3 chars ISO 4217 currency code
+        type: string
+      code_int:
+        description: |
+          numeric ISO 4217 currency code
+        type: integer
+      name:
+        $ref: '#/definitions/model.Name'
+        description: |
+          list of currency names
+        type: object
+    type: object
+  model.SimpleItem:
+    properties:
+      id:
+        description: |
+          unique identifier of item
+        type: string
+      name:
+        description: |
+          item name
+        type: string
+    type: object
+  model.Status:
+    properties:
+      description:
+        description: |
+          text description
+        type: string
+      status:
+        description: |
+          numeric status code
+        type: integer
     type: object
 host: p1payapi.tst.protocol.one
 info:
@@ -986,7 +1109,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Paginate'
+            $ref: '#/definitions/model.OrderPaginate'
             type: object
         "401":
           description: Unauthorized

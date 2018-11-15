@@ -227,3 +227,10 @@ type OrderSimple struct {
 	// date when project was notification about payment
 	ClosedAt *time.Time `json:"confirmed_at"`
 }
+
+type OrderPaginate struct {
+	// total count of selected orders
+	Count int `json:"count"`
+	// array of selected orders
+	Items []*OrderSimple `json:"items"`
+}
