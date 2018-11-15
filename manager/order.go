@@ -444,7 +444,7 @@ func (om *OrderManager) checkSignature(check *check) error {
 	return nil
 }
 
-func (om *OrderManager) FindAll(params *FindAll) ([]*model.OrderSimple, error) {
+func (om *OrderManager) FindAll(params *FindAll) (*model.Paginate, error) {
 	var filter = make(bson.M)
 	var f bson.M
 	var pFilter []bson.ObjectId
@@ -459,13 +459,20 @@ func (om *OrderManager) FindAll(params *FindAll) ([]*model.OrderSimple, error) {
 		f = om.ProcessFilters(params.Values, filter)
 	}
 
+
+	co, err := om.Database.Repository(TableOrder).GetOrdersCountByConditions(f)
+
+	if err != nil {
+		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)
+	}
+
 	o, err := om.Database.Repository(TableOrder).FindAllOrders(f, params.Limit, params.Offset)
 
 	if err != nil {
 		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)
 	}
 
-	var ot []*model.OrderSimple
+	var ot []interface{}
 
 	if o != nil && len(o) > 0 {
 		ot, err = om.transformOrders(o, params)
@@ -475,11 +482,11 @@ func (om *OrderManager) FindAll(params *FindAll) ([]*model.OrderSimple, error) {
 		}
 	}
 
-	return ot, nil
+	return &model.Paginate{Count: co, Items: ot}, nil
 }
 
-func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) ([]*model.OrderSimple, error) {
-	var tOrders []*model.OrderSimple
+func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) ([]interface{}, error) {
+	var tOrders []interface{}
 
 	pms, err := om.paymentMethodManager.FindAllWithPaymentSystemAsMap()
 

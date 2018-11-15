@@ -222,7 +222,7 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 // @Param project_date_to query integer false "end date when payment was closed in project to get orders filtered by they"
 // @Param limit query integer false "maximum number of returning orders. default value is 100"
 // @Param offset query integer false "offset from which you want to return the list of orders. default value is 0"
-// @Success 200 {object} model.Order "OK"
+// @Success 200 {object} model.Paginate "OK"
 // @Failure 404 {object} model.Error "Invalid request data"
 // @Failure 401 {object} model.Error "Unauthorized"
 // @Failure 404 {object} model.Error "Not found"
@@ -251,15 +251,15 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 		Offset: oApiV1.GetParams.offset,
 	}
 
-	o, err := oApiV1.orderManager.FindAll(params)
+	pOrders, err := oApiV1.orderManager.FindAll(params)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	if o == nil {
+	if pOrders.Items == nil || len(pOrders.Items) <= 0 {
 		return echo.NewHTTPError(http.StatusNotFound, responseMessageNotFound)
 	}
 
-	return ctx.JSON(http.StatusOK, o)
+	return ctx.JSON(http.StatusOK, pOrders)
 }

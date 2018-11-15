@@ -145,9 +145,13 @@ definitions:
     type: object
   model.Order:
     properties:
-      amount_merchant_accounting_currency:
+      amount_in_merchant_accounting_currency:
         description: |
-          operation amount in project owner (merchant) accounting currency
+          received from project operation amount in project owner (merchant) accounting currency
+        type: number
+      amount_out_merchant_accounting_currency:
+        description: |
+          received from payment system operation amount in project owner (merchant) accounting currency
         type: number
       amount_ps_accounting_currency:
         description: |
@@ -165,6 +169,11 @@ definitions:
         description: |
           is order create by json request
         type: boolean
+      fixed_package:
+        $ref: '#/definitions/model.OrderFixedPackage'
+        description: |
+          fixed package which buy payer
+        type: object
       id:
         description: |
           unique order identifier in Protocol One
@@ -267,6 +276,19 @@ definitions:
           order status
         type: integer
     type: object
+  model.OrderFixedPackage:
+    properties:
+      currency_int:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      region:
+        type: string
+    type: object
   model.OrderScalar:
     properties:
       account:
@@ -338,9 +360,9 @@ definitions:
           URL for payment data verification request to project. This field can be send if it allowed in project admin panel
         type: string
     required:
-    - account
-    - project
     - amount
+    - project
+    - account
     type: object
   model.OrderUrl:
     properties:
@@ -349,16 +371,35 @@ definitions:
           link for user to payment confirmation form
         type: string
     type: object
+  model.Paginate:
+    properties:
+      count:
+        description: |
+          total count of selected items
+        type: integer
+      items:
+        description: |
+          array of selected items
+        items:
+          type: '&{%!s(token.Pos=311) %!s(*ast.FieldList=&{320 [] 321}) %!s(bool=false)}'
+        type: array
+    type: object
   model.PayerData:
     properties:
       city:
+        $ref: '#/definitions/model.Name'
         description: |
-          payer city name, get from ip geo location
-        type: string
+          payer city names, get from ip geo location
+        type: object
       country_code_a2:
         description: |
           payer country code by ISO 3166-1 from create order request
         type: string
+      country_name:
+        $ref: '#/definitions/model.Name'
+        description: |
+          payer country names
+        type: object
       email:
         description: |
           payer email from create order request
@@ -556,8 +597,8 @@ definitions:
           default url to redirect user after successfully completed payment
         type: string
     required:
-    - callback_protocol
     - name
+    - callback_protocol
     type: object
 host: p1payapi.tst.protocol.one
 info:
@@ -914,11 +955,11 @@ paths:
       - description: start date when payment was closed to get orders filtered by
           they
         in: query
-        name: ps_date_from
+        name: pm_date_from
         type: integer
       - description: end date when payment was closed to get orders filtered by they
         in: query
-        name: ps_date_to
+        name: pm_date_to
         type: integer
       - description: start date when payment was created to get orders filtered by
           they
@@ -933,13 +974,11 @@ paths:
       - description: maximum number of returning orders. default value is 100
         in: query
         name: limit
-        required: true
         type: integer
       - description: offset from which you want to return the list of orders. default
           value is 0
         in: query
         name: offset
-        required: true
         type: integer
       produces:
       - application/json
@@ -947,7 +986,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Order'
+            $ref: '#/definitions/model.Paginate'
             type: object
         "401":
           description: Unauthorized

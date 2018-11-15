@@ -29,3 +29,7 @@ func (rep *Repository) FindAllOrders(filters bson.M, limit int, offset int) ([]*
 
 	return o, err
 }
+
+func (rep *Repository) GetOrdersCountByConditions(filters bson.M) (int, error) {
+	return rep.Collection.Find(filters).Count()
+}

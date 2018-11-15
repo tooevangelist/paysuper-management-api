@@ -516,13 +516,13 @@
                     {
                         "type": "integer",
                         "description": "start date when payment was closed to get orders filtered by they",
-                        "name": "ps_date_from",
+                        "name": "pm_date_from",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "description": "end date when payment was closed to get orders filtered by they",
-                        "name": "ps_date_to",
+                        "name": "pm_date_to",
                         "in": "query"
                     },
                     {
@@ -541,15 +541,13 @@
                         "type": "integer",
                         "description": "maximum number of returning orders. default value is 100",
                         "name": "limit",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "integer",
                         "description": "offset from which you want to return the list of orders. default value is 0",
                         "name": "offset",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -557,7 +555,7 @@
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/model.Order"
+                            "$ref": "#/definitions/model.Paginate"
                         }
                     },
                     "401": {
@@ -1369,8 +1367,12 @@
         "model.Order": {
             "type": "object",
             "properties": {
-                "amount_merchant_accounting_currency": {
-                    "description": "operation amount in project owner (merchant) accounting currency\n",
+                "amount_in_merchant_accounting_currency": {
+                    "description": "received from project operation amount in project owner (merchant) accounting currency\n",
+                    "type": "number"
+                },
+                "amount_out_merchant_accounting_currency": {
+                    "description": "received from payment system operation amount in project owner (merchant) accounting currency\n",
                     "type": "number"
                 },
                 "amount_ps_accounting_currency": {
@@ -1388,6 +1390,11 @@
                 "created_by_json": {
                     "description": "is order create by json request\n",
                     "type": "boolean"
+                },
+                "fixed_package": {
+                    "description": "fixed package which buy payer\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderFixedPackage"
                 },
                 "id": {
                     "description": "unique order identifier in Protocol One\n",
@@ -1492,12 +1499,32 @@
                 }
             }
         },
+        "model.OrderFixedPackage": {
+            "type": "object",
+            "properties": {
+                "currency_int": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "region": {
+                    "type": "string"
+                }
+            }
+        },
         "model.OrderScalar": {
             "type": "object",
             "required": [
-                "account",
+                "amount",
                 "project",
-                "amount"
+                "account"
             ],
             "properties": {
                 "account": {
@@ -1579,16 +1606,38 @@
                 }
             }
         },
+        "model.Paginate": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "total count of selected items\n",
+                    "type": "integer"
+                },
+                "items": {
+                    "description": "array of selected items\n",
+                    "type": "array",
+                    "items": {
+                        "type": "\u0026{%!s(token.Pos=311) %!s(*ast.FieldList=\u0026{320 [] 321}) %!s(bool=false)}"
+                    }
+                }
+            }
+        },
         "model.PayerData": {
             "type": "object",
             "properties": {
                 "city": {
-                    "description": "payer city name, get from ip geo location\n",
-                    "type": "string"
+                    "description": "payer city names, get from ip geo location\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.Name"
                 },
                 "country_code_a2": {
                     "description": "payer country code by ISO 3166-1 from create order request\n",
                     "type": "string"
+                },
+                "country_name": {
+                    "description": "payer country names\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.Name"
                 },
                 "email": {
                     "description": "payer email from create order request\n",
@@ -1712,8 +1761,8 @@
         "model.ProjectScalar": {
             "type": "object",
             "required": [
-                "callback_protocol",
-                "name"
+                "name",
+                "callback_protocol"
             ],
             "properties": {
                 "callback_currency": {
