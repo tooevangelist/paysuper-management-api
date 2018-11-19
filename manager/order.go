@@ -228,36 +228,6 @@ func (om *OrderManager) FindById(id string) *model.Order {
 	return o
 }
 
-func (om *OrderManager) GetCardYears() []int {
-	var years []int
-
-	start := time.Now().Year()
-	end := start + 10
-
-	for i := start; i < end; i++ {
-		years = append(years, i)
-	}
-
-	return years
-}
-
-func (om *OrderManager) GetCardMonths() map[string]string {
-	return map[string]string{
-		"01": "January",
-		"02": "February",
-		"03": "March",
-		"04": "April",
-		"05": "May",
-		"06": "June",
-		"07": "July",
-		"08": "August",
-		"09": "September",
-		"10": "October",
-		"11": "November",
-		"12": "December",
-	}
-}
-
 func (om *OrderManager) getPaymentMethod(order *model.OrderScalar, pms map[string][]*model.ProjectPaymentModes) (*model.ProjectPaymentModes, error) {
 	cpms, ok := pms[*order.PaymentMethod]
 

@@ -165,8 +165,6 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		http.StatusOK,
 		orderFormTemplateName,
 		map[string]interface{}{
-			"Years":  oApiV1.orderManager.GetCardYears(),
-			"Months": oApiV1.orderManager.GetCardMonths(),
 			"Order":  o,
 		},
 	)

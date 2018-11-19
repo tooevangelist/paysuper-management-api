@@ -16,6 +16,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"time"
 )
 
 const (
@@ -24,6 +25,25 @@ const (
 	responseMessageAccessDenied       = "Access denied"
 	responseMessageNotFound           = "Not found"
 )
+
+var funcMap = template.FuncMap{
+	"For": func(start, end int) (stream chan int) {
+		stream = make(chan int)
+
+		go func() {
+			for i := start; i <= end; i++ {
+				stream <- i
+			}
+			close(stream)
+		}()
+
+		return
+	},
+	"Now": time.Now,
+	"Increment": func(i int, add int) int {
+		return i + add
+	},
+}
 
 type Template struct {
 	templates *template.Template
@@ -68,7 +88,7 @@ func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLog
 	}
 
 	renderer := &Template{
-		templates: template.Must(template.New("").ParseGlob("web/template/*.html")),
+		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("web/template/*.html")),
 	}
 	api.Http.Renderer = renderer
 	api.Http.Static("/", "web/static")
