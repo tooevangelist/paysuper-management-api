@@ -17,15 +17,15 @@ func init() {
 				return err
 			}
 
-			ps := model.PaymentSystem{}
-			if err := db.C(manager.TablePaymentSystem).Find(bson.M{"name": "CardPay"}).One(&ps); err != nil {
+			ps := &model.PaymentSystem{}
+			if err := db.C(manager.TablePaymentSystem).Find(bson.M{"name": "CardPay"}).One(ps); err != nil {
 				return err
 			}
 
 			pm := &model.PaymentMethod{
 				Id: bson.NewObjectId(),
 				Name: "Bank card",
-				PaymentSystemId: ps.Id,
+				PaymentSystem: ps,
 				GroupAlias: "bank_card",
 				MinPaymentAmount: 0.01,
 				MaxPaymentAmount: 15000.00,

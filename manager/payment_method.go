@@ -62,10 +62,10 @@ func (pmm *PaymentMethodManager) FindAllWithPaymentSystem() ([]*model.PaymentMet
 	}
 
 	for _, pm := range pms {
-		ps, ok := psMap[pm.PaymentSystemId]
+		ps, ok := psMap[pm.PaymentSystem.Id]
 
 		if !ok {
-			return pms, errors.New(fmt.Sprintf(paymentMethodErrorsPaymentSystemNotFound, pm.PaymentSystemId))
+			return pms, errors.New(fmt.Sprintf(paymentMethodErrorsPaymentSystemNotFound, pm.PaymentSystem.Id))
 		}
 
 		pm.PaymentSystem = ps

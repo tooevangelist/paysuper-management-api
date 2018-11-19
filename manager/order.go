@@ -9,6 +9,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
+	"math"
 	"net"
 	"net/url"
 	"sort"
@@ -167,13 +168,13 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	mACAmount, _ := om.currencyRateManager.convert(oCurrency.CodeInt, p.Merchant.Currency.CodeInt, order.Amount)
 
 	nOrder := &model.Order{
-		Id:                     bson.NewObjectId(),
-		ProjectId:              p.Id,
-		ProjectOrderId:         order.OrderId,
-		ProjectAccount:         order.Account,
-		ProjectIncomeAmount:    order.Amount,
-		ProjectIncomeCurrency:  oCurrency,
-		ProjectParams:          order.Other,
+		Id:                    bson.NewObjectId(),
+		ProjectId:             p.Id,
+		ProjectOrderId:        order.OrderId,
+		ProjectAccount:        order.Account,
+		ProjectIncomeAmount:   om.formatAmount(order.Amount),
+		ProjectIncomeCurrency: oCurrency,
+		ProjectParams:         order.Other,
 		PayerData: &model.PayerData{
 			Ip:            order.CreateOrderIp,
 			CountryCodeA2: gRecord.Country.IsoCode,
@@ -183,14 +184,20 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 			Phone:         order.PayerPhone,
 			Email:         order.PayerEmail,
 		},
-		PaymentMethodId:                    pm.Id,
-		PaymentMethodOutcomeAmount:         pmOutcomeData.amount,
+		PaymentMethod: &model.OrderPaymentMethod{
+			Id:            pm.Id,
+			Name:          pm.Name,
+			TerminalId:    pm.TerminalId,
+			Params:        pm.Params,
+			PaymentSystem: pm.PaymentSystem,
+		},
+		PaymentMethodOutcomeAmount:         om.formatAmount(pmOutcomeData.amount),
 		PaymentMethodOutcomeCurrency:       pmOutcomeData.currency,
 		Status:                             model.OrderStatusCreated,
 		CreatedAt:                          time.Now(),
 		IsJsonRequest:                      order.IsJsonRequest,
 		FixedPackage:                       ofp,
-		AmountInMerchantAccountingCurrency: mACAmount,
+		AmountInMerchantAccountingCurrency: om.formatAmount(mACAmount),
 	}
 
 	if err = om.Database.Repository(TableOrder).InsertOrder(nOrder); err != nil {
@@ -355,7 +362,7 @@ func (om *OrderManager) checkPaymentMethod(c *check) (*model.PaymentMethod, erro
 		return nil, errors.New(orderErrorPaymentMethodInactive)
 	}
 
-	ps := om.paymentSystemManager.FindById(pm.PaymentSystemId)
+	ps := pm.PaymentSystem
 
 	if ps == nil {
 		return nil, errors.New(orderErrorPaymentSystemNotFound)
@@ -459,7 +466,6 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 		f = om.ProcessFilters(params.Values, filter)
 	}
 
-
 	co, err := om.Database.Repository(TableOrder).GetOrdersCountByConditions(f)
 
 	if err != nil {
@@ -488,12 +494,6 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) ([]*model.OrderSimple, error) {
 	var tOrders []*model.OrderSimple
 
-	pms, err := om.paymentMethodManager.FindAllWithPaymentSystemAsMap()
-
-	if err != nil {
-		return nil, err
-	}
-
 	for _, oValue := range orders {
 		tOrder := &model.OrderSimple{
 			Id: oValue.Id,
@@ -505,8 +505,8 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 			ProjectOrderId: oValue.ProjectOrderId,
 			PayerData:      oValue.PayerData,
 			PaymentMethod: &model.SimpleItem{
-				Id:   oValue.PaymentMethodId,
-				Name: pms[oValue.PaymentMethodId].Name,
+				Id:   oValue.PaymentMethod.Id,
+				Name: oValue.PaymentMethod.Name,
 			},
 			ProjectTechnicalIncome: &model.OrderSimpleAmountObject{
 				Amount: oValue.ProjectIncomeAmount,
@@ -538,9 +538,9 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 			tOrder.PaymentSystemTechnicalIncome = &model.OrderSimpleAmountObject{
 				Amount: oValue.AmountInPaymentSystemAccountingCurrency,
 				Currency: &model.SimpleCurrency{
-					CodeInt: pms[oValue.PaymentMethodId].PaymentSystem.AccountingCurrency.CodeInt,
-					CodeA3:  pms[oValue.PaymentMethodId].PaymentSystem.AccountingCurrency.CodeA3,
-					Name:    pms[oValue.PaymentMethodId].PaymentSystem.AccountingCurrency.Name,
+					CodeInt: oValue.PaymentMethod.PaymentSystem.AccountingCurrency.CodeInt,
+					CodeA3:  oValue.PaymentMethod.PaymentSystem.AccountingCurrency.CodeA3,
+					Name:    oValue.PaymentMethod.PaymentSystem.AccountingCurrency.Name,
 				},
 			}
 		}
@@ -652,4 +652,8 @@ func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M 
 	}
 
 	return filter
+}
+
+func (om *OrderManager) formatAmount(amount float64) float64 {
+	return math.Floor(amount*100) / 100
 }

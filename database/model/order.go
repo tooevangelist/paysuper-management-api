@@ -143,7 +143,7 @@ type Order struct {
 	// information about payer, for example: ip, email,phone and etc
 	PayerData *PayerData `bson:"payer_data" json:"payer_data"`
 	// payment method unique identifier
-	PaymentMethodId bson.ObjectId `bson:"pm_id" json:"pm_id"`
+	PaymentMethod *OrderPaymentMethod `bson:"payment_method" json:"payment_method"`
 	// identifier of terminal for process payment in payment system side
 	PaymentMethodTerminalId string `bson:"pm_terminal_id" json:"pm_terminal_id"`
 	// unique order id in payment system
