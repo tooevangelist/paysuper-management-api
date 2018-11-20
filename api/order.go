@@ -9,6 +9,11 @@ import (
 
 const (
 	orderFormTemplateName = "order.html"
+
+	responseMessageRequiredFieldIdNotFound      = "required field \"id\" not found"
+	responseMessageRequiredFieldEmailNotFound      = "required field \"email\" not found"
+	responseMessageOrderWithSpecifiedIdNotFound = "order with specified identifier not found"
+	responseMessageOrderAlreadyComplete         = "order with specified identifier payed early"
 )
 
 type OrderApiV1 struct {
@@ -54,6 +59,8 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.GET("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/api/v1/order", oApiV1.createJson)
+
+	api.Http.POST("/api/v1/payment", oApiV1.processPayment)
 
 	api.accessRouteGroup.GET("/order", oApiV1.getOrders)
 	api.accessRouteGroup.GET("/order/:id", oApiV1.getOrderJson)
@@ -165,7 +172,7 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		http.StatusOK,
 		orderFormTemplateName,
 		map[string]interface{}{
-			"Order":  o,
+			"Order": o,
 		},
 	)
 }
@@ -242,11 +249,11 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 	}
 
 	params := &manager.FindAll{
-		Values: values,
+		Values:   values,
 		Projects: p,
 		Merchant: merchant,
-		Limit: oApiV1.GetParams.limit,
-		Offset: oApiV1.GetParams.offset,
+		Limit:    oApiV1.GetParams.limit,
+		Offset:   oApiV1.GetParams.offset,
 	}
 
 	pOrders, err := oApiV1.orderManager.FindAll(params)
@@ -260,4 +267,46 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, pOrders)
+}
+
+func (oApiV1 *OrderApiV1) processPayment(ctx echo.Context) error {
+	data := make(map[string]string)
+
+	if err := ctx.Bind(&data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, responseMessageInvalidRequestData)
+	}
+
+	id, ok := data[model.OrderPaymentCreateRequestFieldOrderId]
+
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, responseMessageRequiredFieldIdNotFound)
+	}
+
+	email, ok := data[model.OrderPaymentCreateRequestFieldEmail]
+
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, responseMessageRequiredFieldEmailNotFound)
+	}
+
+	o := oApiV1.orderManager.FindById(id)
+
+	if o == nil {
+		return echo.NewHTTPError(http.StatusNotFound, responseMessageOrderWithSpecifiedIdNotFound)
+	}
+
+	if o.IsComplete() == true {
+		return echo.NewHTTPError(http.StatusAlreadyReported, responseMessageOrderAlreadyComplete)
+	}
+
+	delete(data, model.OrderFilterFieldId)
+	o.PaymentRequisites = data
+	o.PayerData.Email = &email
+
+	err := oApiV1.orderManager.ProcessCreatePayment(o, oApiV1.paymentSystemConfig)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, data)
 }

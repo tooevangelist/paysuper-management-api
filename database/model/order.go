@@ -35,6 +35,9 @@ const (
 	OrderFilterFieldPMDateTo        = "pm_date_to"
 	OrderFilterFieldProjectDateFrom = "project_date_from"
 	OrderFilterFieldProjectDateTo   = "project_date_to"
+
+	OrderPaymentCreateRequestFieldOrderId = "order_id"
+	OrderPaymentCreateRequestFieldEmail   = "email"
 )
 
 var OrderReservedWords = map[string]bool{
@@ -126,6 +129,8 @@ type Order struct {
 	ProjectOrderId *string `bson:"project_order_id" json:"project_order_id"`
 	// user unique account in project
 	ProjectAccount string `bson:"project_account" json:"project_account"`
+	// order description
+	Description string `bson:"description" json:"description"`
 	// order amount received from project
 	ProjectIncomeAmount float64 `bson:"project_income_amount" json:"project_income_amount"`
 	// order currency received from project
@@ -181,7 +186,8 @@ type Order struct {
 	// any params received in request of payment system about payment
 	PaymentMethodTxnParams map[string]interface{} `bson:"pm_txn_params" json:"pm_txn_params"`
 	// fixed package which buy payer
-	FixedPackage *OrderFixedPackage `bson:"fixed_package" json:"fixed_package"`
+	FixedPackage      *OrderFixedPackage `bson:"fixed_package" json:"fixed_package"`
+	PaymentRequisites map[string]string  `bson:"payment_requisites" json:"-"`
 
 	ProjectOutcomeAmountPrintable string   `bson:"-" json:"-"`
 	OrderIdPrintable              string   `bson:"-" json:"-"`
@@ -233,4 +239,8 @@ type OrderPaginate struct {
 	Count int `json:"count"`
 	// array of selected orders
 	Items []*OrderSimple `json:"items"`
+}
+
+func (order *Order) IsComplete() bool {
+	return order.Status == OrderStatusComplete
 }

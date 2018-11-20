@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/globalsign/mgo/bson"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
-	"math"
 	"net"
 	"net/url"
 	"sort"
@@ -41,6 +41,8 @@ const (
 	orderErrorSignatureInvalid                         = "order request signature is invalid"
 
 	orderSignatureElementsGlue = "|"
+
+	orderDefaultDescription = "Payment by order # %s"
 )
 
 type OrderManager struct {
@@ -166,13 +168,15 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	}
 
 	mACAmount, _ := om.currencyRateManager.convert(oCurrency.CodeInt, p.Merchant.Currency.CodeInt, order.Amount)
+	id := bson.NewObjectId()
 
 	nOrder := &model.Order{
-		Id:                    bson.NewObjectId(),
+		Id:                    id,
 		ProjectId:             p.Id,
+		Description:           fmt.Sprintf(orderDefaultDescription, id.Hex()),
 		ProjectOrderId:        order.OrderId,
 		ProjectAccount:        order.Account,
-		ProjectIncomeAmount:   om.formatAmount(order.Amount),
+		ProjectIncomeAmount:   FormatAmount(order.Amount),
 		ProjectIncomeCurrency: oCurrency,
 		ProjectParams:         order.Other,
 		PayerData: &model.PayerData{
@@ -187,17 +191,20 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		PaymentMethod: &model.OrderPaymentMethod{
 			Id:            pm.Id,
 			Name:          pm.Name,
-			TerminalId:    pm.TerminalId,
 			Params:        pm.Params,
 			PaymentSystem: pm.PaymentSystem,
 		},
-		PaymentMethodOutcomeAmount:         om.formatAmount(pmOutcomeData.amount),
+		PaymentMethodOutcomeAmount:         FormatAmount(pmOutcomeData.amount),
 		PaymentMethodOutcomeCurrency:       pmOutcomeData.currency,
 		Status:                             model.OrderStatusCreated,
 		CreatedAt:                          time.Now(),
 		IsJsonRequest:                      order.IsJsonRequest,
 		FixedPackage:                       ofp,
-		AmountInMerchantAccountingCurrency: om.formatAmount(mACAmount),
+		AmountInMerchantAccountingCurrency: FormatAmount(mACAmount),
+	}
+
+	if order.Description != nil {
+		nOrder.Description = *order.Description
 	}
 
 	if err = om.Database.Repository(TableOrder).InsertOrder(nOrder); err != nil {
@@ -624,6 +631,24 @@ func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M 
 	return filter
 }
 
-func (om *OrderManager) formatAmount(amount float64) float64 {
-	return math.Floor(amount*100) / 100
+func (om *OrderManager) ProcessCreatePayment(o *model.Order, psSettings map[string]interface{}) error {
+	err := om.Database.Repository(TableOrder).UpdateOrder(o)
+
+	if err != nil {
+		return err
+	}
+
+	handler, err := payment_system.GetPaymentHandler(o, psSettings)
+
+	if err != nil {
+		return err
+	}
+
+	err = handler.CreatePayment()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

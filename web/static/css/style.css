@@ -17,7 +17,7 @@ body {
 
 .pp_order_form {
     width: 360px;
-    height: 440px;
+    height: 550px;
     margin: 60px auto 0;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -50,13 +50,17 @@ body {
 .cvv-input input,
 .month select,
 .proceed-btn,
-.year select {
+.year select,
+.card_holder,
+.email {
     height: 42px;
 }
 
 .card_number,
 .month select,
-.year select {
+.year select,
+.card_holder,
+.email {
     font-size: 14px;
     font-weight: 100;
     line-height: 14px;
@@ -66,12 +70,16 @@ body {
 .cvv-details,
 .cvv-input input,
 .month select,
-.year select {
+.year select,
+.card_holder,
+.email {
     color: #86939e;
     opacity: .7;
 }
 
-.card_number {
+.card_number,
+.card_holder,
+.email {
     width: 100%;
     margin-bottom: 20px;
     padding-left: 20px;

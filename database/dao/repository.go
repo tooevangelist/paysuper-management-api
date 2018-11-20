@@ -36,6 +36,7 @@ type Repository interface {
 	FindAllOrders(bson.M, int, int) ([]*model.Order, error)
 	GetOrdersCountByConditions(bson.M) (int, error)
 	InsertOrder(*model.Order) error
+	UpdateOrder(*model.Order) error
 
 	FindCurrenciesPair(int, int) (*model.CurrencyRate, error)
 }

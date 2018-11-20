@@ -45,6 +45,14 @@ var funcMap = template.FuncMap{
 	},
 }
 
+type ServerInitParams struct {
+	Config              *config.Jwt
+	Database            dao.Database
+	Logger              *zap.SugaredLogger
+	GeoDbReader         *geoip2.Reader
+	PaymentSystemConfig map[string]interface{}
+}
+
 type Template struct {
 	templates *template.Template
 }
@@ -63,28 +71,28 @@ type Order struct {
 }
 
 type Api struct {
-	Http             *echo.Echo
-	config           *config.Config
-	database         dao.Database
-	logger           *zap.SugaredLogger
-	validate         *validator.Validate
-	accessRouteGroup *echo.Group
-	handlers         map[string]interface{}
-	geoDbReader      *geoip2.Reader
+	Http                *echo.Echo
+	config              *config.Config
+	database            dao.Database
+	logger              *zap.SugaredLogger
+	validate            *validator.Validate
+	accessRouteGroup    *echo.Group
+	geoDbReader         *geoip2.Reader
+	paymentSystemConfig map[string]interface{}
 
 	Merchant
 	GetParams
 	Order
 }
 
-func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLogger, geoDbReader *geoip2.Reader) (*Api, error) {
+func NewServer(p *ServerInitParams) (*Api, error) {
 	api := &Api{
-		Http:        echo.New(),
-		database:    database,
-		logger:      logger,
-		validate:    validator.New(),
-		handlers:    make(map[string]interface{}),
-		geoDbReader: geoDbReader,
+		Http:                echo.New(),
+		database:            p.Database,
+		logger:              p.Logger,
+		validate:            validator.New(),
+		geoDbReader:         p.GeoDbReader,
+		paymentSystemConfig: p.PaymentSystemConfig,
 	}
 
 	renderer := &Template{
@@ -98,8 +106,8 @@ func NewServer(config *config.Jwt, database dao.Database, logger *zap.SugaredLog
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:    config.SignatureSecret,
-		SigningMethod: config.Algorithm,
+		SigningKey:    p.Config.SignatureSecret,
+		SigningMethod: p.Config.Algorithm,
 	}))
 	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
 

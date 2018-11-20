@@ -72,7 +72,15 @@ func main() {
 		}
 	}()
 
-	server, err := api.NewServer(&conf.Jwt, db, sugar, geoDbReader)
+	sInit := &api.ServerInitParams{
+		Config: &conf.Jwt,
+		Database: db,
+		Logger: sugar,
+		GeoDbReader: geoDbReader,
+		PaymentSystemConfig: conf.PaymentSystemConfig.Config,
+	}
+
+	server, err := api.NewServer(sInit)
 
 	if err != nil {
 		log.Fatalf("server crashed on init with error: %s\n", err)

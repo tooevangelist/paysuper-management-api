@@ -15,14 +15,43 @@
             $(".card_number, #cvv").keyup(function () {
                 $(this).val($(this).val().replace(/\D/g,''));
             });
+
+            $("#pp-order-form").submit(function (e) {
+                e.preventDefault();
+
+                var data = new FormData($(this)[0]);
+                var object = {};
+
+                data.forEach(function(value, key){
+                    object[key] = value;
+                });
+
+                $.ajax({
+                    url: '/api/v1/payment',
+                    type: 'post',
+                    data: JSON.stringify(object),
+                    success: function(data) {
+                        console.log(data);
+                    },
+                    error: function(xhr) {
+                        var error = JSON.parse(xhr['responseText']);
+                        console.log(error);
+                    },
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    processData: false,
+                    dataType: 'json'
+                });
+            });
         });
     </script>
 </head>
 
 <body>
-    <form class="pp_order_form {{ if .Order.IsJsonRequest }} no-margin {{ end }}">
+    <form id="pp-order-form" class="pp_order_form {{ if .Order.IsJsonRequest }} no-margin {{ end }}">
         <div class="header">
             <h4 class="title">Order detail</h4>
+            <input type="hidden" name="order_id" value="{{ .Order.OrderIdPrintable }}" />
         </div>
 
         <div class="body">
@@ -51,6 +80,7 @@
             </div>
 
             <input type="text" class="card_number" name="pan" placeholder="Card Number">
+            <input type="text" class="card_holder" name="holder" placeholder="Card Holder">
             <div class="date-field">
                 <div class="month">
                     <select name="month">
@@ -86,6 +116,8 @@
                     <p>3 or 4 digits usually found <br> on the signature strip</p>
                 </div>
             </div>
+
+            <input type="text" class="email" name="email" placeholder="Email" value="{{ if .Order.PayerData.Email }} {{ .Order.PayerData.Email }} {{ end }}">
 
             <button type="submit" class="proceed-btn"><a href="#">Proceed</a></button>
         </div>

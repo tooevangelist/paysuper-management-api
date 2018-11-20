@@ -4,14 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
+	"github.com/ProtocolONE/p1pay.api/payment_system/validator"
 	"github.com/labstack/echo"
 	"io/ioutil"
-	"log"
-	"math"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"strings"
@@ -32,7 +30,11 @@ const (
 	cardPayActionRefresh       = "refresh"
 	cardPayActionCreatePayment = "create_payment"
 
-	cardPayErrorAuthenticateFailed = "authentication failed"
+	cardPayDateFormat            = "2006-01-02T15:04:05Z"
+	cardPayPaymentMethodBankCard = "BANK_CARD"
+	cardPayPaymentMethodWebMoney = "WEBMONEY"
+	cardPayPaymentMethodQiwi     = "QIWI"
+	cardPayPaymentMethodNeteller = "NETELLER"
 )
 
 var paths = map[string]*Path{
@@ -54,6 +56,7 @@ var tokens = map[string]*Token{}
 
 type CardPay struct {
 	*Settings
+	*model.Order
 	mu sync.Mutex
 }
 
@@ -67,8 +70,8 @@ type Token struct {
 	RefreshTokenExpireTime time.Time
 }
 
-func Init() {
-
+func NewCardPayHandler(o *model.Order, settings *Settings) PaymentSystem {
+	return &CardPay{Settings: settings, Order: o}
 }
 
 func (cp *CardPay) Auth(pmKey string) error {
@@ -111,7 +114,7 @@ func (cp *CardPay) Auth(pmKey string) error {
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(cardPayErrorAuthenticateFailed)
+		return errors.New(paymentSystemErrorAuthenticateFailed)
 	}
 
 	b, err := ioutil.ReadAll(resp.Body)
@@ -163,7 +166,7 @@ func (cp *CardPay) refresh(pmKey string) error {
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(cardPayErrorAuthenticateFailed)
+		return errors.New(paymentSystemErrorAuthenticateFailed)
 	}
 
 	b, err := ioutil.ReadAll(resp.Body)
@@ -179,80 +182,44 @@ func (cp *CardPay) refresh(pmKey string) error {
 	return nil
 }
 
-func (cp *CardPay) CreatePayment(o *model.Order) error {
+func (cp *CardPay) CreatePayment() error {
+	if err := cp.Auth(cp.Order.PaymentMethod.Params.ExternalId); err != nil {
+		return err
+	}
+
 	qUrl, err := cp.getUrl(cardPayActionCreatePayment)
 
 	if err != nil {
 		return err
 	}
 
+	cpo, err := cp.getCardPayOrder()
+
 	if err != nil {
 		return err
 	}
 
-	cpo := &model.CardPayOrder{
-		Request: &model.CardPayRequest{
-			Id:   o.Id.Hex(),
-			Time: time.Now().Format("2006-01-02T15:04:05Z"),
-		},
-		MerchantOrder: &model.CardPayMerchantOrder{
-			Id: o.Id.Hex(),
-			Description: "Test",
-			Items: []*model.CardPayItem {
-				{
-					Name: o.FixedPackage.Name,
-					Description: o.FixedPackage.Name,
-					Count: 1,
-					Price: o.FixedPackage.Price,
-				},
-			},
-		},
-		Description:     "Test description",
-		PaymentMethod:   "BANK_CARD",
-		PaymentData: &model.CardPayPaymentData{
-			Currency: o.PaymentMethodOutcomeCurrency.CodeA3,
-			Amount:   math.Floor(o.PaymentMethodOutcomeAmount*100)/100,
-		},
-		CardAccount: &model.CardPayCardAccount{
-			Card: &model.CardPayBankCardAccount{
-				Pan:        "4000000000000002",
-				HolderName: "Mr. Card Holder",
-				Cvv:        "123",
-				Expire:     "12/2019",
-			},
-		},
-		Customer: &model.CardPayCustomer{
-			Email:   *o.PayerData.Email,
-			Ip:      o.PayerData.Ip,
-			Account: o.ProjectAccount,
-		},
-	}
-	bytesRepresentation, err := json.Marshal(cpo)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	b, _ := json.Marshal(cpo)
 
-	client := &http.Client{}
-	req, err := http.NewRequest(paths[cardPayActionCreatePayment].method, qUrl, bytes.NewBuffer(bytesRepresentation))
+	client := GetLoggableHttpClient()
+	req, err := http.NewRequest(paths[cardPayActionCreatePayment].method, qUrl, bytes.NewBuffer(b))
 
-	token := cp.getToken("cards")
+	token := cp.getToken(cp.Order.PaymentMethod.Params.ExternalId)
 	auth := strings.Title(token.TokenType) + " " + token.AccessToken
 
 	req.Header.Add(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	req.Header.Add(echo.HeaderAuthorization, auth)
 
-	dump, _ := httputil.DumpRequestOut(req, true)
-	fmt.Printf("%s\n\n", dump)
-
 	resp, err := client.Do(req)
 
-	dump, _ = httputil.DumpResponse(resp, true)
-	fmt.Printf("%s\n\n", dump)
-
 	if resp.StatusCode != http.StatusOK {
-		return errors.New("not 200")
+		return errors.New(paymentSystemErrorCreateRequestFailed)
 	}
 
+	return nil
+}
+
+func (cp *CardPay) ProcessPayment() error {
 	return nil
 }
 
@@ -308,4 +275,98 @@ func (cp *CardPay) getToken(pmKey string) *Token {
 	}
 
 	return tokens[pmKey]
+}
+
+func (cp *CardPay) getCardPayOrder() (*entity.CardPayOrder, error) {
+	var err error
+
+	o := &entity.CardPayOrder{
+		Request: &entity.CardPayRequest{
+			Id:   cp.Order.Id.Hex(),
+			Time: time.Now().UTC().Format(cardPayDateFormat),
+		},
+		MerchantOrder: &entity.CardPayMerchantOrder{
+			Id:          cp.Order.Id.Hex(),
+			Description: cp.Order.Description,
+			Items: []*entity.CardPayItem{
+				{
+					Name:        cp.Order.FixedPackage.Name,
+					Description: cp.Order.FixedPackage.Name,
+					Count:       1,
+					Price:       cp.Order.FixedPackage.Price,
+				},
+			},
+		},
+		Description:   cp.Order.Description,
+		PaymentMethod: cp.Order.PaymentMethod.Params.ExternalId,
+		PaymentData: &entity.CardPayPaymentData{
+			Currency: cp.Order.PaymentMethodOutcomeCurrency.CodeA3,
+			Amount:   cp.Order.PaymentMethodOutcomeAmount,
+		},
+		Customer: &entity.CardPayCustomer{
+			Email:   *cp.Order.PayerData.Email,
+			Ip:      cp.Order.PayerData.Ip,
+			Account: cp.Order.ProjectAccount,
+		},
+	}
+
+	switch cp.Order.PaymentMethod.Params.ExternalId {
+	case cardPayPaymentMethodBankCard:
+		if o, err = cp.geBankCardCardPayOrder(o); err != nil {
+			return nil, err
+		}
+		break
+	case cardPayPaymentMethodQiwi:
+	case cardPayPaymentMethodWebMoney:
+	case cardPayPaymentMethodNeteller:
+		if o, err = cp.geEWalletCardPayOrder(o); err != nil {
+			return nil, err
+		}
+		break
+	default:
+		return nil, errors.New(paymentSystemErrorUnknownPaymentMethod)
+	}
+
+	return o, nil
+}
+
+func (cp *CardPay) geBankCardCardPayOrder(cpo *entity.CardPayOrder) (*entity.CardPayOrder, error) {
+	v := &validator.BankCardValidator{
+		Pan:    cp.Order.PaymentRequisites[bankCardFieldPan],
+		Cvv:    cp.Order.PaymentRequisites[bankCardFieldCvv],
+		Month:  cp.Order.PaymentRequisites[bankCardFieldMonth],
+		Year:   cp.Order.PaymentRequisites[bankCardFieldYear],
+		Holder: cp.Order.PaymentRequisites[bankCardFieldHolder],
+	}
+
+	if err := v.Validate(); err != nil {
+		return nil, err
+	}
+
+	expire := v.Month + "/" + v.Year
+
+	cpo.CardAccount = &entity.CardPayCardAccount{
+		Card: &entity.CardPayBankCardAccount{
+			Pan:        v.Pan,
+			HolderName: v.Holder,
+			Cvv:        v.Cvv,
+			Expire:     expire,
+		},
+	}
+
+	return cpo, nil
+}
+
+func (cp *CardPay) geEWalletCardPayOrder(cpo *entity.CardPayOrder) (*entity.CardPayOrder, error) {
+	ewallet, ok := cp.Order.PaymentRequisites[eWalletFieldIdentifier]
+
+	if !ok || len(ewallet) <= 0 {
+		return nil, errors.New(paymentSystemErrorEWalletIdentifierIsInvalid)
+	}
+
+	cpo.EWalletAccount = &entity.CardPayEWalletAccount{
+		Id: cp.Order.PaymentRequisites[eWalletFieldIdentifier],
+	}
+
+	return cpo, nil
 }

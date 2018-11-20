@@ -1,0 +1,30 @@
+cardpay:
+  create_payment_url: string
+  BANK_CARD:
+    terminal_id: int
+    secret_word: string
+    callback_secret_word: string
+  WEBMONEY:
+    terminal_id: int
+    secret_word: string
+    callback_secret_word: string
+  QIWI:
+    terminal_id: int
+    secret_word: string
+    callback_secret_word: string
+  NETELLER:
+    terminal_id: int
+    secret_word: string
+    callback_secret_word: string
+  ALIPAY:
+    terminal_id: int
+    secret_word: string
+    callback_secret_word: string
+  CHINA_UNIONPAY:
+    terminal_id: int
+    secret_word: string
+    callback_secret_word: string
+  BITCOIN:
+    terminal_id: int
+    secret_word: string
+    callback_secret_word: string

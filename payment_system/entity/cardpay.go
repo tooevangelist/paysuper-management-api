@@ -1,10 +1,14 @@
-package model
+package entity
 
 type CardPayBankCardAccount struct {
 	Pan        string `json:"pan"`
 	HolderName string `json:"holder"`
 	Cvv        string `json:"security_code"`
 	Expire     string `json:"expiration"`
+}
+
+type CardPayEWalletAccount struct {
+	Id string `json:"id"`
 }
 
 type CardPayPaymentData struct {
@@ -55,11 +59,12 @@ type CardPayCardAccount struct {
 }
 
 type CardPayOrder struct {
-	Request       *CardPayRequest       `json:"request"`
-	MerchantOrder *CardPayMerchantOrder `json:"merchant_order"`
-	Description   string                `json:"description"`
-	PaymentMethod string                `json:"payment_method"`
-	PaymentData   *CardPayPaymentData   `json:"payment_data"`
-	CardAccount   *CardPayCardAccount   `json:"card_account"`
-	Customer      *CardPayCustomer      `json:"customer"`
+	Request        *CardPayRequest        `json:"request"`
+	MerchantOrder  *CardPayMerchantOrder  `json:"merchant_order"`
+	Description    string                 `json:"description"`
+	PaymentMethod  string                 `json:"payment_method"`
+	PaymentData    *CardPayPaymentData    `json:"payment_data"`
+	CardAccount    *CardPayCardAccount    `json:"card_account"`
+	Customer       *CardPayCustomer       `json:"customer"`
+	EWalletAccount *CardPayEWalletAccount `json:"ewallet_account"`
 }
