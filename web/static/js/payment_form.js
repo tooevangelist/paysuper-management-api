@@ -1,9 +1,16 @@
 const PM_ACTIVE_CLASS = 'active';
 
+function getAmount($element) {
+    return $element.data('amount') + " " + $element.data('currency')
+}
+
 $(function() {
     let $pmItem = $('div.payment-methods div.item');
+    let $amountContainer = $('div.details div.amount');
+    let $pmFirst = $pmItem.first();
 
-    $('#' + $pmItem.first().data('form')).show();
+    $('#' + $pmFirst.data('form')).show();
+    $amountContainer.html(getAmount($pmFirst));
 
     $pmItem.on('click', function () {
         $pmItem.removeClass(PM_ACTIVE_CLASS);
@@ -11,6 +18,7 @@ $(function() {
 
         $('div.payment-method-requisites').find('div.form').hide();
         $('#' + $(this).data('form')).show();
+        $amountContainer.html(getAmount($(this)));
     });
 
     $('input.number').on('keyup', function () {

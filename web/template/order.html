@@ -18,7 +18,9 @@
         <div class="details">
             <div class="project-title">{{ .Order.ProjectData.Name }}</div>
             <div class="amount">
-                {{ .Order.ProjectOutcomeAmountPrintable }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}
+                {{ if .Order.PaymentMethod }}
+                    {{ .Order.PaymentMethodOutcomeAmount }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}
+                {{ end }}
             </div>
 
             <div class="order-info">
@@ -34,12 +36,19 @@
         </div>
 
         <div class="payment-methods">
-        {{ range $i, $pm := .PaymentMethods }}
-            <div class="item {{ if eq $i 0 }} active {{ end }}" data-form="{{ $pm.GroupAlias }}">
-                <div class="logo" style="background-image: url('{{ $pm.Icon }}');"></div>
-                <div class="title">{{ $pm.Name }}</div>
-            </div>
-        {{ end }}
+            {{ if not .Order.PaymentMethod }}
+                {{ range $i, $pm := .PaymentMethods }}
+                    {{ $prepData := index $.Order.PaymentMethodsPreparedFormData $pm.GroupAlias }}
+
+                    <div class="item {{ if eq $i 0 }} active {{ end }}" data-form="{{ $pm.GroupAlias }}"
+                         data-amount="{{ $prepData.Amount }}" data-currency="{{ $prepData.Currency.CodeA3 }}">
+                        <div class="logo" style="background-image: url('{{ $pm.Icon }}');"></div>
+                        <div class="title">{{ $pm.Name }}</div>
+                    </div>
+                {{ end }}
+            {{ else }}
+                <div class="item hidden" data-form="{{ .Order.PaymentMethod.GroupAlias }}"></div>
+            {{ end }}
         </div>
 
         <form id="order-form">

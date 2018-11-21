@@ -162,13 +162,7 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid order id")
 	}
 
-	o := oApiV1.orderManager.FindById(id)
-
-	if o == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Order not found")
-	}
-
-	projectPms, err := oApiV1.projectManager.GetProjectPaymentMethods(o.ProjectId)
+	o, projectPms, err := oApiV1.orderManager.GetOrderByIdWithPaymentMethods(id)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

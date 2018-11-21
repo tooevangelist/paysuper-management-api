@@ -39,6 +39,7 @@ const (
 	orderErrorAmountGreaterThanMaxAllowedPaymentMethod = "order amount is greater than max allowed payment amount for payment method"
 	orderErrorCanNotCreate                             = "order can't create. try request later"
 	orderErrorSignatureInvalid                         = "order request signature is invalid"
+	orderErrorNotFound                                 = "order not found"
 
 	orderSignatureElementsGlue = "|"
 
@@ -149,8 +150,10 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		return nil, err
 	}
 
-	if pmOutcomeData, err = om.checkPaymentMethodLimits(check); err != nil {
-		return nil, err
+	if order.PaymentMethod != nil {
+		if pmOutcomeData, err = om.checkPaymentMethodLimits(check); err != nil {
+			return nil, err
+		}
 	}
 
 	if order.OrderId != nil {
@@ -168,17 +171,21 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	}
 
 	mACAmount, _ := om.currencyRateManager.convert(oCurrency.CodeInt, p.Merchant.Currency.CodeInt, order.Amount)
+	pOutAmount, _ := om.currencyRateManager.convert(oCurrency.CodeInt, p.CallbackCurrency.CodeInt, order.Amount)
+
 	id := bson.NewObjectId()
 
 	nOrder := &model.Order{
-		Id:                    id,
-		ProjectId:             p.Id,
-		Description:           fmt.Sprintf(orderDefaultDescription, id.Hex()),
-		ProjectOrderId:        order.OrderId,
-		ProjectAccount:        order.Account,
-		ProjectIncomeAmount:   FormatAmount(order.Amount),
-		ProjectIncomeCurrency: oCurrency,
-		ProjectParams:         order.Other,
+		Id:                     id,
+		ProjectId:              p.Id,
+		Description:            fmt.Sprintf(orderDefaultDescription, id.Hex()),
+		ProjectOrderId:         order.OrderId,
+		ProjectAccount:         order.Account,
+		ProjectIncomeAmount:    FormatAmount(order.Amount),
+		ProjectIncomeCurrency:  oCurrency,
+		ProjectOutcomeAmount:   FormatAmount(pOutAmount),
+		ProjectOutcomeCurrency: p.CallbackCurrency,
+		ProjectParams:          order.Other,
 		PayerData: &model.PayerData{
 			Ip:            order.CreateOrderIp,
 			CountryCodeA2: gRecord.Country.IsoCode,
@@ -188,14 +195,6 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 			Phone:         order.PayerPhone,
 			Email:         order.PayerEmail,
 		},
-		PaymentMethod: &model.OrderPaymentMethod{
-			Id:            pm.Id,
-			Name:          pm.Name,
-			Params:        pm.Params,
-			PaymentSystem: pm.PaymentSystem,
-		},
-		PaymentMethodOutcomeAmount:         FormatAmount(pmOutcomeData.amount),
-		PaymentMethodOutcomeCurrency:       pmOutcomeData.currency,
 		Status:                             model.OrderStatusCreated,
 		CreatedAt:                          time.Now(),
 		IsJsonRequest:                      order.IsJsonRequest,
@@ -205,6 +204,19 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 
 	if order.Description != nil {
 		nOrder.Description = *order.Description
+	}
+
+	if order.PaymentMethod != nil {
+		nOrder.PaymentMethod = &model.OrderPaymentMethod{
+			Id:            pm.Id,
+			Name:          pm.Name,
+			Params:        pm.Params,
+			PaymentSystem: pm.PaymentSystem,
+			GroupAlias:    pm.GroupAlias,
+		}
+
+		nOrder.PaymentMethodOutcomeAmount = FormatAmount(pmOutcomeData.amount)
+		nOrder.PaymentMethodOutcomeCurrency = pmOutcomeData.currency
 	}
 
 	if err = om.Database.Repository(TableOrder).InsertOrder(nOrder); err != nil {
@@ -228,11 +240,40 @@ func (om *OrderManager) FindById(id string) *model.Order {
 			o.ProjectData = p
 		}
 
-		o.ProjectOutcomeAmountPrintable = fmt.Sprintf("%.2f", o.PaymentMethodOutcomeAmount)
 		o.OrderIdPrintable = o.Id.Hex()
 	}
 
 	return o
+}
+
+func (om *OrderManager) GetOrderByIdWithPaymentMethods(id string) (*model.Order, []*model.PaymentMethod, error) {
+	order := om.FindById(id)
+
+	if order == nil {
+		return nil, nil, errors.New(orderErrorNotFound)
+	}
+
+	projectPms, err := om.projectManager.GetProjectPaymentMethods(order.ProjectId)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pdMap := make(map[string]*model.PaymentMethodsPreparedFormData)
+
+	for _, pm := range projectPms  {
+		amount, err := om.currencyRateManager.convert(order.ProjectIncomeCurrency.CodeInt, pm.Currency.CodeInt, order.ProjectIncomeAmount)
+
+		if err != nil {
+			return nil, nil, err
+		}
+
+		pdMap[pm.GroupAlias] = &model.PaymentMethodsPreparedFormData{Amount: FormatAmount(amount), Currency: pm.Currency}
+	}
+
+	order.PaymentMethodsPreparedFormData = pdMap
+
+	return order, projectPms, nil
 }
 
 func (om *OrderManager) getPaymentMethod(order *model.OrderScalar, pms map[string][]*model.ProjectPaymentModes) (*model.ProjectPaymentModes, error) {

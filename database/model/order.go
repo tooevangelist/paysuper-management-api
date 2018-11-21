@@ -189,9 +189,9 @@ type Order struct {
 	FixedPackage      *OrderFixedPackage `bson:"fixed_package" json:"fixed_package"`
 	PaymentRequisites map[string]string  `bson:"payment_requisites" json:"-"`
 
-	ProjectOutcomeAmountPrintable string   `bson:"-" json:"-"`
-	OrderIdPrintable              string   `bson:"-" json:"-"`
-	ProjectData                   *Project `bson:"-" json:"-"`
+	PaymentMethodsPreparedFormData map[string]*PaymentMethodsPreparedFormData `bson:"-" json:"-"`
+	OrderIdPrintable               string                                     `bson:"-" json:"-"`
+	ProjectData                    *Project                                   `bson:"-" json:"-"`
 }
 
 type OrderUrl struct {
@@ -243,4 +243,9 @@ type OrderPaginate struct {
 
 func (order *Order) IsComplete() bool {
 	return order.Status == OrderStatusComplete
+}
+
+type PaymentMethodsPreparedFormData struct {
+	Amount   float64
+	Currency *Currency
 }
