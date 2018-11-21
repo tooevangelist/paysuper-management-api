@@ -55,7 +55,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.POST("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/api/v1/order", oApiV1.createJson)
 
-	api.Http.POST("/api/v1/payment", oApiV1.processPayment)
+	api.Http.POST("/api/v1/payment", oApiV1.processCreatePayment)
 
 	api.accessRouteGroup.GET("/order", oApiV1.getOrders)
 	api.accessRouteGroup.GET("/order/:id", oApiV1.getOrderJson)
@@ -265,7 +265,7 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, pOrders)
 }
 
-func (oApiV1 *OrderApiV1) processPayment(ctx echo.Context) error {
+func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 	data := make(map[string]string)
 
 	if err := ctx.Bind(&data); err != nil {

@@ -58,13 +58,18 @@ type CardPayCardAccount struct {
 	Token          string                  `json:"token,omitempty"`
 }
 
+type CardPayCryptoCurrencyAccount struct {
+	RollbackAddress string `json:"rollback_address"`
+}
+
 type CardPayOrder struct {
-	Request        *CardPayRequest        `json:"request"`
-	MerchantOrder  *CardPayMerchantOrder  `json:"merchant_order"`
-	Description    string                 `json:"description"`
-	PaymentMethod  string                 `json:"payment_method"`
-	PaymentData    *CardPayPaymentData    `json:"payment_data"`
-	CardAccount    *CardPayCardAccount    `json:"card_account,omitempty"`
-	Customer       *CardPayCustomer       `json:"customer"`
-	EWalletAccount *CardPayEWalletAccount `json:"ewallet_account,omitempty"`
+	Request               *CardPayRequest               `json:"request"`
+	MerchantOrder         *CardPayMerchantOrder         `json:"merchant_order"`
+	Description           string                        `json:"description"`
+	PaymentMethod         string                        `json:"payment_method"`
+	PaymentData           *CardPayPaymentData           `json:"payment_data"`
+	CardAccount           *CardPayCardAccount           `json:"card_account,omitempty"`
+	Customer              *CardPayCustomer              `json:"customer"`
+	EWalletAccount        *CardPayEWalletAccount        `json:"ewallet_account,omitempty"`
+	CryptoCurrencyAccount *CardPayCryptoCurrencyAccount `json:"cryptocurrency_account,omitempty"`
 }

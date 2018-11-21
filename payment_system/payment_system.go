@@ -8,12 +8,13 @@ import (
 const (
 	PaymentSystemHandlerCardPay = "cardpay"
 
-	paymentSystemErrorHandlerNotFound            = "handler for specified payment system not found"
-	paymentSystemErrorSettingsNotFound           = "payment system settings not found"
-	paymentSystemErrorAuthenticateFailed         = "authentication failed"
-	paymentSystemErrorUnknownPaymentMethod       = "unknown payment method"
-	paymentSystemErrorCreateRequestFailed        = "order can't be create. try request later"
-	paymentSystemErrorEWalletIdentifierIsInvalid = "wallet identifier is invalid"
+	paymentSystemErrorHandlerNotFound                = "handler for specified payment system not found"
+	paymentSystemErrorSettingsNotFound               = "payment system settings not found"
+	paymentSystemErrorAuthenticateFailed             = "authentication failed"
+	paymentSystemErrorUnknownPaymentMethod           = "unknown payment method"
+	paymentSystemErrorCreateRequestFailed            = "order can't be create. try request later"
+	paymentSystemErrorEWalletIdentifierIsInvalid     = "wallet identifier is invalid"
+	paymentSystemErrorCryptoCurrencyAddressIsInvalid = "crypto currency address is invalid"
 
 	bankCardFieldPan       = "pan"
 	bankCardFieldCvv       = "cvv"
@@ -21,6 +22,7 @@ const (
 	bankCardFieldYear      = "year"
 	bankCardFieldHolder    = "card_holder"
 	eWalletFieldIdentifier = "ewallet"
+	cryptoFieldIdentifier  = "address"
 
 	paymentSystemSettingsFieldNameCreatePaymentUrl = "create_payment_url"
 )

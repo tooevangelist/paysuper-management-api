@@ -36,6 +36,8 @@ const (
 	cardPayPaymentMethodWebMoney = "WEBMONEY"
 	cardPayPaymentMethodQiwi     = "QIWI"
 	cardPayPaymentMethodNeteller = "NETELLER"
+	cardPayPaymentMethodAlipay   = "ALIPAY"
+	cardPayPaymentMethodBitcoin  = "BITCOIN"
 )
 
 var paths = map[string]*Path{
@@ -75,7 +77,7 @@ func NewCardPayHandler(o *model.Order, settings *Settings) PaymentSystem {
 	return &CardPay{Settings: settings, Order: o}
 }
 
-func (cp *CardPay) Auth(pmKey string) error {
+func (cp *CardPay) auth(pmKey string) error {
 	if token := cp.getToken(pmKey); token != nil {
 		return nil
 	}
@@ -184,7 +186,7 @@ func (cp *CardPay) refresh(pmKey string) error {
 }
 
 func (cp *CardPay) CreatePayment() error {
-	if err := cp.Auth(cp.Order.PaymentMethod.Params.ExternalId); err != nil {
+	if err := cp.auth(cp.Order.PaymentMethod.Params.ExternalId); err != nil {
 		return err
 	}
 
@@ -321,8 +323,16 @@ func (cp *CardPay) getCardPayOrder() (*entity.CardPayOrder, error) {
 			return nil, err
 		}
 		break
-	case cardPayPaymentMethodQiwi, cardPayPaymentMethodWebMoney, cardPayPaymentMethodNeteller:
-		if o, err = cp.geEWalletCardPayOrder(o); err != nil {
+	case cardPayPaymentMethodQiwi,
+		cardPayPaymentMethodWebMoney,
+		cardPayPaymentMethodNeteller,
+		cardPayPaymentMethodAlipay:
+		if o, err = cp.getEWalletCardPayOrder(o); err != nil {
+			return nil, err
+		}
+		break
+	case cardPayPaymentMethodBitcoin:
+		if o, err = cp.getCryptoCurrencyCardPayOrder(o); err != nil {
 			return nil, err
 		}
 		break
@@ -360,7 +370,7 @@ func (cp *CardPay) geBankCardCardPayOrder(cpo *entity.CardPayOrder) (*entity.Car
 	return cpo, nil
 }
 
-func (cp *CardPay) geEWalletCardPayOrder(cpo *entity.CardPayOrder) (*entity.CardPayOrder, error) {
+func (cp *CardPay) getEWalletCardPayOrder(cpo *entity.CardPayOrder) (*entity.CardPayOrder, error) {
 	ewallet, ok := cp.Order.PaymentRequisites[eWalletFieldIdentifier]
 
 	if !ok || len(ewallet) <= 0 {
@@ -369,6 +379,20 @@ func (cp *CardPay) geEWalletCardPayOrder(cpo *entity.CardPayOrder) (*entity.Card
 
 	cpo.EWalletAccount = &entity.CardPayEWalletAccount{
 		Id: cp.Order.PaymentRequisites[eWalletFieldIdentifier],
+	}
+
+	return cpo, nil
+}
+
+func (cp *CardPay) getCryptoCurrencyCardPayOrder(cpo *entity.CardPayOrder) (*entity.CardPayOrder, error) {
+	address, ok := cp.Order.PaymentRequisites[cryptoFieldIdentifier]
+
+	if !ok || len(address) <= 0 {
+		return nil, errors.New(paymentSystemErrorCryptoCurrencyAddressIsInvalid)
+	}
+
+	cpo.CryptoCurrencyAccount = &entity.CardPayCryptoCurrencyAccount{
+		RollbackAddress: address,
 	}
 
 	return cpo, nil

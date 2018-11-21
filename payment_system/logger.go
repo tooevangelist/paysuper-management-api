@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+const (
+	defaultHttpClientTimeout = 10
+)
+
 type Transport struct {
 	Transport http.RoundTripper
 }
@@ -17,7 +21,10 @@ type contextKey struct {
 }
 
 func GetLoggableHttpClient() *http.Client {
-	return &http.Client{Transport: &Transport{}}
+	return &http.Client{
+		Transport: &Transport{},
+		Timeout: time.Duration(defaultHttpClientTimeout * time.Second),
+	}
 }
 
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
