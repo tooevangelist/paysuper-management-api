@@ -12,7 +12,7 @@ $(function() {
 
     $('#' + $pmFirst.data('form')).show();
 
-    if ($amountContainer.html().length <= 0) {
+    if ($.trim($amountContainer.html()).length <= 0) {
         $amountContainer.html(getAmount($pmFirst));
     }
 
