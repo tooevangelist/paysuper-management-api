@@ -54,8 +54,8 @@ type CardPayMerchantOrder struct {
 
 type CardPayCardAccount struct {
 	BillingAddress *CardPayAddress         `json:"billing_address,omitempty"`
-	Card           *CardPayBankCardAccount `json:"card,omitempty"`
-	Token          string                  `json:"token"`
+	Card           *CardPayBankCardAccount `json:"card"`
+	Token          string                  `json:"token,omitempty"`
 }
 
 type CardPayOrder struct {
@@ -64,7 +64,7 @@ type CardPayOrder struct {
 	Description    string                 `json:"description"`
 	PaymentMethod  string                 `json:"payment_method"`
 	PaymentData    *CardPayPaymentData    `json:"payment_data"`
-	CardAccount    *CardPayCardAccount    `json:"card_account"`
+	CardAccount    *CardPayCardAccount    `json:"card_account,omitempty"`
 	Customer       *CardPayCustomer       `json:"customer"`
-	EWalletAccount *CardPayEWalletAccount `json:"ewallet_account"`
+	EWalletAccount *CardPayEWalletAccount `json:"ewallet_account,omitempty"`
 }

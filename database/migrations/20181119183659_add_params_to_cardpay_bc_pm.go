@@ -19,7 +19,7 @@ func init() {
 			pm.Params = &model.PaymentMethodParams{
 				Handler: "cardpay",
 				Terminal: "15985",
-				ExternalId: "BANK_CARD",
+				ExternalId: "BANKCARD",
 			}
 
 			return db.C(manager.TablePaymentMethod).UpdateId(pm.Id, pm)

@@ -16,6 +16,7 @@ require (
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/oschwald/geoip2-golang v1.2.1
 	github.com/oschwald/maxminddb-golang v1.3.0 // indirect
+	github.com/satori/go.uuid v1.2.0
 	github.com/swaggo/swag v1.3.2 // indirect
 	github.com/ttacon/builder v0.0.0-20170518171403-c099f663e1c2 // indirect
 	github.com/ttacon/libphonenumber v1.0.0

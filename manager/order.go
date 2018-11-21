@@ -39,7 +39,12 @@ const (
 	orderErrorAmountGreaterThanMaxAllowedPaymentMethod = "order amount is greater than max allowed payment amount for payment method"
 	orderErrorCanNotCreate                             = "order can't create. try request later"
 	orderErrorSignatureInvalid                         = "order request signature is invalid"
-	orderErrorNotFound                                 = "order not found"
+	orderErrorNotFound                                 = "order with specified identifier not found"
+	orderErrorOrderAlreadyComplete                     = "order with specified identifier payed early"
+
+	orderErrorCreatePaymentRequiredFieldIdNotFound            = "required field with order identifier not found"
+	orderErrorCreatePaymentRequiredFieldPaymentMethodNotFound = "required field with payment method identifier not found"
+	orderErrorCreatePaymentRequiredFieldEmailNotFound         = "required field \"email\" not found"
 
 	orderSignatureElementsGlue = "|"
 
@@ -259,7 +264,7 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(id string) (*model.Order,
 
 	pdMap := make(map[string]*model.PaymentMethodsPreparedFormData)
 
-	for _, pm := range projectPms  {
+	for _, pm := range projectPms {
 		amount, err := om.currencyRateManager.convert(order.ProjectIncomeCurrency.CodeInt, pm.Currency.CodeInt, order.ProjectIncomeAmount)
 
 		if err != nil {
@@ -670,10 +675,43 @@ func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M 
 	return filter
 }
 
-func (om *OrderManager) ProcessCreatePayment(o *model.Order, psSettings map[string]interface{}) error {
-	err := om.Database.Repository(TableOrder).UpdateOrder(o)
+func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings map[string]interface{}) error {
+	var err error
 
-	if err != nil {
+	if err = om.validateCreatePaymentData(data); err != nil {
+		return err
+	}
+
+	o := om.FindById(data[model.OrderPaymentCreateRequestFieldOrderId])
+
+	if o == nil {
+		return errors.New(orderErrorNotFound)
+	}
+
+	if o.IsComplete() == true {
+		return errors.New(orderErrorOrderAlreadyComplete)
+	}
+
+	pm := om.paymentMethodManager.FindById(bson.ObjectIdHex(data[model.OrderPaymentCreateRequestFieldOPaymentMethodId]))
+
+	if pm == nil {
+		return errors.New(orderErrorPaymentMethodNotFound)
+	}
+
+	if o, err = om.modifyOrderAfterOrderFormSubmit(o, pm); err != nil {
+		return err
+	}
+
+	email, _ := data[model.OrderPaymentCreateRequestFieldEmail]
+	o.PayerData.Email = &email
+
+	delete(data, model.OrderPaymentCreateRequestFieldOrderId)
+	delete(data, model.OrderPaymentCreateRequestFieldOPaymentMethodId)
+	delete(data, model.OrderPaymentCreateRequestFieldEmail)
+
+	o.PaymentRequisites = data
+
+	if err = om.Database.Repository(TableOrder).UpdateOrder(o); err != nil {
 		return err
 	}
 
@@ -683,11 +721,65 @@ func (om *OrderManager) ProcessCreatePayment(o *model.Order, psSettings map[stri
 		return err
 	}
 
-	err = handler.CreatePayment()
-
-	if err != nil {
+	if err = handler.CreatePayment(); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (om *OrderManager) validateCreatePaymentData(data map[string]string) error {
+	if _, ok := data[model.OrderPaymentCreateRequestFieldOrderId]; !ok {
+		return errors.New(orderErrorCreatePaymentRequiredFieldIdNotFound)
+	}
+
+	if _, ok := data[model.OrderPaymentCreateRequestFieldOPaymentMethodId]; !ok {
+		return errors.New(orderErrorCreatePaymentRequiredFieldPaymentMethodNotFound)
+	}
+
+	if _, ok := data[model.OrderPaymentCreateRequestFieldEmail]; !ok {
+		return errors.New(orderErrorCreatePaymentRequiredFieldEmailNotFound)
+	}
+
+	return nil
+}
+
+func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *model.PaymentMethod) (*model.Order, error) {
+	if o.PaymentMethod != nil && o.PaymentMethod.Id == pm.Id {
+		return o, nil
+	}
+
+	p := om.projectManager.FindProjectById(o.ProjectId.Hex())
+
+	if p == nil {
+		return nil, errors.New(orderErrorProjectNotFound)
+	}
+
+	check := &check{
+		order: &model.OrderScalar{
+			Amount: o.ProjectIncomeAmount,
+		},
+		project: p,
+		oCurrency: o.ProjectIncomeCurrency,
+		paymentMethod: pm,
+	}
+
+	pmOutData, err := om.checkPaymentMethodLimits(check)
+
+	if err != nil {
+		return nil, err
+	}
+
+	o.PaymentMethod = &model.OrderPaymentMethod{
+		Id:            pm.Id,
+		Name:          pm.Name,
+		Params:        pm.Params,
+		PaymentSystem: pm.PaymentSystem,
+		GroupAlias:    pm.GroupAlias,
+	}
+
+	o.PaymentMethodOutcomeAmount = FormatAmount(pmOutData.amount)
+	o.PaymentMethodOutcomeCurrency = pmOutData.currency
+
+	return o, nil
 }

@@ -19,7 +19,7 @@ const (
 	bankCardFieldCvv       = "cvv"
 	bankCardFieldMonth     = "month"
 	bankCardFieldYear      = "year"
-	bankCardFieldHolder    = "holder"
+	bankCardFieldHolder    = "card_holder"
 	eWalletFieldIdentifier = "ewallet"
 
 	paymentSystemSettingsFieldNameCreatePaymentUrl = "create_payment_url"

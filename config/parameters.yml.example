@@ -1,6 +1,6 @@
 cardpay:
   create_payment_url: string
-  BANK_CARD:
+  BANKCARD:
     terminal_id: int
     secret_word: string
     callback_secret_word: string
@@ -17,10 +17,6 @@ cardpay:
     secret_word: string
     callback_secret_word: string
   ALIPAY:
-    terminal_id: int
-    secret_word: string
-    callback_secret_word: string
-  CHINA_UNIONPAY:
     terminal_id: int
     secret_word: string
     callback_secret_word: string

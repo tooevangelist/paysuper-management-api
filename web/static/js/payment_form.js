@@ -7,25 +7,38 @@ function getAmount($element) {
 $(function() {
     let $pmItem = $('div.payment-methods div.item');
     let $amountContainer = $('div.details div.amount');
-    let $pmFirst = $pmItem.first();
     let $selectedPmInput = $('form#order-form input[name=payment_method_id]');
 
-    $('#' + $pmFirst.data('form')).show();
+    $pmItem.each(function (i, el) {
+        if (i === 0) {
+            $('#' + $(el).data('form')).show();
+        } else {
+            $('#' + $(el).data('form')).find('input').attr({disabled: 'disabled'});
+        }
+    });
 
     if ($.trim($amountContainer.html()).length <= 0) {
-        $amountContainer.html(getAmount($pmFirst));
+        $amountContainer.html(getAmount($pmItem.first()));
     }
 
     if ($selectedPmInput.val().length <= 0) {
-        $selectedPmInput.val($pmFirst.data('identifier'));
+        $selectedPmInput.val($pmItem.first().data('identifier'));
     }
 
     $pmItem.on('click', function () {
         $pmItem.removeClass(PM_ACTIVE_CLASS);
         $(this).addClass(PM_ACTIVE_CLASS);
 
-        $('div.payment-method-requisites').find('div.form').hide();
-        $('#' + $(this).data('form')).show();
+        let $hideEl = $('div.payment-method-requisites').find('div.form');
+
+        $hideEl.hide();
+        $hideEl.find('input').attr({disabled: 'disabled'});
+
+        let $showEl = $('#' + $(this).data('form'));
+
+        $showEl.show();
+        $showEl.find('input').removeAttr('disabled');
+
         $amountContainer.html(getAmount($(this)));
         $selectedPmInput.val($(this).data('identifier'));
     });

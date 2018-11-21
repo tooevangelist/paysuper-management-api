@@ -36,8 +36,9 @@ const (
 	OrderFilterFieldProjectDateFrom = "project_date_from"
 	OrderFilterFieldProjectDateTo   = "project_date_to"
 
-	OrderPaymentCreateRequestFieldOrderId = "order_id"
-	OrderPaymentCreateRequestFieldEmail   = "email"
+	OrderPaymentCreateRequestFieldOrderId          = "order_id"
+	OrderPaymentCreateRequestFieldOPaymentMethodId = "payment_method_id"
+	OrderPaymentCreateRequestFieldEmail            = "email"
 )
 
 var OrderReservedWords = map[string]bool{

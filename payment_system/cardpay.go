@@ -8,6 +8,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
 	"github.com/ProtocolONE/p1pay.api/payment_system/validator"
 	"github.com/labstack/echo"
+	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -31,7 +32,7 @@ const (
 	cardPayActionCreatePayment = "create_payment"
 
 	cardPayDateFormat            = "2006-01-02T15:04:05Z"
-	cardPayPaymentMethodBankCard = "BANK_CARD"
+	cardPayPaymentMethodBankCard = "BANKCARD"
 	cardPayPaymentMethodWebMoney = "WEBMONEY"
 	cardPayPaymentMethodQiwi     = "QIWI"
 	cardPayPaymentMethodNeteller = "NETELLER"
@@ -280,9 +281,13 @@ func (cp *CardPay) getToken(pmKey string) *Token {
 func (cp *CardPay) getCardPayOrder() (*entity.CardPayOrder, error) {
 	var err error
 
+	if err != nil {
+		return nil, err
+	}
+
 	o := &entity.CardPayOrder{
 		Request: &entity.CardPayRequest{
-			Id:   cp.Order.Id.Hex(),
+			Id:   uuid.NewV4().String(),
 			Time: time.Now().UTC().Format(cardPayDateFormat),
 		},
 		MerchantOrder: &entity.CardPayMerchantOrder{
@@ -316,9 +321,7 @@ func (cp *CardPay) getCardPayOrder() (*entity.CardPayOrder, error) {
 			return nil, err
 		}
 		break
-	case cardPayPaymentMethodQiwi:
-	case cardPayPaymentMethodWebMoney:
-	case cardPayPaymentMethodNeteller:
+	case cardPayPaymentMethodQiwi, cardPayPaymentMethodWebMoney, cardPayPaymentMethodNeteller:
 		if o, err = cp.geEWalletCardPayOrder(o); err != nil {
 			return nil, err
 		}

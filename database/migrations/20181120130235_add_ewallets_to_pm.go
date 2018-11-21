@@ -97,7 +97,7 @@ func init() {
 			pm.Params = &model.PaymentMethodParams{
 				Handler: payment_system.PaymentSystemHandlerCardPay,
 				Terminal: "15985",
-				ExternalId: "BANK_CARD",
+				ExternalId: "BANKCARD",
 			}
 			pm.Icon = "/images/bank_card_logo.png"
 

@@ -9,11 +9,6 @@ import (
 
 const (
 	orderFormTemplateName = "order.html"
-
-	responseMessageRequiredFieldIdNotFound      = "required field \"id\" not found"
-	responseMessageRequiredFieldEmailNotFound      = "required field \"email\" not found"
-	responseMessageOrderWithSpecifiedIdNotFound = "order with specified identifier not found"
-	responseMessageOrderAlreadyComplete         = "order with specified identifier payed early"
 )
 
 type OrderApiV1 struct {
@@ -172,7 +167,7 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		http.StatusOK,
 		orderFormTemplateName,
 		map[string]interface{}{
-			"Order": o,
+			"Order":          o,
 			"PaymentMethods": projectPms,
 		},
 	)
@@ -277,35 +272,7 @@ func (oApiV1 *OrderApiV1) processPayment(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, responseMessageInvalidRequestData)
 	}
 
-	id, ok := data[model.OrderPaymentCreateRequestFieldOrderId]
-
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, responseMessageRequiredFieldIdNotFound)
-	}
-
-	email, ok := data[model.OrderPaymentCreateRequestFieldEmail]
-
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, responseMessageRequiredFieldEmailNotFound)
-	}
-
-	o := oApiV1.orderManager.FindById(id)
-
-	if o == nil {
-		return echo.NewHTTPError(http.StatusNotFound, responseMessageOrderWithSpecifiedIdNotFound)
-	}
-
-	if o.IsComplete() == true {
-		return echo.NewHTTPError(http.StatusAlreadyReported, responseMessageOrderAlreadyComplete)
-	}
-
-	delete(data, model.OrderFilterFieldId)
-	o.PaymentRequisites = data
-	o.PayerData.Email = &email
-
-	err := oApiV1.orderManager.ProcessCreatePayment(o, oApiV1.paymentSystemConfig)
-
-	if err != nil {
+	if err := oApiV1.orderManager.ProcessCreatePayment(data, oApiV1.paymentSystemConfig); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
