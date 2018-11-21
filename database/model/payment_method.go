@@ -20,6 +20,7 @@ type PaymentMethod struct {
 	MinPaymentAmount float64              `bson:"min_payment_amount" json:"min_payment_amount"`
 	MaxPaymentAmount float64              `bson:"max_payment_amount" json:"min_payment_amount"`
 	Params           *PaymentMethodParams `bson:"params" json:"params"`
+	Icon             string               `bson:"icon" json:"icon"`
 	IsActive         bool                 `bson:"is_active" json:"is_active"`
 	CreatedAt        time.Time            `bson:"created_at" json:"created_at"`
 	UpdatedAt        time.Time            `bson:"updated_at" json:"-"`

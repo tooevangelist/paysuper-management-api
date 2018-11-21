@@ -18,3 +18,10 @@ func (rep *Repository) FindAllPaymentMethods() ([]*model.PaymentMethod, error) {
 
 	return pms, err
 }
+
+func (rep *Repository) FindPaymentMethodsByIds(ids []bson.ObjectId) ([]*model.PaymentMethod, error) {
+	var pms []*model.PaymentMethod
+	err := rep.Collection.Find(bson.M{"_id": bson.M{"$in": ids}}).All(&pms)
+
+	return pms, err
+}

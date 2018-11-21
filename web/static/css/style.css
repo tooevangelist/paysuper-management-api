@@ -15,162 +15,187 @@ body {
     sans-serif;
 }
 
-.pp_order_form {
-    width: 360px;
-    height: 550px;
-    margin: 60px auto 0;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+/*******************************************************************/
+.container {
+    width: 560px;
     background-color: #fff;
-    box-shadow: 1px 2px 3px 0 rgba(0, 0, 0, 0.10);
 }
 
-.pp_order_form.no-margin {
-    margin: 0;
+.payment-methods {
+    margin-top: 20px;
+    padding: 0 10px;
+    display: flex;
+    justify-content: stretch;
+    flex-direction: row;
 }
 
-.pp_order_form .header {
-    height: 60px;
-    padding: 20px 30px 0;
-    border-bottom: 1px solid #E1E8EE;
+.payment-methods .item {
+    height: 84px;
+    padding: 5px;
+    margin: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #fbfaf9;
+    cursor: pointer;
+    flex: 1 1 0;
 }
 
-.pp_order_form .body {
-    height: 340px;
-    padding: 15px 30px 20px;
+.payment-methods .item.active,
+.payment-methods .item:hover {
+    background-color: #ffffff;
 }
 
-.title {
-    margin: 0;
-    color: #5e6977;
+.payment-methods .item.active {
+    box-shadow: inset 0 -5px #fc0;
+    cursor: default;
+}
+
+.payment-methods .item .logo {
+    width: 70%;
+    height: 70%;
+    margin: 0 auto;
+    background: none no-repeat transparent center center;;
+    background-size: contain;
+}
+
+.payment-methods .item .title {
+    text-align: center;
+    color: #000000;
+    font-size: 13px;
+    overflow: hidden;
+    padding: 4px;
+}
+
+.details {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.details .project-title {
     font-size: 18px;
+    font-weight: 400;
+    line-height: 25px;
+}
+.details .amount {
+    line-height: normal;
+    font-weight: 400;
+    font-size: 32px;
+}
+.details .order-info {
+    padding-top: 20px;
+}
+.details .order-info .order-info-container {
+    display: flex;
+    justify-content: stretch;
+    flex-direction: row;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 18px;
+}
+.order-info-container .title {
+    color: rgba(0, 0, 0, 0.4);
+    width: 60px;
+    margin-right: 20px;
+    font-size: 13px;
+}
+.order-info-container .data {
+    color: #000000;
 }
 
-.card_number,
-.cvv-input input,
-.month select,
+.payment-method-requisites {
+    padding: 20px 40px;
+    height: 236px;
+}
+
+.bank-card-from {
+    display: none;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 7px;
+    padding: 20px;
+    width: 410px;
+    margin: 0 auto;
+    height: 100%;
+}
+.bank-card-from.no-border {
+    border: none;
+}
+.bank-card-from .row {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+.bank-card-from .row.big {
+    height: 100%;
+    align-items: center;
+}
+.bank-card-from .row:last-child {
+    margin-bottom: 0;
+}
+.bank-card-from .expire,
+.bank-card-from .cvv {
+    display: flex;
+    flex-direction: row;
+}
+.bank-card-from .expire div {
+    display: flex;
+    margin-left: 5px;
+}
+.bank-card-from .expire div.delimiter {
+    align-items: center;
+    color: rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+}
+.bank-card-from .cvv {
+    flex-grow: 1;
+    justify-content: flex-end;
+}
+.button-container {
+    display: flex;
+    flex-direction: row;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+.button-container div {
+    display: flex;
+}
+.button-container .email {
+    flex-grow: 2;
+}
+.button-container .button {
+    flex-grow: 2;
+    justify-content: flex-end;
+}
+.proceed-btn {
+    border-radius: 6px;
+    padding: 0 15px;
+    font-size: 15px;
+    background-color: #ffdb4d;
+    border: 0;
+    cursor: pointer;
+    text-decoration: none;
+}
 .proceed-btn,
-.year select,
-.card_holder,
-.email {
-    height: 42px;
+.proceed-btn:active,
+.proceed-btn:focus {
+    outline: none;
 }
 
-.card_number,
-.month select,
-.year select,
-.card_holder,
-.email {
+input.input {
+    height: 38px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    color: #86939e;
+    opacity: .7;
     font-size: 14px;
     font-weight: 100;
     line-height: 14px;
+    padding: 0 15px;
 }
-
-.card_number,
-.cvv-details,
-.cvv-input input,
-.month select,
-.year select,
-.card_holder,
-.email {
-    color: #86939e;
-    opacity: .7;
-}
-
-.card_number,
-.card_holder,
-.email {
+input.input.big {
     width: 100%;
-    margin-bottom: 20px;
-    padding-left: 20px;
-    border: 2px solid #e1e8ee;
-    border-radius: 6px;
 }
-
-.month select,
-.year select {
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    width: 145px;
-    margin-bottom: 20px;
-    padding-left: 20px;
-    border: 2px solid #e1e8ee;
-    border-radius: 6px;
-    background: url('/images/caret.png') no-repeat;
-    background-position: 85% 50%;
+input.input.xs {
+    width: 75px;
 }
-
-.month select {
-    float: left;
-}
-
-.year select {
-    float: right;
-}
-
-.cvv-input input {
-    width: 145px;
-    float: left;
-    padding-left: 20px;
-    border: 2px solid #e1e8ee;
-    border-radius: 6px;
-    background: #fff;
-}
-
-.cvv-details {
-    float: right;
-    margin-bottom: 20px;
-    font-size: 12px;
-    font-weight: 300;
-    line-height: 16px;
-}
-
-.cvv-details p {
-    margin-top: 6px;
-}
-
-.proceed-btn {
-    cursor: pointer;
-    width: 100%;
-    border-color: transparent;
-    border-radius: 6px;
-    font-size: 16px;
-}
-
-.proceed-btn {
-    margin-bottom: 10px;
-    background: #7dc855;
-}
-
-.proceed-btn a {
-    text-decoration: none;
-    cursor: pointer;
-    color: #fff;
-}
-
-.order_details {
-    position: relative;
-    margin-bottom: 20px;
-}
-.order_details .item {
-    display: flex;
-}
-.order_details .item.title {
-    margin-bottom: 10px;
-    font-weight: bold;
-    color: #000000;
-}
-.order_details .item .item__label,
-.order_details .item .item__data {
-    font-size: 14px;
-}
-.order_details .item .item__label {
-    flex-basis: 35%;
-}
-.order_details .item .item__label label {
-    color: #999999;
-}
-.order_details .item .item__data {
-    flex-basis: 65%;
-    text-align: right;
+input.input.small {
+    width: 125px;
 }

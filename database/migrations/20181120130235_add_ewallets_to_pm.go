@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
+	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/xakep666/mongo-migrate"
@@ -35,6 +36,12 @@ func init() {
 					IsActive: true,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
+					Params: &model.PaymentMethodParams{
+						Handler: payment_system.PaymentSystemHandlerCardPay,
+						Terminal: "15993",
+						ExternalId: "QIWI",
+					},
+					Icon: "/images/qiwi_logo.png",
 				},
 				&model.PaymentMethod{
 					Id: bson.NewObjectId(),
@@ -47,6 +54,12 @@ func init() {
 					IsActive: true,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
+					Params: &model.PaymentMethodParams{
+						Handler: payment_system.PaymentSystemHandlerCardPay,
+						Terminal: "15989",
+						ExternalId: "WEBMONEY",
+					},
+					Icon: "/images/wm_logo.png",
 				},
 				&model.PaymentMethod{
 					Id: bson.NewObjectId(),
@@ -59,10 +72,36 @@ func init() {
 					IsActive: true,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
+					Params: &model.PaymentMethodParams{
+						Handler: payment_system.PaymentSystemHandlerCardPay,
+						Terminal: "15997",
+						ExternalId: "NETELLER",
+					},
+					Icon: "",
 				},
 			}
 
-			return db.C(manager.TablePaymentMethod).Insert(pms...)
+			err := db.C(manager.TablePaymentMethod).Insert(pms...)
+
+			if err != nil {
+				return err
+			}
+
+			var pm *model.PaymentMethod
+
+
+			if err := db.C(manager.TablePaymentMethod).Find(bson.M{"name": "Bank card"}).One(&pm); err != nil {
+				return err
+			}
+
+			pm.Params = &model.PaymentMethodParams{
+				Handler: payment_system.PaymentSystemHandlerCardPay,
+				Terminal: "15985",
+				ExternalId: "BANK_CARD",
+			}
+			pm.Icon = "/images/bank_card_logo.png"
+
+			return db.C(manager.TablePaymentMethod).UpdateId(pm.Id, pm)
 		},
 		func(db *mgo.Database) error {
 			var pms []*model.PaymentMethod

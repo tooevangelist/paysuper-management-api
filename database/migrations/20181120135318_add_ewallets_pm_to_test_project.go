@@ -20,7 +20,7 @@ func init() {
 
 			var pms []*model.PaymentMethod
 
-			err := db.C(manager.TablePaymentMethod).Find(bson.M{"name": bson.M{"$in": []string{"Bank card", "Qiwi", "WebMoney", "Neteller"}}}).All(&pms)
+			err := db.C(manager.TablePaymentMethod).Find(bson.M{"name": bson.M{"$in": []string{"Bank card", "Qiwi", "WebMoney"}}}).All(&pms)
 
 			if err != nil {
 				return err

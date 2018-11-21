@@ -14,14 +14,17 @@ const (
 	maxPaymentAmount float64 = 15000
 
 	projectErrorMerchantNotHaveProjects = "merchant not have projects"
-	projectErrorAccessDeniedToProject = "one or more projects in filter are not a projects of merchant"
+	projectErrorAccessDeniedToProject   = "one or more projects in filter are not a projects of merchant"
+	projectErrorNotFound                = "project with specified identifier not found"
+	projectErrorNotHasPaymentMethods    = "project not has connected payment methods"
 )
 
 type ProjectManager struct {
 	*Manager
 
-	merchantManager *MerchantManager
-	currencyManager *CurrencyManager
+	merchantManager       *MerchantManager
+	currencyManager       *CurrencyManager
+	paymentMethodsManager *PaymentMethodManager
 }
 
 func InitProjectManager(database dao.Database, logger *zap.SugaredLogger) *ProjectManager {
@@ -29,6 +32,7 @@ func InitProjectManager(database dao.Database, logger *zap.SugaredLogger) *Proje
 		Manager:         &Manager{Database: database, Logger: logger},
 		merchantManager: InitMerchantManager(database, logger),
 		currencyManager: InitCurrencyManager(database, logger),
+		paymentMethodsManager: InitPaymentMethodManager(database, logger),
 	}
 
 	return pm
@@ -277,4 +281,42 @@ func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) (map[bs
 	}
 
 	return fp, mProjects[0].Merchant, nil
+}
+
+func (pm *ProjectManager) GetProjectPaymentMethods(projectId bson.ObjectId) ([]*model.PaymentMethod, error) {
+	p := pm.FindProjectById(projectId.Hex())
+
+	if p == nil {
+		return nil, errors.New(projectErrorNotFound)
+	}
+
+	if len(p.PaymentMethods) <= 0 {
+		return nil, errors.New(projectErrorNotHasPaymentMethods)
+	}
+
+	var projectPaymentMethodsIds []bson.ObjectId
+
+	for _, pms := range p.PaymentMethods {
+		var conPaymentMethod *model.ProjectPaymentModes
+
+		for _, pm := range pms {
+			if conPaymentMethod == nil || conPaymentMethod.AddedAt.Before(pm.AddedAt) == true {
+				conPaymentMethod = pm
+			}
+		}
+
+		projectPaymentMethodsIds = append(projectPaymentMethodsIds, conPaymentMethod.Id)
+	}
+
+	if len(projectPaymentMethodsIds) <= 0 {
+		return nil, errors.New(projectErrorNotHasPaymentMethods)
+	}
+
+	projectPaymentMethods := pm.paymentMethodsManager.FindByIds(projectPaymentMethodsIds)
+
+	if projectPaymentMethods == nil || len(projectPaymentMethods) <= 0 {
+		return nil, errors.New(projectErrorNotHasPaymentMethods)
+	}
+
+	return projectPaymentMethods, nil
 }

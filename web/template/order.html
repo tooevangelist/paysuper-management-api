@@ -8,120 +8,59 @@
     <link rel="stylesheet" href="/css/style.css">
 
     <script type="text/javascript" src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="/js/payment_form.js"></script>
+
     <meta name="robots" content="noindex,follow" />
-    
-    <script type="text/javascript">
-        $(function() {
-            $(".card_number, #cvv").keyup(function () {
-                $(this).val($(this).val().replace(/\D/g,''));
-            });
-
-            $("#pp-order-form").submit(function (e) {
-                e.preventDefault();
-
-                var data = new FormData($(this)[0]);
-                var object = {};
-
-                data.forEach(function(value, key){
-                    object[key] = value;
-                });
-
-                $.ajax({
-                    url: '/api/v1/payment',
-                    type: 'post',
-                    data: JSON.stringify(object),
-                    success: function(data) {
-                        console.log(data);
-                    },
-                    error: function(xhr) {
-                        var error = JSON.parse(xhr['responseText']);
-                        console.log(error);
-                    },
-                    cache: false,
-                    contentType: 'application/json; charset=utf-8',
-                    processData: false,
-                    dataType: 'json'
-                });
-            });
-        });
-    </script>
 </head>
 
 <body>
-    <form id="pp-order-form" class="pp_order_form {{ if .Order.IsJsonRequest }} no-margin {{ end }}">
-        <div class="header">
-            <h4 class="title">Order detail</h4>
+    <div class="container">
+        <div class="details">
+            <div class="project-title">{{ .Order.ProjectData.Name }}</div>
+            <div class="amount">
+                {{ .Order.ProjectOutcomeAmountPrintable }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}
+            </div>
+
+            <div class="order-info">
+                <div class="order-info-container">
+                    <div class="title">Order #: </div>
+                    <div class="data">{{ .Order.OrderIdPrintable }}</div>
+                </div>
+                <div class="order-info-container">
+                    <div class="title">Account: </div>
+                    <div class="data">{{ .Order.ProjectAccount }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="payment-methods">
+        {{ range $i, $pm := .PaymentMethods }}
+            <div class="item {{ if eq $i 0 }} active {{ end }}" data-form="{{ $pm.GroupAlias }}">
+                <div class="logo" style="background-image: url('{{ $pm.Icon }}');"></div>
+                <div class="title">{{ $pm.Name }}</div>
+            </div>
+        {{ end }}
+        </div>
+
+        <form id="order-form">
             <input type="hidden" name="order_id" value="{{ .Order.OrderIdPrintable }}" />
-        </div>
 
-        <div class="body">
-            <div class="order_details">
-                <div class="item title">{{ .Order.ProjectData.Name }}</div>
-                <div class="item">
-                    <div class="item__label">
-                        <label>Amount</label>
-                    </div>
-                    <div class="item__data">
-                        {{ .Order.ProjectOutcomeAmountPrintable }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="item__label">
-                        <label>Order #</label>
-                    </div>
-                    <div class="item__data">{{ .Order.OrderIdPrintable }}</div>
-                </div>
-                <div class="item">
-                    <div class="item__label">
-                        <label>Payer Account</label>
-                    </div>
-                    <div class="item__data">{{ .Order.ProjectAccount }}</div>
-                </div>
+            <div class="payment-method-requisites">
+                {{ template "bank_card.html" }}
+                {{ template "qiwi.html" }}
+                {{ template "webmoney.html" }}
             </div>
 
-            <input type="text" class="card_number" name="pan" placeholder="Card Number">
-            <input type="text" class="card_holder" name="holder" placeholder="Card Holder">
-            <div class="date-field">
-                <div class="month">
-                    <select name="month">
-                        <option value="01">January</option>
-                        <option value="02">February</option>
-                        <option value="03">March</option>
-                        <option value="04">April</option>
-                        <option value="05">May</option>
-                        <option value="06">June</option>
-                        <option value="07">July</option>
-                        <option value="08">August</option>
-                        <option value="09">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
-                    </select>
+            <div class="button-container">
+                <div class="email">
+                    <input type="text" class="input big" name="email" placeholder="Enter your email" value="{{ if .Order.PayerData.Email }} {{ .Order.PayerData.Email }} {{ end }}" />
                 </div>
-                <div class="year">
-                    {{ $currentYear := Now.UTC.Year }}
-                    <select name="year">
-                        {{ range $i := For 0 9 }}
-                            {{ $val := Increment $currentYear $i }}
-                            <option value="{{ $val }}">{{ $val }}</option>
-                        {{ end }}
-                    </select>
+                <div class="button">
+                    <button type="submit" class="proceed-btn">Proceed</button>
                 </div>
             </div>
-            <div class="card-verification">
-                <div class="cvv-input">
-                    <input type="password" id="cvv" name="cvv" placeholder="CVV">
-                </div>
-                <div class="cvv-details">
-                    <p>3 or 4 digits usually found <br> on the signature strip</p>
-                </div>
-            </div>
-
-            <input type="text" class="email" name="email" placeholder="Email" value="{{ if .Order.PayerData.Email }} {{ .Order.PayerData.Email }} {{ end }}">
-
-            <button type="submit" class="proceed-btn"><a href="#">Proceed</a></button>
-        </div>
-    </form>
+        </form>
+    </div>
 </body>
 
 </html>

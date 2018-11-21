@@ -89,3 +89,13 @@ func (pmm *PaymentMethodManager) FindAllWithPaymentSystemAsMap() (map[bson.Objec
 
 	return pmsMap, nil
 }
+
+func (pmm *PaymentMethodManager) FindByIds(ids []bson.ObjectId) []*model.PaymentMethod {
+	pms, err := pmm.Database.Repository(TablePaymentMethod).FindPaymentMethodsByIds(ids)
+
+	if err != nil {
+		pmm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TablePaymentMethod, err)
+	}
+
+	return pms
+}

@@ -168,11 +168,18 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Order not found")
 	}
 
+	projectPms, err := oApiV1.projectManager.GetProjectPaymentMethods(o.ProjectId)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
 	return ctx.Render(
 		http.StatusOK,
 		orderFormTemplateName,
 		map[string]interface{}{
 			"Order": o,
+			"PaymentMethods": projectPms,
 		},
 	)
 }

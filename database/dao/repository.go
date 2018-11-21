@@ -30,6 +30,7 @@ type Repository interface {
 
 	FindPaymentMethodById(bson.ObjectId) (*model.PaymentMethod, error)
 	FindAllPaymentMethods() ([]*model.PaymentMethod, error)
+	FindPaymentMethodsByIds([]bson.ObjectId) ([]*model.PaymentMethod, error)
 
 	FindOrderByProjectOrderId(string) (*model.Order, error)
 	FindOrderById(bson.ObjectId) (*model.Order, error)
