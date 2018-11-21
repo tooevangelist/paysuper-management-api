@@ -190,7 +190,6 @@ type Order struct {
 	PaymentRequisites map[string]string  `bson:"payment_requisites" json:"-"`
 
 	PaymentMethodsPreparedFormData map[string]*PaymentMethodsPreparedFormData `bson:"-" json:"-"`
-	OrderIdPrintable               string                                     `bson:"-" json:"-"`
 	ProjectData                    *Project                                   `bson:"-" json:"-"`
 }
 

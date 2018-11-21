@@ -10,66 +10,72 @@
     <script type="text/javascript" src="//code.jquery.com/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="/js/payment_form.js"></script>
 
-    <meta name="robots" content="noindex,follow" />
+    <meta name="robots" content="noindex,follow"/>
 </head>
 
 <body>
-    <div class="container">
-        <div class="details">
-            <div class="project-title">{{ .Order.ProjectData.Name }}</div>
-            <div class="amount">
-                {{ if .Order.PaymentMethod }}
-                    {{ .Order.PaymentMethodOutcomeAmount }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}
-                {{ end }}
-            </div>
+{{ $printableOrderId := BsonObjectIdToString .Order.Id }}
 
-            <div class="order-info">
-                <div class="order-info-container">
-                    <div class="title">Order #: </div>
-                    <div class="data">{{ .Order.OrderIdPrintable }}</div>
-                </div>
-                <div class="order-info-container">
-                    <div class="title">Account: </div>
-                    <div class="data">{{ .Order.ProjectAccount }}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="payment-methods">
-            {{ if not .Order.PaymentMethod }}
-                {{ range $i, $pm := .PaymentMethods }}
-                    {{ $prepData := index $.Order.PaymentMethodsPreparedFormData $pm.GroupAlias }}
-
-                    <div class="item {{ if eq $i 0 }} active {{ end }}" data-form="{{ $pm.GroupAlias }}"
-                         data-amount="{{ $prepData.Amount }}" data-currency="{{ $prepData.Currency.CodeA3 }}">
-                        <div class="logo" style="background-image: url('{{ $pm.Icon }}');"></div>
-                        <div class="title">{{ $pm.Name }}</div>
-                    </div>
-                {{ end }}
-            {{ else }}
-                <div class="item hidden" data-form="{{ .Order.PaymentMethod.GroupAlias }}"></div>
+<div class="container">
+    <div class="details">
+        <div class="project-title">{{ .Order.ProjectData.Name }}</div>
+        <div class="amount">
+            {{ if .Order.PaymentMethod }}
+                {{ .Order.PaymentMethodOutcomeAmount }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}
             {{ end }}
         </div>
 
-        <form id="order-form">
-            <input type="hidden" name="order_id" value="{{ .Order.OrderIdPrintable }}" />
-
-            <div class="payment-method-requisites">
-                {{ template "bank_card.html" }}
-                {{ template "qiwi.html" }}
-                {{ template "webmoney.html" }}
+        <div class="order-info">
+            <div class="order-info-container">
+                <div class="title">Order #:</div>
+                <div class="data">{{ $printableOrderId }}</div>
             </div>
-
-            <div class="button-container">
-                <div class="email">
-                    <input type="text" class="input big" name="email" placeholder="Enter your email" value="{{ if .Order.PayerData.Email }} {{ .Order.PayerData.Email }} {{ end }}" />
-                </div>
-                <div class="button">
-                    <button type="submit" class="proceed-btn">Proceed</button>
-                </div>
+            <div class="order-info-container">
+                <div class="title">Account:</div>
+                <div class="data">{{ .Order.ProjectAccount }}</div>
             </div>
-        </form>
+        </div>
     </div>
+
+    <div class="payment-methods">
+        {{ if not .Order.PaymentMethod }}
+            {{ range $i, $pm := .PaymentMethods }}
+                {{ $prepData := index $.Order.PaymentMethodsPreparedFormData $pm.GroupAlias }}
+
+                <div class="item {{ if eq $i 0 }} active {{ end }}" data-form="{{ $pm.GroupAlias }}"
+                     data-amount="{{ $prepData.Amount }}" data-currency="{{ $prepData.Currency.CodeA3 }}"
+                     data-identifier="{{ BsonObjectIdToString $pm.Id }}">
+                    <div class="logo" style="background-image: url('{{ $pm.Icon }}');"></div>
+                    <div class="title">{{ $pm.Name }}</div>
+                </div>
+            {{ end }}
+        {{ else }}
+            <div class="item hidden" data-form="{{ .Order.PaymentMethod.GroupAlias }}"></div>
+        {{ end }}
+    </div>
+
+    <form id="order-form">
+        <input type="hidden" name="order_id" value="{{ $printableOrderId }}"/>
+        <input type="hidden" name="payment_method_id"
+               value="{{ if .Order.PaymentMethod }} {{ BsonObjectIdToString .Order.PaymentMethod.Id }} {{ end }}"/>
+
+        <div class="payment-method-requisites">
+            {{ template "bank_card.html" }}
+            {{ template "qiwi.html" }}
+            {{ template "webmoney.html" }}
+        </div>
+
+        <div class="button-container">
+            <div class="email">
+                <input type="text" class="input big" name="email" placeholder="Enter your email"
+                       value="{{ if .Order.PayerData.Email }} {{ .Order.PayerData.Email }} {{ end }}"/>
+            </div>
+            <div class="button">
+                <button type="submit" class="proceed-btn">Proceed</button>
+            </div>
+        </div>
+    </form>
+</div>
 </body>
 
 </html>

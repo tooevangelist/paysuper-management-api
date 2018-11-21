@@ -7,6 +7,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/oschwald/geoip2-golang"
@@ -42,6 +43,9 @@ var funcMap = template.FuncMap{
 	"Now": time.Now,
 	"Increment": func(i int, add int) int {
 		return i + add
+	},
+	"BsonObjectIdToString": func(objectId bson.ObjectId) string {
+		return objectId.Hex()
 	},
 }
 

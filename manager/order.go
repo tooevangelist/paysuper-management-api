@@ -239,8 +239,6 @@ func (om *OrderManager) FindById(id string) *model.Order {
 		if p := om.projectManager.FindProjectById(o.ProjectId.Hex()); p != nil {
 			o.ProjectData = p
 		}
-
-		o.OrderIdPrintable = o.Id.Hex()
 	}
 
 	return o

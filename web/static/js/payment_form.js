@@ -8,9 +8,17 @@ $(function() {
     let $pmItem = $('div.payment-methods div.item');
     let $amountContainer = $('div.details div.amount');
     let $pmFirst = $pmItem.first();
+    let $selectedPmInput = $('form#order-form input[name=payment_method_id]');
 
     $('#' + $pmFirst.data('form')).show();
-    $amountContainer.html(getAmount($pmFirst));
+
+    if ($amountContainer.html().length <= 0) {
+        $amountContainer.html(getAmount($pmFirst));
+    }
+
+    if ($selectedPmInput.val().length <= 0) {
+        $selectedPmInput.val($pmFirst.data('identifier'));
+    }
 
     $pmItem.on('click', function () {
         $pmItem.removeClass(PM_ACTIVE_CLASS);
@@ -19,6 +27,7 @@ $(function() {
         $('div.payment-method-requisites').find('div.form').hide();
         $('#' + $(this).data('form')).show();
         $amountContainer.html(getAmount($(this)));
+        $selectedPmInput.val($(this).data('identifier'));
     });
 
     $('input.number').on('keyup', function () {
