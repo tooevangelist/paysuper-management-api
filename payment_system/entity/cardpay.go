@@ -1,5 +1,15 @@
 package entity
 
+const (
+	CardPayPaymentResponseStatusApproved           = "APPROVED"
+	CardPayPaymentResponseStatusDeclined           = "DECLINED"
+	CardPayPaymentResponseStatusPending            = "PENDING"
+	CardPayPaymentResponseStatusVoided             = "VOIDED"
+	CardPayPaymentResponseStatusRefunded           = "REFUNDED"
+	CardPayPaymentResponseStatusChargeBack         = "CHARGEBACK"
+	CardPayPaymentResponseStatusChargeBackResolved = "CHARGEBACK RESOLVED"
+)
+
 type CardPayBankCardAccount struct {
 	Pan        string `json:"pan"`
 	HolderName string `json:"holder"`
@@ -76,4 +86,44 @@ type CardPayOrder struct {
 
 type CardPayOrderResponse struct {
 	RedirectUrl string `json:"redirect_url"`
+}
+
+type CardPayPaymentNotificationWebHookRequest struct {
+	MerchantOrder         *CardPayMerchantOrder                 `json:"merchant_order"`
+	PaymentMethod         string                                `json:"payment_method"`
+	CallbackTime          string                                `json:"callback_time"`
+	CardAccount           *CardPayBankCardAccountResponse       `json:"card_account,omitempty"`
+	CryptoCurrencyAccount *CardPayCryptoCurrencyAccountResponse `json:"cryptocurrency_account,omitempty"`
+	Customer              *CardPayCustomer                      `json:"customer"`
+	EWalletAccount        *CardPayEWalletAccount                `json:"ewallet_account,omitempty"`
+	PaymentData           *CardPayPaymentDataResponse           `json:"payment_data"`
+}
+
+type CardPayCryptoCurrencyAccountResponse struct {
+	CryptoAddress       string  `json:"crypto_address"`
+	CryptoTransactionId string  `json:"crypto_transaction_id"`
+	PrcAmount           float64 `json:"prc_amount"`
+	PrcCurrency         string  `json:"prc_currency"`
+}
+
+type CardPayBankCardAccountResponse struct {
+	Holder             string `json:"holder"`
+	IssuingCountryCode string `json:"issuing_country_code"`
+	MaskedPan          string `json:"masked_pan"`
+	Token              string `json:"token"`
+}
+
+type CardPayPaymentDataResponse struct {
+	Id            string  `json:"id"`
+	Amount        float64 `json:"amount"`
+	AuthCode      string  `json:"auth_code,omitempty"`
+	Created       string  `json:"created"`
+	Currency      string  `json:"currency"`
+	DeclineCode   string  `json:"decline_code,omitempty"`
+	DeclineReason string  `json:"decline_reason,omitempty"`
+	Description   string  `json:"description"`
+	Is3d          bool    `json:"is_3d,omitempty"`
+	Note          string  `json:"note"`
+	Rrn           string  `json:"rrn,omitempty"`
+	Status        string  `json:"status"`
 }

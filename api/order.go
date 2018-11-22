@@ -191,17 +191,17 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 	id := ctx.Param("id")
 
 	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, responseMessageInvalidRequestData)
+		return echo.NewHTTPError(http.StatusBadRequest, ResponseMessageInvalidRequestData)
 	}
 
 	o := oApiV1.orderManager.FindById(id)
 
 	if o == nil {
-		return echo.NewHTTPError(http.StatusNotFound, responseMessageNotFound)
+		return echo.NewHTTPError(http.StatusNotFound, ResponseMessageNotFound)
 	}
 
 	if o.ProjectData.Merchant.ExternalId != oApiV1.Merchant.Identifier {
-		return echo.NewHTTPError(http.StatusForbidden, responseMessageAccessDenied)
+		return echo.NewHTTPError(http.StatusForbidden, ResponseMessageAccessDenied)
 	}
 
 	return ctx.JSON(http.StatusOK, o)
@@ -260,7 +260,7 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 	}
 
 	if pOrders.Items == nil || len(pOrders.Items) <= 0 {
-		return echo.NewHTTPError(http.StatusNotFound, responseMessageNotFound)
+		return echo.NewHTTPError(http.StatusNotFound, ResponseMessageNotFound)
 	}
 
 	return ctx.JSON(http.StatusOK, pOrders)
@@ -270,7 +270,7 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 	data := make(map[string]string)
 
 	if err := ctx.Bind(&data); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": responseMessageInvalidRequestData})
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": ResponseMessageInvalidRequestData})
 	}
 
 	resp := oApiV1.orderManager.ProcessCreatePayment(data, oApiV1.paymentSystemConfig)

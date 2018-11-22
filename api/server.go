@@ -22,9 +22,11 @@ import (
 
 const (
 	errorMessage                      = "Field validation for '%s' failed on the '%s' tag"
-	responseMessageInvalidRequestData = "Invalid request data"
-	responseMessageAccessDenied       = "Access denied"
-	responseMessageNotFound           = "Not found"
+	ResponseMessageInvalidRequestData = "Invalid request data"
+	ResponseMessageAccessDenied       = "Access denied"
+	ResponseMessageNotFound           = "Not found"
+
+	apiWebHookGroupPath = "/webhook"
 )
 
 var funcMap = template.FuncMap{
@@ -83,6 +85,7 @@ type Api struct {
 	accessRouteGroup    *echo.Group
 	geoDbReader         *geoip2.Reader
 	paymentSystemConfig map[string]interface{}
+	WebHookGroup        *echo.Group
 
 	Merchant
 	GetParams
@@ -114,6 +117,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		SigningMethod: p.Config.Algorithm,
 	}))
 	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
+
+	api.WebHookGroup = api.Http.Group(apiWebHookGroupPath)
 
 	api.Http.Use(api.LimitOffsetMiddleware)
 	api.Http.Use(middleware.Logger())
