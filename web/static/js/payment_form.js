@@ -67,7 +67,7 @@ $(function() {
             cache: false,
             async: false,
             success: function(data) {
-                if (!data.hasOwnProperty('redirect_url')) {
+                if (data.hasOwnProperty('redirect_url')) {
                     $sForm.attr({action: data['redirect_url']}).submit();
                     return;
                 }
