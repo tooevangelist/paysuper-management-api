@@ -10,6 +10,16 @@ const (
 	CardPayPaymentResponseStatusChargeBackResolved = "CHARGEBACK RESOLVED"
 )
 
+var CardPayPaymentResponseStatusDescription = map[string]string{
+	CardPayPaymentResponseStatusApproved:           "Transaction successfully completed",
+	CardPayPaymentResponseStatusDeclined:           "Transaction denied",
+	CardPayPaymentResponseStatusPending:            "Transaction successfully authorized, but needs some time to be verified",
+	CardPayPaymentResponseStatusVoided:             "Transaction was voided",
+	CardPayPaymentResponseStatusRefunded:           "Transaction was refunded",
+	CardPayPaymentResponseStatusChargeBack:         "Customer's chargeback claim was received",
+	CardPayPaymentResponseStatusChargeBackResolved: "Customer's claim was rejected, same as APPROVED",
+}
+
 type CardPayBankCardAccount struct {
 	Pan        string `json:"pan"`
 	HolderName string `json:"holder"`
@@ -56,8 +66,8 @@ type CardPayAddress struct {
 }
 
 type CardPayMerchantOrder struct {
-	Id              string          `json:"id"`
-	Description     string          `json:"description"`
+	Id              string          `json:"id" validate:"required,hexadecimal"`
+	Description     string          `json:"description" validate:"required"`
 	Items           []*CardPayItem  `json:"items,omitempty"`
 	ShippingAddress *CardPayAddress `json:"shipping_address,omitempty"`
 }
@@ -89,41 +99,41 @@ type CardPayOrderResponse struct {
 }
 
 type CardPayPaymentNotificationWebHookRequest struct {
-	MerchantOrder         *CardPayMerchantOrder                 `json:"merchant_order"`
-	PaymentMethod         string                                `json:"payment_method"`
-	CallbackTime          string                                `json:"callback_time"`
-	CardAccount           *CardPayBankCardAccountResponse       `json:"card_account,omitempty"`
-	CryptoCurrencyAccount *CardPayCryptoCurrencyAccountResponse `json:"cryptocurrency_account,omitempty"`
-	Customer              *CardPayCustomer                      `json:"customer"`
-	EWalletAccount        *CardPayEWalletAccount                `json:"ewallet_account,omitempty"`
-	PaymentData           *CardPayPaymentDataResponse           `json:"payment_data"`
+	MerchantOrder         *CardPayMerchantOrder                 `json:"merchant_order" validate:"required"`
+	PaymentMethod         string                                `json:"payment_method" validate:"required"`
+	CallbackTime          string                                `json:"callback_time" validate:"required"`
+	CardAccount           *CardPayBankCardAccountResponse       `json:"card_account,omitempty" validate:"omitempty"`
+	CryptoCurrencyAccount *CardPayCryptoCurrencyAccountResponse `json:"cryptocurrency_account,omitempty" validate:"omitempty"`
+	Customer              *CardPayCustomer                      `json:"customer" validate:"required"`
+	EWalletAccount        *CardPayEWalletAccount                `json:"ewallet_account,omitempty" validate:"omitempty"`
+	PaymentData           *CardPayPaymentDataResponse           `json:"payment_data" validate:"required"`
 }
 
 type CardPayCryptoCurrencyAccountResponse struct {
-	CryptoAddress       string  `json:"crypto_address"`
-	CryptoTransactionId string  `json:"crypto_transaction_id"`
+	CryptoAddress       string  `json:"crypto_address" validate:"required,btc_addr"`
+	CryptoTransactionId string  `json:"crypto_transaction_id" validate:"required"`
 	PrcAmount           float64 `json:"prc_amount"`
 	PrcCurrency         string  `json:"prc_currency"`
 }
 
 type CardPayBankCardAccountResponse struct {
-	Holder             string `json:"holder"`
-	IssuingCountryCode string `json:"issuing_country_code"`
-	MaskedPan          string `json:"masked_pan"`
-	Token              string `json:"token"`
+	Holder             string `json:"holder" validate:"required"`
+	IssuingCountryCode string `json:"issuing_country_code" validate:"required"`
+	MaskedPan          string `json:"masked_pan" validate:"required"`
+	Token              string `json:"token" validate:"required"`
 }
 
 type CardPayPaymentDataResponse struct {
-	Id            string  `json:"id"`
-	Amount        float64 `json:"amount"`
+	Id            string  `json:"id" validate:"required"`
+	Amount        float64 `json:"amount" validate:"required,numeric"`
 	AuthCode      string  `json:"auth_code,omitempty"`
-	Created       string  `json:"created"`
-	Currency      string  `json:"currency"`
+	Created       string  `json:"created" validate:"required"`
+	Currency      string  `json:"currency" validate:"required,alpha"`
 	DeclineCode   string  `json:"decline_code,omitempty"`
 	DeclineReason string  `json:"decline_reason,omitempty"`
-	Description   string  `json:"description"`
+	Description   string  `json:"description" validate:"required"`
 	Is3d          bool    `json:"is_3d,omitempty"`
 	Note          string  `json:"note"`
 	Rrn           string  `json:"rrn,omitempty"`
-	Status        string  `json:"status"`
+	Status        string  `json:"status" validate:"required,alpha"`
 }

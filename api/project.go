@@ -16,8 +16,8 @@ type ProjectApiV1 struct {
 func (api *Api) InitProjectRoutes() *Api {
 	pApiV1 := ProjectApiV1{
 		Api:             api,
-		projectManager: manager.InitProjectManager(api.database, api.logger),
-		merchantManager: manager.InitMerchantManager(api.database, api.logger),
+		projectManager: manager.InitProjectManager(api.Database, api.Logger),
+		merchantManager: manager.InitMerchantManager(api.Database, api.Logger),
 	}
 
 	api.accessRouteGroup.GET("/project", pApiV1.getAll)
@@ -85,7 +85,7 @@ func (pApiV1 *ProjectApiV1) create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
 
-	if err := pApiV1.validate.Struct(ps); err != nil {
+	if err := pApiV1.Validate.Struct(ps); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, pApiV1.getFirstValidationError(err))
 	}
 
@@ -143,7 +143,7 @@ func (pApiV1 *ProjectApiV1) update(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	if err := pApiV1.validate.Struct(ps); err != nil {
+	if err := pApiV1.Validate.Struct(ps); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, pApiV1.getFirstValidationError(err))
 	}
 

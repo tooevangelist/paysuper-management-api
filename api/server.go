@@ -79,12 +79,12 @@ type Order struct {
 type Api struct {
 	Http                *echo.Echo
 	config              *config.Config
-	database            dao.Database
-	logger              *zap.SugaredLogger
-	validate            *validator.Validate
+	Database            dao.Database
+	Logger              *zap.SugaredLogger
+	Validate            *validator.Validate
 	accessRouteGroup    *echo.Group
 	geoDbReader         *geoip2.Reader
-	paymentSystemConfig map[string]interface{}
+	PaymentSystemConfig map[string]interface{}
 	WebHookGroup        *echo.Group
 
 	Merchant
@@ -95,11 +95,11 @@ type Api struct {
 func NewServer(p *ServerInitParams) (*Api, error) {
 	api := &Api{
 		Http:                echo.New(),
-		database:            p.Database,
-		logger:              p.Logger,
-		validate:            validator.New(),
+		Database:            p.Database,
+		Logger:              p.Logger,
+		Validate:            validator.New(),
 		geoDbReader:         p.GeoDbReader,
-		paymentSystemConfig: p.PaymentSystemConfig,
+		PaymentSystemConfig: p.PaymentSystemConfig,
 	}
 
 	renderer := &Template{
@@ -108,8 +108,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.Http.Renderer = renderer
 	api.Http.Static("/", "web/static")
 
-	api.validate.RegisterStructValidation(ProjectStructValidator, model.ProjectScalar{})
-	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
+	api.Validate.RegisterStructValidation(ProjectStructValidator, model.ProjectScalar{})
+	api.Validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{

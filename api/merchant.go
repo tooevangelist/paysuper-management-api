@@ -15,7 +15,7 @@ type MerchantApiV1 struct {
 func (api *Api) InitMerchantRoutes() *Api {
 	mApiV1 := MerchantApiV1{
 		Api:             api,
-		merchantManager: manager.InitMerchantManager(api.database, api.logger),
+		merchantManager: manager.InitMerchantManager(api.Database, api.Logger),
 	}
 
 	api.accessRouteGroup.GET("/merchant", mApiV1.get)
@@ -66,7 +66,7 @@ func (mApiV1 *MerchantApiV1) create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request param: "+err.Error())
 	}
 
-	err = mApiV1.validate.Struct(ms)
+	err = mApiV1.Validate.Struct(ms)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, mApiV1.getFirstValidationError(err))
@@ -114,7 +114,7 @@ func (mApiV1 *MerchantApiV1) update(ctx echo.Context) error {
 
 	ms.Id = mApiV1.Merchant.Identifier
 
-	err = mApiV1.validate.Struct(ms)
+	err = mApiV1.Validate.Struct(ms)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, mApiV1.getFirstValidationError(err))

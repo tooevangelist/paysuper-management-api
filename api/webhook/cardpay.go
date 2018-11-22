@@ -12,10 +12,13 @@ const (
 )
 
 type CardPayWebHook struct {
+	api *api.Api
 }
 
 func (wh *WebHook) InitCardPayWebHookRoutes() *WebHook {
-	cpWebHook := &CardPayWebHook{}
+	cpWebHook := &CardPayWebHook{
+		api: wh.Api,
+	}
 
 	wh.Api.WebHookGroup.POST(cardPayWebHookPaymentNotifyPath, cpWebHook.paymentNotify)
 
@@ -27,5 +30,9 @@ func (cpWebHook *CardPayWebHook) paymentNotify(ctx echo.Context) error {
 
 	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, api.ResponseMessageInvalidRequestData)
+	}
+
+	if err := cpWebHook.api.validate.Struct(order); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.getFirstValidationError(err))
 	}
 }

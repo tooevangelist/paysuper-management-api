@@ -15,7 +15,7 @@ type CountryApiV1 struct {
 func (api *Api) InitCountryRoutes() *Api {
 	cApiV1 := CountryApiV1{
 		Api:            api,
-		countryManager: manager.InitCountryManager(api.database, api.logger),
+		countryManager: manager.InitCountryManager(api.Database, api.Logger),
 	}
 
 	api.Http.GET("/api/v1/country", cApiV1.get)

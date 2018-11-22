@@ -15,7 +15,7 @@ type CurrencyApiV1 struct {
 func (api *Api) InitCurrencyRoutes() *Api {
 	cApiV1 := CurrencyApiV1{
 		Api: api,
-		currencyManager: manager.InitCurrencyManager(api.database, api.logger),
+		currencyManager: manager.InitCurrencyManager(api.Database, api.Logger),
 	}
 
 	api.Http.GET("/api/v1/currency", cApiV1.get)

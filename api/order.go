@@ -47,8 +47,8 @@ type OrderApiV1 struct {
 func (api *Api) InitOrderV1Routes() *Api {
 	oApiV1 := OrderApiV1{
 		Api:            api,
-		orderManager:   manager.InitOrderManager(api.database, api.logger, api.geoDbReader),
-		projectManager: manager.InitProjectManager(api.database, api.logger),
+		orderManager:   manager.InitOrderManager(api.Database, api.Logger, api.geoDbReader),
+		projectManager: manager.InitProjectManager(api.Database, api.Logger),
 	}
 
 	api.Http.GET("/order/:id", oApiV1.getOrderForm)
@@ -100,7 +100,7 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Request data invalid")
 	}
 
-	if err := oApiV1.validate.Struct(order); err != nil {
+	if err := oApiV1.Validate.Struct(order); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.getFirstValidationError(err))
 	}
 
@@ -134,7 +134,7 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
 
-	if err := oApiV1.validate.Struct(order); err != nil {
+	if err := oApiV1.Validate.Struct(order); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.getFirstValidationError(err))
 	}
 
@@ -273,7 +273,7 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": ResponseMessageInvalidRequestData})
 	}
 
-	resp := oApiV1.orderManager.ProcessCreatePayment(data, oApiV1.paymentSystemConfig)
+	resp := oApiV1.orderManager.ProcessCreatePayment(data, oApiV1.PaymentSystemConfig)
 
 	var httpStatus int
 
