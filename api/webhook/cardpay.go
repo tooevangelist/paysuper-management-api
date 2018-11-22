@@ -32,7 +32,7 @@ func (cpWebHook *CardPayWebHook) paymentNotify(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, api.ResponseMessageInvalidRequestData)
 	}
 
-	if err := cpWebHook.api.validate.Struct(order); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.getFirstValidationError(err))
+	if err := cpWebHook.api.Validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, cpWebHook.api.getFirstValidationError(err))
 	}
 }

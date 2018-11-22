@@ -145,7 +145,7 @@ func (api *Api) Start() error {
 	return api.Http.Start(":3001")
 }
 
-func (api *Api) getFirstValidationError(err error) string {
+func (api *Api) GetFirstValidationError(err error) string {
 	vErr := err.(validator.ValidationErrors)[0]
 
 	return fmt.Sprintf(errorMessage, vErr.Field(), vErr.Tag())

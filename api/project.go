@@ -86,7 +86,7 @@ func (pApiV1 *ProjectApiV1) create(ctx echo.Context) error {
 	}
 
 	if err := pApiV1.Validate.Struct(ps); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, pApiV1.getFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, pApiV1.GetFirstValidationError(err))
 	}
 
 	ps.Merchant = pApiV1.merchantManager.FindById(pApiV1.Merchant.Identifier)
@@ -144,7 +144,7 @@ func (pApiV1 *ProjectApiV1) update(ctx echo.Context) error {
 	}
 
 	if err := pApiV1.Validate.Struct(ps); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, pApiV1.getFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, pApiV1.GetFirstValidationError(err))
 	}
 
 	pf := pApiV1.projectManager.FindProjectsByMerchantIdAndName(p.Merchant.Id, ps.Name)

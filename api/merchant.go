@@ -69,7 +69,7 @@ func (mApiV1 *MerchantApiV1) create(ctx echo.Context) error {
 	err = mApiV1.Validate.Struct(ms)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, mApiV1.getFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, mApiV1.GetFirstValidationError(err))
 	}
 
 	if ms.Email == nil {
@@ -117,7 +117,7 @@ func (mApiV1 *MerchantApiV1) update(ctx echo.Context) error {
 	err = mApiV1.Validate.Struct(ms)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, mApiV1.getFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, mApiV1.GetFirstValidationError(err))
 	}
 
 	m := mApiV1.merchantManager.FindById(ms.Id)

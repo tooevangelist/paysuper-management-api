@@ -101,7 +101,7 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 	}
 
 	if err := oApiV1.Validate.Struct(order); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.getFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.GetFirstValidationError(err))
 	}
 
 	nOrder, err := oApiV1.orderManager.Process(order)
@@ -135,7 +135,7 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 	}
 
 	if err := oApiV1.Validate.Struct(order); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.getFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.GetFirstValidationError(err))
 	}
 
 	nOrder, err := oApiV1.orderManager.Process(order)
