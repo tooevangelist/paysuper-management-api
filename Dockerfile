@@ -7,7 +7,7 @@ WORKDIR /application
 ENV GO111MODULE=on
 ENV MAXMIND_GEOIP_DB_PATH=/application/etc/maxmind/GeoLite2-City.mmdb
 ENV PSP_ACCOUNTING_CURRENCY=EUR
-ENV PATH_TO_PS_CONFIG=/application/config/parameters.yml
+ENV PATH_TO_PS_CONFIG=/application/config/parameters/parameters.yml
 
 COPY go.mod go.sum ./
 RUN go mod download
