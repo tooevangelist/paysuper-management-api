@@ -185,21 +185,21 @@ func (cp *CardPay) refresh(pmKey string) error {
 	return nil
 }
 
-func (cp *CardPay) CreatePayment() error {
+func (cp *CardPay) CreatePayment() *CreatePaymentResponse {
 	if err := cp.auth(cp.Order.PaymentMethod.Params.ExternalId); err != nil {
-		return err
+		return GetCreatePaymentResponse(CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
 	qUrl, err := cp.getUrl(cardPayActionCreatePayment)
 
 	if err != nil {
-		return err
+		return GetCreatePaymentResponse(CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
 	cpo, err := cp.getCardPayOrder()
 
 	if err != nil {
-		return err
+		return GetCreatePaymentResponse(CreatePaymentStatusErrorValidation, err.Error(), "")
 	}
 
 	b, _ := json.Marshal(cpo)
@@ -216,10 +216,20 @@ func (cp *CardPay) CreatePayment() error {
 	resp, err := client.Do(req)
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(paymentSystemErrorCreateRequestFailed)
+		return GetCreatePaymentResponse(CreatePaymentStatusErrorPaymentSystem, paymentSystemErrorCreateRequestFailed, "")
 	}
 
-	return nil
+	if b, err = ioutil.ReadAll(resp.Body); err != nil {
+		return GetCreatePaymentResponse(CreatePaymentStatusErrorPaymentSystem, err.Error(), "")
+	}
+
+	var cpResponse *entity.CardPayOrderResponse
+
+	if err = json.Unmarshal(b, &cpResponse); err != nil {
+		return GetCreatePaymentResponse(CreatePaymentStatusErrorPaymentSystem, err.Error(), "")
+	}
+
+	return GetCreatePaymentResponse(CreatePaymentStatusOK, "", cpResponse.RedirectUrl)
 }
 
 func (cp *CardPay) ProcessPayment() error {
@@ -282,10 +292,6 @@ func (cp *CardPay) getToken(pmKey string) *Token {
 
 func (cp *CardPay) getCardPayOrder() (*entity.CardPayOrder, error) {
 	var err error
-
-	if err != nil {
-		return nil, err
-	}
 
 	o := &entity.CardPayOrder{
 		Request: &entity.CardPayRequest{

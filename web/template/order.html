@@ -57,7 +57,7 @@
     <form id="order-form">
         <input type="hidden" name="order_id" value="{{ $printableOrderId }}"/>
         <input type="hidden" name="payment_method_id"
-               value="{{ if .Order.PaymentMethod }} {{ BsonObjectIdToString .Order.PaymentMethod.Id }} {{ end }}"/>
+               value="{{ if .Order.PaymentMethod }} {{- BsonObjectIdToString .Order.PaymentMethod.Id -}} {{ end }}"/>
 
         <div class="payment-method-requisites">
             {{ template "bank_card.html" }}
@@ -70,13 +70,15 @@
         <div class="button-container">
             <div class="email">
                 <input type="text" class="input big" name="email" placeholder="Enter your email"
-                       value="{{ if .Order.PayerData.Email }} {{ .Order.PayerData.Email }} {{ end }}"/>
+                       value="{{ if .Order.PayerData.Email }} {{- .Order.PayerData.Email -}} {{ end }}"/>
             </div>
             <div class="button">
                 <button type="submit" class="proceed-btn">Proceed</button>
             </div>
         </div>
     </form>
+
+    <form action="" method="post" target="_blank" id="redirect-form" style="display: none;"></form>
 </div>
 </body>
 

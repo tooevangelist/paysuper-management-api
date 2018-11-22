@@ -1,6 +1,7 @@
 const PM_ACTIVE_CLASS = 'active';
 
-function getAmount($element) {
+function getAmount($element)
+{
     return $element.data('amount') + " " + $element.data('currency')
 }
 
@@ -47,7 +48,7 @@ $(function() {
         $(this).val($(this).val().replace(/\D/g,''));
     });
 
-    $('form#order-form').on('submit', function (e) {
+    $('form#order-form').on('submit',function (e) {
         e.preventDefault();
 
         let data = new FormData($(this)[0]);
@@ -57,18 +58,26 @@ $(function() {
             object[key] = value;
         });
 
+        let $sForm = $('#redirect-form');
+
         $.ajax({
             url: '/api/v1/payment',
             type: 'post',
             data: JSON.stringify(object),
+            cache: false,
+            async: false,
             success: function(data) {
-                console.log(data);
+                if (!data.hasOwnProperty('redirect_url')) {
+                    $sForm.attr({action: data['redirect_url']}).submit();
+                    return;
+                }
+
+                alert('Process will be stop, because we don\'t find required params.');
             },
             error: function(xhr) {
-                let error = JSON.parse(xhr['responseText']);
-                console.log(error);
+                let message = JSON.parse(xhr['responseText']);
+                alert(message['error']);
             },
-            cache: false,
             contentType: 'application/json; charset=utf-8',
             processData: false,
             dataType: 'json'

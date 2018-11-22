@@ -25,6 +25,11 @@ const (
 	cryptoFieldIdentifier  = "address"
 
 	paymentSystemSettingsFieldNameCreatePaymentUrl = "create_payment_url"
+
+	CreatePaymentStatusOK                 = 0
+	CreatePaymentStatusErrorValidation    = 1
+	CreatePaymentStatusErrorSystem        = 2
+	CreatePaymentStatusErrorPaymentSystem = 3
 )
 
 var handlers = map[string]func(*model.Order, *Settings) PaymentSystem{
@@ -32,7 +37,7 @@ var handlers = map[string]func(*model.Order, *Settings) PaymentSystem{
 }
 
 type PaymentSystem interface {
-	CreatePayment() error
+	CreatePayment() *CreatePaymentResponse
 	ProcessPayment() error
 }
 
@@ -44,6 +49,12 @@ type Settings struct {
 type Path struct {
 	path   string
 	method string
+}
+
+type CreatePaymentResponse struct {
+	Status      int    `json:"-"`
+	RedirectUrl string `json:"redirect_url,omitempty"`
+	Error       string `json:"error,omitempty"`
 }
 
 func GetPaymentHandler(order *model.Order, config map[string]interface{}) (PaymentSystem, error) {
@@ -67,4 +78,18 @@ func GetPaymentHandler(order *model.Order, config map[string]interface{}) (Payme
 	}
 
 	return handler(order, s), nil
+}
+
+func GetCreatePaymentResponse(status int, error string, url string) *CreatePaymentResponse {
+	cpResp := &CreatePaymentResponse{Status: status}
+
+	if error != "" {
+		cpResp.Error = error
+	}
+
+	if url != "" {
+		cpResp.RedirectUrl = url
+	}
+
+	return cpResp
 }

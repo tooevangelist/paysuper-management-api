@@ -675,31 +675,31 @@ func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M 
 	return filter
 }
 
-func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings map[string]interface{}) error {
+func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings map[string]interface{}) *payment_system.CreatePaymentResponse {
 	var err error
 
 	if err = om.validateCreatePaymentData(data); err != nil {
-		return err
+		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorValidation, err.Error(), "")
 	}
 
 	o := om.FindById(data[model.OrderPaymentCreateRequestFieldOrderId])
 
 	if o == nil {
-		return errors.New(orderErrorNotFound)
+		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorValidation, orderErrorNotFound, "")
 	}
 
 	if o.IsComplete() == true {
-		return errors.New(orderErrorOrderAlreadyComplete)
+		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorValidation, orderErrorOrderAlreadyComplete, "")
 	}
 
 	pm := om.paymentMethodManager.FindById(bson.ObjectIdHex(data[model.OrderPaymentCreateRequestFieldOPaymentMethodId]))
 
 	if pm == nil {
-		return errors.New(orderErrorPaymentMethodNotFound)
+		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorValidation, orderErrorPaymentMethodNotFound, "")
 	}
 
 	if o, err = om.modifyOrderAfterOrderFormSubmit(o, pm); err != nil {
-		return err
+		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorValidation, err.Error(), "")
 	}
 
 	email, _ := data[model.OrderPaymentCreateRequestFieldEmail]
@@ -712,20 +712,16 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 	o.PaymentRequisites = data
 
 	if err = om.Database.Repository(TableOrder).UpdateOrder(o); err != nil {
-		return err
+		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
 	handler, err := payment_system.GetPaymentHandler(o, psSettings)
 
 	if err != nil {
-		return err
+		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
-	if err = handler.CreatePayment(); err != nil {
-		return err
-	}
-
-	return nil
+	return handler.CreatePayment()
 }
 
 func (om *OrderManager) validateCreatePaymentData(data map[string]string) error {

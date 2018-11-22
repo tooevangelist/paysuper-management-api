@@ -73,3 +73,7 @@ type CardPayOrder struct {
 	EWalletAccount        *CardPayEWalletAccount        `json:"ewallet_account,omitempty"`
 	CryptoCurrencyAccount *CardPayCryptoCurrencyAccount `json:"cryptocurrency_account,omitempty"`
 }
+
+type CardPayOrderResponse struct {
+	RedirectUrl string `json:"redirect_url"`
+}

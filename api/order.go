@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
+	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/labstack/echo"
 	"net/http"
 )
@@ -269,12 +270,26 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 	data := make(map[string]string)
 
 	if err := ctx.Bind(&data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, responseMessageInvalidRequestData)
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": responseMessageInvalidRequestData})
 	}
 
-	if err := oApiV1.orderManager.ProcessCreatePayment(data, oApiV1.paymentSystemConfig); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	resp := oApiV1.orderManager.ProcessCreatePayment(data, oApiV1.paymentSystemConfig)
+
+	var httpStatus int
+
+	switch resp.Status {
+	case payment_system.CreatePaymentStatusErrorValidation:
+		httpStatus = http.StatusBadRequest
+		break
+	case payment_system.CreatePaymentStatusErrorSystem:
+		httpStatus = http.StatusInternalServerError
+		break
+	case payment_system.CreatePaymentStatusErrorPaymentSystem:
+		httpStatus = http.StatusPaymentRequired
+		break
+	default:
+		httpStatus = http.StatusOK
 	}
 
-	return ctx.JSON(http.StatusOK, data)
+	return ctx.JSON(httpStatus, resp)
 }
