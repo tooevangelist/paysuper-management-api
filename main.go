@@ -73,11 +73,12 @@ func main() {
 	}()
 
 	sInit := &api.ServerInitParams{
-		Config: &conf.Jwt,
-		Database: db,
-		Logger: sugar,
-		GeoDbReader: geoDbReader,
-		PaymentSystemConfig: conf.PaymentSystemConfig.Config,
+		Config:                  &conf.Jwt,
+		Database:                db,
+		Logger:                  sugar,
+		GeoDbReader:             geoDbReader,
+		PaymentSystemConfig:     conf.PaymentSystemConfig.Config,
+		PSPAccountingCurrencyA3: conf.PSPAccountingCurrencyA3,
 	}
 
 	server, err := api.NewServer(sInit)

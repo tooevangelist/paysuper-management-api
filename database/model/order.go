@@ -22,8 +22,16 @@ const (
 	orderFieldDescription   = "PP_DESCRIPTION"
 	orderFieldRegion        = "PP_REGION"
 
-	OrderStatusCreated  = 0
-	OrderStatusComplete = 10
+	OrderStatusNew                   = 0
+	OrderStatusPaymentSystemCreate   = 1
+	OrderStatusPaymentSystemReject   = 2
+	OrderStatusPaymentSystemComplete = 3
+	OrderStatusProjectInProgress     = 4
+	OrderStatusProjectComplete       = 5
+	OrderStatusProjectPending        = 6
+	OrderStatusProjectReject         = 7
+	OrderStatusRefund                = 8
+	OrderStatusChargeback            = 9
 
 	OrderFilterFieldProjects        = "projects"
 	OrderFilterFieldId              = "id"
@@ -60,8 +68,16 @@ var OrderReservedWords = map[string]bool{
 }
 
 var OrderStatusesDescription = map[int]string{
-	OrderStatusCreated:  "Order created",
-	OrderStatusComplete: "Order successfully complete. Notification successfully send to project",
+	OrderStatusNew:                   "Project create new payment order in P1.",
+	OrderStatusPaymentSystemCreate:   "Payment order was create in payment system.",
+	OrderStatusPaymentSystemReject:   "Payment notification request from payment system was reject. Possible reasons: incorrect amount or currency.",
+	OrderStatusPaymentSystemComplete: "Payment notification request from payment system successfully complete.",
+	OrderStatusProjectInProgress:     "P1 started sending notification request about payment to project.",
+	OrderStatusProjectComplete:       "Project successfully processed notification about payment from P1",
+	OrderStatusProjectPending:        "Project can't processed notification about payment from P1 and limit of notification attempts was ended.",
+	OrderStatusProjectReject:         "Project reject notification about payment from P1. This payment is candidate to refund.",
+	OrderStatusRefund:                "Payment was refunded to payer",
+	OrderStatusChargeback:            "Customer's chargeback claim was received",
 }
 
 type PayerData struct {
@@ -162,16 +178,17 @@ type Order struct {
 	PaymentMethodIncomeAmount float64 `bson:"pm_income_amount" json:"pm_income_amount"`
 	// order currency received from payment system in notification request
 	PaymentMethodIncomeCurrency *Currency `bson:"pm_income_currency" json:"pm_income_currency"`
+	PaymentMethodIncomeCurrencyA3 string `bson:"-" json:"-"`
 	// payment system fee for payment operation
 	PaymentMethodFee float64 `bson:"pm_fee" json:"pm_fee"`
 	// date of ended payment operation in payment system
-	PaymentMethodOrderClosedAt *time.Time `bson:"pm_order_close_date" json:"pm_order_close_date,omitempty"`
+	PaymentMethodOrderClosedAt time.Time `bson:"pm_order_close_date" json:"pm_order_close_date,omitempty"`
 	// order status
 	Status int `bson:"status" json:"status"`
 	// date of create order
 	CreatedAt time.Time `bson:"created_at" json:"created_at"`
 	// date of last update order data
-	UpdatedAt *time.Time `bson:"updated_at" json:"created_at,omitempty"`
+	UpdatedAt time.Time `bson:"updated_at" json:"created_at,omitempty"`
 	// is order create by json request
 	IsJsonRequest bool `bson:"created_by_json" json:"created_by_json"`
 	// operation amount in accounting currency of PSP
@@ -242,10 +259,21 @@ type OrderPaginate struct {
 }
 
 func (order *Order) IsComplete() bool {
-	return order.Status == OrderStatusComplete
+	return order.Status == OrderStatusProjectComplete
+}
+
+func (order *Order) HasEndedStatus() bool {
+	return order.Status == OrderStatusPaymentSystemReject || order.Status == OrderStatusProjectComplete ||
+		order.Status == OrderStatusProjectReject || order.Status == OrderStatusRefund || order.Status == OrderStatusChargeback
 }
 
 type PaymentMethodsPreparedFormData struct {
 	Amount   float64
 	Currency *Currency
+}
+
+type OrderPaymentNotification struct {
+	Id         string
+	Request    interface{}
+	RawRequest string
 }

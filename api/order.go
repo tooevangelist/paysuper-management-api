@@ -47,7 +47,7 @@ type OrderApiV1 struct {
 func (api *Api) InitOrderV1Routes() *Api {
 	oApiV1 := OrderApiV1{
 		Api:            api,
-		orderManager:   manager.InitOrderManager(api.Database, api.Logger, api.geoDbReader),
+		orderManager:   manager.InitOrderManager(api.Database, api.Logger, api.GeoDbReader, api.PSPAccountingCurrencyA3),
 		projectManager: manager.InitProjectManager(api.Database, api.Logger),
 	}
 
@@ -144,7 +144,7 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	url := "https://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
+	url := "http://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
 
 	ou := &model.OrderUrl{OrderUrl: url}
 

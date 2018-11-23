@@ -1,26 +1,26 @@
 cardpay:
-  create_payment_url: string
+  create_payment_url: "string"
   BANKCARD:
-    terminal_id: int
-    secret_word: string
-    callback_secret_word: string
+    terminal_id: "string"
+    secret_word: "string"
+    callback_secret_word: "string"
   WEBMONEY:
-    terminal_id: int
-    secret_word: string
-    callback_secret_word: string
+    terminal_id: "string"
+    secret_word: "string"
+    callback_secret_word: "string"
   QIWI:
-    terminal_id: int
-    secret_word: string
-    callback_secret_word: string
+    terminal_id: "string"
+    secret_word: "string"
+    callback_secret_word: "string"
   NETELLER:
-    terminal_id: int
-    secret_word: string
-    callback_secret_word: string
+    terminal_id: "string"
+    secret_word: "string"
+    callback_secret_word: "string"
   ALIPAY:
-    terminal_id: int
-    secret_word: string
-    callback_secret_word: string
+    terminal_id: "string"
+    secret_word: "string"
+    callback_secret_word: "string"
   BITCOIN:
-    terminal_id: int
-    secret_word: string
-    callback_secret_word: string
+    terminal_id: "string"
+    secret_word: "string"
+    callback_secret_word: "string"

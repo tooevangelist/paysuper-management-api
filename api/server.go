@@ -52,11 +52,12 @@ var funcMap = template.FuncMap{
 }
 
 type ServerInitParams struct {
-	Config              *config.Jwt
-	Database            dao.Database
-	Logger              *zap.SugaredLogger
-	GeoDbReader         *geoip2.Reader
-	PaymentSystemConfig map[string]interface{}
+	Config                  *config.Jwt
+	Database                dao.Database
+	Logger                  *zap.SugaredLogger
+	GeoDbReader             *geoip2.Reader
+	PaymentSystemConfig     map[string]interface{}
+	PSPAccountingCurrencyA3 string
 }
 
 type Template struct {
@@ -77,15 +78,18 @@ type Order struct {
 }
 
 type Api struct {
-	Http                *echo.Echo
-	config              *config.Config
-	Database            dao.Database
-	Logger              *zap.SugaredLogger
-	Validate            *validator.Validate
-	accessRouteGroup    *echo.Group
-	geoDbReader         *geoip2.Reader
-	PaymentSystemConfig map[string]interface{}
-	WebHookGroup        *echo.Group
+	Http                    *echo.Echo
+	config                  *config.Config
+	Database                dao.Database
+	Logger                  *zap.SugaredLogger
+	Validate                *validator.Validate
+	accessRouteGroup        *echo.Group
+	GeoDbReader             *geoip2.Reader
+	PaymentSystemConfig     map[string]interface{}
+	PSPAccountingCurrencyA3 string
+
+	WebHookGroup   *echo.Group
+	WebHookRawBody string
 
 	Merchant
 	GetParams
@@ -94,12 +98,13 @@ type Api struct {
 
 func NewServer(p *ServerInitParams) (*Api, error) {
 	api := &Api{
-		Http:                echo.New(),
-		Database:            p.Database,
-		Logger:              p.Logger,
-		Validate:            validator.New(),
-		geoDbReader:         p.GeoDbReader,
-		PaymentSystemConfig: p.PaymentSystemConfig,
+		Http:                    echo.New(),
+		Database:                p.Database,
+		Logger:                  p.Logger,
+		Validate:                validator.New(),
+		GeoDbReader:             p.GeoDbReader,
+		PaymentSystemConfig:     p.PaymentSystemConfig,
+		PSPAccountingCurrencyA3: p.PSPAccountingCurrencyA3,
 	}
 
 	renderer := &Template{
@@ -119,6 +124,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
 
 	api.WebHookGroup = api.Http.Group(apiWebHookGroupPath)
+	api.WebHookGroup.Use(api.WebHookRequestLoggerMiddleware)
 
 	api.Http.Use(api.LimitOffsetMiddleware)
 	api.Http.Use(middleware.Logger())

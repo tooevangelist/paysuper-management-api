@@ -2,6 +2,7 @@ package payment_system
 
 import (
 	"bytes"
+	"crypto/sha512"
 	"encoding/json"
 	"errors"
 	"github.com/ProtocolONE/p1pay.api/database/model"
@@ -60,7 +61,8 @@ var tokens = map[string]*Token{}
 type CardPay struct {
 	*Settings
 	*model.Order
-	mu sync.Mutex
+	mu         sync.Mutex
+	pmSettings map[string]string
 }
 
 type Token struct {
@@ -74,7 +76,14 @@ type Token struct {
 }
 
 func NewCardPayHandler(o *model.Order, settings *Settings) PaymentSystem {
-	return &CardPay{Settings: settings, Order: o}
+	mSettings := make(map[string]string)
+	iSettings := settings.Settings.(map[interface{}]interface{})
+
+	for k, v := range iSettings {
+		mSettings[k.(string)] = v.(string)
+	}
+
+	return &CardPay{Settings: settings, Order: o, pmSettings: mSettings}
 }
 
 func (cp *CardPay) auth(pmKey string) error {
@@ -84,8 +93,8 @@ func (cp *CardPay) auth(pmKey string) error {
 
 	data := url.Values{
 		cardPayRequestFieldGrantType:    []string{cardPayGrantTypePassword},
-		cardPayRequestFieldTerminalCode: []string{"15985"},
-		cardPayRequestFieldPassword:     []string{"A1tph4I6BD0f"},
+		cardPayRequestFieldTerminalCode: []string{cp.pmSettings[settingsFieldTerminalId]},
+		cardPayRequestFieldPassword:     []string{cp.pmSettings[settingsFieldSecretWord]},
 	}
 
 	qUrl, err := cp.getUrl(cardPayActionAuthenticate)
@@ -94,7 +103,7 @@ func (cp *CardPay) auth(pmKey string) error {
 		return err
 	}
 
-	client := &http.Client{}
+	client := GetLoggableHttpClient()
 	req, err := http.NewRequest(paths[cardPayActionAuthenticate].method, qUrl, strings.NewReader(data.Encode()))
 
 	if err != nil {
@@ -136,7 +145,7 @@ func (cp *CardPay) auth(pmKey string) error {
 func (cp *CardPay) refresh(pmKey string) error {
 	data := url.Values{
 		cardPayRequestFieldGrantType:    []string{cardPayGrantTypeRefreshToken},
-		cardPayRequestFieldTerminalCode: []string{"15985"},
+		cardPayRequestFieldTerminalCode: []string{cp.pmSettings[settingsFieldTerminalId]},
 		cardPayRequestFieldRefreshToken: []string{tokens[pmKey].RefreshToken},
 	}
 
@@ -146,7 +155,7 @@ func (cp *CardPay) refresh(pmKey string) error {
 		return err
 	}
 
-	client := &http.Client{}
+	client := GetLoggableHttpClient()
 	req, err := http.NewRequest(paths[cardPayActionRefresh].method, qUrl, strings.NewReader(data.Encode()))
 
 	if err != nil {
@@ -232,8 +241,56 @@ func (cp *CardPay) CreatePayment() *CreatePaymentResponse {
 	return GetCreatePaymentResponse(CreatePaymentStatusOK, "", cpResponse.RedirectUrl)
 }
 
-func (cp *CardPay) ProcessPayment() error {
-	return nil
+func (cp *CardPay) ProcessPayment(o *model.Order, opn *model.OrderPaymentNotification) (*model.Order, error) {
+	cpReq := opn.Request.(*entity.CardPayPaymentNotificationWebHookRequest)
+
+	if cp.checkNotificationRequestSignature(opn.RawRequest, cpReq.Signature) == false {
+		return nil, errors.New(paymentSystemErrorRequestSignatureIsInvalid)
+	}
+
+	var err error
+
+	cpReq.CallbackTimeTime, err = time.Parse(cardPayDateFormat, cpReq.CallbackTime)
+
+	if err != nil {
+		return nil, errors.New(paymentSystemErrorRequestTimeFieldIsInvalid)
+	}
+
+	if cpReq.IsPaymentAllowedStatus() {
+		return nil, errors.New(paymentSystemErrorRequestStatusIsInvalid)
+	}
+
+	switch cpReq.PaymentMethod {
+	case cardPayPaymentMethodBankCard:
+		o.PaymentMethodPayerAccount = cpReq.CardAccount.MaskedPan
+		o.PaymentMethodTxnParams = cpReq.GetBankCardTxnParams()
+		break
+	case cardPayPaymentMethodQiwi,
+		cardPayPaymentMethodWebMoney,
+		cardPayPaymentMethodNeteller,
+		cardPayPaymentMethodAlipay:
+		o.PaymentMethodPayerAccount = cpReq.EWalletAccount.Id
+		o.PaymentMethodTxnParams = cpReq.GetEWalletTxnParams()
+		break
+	case cardPayPaymentMethodBitcoin:
+		o.PaymentMethodPayerAccount = cpReq.CryptoCurrencyAccount.CryptoAddress
+		o.PaymentMethodTxnParams = cpReq.GetCryptoCurrencyTxnParams()
+		break
+	default:
+		return nil, errors.New(paymentSystemErrorRequestPaymentMethodIsInvalid)
+	}
+
+	if cpReq.PaymentMethod != o.PaymentMethod.Params.ExternalId {
+		return nil, errors.New(paymentSystemErrorRequestPaymentMethodIsInvalid)
+	}
+
+	o.PaymentMethodTerminalId = cp.pmSettings[settingsFieldTerminalId]
+	o.PaymentMethodOrderId = cpReq.PaymentData.Id
+	o.PaymentMethodOrderClosedAt = cpReq.CallbackTimeTime
+	o.PaymentMethodIncomeAmount = cpReq.PaymentData.Amount
+	o.PaymentMethodIncomeCurrencyA3 = cpReq.PaymentData.Currency
+
+	return o, nil
 }
 
 func (cp *CardPay) getUrl(action string) (string, error) {
@@ -351,11 +408,11 @@ func (cp *CardPay) getCardPayOrder() (*entity.CardPayOrder, error) {
 
 func (cp *CardPay) geBankCardCardPayOrder(cpo *entity.CardPayOrder) (*entity.CardPayOrder, error) {
 	v := &validator.BankCardValidator{
-		Pan:    cp.Order.PaymentRequisites[bankCardFieldPan],
-		Cvv:    cp.Order.PaymentRequisites[bankCardFieldCvv],
-		Month:  cp.Order.PaymentRequisites[bankCardFieldMonth],
-		Year:   cp.Order.PaymentRequisites[bankCardFieldYear],
-		Holder: cp.Order.PaymentRequisites[bankCardFieldHolder],
+		Pan:    cp.Order.PaymentRequisites[entity.BankCardFieldPan],
+		Cvv:    cp.Order.PaymentRequisites[entity.BankCardFieldCvv],
+		Month:  cp.Order.PaymentRequisites[entity.BankCardFieldMonth],
+		Year:   cp.Order.PaymentRequisites[entity.BankCardFieldYear],
+		Holder: cp.Order.PaymentRequisites[entity.BankCardFieldHolder],
 	}
 
 	if err := v.Validate(); err != nil {
@@ -377,21 +434,21 @@ func (cp *CardPay) geBankCardCardPayOrder(cpo *entity.CardPayOrder) (*entity.Car
 }
 
 func (cp *CardPay) getEWalletCardPayOrder(cpo *entity.CardPayOrder) (*entity.CardPayOrder, error) {
-	ewallet, ok := cp.Order.PaymentRequisites[eWalletFieldIdentifier]
+	ewallet, ok := cp.Order.PaymentRequisites[entity.EWalletFieldIdentifier]
 
 	if !ok || len(ewallet) <= 0 {
 		return nil, errors.New(paymentSystemErrorEWalletIdentifierIsInvalid)
 	}
 
 	cpo.EWalletAccount = &entity.CardPayEWalletAccount{
-		Id: cp.Order.PaymentRequisites[eWalletFieldIdentifier],
+		Id: cp.Order.PaymentRequisites[entity.EWalletFieldIdentifier],
 	}
 
 	return cpo, nil
 }
 
 func (cp *CardPay) getCryptoCurrencyCardPayOrder(cpo *entity.CardPayOrder) (*entity.CardPayOrder, error) {
-	address, ok := cp.Order.PaymentRequisites[cryptoFieldIdentifier]
+	address, ok := cp.Order.PaymentRequisites[entity.CryptoFieldIdentifier]
 
 	if !ok || len(address) <= 0 {
 		return nil, errors.New(paymentSystemErrorCryptoCurrencyAddressIsInvalid)
@@ -402,4 +459,11 @@ func (cp *CardPay) getCryptoCurrencyCardPayOrder(cpo *entity.CardPayOrder) (*ent
 	}
 
 	return cpo, nil
+}
+
+func (cp *CardPay) checkNotificationRequestSignature(reqRaw string, reqSign string) bool {
+	h := sha512.New()
+	h.Write([]byte(reqRaw + cp.pmSettings[settingsFieldCallbackSecretWord]))
+
+	return string(h.Sum(nil)) == reqSign
 }

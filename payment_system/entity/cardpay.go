@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 const (
 	CardPayPaymentResponseStatusApproved           = "APPROVED"
 	CardPayPaymentResponseStatusDeclined           = "DECLINED"
@@ -8,17 +10,9 @@ const (
 	CardPayPaymentResponseStatusRefunded           = "REFUNDED"
 	CardPayPaymentResponseStatusChargeBack         = "CHARGEBACK"
 	CardPayPaymentResponseStatusChargeBackResolved = "CHARGEBACK RESOLVED"
-)
 
-var CardPayPaymentResponseStatusDescription = map[string]string{
-	CardPayPaymentResponseStatusApproved:           "Transaction successfully completed",
-	CardPayPaymentResponseStatusDeclined:           "Transaction denied",
-	CardPayPaymentResponseStatusPending:            "Transaction successfully authorized, but needs some time to be verified",
-	CardPayPaymentResponseStatusVoided:             "Transaction was voided",
-	CardPayPaymentResponseStatusRefunded:           "Transaction was refunded",
-	CardPayPaymentResponseStatusChargeBack:         "Customer's chargeback claim was received",
-	CardPayPaymentResponseStatusChargeBackResolved: "Customer's claim was rejected, same as APPROVED",
-}
+	CardPayPaymentResponseHeaderSignature = "Signature"
+)
 
 type CardPayBankCardAccount struct {
 	Pan        string `json:"pan"`
@@ -102,11 +96,13 @@ type CardPayPaymentNotificationWebHookRequest struct {
 	MerchantOrder         *CardPayMerchantOrder                 `json:"merchant_order" validate:"required"`
 	PaymentMethod         string                                `json:"payment_method" validate:"required"`
 	CallbackTime          string                                `json:"callback_time" validate:"required"`
+	CallbackTimeTime      time.Time                             `json:"-"`
 	CardAccount           *CardPayBankCardAccountResponse       `json:"card_account,omitempty" validate:"omitempty"`
 	CryptoCurrencyAccount *CardPayCryptoCurrencyAccountResponse `json:"cryptocurrency_account,omitempty" validate:"omitempty"`
 	Customer              *CardPayCustomer                      `json:"customer" validate:"required"`
 	EWalletAccount        *CardPayEWalletAccount                `json:"ewallet_account,omitempty" validate:"omitempty"`
 	PaymentData           *CardPayPaymentDataResponse           `json:"payment_data" validate:"required"`
+	Signature             string                                `json:"-"`
 }
 
 type CardPayCryptoCurrencyAccountResponse struct {
@@ -136,4 +132,56 @@ type CardPayPaymentDataResponse struct {
 	Note          string  `json:"note"`
 	Rrn           string  `json:"rrn,omitempty"`
 	Status        string  `json:"status" validate:"required,alpha"`
+}
+
+func (cpReq *CardPayPaymentNotificationWebHookRequest) IsPaymentAllowedStatus() bool {
+	return cpReq.PaymentData.Status == CardPayPaymentResponseStatusApproved ||
+		cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined || cpReq.PaymentData.Status == CardPayPaymentResponseStatusPending
+}
+
+func (cpReq *CardPayPaymentNotificationWebHookRequest) GetBankCardTxnParams() map[string]interface{} {
+	params := make(map[string]interface{})
+
+	params[BankCardFieldPan] = cpReq.CardAccount.MaskedPan
+	params[BankCardFieldHolder] = cpReq.CardAccount.Holder
+	params[TxnParamsFieldBankCardEmissionCountry] = cpReq.CardAccount.IssuingCountryCode
+	params[TxnParamsFieldBankCardToken] = cpReq.CardAccount.Token
+	params[TxnParamsFieldBankCardIs3DS] = cpReq.PaymentData.Is3d
+	params[TxnParamsFieldBankCardRrn] = cpReq.PaymentData.Rrn
+
+	if cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined {
+		params[TxnParamsFieldDeclineCode] = cpReq.PaymentData.DeclineCode
+		params[TxnParamsFieldDeclineReason] = cpReq.PaymentData.DeclineReason
+	}
+
+	return params
+}
+
+func (cpReq *CardPayPaymentNotificationWebHookRequest) GetEWalletTxnParams() map[string]interface{} {
+	params := make(map[string]interface{})
+
+	params[EWalletFieldIdentifier] = cpReq.EWalletAccount.Id
+
+	if cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined {
+		params[TxnParamsFieldDeclineCode] = cpReq.PaymentData.DeclineCode
+		params[TxnParamsFieldDeclineReason] = cpReq.PaymentData.DeclineReason
+	}
+
+	return params
+}
+
+func (cpReq *CardPayPaymentNotificationWebHookRequest) GetCryptoCurrencyTxnParams() map[string]interface{} {
+	params := make(map[string]interface{})
+
+	params[CryptoFieldIdentifier] = cpReq.CryptoCurrencyAccount.CryptoAddress
+	params[TxnParamsFieldCryptoTransactionId] = cpReq.CryptoCurrencyAccount.CryptoTransactionId
+	params[TxnParamsFieldCryptoAmount] = cpReq.CryptoCurrencyAccount.PrcAmount
+	params[TxnParamsFieldCryptoCurrency] = cpReq.CryptoCurrencyAccount.PrcCurrency
+
+	if cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined {
+		params[TxnParamsFieldDeclineCode] = cpReq.PaymentData.DeclineCode
+		params[TxnParamsFieldDeclineReason] = cpReq.PaymentData.DeclineReason
+	}
+
+	return params
 }

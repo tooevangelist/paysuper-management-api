@@ -40,6 +40,7 @@ type Config struct {
 	Jwt
 	Database
 	PaymentSystemConfig
+	PSPAccountingCurrencyA3 string `envconfig:"PSP_ACCOUNTING_CURRENCY"`
 }
 
 func NewConfig() (error, *Config) {

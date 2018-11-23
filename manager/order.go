@@ -41,6 +41,9 @@ const (
 	orderErrorSignatureInvalid                         = "order request signature is invalid"
 	orderErrorNotFound                                 = "order with specified identifier not found"
 	orderErrorOrderAlreadyComplete                     = "order with specified identifier payed early"
+	orderErrorOrderAlreadyHasEndedStatus               = "order with specified identifier already ended (status is %d)"
+	orderErrorOrderPaymentMethodIncomeCurrencyNotFound = "unknown currency received from payment system"
+	orderErrorOrderPSPAccountingCurrencyNotFound       = "unknown PSP accounting currency"
 
 	orderErrorCreatePaymentRequiredFieldIdNotFound            = "required field with order identifier not found"
 	orderErrorCreatePaymentRequiredFieldPaymentMethodNotFound = "required field with payment method identifier not found"
@@ -54,12 +57,13 @@ const (
 type OrderManager struct {
 	*Manager
 
-	geoDbReader          *geoip2.Reader
-	projectManager       *ProjectManager
-	paymentSystemManager *PaymentSystemManager
-	paymentMethodManager *PaymentMethodManager
-	currencyRateManager  *CurrencyRateManager
-	currencyManager      *CurrencyManager
+	geoDbReader           *geoip2.Reader
+	projectManager        *ProjectManager
+	paymentSystemManager  *PaymentSystemManager
+	paymentMethodManager  *PaymentMethodManager
+	currencyRateManager   *CurrencyRateManager
+	currencyManager       *CurrencyManager
+	pspAccountingCurrency *model.Currency
 }
 
 type check struct {
@@ -82,7 +86,12 @@ type FindAll struct {
 	Offset   int
 }
 
-func InitOrderManager(database dao.Database, logger *zap.SugaredLogger, geoDbReader *geoip2.Reader) *OrderManager {
+func InitOrderManager(
+	database dao.Database,
+	logger *zap.SugaredLogger,
+	geoDbReader *geoip2.Reader,
+	pspAccountingCurrencyA3 string,
+) *OrderManager {
 	om := &OrderManager{
 		Manager:              &Manager{Database: database, Logger: logger},
 		geoDbReader:          geoDbReader,
@@ -92,6 +101,8 @@ func InitOrderManager(database dao.Database, logger *zap.SugaredLogger, geoDbRea
 		currencyRateManager:  InitCurrencyRateManager(database, logger),
 		currencyManager:      InitCurrencyManager(database, logger),
 	}
+
+	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)
 
 	return om
 }
@@ -200,7 +211,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 			Phone:         order.PayerPhone,
 			Email:         order.PayerEmail,
 		},
-		Status:                             model.OrderStatusCreated,
+		Status:                             model.OrderStatusNew,
 		CreatedAt:                          time.Now(),
 		IsJsonRequest:                      order.IsJsonRequest,
 		FixedPackage:                       ofp,
@@ -551,7 +562,7 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 				Description: model.OrderStatusesDescription[oValue.Status],
 			},
 			CreatedAt:   oValue.CreatedAt,
-			ConfirmedAt: oValue.PaymentMethodOrderClosedAt,
+			ConfirmedAt: &oValue.PaymentMethodOrderClosedAt,
 			ClosedAt:    oValue.ProjectLastRequestedAt,
 		}
 
@@ -724,6 +735,102 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 	return handler.CreatePayment()
 }
 
+func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification, psSettings map[string]interface{}) (*model.Order, error) {
+	o := om.FindById(opn.Id)
+
+	if o == nil {
+		return nil, errors.New(orderErrorNotFound)
+	}
+
+	if o.Status != model.OrderStatusPaymentSystemCreate {
+		return nil, errors.New(fmt.Sprintf(orderErrorOrderAlreadyHasEndedStatus, o.Status))
+	}
+
+	handler, err := payment_system.GetPaymentHandler(o, psSettings)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var hErr error
+
+	o, hErr = handler.ProcessPayment(o, opn)
+
+	if hErr != nil {
+		o.Status = model.OrderStatusPaymentSystemReject
+	} else {
+		o.Status = model.OrderStatusPaymentSystemComplete
+	}
+
+	if o, err = om.processNotifyPaymentAmounts(o); err != nil {
+		return nil, err
+	}
+
+	o.UpdatedAt = time.Now()
+
+	if err = om.Database.Repository(TableOrder).UpdateOrder(o); err != nil {
+		return nil, err
+	}
+
+	return o, hErr
+}
+
+func (om *OrderManager) processNotifyPaymentAmounts(o *model.Order) (*model.Order, error) {
+	var err error
+
+	o.PaymentMethodIncomeCurrency = om.currencyManager.FindByCodeA3(o.PaymentMethodIncomeCurrencyA3)
+
+	if o.PaymentMethodIncomeCurrency == nil {
+		return nil, errors.New(orderErrorOrderPaymentMethodIncomeCurrencyNotFound)
+	}
+
+	o.ProjectOutcomeAmount, err = om.currencyRateManager.convert(
+		o.PaymentMethodIncomeCurrency.CodeInt,
+		o.ProjectOutcomeCurrency.CodeInt,
+		o.PaymentMethodIncomeAmount,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if om.pspAccountingCurrency == nil {
+		return nil, errors.New(orderErrorOrderPSPAccountingCurrencyNotFound)
+	}
+
+	o.AmountInPSPAccountingCurrency, err = om.currencyRateManager.convert(
+		o.PaymentMethodIncomeCurrency.CodeInt,
+		om.pspAccountingCurrency.CodeInt,
+		o.PaymentMethodIncomeAmount,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	o.AmountOutMerchantAccountingCurrency, err = om.currencyRateManager.convert(
+		o.PaymentMethodIncomeCurrency.CodeInt,
+		o.ProjectData.Merchant.Currency.CodeInt,
+		o.PaymentMethodIncomeAmount,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	o.AmountInPaymentSystemAccountingCurrency, err = om.currencyRateManager.convert(
+		o.PaymentMethodIncomeCurrency.CodeInt,
+		o.PaymentMethod.PaymentSystem.AccountingCurrency.CodeInt,
+		o.PaymentMethodIncomeAmount,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return o, nil
+}
+
 func (om *OrderManager) validateCreatePaymentData(data map[string]string) error {
 	if _, ok := data[model.OrderPaymentCreateRequestFieldOrderId]; !ok {
 		return errors.New(orderErrorCreatePaymentRequiredFieldIdNotFound)
@@ -755,8 +862,8 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 		order: &model.OrderScalar{
 			Amount: o.ProjectIncomeAmount,
 		},
-		project: p,
-		oCurrency: o.ProjectIncomeCurrency,
+		project:       p,
+		oCurrency:     o.ProjectIncomeCurrency,
 		paymentMethod: pm,
 	}
 

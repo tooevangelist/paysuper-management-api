@@ -15,14 +15,10 @@ const (
 	paymentSystemErrorCreateRequestFailed            = "order can't be create. try request later"
 	paymentSystemErrorEWalletIdentifierIsInvalid     = "wallet identifier is invalid"
 	paymentSystemErrorCryptoCurrencyAddressIsInvalid = "crypto currency address is invalid"
-
-	bankCardFieldPan       = "pan"
-	bankCardFieldCvv       = "cvv"
-	bankCardFieldMonth     = "month"
-	bankCardFieldYear      = "year"
-	bankCardFieldHolder    = "card_holder"
-	eWalletFieldIdentifier = "ewallet"
-	cryptoFieldIdentifier  = "address"
+	paymentSystemErrorRequestSignatureIsInvalid      = "request signature is invalid"
+	paymentSystemErrorRequestTimeFieldIsInvalid      = "time field in request is invalid"
+	paymentSystemErrorRequestStatusIsInvalid         = "status is invalid"
+	paymentSystemErrorRequestPaymentMethodIsInvalid  = "payment method from request not equal value in order"
 
 	paymentSystemSettingsFieldNameCreatePaymentUrl = "create_payment_url"
 
@@ -30,6 +26,10 @@ const (
 	CreatePaymentStatusErrorValidation    = 1
 	CreatePaymentStatusErrorSystem        = 2
 	CreatePaymentStatusErrorPaymentSystem = 3
+
+	settingsFieldTerminalId         = "terminal_id"
+	settingsFieldSecretWord         = "secret_word"
+	settingsFieldCallbackSecretWord = "callback_secret_word"
 )
 
 var handlers = map[string]func(*model.Order, *Settings) PaymentSystem{
@@ -38,7 +38,7 @@ var handlers = map[string]func(*model.Order, *Settings) PaymentSystem{
 
 type PaymentSystem interface {
 	CreatePayment() *CreatePaymentResponse
-	ProcessPayment() error
+	ProcessPayment(*model.Order, *model.OrderPaymentNotification) (*model.Order, error)
 }
 
 type Settings struct {
