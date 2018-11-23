@@ -5,6 +5,10 @@ import "github.com/globalsign/mgo/bson"
 const (
 	DefaultLimit  = 100
 	DefaultOffset = 0
+
+	ResponseMessageInvalidRequestData = "Invalid request data"
+	ResponseMessageAccessDenied       = "Access denied"
+	ResponseMessageNotFound           = "Not found"
 )
 
 type Error struct {
@@ -21,7 +25,7 @@ type SimpleItem struct {
 
 type Status struct {
 	// numeric status code
-	Status      int    `json:"status"`
+	Status int `json:"status"`
 	// text description
 	Description string `json:"description"`
 }

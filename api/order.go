@@ -47,8 +47,8 @@ type OrderApiV1 struct {
 func (api *Api) InitOrderV1Routes() *Api {
 	oApiV1 := OrderApiV1{
 		Api:            api,
-		orderManager:   manager.InitOrderManager(api.Database, api.Logger, api.GeoDbReader, api.PSPAccountingCurrencyA3),
-		projectManager: manager.InitProjectManager(api.Database, api.Logger),
+		orderManager:   manager.InitOrderManager(api.database, api.logger, api.geoDbReader, api.pspAccountingCurrencyA3),
+		projectManager: manager.InitProjectManager(api.database, api.logger),
 	}
 
 	api.Http.GET("/order/:id", oApiV1.getOrderForm)
@@ -100,8 +100,8 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Request data invalid")
 	}
 
-	if err := oApiV1.Validate.Struct(order); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.GetFirstValidationError(err))
+	if err := oApiV1.validate.Struct(order); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
 	nOrder, err := oApiV1.orderManager.Process(order)
@@ -134,8 +134,8 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
 
-	if err := oApiV1.Validate.Struct(order); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, oApiV1.GetFirstValidationError(err))
+	if err := oApiV1.validate.Struct(order); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
 	nOrder, err := oApiV1.orderManager.Process(order)
@@ -191,17 +191,17 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 	id := ctx.Param("id")
 
 	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, ResponseMessageInvalidRequestData)
+		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
 
 	o := oApiV1.orderManager.FindById(id)
 
 	if o == nil {
-		return echo.NewHTTPError(http.StatusNotFound, ResponseMessageNotFound)
+		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 
 	if o.ProjectData.Merchant.ExternalId != oApiV1.Merchant.Identifier {
-		return echo.NewHTTPError(http.StatusForbidden, ResponseMessageAccessDenied)
+		return echo.NewHTTPError(http.StatusForbidden, model.ResponseMessageAccessDenied)
 	}
 
 	return ctx.JSON(http.StatusOK, o)
@@ -260,7 +260,7 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 	}
 
 	if pOrders.Items == nil || len(pOrders.Items) <= 0 {
-		return echo.NewHTTPError(http.StatusNotFound, ResponseMessageNotFound)
+		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 
 	return ctx.JSON(http.StatusOK, pOrders)
@@ -270,7 +270,7 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 	data := make(map[string]string)
 
 	if err := ctx.Bind(&data); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": ResponseMessageInvalidRequestData})
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageInvalidRequestData})
 	}
 
 	resp := oApiV1.orderManager.ProcessCreatePayment(data, oApiV1.PaymentSystemConfig)

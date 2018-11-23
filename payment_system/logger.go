@@ -2,9 +2,10 @@ package payment_system
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
+	"os"
 	"time"
 )
 
@@ -50,7 +51,8 @@ func (t *Transport) logRequest(req *http.Request) {
 		return
 	}
 
-	fmt.Println(string(dump))
+	log.SetOutput(os.Stdout)
+	log.Println(string(dump))
 }
 
 func (t *Transport) logResponse(resp *http.Response) {
@@ -60,7 +62,8 @@ func (t *Transport) logResponse(resp *http.Response) {
 		return
 	}
 
-	fmt.Println(string(dump))
+	log.SetOutput(os.Stdout)
+	log.Println(string(dump))
 }
 
 func (t *Transport) transport() http.RoundTripper {

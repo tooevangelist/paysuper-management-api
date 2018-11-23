@@ -40,7 +40,7 @@ func (api *Api) WebHookRequestLoggerMiddleware(next echo.HandlerFunc) echo.Handl
 		rdr := ioutil.NopCloser(bytes.NewBuffer(buf))
 
 		ctx.Request().Body = rdr
-		api.WebHookRawBody = string(buf)
+		api.webHookRawBody = string(buf)
 
 		return next(ctx)
 	}

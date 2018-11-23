@@ -2,7 +2,7 @@ package api
 
 import (
 	"errors"
-	"fmt"
+	"github.com/ProtocolONE/p1pay.api/api/webhook"
 	"github.com/ProtocolONE/p1pay.api/config"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
@@ -16,16 +16,13 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
 const (
-	errorMessage                      = "Field validation for '%s' failed on the '%s' tag"
-	ResponseMessageInvalidRequestData = "Invalid request data"
-	ResponseMessageAccessDenied       = "Access denied"
-	ResponseMessageNotFound           = "Not found"
-
 	apiWebHookGroupPath = "/webhook"
 )
 
@@ -80,16 +77,14 @@ type Order struct {
 type Api struct {
 	Http                    *echo.Echo
 	config                  *config.Config
-	Database                dao.Database
-	Logger                  *zap.SugaredLogger
-	Validate                *validator.Validate
+	database                dao.Database
+	logger                  *zap.SugaredLogger
+	validate                *validator.Validate
 	accessRouteGroup        *echo.Group
-	GeoDbReader             *geoip2.Reader
+	geoDbReader             *geoip2.Reader
 	PaymentSystemConfig     map[string]interface{}
-	PSPAccountingCurrencyA3 string
-
-	WebHookGroup   *echo.Group
-	WebHookRawBody string
+	pspAccountingCurrencyA3 string
+	webHookRawBody          string
 
 	Merchant
 	GetParams
@@ -99,12 +94,12 @@ type Api struct {
 func NewServer(p *ServerInitParams) (*Api, error) {
 	api := &Api{
 		Http:                    echo.New(),
-		Database:                p.Database,
-		Logger:                  p.Logger,
-		Validate:                validator.New(),
-		GeoDbReader:             p.GeoDbReader,
+		database:                p.Database,
+		logger:                  p.Logger,
+		validate:                validator.New(),
+		geoDbReader:             p.GeoDbReader,
 		PaymentSystemConfig:     p.PaymentSystemConfig,
-		PSPAccountingCurrencyA3: p.PSPAccountingCurrencyA3,
+		pspAccountingCurrencyA3: p.PSPAccountingCurrencyA3,
 	}
 
 	renderer := &Template{
@@ -113,8 +108,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.Http.Renderer = renderer
 	api.Http.Static("/", "web/static")
 
-	api.Validate.RegisterStructValidation(ProjectStructValidator, model.ProjectScalar{})
-	api.Validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
+	api.validate.RegisterStructValidation(ProjectStructValidator, model.ProjectScalar{})
+	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
@@ -122,9 +117,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		SigningMethod: p.Config.Algorithm,
 	}))
 	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
-
-	api.WebHookGroup = api.Http.Group(apiWebHookGroupPath)
-	api.WebHookGroup.Use(api.WebHookRequestLoggerMiddleware)
 
 	api.Http.Use(api.LimitOffsetMiddleware)
 	api.Http.Use(middleware.Logger())
@@ -140,6 +132,9 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitProjectRoutes().
 		InitOrderV1Routes()
 
+	// init webhook endpoints section
+	api.InitWebHooks()
+
 	api.Http.GET("/docs", func(ctx echo.Context) error {
 		return ctx.Render(http.StatusOK, "docs.html", map[string]interface{}{})
 	})
@@ -149,12 +144,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 
 func (api *Api) Start() error {
 	return api.Http.Start(":3001")
-}
-
-func (api *Api) GetFirstValidationError(err error) string {
-	vErr := err.(validator.ValidationErrors)[0]
-
-	return fmt.Sprintf(errorMessage, vErr.Field(), vErr.Tag())
 }
 
 func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
@@ -176,4 +165,25 @@ func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.Hand
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, ctx echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+func (api *Api) InitWebHooks() {
+	whGroup := api.Http.Group(apiWebHookGroupPath)
+	whGroup.Use(api.WebHookRequestLoggerMiddleware)
+	whGroup.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		log.SetOutput(os.Stdout)
+		log.Println(string(resBody))
+	}))
+
+	wh := webhook.InitWebHook(
+		api.database,
+		api.logger,
+		api.validate,
+		api.geoDbReader,
+		api.pspAccountingCurrencyA3,
+		whGroup,
+		api.webHookRawBody,
+		api.PaymentSystemConfig,
+	)
+	wh.InitCardPayWebHookRoutes()
 }

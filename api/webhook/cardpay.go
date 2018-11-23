@@ -1,7 +1,6 @@
 package webhook
 
 import (
-	"github.com/ProtocolONE/p1pay.api/api"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
@@ -14,17 +13,17 @@ const (
 )
 
 type CardPayWebHook struct {
-	api          *api.Api
+	*WebHook
 	orderManager *manager.OrderManager
 }
 
 func (wh *WebHook) InitCardPayWebHookRoutes() *WebHook {
 	cpWebHook := &CardPayWebHook{
-		api:          wh.Api,
-		orderManager: manager.InitOrderManager(wh.Api.Database, wh.Api.Logger, wh.Api.GeoDbReader, wh.Api.PSPAccountingCurrencyA3),
+		WebHook:      wh,
+		orderManager: manager.InitOrderManager(wh.database, wh.logger, wh.geoDbReader, wh.pspAccountingCurrencyA3),
 	}
 
-	wh.Api.WebHookGroup.POST(cardPayWebHookPaymentNotifyPath, cpWebHook.paymentNotify)
+	wh.webHookGroup.POST(cardPayWebHookPaymentNotifyPath, cpWebHook.paymentNotify)
 
 	return wh
 }
@@ -35,20 +34,20 @@ func (cpWebHook *CardPayWebHook) paymentNotify(ctx echo.Context) error {
 	}
 
 	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, api.ResponseMessageInvalidRequestData)
+		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
 
-	if err := cpWebHook.api.Validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, cpWebHook.api.GetFirstValidationError(err))
+	if err := cpWebHook.validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
 	oPaymentNotification := &model.OrderPaymentNotification{
 		Id:         req.MerchantOrder.Id,
 		Request:    req,
-		RawRequest: cpWebHook.api.WebHookRawBody,
+		RawRequest: cpWebHook.webHookRawBody,
 	}
 
-	order, err := cpWebHook.orderManager.ProcessNotifyPayment(oPaymentNotification, cpWebHook.api.PaymentSystemConfig)
+	order, err := cpWebHook.orderManager.ProcessNotifyPayment(oPaymentNotification, cpWebHook.paymentSystemConfig)
 
 	if err != nil && order == nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
