@@ -144,7 +144,7 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	url := "http://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
+	url := "https://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
 
 	ou := &model.OrderUrl{OrderUrl: url}
 
