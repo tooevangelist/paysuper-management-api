@@ -16,9 +16,7 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -168,11 +166,27 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, ctx echo.C
 }
 
 func (api *Api) InitWebHooks() {
+	var headerToString = func(headers map[string][]string) string {
+		var out string
+
+		for k, v := range headers {
+			out += k + ":" + v[0] + "\n "
+		}
+
+		return out
+	}
+
 	whGroup := api.Http.Group(apiWebHookGroupPath)
 	whGroup.Use(api.WebHookRequestLoggerMiddleware)
-	whGroup.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
-		log.SetOutput(os.Stdout)
-		log.Println(string(resBody))
+	whGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
+		data := []interface{}{
+			"request_headers", headerToString(ctx.Request().Header),
+			"request_body", string(reqBody),
+			"response_headers", headerToString(ctx.Response().Header()),
+			"response_body", string(resBody),
+		}
+
+		api.logger.Infow(ctx.Path(), data...)
 	}))
 
 	wh := webhook.InitWebHook(
