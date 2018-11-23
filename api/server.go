@@ -6,6 +6,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/config"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
@@ -187,6 +188,15 @@ func (api *Api) InitWebHooks() {
 		}
 
 		api.logger.Infow(ctx.Path(), data...)
+
+		log := &model.Log{
+			RequestHeaders: headerToString(ctx.Request().Header),
+			RequestBody: string(reqBody),
+			ResponseHeaders: headerToString(ctx.Response().Header()),
+			ResponseBody: string(resBody),
+		}
+
+		(&manager.LoggerManager{Database: api.database, Logger: api.logger}).Insert(log)
 	}))
 
 	wh := webhook.InitWebHook(

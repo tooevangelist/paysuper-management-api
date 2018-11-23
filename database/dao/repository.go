@@ -40,4 +40,6 @@ type Repository interface {
 	UpdateOrder(*model.Order) error
 
 	FindCurrenciesPair(int, int) (*model.CurrencyRate, error)
+
+	InsertLog(*model.Log) error
 }

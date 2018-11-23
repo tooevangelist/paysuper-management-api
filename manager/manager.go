@@ -17,6 +17,7 @@ const (
 	TablePaymentMethod = "payment_method"
 	TableOrder         = "order"
 	TableCurrencyRate  = "currency_rate"
+	TableLog           = "log"
 
 	errorMessageMask = "Field validation for '%s' failed on the '%s' tag"
 )
