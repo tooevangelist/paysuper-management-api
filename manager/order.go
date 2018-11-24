@@ -536,10 +536,6 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 			Account:        oValue.ProjectAccount,
 			ProjectOrderId: oValue.ProjectOrderId,
 			PayerData:      oValue.PayerData,
-			PaymentMethod: &model.SimpleItem{
-				Id:   oValue.PaymentMethod.Id,
-				Name: oValue.PaymentMethod.Name,
-			},
 			ProjectTechnicalIncome: &model.OrderSimpleAmountObject{
 				Amount: oValue.ProjectIncomeAmount,
 				Currency: &model.SimpleCurrency{
@@ -562,7 +558,7 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 				Description: model.OrderStatusesDescription[oValue.Status],
 			},
 			CreatedAt:   oValue.CreatedAt,
-			ConfirmedAt: &oValue.PaymentMethodOrderClosedAt,
+			ConfirmedAt: oValue.PaymentMethodOrderClosedAt,
 			ClosedAt:    oValue.ProjectLastRequestedAt,
 		}
 
@@ -599,6 +595,13 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 			}
 		}
 
+		if oValue.PaymentMethod != nil {
+			tOrder.PaymentMethod = &model.SimpleItem{
+				Id:   oValue.PaymentMethod.Id,
+				Name: oValue.PaymentMethod.Name,
+			}
+		}
+
 		tOrders = append(tOrders, tOrder)
 	}
 
@@ -617,7 +620,7 @@ func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M 
 			fPms = append(fPms, bson.ObjectIdHex(pm))
 		}
 
-		filter["pm_id"] = bson.M{"$in": fPms}
+		filter["payment_method.id"] = bson.M{"$in": fPms}
 	}
 
 	if cs, ok := values[model.OrderFilterFieldCountries]; ok {

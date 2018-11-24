@@ -286,7 +286,7 @@ func (cp *CardPay) ProcessPayment(o *model.Order, opn *model.OrderPaymentNotific
 
 	o.PaymentMethodTerminalId = cp.pmSettings[settingsFieldTerminalId]
 	o.PaymentMethodOrderId = cpReq.PaymentData.Id
-	o.PaymentMethodOrderClosedAt = cpReq.CallbackTimeTime
+	o.PaymentMethodOrderClosedAt = &cpReq.CallbackTimeTime
 	o.PaymentMethodIncomeAmount = cpReq.PaymentData.Amount
 	o.PaymentMethodIncomeCurrencyA3 = cpReq.PaymentData.Currency
 

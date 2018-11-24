@@ -6,6 +6,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/labstack/echo"
 	"net/http"
+	"net/url"
 )
 
 const (
@@ -144,9 +145,9 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	url := "https://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
+	rUrl := "https://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
 
-	ou := &model.OrderUrl{OrderUrl: url}
+	ou := &model.OrderUrl{OrderUrl: rUrl}
 
 	return ctx.JSON(http.StatusOK, ou)
 }
@@ -194,17 +195,31 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
 
-	o := oApiV1.orderManager.FindById(id)
+	p, merchant, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, []string{})
 
-	if o == nil {
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, err)
+	}
+
+	params := &manager.FindAll{
+		Values:   url.Values{"id": []string{id}},
+		Projects: p,
+		Merchant: merchant,
+		Limit:    oApiV1.GetParams.limit,
+		Offset:   oApiV1.GetParams.offset,
+	}
+
+	pOrders, err := oApiV1.orderManager.FindAll(params)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	if pOrders.Count == 0 {
 		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 
-	if o.ProjectData.Merchant.ExternalId != oApiV1.Merchant.Identifier {
-		return echo.NewHTTPError(http.StatusForbidden, model.ResponseMessageAccessDenied)
-	}
-
-	return ctx.JSON(http.StatusOK, o)
+	return ctx.JSON(http.StatusOK, pOrders.Items[0])
 }
 
 // @Summary Get orders
@@ -259,7 +274,7 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	if pOrders.Items == nil || len(pOrders.Items) <= 0 {
+	if pOrders.Count == 0 {
 		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 

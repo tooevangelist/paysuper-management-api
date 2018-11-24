@@ -182,7 +182,7 @@ type Order struct {
 	// payment system fee for payment operation
 	PaymentMethodFee float64 `bson:"pm_fee" json:"pm_fee"`
 	// date of ended payment operation in payment system
-	PaymentMethodOrderClosedAt time.Time `bson:"pm_order_close_date" json:"pm_order_close_date,omitempty"`
+	PaymentMethodOrderClosedAt *time.Time `bson:"pm_order_close_date" json:"pm_order_close_date,omitempty"`
 	// order status
 	Status int `bson:"status" json:"status"`
 	// date of create order
