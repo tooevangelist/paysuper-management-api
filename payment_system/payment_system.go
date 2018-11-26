@@ -3,6 +3,9 @@ package payment_system
 import (
 	"errors"
 	"github.com/ProtocolONE/p1pay.api/database/model"
+	"go.uber.org/zap"
+	"net/http"
+	"time"
 )
 
 const (
@@ -41,9 +44,14 @@ type PaymentSystem interface {
 	ProcessPayment(*model.Order, *model.OrderPaymentNotification) (*model.Order, error)
 }
 
+type PaymentSystemSetting struct {
+	Logger *zap.SugaredLogger
+}
+
 type Settings struct {
 	Url      string
 	Settings interface{}
+	*PaymentSystemSetting
 }
 
 type Path struct {
@@ -57,7 +65,7 @@ type CreatePaymentResponse struct {
 	Error       string `json:"error,omitempty"`
 }
 
-func GetPaymentHandler(order *model.Order, config map[string]interface{}) (PaymentSystem, error) {
+func (pss *PaymentSystemSetting) GetPaymentHandler(order *model.Order, config map[string]interface{}) (PaymentSystem, error) {
 	handler, ok := handlers[order.PaymentMethod.Params.Handler]
 
 	if !ok {
@@ -75,9 +83,17 @@ func GetPaymentHandler(order *model.Order, config map[string]interface{}) (Payme
 	s := &Settings{
 		Url:      cMap[paymentSystemSettingsFieldNameCreatePaymentUrl].(string),
 		Settings: cMap[order.PaymentMethod.Params.ExternalId],
+		PaymentSystemSetting: pss,
 	}
 
 	return handler(order, s), nil
+}
+
+func (pss *PaymentSystemSetting) GetLoggableHttpClient() *http.Client {
+	return &http.Client{
+		Transport: &Transport{Logger: pss.Logger},
+		Timeout:   time.Duration(defaultHttpClientTimeout * time.Second),
+	}
 }
 
 func GetCreatePaymentResponse(status int, error string, url string) *CreatePaymentResponse {

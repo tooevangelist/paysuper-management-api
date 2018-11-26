@@ -47,8 +47,14 @@ type OrderApiV1 struct {
 // @Router /order/create [get]
 func (api *Api) InitOrderV1Routes() *Api {
 	oApiV1 := OrderApiV1{
-		Api:            api,
-		orderManager:   manager.InitOrderManager(api.database, api.logger, api.geoDbReader, api.pspAccountingCurrencyA3),
+		Api: api,
+		orderManager: manager.InitOrderManager(
+			api.database,
+			api.logger,
+			api.geoDbReader,
+			api.pspAccountingCurrencyA3,
+			api.paymentSystemsSettings,
+		),
 		projectManager: manager.InitProjectManager(api.database, api.logger),
 	}
 

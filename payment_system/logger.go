@@ -1,11 +1,12 @@
 package payment_system
 
 import (
+	"bytes"
 	"context"
-	"log"
+	"github.com/ProtocolONE/p1pay.api/utils"
+	"go.uber.org/zap"
+	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
-	"os"
 	"time"
 )
 
@@ -15,55 +16,25 @@ const (
 
 type Transport struct {
 	Transport http.RoundTripper
+	Logger    *zap.SugaredLogger
 }
 
 type contextKey struct {
 	name string
 }
 
-func GetLoggableHttpClient() *http.Client {
-	return &http.Client{
-		Transport: &Transport{},
-		Timeout: time.Duration(defaultHttpClientTimeout * time.Second),
-	}
-}
-
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	ctx := context.WithValue(req.Context(), &contextKey{name: "RequestStart"}, time.Now())
 	req = req.WithContext(ctx)
-
-	t.logRequest(req)
 
 	resp, err := t.transport().RoundTrip(req)
 	if err != nil {
 		return resp, err
 	}
 
-	t.logResponse(resp)
+	t.log(req, resp)
 
 	return resp, err
-}
-
-func (t *Transport) logRequest(req *http.Request) {
-	dump, err := httputil.DumpRequestOut(req, true)
-
-	if err != nil {
-		return
-	}
-
-	log.SetOutput(os.Stdout)
-	log.Println(string(dump))
-}
-
-func (t *Transport) logResponse(resp *http.Response) {
-	dump, err := httputil.DumpResponse(resp, true)
-
-	if err != nil {
-		return
-	}
-
-	log.SetOutput(os.Stdout)
-	log.Println(string(dump))
 }
 
 func (t *Transport) transport() http.RoundTripper {
@@ -72,4 +43,28 @@ func (t *Transport) transport() http.RoundTripper {
 	}
 
 	return http.DefaultTransport
+}
+
+func (t *Transport) log(req *http.Request, resp *http.Response) {
+	var reqBody []byte
+	var resBody []byte
+
+	if req.Body != nil {
+		reqBody, _ = ioutil.ReadAll(req.Body)
+	}
+	req.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
+
+	if resp.Body != nil {
+		resBody, _ = ioutil.ReadAll(resp.Body)
+	}
+	resp.Body = ioutil.NopCloser(bytes.NewBuffer(resBody))
+
+	data := []interface{}{
+		"request_headers", utils.RequestResponseHeadersToString(req.Header),
+		"request_body", string(reqBody),
+		"response_headers", utils.RequestResponseHeadersToString(resp.Header),
+		"response_body", string(resBody),
+	}
+
+	t.Logger.Infow(req.URL.Path, data...)
 }

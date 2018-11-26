@@ -103,7 +103,7 @@ func (cp *CardPay) auth(pmKey string) error {
 		return err
 	}
 
-	client := GetLoggableHttpClient()
+	client := cp.Settings.PaymentSystemSetting.GetLoggableHttpClient()
 	req, err := http.NewRequest(paths[cardPayActionAuthenticate].method, qUrl, strings.NewReader(data.Encode()))
 
 	if err != nil {
@@ -155,7 +155,7 @@ func (cp *CardPay) refresh(pmKey string) error {
 		return err
 	}
 
-	client := GetLoggableHttpClient()
+	client := cp.Settings.PaymentSystemSetting.GetLoggableHttpClient()
 	req, err := http.NewRequest(paths[cardPayActionRefresh].method, qUrl, strings.NewReader(data.Encode()))
 
 	if err != nil {
@@ -213,7 +213,7 @@ func (cp *CardPay) CreatePayment() *CreatePaymentResponse {
 
 	b, _ := json.Marshal(cpo)
 
-	client := GetLoggableHttpClient()
+	client := cp.Settings.PaymentSystemSetting.GetLoggableHttpClient()
 	req, err := http.NewRequest(paths[cardPayActionCreatePayment].method, qUrl, bytes.NewBuffer(b))
 
 	token := cp.getToken(cp.Order.PaymentMethod.Params.ExternalId)

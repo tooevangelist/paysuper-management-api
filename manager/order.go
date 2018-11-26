@@ -57,13 +57,14 @@ const (
 type OrderManager struct {
 	*Manager
 
-	geoDbReader           *geoip2.Reader
-	projectManager        *ProjectManager
-	paymentSystemManager  *PaymentSystemManager
-	paymentMethodManager  *PaymentMethodManager
-	currencyRateManager   *CurrencyRateManager
-	currencyManager       *CurrencyManager
-	pspAccountingCurrency *model.Currency
+	geoDbReader            *geoip2.Reader
+	projectManager         *ProjectManager
+	paymentSystemManager   *PaymentSystemManager
+	paymentMethodManager   *PaymentMethodManager
+	currencyRateManager    *CurrencyRateManager
+	currencyManager        *CurrencyManager
+	pspAccountingCurrency  *model.Currency
+	paymentSystemsSettings *payment_system.PaymentSystemSetting
 }
 
 type check struct {
@@ -91,15 +92,17 @@ func InitOrderManager(
 	logger *zap.SugaredLogger,
 	geoDbReader *geoip2.Reader,
 	pspAccountingCurrencyA3 string,
+	paymentSystemsSettings *payment_system.PaymentSystemSetting,
 ) *OrderManager {
 	om := &OrderManager{
-		Manager:              &Manager{Database: database, Logger: logger},
-		geoDbReader:          geoDbReader,
-		projectManager:       InitProjectManager(database, logger),
-		paymentSystemManager: InitPaymentSystemManager(database, logger),
-		paymentMethodManager: InitPaymentMethodManager(database, logger),
-		currencyRateManager:  InitCurrencyRateManager(database, logger),
-		currencyManager:      InitCurrencyManager(database, logger),
+		Manager:                &Manager{Database: database, Logger: logger},
+		geoDbReader:            geoDbReader,
+		projectManager:         InitProjectManager(database, logger),
+		paymentSystemManager:   InitPaymentSystemManager(database, logger),
+		paymentMethodManager:   InitPaymentMethodManager(database, logger),
+		currencyRateManager:    InitCurrencyRateManager(database, logger),
+		currencyManager:        InitCurrencyManager(database, logger),
+		paymentSystemsSettings: paymentSystemsSettings,
 	}
 
 	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)
@@ -727,7 +730,7 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
-	handler, err := payment_system.GetPaymentHandler(o, psSettings)
+	handler, err := om.paymentSystemsSettings.GetPaymentHandler(o, psSettings)
 
 	if err != nil {
 		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
@@ -747,7 +750,7 @@ func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification
 		return nil, errors.New(fmt.Sprintf(orderErrorOrderAlreadyHasEndedStatus, o.Status))
 	}
 
-	handler, err := payment_system.GetPaymentHandler(o, psSettings)
+	handler, err := om.paymentSystemsSettings.GetPaymentHandler(o, psSettings)
 
 	if err != nil {
 		return nil, err
