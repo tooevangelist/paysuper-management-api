@@ -727,7 +727,7 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
-	handler, err := payment_system.GetPaymentHandler(o, psSettings, om.Database)
+	handler, err := payment_system.GetPaymentHandler(o, psSettings)
 
 	if err != nil {
 		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
@@ -747,7 +747,7 @@ func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification
 		return nil, errors.New(fmt.Sprintf(orderErrorOrderAlreadyHasEndedStatus, o.Status))
 	}
 
-	handler, err := payment_system.GetPaymentHandler(o, psSettings, om.Database)
+	handler, err := payment_system.GetPaymentHandler(o, psSettings)
 
 	if err != nil {
 		return nil, err

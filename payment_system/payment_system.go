@@ -2,7 +2,6 @@ package payment_system
 
 import (
 	"errors"
-	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 )
 
@@ -45,7 +44,6 @@ type PaymentSystem interface {
 type Settings struct {
 	Url      string
 	Settings interface{}
-	Database dao.Database
 }
 
 type Path struct {
@@ -59,7 +57,7 @@ type CreatePaymentResponse struct {
 	Error       string `json:"error,omitempty"`
 }
 
-func GetPaymentHandler(order *model.Order, config map[string]interface{}, db dao.Database) (PaymentSystem, error) {
+func GetPaymentHandler(order *model.Order, config map[string]interface{}) (PaymentSystem, error) {
 	handler, ok := handlers[order.PaymentMethod.Params.Handler]
 
 	if !ok {
@@ -77,7 +75,6 @@ func GetPaymentHandler(order *model.Order, config map[string]interface{}, db dao
 	s := &Settings{
 		Url:      cMap[paymentSystemSettingsFieldNameCreatePaymentUrl].(string),
 		Settings: cMap[order.PaymentMethod.Params.ExternalId],
-		Database: db,
 	}
 
 	return handler(order, s), nil
