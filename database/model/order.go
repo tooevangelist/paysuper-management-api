@@ -33,9 +33,9 @@ const (
 	OrderStatusRefund                = 8
 	OrderStatusChargeback            = 9
 
-	OrderFilterFieldProjects        = "projects"
+	OrderFilterFieldProjects        = "project[]"
 	OrderFilterFieldId              = "id"
-	OrderFilterFieldPaymentMethods  = "payment_methods"
+	OrderFilterFieldPaymentMethods  = "payment_method[]"
 	OrderFilterFieldCountries       = "countries"
 	OrderFilterFieldStatuses        = "statuses"
 	OrderFilterFieldAccount         = "account"
@@ -47,6 +47,17 @@ const (
 	OrderPaymentCreateRequestFieldOrderId          = "order_id"
 	OrderPaymentCreateRequestFieldOPaymentMethodId = "payment_method_id"
 	OrderPaymentCreateRequestFieldEmail            = "email"
+
+	OrderRevenueDynamicRequestFieldFrom    = "from"
+	OrderRevenueDynamicRequestFieldTo      = "to"
+	OrderRevenueDynamicRequestFieldProject = "project[]"
+	OrderRevenueDynamicRequestFieldPeriod  = "period"
+
+	RevenueDynamicRequestPeriodHour  = "hour"
+	RevenueDynamicRequestPeriodDay   = "day"
+	RevenueDynamicRequestPeriodWeek  = "week"
+	RevenueDynamicRequestPeriodMonth = "month"
+	RevenueDynamicRequestPeriodYear  = "year"
 )
 
 var OrderReservedWords = map[string]bool{
@@ -78,6 +89,14 @@ var OrderStatusesDescription = map[int]string{
 	OrderStatusProjectReject:         "Project reject notification about payment from P1. This payment is candidate to refund.",
 	OrderStatusRefund:                "Payment was refunded to payer",
 	OrderStatusChargeback:            "Customer's chargeback claim was received",
+}
+
+var RevenuePeriods = map[string]bool{
+	RevenueDynamicRequestPeriodHour:  true,
+	RevenueDynamicRequestPeriodDay:   true,
+	RevenueDynamicRequestPeriodWeek:  true,
+	RevenueDynamicRequestPeriodMonth: true,
+	RevenueDynamicRequestPeriodYear:  true,
 }
 
 type PayerData struct {
@@ -258,15 +277,6 @@ type OrderPaginate struct {
 	Items []*OrderSimple `json:"items"`
 }
 
-func (order *Order) IsComplete() bool {
-	return order.Status == OrderStatusProjectComplete
-}
-
-func (order *Order) HasEndedStatus() bool {
-	return order.Status == OrderStatusPaymentSystemReject || order.Status == OrderStatusProjectComplete ||
-		order.Status == OrderStatusProjectReject || order.Status == OrderStatusRefund || order.Status == OrderStatusChargeback
-}
-
 type PaymentMethodsPreparedFormData struct {
 	Amount   float64
 	Currency *Currency
@@ -279,8 +289,27 @@ type OrderPaymentNotification struct {
 }
 
 type RevenueDynamicRequest struct {
-	From    string `query:"from"`
-	To      string `query:"to"`
-	Project []string  `query:"project"`
-	Group   string
+	From    time.Time
+	To      time.Time
+	Project []bson.ObjectId
+	Period  string
+}
+
+func (order *Order) IsComplete() bool {
+	return order.Status == OrderStatusProjectComplete
+}
+
+func (order *Order) HasEndedStatus() bool {
+	return order.Status == OrderStatusPaymentSystemReject || order.Status == OrderStatusProjectComplete ||
+		order.Status == OrderStatusProjectReject || order.Status == OrderStatusRefund || order.Status == OrderStatusChargeback
+}
+
+func (rdr *RevenueDynamicRequest) SetProjectsFromMap(pMap map[bson.ObjectId]string) {
+	var p []bson.ObjectId
+
+	for k := range pMap {
+		p = append(p, k)
+	}
+
+	rdr.Project = p
 }

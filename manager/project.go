@@ -255,7 +255,7 @@ func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model
 	return fixedPackages
 }
 
-func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) (map[bson.ObjectId]string, *model.Merchant, error) {
+func (pm *ProjectManager) FilterProjects(mId string, fProjects []bson.ObjectId) (map[bson.ObjectId]string, *model.Merchant, error) {
 	mProjects := pm.FindProjectsByMerchantId(mId, model.DefaultLimit, model.DefaultOffset)
 
 	if len(mProjects) <= 0 {
@@ -273,7 +273,7 @@ func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) (map[bs
 	}
 
 	for _, p := range fProjects {
-		if _, ok := fp[bson.ObjectIdHex(p)]; ok {
+		if _, ok := fp[p]; ok {
 			continue
 		}
 

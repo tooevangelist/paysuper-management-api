@@ -4,20 +4,26 @@ import (
 	"bytes"
 	"errors"
 	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"io/ioutil"
+	"strconv"
+	"time"
 )
 
 const (
-	binderErrorQueryParamsIsEmpty = "required params not found"
-	binderErrorPeriodIsRequire = "period is required"
+	binderErrorQueryParamsIsEmpty   = "required params not found"
+	binderErrorPeriodIsRequire      = "period is required field"
+	binderErrorFromIsRequire        = "date from is required field"
+	binderErrorToIsRequire          = "date to is required field"
+	binderErrorUnknownRevenuePeriod = "unknown revenue period"
 )
 
 type OrderFormBinder struct{}
 
-type OrderJsonBinder struct {}
+type OrderJsonBinder struct{}
 
-type OrderRevenueDynamicRequestBinder struct {}
+type OrderRevenueDynamicRequestBinder struct{}
 
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	db := new(echo.DefaultBinder)
@@ -75,11 +81,15 @@ func (cb *OrderJsonBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	return
 }
 
-func (cb *OrderRevenueDynamicRequestBinder) Bind(i interface{}, ctx echo.Context) error {
-	period := ctx.Param("period")
+func (cb *OrderRevenueDynamicRequestBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+	period := ctx.Param(model.OrderRevenueDynamicRequestFieldPeriod)
 
 	if period == "" {
 		return errors.New(binderErrorPeriodIsRequire)
+	}
+
+	if _, ok := model.RevenuePeriods[period]; !ok {
+		return errors.New(binderErrorUnknownRevenuePeriod)
 	}
 
 	params := ctx.QueryParams()
@@ -88,5 +98,43 @@ func (cb *OrderRevenueDynamicRequestBinder) Bind(i interface{}, ctx echo.Context
 		return errors.New(binderErrorQueryParamsIsEmpty)
 	}
 
-	return nil
+	if _, ok := params[model.OrderRevenueDynamicRequestFieldFrom]; !ok {
+		return errors.New(binderErrorFromIsRequire)
+	}
+
+	if _, ok := params[model.OrderRevenueDynamicRequestFieldTo]; !ok {
+		return errors.New(binderErrorToIsRequire)
+	}
+
+	s := i.(*model.RevenueDynamicRequest)
+	s.Period = period
+	s.Project = []bson.ObjectId{}
+
+	if projects, ok := params[model.OrderRevenueDynamicRequestFieldProject]; ok {
+		for _, project := range projects {
+			if bson.IsObjectIdHex(project) == false {
+				return errors.New(model.ResponseMessageProjectIdIsInvalid)
+			}
+
+			s.Project = append(s.Project, bson.ObjectIdHex(project))
+		}
+	}
+
+	t, err := strconv.ParseInt(params[model.OrderRevenueDynamicRequestFieldFrom][0], 10, 64)
+
+	if err != nil {
+		return err
+	}
+
+	s.From = time.Unix(t, 0)
+
+	t, err = strconv.ParseInt(params[model.OrderRevenueDynamicRequestFieldTo][0], 10, 64)
+
+	if err != nil {
+		return err
+	}
+
+	s.To = time.Unix(t, 0)
+
+	return
 }

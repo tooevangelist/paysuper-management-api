@@ -9,6 +9,7 @@ const (
 	ResponseMessageInvalidRequestData = "Invalid request data"
 	ResponseMessageAccessDenied       = "Access denied"
 	ResponseMessageNotFound           = "Not found"
+	ResponseMessageProjectIdIsInvalid = "one or more project identifier is invalid"
 )
 
 type Error struct {

@@ -116,11 +116,12 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
-	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+	/*api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningKey:    p.Config.SignatureSecret,
 		SigningMethod: p.Config.Algorithm,
 	}))
-	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
+	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)*/
+	api.Merchant.Identifier = "5bd817f3a5411e000a65c922"
 
 	api.Http.Use(api.LimitOffsetMiddleware)
 	api.Http.Use(middleware.Logger())

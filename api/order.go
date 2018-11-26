@@ -4,6 +4,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"net/http"
 	"net/url"
@@ -202,7 +203,7 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
 
-	p, merchant, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, []string{})
+	p, merchant, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, []bson.ObjectId{})
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, err)
@@ -235,8 +236,8 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param id query string false "order unique identifier"
-// @Param projects query array false "list of projects to get orders filtered by they"
-// @Param payment_methods query array false "list of payment methods to get orders filtered by they"
+// @Param project query array false "list of projects to get orders filtered by they"
+// @Param payment_method query array false "list of payment methods to get orders filtered by they"
 // @Param countries query array false "list of payer countries to get orders filtered by they"
 // @Param statuses query array false "list of orders statuses to get orders filtered by they"
 // @Param account query string false "payer account on the any side of payment process. for example it may be account in project, account in payment system, payer email and etc"
@@ -255,10 +256,16 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 	values := ctx.QueryParams()
 
-	var fp []string
+	var fp []bson.ObjectId
 
 	if fProjects, ok := values[model.OrderFilterFieldProjects]; ok {
-		fp = fProjects
+		for _, project := range fProjects {
+			if bson.IsObjectIdHex(project) == false {
+				return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageProjectIdIsInvalid)
+			}
+
+			fp = append(fp, bson.ObjectIdHex(project))
+		}
 	}
 
 	p, merchant, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, fp)
@@ -317,18 +324,21 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 }
 
 func (oApiV1 *OrderApiV1) getRevenueDynamic(ctx echo.Context) error {
-	//может быть: по проектам, или по мерчанту в целом
-	//группировка по час, дням, месяцам, годам
-	//временной период с по
 	rdr := &model.RevenueDynamicRequest{}
 
-	if err := ctx.Bind(rdr); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+	if err := (&OrderRevenueDynamicRequestBinder{}).Bind(rdr, ctx); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	/*if err := oApiV1.validate.Struct(rdr); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
-	}*/
+	pMap, _, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, rdr.Project)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, err.Error())
+	}
+
+	if len(rdr.Project) <= 0 {
+		rdr.SetProjectsFromMap(pMap)
+	}
 
 	return ctx.JSON(http.StatusOK, rdr)
 }
