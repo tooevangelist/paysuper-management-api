@@ -37,3 +37,7 @@ func (rep *Repository) FindAllOrders(filters bson.M, limit int, offset int) ([]*
 func (rep *Repository) GetOrdersCountByConditions(filters bson.M) (int, error) {
 	return rep.Collection.Find(filters).Count()
 }
+
+func (rep *Repository) GetRevenueDynamic() {
+
+}

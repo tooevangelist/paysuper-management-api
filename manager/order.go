@@ -192,8 +192,12 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	id := bson.NewObjectId()
 
 	nOrder := &model.Order{
-		Id:                     id,
-		ProjectId:              p.Id,
+		Id: id,
+		Project: &model.ProjectOrder{
+			Id:       p.Id,
+			Name:     p.Name,
+			Merchant: p.Merchant,
+		},
 		Description:            fmt.Sprintf(orderDefaultDescription, id.Hex()),
 		ProjectOrderId:         order.OrderId,
 		ProjectAccount:         order.Account,
@@ -251,12 +255,6 @@ func (om *OrderManager) FindById(id string) *model.Order {
 		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)
 	}
 
-	if o != nil {
-		if p := om.projectManager.FindProjectById(o.ProjectId.Hex()); p != nil {
-			o.ProjectData = p
-		}
-	}
-
 	return o
 }
 
@@ -267,7 +265,7 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(id string) (*model.Order,
 		return nil, nil, errors.New(orderErrorNotFound)
 	}
 
-	projectPms, err := om.projectManager.GetProjectPaymentMethods(order.ProjectId)
+	projectPms, err := om.projectManager.GetProjectPaymentMethods(order.Project.Id)
 
 	if err != nil {
 		return nil, nil, err
@@ -492,7 +490,7 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 		pFilter = append(pFilter, k)
 	}
 
-	filter["project_id"] = bson.M{"$in": pFilter}
+	filter["project.id"] = bson.M{"$in": pFilter}
 
 	if len(params.Values) > 0 {
 		f = om.ProcessFilters(params.Values, filter)
@@ -530,8 +528,8 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 		tOrder := &model.OrderSimple{
 			Id: oValue.Id,
 			Project: &model.SimpleItem{
-				Id:   oValue.ProjectId,
-				Name: params.Projects[oValue.ProjectId],
+				Id:   oValue.Project.Id,
+				Name: oValue.Project.Name,
 			},
 			Account:        oValue.ProjectAccount,
 			ProjectOrderId: oValue.ProjectOrderId,
@@ -729,7 +727,7 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
-	handler, err := payment_system.GetPaymentHandler(o, psSettings)
+	handler, err := payment_system.GetPaymentHandler(o, psSettings, om.Database)
 
 	if err != nil {
 		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
@@ -749,7 +747,7 @@ func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification
 		return nil, errors.New(fmt.Sprintf(orderErrorOrderAlreadyHasEndedStatus, o.Status))
 	}
 
-	handler, err := payment_system.GetPaymentHandler(o, psSettings)
+	handler, err := payment_system.GetPaymentHandler(o, psSettings, om.Database)
 
 	if err != nil {
 		return nil, err
@@ -813,7 +811,7 @@ func (om *OrderManager) processNotifyPaymentAmounts(o *model.Order) (*model.Orde
 
 	o.AmountOutMerchantAccountingCurrency, err = om.currencyRateManager.convert(
 		o.PaymentMethodIncomeCurrency.CodeInt,
-		o.ProjectData.Merchant.Currency.CodeInt,
+		o.Project.Merchant.Currency.CodeInt,
 		o.PaymentMethodIncomeAmount,
 	)
 
@@ -855,7 +853,7 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 		return o, nil
 	}
 
-	p := om.projectManager.FindProjectById(o.ProjectId.Hex())
+	p := om.projectManager.FindProjectById(o.Project.Id.Hex())
 
 	if p == nil {
 		return nil, errors.New(orderErrorProjectNotFound)

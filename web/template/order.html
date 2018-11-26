@@ -18,7 +18,7 @@
 
 <div class="container">
     <div class="details">
-        <div class="project-title">{{ .Order.ProjectData.Name }}</div>
+        <div class="project-title">{{ .Order.Project.Name }}</div>
         <div class="amount">
             {{ if .Order.PaymentMethod }}
                 {{ .Order.PaymentMethodOutcomeAmount }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}

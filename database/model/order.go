@@ -140,8 +140,8 @@ type OrderScalar struct {
 type Order struct {
 	// unique order identifier in Protocol One
 	Id bson.ObjectId `bson:"_id" json:"id"`
-	// project unique identifier in Protocol One payment solution
-	ProjectId bson.ObjectId `bson:"project_id" json:"project_id"`
+	// object described main entities of project in Protocol One payment solution
+	Project *ProjectOrder `bson:"project" json:"project"`
 	// unique order identifier in project. if was send in create order process
 	ProjectOrderId *string `bson:"project_order_id" json:"project_order_id"`
 	// user unique account in project
@@ -177,8 +177,8 @@ type Order struct {
 	// order amount received from payment system in notification request
 	PaymentMethodIncomeAmount float64 `bson:"pm_income_amount" json:"pm_income_amount"`
 	// order currency received from payment system in notification request
-	PaymentMethodIncomeCurrency *Currency `bson:"pm_income_currency" json:"pm_income_currency"`
-	PaymentMethodIncomeCurrencyA3 string `bson:"-" json:"-"`
+	PaymentMethodIncomeCurrency   *Currency `bson:"pm_income_currency" json:"pm_income_currency"`
+	PaymentMethodIncomeCurrencyA3 string    `bson:"-" json:"-"`
 	// payment system fee for payment operation
 	PaymentMethodFee float64 `bson:"pm_fee" json:"pm_fee"`
 	// date of ended payment operation in payment system
@@ -208,7 +208,7 @@ type Order struct {
 	PaymentRequisites map[string]string  `bson:"payment_requisites" json:"-"`
 
 	PaymentMethodsPreparedFormData map[string]*PaymentMethodsPreparedFormData `bson:"-" json:"-"`
-	ProjectData                    *Project                                   `bson:"-" json:"-"`
+	//ProjectData                    *Project                                   `bson:"-" json:"-"`
 }
 
 type OrderUrl struct {
@@ -276,4 +276,11 @@ type OrderPaymentNotification struct {
 	Id         string
 	Request    interface{}
 	RawRequest string
+}
+
+type RevenueDynamicRequest struct {
+	From    string `query:"from"`
+	To      string `query:"to"`
+	Project []string  `query:"project"`
+	Group   string
 }

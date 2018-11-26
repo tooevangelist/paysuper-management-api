@@ -61,6 +61,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 
 	api.accessRouteGroup.GET("/order", oApiV1.getOrders)
 	api.accessRouteGroup.GET("/order/:id", oApiV1.getOrderJson)
+	api.accessRouteGroup.GET("/order/revenue_dynamic/:period", oApiV1.getRevenueDynamic)
 
 	return api
 }
@@ -145,7 +146,7 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	rUrl := "https://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
+	rUrl := "http://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
 
 	ou := &model.OrderUrl{OrderUrl: rUrl}
 
@@ -307,4 +308,21 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(httpStatus, resp)
+}
+
+func (oApiV1 *OrderApiV1) getRevenueDynamic(ctx echo.Context) error {
+	//может быть: по проектам, или по мерчанту в целом
+	//группировка по час, дням, месяцам, годам
+	//временной период с по
+	rdr := &model.RevenueDynamicRequest{}
+
+	if err := ctx.Bind(rdr); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	/*if err := oApiV1.validate.Struct(rdr); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
+	}*/
+
+	return ctx.JSON(http.StatusOK, rdr)
 }

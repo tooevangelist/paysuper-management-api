@@ -6,6 +6,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/config"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
@@ -110,14 +111,14 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
-	/*api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningKey:    p.Config.SignatureSecret,
 		SigningMethod: p.Config.Algorithm,
 	}))
-	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)*/
-	api.Merchant = Merchant{
+	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
+	/*api.Merchant = Merchant{
 		Identifier: "5bd817f3a5411e000a65c922",
-	}
+	}*/
 
 	api.Http.Use(api.LimitOffsetMiddleware)
 	api.Http.Use(middleware.Logger())
@@ -169,7 +170,7 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, ctx echo.C
 }
 
 func (api *Api) InitWebHooks() {
-	/*var headerToString = func(headers map[string][]string) string {
+	var headerToString = func(headers map[string][]string) string {
 		var out string
 
 		for k, v := range headers {
@@ -177,12 +178,12 @@ func (api *Api) InitWebHooks() {
 		}
 
 		return out
-	}*/
+	}
 
 	whGroup := api.Http.Group(apiWebHookGroupPath)
 	whGroup.Use(api.WebHookRequestLoggerMiddleware)
 	whGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
-		/*data := []interface{}{
+		data := []interface{}{
 			"request_headers", headerToString(ctx.Request().Header),
 			"request_body", string(reqBody),
 			"response_headers", headerToString(ctx.Response().Header()),
@@ -192,13 +193,13 @@ func (api *Api) InitWebHooks() {
 		api.logger.Infow(ctx.Path(), data...)
 
 		log := &model.Log{
-			RequestHeaders: headerToString(ctx.Request().Header),
-			RequestBody: string(reqBody),
+			RequestHeaders:  headerToString(ctx.Request().Header),
+			RequestBody:     string(reqBody),
 			ResponseHeaders: headerToString(ctx.Response().Header()),
-			ResponseBody: string(resBody),
+			ResponseBody:    string(resBody),
 		}
 
-		(&manager.LoggerManager{Database: api.database, Logger: api.logger}).Insert(log)*/
+		(&manager.LoggerManager{Database: api.database, Logger: api.logger}).Insert(log)
 	}))
 
 	wh := webhook.InitWebHook(
