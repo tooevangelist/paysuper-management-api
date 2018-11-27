@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"time"
 )
@@ -58,6 +59,15 @@ const (
 	RevenueDynamicRequestPeriodWeek  = "week"
 	RevenueDynamicRequestPeriodMonth = "month"
 	RevenueDynamicRequestPeriodYear  = "year"
+
+	RevenueDynamicFacetFieldId            = "_id"
+	RevenueDynamicFacetFieldTotal         = "total"
+	RevenueDynamicFacetFieldRevenue       = "revenue"
+	RevenueDynamicFacetFieldRefund        = "refund"
+	RevenueDynamicFacetFieldPointsRevenue = "points_revenue"
+	RevenueDynamicFacetFieldPointsRefund  = "points_refund"
+	RevenueDynamicFacetFieldCount         = "count"
+	RevenueDynamicFacetFieldAvg           = "avg"
 )
 
 var OrderReservedWords = map[string]bool{
@@ -295,6 +305,31 @@ type RevenueDynamicRequest struct {
 	Period  string
 }
 
+type RevenueDynamicResult struct {
+	Points  []*RevenueDynamicPoint  `json:"points"`
+	Revenue *RevenueDynamicMainData `json:"revenue"`
+	Refund  *RevenueDynamicMainData `json:"refund"`
+}
+
+type RevenueDynamicPoint struct {
+	Date   *RevenueDynamicPointDate `json:"date"`
+	Amount float64                  `json:"amount"`
+}
+
+type RevenueDynamicPointDate struct {
+	Year  int `json:"year"`
+	Month int `json:"month,omitempty"`
+	Week  int `json:"week,omitempty"`
+	Day   int `json:"day,omitempty"`
+	Hour  int `json:"hour,omitempty"`
+}
+
+type RevenueDynamicMainData struct {
+	Count int     `json:"count"`
+	Total float64 `json:"total"`
+	Avg   float64 `json:"avg"`
+}
+
 func (order *Order) IsComplete() bool {
 	return order.Status == OrderStatusProjectComplete
 }
@@ -312,4 +347,8 @@ func (rdr *RevenueDynamicRequest) SetProjectsFromMap(pMap map[bson.ObjectId]stri
 	}
 
 	rdr.Project = p
+}
+
+func (pd *RevenueDynamicPointDate) String() string {
+	return fmt.Sprintf("%d%d%d%d%d", pd.Year, pd.Month, pd.Week, pd.Day, pd.Hour)
 }

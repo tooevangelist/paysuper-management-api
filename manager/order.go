@@ -890,3 +890,92 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 
 	return o, nil
 }
+
+func (om *OrderManager) GetRevenueDynamic(rdr *model.RevenueDynamicRequest) (*model.RevenueDynamicResult, error) {
+	res, err := om.Database.Repository(TableOrder).GetRevenueDynamic(rdr)
+
+	if err != nil {
+		return nil, err
+	}
+
+	refPoints := make(map[string]float64)
+
+	var revPoints []*model.RevenueDynamicPoint
+
+	pRefund := res[0][model.RevenueDynamicFacetFieldPointsRefund].([]interface{})
+	pRevenue := res[0][model.RevenueDynamicFacetFieldPointsRevenue].([]interface{})
+
+	for _, v := range pRefund {
+		vm := v.(map[string]interface{})
+
+		vmId := vm[model.RevenueDynamicFacetFieldId].(map[string]interface{})
+		vmTotal := vm[model.RevenueDynamicFacetFieldTotal].(float64)
+
+		refPoints[om.getRevenueDynamicPointsKey(vmId).String()] = FormatAmount(vmTotal)
+	}
+
+	for _, v := range pRevenue {
+		vm := v.(map[string]interface{})
+
+		vmId := vm[model.RevenueDynamicFacetFieldId].(map[string]interface{})
+		vmTotal := vm[model.RevenueDynamicFacetFieldTotal].(float64)
+
+		revPointDate := om.getRevenueDynamicPointsKey(vmId)
+		refVal, ok := refPoints[revPointDate.String()]
+
+		revPoint := &model.RevenueDynamicPoint{
+			Date: revPointDate,
+		}
+
+		if ok {
+			revPoint.Amount = FormatAmount(vmTotal - refVal)
+		} else {
+			revPoint.Amount = FormatAmount(vmTotal)
+		}
+
+		revPoints = append(revPoints, revPoint)
+	}
+
+	rev := res[0][model.RevenueDynamicFacetFieldRevenue].([]interface{})[0].(map[string]interface{})
+	ref := res[0][model.RevenueDynamicFacetFieldRefund].([]interface{})[0].(map[string]interface{})
+
+	rd := &model.RevenueDynamicResult{
+		Points: revPoints,
+		Revenue: &model.RevenueDynamicMainData{
+			Count: rev[model.RevenueDynamicFacetFieldCount].(int),
+			Total: FormatAmount(rev[model.RevenueDynamicFacetFieldTotal].(float64)),
+			Avg:   FormatAmount(rev[model.RevenueDynamicFacetFieldAvg].(float64)),
+		},
+		Refund: &model.RevenueDynamicMainData{
+			Count: ref[model.RevenueDynamicFacetFieldCount].(int),
+			Total: FormatAmount(ref[model.RevenueDynamicFacetFieldTotal].(float64)),
+			Avg:   FormatAmount(ref[model.RevenueDynamicFacetFieldAvg].(float64)),
+		},
+	}
+
+	return rd, err
+}
+
+func (om *OrderManager) getRevenueDynamicPointsKey(pointId map[string]interface{}) *model.RevenueDynamicPointDate {
+	revPointDate := &model.RevenueDynamicPointDate{
+		Year: pointId[model.RevenueDynamicRequestPeriodYear].(int),
+	}
+
+	if val, ok := pointId[model.RevenueDynamicRequestPeriodMonth]; ok {
+		revPointDate.Month = val.(int)
+	}
+
+	if val, ok := pointId[model.RevenueDynamicRequestPeriodWeek]; ok {
+		revPointDate.Week = val.(int)
+	}
+
+	if val, ok := pointId[model.RevenueDynamicRequestPeriodDay]; ok {
+		revPointDate.Day = val.(int)
+	}
+
+	if val, ok := pointId[model.RevenueDynamicRequestPeriodHour]; ok {
+		revPointDate.Hour = val.(int)
+	}
+
+	return revPointDate
+}

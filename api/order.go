@@ -340,5 +340,11 @@ func (oApiV1 *OrderApiV1) getRevenueDynamic(ctx echo.Context) error {
 		rdr.SetProjectsFromMap(pMap)
 	}
 
-	return ctx.JSON(http.StatusOK, rdr)
+	res, err := oApiV1.orderManager.GetRevenueDynamic(rdr)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, res)
 }
