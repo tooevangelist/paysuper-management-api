@@ -323,6 +323,21 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 	return ctx.JSON(httpStatus, resp)
 }
 
+// @Summary Get revenue dynamics
+// @Description Get revenue dynamics by merchant or project
+// @Tags Payment Order
+// @Accept application/x-www-form-urlencoded
+// @Produce json
+// @Param period path string true "period to group revenue dynamics data. now allowed next values: hour, day, week, month, year"
+// @Param from query int true "period start in unix timestamp"
+// @Param to query array true "period end in unix timestamp"
+// @Param project query array false "list of projects to calculate dynamics of revenue"
+// @Success 200 {object} model.RevenueDynamicResult "OK"
+// @Failure 400 {object} model.Error "Invalid request data"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 403 {object} model.Error "Access denied"
+// @Failure 500 {object} model.Error "Object with error message"
+// @Router /api/v1/s/order/revenue_dynamic/{period} [get]
 func (oApiV1 *OrderApiV1) getRevenueDynamic(ctx echo.Context) error {
 	rdr := &model.RevenueDynamicRequest{}
 

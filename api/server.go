@@ -111,17 +111,17 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}
 	api.Http.Renderer = renderer
 	api.Http.Static("/", "web/static")
+	api.Http.Static("/spec", "spec")
 
 	api.validate.RegisterStructValidation(ProjectStructValidator, model.ProjectScalar{})
 	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
-	/*api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningKey:    p.Config.SignatureSecret,
 		SigningMethod: p.Config.Algorithm,
 	}))
-	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)*/
-	api.Merchant.Identifier = "5bd817f3a5411e000a65c922"
+	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
 
 	api.Http.Use(api.LimitOffsetMiddleware)
 	api.Http.Use(middleware.Logger())

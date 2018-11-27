@@ -169,6 +169,10 @@ definitions:
         description: |
           is order create by json request
         type: boolean
+      description:
+        description: |
+          order description
+        type: string
       fixed_package:
         $ref: '#/definitions/model.OrderFixedPackage'
         description: |
@@ -183,6 +187,11 @@ definitions:
         description: |
           information about payer, for example: ip, email,phone and etc
         type: object
+      payment_method:
+        $ref: '#/definitions/model.OrderPaymentMethod'
+        description: |
+          payment method unique identifier
+        type: object
       pm_account:
         description: |
           account of payer in payment system
@@ -191,10 +200,6 @@ definitions:
         description: |
           payment system fee for payment operation
         type: number
-      pm_id:
-        description: |
-          payment method unique identifier
-        type: string
       pm_income_amount:
         description: |
           order amount received from payment system in notification request
@@ -229,6 +234,11 @@ definitions:
         description: |
           any params received in request of payment system about payment
         type: object
+      project:
+        $ref: '#/definitions/model.ProjectOrder'
+        description: |
+          object described main entities of project in Protocol One payment solution
+        type: object
       project_account:
         description: |
           user unique account in project
@@ -237,10 +247,6 @@ definitions:
         description: |
           fee is charged with the project for the operation
         type: number
-      project_id:
-        description: |
-          project unique identifier in Protocol One payment solution
-        type: string
       project_income_amount:
         description: |
           order amount received from project
@@ -301,6 +307,21 @@ definitions:
         items:
           $ref: '#/definitions/model.OrderSimple'
         type: array
+    type: object
+  model.OrderPaymentMethod:
+    properties:
+      group_alias:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      params:
+        $ref: '#/definitions/model.PaymentMethodParams'
+        type: object
+      payment_system:
+        $ref: '#/definitions/model.PaymentSystem'
+        type: object
     type: object
   model.OrderScalar:
     properties:
@@ -373,9 +394,9 @@ definitions:
           URL for payment data verification request to project. This field can be send if it allowed in project admin panel
         type: string
     required:
-    - project
     - amount
     - account
+    - project
     type: object
   model.OrderSimple:
     properties:
@@ -502,6 +523,36 @@ definitions:
           payer timezone name, get from ip geo location
         type: string
     type: object
+  model.PaymentMethodParams:
+    properties:
+      external_id:
+        type: string
+      handler:
+        type: string
+      other:
+        type: object
+      terminal:
+        type: string
+    type: object
+  model.PaymentSystem:
+    properties:
+      accounting_currency:
+        $ref: '#/definitions/model.Currency'
+        type: object
+      accounting_period:
+        type: string
+      country:
+        $ref: '#/definitions/model.Country'
+        type: object
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+    type: object
   model.Project:
     properties:
       callback_currency:
@@ -599,6 +650,16 @@ definitions:
           default url to redirect user after successfully completed payment
         type: string
     type: object
+  model.ProjectOrder:
+    properties:
+      id:
+        type: string
+      merchant:
+        $ref: '#/definitions/model.Merchant'
+        type: object
+      name:
+        type: string
+    type: object
   model.ProjectScalar:
     properties:
       callback_currency:
@@ -682,8 +743,51 @@ definitions:
           default url to redirect user after successfully completed payment
         type: string
     required:
-    - callback_protocol
     - name
+    - callback_protocol
+    type: object
+  model.RevenueDynamicMainData:
+    properties:
+      avg:
+        type: number
+      count:
+        type: integer
+      total:
+        type: number
+    type: object
+  model.RevenueDynamicPoint:
+    properties:
+      amount:
+        type: number
+      date:
+        $ref: '#/definitions/model.RevenueDynamicPointDate'
+        type: object
+    type: object
+  model.RevenueDynamicPointDate:
+    properties:
+      day:
+        type: integer
+      hour:
+        type: integer
+      month:
+        type: integer
+      week:
+        type: integer
+      year:
+        type: integer
+    type: object
+  model.RevenueDynamicResult:
+    properties:
+      points:
+        items:
+          $ref: '#/definitions/model.RevenueDynamicPoint'
+        type: array
+      refund:
+        $ref: '#/definitions/model.RevenueDynamicMainData'
+        type: object
+      revenue:
+        $ref: '#/definitions/model.RevenueDynamicMainData'
+        type: object
     type: object
   model.SimpleCurrency:
     properties:
@@ -1055,11 +1159,11 @@ paths:
         type: string
       - description: list of projects to get orders filtered by they
         in: query
-        name: projects
+        name: project
         type: array
       - description: list of payment methods to get orders filtered by they
         in: query
-        name: payment_methods
+        name: payment_method
         type: array
       - description: list of payer countries to get orders filtered by they
         in: query
@@ -1174,6 +1278,63 @@ paths:
             $ref: '#/definitions/model.Error'
             type: object
       summary: Get order data
+      tags:
+      - Payment Order
+  /api/v1/s/order/revenue_dynamic/{period}:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Get revenue dynamics by merchant or project
+      parameters:
+      - description: 'period to group revenue dynamics data. now allowed next values:
+          hour, day, week, month, year'
+        in: path
+        name: period
+        required: true
+        type: string
+      - description: period start in unix timestamp
+        in: query
+        name: from
+        required: true
+        type: integer
+      - description: period end in unix timestamp
+        in: query
+        name: to
+        required: true
+        type: array
+      - description: list of projects to calculate dynamics of revenue
+        in: query
+        name: project
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RevenueDynamicResult'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+      summary: Get revenue dynamics
       tags:
       - Payment Order
   /api/v1/s/project:

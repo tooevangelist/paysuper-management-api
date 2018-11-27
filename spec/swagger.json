@@ -486,13 +486,13 @@
                     {
                         "type": "array",
                         "description": "list of projects to get orders filtered by they",
-                        "name": "projects",
+                        "name": "project",
                         "in": "query"
                     },
                     {
                         "type": "array",
                         "description": "list of payment methods to get orders filtered by they",
-                        "name": "payment_methods",
+                        "name": "payment_method",
                         "in": "query"
                     },
                     {
@@ -567,6 +567,87 @@
                     },
                     "404": {
                         "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Object with error message",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/s/order/revenue_dynamic/{period}": {
+            "get": {
+                "description": "Get revenue dynamics by merchant or project",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment Order"
+                ],
+                "summary": "Get revenue dynamics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "period to group revenue dynamics data. now allowed next values: hour, day, week, month, year",
+                        "name": "period",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "period start in unix timestamp",
+                        "name": "from",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "description": "period end in unix timestamp",
+                        "name": "to",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "description": "list of projects to calculate dynamics of revenue",
+                        "name": "project",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.RevenueDynamicResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/model.Error"
@@ -1391,6 +1472,10 @@
                     "description": "is order create by json request\n",
                     "type": "boolean"
                 },
+                "description": {
+                    "description": "order description\n",
+                    "type": "string"
+                },
                 "fixed_package": {
                     "description": "fixed package which buy payer\n",
                     "type": "object",
@@ -1405,6 +1490,11 @@
                     "type": "object",
                     "$ref": "#/definitions/model.PayerData"
                 },
+                "payment_method": {
+                    "description": "payment method unique identifier\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderPaymentMethod"
+                },
                 "pm_account": {
                     "description": "account of payer in payment system\n",
                     "type": "string"
@@ -1412,10 +1502,6 @@
                 "pm_fee": {
                     "description": "payment system fee for payment operation\n",
                     "type": "number"
-                },
-                "pm_id": {
-                    "description": "payment method unique identifier\n",
-                    "type": "string"
                 },
                 "pm_income_amount": {
                     "description": "order amount received from payment system in notification request\n",
@@ -1451,6 +1537,11 @@
                     "description": "any params received in request of payment system about payment\n",
                     "type": "object"
                 },
+                "project": {
+                    "description": "object described main entities of project in Protocol One payment solution\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.ProjectOrder"
+                },
                 "project_account": {
                     "description": "user unique account in project\n",
                     "type": "string"
@@ -1458,10 +1549,6 @@
                 "project_fee": {
                     "description": "fee is charged with the project for the operation\n",
                     "type": "number"
-                },
-                "project_id": {
-                    "description": "project unique identifier in Protocol One payment solution\n",
-                    "type": "string"
                 },
                 "project_income_amount": {
                     "description": "order amount received from project\n",
@@ -1535,12 +1622,34 @@
                 }
             }
         },
+        "model.OrderPaymentMethod": {
+            "type": "object",
+            "properties": {
+                "group_alias": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "params": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.PaymentMethodParams"
+                },
+                "payment_system": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.PaymentSystem"
+                }
+            }
+        },
         "model.OrderScalar": {
             "type": "object",
             "required": [
-                "project",
                 "amount",
-                "account"
+                "account",
+                "project"
             ],
             "properties": {
                 "account": {
@@ -1746,6 +1855,51 @@
                 }
             }
         },
+        "model.PaymentMethodParams": {
+            "type": "object",
+            "properties": {
+                "external_id": {
+                    "type": "string"
+                },
+                "handler": {
+                    "type": "string"
+                },
+                "other": {
+                    "type": "object"
+                },
+                "terminal": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.PaymentSystem": {
+            "type": "object",
+            "properties": {
+                "accounting_currency": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.Currency"
+                },
+                "accounting_period": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.Country"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Project": {
             "type": "object",
             "properties": {
@@ -1847,11 +2001,26 @@
                 }
             }
         },
+        "model.ProjectOrder": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "merchant": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.Merchant"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "model.ProjectScalar": {
             "type": "object",
             "required": [
-                "callback_protocol",
-                "name"
+                "name",
+                "callback_protocol"
             ],
             "properties": {
                 "callback_currency": {
@@ -1935,6 +2104,71 @@
                 "url_redirect_success": {
                     "description": "default url to redirect user after successfully completed payment\n",
                     "type": "string"
+                }
+            }
+        },
+        "model.RevenueDynamicMainData": {
+            "type": "object",
+            "properties": {
+                "avg": {
+                    "type": "number"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.RevenueDynamicPoint": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "date": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.RevenueDynamicPointDate"
+                }
+            }
+        },
+        "model.RevenueDynamicPointDate": {
+            "type": "object",
+            "properties": {
+                "day": {
+                    "type": "integer"
+                },
+                "hour": {
+                    "type": "integer"
+                },
+                "month": {
+                    "type": "integer"
+                },
+                "week": {
+                    "type": "integer"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.RevenueDynamicResult": {
+            "type": "object",
+            "properties": {
+                "points": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.RevenueDynamicPoint"
+                    }
+                },
+                "refund": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.RevenueDynamicMainData"
+                },
+                "revenue": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.RevenueDynamicMainData"
                 }
             }
         },
