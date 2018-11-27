@@ -18,6 +18,8 @@ const (
 	TableOrder         = "order"
 	TableCurrencyRate  = "currency_rate"
 	TableLog           = "log"
+	TableVat           = "vat"
+	TableCommission    = "commission"
 
 	errorMessageMask = "Field validation for '%s' failed on the '%s' tag"
 )

@@ -40,6 +40,13 @@ type SimpleCurrency struct {
 	Name *Name `json:"name"`
 }
 
+type SimpleCountry struct {
+	CodeInt int    `bson:"code_int" json:"code_int"`
+	CodeA2  string `bson:"code_a2" json:"code_a2"`
+	CodeA3  string `bson:"code_a3" json:"code_a3"`
+	Name    *Name  `bson:"code_name" json:"name"`
+}
+
 type OrderSimpleAmountObject struct {
 	// amount value
 	Amount float64 `json:"amount"`
