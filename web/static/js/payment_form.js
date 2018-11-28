@@ -20,14 +20,6 @@ $(function() {
         let vat = $pmItem.first().data('vat');
         let commission = $pmItem.first().data('commission');
 
-        if (vat) {
-            amount += vat;
-        }
-
-        if (commission) {
-            amount += commission;
-        }
-
         $amountContainer.html(amount + ' ' + currency);
 
         if (vat || commission) {
@@ -66,14 +58,6 @@ $(function() {
         let currency = $(this).data('currency');
         let vat = $(this).data('vat');
         let commission = $(this).data('commission');
-
-        if (vat) {
-            amount += vat;
-        }
-
-        if (commission) {
-            amount += commission;
-        }
 
         $amountContainer.html(amount + ' ' + currency);
 

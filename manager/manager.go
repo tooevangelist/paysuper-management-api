@@ -30,7 +30,7 @@ type Manager struct {
 }
 
 func FormatAmount(amount float64) float64 {
-	return math.Floor(amount*100) / 100
+	return math.Ceil(amount*100) / 100
 }
 
 func GetFirstValidationError(err error) string {

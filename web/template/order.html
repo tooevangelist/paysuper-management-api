@@ -67,7 +67,7 @@
                      data-identifier="{{ BsonObjectIdToString $pm.Id }}"
 
                     {{ if $.Order.Project.Merchant.IsVatEnabled }}
-                        data-vat="{{ $.Order.VatAmount }}"
+                        data-vat="{{ $prepData.Vat }}"
                     {{ end }}
 
                     {{ if $.Order.Project.Merchant.IsCommissionToUserEnabled }}

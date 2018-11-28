@@ -297,6 +297,7 @@ type PaymentMethodsPreparedFormData struct {
 	Amount                 float64
 	Currency               *Currency
 	ToUserCommissionAmount float64
+	Vat                    float64
 }
 
 type OrderPaymentNotification struct {
