@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
-	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 )
 
@@ -23,16 +22,16 @@ func InitVatManager(database dao.Database, logger *zap.SugaredLogger) *VatManage
 	return vm
 }
 
-func (vm *VatManager) CalculateVat(geo *geoip2.City, amount float64) (float64, error) {
+func (vm *VatManager) CalculateVat(countryCodeA2 string, subdivision string, amount float64) (float64, error) {
 	var vat *model.Vat
 	var err error
 
-	vsFlag, ok := model.VatBySubdivisionCountries[geo.Country.IsoCode]
+	vsFlag, ok := model.VatBySubdivisionCountries[countryCodeA2]
 
-	if !ok || vsFlag == false || geo.Subdivisions[0].IsoCode == "" {
-		vat, err = vm.Database.Repository(TableVat).FindVatByCountry(geo.Country.IsoCode)
+	if !ok || vsFlag == false || subdivision == "" {
+		vat, err = vm.Database.Repository(TableVat).FindVatByCountry(countryCodeA2)
 	} else {
-		vat, err = vm.Database.Repository(TableVat).FindVatByCountryAndSubdivision(geo.Country.IsoCode, geo.Subdivisions[0].IsoCode)
+		vat, err = vm.Database.Repository(TableVat).FindVatByCountryAndSubdivision(countryCodeA2, subdivision)
 	}
 
 	if err != nil {

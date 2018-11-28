@@ -195,21 +195,22 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		// temporary variable to prevent to mutation of amount which will send to payment method
 		pmOutAmount := pmOutcomeData.amount
 
+		// calculate commissions to selected payment method
+		commissions, err = om.commissionManager.CalculateCommission(p.Id, pm.Id, pmOutcomeData.amount)
+
+		if err != nil {
+			return nil, err
+		}
+
 		// if merchant enable add commissions to payer and we're know payment method
 		// then calculate commissions for payment
 		if p.Merchant.IsCommissionToUserEnabled == true {
-			commissions, err = om.commissionManager.CalculateCommission(p.Id, pm.Id, pmOutcomeData.amount)
-
-			if err != nil {
-				return nil, err
-			}
-
 			pmOutAmount += commissions.ToUserCommission
 		}
 
 		// if merchant enable VAT calculation then we're calculate VAT for payer
 		if p.Merchant.IsVatEnabled == true {
-			vatAmount, err = om.vatManager.CalculateVat(gRecord, pmOutcomeData.amount)
+			vatAmount, err = om.vatManager.CalculateVat(gRecord.Country.IsoCode, gRecord.Subdivisions[0].IsoCode, pmOutcomeData.amount)
 
 			if err != nil {
 				return nil, err
@@ -260,6 +261,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 			CountryCodeA2: gRecord.Country.IsoCode,
 			CountryName:   &model.Name{EN: gRecord.Country.Names["en"], RU: gRecord.Country.Names["ru"]},
 			City:          &model.Name{EN: gRecord.City.Names["en"], RU: gRecord.City.Names["ru"]},
+			Subdivision:   gRecord.Subdivisions[0].IsoCode,
 			Timezone:      gRecord.Location.TimeZone,
 			Phone:         order.PayerPhone,
 			Email:         order.PayerEmail,
@@ -292,7 +294,10 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 			nOrder.ProjectFeeAmount = FormatAmount(commissions.PspCommission + commissions.PMCommission)
 			nOrder.PaymentMethodFeeAmount = FormatAmount(commissions.PMCommission)
 			nOrder.PspFeeAmount = FormatAmount(commissions.PspCommission)
-			nOrder.ToPayerFeeAmount = FormatAmount(commissions.ToUserCommission)
+
+			if p.Merchant.IsCommissionToUserEnabled == true {
+				nOrder.ToPayerFeeAmount = FormatAmount(commissions.ToUserCommission)
+			}
 		}
 	}
 
@@ -357,14 +362,7 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(id string) (*model.Order,
 
 		// if merchant enable VAT calculation then we're calculate VAT for payer
 		if order.Project.Merchant.IsVatEnabled == true {
-			ip := net.ParseIP(order.PayerData.Ip)
-			gRecord, err := om.geoDbReader.City(ip)
-
-			if err != nil {
-				return nil, nil, errors.New(orderErrorPayerRegionUnknown)
-			}
-
-			vat, err := om.vatManager.CalculateVat(gRecord, pmPreparedData.Amount)
+			vat, err := om.vatManager.CalculateVat(order.PayerData.CountryCodeA2, order.PayerData.Subdivision, pmPreparedData.Amount)
 
 			if err != nil {
 				return nil, nil, err
@@ -964,24 +962,43 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 		paymentMethod: pm,
 	}
 
-	// if merchant enable VAT calculation then we're add VAT to amount
-	if p.Merchant.IsVatEnabled == true {
-		check.order.Amount = check.order.Amount + o.VatAmount
-	}
-
-	// if we're don't know payment method when was create order then we're set commission's data to order now
-	commissions, err := om.commissionManager.CalculateCommission(p.Id, pm.Id, o.ProjectIncomeAmount)
-
-	// if merchant enable add commissions to amount
-	if p.Merchant.IsCommissionToUserEnabled == true {
-		check.order.Amount = check.order.Amount + commissions.ToUserCommission
-	}
-
 	pmOutData, err := om.checkPaymentMethodLimits(check)
 
 	if err != nil {
 		return nil, err
 	}
+
+	// temporary variable to prevent to mutation of amount which will send to payment method
+	pmOutAmount := pmOutData.amount
+
+	// if payment method wasn't send in request of order create then we're calculate commissions for selected on
+	// form payment method
+	commissions, err := om.commissionManager.CalculateCommission(o.Project.Id, pm.Id, pmOutData.amount)
+
+	// if commission to user enabled for merchant
+	if o.Project.Merchant.IsCommissionToUserEnabled == true {
+		if err != nil {
+			return nil, err
+		}
+
+		pmOutAmount += commissions.ToUserCommission
+		o.ToPayerFeeAmount = FormatAmount(commissions.ToUserCommission)
+	}
+
+	// if merchant enable VAT to user and payment method wasn't send in request of order create
+	// then we're calculate VAT for selected on form payment method
+	if o.Project.Merchant.IsVatEnabled == true {
+		vat, err := om.vatManager.CalculateVat(o.PayerData.CountryCodeA2, o.PayerData.Subdivision, pmOutData.amount)
+
+		if err != nil {
+			return nil, err
+		}
+
+		pmOutAmount += vat
+		o.VatAmount = FormatAmount(vat)
+	}
+
+	pmOutData.amount = pmOutAmount
 
 	o.PaymentMethod = &model.OrderPaymentMethod{
 		Id:            pm.Id,
@@ -993,10 +1010,10 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 
 	o.PaymentMethodOutcomeAmount = FormatAmount(pmOutData.amount)
 	o.PaymentMethodOutcomeCurrency = pmOutData.currency
+
 	o.ProjectFeeAmount = FormatAmount(commissions.PspCommission + commissions.PMCommission)
 	o.PaymentMethodFeeAmount = FormatAmount(commissions.PMCommission)
 	o.PspFeeAmount = FormatAmount(commissions.PspCommission)
-	o.ToPayerFeeAmount = FormatAmount(commissions.ToUserCommission)
 
 	return o, nil
 }

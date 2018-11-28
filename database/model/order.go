@@ -118,6 +118,8 @@ type PayerData struct {
 	CountryName *Name `bson:"country_name" json:"country_name"`
 	// payer city names, get from ip geo location
 	City *Name `bson:"city" json:"city"`
+	// payer subdivision code by ISO-3166-2
+	Subdivision string `bson:"subdivision" json:"subdivision"`
 	// payer timezone name, get from ip geo location
 	Timezone string `bson:"timezone" json:"timezone"`
 	// payer phone from create order request
