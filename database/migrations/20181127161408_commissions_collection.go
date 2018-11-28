@@ -13,7 +13,7 @@ const (
 	pspCommission = 1.5
 )
 
-var pmCommissions = map[string]float32{
+var pmCommissions = map[string]float64{
 	"bank_card": 3,
 	"qiwi":      5,
 	"webmoney":  2,

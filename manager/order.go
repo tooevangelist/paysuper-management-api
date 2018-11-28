@@ -65,6 +65,7 @@ type OrderManager struct {
 	currencyManager        *CurrencyManager
 	pspAccountingCurrency  *model.Currency
 	paymentSystemsSettings *payment_system.PaymentSystemSetting
+	vatManager             *VatManager
 }
 
 type check struct {
@@ -103,6 +104,7 @@ func InitOrderManager(
 		currencyRateManager:    InitCurrencyRateManager(database, logger),
 		currencyManager:        InitCurrencyManager(database, logger),
 		paymentSystemsSettings: paymentSystemsSettings,
+		vatManager:             InitVatManager(database, logger),
 	}
 
 	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)

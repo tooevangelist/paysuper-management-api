@@ -12,7 +12,7 @@ import (
 type VatItem struct {
 	CountryCode int
 	Subdivision string
-	Value       float32
+	Value       float64
 }
 
 var items = []*VatItem{

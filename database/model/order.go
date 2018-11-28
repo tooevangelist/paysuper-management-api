@@ -187,6 +187,10 @@ type Order struct {
 	ProjectOutcomeCurrency *Currency `bson:"project_outcome_currency" json:"project_outcome_currency"`
 	// fee is charged with the project for the operation
 	ProjectFee float64 `bson:"project_fee" json:"project_fee"`
+	// value of fee which added to payer amount
+	ToPayerFee float64 `bson:"to_payer_fee" json:"to_payer_fee"`
+	// vat amount
+	VatAmount float64 `bson:"vat_amount" json:"vat_amount"`
 	// date of last notification request to project
 	ProjectLastRequestedAt *time.Time `bson:"project_last_requested_at" json:"project_last_requested_at,omitempty"`
 	// any project params which received from project in request of create of order
