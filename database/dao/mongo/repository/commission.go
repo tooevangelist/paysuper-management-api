@@ -12,8 +12,8 @@ func (rep *Repository) FindCommissionByProjectIdAndPaymentMethodId(projectId bso
 	err := rep.Collection.Find(
 		bson.M{
 			"project_id": projectId,
-			"pm_id": pmId,
-			"start_date": bson.M{"$gte": time.Now()},
+			"pm_id":      pmId,
+			"start_date": bson.M{"$lte": time.Now()},
 		},
 	).Sort("-start_date").Limit(1).One(&commission)
 

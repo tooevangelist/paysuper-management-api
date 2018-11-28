@@ -30,7 +30,7 @@ body {
 }
 
 .payment-methods .item {
-    height: 84px;
+    height: 74px;
     padding: 5px;
     margin: 3px;
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -70,7 +70,7 @@ body {
 
 .details {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    padding: 0 20px 10px 20px;
 }
 
 .details .project-title {
@@ -103,10 +103,14 @@ body {
 .order-info-container .data {
     color: #000000;
 }
+.details .amount .commissions {
+    font-size: 13px;
+    height: 55px;
+}
 
 .payment-method-requisites {
-    padding: 20px 40px;
-    height: 236px;
+    padding: 10px 40px;
+    height: 198px;
 }
 
 .bank-card-from {
@@ -124,7 +128,7 @@ body {
 .bank-card-from .row {
     display: flex;
     flex-direction: row;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 .bank-card-from .row.big {
     height: 100%;

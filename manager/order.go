@@ -66,6 +66,7 @@ type OrderManager struct {
 	pspAccountingCurrency  *model.Currency
 	paymentSystemsSettings *payment_system.PaymentSystemSetting
 	vatManager             *VatManager
+	commissionManager      *CommissionManager
 }
 
 type check struct {
@@ -105,6 +106,7 @@ func InitOrderManager(
 		currencyManager:        InitCurrencyManager(database, logger),
 		paymentSystemsSettings: paymentSystemsSettings,
 		vatManager:             InitVatManager(database, logger),
+		commissionManager:      InitCommissionManager(database, logger),
 	}
 
 	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)
@@ -117,6 +119,8 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	var pmOutcomeData *pmOutcomeData
 	var gRecord *geoip2.City
 	var ofp *model.OrderFixedPackage
+	var vatAmount float64
+	var commissions *model.CommissionOrder
 	var err error
 
 	p := om.projectManager.FindProjectById(order.ProjectId)
@@ -139,7 +143,19 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		}
 	}
 
-	check := &check{order: order, project: p, oCurrency: oCurrency}
+	check := &check{
+		order: &model.OrderScalar{
+			Amount: order.Amount,
+			Currency: order.Currency,
+			Region: order.Region,
+			CreateOrderIp: order.CreateOrderIp,
+			RawRequestParams: order.RawRequestParams,
+			Signature: order.Signature,
+			PaymentMethod: order.PaymentMethod,
+		},
+		project: p,
+		oCurrency: oCurrency,
+	}
 
 	if order.Signature != nil {
 		err = om.checkSignature(check)
@@ -171,7 +187,26 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		return nil, err
 	}
 
+	// if merchant enable VAT calculation then we're calculate VAT for payer
+	if p.Merchant.IsVatEnabled == true {
+		vatAmount, err = om.vatManager.CalculateVat(gRecord, order.Amount)
+
+		if err != nil {
+			return nil, err
+		}
+
+		check.order.Amount = check.order.Amount + vatAmount
+	}
+
 	if order.PaymentMethod != nil {
+		// if we're know payment method calculate commissions for payment
+		commissions, err = om.commissionManager.CalculateCommission(p.Id, pm.Id, order.Amount)
+
+		// if merchant enable add commissions to payer
+		if p.Merchant.IsCommissionToUserEnabled == true {
+			check.order.Amount = check.order.Amount + commissions.ToUserCommission
+		}
+
 		if pmOutcomeData, err = om.checkPaymentMethodLimits(check); err != nil {
 			return nil, err
 		}
@@ -225,6 +260,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		IsJsonRequest:                      order.IsJsonRequest,
 		FixedPackage:                       ofp,
 		AmountInMerchantAccountingCurrency: FormatAmount(mACAmount),
+		VatAmount:                          vatAmount,
 	}
 
 	if order.Description != nil {
@@ -242,6 +278,13 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 
 		nOrder.PaymentMethodOutcomeAmount = FormatAmount(pmOutcomeData.amount)
 		nOrder.PaymentMethodOutcomeCurrency = pmOutcomeData.currency
+	}
+
+	if commissions != nil {
+		nOrder.ProjectFeeAmount = FormatAmount(commissions.PspCommission + commissions.PMCommission)
+		nOrder.PaymentMethodFeeAmount = FormatAmount(commissions.PMCommission)
+		nOrder.PspFeeAmount = FormatAmount(commissions.PspCommission)
+		nOrder.ToPayerFeeAmount = FormatAmount(commissions.ToUserCommission)
 	}
 
 	if err = om.Database.Repository(TableOrder).InsertOrder(nOrder); err != nil {
@@ -285,7 +328,24 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(id string) (*model.Order,
 			return nil, nil, err
 		}
 
-		pdMap[pm.GroupAlias] = &model.PaymentMethodsPreparedFormData{Amount: FormatAmount(amount), Currency: pm.Currency}
+		pmPreparedData := &model.PaymentMethodsPreparedFormData{
+			Amount:   FormatAmount(amount),
+			Currency: pm.Currency,
+		}
+
+		// if commission to user enabled for merchant then calculate commissions to user
+		// for every allowed payment methods
+		if order.Project.Merchant.IsCommissionToUserEnabled == true {
+			commissions, err := om.commissionManager.CalculateCommission(order.Project.Id, pm.Id, order.ProjectIncomeAmount)
+
+			if err != nil {
+				return nil, nil, err
+			}
+
+			pmPreparedData.ToUserCommissionAmount = FormatAmount(commissions.ToUserCommission)
+		}
+
+		pdMap[pm.GroupAlias] = pmPreparedData
 	}
 
 	order.PaymentMethodsPreparedFormData = pdMap
@@ -873,6 +933,14 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 		paymentMethod: pm,
 	}
 
+	// if we're don't know payment method when was create order then we're set commission's data to order now
+	commissions, err := om.commissionManager.CalculateCommission(p.Id, pm.Id, o.ProjectIncomeAmount)
+
+	// if merchant enable add commissions to payer
+	if p.Merchant.IsCommissionToUserEnabled == true {
+		check.order.Amount = check.order.Amount + commissions.ToUserCommission
+	}
+
 	pmOutData, err := om.checkPaymentMethodLimits(check)
 
 	if err != nil {
@@ -889,6 +957,10 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 
 	o.PaymentMethodOutcomeAmount = FormatAmount(pmOutData.amount)
 	o.PaymentMethodOutcomeCurrency = pmOutData.currency
+	o.ProjectFeeAmount = commissions.PspCommission + commissions.PMCommission
+	o.PaymentMethodFeeAmount = commissions.PMCommission
+	o.PspFeeAmount = commissions.PspCommission
+	o.ToPayerFeeAmount = commissions.ToUserCommission
 
 	return o, nil
 }

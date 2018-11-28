@@ -45,11 +45,9 @@ type Merchant struct {
 	// full object describes merchant's accounting currency
 	Currency *Currency `bson:"currency" json:"currency"`
 	// vat calculation enabled
-	IsVatEnabled *bool `bson:"is_vat_enabled" json:"is_vat_enabled,omitempty"`
+	IsVatEnabled bool `bson:"is_vat_enabled" json:"is_vat_enabled"`
 	// enable to add commission payment method and commission PSP (P1) to payment amount
-	IsCommissionToUserEnabled *bool `bson:"is_commission_to_user_enabled" json:"is_commission_to_user_enabled,omitempty"`
-	// values of commission by payment method putted to user
-	CommissionToUserValues map[string]float64 `bson:"commission_to_user_values" json:"commission_to_user_values"`
+	IsCommissionToUserEnabled bool `bson:"is_commission_to_user_enabled" json:"is_commission_to_user_enabled"`
 	// merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
 	Status int `bson:"status" json:"status"`
 	// date of create merchant in system

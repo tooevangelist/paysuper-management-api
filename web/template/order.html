@@ -20,9 +20,29 @@
     <div class="details">
         <div class="project-title">{{ .Order.Project.Name }}</div>
         <div class="amount">
-            {{ if .Order.PaymentMethod }}
-                {{ .Order.PaymentMethodOutcomeAmount }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}
-            {{ end }}
+            <div class="main">
+                {{ if .Order.PaymentMethod }}
+                    {{ .Order.PaymentMethodOutcomeAmount }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}
+                {{ end }}
+            </div>
+
+            <div class="commissions">
+                {{ if .Order.PaymentMethod }}
+                    {{ if or .Order.Project.Merchant.IsVatEnabled .Order.Project.Merchant.IsCommissionToUserEnabled  }}
+                        <div style="margin-bottom: 7px;">
+                            of them:
+                        </div>
+
+                        {{ if .Order.Project.Merchant.IsVatEnabled }}
+                            VAT: {{ .Order.VatAmount }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}<br />
+                        {{ end }}
+
+                        {{ if .Order.Project.Merchant.IsCommissionToUserEnabled }}
+                            Commission: {{ .Order.ToPayerFeeAmount }} {{ .Order.PaymentMethodOutcomeCurrency.CodeA3 }}
+                        {{ end }}
+                    {{ end }}
+                {{ end }}
+            </div>
         </div>
 
         <div class="order-info">
@@ -44,7 +64,16 @@
 
                 <div class="item {{ if eq $i 0 }} active {{ end }}" data-form="{{ $pm.GroupAlias }}"
                      data-amount="{{ $prepData.Amount }}" data-currency="{{ $prepData.Currency.CodeA3 }}"
-                     data-identifier="{{ BsonObjectIdToString $pm.Id }}">
+                     data-identifier="{{ BsonObjectIdToString $pm.Id }}"
+
+                    {{ if $.Order.Project.Merchant.IsVatEnabled }}
+                        data-vat="{{ $.Order.VatAmount }}"
+                    {{ end }}
+
+                    {{ if $.Order.Project.Merchant.IsCommissionToUserEnabled }}
+                        data-commission="{{ $prepData.ToUserCommissionAmount }}"
+                    {{ end }}
+                >
                     <div class="logo" style="background-image: url('{{ $pm.Icon }}');"></div>
                     <div class="title">{{ $pm.Name }}</div>
                 </div>

@@ -186,9 +186,9 @@ type Order struct {
 	// order currency send to project in notification request
 	ProjectOutcomeCurrency *Currency `bson:"project_outcome_currency" json:"project_outcome_currency"`
 	// fee is charged with the project for the operation
-	ProjectFee float64 `bson:"project_fee" json:"project_fee"`
+	ProjectFeeAmount float64 `bson:"project_fee_amount" json:"project_fee_amount"`
 	// value of fee which added to payer amount
-	ToPayerFee float64 `bson:"to_payer_fee" json:"to_payer_fee"`
+	ToPayerFeeAmount float64 `bson:"to_payer_fee_amount" json:"to_payer_fee_amount"`
 	// vat amount
 	VatAmount float64 `bson:"vat_amount" json:"vat_amount"`
 	// date of last notification request to project
@@ -213,7 +213,7 @@ type Order struct {
 	PaymentMethodIncomeCurrency   *Currency `bson:"pm_income_currency" json:"pm_income_currency"`
 	PaymentMethodIncomeCurrencyA3 string    `bson:"-" json:"-"`
 	// payment system fee for payment operation
-	PaymentMethodFee float64 `bson:"pm_fee" json:"pm_fee"`
+	PaymentMethodFeeAmount float64 `bson:"pm_fee_amount" json:"pm_fee_amount"`
 	// date of ended payment operation in payment system
 	PaymentMethodOrderClosedAt *time.Time `bson:"pm_order_close_date" json:"pm_order_close_date,omitempty"`
 	// order status
@@ -239,6 +239,8 @@ type Order struct {
 	// fixed package which buy payer
 	FixedPackage      *OrderFixedPackage `bson:"fixed_package" json:"fixed_package"`
 	PaymentRequisites map[string]string  `bson:"payment_requisites" json:"-"`
+	// PSP (P1) fee amount
+	PspFeeAmount float64 `bson:"psp_fee_amount" json:"psp_amount_fee_amount"`
 
 	PaymentMethodsPreparedFormData map[string]*PaymentMethodsPreparedFormData `bson:"-" json:"-"`
 	//ProjectData                    *Project                                   `bson:"-" json:"-"`
@@ -292,8 +294,9 @@ type OrderPaginate struct {
 }
 
 type PaymentMethodsPreparedFormData struct {
-	Amount   float64
-	Currency *Currency
+	Amount                 float64
+	Currency               *Currency
+	ToUserCommissionAmount float64
 }
 
 type OrderPaymentNotification struct {

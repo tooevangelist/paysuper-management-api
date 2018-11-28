@@ -1,13 +1,9 @@
 const PM_ACTIVE_CLASS = 'active';
 
-function getAmount($element)
-{
-    return $element.data('amount') + " " + $element.data('currency')
-}
-
 $(function() {
     let $pmItem = $('div.payment-methods div.item');
-    let $amountContainer = $('div.details div.amount');
+    let $amountContainer = $('div.details div.amount div.main');
+    let $commissionsContainer = $('div.details div.amount div.commissions');
     let $selectedPmInput = $('form#order-form input[name=payment_method_id]');
 
     $pmItem.each(function (i, el) {
@@ -19,7 +15,33 @@ $(function() {
     });
 
     if ($.trim($amountContainer.html()).length <= 0) {
-        $amountContainer.html(getAmount($pmItem.first()));
+        let amount = $pmItem.first().data('amount');
+        let currency = $pmItem.first().data('currency');
+        let vat = $pmItem.first().data('vat');
+        let commission = $pmItem.first().data('commission');
+
+        if (vat) {
+            amount += vat;
+        }
+
+        if (commission) {
+            amount += commission;
+        }
+
+        $amountContainer.html(amount + ' ' + currency);
+
+        if (vat || commission) {
+            $commissionsContainer.html('');
+            $commissionsContainer.append('<div style="margin-bottom: 7px;">of them:</div>');
+
+            if (vat) {
+                $commissionsContainer.append('VAT ' + vat + ' ' + currency + '<br />');
+            }
+
+            if (commission) {
+                $commissionsContainer.append('Commission ' + commission + ' ' + currency);
+            }
+        }
     }
 
     if ($selectedPmInput.val().length <= 0) {
@@ -40,7 +62,34 @@ $(function() {
         $showEl.show();
         $showEl.find('input').removeAttr('disabled');
 
-        $amountContainer.html(getAmount($(this)));
+        let amount = $(this).data('amount');
+        let currency = $(this).data('currency');
+        let vat = $(this).data('vat');
+        let commission = $(this).data('commission');
+
+        if (vat) {
+            amount += vat;
+        }
+
+        if (commission) {
+            amount += commission;
+        }
+
+        $amountContainer.html(amount + ' ' + currency);
+
+        if (vat || commission) {
+            $commissionsContainer.html('');
+            $commissionsContainer.append('<div style="margin-bottom: 7px;">of them:</div>');
+
+            if (vat) {
+                $commissionsContainer.append('VAT ' + vat + ' ' + currency + '<br />');
+            }
+
+            if (commission) {
+                $commissionsContainer.append('Commission ' + commission + ' ' + currency);
+            }
+        }
+
         $selectedPmInput.val($(this).data('identifier'));
     });
 
