@@ -15,7 +15,7 @@ func (rep *Repository) FindCommissionByProjectIdAndPaymentMethodId(projectId bso
 			"pm_id": pmId,
 			"start_date": bson.M{"$gte": time.Now()},
 		},
-	).Sort("-start_date").Limit(1).One(commission)
+	).Sort("-start_date").Limit(1).One(&commission)
 
 	return commission, err
 }

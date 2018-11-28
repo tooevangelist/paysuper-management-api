@@ -42,7 +42,10 @@ type Repository interface {
 
 	FindCurrenciesPair(int, int) (*model.CurrencyRate, error)
 
-	FindCommissionByProjectIdAndPaymentMethodId(bson.ObjectId, bson.ObjectId) (*model.Commission, error)
+	FindCommissionByProjectIdAndPaymentMethodId(projectId bson.ObjectId, pmId bson.ObjectId) (*model.Commission, error)
+
+	FindVatByCountry(string) (*model.Vat, error)
+	FindVatByCountryAndSubdivision(string, string) (*model.Vat, error)
 
 	InsertLog(*model.Log) error
 }
