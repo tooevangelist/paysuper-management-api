@@ -23,16 +23,17 @@ const (
 	orderFieldDescription   = "PP_DESCRIPTION"
 	orderFieldRegion        = "PP_REGION"
 
-	OrderStatusNew                   = 0
-	OrderStatusPaymentSystemCreate   = 1
-	OrderStatusPaymentSystemReject   = 2
-	OrderStatusPaymentSystemComplete = 3
-	OrderStatusProjectInProgress     = 4
-	OrderStatusProjectComplete       = 5
-	OrderStatusProjectPending        = 6
-	OrderStatusProjectReject         = 7
-	OrderStatusRefund                = 8
-	OrderStatusChargeback            = 9
+	OrderStatusNew                         = 0
+	OrderStatusPaymentSystemCreate         = 1
+	OrderStatusPaymentSystemRejectOnCreate = 2
+	OrderStatusPaymentSystemReject         = 3
+	OrderStatusPaymentSystemComplete       = 4
+	OrderStatusProjectInProgress           = 5
+	OrderStatusProjectComplete             = 6
+	OrderStatusProjectPending              = 7
+	OrderStatusProjectReject               = 8
+	OrderStatusRefund                      = 9
+	OrderStatusChargeback                  = 10
 
 	OrderFilterFieldProjects        = "project[]"
 	OrderFilterFieldId              = "id"
@@ -89,16 +90,17 @@ var OrderReservedWords = map[string]bool{
 }
 
 var OrderStatusesDescription = map[int]string{
-	OrderStatusNew:                   "Project create new payment order in P1.",
-	OrderStatusPaymentSystemCreate:   "Payment order was create in payment system.",
-	OrderStatusPaymentSystemReject:   "Payment notification request from payment system was reject. Possible reasons: incorrect amount or currency.",
-	OrderStatusPaymentSystemComplete: "Payment notification request from payment system successfully complete.",
-	OrderStatusProjectInProgress:     "P1 started sending notification request about payment to project.",
-	OrderStatusProjectComplete:       "Project successfully processed notification about payment from P1",
-	OrderStatusProjectPending:        "Project can't processed notification about payment from P1 and limit of notification attempts was ended.",
-	OrderStatusProjectReject:         "Project reject notification about payment from P1. This payment is candidate to refund.",
-	OrderStatusRefund:                "Payment was refunded to payer",
-	OrderStatusChargeback:            "Customer's chargeback claim was received",
+	OrderStatusNew:                         "Project create new payment order in P1.",
+	OrderStatusPaymentSystemCreate:         "Payment order was create in payment system.",
+	OrderStatusPaymentSystemRejectOnCreate: "Payment system reject create order request.",
+	OrderStatusPaymentSystemReject:         "Payment notification request from payment system was reject. Possible reasons: incorrect amount or currency.",
+	OrderStatusPaymentSystemComplete:       "Payment notification request from payment system successfully complete.",
+	OrderStatusProjectInProgress:           "P1 started sending notification request about payment to project.",
+	OrderStatusProjectComplete:             "Project successfully processed notification about payment from P1",
+	OrderStatusProjectPending:              "Project can't processed notification about payment from P1 and limit of notification attempts was ended.",
+	OrderStatusProjectReject:               "Project reject notification about payment from P1. This payment is candidate to refund.",
+	OrderStatusRefund:                      "Payment was refunded to payer",
+	OrderStatusChargeback:                  "Customer's chargeback claim was received",
 }
 
 var RevenuePeriods = map[string]bool{

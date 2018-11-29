@@ -295,7 +295,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 			nOrder.PaymentMethodFeeAmount = FormatAmount(commissions.PMCommission)
 
 			// save PSP fee in currency of project's merchant
-			pspConvertCommission, err := om.currencyRateManager.convert(pm.Currency.CodeInt, p.Merchant.Currency.CodeInt, commissions.PMCommission)
+			pspConvertCommission, err := om.currencyRateManager.convert(pm.Currency.CodeInt, om.pspAccountingCurrency.CodeInt, commissions.PspCommission)
 
 			if err != nil {
 				return nil, err
@@ -837,8 +837,9 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 	delete(data, model.OrderPaymentCreateRequestFieldEmail)
 
 	o.PaymentRequisites = data
+	o.PaymentMethodTerminalId = pm.Params.Terminal
 
-	if err = om.Database.Repository(TableOrder).UpdateOrder(o); err != nil {
+	if o, err = om.updateOrderAccountingAmounts(o); err != nil {
 		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
@@ -848,7 +849,21 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
-	return handler.CreatePayment()
+	res :=  handler.CreatePayment()
+
+	if res.Status == payment_system.CreatePaymentStatusOK {
+		o.Status = model.OrderStatusPaymentSystemCreate
+	}
+
+	if res.Status == payment_system.CreatePaymentStatusErrorSystem {
+		o.Status = model.OrderStatusPaymentSystemRejectOnCreate
+	}
+
+	if err = om.Database.Repository(TableOrder).UpdateOrder(o); err != nil {
+		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
+	}
+
+	return res
 }
 
 func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification, psSettings map[string]interface{}) (*model.Order, error) {
@@ -1000,7 +1015,7 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 	o.PaymentMethodFeeAmount = FormatAmount(commissions.PMCommission)
 
 	// save PSP fee in currency of project's merchant
-	pspConvertCommission, err := om.currencyRateManager.convert(pm.Currency.CodeInt, p.Merchant.Currency.CodeInt, commissions.PMCommission)
+	pspConvertCommission, err := om.currencyRateManager.convert(pm.Currency.CodeInt, om.pspAccountingCurrency.CodeInt, commissions.PspCommission)
 
 	if err != nil {
 		return nil, err
@@ -1147,4 +1162,41 @@ func (om *OrderManager) getRevenueDynamicPointsKey(pointId map[string]interface{
 	}
 
 	return revPointDate
+}
+
+// Calculate order accounting amounts and update this amounts in order struct
+func (om *OrderManager) updateOrderAccountingAmounts(o *model.Order) (*model.Order, error) {
+	var cAmount float64
+	var err error
+
+	pmCodeInt := o.PaymentMethodOutcomeCurrency.CodeInt
+
+	// calculate and save order amount in PSP accounting currency
+	cAmount, err = om.currencyRateManager.convert(pmCodeInt, om.pspAccountingCurrency.CodeInt, o.PaymentMethodOutcomeAmount)
+
+	if err != nil {
+		return nil, err
+	}
+
+	o.AmountInPSPAccountingCurrency = FormatAmount(cAmount)
+
+	// calculate and save order amount in merchant accounting currency
+	cAmount, err = om.currencyRateManager.convert(pmCodeInt, o.Project.Merchant.Currency.CodeInt, o.PaymentMethodOutcomeAmount)
+
+	if err != nil {
+		return nil, err
+	}
+
+	o.AmountOutMerchantAccountingCurrency = FormatAmount(cAmount)
+
+	// calculate and save order amount in payment system accounting currency
+	cAmount, err = om.currencyRateManager.convert(pmCodeInt, o.PaymentMethod.PaymentSystem.AccountingCurrency.CodeInt, o.PaymentMethodOutcomeAmount)
+
+	if err != nil {
+		return nil, err
+	}
+
+	o.AmountInPaymentSystemAccountingCurrency = FormatAmount(cAmount)
+
+	return o, nil
 }
