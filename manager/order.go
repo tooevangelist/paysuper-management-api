@@ -1181,7 +1181,7 @@ func (om *OrderManager) updateOrderAccountingAmounts(o *model.Order) (*model.Ord
 	o.AmountInPSPAccountingCurrency = FormatAmount(cAmount)
 
 	// calculate and save order amount in merchant accounting currency
-	cAmount, err = om.currencyRateManager.convert(pmCodeInt, o.Project.Merchant.Currency.CodeInt, o.PaymentMethodOutcomeAmount)
+	cAmount, err = om.currencyRateManager.convert(o.ProjectIncomeCurrency.CodeInt, o.Project.Merchant.Currency.CodeInt, o.ProjectIncomeAmount)
 
 	if err != nil {
 		return nil, err
