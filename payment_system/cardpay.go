@@ -419,6 +419,10 @@ func (cp *CardPay) geBankCardCardPayOrder(cpo *entity.CardPayOrder) (*entity.Car
 		return nil, err
 	}
 
+	if len(v.Year) < 3 {
+		v.Year = strconv.Itoa(time.Now().UTC().Year())[:2] + v.Year
+	}
+
 	expire := v.Month + "/" + v.Year
 
 	cpo.CardAccount = &entity.CardPayCardAccount{

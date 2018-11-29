@@ -3,13 +3,17 @@ package entity
 import "time"
 
 const (
-	CardPayPaymentResponseStatusApproved           = "APPROVED"
-	CardPayPaymentResponseStatusDeclined           = "DECLINED"
-	CardPayPaymentResponseStatusPending            = "PENDING"
-	CardPayPaymentResponseStatusVoided             = "VOIDED"
-	CardPayPaymentResponseStatusRefunded           = "REFUNDED"
-	CardPayPaymentResponseStatusChargeBack         = "CHARGEBACK"
-	CardPayPaymentResponseStatusChargeBackResolved = "CHARGEBACK RESOLVED"
+	CardPayPaymentResponseStatusNew = "NEW"
+	CardPayPaymentResponseStatusInProgress = "IN_PROGRESS"
+	CardPayPaymentResponseStatusDeclined = "DECLINED"
+	CardPayPaymentResponseStatusAuthorized = "AUTHORIZED"
+	CardPayPaymentResponseStatusCompleted = "COMPLETED"
+	CardPayPaymentResponseStatusCancelled = "CANCELLED"
+	CardPayPaymentResponseStatusRefunded = "REFUNDED"
+	CardPayPaymentResponseStatusPartiallyRefunded = "PARTIALLY_REFUNDED"
+	CardPayPaymentResponseStatusVoided = "VOIDED"
+	CardPayPaymentResponseStatusChargedBack = "CHARGED_BACK"
+	CardPayPaymentResponseStatusChargebackResolved = "CHARGEBACK_RESOLVED"
 
 	CardPayPaymentResponseHeaderSignature = "Signature"
 )
@@ -135,8 +139,8 @@ type CardPayPaymentDataResponse struct {
 }
 
 func (cpReq *CardPayPaymentNotificationWebHookRequest) IsPaymentAllowedStatus() bool {
-	return cpReq.PaymentData.Status == CardPayPaymentResponseStatusApproved ||
-		cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined || cpReq.PaymentData.Status == CardPayPaymentResponseStatusPending
+	return cpReq.PaymentData.Status == CardPayPaymentResponseStatusCompleted ||
+		cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined || cpReq.PaymentData.Status == CardPayPaymentResponseStatusCancelled
 }
 
 func (cpReq *CardPayPaymentNotificationWebHookRequest) GetBankCardTxnParams() map[string]interface{} {
