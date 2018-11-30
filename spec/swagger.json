@@ -257,6 +257,79 @@
                 }
             }
         },
+        "/api/v1/project/package/{region}/{project_id}": {
+            "get": {
+                "description": "Get list of project's fixed packages by filters",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Get project's fixed packages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "2 symbols region code by ISO 3166-1",
+                        "name": "region",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project unique identifier",
+                        "name": "project_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "description": "array of identifiers of fixed packages",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "description": "array of names of fixed packages",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.FilteredFixedPackage"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Object with error message",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/s/merchant": {
             "put": {
                 "description": "Update merchant data",
@@ -1353,6 +1426,24 @@
                 }
             }
         },
+        "model.FilteredFixedPackage": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "object",
+                    "$ref": "#/definitions/model.SimpleCurrency"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
         "model.Merchant": {
             "type": "object",
             "properties": {
@@ -1385,6 +1476,14 @@
                 "id": {
                     "description": "unique merchant identifier\n",
                     "type": "string"
+                },
+                "is_commission_to_user_enabled": {
+                    "description": "enable to add commission payment method and commission PSP (P1) to payment amount\n",
+                    "type": "boolean"
+                },
+                "is_vat_enabled": {
+                    "description": "vat calculation enabled\n",
+                    "type": "boolean"
                 },
                 "name": {
                     "description": "merchant company legal name\n",
@@ -1499,7 +1598,7 @@
                     "description": "account of payer in payment system\n",
                     "type": "string"
                 },
-                "pm_fee": {
+                "pm_fee_amount": {
                     "description": "payment system fee for payment operation\n",
                     "type": "number"
                 },
@@ -1546,7 +1645,7 @@
                     "description": "user unique account in project\n",
                     "type": "string"
                 },
-                "project_fee": {
+                "project_fee_amount": {
                     "description": "fee is charged with the project for the operation\n",
                     "type": "number"
                 },
@@ -1580,9 +1679,21 @@
                     "description": "any project params which received from project in request of create of order\n",
                     "type": "object"
                 },
+                "psp_amount_fee_amount": {
+                    "description": "PSP (P1) fee amount\n",
+                    "type": "number"
+                },
                 "status": {
                     "description": "order status\n",
                     "type": "integer"
+                },
+                "to_payer_fee_amount": {
+                    "description": "value of fee which added to payer amount\n",
+                    "type": "number"
+                },
+                "vat_amount": {
+                    "description": "vat amount\n",
+                    "type": "number"
                 }
             }
         },
@@ -1648,8 +1759,8 @@
             "type": "object",
             "required": [
                 "amount",
-                "account",
-                "project"
+                "project",
+                "account"
             ],
             "properties": {
                 "account": {
@@ -1847,6 +1958,10 @@
                 },
                 "phone": {
                     "description": "payer phone from create order request\n",
+                    "type": "string"
+                },
+                "subdivision": {
+                    "description": "payer subdivision code by ISO-3166-2\n",
                     "type": "string"
                 },
                 "timezone": {

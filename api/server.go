@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/oschwald/geoip2-golang"
+	"github.com/sidmal/slug"
 	"github.com/ttacon/libphonenumber"
 	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
@@ -142,6 +143,17 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 
 	api.Http.GET("/docs", func(ctx echo.Context) error {
 		return ctx.Render(http.StatusOK, "docs.html", map[string]interface{}{})
+	})
+	api.Http.GET("/slug", func(ctx echo.Context) error {
+		text := ctx.QueryParam("text")
+
+		if text == "" {
+			return ctx.NoContent(http.StatusBadRequest)
+		}
+
+		got := slug.MakeLang(text, slug.DefaultLang, model.FixedPackageSlugSeparator)
+
+		return ctx.JSON(http.StatusOK, map[string]string{"slug": got})
 	})
 
 	return api, nil

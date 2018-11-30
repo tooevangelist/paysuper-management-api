@@ -2,6 +2,10 @@ package model
 
 import "time"
 
+const (
+	FixedPackageSlugSeparator = "_"
+)
+
 type OrderFixedPackage struct {
 	Id          int     `bson:"id" json:"id"`
 	Region      string  `bson:"region" json:"region"`
@@ -11,6 +15,8 @@ type OrderFixedPackage struct {
 }
 
 type FixedPackage struct {
+	// unique identifier of package
+	Id string `bson:"id" json:"id" validate:"required,max=255"`
 	// package name
 	Name string `bson:"name" json:"name" validate:"required,url,max=255"`
 	// numeric ISO 4217 currency code to package price
@@ -24,4 +30,18 @@ type FixedPackage struct {
 	UpdatedAt time.Time `bson:"updated_at" json:"-"`
 	// full object of currency to package price
 	Currency *Currency `json:"currency"`
+}
+
+type FixedPackageFilters struct {
+	Ids       []string `query:"id[]"`
+	ProjectId string   `validate:"required,hexadecimal"`
+	Region    string   `validate:"required,alpha,len=2"`
+	Names     []string `query:"name[]"`
+}
+
+type FilteredFixedPackage struct {
+	Id       string          `json:"id"`
+	Name     string          `json:"name"`
+	Price    float64         `json:"price"`
+	Currency *SimpleCurrency `json:"currency"`
 }

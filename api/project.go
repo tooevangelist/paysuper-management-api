@@ -26,6 +26,8 @@ func (api *Api) InitProjectRoutes() *Api {
 	api.accessRouteGroup.PUT("/project/:id", pApiV1.update)
 	api.accessRouteGroup.DELETE("/project/:id", pApiV1.delete)
 
+	api.Http.GET("/api/v1/project/package/:region/:project_id", pApiV1.getFixedPackage)
+
 	return api
 }
 
@@ -182,7 +184,7 @@ func (pApiV1 *ProjectApiV1) delete(ctx echo.Context) error {
 	}
 
 	if p.Merchant.Id.String() != pApiV1.Merchant.Identifier {
-		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
+		return echo.NewHTTPError(http.StatusForbidden, model.ResponseMessageAccessDenied)
 	}
 
 	err := pApiV1.projectManager.Delete(p)
@@ -192,6 +194,49 @@ func (pApiV1 *ProjectApiV1) delete(ctx echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusOK)
+}
+
+// @Summary Get project's fixed packages
+// @Description Get list of project's fixed packages by filters
+// @Tags Project
+// @Accept application/x-www-form-urlencoded
+// @Produce json
+// @Param region path string true "2 symbols region code by ISO 3166-1"
+// @Param project_id query string true "project unique identifier"
+// @Param id query array false "array of identifiers of fixed packages"
+// @Param name query array false "array of names of fixed packages"
+// @Success 200 {object} model.FilteredFixedPackage "OK"
+// @Failure 400 {object} model.Error "Invalid request data"
+// @Failure 404 {object} model.Error "Not found"
+// @Failure 500 {object} model.Error "Object with error message"
+// @Router /api/v1/project/package/{region}/{project_id} [get]
+func (pApiV1 *ProjectApiV1) getFixedPackage(ctx echo.Context) error {
+	filters := &model.FixedPackageFilters{
+		Region: ctx.Param(model.ApiRequestParameterRegion),
+		ProjectId: ctx.Param(model.ApiRequestParameterProjectId),
+	}
+
+	if err := ctx.Bind(filters); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := pApiV1.validate.Struct(filters); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
+	}
+
+	p := pApiV1.projectManager.FindProjectById(filters.ProjectId)
+
+	if p == nil {
+		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
+	}
+
+	fps := pApiV1.projectManager.FindFixedPackage(filters)
+
+	if fps == nil {
+		return ctx.JSON(http.StatusOK, []string{})
+	}
+
+	return ctx.JSON(http.StatusOK, fps)
 }
 
 

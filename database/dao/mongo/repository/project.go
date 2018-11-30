@@ -33,3 +33,54 @@ func (rep *Repository) FindProjectById(id bson.ObjectId) (*model.Project, error)
 
 	return p, err
 }
+
+func (rep *Repository) FindFixedPackageByFilters(filters *model.FixedPackageFilters) ([]map[string]interface{}, error) {
+	var res []map[string]interface{}
+
+	fpSection := "fixed_package." + filters.Region
+	qCond := bson.M{
+		"$and": []bson.M{
+			{ "$eq": []interface{}{"$$fixed_package.is_active", true} },
+		},
+	}
+
+	orCond := bson.M{"$or": []bson.M{}}
+
+	if len(filters.Ids) > 0 {
+		orCond["$or"] = append(orCond["$or"].([]bson.M), map[string]interface{}{"$in": []interface{}{"$$fixed_package.id", filters.Ids}})
+	}
+
+	if len(filters.Names) > 0 {
+		orCond["$or"] = append(orCond["$or"].([]bson.M), map[string]interface{}{"$in": []interface{}{"$$fixed_package.name", filters.Names}})
+	}
+
+	if len(orCond["$or"].([]bson.M)) > 0 {
+		qCond["$and"] = append(qCond["$and"].([]bson.M), orCond)
+	}
+
+	q := []bson.M{
+		{
+			"$match": bson.M{
+				"_id":       bson.ObjectIdHex(filters.ProjectId),
+				fpSection:   bson.M{"$exists": true},
+				"is_active": true,
+			},
+		},
+		{
+			"$project": bson.M{
+				"fixed_package": bson.M{
+					"$filter": bson.M{
+						"input": "$" + fpSection,
+						"as":    "fixed_package",
+						"cond":  qCond,
+					},
+				},
+				"_id": 0,
+			},
+		},
+	}
+
+	err := rep.Collection.Pipe(q).All(&res)
+
+	return res, err
+}

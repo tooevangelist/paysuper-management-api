@@ -5,7 +5,9 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
+	"github.com/sidmal/slug"
 	"go.uber.org/zap"
+	"strings"
 	"time"
 )
 
@@ -29,9 +31,9 @@ type ProjectManager struct {
 
 func InitProjectManager(database dao.Database, logger *zap.SugaredLogger) *ProjectManager {
 	pm := &ProjectManager{
-		Manager:         &Manager{Database: database, Logger: logger},
-		merchantManager: InitMerchantManager(database, logger),
-		currencyManager: InitCurrencyManager(database, logger),
+		Manager:               &Manager{Database: database, Logger: logger},
+		merchantManager:       InitMerchantManager(database, logger),
+		currencyManager:       InitCurrencyManager(database, logger),
 		paymentMethodsManager: InitPaymentMethodManager(database, logger),
 	}
 
@@ -249,6 +251,12 @@ func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model
 					p.Currency = c
 				}
 			}
+
+			p.Id = strings.TrimSpace(p.Id)
+
+			if p.Id == "" {
+				p.Id = slug.MakeLang(p.Name, slug.DefaultLang, model.FixedPackageSlugSeparator)
+			}
 		}
 	}
 
@@ -319,4 +327,46 @@ func (pm *ProjectManager) GetProjectPaymentMethods(projectId bson.ObjectId) ([]*
 	}
 
 	return projectPaymentMethods, nil
+}
+
+func (pm *ProjectManager) FindFixedPackage(filters *model.FixedPackageFilters) []*model.FilteredFixedPackage {
+	var fps []*model.FilteredFixedPackage
+
+	filters.Region = strings.ToUpper(filters.Region)
+	smFps, err := pm.Database.Repository(TableProject).FindFixedPackageByFilters(filters)
+
+	if err != nil {
+		pm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableProject, err)
+	}
+
+	sFps := smFps[0]["fixed_package"].([]interface{})
+
+	if len(sFps) <= 0 {
+		return fps
+	}
+
+	for _, v := range sFps {
+		vm := v.(map[string]interface{})
+
+		c := pm.currencyManager.FindByCodeInt(vm[model.DBFieldCurrencyInt].(int))
+
+		if c == nil {
+			continue
+		}
+
+		ffp := &model.FilteredFixedPackage{
+			Id: vm[model.DBFieldId].(string),
+			Name: vm[model.DBFieldName].(string),
+			Price: vm[model.DBFieldPrice].(float64),
+			Currency: &model.SimpleCurrency{
+				Name: c.Name,
+				CodeInt: c.CodeInt,
+				CodeA3: c.CodeA3,
+			},
+		}
+
+		fps = append(fps, ffp)
+	}
+
+	return fps
 }

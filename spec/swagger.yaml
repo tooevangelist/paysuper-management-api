@@ -58,6 +58,18 @@ definitions:
           text error description
         type: string
     type: object
+  model.FilteredFixedPackage:
+    properties:
+      currency:
+        $ref: '#/definitions/model.SimpleCurrency'
+        type: object
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    type: object
   model.Merchant:
     properties:
       accounting_period:
@@ -90,6 +102,14 @@ definitions:
         description: |
           unique merchant identifier
         type: string
+      is_commission_to_user_enabled:
+        description: |
+          enable to add commission payment method and commission PSP (P1) to payment amount
+        type: boolean
+      is_vat_enabled:
+        description: |
+          vat calculation enabled
+        type: boolean
       name:
         description: |
           merchant company legal name
@@ -196,7 +216,7 @@ definitions:
         description: |
           account of payer in payment system
         type: string
-      pm_fee:
+      pm_fee_amount:
         description: |
           payment system fee for payment operation
         type: number
@@ -243,7 +263,7 @@ definitions:
         description: |
           user unique account in project
         type: string
-      project_fee:
+      project_fee_amount:
         description: |
           fee is charged with the project for the operation
         type: number
@@ -277,10 +297,22 @@ definitions:
         description: |
           any project params which received from project in request of create of order
         type: object
+      psp_amount_fee_amount:
+        description: |
+          PSP (P1) fee amount
+        type: number
       status:
         description: |
           order status
         type: integer
+      to_payer_fee_amount:
+        description: |
+          value of fee which added to payer amount
+        type: number
+      vat_amount:
+        description: |
+          vat amount
+        type: number
     type: object
   model.OrderFixedPackage:
     properties:
@@ -395,8 +427,8 @@ definitions:
         type: string
     required:
     - amount
-    - account
     - project
+    - account
     type: object
   model.OrderSimple:
     properties:
@@ -517,6 +549,10 @@ definitions:
       phone:
         description: |
           payer phone from create order request
+        type: string
+      subdivision:
+        description: |
+          payer subdivision code by ISO-3166-2
         type: string
       timezone:
         description: |
@@ -1005,6 +1041,56 @@ paths:
       summary: Create order with json request
       tags:
       - Payment Order
+  /api/v1/project/package/{region}/{project_id}:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Get list of project's fixed packages by filters
+      parameters:
+      - description: 2 symbols region code by ISO 3166-1
+        in: path
+        name: region
+        required: true
+        type: string
+      - description: project unique identifier
+        in: query
+        name: project_id
+        required: true
+        type: string
+      - description: array of identifiers of fixed packages
+        in: query
+        name: id
+        type: array
+      - description: array of names of fixed packages
+        in: query
+        name: name
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.FilteredFixedPackage'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+      summary: Get project's fixed packages
+      tags:
+      - Project
   /api/v1/s/merchant:
     delete:
       consumes:
