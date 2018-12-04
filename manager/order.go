@@ -597,7 +597,6 @@ func (om *OrderManager) checkSignature(check *check) error {
 }
 
 func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
-	var filter = make(bson.M)
 	var f bson.M
 	var pFilter []bson.ObjectId
 
@@ -605,7 +604,7 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 		pFilter = append(pFilter, k)
 	}
 
-	filter["project.id"] = bson.M{"$in": pFilter}
+	filter := bson.M{"project.id": bson.M{"$in": pFilter}}
 
 	if len(params.Values) > 0 {
 		f = om.ProcessFilters(params.Values, filter)
@@ -649,7 +648,7 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 			Account:        oValue.ProjectAccount,
 			ProjectOrderId: oValue.ProjectOrderId,
 			PayerData:      oValue.PayerData,
-			ProjectTechnicalIncome: &model.OrderSimpleAmountObject{
+			ProjectAmountIncome: &model.OrderSimpleAmountObject{
 				Amount: oValue.ProjectIncomeAmount,
 				Currency: &model.SimpleCurrency{
 					CodeInt: oValue.ProjectIncomeCurrency.CodeInt,
@@ -657,37 +656,30 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 					Name:    oValue.ProjectIncomeCurrency.Name,
 				},
 			},
-			ProjectAccountingIncome: &model.OrderSimpleAmountObject{
-				Amount: oValue.AmountInMerchantAccountingCurrency,
-				Currency: &model.SimpleCurrency{
-					CodeInt: params.Merchant.Currency.CodeInt,
-					CodeA3:  params.Merchant.Currency.CodeA3,
-					Name:    params.Merchant.Currency.Name,
-				},
-			},
 			FixedPackage: oValue.FixedPackage,
 			Status: &model.Status{
 				Status:      oValue.Status,
 				Description: model.OrderStatusesDescription[oValue.Status],
 			},
+			VatAmount:   oValue.VatAmount,
 			CreatedAt:   oValue.CreatedAt,
 			ConfirmedAt: oValue.PaymentMethodOrderClosedAt,
 			ClosedAt:    oValue.ProjectLastRequestedAt,
 		}
 
-		if oValue.AmountInPaymentSystemAccountingCurrency > 0 {
-			tOrder.PaymentSystemTechnicalIncome = &model.OrderSimpleAmountObject{
-				Amount: oValue.AmountInPaymentSystemAccountingCurrency,
+		if oValue.PaymentMethodIncomeAmount > 0 {
+			tOrder.PaymentMethodAmountIncome = &model.OrderSimpleAmountObject{
+				Amount: oValue.PaymentMethodIncomeAmount,
 				Currency: &model.SimpleCurrency{
-					CodeInt: oValue.PaymentMethod.PaymentSystem.AccountingCurrency.CodeInt,
-					CodeA3:  oValue.PaymentMethod.PaymentSystem.AccountingCurrency.CodeA3,
-					Name:    oValue.PaymentMethod.PaymentSystem.AccountingCurrency.Name,
+					CodeInt: oValue.PaymentMethodIncomeCurrency.CodeInt,
+					CodeA3:  oValue.PaymentMethodIncomeCurrency.CodeA3,
+					Name:    oValue.PaymentMethodIncomeCurrency.Name,
 				},
 			}
 		}
 
 		if oValue.AmountOutMerchantAccountingCurrency > 0 {
-			tOrder.ProjectAccountingOutcome = &model.OrderSimpleAmountObject{
+			tOrder.ProjectAmountOutcome = &model.OrderSimpleAmountObject{
 				Amount: oValue.AmountOutMerchantAccountingCurrency,
 				Currency: &model.SimpleCurrency{
 					CodeInt: params.Merchant.Currency.CodeInt,
@@ -697,22 +689,16 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 			}
 		}
 
-		if oValue.ProjectOutcomeAmount > 0 {
-			tOrder.ProjectTechnicalOutcome = &model.OrderSimpleAmountObject{
-				Amount: oValue.ProjectOutcomeAmount,
-				Currency: &model.SimpleCurrency{
-					CodeInt: oValue.ProjectOutcomeCurrency.CodeInt,
-					CodeA3:  oValue.ProjectOutcomeCurrency.CodeA3,
-					Name:    oValue.ProjectOutcomeCurrency.Name,
-				},
-			}
-		}
-
 		if oValue.PaymentMethod != nil {
 			tOrder.PaymentMethod = &model.SimpleItem{
 				Id:   oValue.PaymentMethod.Id,
 				Name: oValue.PaymentMethod.Name,
 			}
+
+			tOrder.PspFeeAmount = oValue.PspFeeAmount
+			tOrder.PaymentMethodFeeAmount = oValue.PaymentMethodFeeAmount
+			tOrder.ProjectFeeAmount = oValue.ProjectFeeAmount
+			tOrder.ToPayerFeeAmount = oValue.ToPayerFeeAmount
 		}
 
 		tOrders = append(tOrders, tOrder)
@@ -849,7 +835,7 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
-	res :=  handler.CreatePayment()
+	res := handler.CreatePayment()
 
 	if res.Status == payment_system.CreatePaymentStatusOK {
 		o.Status = model.OrderStatusPaymentSystemCreate

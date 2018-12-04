@@ -247,7 +247,6 @@ type Order struct {
 	PspFeeAmount float64 `bson:"psp_fee_amount" json:"psp_amount_fee_amount"`
 
 	PaymentMethodsPreparedFormData map[string]*PaymentMethodsPreparedFormData `bson:"-" json:"-"`
-	//ProjectData                    *Project                                   `bson:"-" json:"-"`
 }
 
 type OrderUrl struct {
@@ -268,16 +267,12 @@ type OrderSimple struct {
 	PayerData *PayerData `json:"payer_data"`
 	// object which contains main information about payment method
 	PaymentMethod *SimpleItem `json:"payment_method"`
-	// object which contains main information about technical finances of project which received of project
-	ProjectTechnicalIncome *OrderSimpleAmountObject `json:"project_technical_income,omitempty"`
-	// object which contains main information about technical finances of project which will send to project
-	ProjectTechnicalOutcome *OrderSimpleAmountObject `json:"project_technical_outcome,omitempty"`
-	// object which contains main information about technical finances of payment system which received of payment system
-	PaymentSystemTechnicalIncome *OrderSimpleAmountObject `json:"ps_technical_income,omitempty"`
 	// object which contains main information about accounting finances of project which received of project
-	ProjectAccountingIncome *OrderSimpleAmountObject `json:"project_accounting_income,omitempty"`
+	ProjectAmountIncome *OrderSimpleAmountObject `json:"project_amount_income"`
 	// object which contains main information about accounting finances of project which will send to project
-	ProjectAccountingOutcome *OrderSimpleAmountObject `json:"project_accounting_outcome,omitempty"`
+	ProjectAmountOutcome *OrderSimpleAmountObject `json:"project_amount_outcome"`
+	// object which contains main information about finances of payment system which received of payment system
+	PaymentMethodAmountIncome *OrderSimpleAmountObject `json:"payment_method_amount_income"`
 	// object which contains main information about fixed package which was buy
 	FixedPackage *OrderFixedPackage `json:"fixed_package"`
 	// object which contains main information about payment status
@@ -288,6 +283,16 @@ type OrderSimple struct {
 	ConfirmedAt *time.Time `json:"confirmed_at"`
 	// date when project was notification about payment
 	ClosedAt *time.Time `json:"confirmed_at"`
+	// PSP (P1) fee amount in merchant accounting currency
+	PspFeeAmount float64 `json:"psp_fee"`
+	// payment system fee for payment operation in payment system accounting currency
+	PaymentMethodFeeAmount float64 `bson:"pm_fee_amount" json:"pm_fee_amount"`
+	// fee is charged with the project for the operation in merchant accounting currency
+	ProjectFeeAmount float64 `bson:"project_fee_amount" json:"project_fee_amount"`
+	// value of fee which added to payer amount in merchant accounting currency
+	ToPayerFeeAmount float64 `bson:"to_payer_fee_amount" json:"to_payer_fee_amount"`
+	// vat amount in payment system accounting currency
+	VatAmount float64 `bson:"vat_amount" json:"vat_amount"`
 }
 
 type OrderPaginate struct {
