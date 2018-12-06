@@ -10,6 +10,7 @@ const (
 	ResponseMessageAccessDenied       = "Access denied"
 	ResponseMessageNotFound           = "Not found"
 	ResponseMessageProjectIdIsInvalid = "one or more project identifier is invalid"
+	ResponseMessageUnknownDbError     = "err: 1, unknown error. try request later"
 
 	ApiRequestParameterProjectId = "project_id"
 	ApiRequestParameterRegion    = "region"
@@ -18,7 +19,6 @@ const (
 	DBFieldName        = "name"
 	DBFieldPrice       = "price"
 	DBFieldCurrencyInt = "currency_int"
-	DBFieldCurrency    = "currency"
 )
 
 type Error struct {

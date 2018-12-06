@@ -40,7 +40,7 @@ var handlers = map[string]func(*model.Order, *Settings) PaymentSystem{
 }
 
 type PaymentSystem interface {
-	CreatePayment() *CreatePaymentResponse
+	CreatePayment() *PaymentResponse
 	ProcessPayment(*model.Order, *model.OrderPaymentNotification) (*model.Order, error)
 }
 
@@ -59,7 +59,7 @@ type Path struct {
 	method string
 }
 
-type CreatePaymentResponse struct {
+type PaymentResponse struct {
 	Status      int    `json:"-"`
 	RedirectUrl string `json:"redirect_url,omitempty"`
 	Error       string `json:"error,omitempty"`
@@ -96,8 +96,8 @@ func (pss *PaymentSystemSetting) GetLoggableHttpClient() *http.Client {
 	}
 }
 
-func GetCreatePaymentResponse(status int, error string, url string) *CreatePaymentResponse {
-	cpResp := &CreatePaymentResponse{Status: status}
+func NewPaymentResponse(status int, error string, url string) *PaymentResponse {
+	cpResp := &PaymentResponse{Status: status}
 
 	if error != "" {
 		cpResp.Error = error

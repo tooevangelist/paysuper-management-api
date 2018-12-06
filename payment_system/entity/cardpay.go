@@ -3,8 +3,6 @@ package entity
 import "time"
 
 const (
-	CardPayPaymentResponseStatusNew = "NEW"
-	CardPayPaymentResponseStatusInProgress = "IN_PROGRESS"
 	CardPayPaymentResponseStatusDeclined = "DECLINED"
 	CardPayPaymentResponseStatusAuthorized = "AUTHORIZED"
 	CardPayPaymentResponseStatusCompleted = "COMPLETED"
@@ -65,7 +63,7 @@ type CardPayAddress struct {
 
 type CardPayMerchantOrder struct {
 	Id              string          `json:"id" validate:"required,hexadecimal"`
-	Description     string          `json:"description" validate:"required"`
+	Description     string          `json:"description,omitempty"`
 	Items           []*CardPayItem  `json:"items,omitempty"`
 	ShippingAddress *CardPayAddress `json:"shipping_address,omitempty"`
 }
@@ -131,7 +129,7 @@ type CardPayPaymentDataResponse struct {
 	Currency      string  `json:"currency" validate:"required,alpha"`
 	DeclineCode   string  `json:"decline_code,omitempty"`
 	DeclineReason string  `json:"decline_reason,omitempty"`
-	Description   string  `json:"description" validate:"required"`
+	Description   string  `json:"description,omitempty"`
 	Is3d          bool    `json:"is_3d,omitempty"`
 	Note          string  `json:"note"`
 	Rrn           string  `json:"rrn,omitempty"`
@@ -141,6 +139,10 @@ type CardPayPaymentDataResponse struct {
 func (cpReq *CardPayPaymentNotificationWebHookRequest) IsPaymentAllowedStatus() bool {
 	return cpReq.PaymentData.Status == CardPayPaymentResponseStatusCompleted ||
 		cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined || cpReq.PaymentData.Status == CardPayPaymentResponseStatusCancelled
+}
+
+func (cpReq *CardPayPaymentNotificationWebHookRequest) IsFailStatus() bool {
+	return cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined || cpReq.PaymentData.Status == CardPayPaymentResponseStatusCancelled
 }
 
 func (cpReq *CardPayPaymentNotificationWebHookRequest) GetBankCardTxnParams() map[string]interface{} {

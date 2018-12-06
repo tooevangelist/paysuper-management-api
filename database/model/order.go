@@ -34,6 +34,8 @@ const (
 	OrderStatusProjectReject               = 8
 	OrderStatusRefund                      = 9
 	OrderStatusChargeback                  = 10
+	OrderStatusPaymentSystemDeclined       = 11
+	OrderStatusPaymentSystemCanceled       = 12
 
 	OrderFilterFieldProjects        = "project[]"
 	OrderFilterFieldId              = "id"
@@ -101,6 +103,8 @@ var OrderStatusesDescription = map[int]string{
 	OrderStatusProjectReject:               "Project reject notification about payment from P1. This payment is candidate to refund.",
 	OrderStatusRefund:                      "Payment was refunded to payer",
 	OrderStatusChargeback:                  "Customer's chargeback claim was received",
+	OrderStatusPaymentSystemDeclined:       "Payment system declined payment",
+	OrderStatusPaymentSystemCanceled:       "User canceled payment on payment system side",
 }
 
 var OrderStatusesNames = map[int]string{
@@ -115,6 +119,8 @@ var OrderStatusesNames = map[int]string{
 	OrderStatusProjectReject:               "Refund",
 	OrderStatusRefund:                      "Refund",
 	OrderStatusChargeback:                  "Chargeback",
+	OrderStatusPaymentSystemDeclined:       "Declined",
+	OrderStatusPaymentSystemCanceled:       "Canceled",
 }
 
 var RevenuePeriods = map[string]bool{

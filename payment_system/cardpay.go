@@ -3,6 +3,7 @@ package payment_system
 import (
 	"bytes"
 	"crypto/sha512"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"github.com/ProtocolONE/p1pay.api/database/model"
@@ -194,21 +195,21 @@ func (cp *CardPay) refresh(pmKey string) error {
 	return nil
 }
 
-func (cp *CardPay) CreatePayment() *CreatePaymentResponse {
+func (cp *CardPay) CreatePayment() *PaymentResponse {
 	if err := cp.auth(cp.Order.PaymentMethod.Params.ExternalId); err != nil {
-		return GetCreatePaymentResponse(CreatePaymentStatusErrorSystem, err.Error(), "")
+		return NewPaymentResponse(CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
 	qUrl, err := cp.getUrl(cardPayActionCreatePayment)
 
 	if err != nil {
-		return GetCreatePaymentResponse(CreatePaymentStatusErrorSystem, err.Error(), "")
+		return NewPaymentResponse(CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
 	cpo, err := cp.getCardPayOrder()
 
 	if err != nil {
-		return GetCreatePaymentResponse(CreatePaymentStatusErrorValidation, err.Error(), "")
+		return NewPaymentResponse(CreatePaymentStatusErrorValidation, err.Error(), "")
 	}
 
 	b, _ := json.Marshal(cpo)
@@ -225,27 +226,27 @@ func (cp *CardPay) CreatePayment() *CreatePaymentResponse {
 	resp, err := client.Do(req)
 
 	if resp.StatusCode != http.StatusOK {
-		return GetCreatePaymentResponse(CreatePaymentStatusErrorPaymentSystem, paymentSystemErrorCreateRequestFailed, "")
+		return NewPaymentResponse(CreatePaymentStatusErrorPaymentSystem, paymentSystemErrorCreateRequestFailed, "")
 	}
 
 	if b, err = ioutil.ReadAll(resp.Body); err != nil {
-		return GetCreatePaymentResponse(CreatePaymentStatusErrorPaymentSystem, err.Error(), "")
+		return NewPaymentResponse(CreatePaymentStatusErrorPaymentSystem, err.Error(), "")
 	}
 
 	var cpResponse *entity.CardPayOrderResponse
 
 	if err = json.Unmarshal(b, &cpResponse); err != nil {
-		return GetCreatePaymentResponse(CreatePaymentStatusErrorPaymentSystem, err.Error(), "")
+		return NewPaymentResponse(CreatePaymentStatusErrorPaymentSystem, err.Error(), "")
 	}
 
-	return GetCreatePaymentResponse(CreatePaymentStatusOK, "", cpResponse.RedirectUrl)
+	return NewPaymentResponse(CreatePaymentStatusOK, "", cpResponse.RedirectUrl)
 }
 
 func (cp *CardPay) ProcessPayment(o *model.Order, opn *model.OrderPaymentNotification) (*model.Order, error) {
 	cpReq := opn.Request.(*entity.CardPayPaymentNotificationWebHookRequest)
 
 	if cp.checkNotificationRequestSignature(opn.RawRequest, cpReq.Signature) == false {
-		return nil, errors.New(paymentSystemErrorRequestSignatureIsInvalid)
+		return o, errors.New(paymentSystemErrorRequestSignatureIsInvalid)
 	}
 
 	var err error
@@ -253,11 +254,11 @@ func (cp *CardPay) ProcessPayment(o *model.Order, opn *model.OrderPaymentNotific
 	cpReq.CallbackTimeTime, err = time.Parse(cardPayDateFormat, cpReq.CallbackTime)
 
 	if err != nil {
-		return nil, errors.New(paymentSystemErrorRequestTimeFieldIsInvalid)
+		return o, errors.New(paymentSystemErrorRequestTimeFieldIsInvalid)
 	}
 
-	if cpReq.IsPaymentAllowedStatus() {
-		return nil, errors.New(paymentSystemErrorRequestStatusIsInvalid)
+	if !cpReq.IsPaymentAllowedStatus() {
+		return o, errors.New(paymentSystemErrorRequestStatusIsInvalid)
 	}
 
 	switch cpReq.PaymentMethod {
@@ -277,11 +278,11 @@ func (cp *CardPay) ProcessPayment(o *model.Order, opn *model.OrderPaymentNotific
 		o.PaymentMethodTxnParams = cpReq.GetCryptoCurrencyTxnParams()
 		break
 	default:
-		return nil, errors.New(paymentSystemErrorRequestPaymentMethodIsInvalid)
+		return o, errors.New(paymentSystemErrorRequestPaymentMethodIsInvalid)
 	}
 
 	if cpReq.PaymentMethod != o.PaymentMethod.Params.ExternalId {
-		return nil, errors.New(paymentSystemErrorRequestPaymentMethodIsInvalid)
+		return o, errors.New(paymentSystemErrorRequestPaymentMethodIsInvalid)
 	}
 
 	o.PaymentMethodTerminalId = cp.pmSettings[settingsFieldTerminalId]
@@ -469,5 +470,5 @@ func (cp *CardPay) checkNotificationRequestSignature(reqRaw string, reqSign stri
 	h := sha512.New()
 	h.Write([]byte(reqRaw + cp.pmSettings[settingsFieldCallbackSecretWord]))
 
-	return string(h.Sum(nil)) == reqSign
+	return hex.EncodeToString(h.Sum(nil)) == reqSign
 }

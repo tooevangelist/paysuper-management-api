@@ -876,31 +876,31 @@ func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M 
 	return filter
 }
 
-func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings map[string]interface{}) *payment_system.CreatePaymentResponse {
+func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings map[string]interface{}) *payment_system.PaymentResponse {
 	var err error
 
 	if err = om.validateCreatePaymentData(data); err != nil {
-		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorValidation, err.Error(), "")
+		return payment_system.NewPaymentResponse(payment_system.CreatePaymentStatusErrorValidation, err.Error(), "")
 	}
 
 	o := om.FindById(data[model.OrderPaymentCreateRequestFieldOrderId])
 
 	if o == nil {
-		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorValidation, orderErrorNotFound, "")
+		return payment_system.NewPaymentResponse(payment_system.CreatePaymentStatusErrorValidation, orderErrorNotFound, "")
 	}
 
 	if o.IsComplete() == true {
-		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorValidation, orderErrorOrderAlreadyComplete, "")
+		return payment_system.NewPaymentResponse(payment_system.CreatePaymentStatusErrorValidation, orderErrorOrderAlreadyComplete, "")
 	}
 
 	pm := om.paymentMethodManager.FindById(bson.ObjectIdHex(data[model.OrderPaymentCreateRequestFieldOPaymentMethodId]))
 
 	if pm == nil {
-		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorValidation, orderErrorPaymentMethodNotFound, "")
+		return payment_system.NewPaymentResponse(payment_system.CreatePaymentStatusErrorValidation, orderErrorPaymentMethodNotFound, "")
 	}
 
 	if o, err = om.modifyOrderAfterOrderFormSubmit(o, pm); err != nil {
-		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorValidation, err.Error(), "")
+		return payment_system.NewPaymentResponse(payment_system.CreatePaymentStatusErrorValidation, err.Error(), "")
 	}
 
 	email, _ := data[model.OrderPaymentCreateRequestFieldEmail]
@@ -914,13 +914,13 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 	o.PaymentMethodTerminalId = pm.Params.Terminal
 
 	if o, err = om.updateOrderAccountingAmounts(o); err != nil {
-		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
+		return payment_system.NewPaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
 	handler, err := om.paymentSystemsSettings.GetPaymentHandler(o, psSettings)
 
 	if err != nil {
-		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
+		return payment_system.NewPaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
 	res := handler.CreatePayment()
@@ -934,13 +934,15 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 	}
 
 	if err = om.Database.Repository(TableOrder).UpdateOrder(o); err != nil {
-		return payment_system.GetCreatePaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
+		return payment_system.NewPaymentResponse(payment_system.CreatePaymentStatusErrorSystem, err.Error(), "")
 	}
 
 	return res
 }
 
 func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification, psSettings map[string]interface{}) (*model.Order, error) {
+	var hErr error
+
 	o := om.FindById(opn.Id)
 
 	if o == nil {
@@ -957,15 +959,17 @@ func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification
 		return nil, err
 	}
 
-	var hErr error
+	o.Status = model.OrderStatusPaymentSystemReject
 
-	o, hErr = handler.ProcessPayment(o, opn)
+	if o, hErr = handler.ProcessPayment(o, opn); hErr != nil {
+		if _, err = om.UpdateOrder(o); err != nil {
+			return nil, errors.New(model.ResponseMessageUnknownDbError)
+		}
 
-	if hErr != nil {
-		o.Status = model.OrderStatusPaymentSystemReject
-	} else {
-		o.Status = model.OrderStatusPaymentSystemComplete
+		return nil, hErr
 	}
+
+	o.Status = model.OrderStatusPaymentSystemComplete
 
 	if o, err = om.processNotifyPaymentAmounts(o); err != nil {
 		return nil, err
@@ -973,11 +977,11 @@ func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification
 
 	o.UpdatedAt = time.Now()
 
-	if err = om.Database.Repository(TableOrder).UpdateOrder(o); err != nil {
-		return nil, err
+	if _, err = om.UpdateOrder(o); err != nil {
+		return nil, errors.New(model.ResponseMessageUnknownDbError)
 	}
 
-	return o, hErr
+	return o, nil
 }
 
 func (om *OrderManager) processNotifyPaymentAmounts(o *model.Order) (*model.Order, error) {
@@ -1218,6 +1222,17 @@ func (om *OrderManager) updateOrderAccountingAmounts(o *model.Order) (*model.Ord
 	}
 
 	o.AmountInPaymentSystemAccountingCurrency = FormatAmount(cAmount)
+
+	return o, nil
+}
+
+func (om *OrderManager) UpdateOrder(o *model.Order) (*model.Order, error){
+	err := om.Database.Repository(TableOrder).UpdateOrder(o)
+
+	if err != nil {
+		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)
+		return nil, err
+	}
 
 	return o, nil
 }
