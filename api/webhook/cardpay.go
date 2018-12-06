@@ -34,6 +34,9 @@ func (cpWebHook *CardPayWebHook) paymentNotify(ctx echo.Context) error {
 		Signature: ctx.Request().Header.Get(entity.CardPayPaymentResponseHeaderSignature),
 	}
 
+	// temporary hack to change content-type header to correct
+	ctx.Request().Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
 	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
