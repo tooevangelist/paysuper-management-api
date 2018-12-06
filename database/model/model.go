@@ -6,6 +6,8 @@ const (
 	DefaultLimit  = 100
 	DefaultOffset = 0
 
+	EmptyString = ""
+
 	ResponseMessageInvalidRequestData = "Invalid request data"
 	ResponseMessageAccessDenied       = "Access denied"
 	ResponseMessageNotFound           = "Not found"

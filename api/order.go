@@ -307,10 +307,10 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 	var httpStatus int
 
 	switch resp.Status {
-	case payment_system.CreatePaymentStatusErrorValidation:
+	case payment_system.PaymentStatusErrorValidation:
 		httpStatus = http.StatusBadRequest
 		break
-	case payment_system.CreatePaymentStatusErrorSystem:
+	case payment_system.PaymentStatusErrorSystem:
 		httpStatus = http.StatusInternalServerError
 		break
 	case payment_system.CreatePaymentStatusErrorPaymentSystem:

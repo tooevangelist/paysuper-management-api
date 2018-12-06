@@ -138,11 +138,8 @@ type CardPayPaymentDataResponse struct {
 
 func (cpReq *CardPayPaymentNotificationWebHookRequest) IsPaymentAllowedStatus() bool {
 	return cpReq.PaymentData.Status == CardPayPaymentResponseStatusCompleted ||
-		cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined || cpReq.PaymentData.Status == CardPayPaymentResponseStatusCancelled
-}
-
-func (cpReq *CardPayPaymentNotificationWebHookRequest) IsFailStatus() bool {
-	return cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined || cpReq.PaymentData.Status == CardPayPaymentResponseStatusCancelled
+		cpReq.PaymentData.Status == CardPayPaymentResponseStatusDeclined ||
+		cpReq.PaymentData.Status == CardPayPaymentResponseStatusCancelled || cpReq.PaymentData.Status == CardPayPaymentResponseStatusAuthorized
 }
 
 func (cpReq *CardPayPaymentNotificationWebHookRequest) GetBankCardTxnParams() map[string]interface{} {

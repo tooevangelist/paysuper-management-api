@@ -417,3 +417,7 @@ func (rdr *RevenueDynamicRequest) SetProjectsFromMap(pMap map[bson.ObjectId]stri
 func (pd *RevenueDynamicPointDate) String() string {
 	return fmt.Sprintf("%d%d%d%d%d", pd.Year, pd.Month, pd.Week, pd.Day, pd.Hour)
 }
+
+func (order *Order) CanProcessNotify() bool {
+	return order.Status == OrderStatusPaymentSystemCreate || order.Status == OrderStatusPaymentSystemReject
+}

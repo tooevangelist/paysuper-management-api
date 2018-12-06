@@ -3,6 +3,7 @@ package webhook
 import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
+	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
 	"github.com/labstack/echo"
 	"net/http"
@@ -47,15 +48,24 @@ func (cpWebHook *CardPayWebHook) paymentNotify(ctx echo.Context) error {
 		RawRequest: cpWebHook.webHookRawBody,
 	}
 
-	order, err := cpWebHook.orderManager.ProcessNotifyPayment(oPaymentNotification, cpWebHook.paymentSystemConfig)
+	res := cpWebHook.orderManager.ProcessNotifyPayment(oPaymentNotification, cpWebHook.paymentSystemConfig)
 
-	if err != nil && order == nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	var httpStatus int
+	var message = map[string]string{"message": res.Error}
+
+	switch res.Status {
+	case payment_system.PaymentStatusErrorValidation:
+		httpStatus = http.StatusBadRequest
+		break
+	case payment_system.PaymentStatusErrorSystem:
+		httpStatus = http.StatusInternalServerError
+		break
+	case payment_system.PaymentStatusTemporary:
+		break
+	default:
+		httpStatus = http.StatusOK
+		message["message"] = "Payment successfully complete"
 	}
 
-	if err != nil && order != nil {
-		return ctx.JSON(http.StatusOK, err.Error())
-	}
-
-	return ctx.JSON(http.StatusOK, "Payment successfully complete")
+	return ctx.JSON(httpStatus, message)
 }

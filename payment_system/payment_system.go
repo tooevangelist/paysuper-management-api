@@ -22,13 +22,15 @@ const (
 	paymentSystemErrorRequestTimeFieldIsInvalid      = "time field in request is invalid"
 	paymentSystemErrorRequestStatusIsInvalid         = "status is invalid"
 	paymentSystemErrorRequestPaymentMethodIsInvalid  = "payment method from request not equal value in order"
+	paymentSystemErrorRequestTemporarySkipped        = "notification skipped with temporary status"
 
 	paymentSystemSettingsFieldNameCreatePaymentUrl = "create_payment_url"
 
-	CreatePaymentStatusOK                 = 0
-	CreatePaymentStatusErrorValidation    = 1
-	CreatePaymentStatusErrorSystem        = 2
+	PaymentStatusOK                       = 0
+	PaymentStatusErrorValidation          = 1
+	PaymentStatusErrorSystem              = 2
 	CreatePaymentStatusErrorPaymentSystem = 3
+	PaymentStatusTemporary                = 4
 
 	settingsFieldTerminalId         = "terminal_id"
 	settingsFieldSecretWord         = "secret_word"
@@ -41,7 +43,7 @@ var handlers = map[string]func(*model.Order, *Settings) PaymentSystem{
 
 type PaymentSystem interface {
 	CreatePayment() *PaymentResponse
-	ProcessPayment(*model.Order, *model.OrderPaymentNotification) (*model.Order, error)
+	ProcessPayment(*model.Order, *model.OrderPaymentNotification) *PaymentResponse
 }
 
 type PaymentSystemSetting struct {
@@ -63,6 +65,7 @@ type PaymentResponse struct {
 	Status      int    `json:"-"`
 	RedirectUrl string `json:"redirect_url,omitempty"`
 	Error       string `json:"error,omitempty"`
+	*model.Order
 }
 
 func (pss *PaymentSystemSetting) GetPaymentHandler(order *model.Order, config map[string]interface{}) (PaymentSystem, error) {
@@ -81,8 +84,8 @@ func (pss *PaymentSystemSetting) GetPaymentHandler(order *model.Order, config ma
 	cMap := c.(map[interface{}]interface{})
 
 	s := &Settings{
-		Url:      cMap[paymentSystemSettingsFieldNameCreatePaymentUrl].(string),
-		Settings: cMap[order.PaymentMethod.Params.ExternalId],
+		Url:                  cMap[paymentSystemSettingsFieldNameCreatePaymentUrl].(string),
+		Settings:             cMap[order.PaymentMethod.Params.ExternalId],
 		PaymentSystemSetting: pss,
 	}
 
@@ -96,16 +99,24 @@ func (pss *PaymentSystemSetting) GetLoggableHttpClient() *http.Client {
 	}
 }
 
-func NewPaymentResponse(status int, error string, url string) *PaymentResponse {
+func NewPaymentResponse(status int, error string) *PaymentResponse {
 	cpResp := &PaymentResponse{Status: status}
 
 	if error != "" {
 		cpResp.Error = error
 	}
 
-	if url != "" {
-		cpResp.RedirectUrl = url
-	}
-
 	return cpResp
+}
+
+func (pr *PaymentResponse) SetOrder(o *model.Order) *PaymentResponse  {
+	pr.Order = o
+
+	return pr
+}
+
+func (pr *PaymentResponse) SetError(error string) *PaymentResponse  {
+	pr.Error = error
+
+	return pr
 }

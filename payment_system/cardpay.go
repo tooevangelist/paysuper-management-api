@@ -197,19 +197,19 @@ func (cp *CardPay) refresh(pmKey string) error {
 
 func (cp *CardPay) CreatePayment() *PaymentResponse {
 	if err := cp.auth(cp.Order.PaymentMethod.Params.ExternalId); err != nil {
-		return NewPaymentResponse(CreatePaymentStatusErrorSystem, err.Error(), "")
+		return NewPaymentResponse(PaymentStatusErrorSystem, err.Error())
 	}
 
 	qUrl, err := cp.getUrl(cardPayActionCreatePayment)
 
 	if err != nil {
-		return NewPaymentResponse(CreatePaymentStatusErrorSystem, err.Error(), "")
+		return NewPaymentResponse(PaymentStatusErrorSystem, err.Error())
 	}
 
 	cpo, err := cp.getCardPayOrder()
 
 	if err != nil {
-		return NewPaymentResponse(CreatePaymentStatusErrorValidation, err.Error(), "")
+		return NewPaymentResponse(PaymentStatusErrorValidation, err.Error())
 	}
 
 	b, _ := json.Marshal(cpo)
@@ -226,27 +226,33 @@ func (cp *CardPay) CreatePayment() *PaymentResponse {
 	resp, err := client.Do(req)
 
 	if resp.StatusCode != http.StatusOK {
-		return NewPaymentResponse(CreatePaymentStatusErrorPaymentSystem, paymentSystemErrorCreateRequestFailed, "")
+		return NewPaymentResponse(CreatePaymentStatusErrorPaymentSystem, paymentSystemErrorCreateRequestFailed)
 	}
 
 	if b, err = ioutil.ReadAll(resp.Body); err != nil {
-		return NewPaymentResponse(CreatePaymentStatusErrorPaymentSystem, err.Error(), "")
+		return NewPaymentResponse(CreatePaymentStatusErrorPaymentSystem, err.Error())
 	}
 
 	var cpResponse *entity.CardPayOrderResponse
 
 	if err = json.Unmarshal(b, &cpResponse); err != nil {
-		return NewPaymentResponse(CreatePaymentStatusErrorPaymentSystem, err.Error(), "")
+		return NewPaymentResponse(CreatePaymentStatusErrorPaymentSystem, err.Error())
 	}
 
-	return NewPaymentResponse(CreatePaymentStatusOK, "", cpResponse.RedirectUrl)
+	res := NewPaymentResponse(PaymentStatusOK, model.EmptyString)
+	res.RedirectUrl = cpResponse.RedirectUrl
+
+	return res
 }
 
-func (cp *CardPay) ProcessPayment(o *model.Order, opn *model.OrderPaymentNotification) (*model.Order, error) {
+func (cp *CardPay) ProcessPayment(o *model.Order, opn *model.OrderPaymentNotification) *PaymentResponse {
 	cpReq := opn.Request.(*entity.CardPayPaymentNotificationWebHookRequest)
 
+	o.Status = model.OrderStatusPaymentSystemReject
+	resp := NewPaymentResponse(PaymentStatusErrorValidation, model.EmptyString).SetOrder(o)
+
 	if cp.checkNotificationRequestSignature(opn.RawRequest, cpReq.Signature) == false {
-		return o, errors.New(paymentSystemErrorRequestSignatureIsInvalid)
+		return resp.SetError(paymentSystemErrorRequestSignatureIsInvalid)
 	}
 
 	var err error
@@ -254,11 +260,11 @@ func (cp *CardPay) ProcessPayment(o *model.Order, opn *model.OrderPaymentNotific
 	cpReq.CallbackTimeTime, err = time.Parse(cardPayDateFormat, cpReq.CallbackTime)
 
 	if err != nil {
-		return o, errors.New(paymentSystemErrorRequestTimeFieldIsInvalid)
+		return resp.SetError(paymentSystemErrorRequestTimeFieldIsInvalid)
 	}
 
 	if !cpReq.IsPaymentAllowedStatus() {
-		return o, errors.New(paymentSystemErrorRequestStatusIsInvalid)
+		return resp.SetError(paymentSystemErrorRequestStatusIsInvalid)
 	}
 
 	switch cpReq.PaymentMethod {
@@ -278,11 +284,25 @@ func (cp *CardPay) ProcessPayment(o *model.Order, opn *model.OrderPaymentNotific
 		o.PaymentMethodTxnParams = cpReq.GetCryptoCurrencyTxnParams()
 		break
 	default:
-		return o, errors.New(paymentSystemErrorRequestPaymentMethodIsInvalid)
+		return resp.SetError(paymentSystemErrorRequestPaymentMethodIsInvalid)
 	}
 
 	if cpReq.PaymentMethod != o.PaymentMethod.Params.ExternalId {
-		return o, errors.New(paymentSystemErrorRequestPaymentMethodIsInvalid)
+		return resp.SetError(paymentSystemErrorRequestPaymentMethodIsInvalid)
+	}
+
+	switch cpReq.PaymentData.Status {
+	case entity.CardPayPaymentResponseStatusDeclined:
+		o.Status = model.OrderStatusPaymentSystemDeclined
+		break
+	case entity.CardPayPaymentResponseStatusCancelled:
+		o.Status = model.OrderStatusPaymentSystemCanceled
+		break
+	case entity.CardPayPaymentResponseStatusCompleted:
+		o.Status = model.OrderStatusPaymentSystemComplete
+		break
+	default:
+		return NewPaymentResponse(PaymentStatusTemporary, paymentSystemErrorRequestTemporarySkipped)
 	}
 
 	o.PaymentMethodTerminalId = cp.pmSettings[settingsFieldTerminalId]
@@ -291,7 +311,9 @@ func (cp *CardPay) ProcessPayment(o *model.Order, opn *model.OrderPaymentNotific
 	o.PaymentMethodIncomeAmount = cpReq.PaymentData.Amount
 	o.PaymentMethodIncomeCurrencyA3 = cpReq.PaymentData.Currency
 
-	return o, nil
+	res := NewPaymentResponse(PaymentStatusOK, model.EmptyString).SetOrder(o)
+
+	return res
 }
 
 func (cp *CardPay) getUrl(action string) (string, error) {
