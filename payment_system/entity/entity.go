@@ -19,3 +19,14 @@ const (
 	TxnParamsFieldCryptoAmount            = "amount_crypto"
 	TxnParamsFieldCryptoCurrency          = "currency_crypto"
 )
+
+var PaymentRequisitesNames = map[string]string{
+	BankCardFieldPan: "Card number",
+	BankCardFieldHolder: "Card holder",
+	EWalletFieldIdentifier: "Payment system account",
+	CryptoFieldIdentifier: "Address",
+	TxnParamsFieldBankCardIs3DS: "Is 3DS Secured",
+	TxnParamsFieldDeclineCode: "Decline code",
+	TxnParamsFieldDeclineReason: "Decline reason",
+	TxnParamsFieldCryptoAmount: "Amount in crypto currency",
+}

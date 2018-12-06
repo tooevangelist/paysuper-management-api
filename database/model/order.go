@@ -103,6 +103,20 @@ var OrderStatusesDescription = map[int]string{
 	OrderStatusChargeback:                  "Customer's chargeback claim was received",
 }
 
+var OrderStatusesNames = map[int]string{
+	OrderStatusNew:                         "New",
+	OrderStatusPaymentSystemCreate:         "Send to payment system",
+	OrderStatusPaymentSystemRejectOnCreate: "Error",
+	OrderStatusPaymentSystemReject:         "Error",
+	OrderStatusPaymentSystemComplete:       "Paid",
+	OrderStatusProjectInProgress:           "In progress",
+	OrderStatusProjectComplete:             "Completed",
+	OrderStatusProjectPending:              "Pending",
+	OrderStatusProjectReject:               "Refund",
+	OrderStatusRefund:                      "Refund",
+	OrderStatusChargeback:                  "Chargeback",
+}
+
 var RevenuePeriods = map[string]bool{
 	RevenueDynamicRequestPeriodHour:  true,
 	RevenueDynamicRequestPeriodDay:   true,
@@ -189,12 +203,6 @@ type Order struct {
 	ProjectOutcomeAmount float64 `bson:"project_outcome_amount" json:"project_outcome_amount"`
 	// order currency send to project in notification request
 	ProjectOutcomeCurrency *Currency `bson:"project_outcome_currency" json:"project_outcome_currency"`
-	// fee is charged with the project for the operation
-	ProjectFeeAmount float64 `bson:"project_fee_amount" json:"project_fee_amount"`
-	// value of fee which added to payer amount
-	ToPayerFeeAmount float64 `bson:"to_payer_fee_amount" json:"to_payer_fee_amount"`
-	// vat amount
-	VatAmount float64 `bson:"vat_amount" json:"vat_amount"`
 	// date of last notification request to project
 	ProjectLastRequestedAt *time.Time `bson:"project_last_requested_at" json:"project_last_requested_at,omitempty"`
 	// any project params which received from project in request of create of order
@@ -216,8 +224,6 @@ type Order struct {
 	// order currency received from payment system in notification request
 	PaymentMethodIncomeCurrency   *Currency `bson:"pm_income_currency" json:"pm_income_currency"`
 	PaymentMethodIncomeCurrencyA3 string    `bson:"-" json:"-"`
-	// payment system fee for payment operation
-	PaymentMethodFeeAmount float64 `bson:"pm_fee_amount" json:"pm_fee_amount"`
 	// date of ended payment operation in payment system
 	PaymentMethodOrderClosedAt *time.Time `bson:"pm_order_close_date" json:"pm_order_close_date,omitempty"`
 	// order status
@@ -244,7 +250,15 @@ type Order struct {
 	FixedPackage      *OrderFixedPackage `bson:"fixed_package" json:"fixed_package"`
 	PaymentRequisites map[string]string  `bson:"payment_requisites" json:"-"`
 	// PSP (P1) fee amount
-	PspFeeAmount float64 `bson:"psp_fee_amount" json:"psp_amount_fee_amount"`
+	PspFeeAmount *OrderFeePsp `bson:"psp_fee_amount" json:"psp_amount_fee_amount"`
+	// fee is charged with the project for the operation
+	ProjectFeeAmount *OrderFee `bson:"project_fee_amount" json:"project_fee_amount"`
+	// value of fee which added to payer amount
+	ToPayerFeeAmount *OrderFee `bson:"to_payer_fee_amount" json:"to_payer_fee_amount"`
+	// vat amount
+	VatAmount float64 `bson:"vat_amount" json:"vat_amount"`
+	// payment system fee for payment operation
+	PaymentSystemFeeAmount *OrderFeePaymentSystem `bson:"ps_fee_amount" json:"ps_fee_amount"`
 
 	PaymentMethodsPreparedFormData map[string]*PaymentMethodsPreparedFormData `bson:"-" json:"-"`
 }
@@ -265,6 +279,8 @@ type OrderSimple struct {
 	ProjectOrderId *string `json:"order_id,omitempty"`
 	// data about payer, for example: country, city, ip and etc
 	PayerData *PayerData `json:"payer_data"`
+	// payer payment requisites
+	PaymentRequisites map[string]string `json:"payment_requisites"`
 	// object which contains main information about payment method
 	PaymentMethod *SimpleItem `json:"payment_method"`
 	// object which contains main information about accounting finances of project which received of project
@@ -278,21 +294,21 @@ type OrderSimple struct {
 	// object which contains main information about payment status
 	Status *Status `json:"status"`
 	// date when payment created
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt int64 `json:"created_at"`
 	// date when payment was confirmed from payment system side
-	ConfirmedAt *time.Time `json:"confirmed_at"`
+	ConfirmedAt int64 `json:"confirmed_at,omitempty"`
 	// date when project was notification about payment
-	ClosedAt *time.Time `json:"confirmed_at"`
+	ClosedAt int64 `json:"confirmed_at,omitempty"`
 	// PSP (P1) fee amount in merchant accounting currency
-	PspFeeAmount float64 `json:"psp_fee"`
+	PspFeeAmount *OrderFeePsp `json:"psp_fee"`
 	// payment system fee for payment operation in payment system accounting currency
-	PaymentMethodFeeAmount float64 `bson:"pm_fee_amount" json:"pm_fee_amount"`
+	PaymentSystemFeeAmount *OrderFeePaymentSystem `json:"ps_fee_amount"`
 	// fee is charged with the project for the operation in merchant accounting currency
-	ProjectFeeAmount float64 `bson:"project_fee_amount" json:"project_fee_amount"`
+	ProjectFeeAmount *OrderFee `json:"project_fee_amount"`
 	// value of fee which added to payer amount in merchant accounting currency
-	ToPayerFeeAmount float64 `bson:"to_payer_fee_amount" json:"to_payer_fee_amount"`
+	ToPayerFeeAmount *OrderFee `json:"to_payer_fee_amount"`
 	// vat amount in payment system accounting currency
-	VatAmount float64 `bson:"vat_amount" json:"vat_amount"`
+	VatAmount float64 `json:"vat_amount"`
 }
 
 type OrderPaginate struct {
@@ -345,6 +361,32 @@ type RevenueDynamicMainData struct {
 	Count int     `json:"count"`
 	Total float64 `json:"total"`
 	Avg   float64 `json:"avg"`
+}
+
+type OrderFee struct {
+	// amount of fee of payment system in payment currency
+	AmountPaymentMethodCurrency float64 `bson:"amount_payment_method_currency" json:"amount_payment_method_currency"`
+	// amount of fee of payment system in accounting currency of merchant
+	AmountMerchantCurrency float64 `bson:"amount_merchant_currency" json:"amount_merchant_currency"`
+}
+
+type OrderFeePsp struct {
+	// amount of fee of payment system in payment currency
+	AmountPaymentMethodCurrency float64 `bson:"amount_payment_method_currency" json:"amount_payment_method_currency"`
+	// amount of fee of payment system in accounting currency of merchant
+	AmountMerchantCurrency float64 `bson:"amount_merchant_currency" json:"amount_merchant_currency"`
+	// amount of fee of PSP (P1) in PSP (P1) accounting currencies
+	AmountPspCurrency float64 `bson:"amount_psp_currency" json:"amount_psp_currency"`
+}
+
+// Contain information about payment system commission in other currencies
+type OrderFeePaymentSystem struct {
+	// amount of fee of payment system in payment currency
+	AmountPaymentMethodCurrency float64 `bson:"amount_payment_method_currency" json:"amount_payment_method_currency"`
+	// amount of fee of payment system in accounting currency of merchant
+	AmountMerchantCurrency float64 `bson:"amount_merchant_currency" json:"amount_merchant_currency"`
+	// amount of fee of payment system in accounting currency of payment system
+	AmountPaymentSystemCurrency float64 `bson:"amount_payment_system_currency" json:"amount_payment_system_currency"`
 }
 
 func (order *Order) IsComplete() bool {

@@ -7,6 +7,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
+	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
 	"github.com/globalsign/mgo/bson"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
@@ -119,8 +120,6 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	var pmOutcomeData *pmOutcomeData
 	var gRecord *geoip2.City
 	var ofp *model.OrderFixedPackage
-	var vatAmount float64
-	var commissions *model.CommissionOrder
 	var err error
 
 	p := om.projectManager.FindProjectById(order.ProjectId)
@@ -191,35 +190,6 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		if pmOutcomeData, err = om.checkPaymentMethodLimits(check); err != nil {
 			return nil, err
 		}
-
-		// temporary variable to prevent to mutation of amount which will send to payment method
-		pmOutAmount := pmOutcomeData.amount
-
-		// calculate commissions to selected payment method
-		commissions, err = om.commissionManager.CalculateCommission(p.Id, pm.Id, pmOutcomeData.amount)
-
-		if err != nil {
-			return nil, err
-		}
-
-		// if merchant enable add commissions to payer and we're know payment method
-		// then calculate commissions for payment
-		if p.Merchant.IsCommissionToUserEnabled == true {
-			pmOutAmount += commissions.ToUserCommission
-		}
-
-		// if merchant enable VAT calculation then we're calculate VAT for payer
-		if p.Merchant.IsVatEnabled == true {
-			vatAmount, err = om.vatManager.CalculateVat(gRecord.Country.IsoCode, gRecord.Subdivisions[0].IsoCode, pmOutcomeData.amount)
-
-			if err != nil {
-				return nil, err
-			}
-
-			pmOutAmount += vatAmount
-		}
-
-		pmOutcomeData.amount = pmOutAmount
 	}
 
 	if order.OrderId != nil {
@@ -271,7 +241,6 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		IsJsonRequest:                      order.IsJsonRequest,
 		FixedPackage:                       ofp,
 		AmountInMerchantAccountingCurrency: FormatAmount(mACAmount),
-		VatAmount:                          FormatAmount(vatAmount),
 	}
 
 	if order.Description != nil {
@@ -290,35 +259,8 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		nOrder.PaymentMethodOutcomeAmount = FormatAmount(pmOutcomeData.amount)
 		nOrder.PaymentMethodOutcomeCurrency = pmOutcomeData.currency
 
-		if commissions != nil {
-			nOrder.ProjectFeeAmount = FormatAmount(commissions.PspCommission + commissions.PMCommission)
-			nOrder.PaymentMethodFeeAmount = FormatAmount(commissions.PMCommission)
-
-			// save PSP fee in currency of project's merchant
-			pspConvertCommission, err := om.currencyRateManager.convert(pm.Currency.CodeInt, om.pspAccountingCurrency.CodeInt, commissions.PspCommission)
-
-			if err != nil {
-				return nil, err
-			}
-
-			nOrder.PspFeeAmount = FormatAmount(pspConvertCommission)
-
-			if p.Merchant.IsCommissionToUserEnabled == true {
-				nOrder.ToPayerFeeAmount = FormatAmount(commissions.ToUserCommission)
-
-				// if part of commission is passed to user then subtract this part of commission from total
-				// commission in the project
-				nOrder.ProjectFeeAmount = FormatAmount(nOrder.ProjectFeeAmount - nOrder.ToPayerFeeAmount)
-			}
-
-			// save project's commission in currency of project's merchant
-			prjConvertCommission, err := om.currencyRateManager.convert(pm.Currency.CodeInt, p.Merchant.Currency.CodeInt, nOrder.ProjectFeeAmount)
-
-			if err != nil {
-				return nil, err
-			}
-
-			nOrder.ProjectFeeAmount = FormatAmount(prjConvertCommission)
+		if nOrder, err = om.ProcessOrderCommissions(nOrder); err != nil {
+			return nil, err
 		}
 	}
 
@@ -329,6 +271,112 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	}
 
 	return nOrder, nil
+}
+
+// Calculate all possible commissions for order, i.e. payment system fee amount, PSP (P1) fee amount,
+// commission shifted from project to user and VAT
+func (om *OrderManager) ProcessOrderCommissions(o *model.Order) (*model.Order, error) {
+	pmOutAmount := o.PaymentMethodOutcomeAmount
+
+	// if merchant enable VAT calculation then we're need to calculate VAT for payer
+	if o.Project.Merchant.IsVatEnabled == true {
+		vatAmount, err := om.vatManager.CalculateVat(o.PayerData.CountryCodeA2, o.PayerData.Subdivision, o.PaymentMethodOutcomeAmount)
+
+		if err != nil {
+			return nil, err
+		}
+
+		o.VatAmount = FormatAmount(vatAmount)
+
+		// add VAT amount to payment amount
+		pmOutAmount += vatAmount
+	}
+
+	// calculate commissions to selected payment method
+	commissions, err := om.commissionManager.CalculateCommission(o.Project.Id, o.PaymentMethod.Id, o.PaymentMethodOutcomeAmount)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var cCom float64
+
+	mAccCur := o.Project.Merchant.Currency.CodeInt
+	pmOutCur := o.PaymentMethodOutcomeCurrency.CodeInt
+
+	totalCommission := commissions.PMCommission + commissions.PspCommission
+
+	// if merchant enable to shift commissions form project to payer then we're need to calculate commissions shifting
+	if o.Project.Merchant.IsCommissionToUserEnabled == true {
+		// subtract commission to user from project's commission
+		totalCommission -= commissions.ToUserCommission
+
+		// add commission to user to payment amount
+		pmOutAmount += commissions.ToUserCommission
+
+		o.ToPayerFeeAmount = &model.OrderFee{
+			AmountPaymentMethodCurrency: FormatAmount(commissions.ToUserCommission),
+		}
+
+		// convert amount of fee shifted to user to accounting currency of merchant
+		if cCom, err = om.currencyRateManager.convert(pmOutCur, mAccCur, commissions.ToUserCommission); err != nil {
+			return nil, err
+		}
+
+		o.ToPayerFeeAmount.AmountMerchantCurrency = FormatAmount(cCom)
+	}
+
+	o.ProjectFeeAmount = &model.OrderFee{
+		AmountPaymentMethodCurrency: FormatAmount(totalCommission),
+	}
+
+	// convert amount of fee to project to accounting currency of merchant
+	if cCom, err = om.currencyRateManager.convert(pmOutCur, mAccCur, totalCommission); err != nil {
+		return nil, err
+	}
+
+	o.ProjectFeeAmount.AmountMerchantCurrency = FormatAmount(cCom)
+
+	o.PspFeeAmount = &model.OrderFeePsp{
+		AmountPaymentMethodCurrency: commissions.PspCommission,
+	}
+
+	// convert PSP amount of fee to accounting currency of merchant
+	if cCom, err = om.currencyRateManager.convert(pmOutCur, mAccCur, commissions.PspCommission); err != nil {
+		return nil, err
+	}
+
+	o.PspFeeAmount.AmountMerchantCurrency = FormatAmount(cCom)
+
+	// convert PSP amount of fee to accounting currency of PSP
+	if cCom, err = om.currencyRateManager.convert(pmOutCur, om.pspAccountingCurrency.CodeInt, commissions.PspCommission); err != nil {
+		return nil, err
+	}
+
+	o.PspFeeAmount.AmountPspCurrency = FormatAmount(cCom)
+
+	// save information about payment system commission
+	o.PaymentSystemFeeAmount = &model.OrderFeePaymentSystem{
+		AmountPaymentMethodCurrency: FormatAmount(commissions.PMCommission),
+	}
+
+	// convert payment system amount of fee to accounting currency of payment system
+	cCom, err = om.currencyRateManager.convert(pmOutCur, o.PaymentMethod.PaymentSystem.AccountingCurrency.CodeInt, commissions.PMCommission)
+
+	if err != nil {
+		return nil, err
+	}
+
+	o.PaymentSystemFeeAmount.AmountPaymentSystemCurrency = FormatAmount(cCom)
+
+	// convert payment system amount of fee to accounting currency of merchant
+	if cCom, err = om.currencyRateManager.convert(pmOutCur, mAccCur, commissions.PMCommission); err != nil {
+		return nil, err
+	}
+
+	o.PaymentSystemFeeAmount.AmountMerchantCurrency = FormatAmount(cCom)
+
+	return o, nil
 }
 
 func (om *OrderManager) FindById(id string) *model.Order {
@@ -659,12 +707,11 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 			FixedPackage: oValue.FixedPackage,
 			Status: &model.Status{
 				Status:      oValue.Status,
+				Name:        model.OrderStatusesNames[oValue.Status],
 				Description: model.OrderStatusesDescription[oValue.Status],
 			},
-			VatAmount:   oValue.VatAmount,
-			CreatedAt:   oValue.CreatedAt,
-			ConfirmedAt: oValue.PaymentMethodOrderClosedAt,
-			ClosedAt:    oValue.ProjectLastRequestedAt,
+			VatAmount: oValue.VatAmount,
+			CreatedAt: oValue.CreatedAt.Unix(),
 		}
 
 		if oValue.PaymentMethodIncomeAmount > 0 {
@@ -696,15 +743,56 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 			}
 
 			tOrder.PspFeeAmount = oValue.PspFeeAmount
-			tOrder.PaymentMethodFeeAmount = oValue.PaymentMethodFeeAmount
+			tOrder.PaymentSystemFeeAmount = oValue.PaymentSystemFeeAmount
 			tOrder.ProjectFeeAmount = oValue.ProjectFeeAmount
 			tOrder.ToPayerFeeAmount = oValue.ToPayerFeeAmount
+
+			tOrder.PaymentRequisites = om.preparePaymentRequisites(oValue)
+		}
+
+		if oValue.PaymentMethodOrderClosedAt != nil {
+			tOrder.ConfirmedAt = oValue.PaymentMethodOrderClosedAt.Unix()
+		}
+
+		if oValue.ProjectLastRequestedAt != nil {
+			tOrder.ClosedAt = oValue.ProjectLastRequestedAt.Unix()
 		}
 
 		tOrders = append(tOrders, tOrder)
 	}
 
 	return tOrders, nil
+}
+
+// Prepare payer payment requisites for frontend
+func (om *OrderManager) preparePaymentRequisites(o *model.Order) map[string]string {
+	requisites := make(map[string]string)
+
+	for k, v := range o.PaymentRequisites {
+		n, ok := entity.PaymentRequisitesNames[k]
+
+		if !ok {
+			continue
+		}
+
+		requisites[n] = v
+	}
+
+	if len(o.PaymentMethodTxnParams) <= 0 {
+		return requisites
+	}
+
+	for k, v := range o.PaymentMethodTxnParams {
+		n, ok := entity.PaymentRequisitesNames[k]
+
+		if !ok {
+			continue
+		}
+
+		requisites[n] = v.(string)
+	}
+
+	return requisites
 }
 
 func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M {
@@ -990,63 +1078,6 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 		return nil, err
 	}
 
-	// temporary variable to prevent to mutation of amount which will send to payment method
-	pmOutAmount := pmOutData.amount
-
-	// if payment method wasn't send in request of order create then we're calculate commissions for selected on
-	// form payment method
-	commissions, err := om.commissionManager.CalculateCommission(o.Project.Id, pm.Id, pmOutData.amount)
-
-	o.ProjectFeeAmount = FormatAmount(commissions.PspCommission + commissions.PMCommission)
-	o.PaymentMethodFeeAmount = FormatAmount(commissions.PMCommission)
-
-	// save PSP fee in currency of project's merchant
-	pspConvertCommission, err := om.currencyRateManager.convert(pm.Currency.CodeInt, om.pspAccountingCurrency.CodeInt, commissions.PspCommission)
-
-	if err != nil {
-		return nil, err
-	}
-
-	o.PspFeeAmount = FormatAmount(pspConvertCommission)
-
-	// if commission to user enabled for merchant
-	if o.Project.Merchant.IsCommissionToUserEnabled == true {
-		if err != nil {
-			return nil, err
-		}
-
-		pmOutAmount += commissions.ToUserCommission
-		o.ToPayerFeeAmount = FormatAmount(commissions.ToUserCommission)
-
-		// if part of commission is passed to user then subtract this part of commission from total
-		// commission in the project
-		o.ProjectFeeAmount = FormatAmount(o.ProjectFeeAmount - o.ToPayerFeeAmount)
-	}
-
-	// save project's commission in currency of project's merchant
-	prjConvertCommission, err := om.currencyRateManager.convert(pm.Currency.CodeInt, p.Merchant.Currency.CodeInt, o.ProjectFeeAmount)
-
-	if err != nil {
-		return nil, err
-	}
-
-	o.ProjectFeeAmount = FormatAmount(prjConvertCommission)
-
-	// if merchant enable VAT to user and payment method wasn't send in request of order create
-	// then we're calculate VAT for selected on form payment method
-	if o.Project.Merchant.IsVatEnabled == true {
-		vat, err := om.vatManager.CalculateVat(o.PayerData.CountryCodeA2, o.PayerData.Subdivision, pmOutData.amount)
-
-		if err != nil {
-			return nil, err
-		}
-
-		pmOutAmount += vat
-		o.VatAmount = FormatAmount(vat)
-	}
-
-	pmOutData.amount = pmOutAmount
-
 	o.PaymentMethod = &model.OrderPaymentMethod{
 		Id:            pm.Id,
 		Name:          pm.Name,
@@ -1057,6 +1088,10 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 
 	o.PaymentMethodOutcomeAmount = FormatAmount(pmOutData.amount)
 	o.PaymentMethodOutcomeCurrency = pmOutData.currency
+
+	if o, err = om.ProcessOrderCommissions(o); err != nil {
+		return nil, err
+	}
 
 	return o, nil
 }

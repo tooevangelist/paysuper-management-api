@@ -36,6 +36,8 @@ type SimpleItem struct {
 type Status struct {
 	// numeric status code
 	Status int `json:"status"`
+	// status name
+	Name string `json:"name"`
 	// text description
 	Description string `json:"description"`
 }
