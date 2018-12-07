@@ -384,3 +384,33 @@ func (pm *ProjectManager) FindFixedPackage(filters *model.FixedPackageFilters) [
 
 	return fps
 }
+
+func (pm *ProjectManager) GetProjectsPaymentMethodsByMerchantMainData(mId string) map[string]string {
+	projects := pm.FindProjectsByMerchantId(mId, model.DefaultLimit, model.DefaultOffset)
+
+	pms := make(map[string]string)
+
+	if len(projects) <= 0 {
+		return pms
+	}
+
+	for _, project := range projects {
+		projectPms, err := pm.GetProjectPaymentMethods(project.Id)
+
+		if err != nil || len(projectPms) <= 0 {
+			continue
+		}
+
+		for _, ppm := range projectPms {
+			sPpmId := ppm.Id.Hex()
+
+			if _, ok := pms[sPpmId]; ok {
+				continue
+			}
+
+			pms[sPpmId] = ppm.Name
+		}
+	}
+
+	return pms
+}

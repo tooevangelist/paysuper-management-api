@@ -135,7 +135,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitCountryRoutes().
 		InitMerchantRoutes().
 		InitProjectRoutes().
-		InitOrderV1Routes()
+		InitOrderV1Routes().
+		InitPaymentMethodRoutes()
 
 	// init webhook endpoints section
 	api.InitWebHooks()
