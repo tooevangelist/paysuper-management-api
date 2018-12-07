@@ -85,7 +85,6 @@ type Api struct {
 	geoDbReader             *geoip2.Reader
 	PaymentSystemConfig     map[string]interface{}
 	pspAccountingCurrencyA3 string
-	webHookRawBody          string
 	paymentSystemsSettings  *payment_system.PaymentSystemSetting
 
 	Merchant
@@ -186,7 +185,6 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, ctx echo.C
 
 func (api *Api) InitWebHooks() {
 	whGroup := api.Http.Group(apiWebHookGroupPath)
-	whGroup.Use(api.WebHookRequestLoggerMiddleware)
 	whGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
 		data := []interface{}{
 			"request_headers", utils.RequestResponseHeadersToString(ctx.Request().Header),
@@ -205,9 +203,10 @@ func (api *Api) InitWebHooks() {
 		api.geoDbReader,
 		api.pspAccountingCurrencyA3,
 		whGroup,
-		api.webHookRawBody,
 		api.PaymentSystemConfig,
 		api.paymentSystemsSettings,
 	)
+
+	whGroup.Use(wh.RawBodyMiddleware)
 	wh.InitCardPayWebHookRoutes()
 }
