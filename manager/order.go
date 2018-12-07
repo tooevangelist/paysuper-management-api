@@ -942,7 +942,7 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 }
 
 func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification, psSettings map[string]interface{}) *payment_system.PaymentResponse {
-	o := om.FindById("5c0792bf1986ee3418a4d10d")
+	o := om.FindById(opn.Id)
 
 	if o == nil {
 		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, orderErrorNotFound)
