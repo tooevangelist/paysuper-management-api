@@ -48,7 +48,7 @@ func (cpWebHook *CardPayWebHook) paymentNotify(ctx echo.Context) error {
 	oPaymentNotification := &model.OrderPaymentNotification{
 		Id:         req.MerchantOrder.Id,
 		Request:    req,
-		RawRequest: cpWebHook.webHookRawBody,
+		RawRequest: cpWebHook.rawBody,
 	}
 
 	res := cpWebHook.orderManager.ProcessNotifyPayment(oPaymentNotification, cpWebHook.paymentSystemConfig)
