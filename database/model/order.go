@@ -109,7 +109,7 @@ var OrderStatusesDescription = map[int]string{
 
 var OrderStatusesNames = map[int]string{
 	OrderStatusNew:                         "New",
-	OrderStatusPaymentSystemCreate:         "Send to payment system",
+	OrderStatusPaymentSystemCreate:         "In payment",
 	OrderStatusPaymentSystemRejectOnCreate: "Error",
 	OrderStatusPaymentSystemReject:         "Error",
 	OrderStatusPaymentSystemComplete:       "Paid",

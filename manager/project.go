@@ -212,6 +212,20 @@ func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int, offset
 	return p
 }
 
+func (pm *ProjectManager) FindProjectsMainData(mId string) map[string]string {
+	p := pm.FindProjectsByMerchantId(mId, model.DefaultLimit, model.DefaultOffset)
+
+	pmd := make(map[string]string)
+
+	if len(p) > 0 {
+		for _, v := range p {
+			pmd[v.Id.Hex()] = v.Name
+		}
+	}
+
+	return pmd
+}
+
 func (pm *ProjectManager) FindProjectById(id string) *model.Project {
 	bId := bson.ObjectIdHex(id)
 	p, err := pm.Database.Repository(TableProject).FindProjectById(bId)

@@ -25,6 +25,7 @@ func (api *Api) InitProjectRoutes() *Api {
 	api.accessRouteGroup.POST("/project", pApiV1.create)
 	api.accessRouteGroup.PUT("/project/:id", pApiV1.update)
 	api.accessRouteGroup.DELETE("/project/:id", pApiV1.delete)
+	api.accessRouteGroup.GET("/project/filters", pApiV1.getFiltersProjects)
 
 	api.Http.GET("/api/v1/project/package/:region/:project_id", pApiV1.getFixedPackage)
 
@@ -239,4 +240,9 @@ func (pApiV1 *ProjectApiV1) getFixedPackage(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, fps)
 }
 
+func (pApiV1 *ProjectApiV1) getFiltersProjects(ctx echo.Context) error {
+	p := pApiV1.projectManager.FindProjectsMainData(pApiV1.Merchant.Identifier)
+
+	return ctx.JSON(http.StatusOK, p)
+}
 
