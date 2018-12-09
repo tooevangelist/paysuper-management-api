@@ -1107,6 +1107,9 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 }
 
 func (om *OrderManager) GetRevenueDynamic(rdr *model.RevenueDynamicRequest) (*model.RevenueDynamicResult, error) {
+	rdr.From = time.Date(rdr.From.Year(), rdr.From.Month(), rdr.From.Day(), 0, 0, 0, 0, rdr.From.Location())
+	rdr.To = time.Date(rdr.To.Year(), rdr.To.Month(), rdr.To.Day(), 23, 59, 59, 99, rdr.To.Location())
+
 	res, err := om.Database.Repository(TableOrder).GetRevenueDynamic(rdr)
 
 	if err != nil {
@@ -1151,21 +1154,46 @@ func (om *OrderManager) GetRevenueDynamic(rdr *model.RevenueDynamicRequest) (*mo
 		revPoints = append(revPoints, revPoint)
 	}
 
-	rev := res[0][model.RevenueDynamicFacetFieldRevenue].([]interface{})[0].(map[string]interface{})
-	ref := res[0][model.RevenueDynamicFacetFieldRefund].([]interface{})[0].(map[string]interface{})
-
 	rd := &model.RevenueDynamicResult{
-		Points: revPoints,
-		Revenue: &model.RevenueDynamicMainData{
-			Count: rev[model.RevenueDynamicFacetFieldCount].(int),
-			Total: FormatAmount(rev[model.RevenueDynamicFacetFieldTotal].(float64)),
-			Avg:   FormatAmount(rev[model.RevenueDynamicFacetFieldAvg].(float64)),
-		},
-		Refund: &model.RevenueDynamicMainData{
-			Count: ref[model.RevenueDynamicFacetFieldCount].(int),
-			Total: FormatAmount(ref[model.RevenueDynamicFacetFieldTotal].(float64)),
-			Avg:   FormatAmount(ref[model.RevenueDynamicFacetFieldAvg].(float64)),
-		},
+		Points:  revPoints,
+		Revenue: &model.RevenueDynamicMainData{Count: 0, Total: 0, Avg: 0},
+		Refund:  &model.RevenueDynamicMainData{Count: 0, Total: 0, Avg: 0},
+	}
+
+	rev := res[0][model.RevenueDynamicFacetFieldRevenue].([]interface{})
+
+	if len(rev) > 0 {
+		mRev := rev[0].(map[string]interface{})
+
+		if v, ok := mRev[model.RevenueDynamicFacetFieldCount]; ok {
+			rd.Revenue.Count = v.(int)
+		}
+
+		if v, ok := mRev[model.RevenueDynamicFacetFieldTotal]; ok {
+			rd.Revenue.Total = FormatAmount(v.(float64))
+		}
+
+		if v, ok := mRev[model.RevenueDynamicFacetFieldAvg]; ok {
+			rd.Revenue.Avg = FormatAmount(v.(float64))
+		}
+	}
+
+	ref := res[0][model.RevenueDynamicFacetFieldRefund].([]interface{})
+
+	if len(ref) > 0 {
+		mRef := ref[0].(map[string]interface{})
+
+		if v, ok := mRef[model.RevenueDynamicFacetFieldCount]; ok {
+			rd.Refund.Count = v.(int)
+		}
+
+		if v, ok := mRef[model.RevenueDynamicFacetFieldTotal]; ok {
+			rd.Refund.Total = FormatAmount(v.(float64))
+		}
+
+		if v, ok := mRef[model.RevenueDynamicFacetFieldAvg]; ok {
+			rd.Refund.Avg = FormatAmount(v.(float64))
+		}
 	}
 
 	return rd, err
