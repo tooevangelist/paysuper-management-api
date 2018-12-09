@@ -69,6 +69,7 @@ type Merchant struct {
 type GetParams struct {
 	limit  int
 	offset int
+	sort   []string
 }
 
 type Order struct {
@@ -123,7 +124,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}))
 	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
 
-	api.Http.Use(api.LimitOffsetMiddleware)
+	api.Http.Use(api.LimitOffsetSortMiddleware)
 	api.Http.Use(middleware.Logger())
 	api.Http.Use(middleware.Recover())
 	api.Http.Use(middleware.CORSWithConfig(middleware.CORSConfig{

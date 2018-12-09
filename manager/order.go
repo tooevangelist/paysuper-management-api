@@ -89,6 +89,7 @@ type FindAll struct {
 	Merchant *model.Merchant
 	Limit    int
 	Offset   int
+	SortBy   []string
 }
 
 func InitOrderManager(
@@ -665,7 +666,7 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)
 	}
 
-	o, err := om.Database.Repository(TableOrder).FindAllOrders(f, params.Limit, params.Offset)
+	o, err := om.Database.Repository(TableOrder).FindAllOrders(f, params.SortBy, params.Limit, params.Offset)
 
 	if err != nil {
 		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)

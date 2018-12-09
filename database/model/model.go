@@ -8,6 +8,10 @@ const (
 
 	EmptyString = ""
 
+	QueryParameterNameLimit  = "limit"
+	QueryParameterNameOffset = "offset"
+	QueryParameterNameSort   = "sort[]"
+
 	ResponseMessageInvalidRequestData = "Invalid request data"
 	ResponseMessageAccessDenied       = "Access denied"
 	ResponseMessageNotFound           = "Not found"
@@ -22,6 +26,8 @@ const (
 	DBFieldPrice       = "price"
 	DBFieldCurrencyInt = "currency_int"
 )
+
+var DefaultSort = []string{"_id"}
 
 type Error struct {
 	// text error description

@@ -27,9 +27,9 @@ func (rep *Repository) UpdateOrder(o *model.Order) error {
 	return rep.Collection.UpdateId(o.Id, o)
 }
 
-func (rep *Repository) FindAllOrders(filters bson.M, limit int, offset int) ([]*model.Order, error) {
+func (rep *Repository) FindAllOrders(filters bson.M, sort []string, limit int, offset int) ([]*model.Order, error) {
 	var o []*model.Order
-	err := rep.Collection.Find(filters).Limit(limit).Skip(offset).All(&o)
+	err := rep.Collection.Find(filters).Sort(sort...).Limit(limit).Skip(offset).All(&o)
 
 	return o, err
 }
