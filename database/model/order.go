@@ -409,6 +409,28 @@ type AccountingPayment struct {
 	TotalCommission float64 `json:"total_commission"`
 }
 
+// Contain data to create payment on payment system side
+type OrderCreatePaymentRequest struct {
+	// unique identifier of order on PSP (P1) side
+	OrderId string `json:"order_id"`
+	// unique identifier of payment method by PSP (P1) classifier
+	PaymentMethodId string `json:"payment_method_id"`
+	// user bank card number. required only for bank card payment
+	Pan *string `json:"pan,omitempty"`
+	// month of expire date of user bank card. required only for bank card payment
+	Month *int `json:"month,omitempty"`
+	// year of expire date of user bank card. required only for bank card payment
+	Year *int `json:"year,omitempty"`
+	// bank card cvv code. required only for bank card payment
+	Cvv *int `json:"cvv,omitempty"`
+	// bank card card holder name. required only for bank card payment
+	CardHolder *string `json:"card_holder,omitempty"`
+	// user account in ewallet payment system. required only for ewallet payment
+	Ewallet *string `json:"ewallet,omitempty"`
+	// user wallet address in crypto payment system. required only for crypto payment
+	Address *string `json:"address,omitempty"`
+}
+
 func (order *Order) IsComplete() bool {
 	return order.Status == OrderStatusProjectComplete
 }

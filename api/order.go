@@ -294,6 +294,17 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, pOrders)
 }
 
+// @Summary Create payment
+// @Description Create payment by order
+// @Tags Payment Order
+// @Accept json
+// @Produce json
+// @Param data body model.OrderCreatePaymentRequest true "data to create payment"
+// @Success 200 {object} payment_system.PaymentResponse "contain url to redirect user"
+// @Failure 400 {object} payment_system.PaymentResponse "contain error description about data validation error"
+// @Failure 402 {object} payment_system.PaymentResponse "contain error description about error on payment system side"
+// @Failure 500 {object} payment_system.PaymentResponse "contain error description about error on PSP (P1) side"
+// @Router /api/v1/payment [post]
 func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 	data := make(map[string]string)
 

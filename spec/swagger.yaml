@@ -341,6 +341,45 @@ definitions:
           vat amount
         type: number
     type: object
+  model.OrderCreatePaymentRequest:
+    properties:
+      address:
+        description: |
+          user wallet address in crypto payment system. required only for crypto payment
+        type: string
+      card_holder:
+        description: |
+          bank card card holder name. required only for bank card payment
+        type: string
+      cvv:
+        description: |
+          bank card cvv code. required only for bank card payment
+        type: integer
+      ewallet:
+        description: |
+          user account in ewallet payment system. required only for ewallet payment
+        type: string
+      month:
+        description: |
+          month of expire date of user bank card. required only for bank card payment
+        type: integer
+      order_id:
+        description: |
+          unique identifier of order on PSP (P1) side
+        type: string
+      pan:
+        description: |
+          user bank card number. required only for bank card payment
+        type: string
+      payment_method_id:
+        description: |
+          unique identifier of payment method by PSP (P1) classifier
+        type: string
+      year:
+        description: |
+          year of expire date of user bank card. required only for bank card payment
+        type: integer
+    type: object
   model.OrderFee:
     properties:
       amount_merchant_currency:
@@ -494,9 +533,9 @@ definitions:
           URL for payment data verification request to project. This field can be send if it allowed in project admin panel
         type: string
     required:
+    - amount
     - account
     - project
-    - amount
     type: object
   model.OrderSimple:
     properties:
@@ -953,6 +992,13 @@ definitions:
           numeric status code
         type: integer
     type: object
+  payment_system.PaymentResponse:
+    properties:
+      error:
+        type: string
+      redirect_url:
+        type: string
+    type: object
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -1129,6 +1175,45 @@ paths:
             $ref: '#/definitions/model.Error'
             type: object
       summary: Create order with json request
+      tags:
+      - Payment Order
+  /api/v1/payment:
+    post:
+      consumes:
+      - application/json
+      description: Create payment by order
+      parameters:
+      - description: data to create payment
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.OrderCreatePaymentRequest'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: contain url to redirect user
+          schema:
+            $ref: '#/definitions/payment_system.PaymentResponse'
+            type: object
+        "400":
+          description: contain error description about data validation error
+          schema:
+            $ref: '#/definitions/payment_system.PaymentResponse'
+            type: object
+        "402":
+          description: contain error description about error on payment system side
+          schema:
+            $ref: '#/definitions/payment_system.PaymentResponse'
+            type: object
+        "500":
+          description: contain error description about error on PSP (P1) side
+          schema:
+            $ref: '#/definitions/payment_system.PaymentResponse'
+            type: object
+      summary: Create payment
       tags:
       - Payment Order
   /api/v1/project/package/{region}/{project_id}:

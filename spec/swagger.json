@@ -257,6 +257,63 @@
                 }
             }
         },
+        "/api/v1/payment": {
+            "post": {
+                "description": "Create payment by order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment Order"
+                ],
+                "summary": "Create payment",
+                "parameters": [
+                    {
+                        "description": "data to create payment",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.OrderCreatePaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "contain url to redirect user",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/payment_system.PaymentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "contain error description about data validation error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/payment_system.PaymentResponse"
+                        }
+                    },
+                    "402": {
+                        "description": "contain error description about error on payment system side",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/payment_system.PaymentResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "contain error description about error on PSP (P1) side",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/payment_system.PaymentResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/project/package/{region}/{project_id}": {
             "get": {
                 "description": "Get list of project's fixed packages by filters",
@@ -1800,6 +1857,47 @@
                 }
             }
         },
+        "model.OrderCreatePaymentRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "user wallet address in crypto payment system. required only for crypto payment\n",
+                    "type": "string"
+                },
+                "card_holder": {
+                    "description": "bank card card holder name. required only for bank card payment\n",
+                    "type": "string"
+                },
+                "cvv": {
+                    "description": "bank card cvv code. required only for bank card payment\n",
+                    "type": "integer"
+                },
+                "ewallet": {
+                    "description": "user account in ewallet payment system. required only for ewallet payment\n",
+                    "type": "string"
+                },
+                "month": {
+                    "description": "month of expire date of user bank card. required only for bank card payment\n",
+                    "type": "integer"
+                },
+                "order_id": {
+                    "description": "unique identifier of order on PSP (P1) side\n",
+                    "type": "string"
+                },
+                "pan": {
+                    "description": "user bank card number. required only for bank card payment\n",
+                    "type": "string"
+                },
+                "payment_method_id": {
+                    "description": "unique identifier of payment method by PSP (P1) classifier\n",
+                    "type": "string"
+                },
+                "year": {
+                    "description": "year of expire date of user bank card. required only for bank card payment\n",
+                    "type": "integer"
+                }
+            }
+        },
         "model.OrderFee": {
             "type": "object",
             "properties": {
@@ -1908,9 +2006,9 @@
         "model.OrderScalar": {
             "type": "object",
             "required": [
+                "amount",
                 "account",
-                "project",
-                "amount"
+                "project"
             ],
             "properties": {
                 "account": {
@@ -2500,6 +2598,17 @@
                 "status": {
                     "description": "numeric status code\n",
                     "type": "integer"
+                }
+            }
+        },
+        "payment_system.PaymentResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "redirect_url": {
+                    "type": "string"
                 }
             }
         }
