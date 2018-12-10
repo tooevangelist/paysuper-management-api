@@ -1,4 +1,27 @@
 definitions:
+  model.AccountingPayment:
+    properties:
+      success_with_commissions:
+        description: |
+          total amount to accounting payment to merchant include commissions
+        type: number
+      success_without_commissions:
+        description: |
+          total amount to accounting payment to merchant exclude commissions
+        type: number
+      total_chargeback:
+        description: |
+          total amount charged payments
+        type: number
+      total_commission:
+        description: |
+          total amount of commissions
+        type: number
+      total_refund:
+        description: |
+          total amount refunded payments
+        type: number
+    type: object
   model.Country:
     properties:
       code_a2:
@@ -216,10 +239,6 @@ definitions:
         description: |
           account of payer in payment system
         type: string
-      pm_fee_amount:
-        description: |
-          payment system fee for payment operation
-        type: number
       pm_income_amount:
         description: |
           order amount received from payment system in notification request
@@ -264,9 +283,10 @@ definitions:
           user unique account in project
         type: string
       project_fee_amount:
+        $ref: '#/definitions/model.OrderFee'
         description: |
           fee is charged with the project for the operation
-        type: number
+        type: object
       project_income_amount:
         description: |
           order amount received from project
@@ -297,21 +317,69 @@ definitions:
         description: |
           any project params which received from project in request of create of order
         type: object
+      ps_fee_amount:
+        $ref: '#/definitions/model.OrderFeePaymentSystem'
+        description: |
+          payment system fee for payment operation
+        type: object
       psp_amount_fee_amount:
+        $ref: '#/definitions/model.OrderFeePsp'
         description: |
           PSP (P1) fee amount
-        type: number
+        type: object
       status:
         description: |
           order status
         type: integer
       to_payer_fee_amount:
+        $ref: '#/definitions/model.OrderFee'
         description: |
           value of fee which added to payer amount
-        type: number
+        type: object
       vat_amount:
         description: |
           vat amount
+        type: number
+    type: object
+  model.OrderFee:
+    properties:
+      amount_merchant_currency:
+        description: |
+          amount of fee of payment system in accounting currency of merchant
+        type: number
+      amount_payment_method_currency:
+        description: |
+          amount of fee of payment system in payment currency
+        type: number
+    type: object
+  model.OrderFeePaymentSystem:
+    properties:
+      amount_merchant_currency:
+        description: |
+          amount of fee of payment system in accounting currency of merchant
+        type: number
+      amount_payment_method_currency:
+        description: |
+          amount of fee of payment system in payment currency
+        type: number
+      amount_payment_system_currency:
+        description: |
+          amount of fee of payment system in accounting currency of payment system
+        type: number
+    type: object
+  model.OrderFeePsp:
+    properties:
+      amount_merchant_currency:
+        description: |
+          amount of fee of payment system in accounting currency of merchant
+        type: number
+      amount_payment_method_currency:
+        description: |
+          amount of fee of payment system in payment currency
+        type: number
+      amount_psp_currency:
+        description: |
+          amount of fee of PSP (P1) in PSP (P1) accounting currencies
         type: number
     type: object
   model.OrderFixedPackage:
@@ -426,9 +494,9 @@ definitions:
           URL for payment data verification request to project. This field can be send if it allowed in project admin panel
         type: string
     required:
-    - amount
-    - project
     - account
+    - project
+    - amount
     type: object
   model.OrderSimple:
     properties:
@@ -439,11 +507,11 @@ definitions:
       confirmed_at:
         description: |
           date when project was notification about payment
-        type: string
+        type: integer
       created_at:
         description: |
           date when payment created
-        type: string
+        type: integer
       fixed_package:
         $ref: '#/definitions/model.OrderFixedPackage'
         description: |
@@ -467,41 +535,59 @@ definitions:
         description: |
           object which contains main information about payment method
         type: object
+      payment_method_amount_income:
+        $ref: '#/definitions/model.OrderSimpleAmountObject'
+        description: |
+          object which contains main information about finances of payment system which received of payment system
+        type: object
+      payment_requisites:
+        description: |
+          payer payment requisites
+        type: object
       project:
         $ref: '#/definitions/model.SimpleItem'
         description: |
           object which contains main information about project
         type: object
-      project_accounting_income:
+      project_amount_income:
         $ref: '#/definitions/model.OrderSimpleAmountObject'
         description: |
           object which contains main information about accounting finances of project which received of project
         type: object
-      project_accounting_outcome:
+      project_amount_outcome:
         $ref: '#/definitions/model.OrderSimpleAmountObject'
         description: |
           object which contains main information about accounting finances of project which will send to project
         type: object
-      project_technical_income:
-        $ref: '#/definitions/model.OrderSimpleAmountObject'
+      project_fee_amount:
+        $ref: '#/definitions/model.OrderFee'
         description: |
-          object which contains main information about technical finances of project which received of project
+          fee is charged with the project for the operation in merchant accounting currency
         type: object
-      project_technical_outcome:
-        $ref: '#/definitions/model.OrderSimpleAmountObject'
+      ps_fee_amount:
+        $ref: '#/definitions/model.OrderFeePaymentSystem'
         description: |
-          object which contains main information about technical finances of project which will send to project
+          payment system fee for payment operation in payment system accounting currency
         type: object
-      ps_technical_income:
-        $ref: '#/definitions/model.OrderSimpleAmountObject'
+      psp_fee:
+        $ref: '#/definitions/model.OrderFeePsp'
         description: |
-          object which contains main information about technical finances of payment system which received of payment system
+          PSP (P1) fee amount in merchant accounting currency
         type: object
       status:
         $ref: '#/definitions/model.Status'
         description: |
           object which contains main information about payment status
         type: object
+      to_payer_fee_amount:
+        $ref: '#/definitions/model.OrderFee'
+        description: |
+          value of fee which added to payer amount in merchant accounting currency
+        type: object
+      vat_amount:
+        description: |
+          vat amount in payment system accounting currency
+        type: number
     type: object
   model.OrderSimpleAmountObject:
     properties:
@@ -857,6 +943,10 @@ definitions:
       description:
         description: |
           text description
+        type: string
+      name:
+        description: |
+          status name
         type: string
       status:
         description: |
@@ -1253,11 +1343,11 @@ paths:
         type: array
       - description: list of payer countries to get orders filtered by they
         in: query
-        name: countries
+        name: country
         type: array
       - description: list of orders statuses to get orders filtered by they
         in: query
-        name: statuses
+        name: status
         type: array
       - description: payer account on the any side of payment process. for example
           it may be account in project, account in payment system, payer email and
@@ -1293,6 +1383,10 @@ paths:
         in: query
         name: offset
         type: integer
+      - description: fields list for sorting
+        in: query
+        name: sort
+        type: array
       produces:
       - application/json
       responses:
@@ -1307,7 +1401,7 @@ paths:
             $ref: '#/definitions/model.Error'
             type: object
         "404":
-          description: Not found
+          description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
             type: object
@@ -1366,6 +1460,53 @@ paths:
       summary: Get order data
       tags:
       - Payment Order
+  /api/v1/s/order/accounting_payment:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: accounting payment by accounting period of merchant
+      parameters:
+      - description: period start in unix timestamp
+        in: query
+        name: from
+        required: true
+        type: integer
+      - description: period end in unix timestamp
+        in: query
+        name: to
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AccountingPayment'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+      summary: Get accounting payment amounts by accounting period of merchant
+      tags:
+      - Payment Order
   /api/v1/s/order/revenue_dynamic/{period}:
     get:
       consumes:
@@ -1387,7 +1528,7 @@ paths:
         in: query
         name: to
         required: true
-        type: array
+        type: integer
       - description: list of projects to calculate dynamics of revenue
         in: query
         name: project

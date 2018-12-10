@@ -25,6 +25,8 @@ type OrderJsonBinder struct{}
 
 type OrderRevenueDynamicRequestBinder struct{}
 
+type OrderAccountingPaymentRequestBinder struct {}
+
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	db := new(echo.DefaultBinder)
 
@@ -94,18 +96,6 @@ func (cb *OrderRevenueDynamicRequestBinder) Bind(i interface{}, ctx echo.Context
 
 	params := ctx.QueryParams()
 
-	if len(params) <= 0 {
-		return errors.New(binderErrorQueryParamsIsEmpty)
-	}
-
-	if _, ok := params[model.OrderRevenueDynamicRequestFieldFrom]; !ok {
-		return errors.New(binderErrorFromIsRequire)
-	}
-
-	if _, ok := params[model.OrderRevenueDynamicRequestFieldTo]; !ok {
-		return errors.New(binderErrorToIsRequire)
-	}
-
 	s := i.(*model.RevenueDynamicRequest)
 	s.Period = period
 	s.Project = []bson.ObjectId{}
@@ -120,21 +110,56 @@ func (cb *OrderRevenueDynamicRequestBinder) Bind(i interface{}, ctx echo.Context
 		}
 	}
 
-	t, err := strconv.ParseInt(params[model.OrderRevenueDynamicRequestFieldFrom][0], 10, 64)
+	s, err = OrderPrepareAccountingPaymentRequest(s, ctx)
 
 	if err != nil {
 		return err
 	}
 
-	s.From = time.Unix(t, 0)
+	return
+}
+
+func (cb *OrderAccountingPaymentRequestBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+	rdr := i.(*model.RevenueDynamicRequest)
+	rdr, err = OrderPrepareAccountingPaymentRequest(rdr, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	return
+}
+
+func OrderPrepareAccountingPaymentRequest(rdr *model.RevenueDynamicRequest, ctx echo.Context) (*model.RevenueDynamicRequest, error) {
+	params := ctx.QueryParams()
+
+	if len(params) <= 0 {
+		return nil, errors.New(binderErrorQueryParamsIsEmpty)
+	}
+
+	if _, ok := params[model.OrderRevenueDynamicRequestFieldFrom]; !ok {
+		return nil, errors.New(binderErrorFromIsRequire)
+	}
+
+	if _, ok := params[model.OrderRevenueDynamicRequestFieldTo]; !ok {
+		return nil, errors.New(binderErrorToIsRequire)
+	}
+
+	t, err := strconv.ParseInt(params[model.OrderRevenueDynamicRequestFieldFrom][0], 10, 64)
+
+	if err != nil {
+		return nil, err
+	}
+
+	rdr.From = time.Unix(t, 0)
 
 	t, err = strconv.ParseInt(params[model.OrderRevenueDynamicRequestFieldTo][0], 10, 64)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	s.To = time.Unix(t, 0)
+	rdr.To = time.Unix(t, 0)
 
-	return
+	return rdr, nil
 }

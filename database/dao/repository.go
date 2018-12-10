@@ -38,6 +38,7 @@ type Repository interface {
 	FindAllOrders(filters bson.M, sort []string, limit int, offset int) ([]*model.Order, error)
 	GetOrdersCountByConditions(filters bson.M) (int, error)
 	GetRevenueDynamic(*model.RevenueDynamicRequest) ([]map[string]interface{}, error)
+	GetAccountingPayment(rdr *model.RevenueDynamicRequest, mId string) ([]map[string]interface{}, error)
 	InsertOrder(*model.Order) error
 	UpdateOrder(*model.Order) error
 

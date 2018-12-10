@@ -571,13 +571,13 @@
                     {
                         "type": "array",
                         "description": "list of payer countries to get orders filtered by they",
-                        "name": "countries",
+                        "name": "country",
                         "in": "query"
                     },
                     {
                         "type": "array",
                         "description": "list of orders statuses to get orders filtered by they",
-                        "name": "statuses",
+                        "name": "status",
                         "in": "query"
                     },
                     {
@@ -621,6 +621,12 @@
                         "description": "offset from which you want to return the list of orders. default value is 0",
                         "name": "offset",
                         "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "description": "fields list for sorting",
+                        "name": "sort",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -639,7 +645,75 @@
                         }
                     },
                     "404": {
-                        "description": "Not found",
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Object with error message",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/s/order/accounting_payment": {
+            "get": {
+                "description": "accounting payment by accounting period of merchant",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment Order"
+                ],
+                "summary": "Get accounting payment amounts by accounting period of merchant",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "period start in unix timestamp",
+                        "name": "from",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "period end in unix timestamp",
+                        "name": "to",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.AccountingPayment"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request data",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied",
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/model.Error"
@@ -684,7 +758,7 @@
                         "required": true
                     },
                     {
-                        "type": "array",
+                        "type": "integer",
                         "description": "period end in unix timestamp",
                         "name": "to",
                         "in": "query",
@@ -1361,6 +1435,31 @@
         }
     },
     "definitions": {
+        "model.AccountingPayment": {
+            "type": "object",
+            "properties": {
+                "success_with_commissions": {
+                    "description": "total amount to accounting payment to merchant include commissions\n",
+                    "type": "number"
+                },
+                "success_without_commissions": {
+                    "description": "total amount to accounting payment to merchant exclude commissions\n",
+                    "type": "number"
+                },
+                "total_chargeback": {
+                    "description": "total amount charged payments\n",
+                    "type": "number"
+                },
+                "total_commission": {
+                    "description": "total amount of commissions\n",
+                    "type": "number"
+                },
+                "total_refund": {
+                    "description": "total amount refunded payments\n",
+                    "type": "number"
+                }
+            }
+        },
         "model.Country": {
             "type": "object",
             "properties": {
@@ -1598,10 +1697,6 @@
                     "description": "account of payer in payment system\n",
                     "type": "string"
                 },
-                "pm_fee_amount": {
-                    "description": "payment system fee for payment operation\n",
-                    "type": "number"
-                },
                 "pm_income_amount": {
                     "description": "order amount received from payment system in notification request\n",
                     "type": "number"
@@ -1647,7 +1742,8 @@
                 },
                 "project_fee_amount": {
                     "description": "fee is charged with the project for the operation\n",
-                    "type": "number"
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderFee"
                 },
                 "project_income_amount": {
                     "description": "order amount received from project\n",
@@ -1679,9 +1775,15 @@
                     "description": "any project params which received from project in request of create of order\n",
                     "type": "object"
                 },
+                "ps_fee_amount": {
+                    "description": "payment system fee for payment operation\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderFeePaymentSystem"
+                },
                 "psp_amount_fee_amount": {
                     "description": "PSP (P1) fee amount\n",
-                    "type": "number"
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderFeePsp"
                 },
                 "status": {
                     "description": "order status\n",
@@ -1689,10 +1791,58 @@
                 },
                 "to_payer_fee_amount": {
                     "description": "value of fee which added to payer amount\n",
-                    "type": "number"
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderFee"
                 },
                 "vat_amount": {
                     "description": "vat amount\n",
+                    "type": "number"
+                }
+            }
+        },
+        "model.OrderFee": {
+            "type": "object",
+            "properties": {
+                "amount_merchant_currency": {
+                    "description": "amount of fee of payment system in accounting currency of merchant\n",
+                    "type": "number"
+                },
+                "amount_payment_method_currency": {
+                    "description": "amount of fee of payment system in payment currency\n",
+                    "type": "number"
+                }
+            }
+        },
+        "model.OrderFeePaymentSystem": {
+            "type": "object",
+            "properties": {
+                "amount_merchant_currency": {
+                    "description": "amount of fee of payment system in accounting currency of merchant\n",
+                    "type": "number"
+                },
+                "amount_payment_method_currency": {
+                    "description": "amount of fee of payment system in payment currency\n",
+                    "type": "number"
+                },
+                "amount_payment_system_currency": {
+                    "description": "amount of fee of payment system in accounting currency of payment system\n",
+                    "type": "number"
+                }
+            }
+        },
+        "model.OrderFeePsp": {
+            "type": "object",
+            "properties": {
+                "amount_merchant_currency": {
+                    "description": "amount of fee of payment system in accounting currency of merchant\n",
+                    "type": "number"
+                },
+                "amount_payment_method_currency": {
+                    "description": "amount of fee of payment system in payment currency\n",
+                    "type": "number"
+                },
+                "amount_psp_currency": {
+                    "description": "amount of fee of PSP (P1) in PSP (P1) accounting currencies\n",
                     "type": "number"
                 }
             }
@@ -1758,9 +1908,9 @@
         "model.OrderScalar": {
             "type": "object",
             "required": [
-                "amount",
+                "account",
                 "project",
-                "account"
+                "amount"
             ],
             "properties": {
                 "account": {
@@ -1842,11 +1992,11 @@
                 },
                 "confirmed_at": {
                     "description": "date when project was notification about payment\n",
-                    "type": "string"
+                    "type": "integer"
                 },
                 "created_at": {
                     "description": "date when payment created\n",
-                    "type": "string"
+                    "type": "integer"
                 },
                 "fixed_package": {
                     "description": "object which contains main information about fixed package which was buy\n",
@@ -1871,40 +2021,58 @@
                     "type": "object",
                     "$ref": "#/definitions/model.SimpleItem"
                 },
+                "payment_method_amount_income": {
+                    "description": "object which contains main information about finances of payment system which received of payment system\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderSimpleAmountObject"
+                },
+                "payment_requisites": {
+                    "description": "payer payment requisites\n",
+                    "type": "object"
+                },
                 "project": {
                     "description": "object which contains main information about project\n",
                     "type": "object",
                     "$ref": "#/definitions/model.SimpleItem"
                 },
-                "project_accounting_income": {
+                "project_amount_income": {
                     "description": "object which contains main information about accounting finances of project which received of project\n",
                     "type": "object",
                     "$ref": "#/definitions/model.OrderSimpleAmountObject"
                 },
-                "project_accounting_outcome": {
+                "project_amount_outcome": {
                     "description": "object which contains main information about accounting finances of project which will send to project\n",
                     "type": "object",
                     "$ref": "#/definitions/model.OrderSimpleAmountObject"
                 },
-                "project_technical_income": {
-                    "description": "object which contains main information about technical finances of project which received of project\n",
+                "project_fee_amount": {
+                    "description": "fee is charged with the project for the operation in merchant accounting currency\n",
                     "type": "object",
-                    "$ref": "#/definitions/model.OrderSimpleAmountObject"
+                    "$ref": "#/definitions/model.OrderFee"
                 },
-                "project_technical_outcome": {
-                    "description": "object which contains main information about technical finances of project which will send to project\n",
+                "ps_fee_amount": {
+                    "description": "payment system fee for payment operation in payment system accounting currency\n",
                     "type": "object",
-                    "$ref": "#/definitions/model.OrderSimpleAmountObject"
+                    "$ref": "#/definitions/model.OrderFeePaymentSystem"
                 },
-                "ps_technical_income": {
-                    "description": "object which contains main information about technical finances of payment system which received of payment system\n",
+                "psp_fee": {
+                    "description": "PSP (P1) fee amount in merchant accounting currency\n",
                     "type": "object",
-                    "$ref": "#/definitions/model.OrderSimpleAmountObject"
+                    "$ref": "#/definitions/model.OrderFeePsp"
                 },
                 "status": {
                     "description": "object which contains main information about payment status\n",
                     "type": "object",
                     "$ref": "#/definitions/model.Status"
+                },
+                "to_payer_fee_amount": {
+                    "description": "value of fee which added to payer amount in merchant accounting currency\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.OrderFee"
+                },
+                "vat_amount": {
+                    "description": "vat amount in payment system accounting currency\n",
+                    "type": "number"
                 }
             }
         },
@@ -2323,6 +2491,10 @@
             "properties": {
                 "description": {
                     "description": "text description\n",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "status name\n",
                     "type": "string"
                 },
                 "status": {

@@ -97,7 +97,7 @@ func (rep *Repository) GetRevenueDynamic(rdr *model.RevenueDynamicRequest) ([]ma
 					},
 					{
 						"$group": bson.M{
-							model.RevenueDynamicFacetFieldId:    "$project.merchant.id",
+							model.RevenueDynamicFacetFieldId:    "$project.merchant._id",
 							model.RevenueDynamicFacetFieldCount: bson.M{"$sum": 1},
 							model.RevenueDynamicFacetFieldTotal: bson.M{"$sum": "$amount_out_merchant_ac"},
 							model.RevenueDynamicFacetFieldAvg:   bson.M{"$avg": "$amount_out_merchant_ac"},
@@ -114,7 +114,7 @@ func (rep *Repository) GetRevenueDynamic(rdr *model.RevenueDynamicRequest) ([]ma
 					},
 					{
 						"$group": bson.M{
-							model.RevenueDynamicFacetFieldId:    "$project.merchant.id",
+							model.RevenueDynamicFacetFieldId:    "$project.merchant._id",
 							model.RevenueDynamicFacetFieldCount: bson.M{"$sum": 1},
 							model.RevenueDynamicFacetFieldTotal: bson.M{"$sum": "$amount_out_merchant_ac"},
 							model.RevenueDynamicFacetFieldAvg:   bson.M{"$avg": "$amount_out_merchant_ac"},
@@ -152,6 +152,124 @@ func (rep *Repository) GetRevenueDynamic(rdr *model.RevenueDynamicRequest) ([]ma
 						},
 					},
 					{"$sort": bson.M{model.RevenueDynamicFacetFieldId: 1}},
+				},
+			},
+		},
+	}
+
+	err := rep.Collection.Pipe(q).All(&result)
+
+	return result, err
+}
+
+func (rep *Repository) GetAccountingPayment(rdr *model.RevenueDynamicRequest, mId string) ([]map[string]interface{}, error) {
+	var result []map[string]interface{}
+
+	q := []bson.M{
+		{
+			"$project": bson.M{
+				"project":                   true,
+				"status":                    true,
+				"project_last_requested_at": true,
+				"project_fee_amount":        true,
+				"to_payer_fee_amount":       true,
+				"amount_in_merchant_ac":     true,
+				"total": bson.M{
+					"$subtract": []interface{}{
+						"$amount_in_merchant_ac",
+						bson.M{
+							"$add": []string{
+								"$project_fee_amount.amount_merchant_currency",
+								"$to_payer_fee_amount.amount_merchant_currency",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			"$facet": bson.M{
+				"total_success": []bson.M{
+					{
+						"$match": bson.M{
+							"status":                       model.OrderStatusProjectComplete,
+							"project_last_requested_at":    bson.M{"$gte": rdr.From, "$lte": rdr.To},
+							"project.merchant.external_id": bson.M{"$eq": mId},
+						},
+					},
+					{
+						"$group": bson.M{
+							"_id":   "$project.merchant._id",
+							"total": bson.M{"$sum": "$amount_in_merchant_ac"},
+						},
+					},
+				},
+				"success": []bson.M{
+					{
+						"$match": bson.M{
+							"status":                       model.OrderStatusProjectComplete,
+							"project_last_requested_at":    bson.M{"$gte": rdr.From, "$lte": rdr.To},
+							"project.merchant.external_id": bson.M{"$eq": mId},
+						},
+					},
+					{
+						"$group": bson.M{
+							"_id":   "$project.merchant._id",
+							"total": bson.M{"$sum": "$total"},
+						},
+					},
+				},
+				"refund": []bson.M{
+					{
+						"$match": bson.M{
+							"status":                       model.OrderStatusRefund,
+							"project_last_requested_at":    bson.M{"$gte": rdr.From, "$lte": rdr.To},
+							"project.merchant.external_id": bson.M{"$eq": mId},
+						},
+					},
+					{
+						"$group": bson.M{
+							"_id":   "$project.merchant._id",
+							"total": bson.M{"$sum": "$amount_in_merchant_ac"},
+						},
+					},
+				},
+				"chargeback": []bson.M{
+					{
+						"$match": bson.M{
+							"status":                       model.OrderStatusChargeback,
+							"project_last_requested_at":    bson.M{"$gte": rdr.From, "$lte": rdr.To},
+							"project.merchant.external_id": bson.M{"$eq": mId},
+						},
+					},
+					{
+						"$group": bson.M{
+							"_id":   "$project.merchant._id",
+							"total": bson.M{"$sum": "$amount_in_merchant_ac"},
+						},
+					},
+				},
+				"commission": []bson.M{
+					{
+						"$match": bson.M{
+							"status":                       model.OrderStatusChargeback,
+							"project_last_requested_at":    bson.M{"$gte": rdr.From, "$lte": rdr.To},
+							"project.merchant.external_id": bson.M{"$eq": mId},
+						},
+					},
+					{
+						"$group": bson.M{
+							"_id": "$project.merchant._id",
+							"total": bson.M{
+								"$sum": bson.M{
+									"$add": []string{
+										"$project_fee_amount.amount_merchant_currency",
+										"$to_payer_fee_amount.amount_merchant_currency",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},

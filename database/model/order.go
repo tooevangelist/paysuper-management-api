@@ -395,6 +395,20 @@ type OrderFeePaymentSystem struct {
 	AmountPaymentSystemCurrency float64 `bson:"amount_payment_system_currency" json:"amount_payment_system_currency"`
 }
 
+// Contain information about accounting payment to merchant by accounting period
+type AccountingPayment struct {
+	// total amount to accounting payment to merchant include commissions
+	SuccessWithCommissions float64 `json:"success_with_commissions"`
+	// total amount to accounting payment to merchant exclude commissions
+	SuccessWithoutCommissions float64 `json:"success_without_commissions"`
+	// total amount refunded payments
+	TotalRefund float64 `json:"total_refund"`
+	// total amount charged payments
+	TotalChargeback float64 `json:"total_chargeback"`
+	// total amount of commissions
+	TotalCommission float64 `json:"total_commission"`
+}
+
 func (order *Order) IsComplete() bool {
 	return order.Status == OrderStatusProjectComplete
 }

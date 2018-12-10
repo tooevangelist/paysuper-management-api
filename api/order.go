@@ -69,6 +69,8 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.accessRouteGroup.GET("/order", oApiV1.getOrders)
 	api.accessRouteGroup.GET("/order/:id", oApiV1.getOrderJson)
 	api.accessRouteGroup.GET("/order/revenue_dynamic/:period", oApiV1.getRevenueDynamic)
+	api.accessRouteGroup.GET("/order/accounting_payment", oApiV1.getAccountingPaymentCalculation)
+
 
 	return api
 }
@@ -327,7 +329,7 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 // @Produce json
 // @Param period path string true "period to group revenue dynamics data. now allowed next values: hour, day, week, month, year"
 // @Param from query int true "period start in unix timestamp"
-// @Param to query array true "period end in unix timestamp"
+// @Param to query int true "period end in unix timestamp"
 // @Param project query array false "list of projects to calculate dynamics of revenue"
 // @Success 200 {object} model.RevenueDynamicResult "OK"
 // @Failure 400 {object} model.Error "Invalid request data"
@@ -353,6 +355,35 @@ func (oApiV1 *OrderApiV1) getRevenueDynamic(ctx echo.Context) error {
 	}
 
 	res, err := oApiV1.orderManager.GetRevenueDynamic(rdr)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+// @Summary Get accounting payment amounts by accounting period of merchant
+// @Description accounting payment by accounting period of merchant
+// @Tags Payment Order
+// @Accept application/x-www-form-urlencoded
+// @Produce json
+// @Param from query int true "period start in unix timestamp"
+// @Param to query int true "period end in unix timestamp"
+// @Success 200 {object} model.AccountingPayment "OK"
+// @Failure 400 {object} model.Error "Invalid request data"
+// @Failure 401 {object} model.Error "Unauthorized"
+// @Failure 403 {object} model.Error "Access denied"
+// @Failure 500 {object} model.Error "Object with error message"
+// @Router /api/v1/s/order/accounting_payment [get]
+func (oApiV1 *OrderApiV1) getAccountingPaymentCalculation(ctx echo.Context) error {
+	rdr := &model.RevenueDynamicRequest{}
+
+	if err := (&OrderAccountingPaymentRequestBinder{}).Bind(rdr, ctx); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	res, err := oApiV1.orderManager.GetAccountingPayment(rdr, oApiV1.Merchant.Identifier)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

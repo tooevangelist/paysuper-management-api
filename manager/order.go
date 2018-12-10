@@ -8,6 +8,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
+	"github.com/ProtocolONE/p1pay.api/utils"
 	"github.com/globalsign/mgo/bson"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
@@ -1107,8 +1108,8 @@ func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *mode
 }
 
 func (om *OrderManager) GetRevenueDynamic(rdr *model.RevenueDynamicRequest) (*model.RevenueDynamicResult, error) {
-	rdr.From = time.Date(rdr.From.Year(), rdr.From.Month(), rdr.From.Day(), 0, 0, 0, 0, rdr.From.Location())
-	rdr.To = time.Date(rdr.To.Year(), rdr.To.Month(), rdr.To.Day(), 23, 59, 59, 99, rdr.To.Location())
+	rdr.From = utils.GetTimeRangeFrom(rdr.From)
+	rdr.To = utils.GetTimeRangeFrom(rdr.To)
 
 	res, err := om.Database.Repository(TableOrder).GetRevenueDynamic(rdr)
 
@@ -1269,4 +1270,65 @@ func (om *OrderManager) UpdateOrder(o *model.Order) (*model.Order, error) {
 	}
 
 	return o, nil
+}
+
+// Get data about accounting payment by accounting period of merchant
+func (om *OrderManager) GetAccountingPayment(rdr *model.RevenueDynamicRequest, mId string) (*model.AccountingPayment, error) {
+	rdr.From = utils.GetTimeRangeFrom(rdr.From)
+	rdr.To = utils.GetTimeRangeTo(rdr.To)
+
+	res, err := om.Database.Repository(TableOrder).GetAccountingPayment(rdr, mId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	apData := res[0]
+	ap := &model.AccountingPayment{}
+
+	if v, ok := apData["total_success"]; ok {
+		sV := v.([]interface{})
+
+		if len(sV) > 0 {
+			mV := sV[0].(map[string]interface{})
+
+			if vv, ok := mV["total"]; ok {
+				ap.SuccessWithCommissions = vv.(float64)
+			}
+		}
+	}
+
+	if v, ok := apData["success"]; ok {
+		ap.SuccessWithoutCommissions = om.getValueFromAccountingPaymentReport(v)
+	}
+
+	if v, ok := apData["refund"]; ok {
+		ap.TotalRefund = om.getValueFromAccountingPaymentReport(v)
+	}
+
+	if v, ok := apData["chargeback"]; ok {
+		ap.TotalChargeback = om.getValueFromAccountingPaymentReport(v)
+	}
+
+	if v, ok := apData["commission"]; ok {
+		ap.TotalCommission = om.getValueFromAccountingPaymentReport(v)
+	}
+
+	return ap, nil
+}
+
+func (om *OrderManager) getValueFromAccountingPaymentReport(v interface{}) float64 {
+	var fV float64
+
+	sV := v.([]interface{})
+
+	if len(sV) > 0 {
+		mV := sV[0].(map[string]interface{})
+
+		if vv, ok := mV["total"]; ok {
+			fV = vv.(float64)
+		}
+	}
+
+	return fV
 }
