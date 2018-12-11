@@ -121,6 +121,11 @@ definitions:
         items:
           $ref: '#/definitions/model.PaymentMethodJsonOrderResponse'
         type: array
+      project:
+        $ref: '#/definitions/model.ProjectJsonOrderResponse'
+        description: |
+          contain data about project
+        type: object
     type: object
   model.Merchant:
     properties:
@@ -873,6 +878,21 @@ definitions:
       url_redirect_success:
         description: |
           default url to redirect user after successfully completed payment
+        type: string
+    type: object
+  model.ProjectJsonOrderResponse:
+    properties:
+      name:
+        description: |
+          project name
+        type: string
+      url_fail:
+        description: |
+          url to redirect user after failed payment. may be NULL if not set in project settings
+        type: string
+      url_success:
+        description: |
+          url to redirect user after successfully completed payment. may be NULL if not set in project settings
         type: string
     type: object
   model.ProjectOrder:

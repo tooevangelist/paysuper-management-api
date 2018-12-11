@@ -111,6 +111,7 @@ type ProjectOrder struct {
 	Merchant   *Merchant     `bson:"merchant" json:"merchant"`
 }
 
+// contain data about project
 type ProjectJsonOrderResponse struct {
 	// project name
 	Name string `json:"name"`

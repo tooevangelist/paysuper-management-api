@@ -295,7 +295,7 @@ func (om *OrderManager) JsonOrderCreatePostProcess(o *model.Order, oh *OrderHttp
 		Id:                o.Id.Hex(),
 		HasVat:            o.Project.Merchant.IsVatEnabled,
 		HasUserCommission: o.Project.Merchant.IsCommissionToUserEnabled,
-		ProjectJsonOrderResponse: &model.ProjectJsonOrderResponse{
+		Project: &model.ProjectJsonOrderResponse{
 			Name:       o.Project.Name,
 			UrlSuccess: o.Project.UrlSuccess,
 			UrlFail:    o.Project.UrlFail,

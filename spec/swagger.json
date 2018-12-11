@@ -1629,6 +1629,11 @@
                     "items": {
                         "$ref": "#/definitions/model.PaymentMethodJsonOrderResponse"
                     }
+                },
+                "project": {
+                    "description": "contain data about project\n",
+                    "type": "object",
+                    "$ref": "#/definitions/model.ProjectJsonOrderResponse"
                 }
             }
         },
@@ -2445,6 +2450,23 @@
                 },
                 "url_redirect_success": {
                     "description": "default url to redirect user after successfully completed payment\n",
+                    "type": "string"
+                }
+            }
+        },
+        "model.ProjectJsonOrderResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "project name\n",
+                    "type": "string"
+                },
+                "url_fail": {
+                    "description": "url to redirect user after failed payment. may be NULL if not set in project settings\n",
+                    "type": "string"
+                },
+                "url_success": {
+                    "description": "url to redirect user after successfully completed payment. may be NULL if not set in project settings\n",
                     "type": "string"
                 }
             }

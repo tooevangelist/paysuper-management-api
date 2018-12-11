@@ -72,7 +72,7 @@ const (
 	RevenueDynamicFacetFieldCount         = "count"
 	RevenueDynamicFacetFieldAvg           = "avg"
 
-	OrderInlineFormUrlMask = "%s://%s/order/%s"
+	OrderInlineFormUrlMask       = "%s://%s/order/%s"
 	OrderInlineFormImagesUrlMask = "//%s/%s"
 )
 
@@ -431,7 +431,7 @@ type JsonOrderCreateResponse struct {
 	// flag to show commission amount changed to user in payment form
 	HasUserCommission bool `json:"has_user_commission"`
 	// contain data about project
-	*ProjectJsonOrderResponse `json:"project"`
+	Project *ProjectJsonOrderResponse `json:"project"`
 	// contain data about payment methods
 	PaymentMethods []*PaymentMethodJsonOrderResponse `json:"payment_methods"`
 	// url to redirect user to inline form in PSP side
