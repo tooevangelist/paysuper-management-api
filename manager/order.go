@@ -285,7 +285,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 
 // Post action after process order to form data to json order create response
 func (om *OrderManager) JsonOrderCreatePostProcess(o *model.Order, oh *OrderHttp) (*model.JsonOrderCreateResponse, error) {
-	pmPrepData, err := om.GetOrderByIdWithPaymentMethods(o)
+	pmPrepData, err := om.GetOrderByIdWithPaymentMethods(o, oh.Host)
 
 	if err != nil {
 		return nil, err
@@ -427,7 +427,7 @@ func (om *OrderManager) FindById(id string) *model.Order {
 	return o
 }
 
-func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order) (*model.OrderFormRendering, error) {
+func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order, host string) (*model.OrderFormRendering, error) {
 	projectPms, err := om.projectManager.GetProjectPaymentMethods(o.Project.Id)
 
 	if err != nil {
@@ -446,7 +446,7 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order) (*model.O
 		pmPrepData := &model.PaymentMethodJsonOrderResponse{
 			Id:                       pm.Id.Hex(),
 			Name:                     pm.Name,
-			Icon:                     pm.Icon,
+			Icon:                     fmt.Sprintf(model.OrderInlineFormImagesUrlMask, host, pm.Icon),
 			Type:                     pm.Type,
 			AccountRegexp:            pm.AccountRegexp,
 			AmountWithoutCommissions: FormatAmount(amount),
@@ -481,7 +481,7 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order) (*model.O
 		pmPrepData.AmountWithCommissions = FormatAmount(amount)
 
 		tOfr := &model.PaymentMethodJsonOrderResponseOrderFormRendering{
-			GroupAlias: pm.GroupAlias,
+			GroupAlias:                     pm.GroupAlias,
 			PaymentMethodJsonOrderResponse: pmPrepData,
 		}
 

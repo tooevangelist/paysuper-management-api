@@ -182,7 +182,7 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 
-	projectPms, err := oApiV1.orderManager.GetOrderByIdWithPaymentMethods(o)
+	projectPms, err := oApiV1.orderManager.GetOrderByIdWithPaymentMethods(o, ctx.Request().Host)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

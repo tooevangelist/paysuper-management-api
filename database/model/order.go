@@ -73,6 +73,7 @@ const (
 	RevenueDynamicFacetFieldAvg           = "avg"
 
 	OrderInlineFormUrlMask = "%s://%s/order/%s"
+	OrderInlineFormImagesUrlMask = "//%s/%s"
 )
 
 var OrderReservedWords = map[string]bool{
