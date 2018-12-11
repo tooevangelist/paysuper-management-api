@@ -972,8 +972,8 @@ definitions:
           default url to redirect user after successfully completed payment
         type: string
     required:
-    - name
     - callback_protocol
+    - name
     type: object
   model.RevenueDynamicMainData:
     properties:

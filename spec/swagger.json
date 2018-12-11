@@ -2473,8 +2473,8 @@
         "model.ProjectScalar": {
             "type": "object",
             "required": [
-                "name",
-                "callback_protocol"
+                "callback_protocol",
+                "name"
             ],
             "properties": {
                 "callback_currency": {
