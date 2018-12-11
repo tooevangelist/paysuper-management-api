@@ -954,6 +954,10 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 	o.PaymentRequisites = data
 	o.PaymentMethodTerminalId = pm.Params.Terminal
 
+	if o.ProjectAccount == "" {
+		o.ProjectAccount = email
+	}
+
 	if o, err = om.updateOrderAccountingAmounts(o); err != nil {
 		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
 	}
