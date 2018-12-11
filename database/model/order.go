@@ -71,6 +71,8 @@ const (
 	RevenueDynamicFacetFieldPointsRefund  = "points_refund"
 	RevenueDynamicFacetFieldCount         = "count"
 	RevenueDynamicFacetFieldAvg           = "avg"
+
+	OrderInlineFormUrlMask = "%s://%s/order/%s"
 )
 
 var OrderReservedWords = map[string]bool{
@@ -160,7 +162,7 @@ type OrderScalar struct {
 	// order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency
 	Currency *string `query:"PP_CURRENCY" form:"PP_CURRENCY" json:"currency" validate:"omitempty,alpha,len=3" swaggertype:"string"`
 	// user unique account in project
-	Account string `query:"PP_ACCOUNT" form:"PP_ACCOUNT" json:"account" validate:"required"`
+	Account string `query:"PP_ACCOUNT" form:"PP_ACCOUNT" json:"account"`
 	// unique order identifier in project. This field not required, BUT we're recommend send this field always
 	OrderId *string `query:"PP_ORDER_ID" form:"PP_ORDER_ID" json:"order_id"`
 	// order description. If this field not send in request, then we're create standard order description
@@ -265,13 +267,6 @@ type Order struct {
 	VatAmount float64 `bson:"vat_amount" json:"vat_amount"`
 	// payment system fee for payment operation
 	PaymentSystemFeeAmount *OrderFeePaymentSystem `bson:"ps_fee_amount" json:"ps_fee_amount"`
-
-	PaymentMethodsPreparedFormData map[string]*PaymentMethodsPreparedFormData `bson:"-" json:"-"`
-}
-
-type OrderUrl struct {
-	// link for user to payment confirmation form
-	OrderUrl string `json:"order_url"`
 }
 
 type OrderSimple struct {
@@ -322,13 +317,6 @@ type OrderPaginate struct {
 	Count int `json:"count"`
 	// array of selected orders
 	Items []*OrderSimple `json:"items"`
-}
-
-type PaymentMethodsPreparedFormData struct {
-	Amount                 float64
-	Currency               *Currency
-	ToUserCommissionAmount float64
-	Vat                    float64
 }
 
 type OrderPaymentNotification struct {
@@ -429,6 +417,24 @@ type OrderCreatePaymentRequest struct {
 	Ewallet *string `json:"ewallet,omitempty"`
 	// user wallet address in crypto payment system. required only for crypto payment
 	Address *string `json:"address,omitempty"`
+}
+
+// Aggregate all data to render payment form from client library
+type JsonOrderCreateResponse struct {
+	// order unique identifier
+	Id string `json:"id"`
+	// user account, may be null
+	Account *string `json:"account"`
+	// flag to show VAT commission amount in payment form
+	HasVat bool `json:"has_vat"`
+	// flag to show commission amount changed to user in payment form
+	HasUserCommission bool `json:"has_user_commission"`
+	// contain data about project
+	*ProjectJsonOrderResponse `json:"project"`
+	// contain data about payment methods
+	PaymentMethods []*PaymentMethodJsonOrderResponse `json:"payment_methods"`
+	// url to redirect user to inline form in PSP side
+	InlineFormRedirectUrl string `json:"inline_form_redirect_url"`
 }
 
 func (order *Order) IsComplete() bool {

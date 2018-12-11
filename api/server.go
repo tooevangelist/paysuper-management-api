@@ -56,6 +56,7 @@ type ServerInitParams struct {
 	GeoDbReader             *geoip2.Reader
 	PaymentSystemConfig     map[string]interface{}
 	PSPAccountingCurrencyA3 string
+	HttpScheme              string
 }
 
 type Template struct {
@@ -87,6 +88,7 @@ type Api struct {
 	PaymentSystemConfig     map[string]interface{}
 	pspAccountingCurrencyA3 string
 	paymentSystemsSettings  *payment_system.PaymentSystemSetting
+	httpScheme              string
 
 	Merchant
 	GetParams
@@ -102,6 +104,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		geoDbReader:             p.GeoDbReader,
 		PaymentSystemConfig:     p.PaymentSystemConfig,
 		pspAccountingCurrencyA3: p.PSPAccountingCurrencyA3,
+		httpScheme:              p.HttpScheme,
 		paymentSystemsSettings: &payment_system.PaymentSystemSetting{
 			Logger: p.Logger,
 		},

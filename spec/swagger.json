@@ -234,10 +234,10 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Object with url to form entering payment requisites",
+                        "description": "Object which contain data to render payment form",
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/model.OrderUrl"
+                            "$ref": "#/definitions/model.JsonOrderCreateResponse"
                         }
                     },
                     "400": {
@@ -1600,6 +1600,38 @@
                 }
             }
         },
+        "model.JsonOrderCreateResponse": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "description": "user account, may be null\n",
+                    "type": "string"
+                },
+                "has_user_commission": {
+                    "description": "flag to show commission amount changed to user in payment form\n",
+                    "type": "boolean"
+                },
+                "has_vat": {
+                    "description": "flag to show VAT commission amount in payment form\n",
+                    "type": "boolean"
+                },
+                "id": {
+                    "description": "order unique identifier\n",
+                    "type": "string"
+                },
+                "inline_form_redirect_url": {
+                    "description": "url to redirect user to inline form in PSP side\n",
+                    "type": "string"
+                },
+                "payment_methods": {
+                    "description": "contain data about payment methods\n",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PaymentMethodJsonOrderResponse"
+                    }
+                }
+            }
+        },
         "model.Merchant": {
             "type": "object",
             "properties": {
@@ -2006,9 +2038,8 @@
         "model.OrderScalar": {
             "type": "object",
             "required": [
-                "amount",
-                "account",
-                "project"
+                "project",
+                "amount"
             ],
             "properties": {
                 "account": {
@@ -2188,15 +2219,6 @@
                 }
             }
         },
-        "model.OrderUrl": {
-            "type": "object",
-            "properties": {
-                "order_url": {
-                    "description": "link for user to payment confirmation form\n",
-                    "type": "string"
-                }
-            }
-        },
         "model.PayerData": {
             "type": "object",
             "properties": {
@@ -2233,6 +2255,51 @@
                 "timezone": {
                     "description": "payer timezone name, get from ip geo location\n",
                     "type": "string"
+                }
+            }
+        },
+        "model.PaymentMethodJsonOrderResponse": {
+            "type": "object",
+            "properties": {
+                "account_regexp": {
+                    "description": "regexp mask for check main requisite of payment method\n",
+                    "type": "string"
+                },
+                "amount_with_commissions": {
+                    "description": "total amount to payment in payment method currency include all possible commissions\n",
+                    "type": "number"
+                },
+                "amount_without_commissions": {
+                    "description": "original price of item in currency of payment method  which buy user\n",
+                    "type": "number"
+                },
+                "currency": {
+                    "description": "3 symbols currency code of payment method by  ISO 4217\n",
+                    "type": "string"
+                },
+                "icon": {
+                    "description": "url to payment method icon\n",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "payment method unique identifier\n",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "payment method name\n",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "payment method type. allowed: bank_card, ewallet, crypto\n",
+                    "type": "string"
+                },
+                "user_commission_amount": {
+                    "description": "amount of commission in payment method currency, which the user pays for the project\n",
+                    "type": "number"
+                },
+                "vat_amount": {
+                    "description": "amount of VAT in payment method currency, which the user pays\n",
+                    "type": "number"
                 }
             }
         },
@@ -2393,6 +2460,12 @@
                     "$ref": "#/definitions/model.Merchant"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "url_fail": {
+                    "type": "string"
+                },
+                "url_success": {
                     "type": "string"
                 }
             }

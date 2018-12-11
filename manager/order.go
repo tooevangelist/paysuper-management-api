@@ -93,6 +93,11 @@ type FindAll struct {
 	SortBy   []string
 }
 
+type OrderHttp struct {
+	Host   string
+	Scheme string
+}
+
 func InitOrderManager(
 	database dao.Database,
 	logger *zap.SugaredLogger,
@@ -217,9 +222,11 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	nOrder := &model.Order{
 		Id: id,
 		Project: &model.ProjectOrder{
-			Id:       p.Id,
-			Name:     p.Name,
-			Merchant: p.Merchant,
+			Id:         p.Id,
+			Name:       p.Name,
+			UrlSuccess: p.URLRedirectSuccess,
+			UrlFail:    p.URLRedirectFail,
+			Merchant:   p.Merchant,
 		},
 		Description:            fmt.Sprintf(orderDefaultDescription, id.Hex()),
 		ProjectOrderId:         order.OrderId,
@@ -274,6 +281,34 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	}
 
 	return nOrder, nil
+}
+
+// Post action after process order to form data to json order create response
+func (om *OrderManager) JsonOrderCreatePostProcess(o *model.Order, oh *OrderHttp) (*model.JsonOrderCreateResponse, error) {
+	pmPrepData, err := om.GetOrderByIdWithPaymentMethods(o)
+
+	if err != nil {
+		return nil, err
+	}
+
+	jo := &model.JsonOrderCreateResponse{
+		Id:                o.Id.Hex(),
+		HasVat:            o.Project.Merchant.IsVatEnabled,
+		HasUserCommission: o.Project.Merchant.IsCommissionToUserEnabled,
+		ProjectJsonOrderResponse: &model.ProjectJsonOrderResponse{
+			Name:       o.Project.Name,
+			UrlSuccess: o.Project.UrlSuccess,
+			UrlFail:    o.Project.UrlFail,
+		},
+		PaymentMethods:        pmPrepData.SlicePaymentMethodJsonOrderResponse,
+		InlineFormRedirectUrl: fmt.Sprintf(model.OrderInlineFormUrlMask, oh.Scheme, oh.Host, o.Id.Hex()),
+	}
+
+	if o.ProjectAccount != "" {
+		jo.Account = &o.ProjectAccount
+	}
+
+	return jo, nil
 }
 
 // Calculate all possible commissions for order, i.e. payment system fee amount, PSP (P1) fee amount,
@@ -392,66 +427,69 @@ func (om *OrderManager) FindById(id string) *model.Order {
 	return o
 }
 
-func (om *OrderManager) GetOrderByIdWithPaymentMethods(id string) (*model.Order, []*model.PaymentMethod, error) {
-	order := om.FindById(id)
-
-	if order == nil {
-		return nil, nil, errors.New(orderErrorNotFound)
-	}
-
-	projectPms, err := om.projectManager.GetProjectPaymentMethods(order.Project.Id)
+func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order) (*model.OrderFormRendering, error) {
+	projectPms, err := om.projectManager.GetProjectPaymentMethods(o.Project.Id)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	pdMap := make(map[string]*model.PaymentMethodsPreparedFormData)
+	ofr := &model.OrderFormRendering{}
 
 	for _, pm := range projectPms {
-		amount, err := om.currencyRateManager.convert(order.ProjectIncomeCurrency.CodeInt, pm.Currency.CodeInt, order.ProjectIncomeAmount)
+		amount, err := om.currencyRateManager.convert(o.ProjectIncomeCurrency.CodeInt, pm.Currency.CodeInt, o.ProjectIncomeAmount)
 
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 
-		pmPreparedData := &model.PaymentMethodsPreparedFormData{
-			Amount:   amount,
-			Currency: pm.Currency,
+		pmPrepData := &model.PaymentMethodJsonOrderResponse{
+			Id:                       pm.Id.Hex(),
+			Name:                     pm.Name,
+			Icon:                     pm.Icon,
+			Type:                     pm.Type,
+			AccountRegexp:            pm.AccountRegexp,
+			AmountWithoutCommissions: FormatAmount(amount),
+			Currency:                 pm.Currency.CodeA3,
 		}
 
 		// if commission to user enabled for merchant then calculate commissions to user
 		// for every allowed payment methods
-		if order.Project.Merchant.IsCommissionToUserEnabled == true {
-			commissions, err := om.commissionManager.CalculateCommission(order.Project.Id, pm.Id, pmPreparedData.Amount)
+		if o.Project.Merchant.IsCommissionToUserEnabled == true {
+			commissions, err := om.commissionManager.CalculateCommission(o.Project.Id, pm.Id, pmPrepData.AmountWithoutCommissions)
 
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 
 			amount += commissions.ToUserCommission
-			pmPreparedData.ToUserCommissionAmount = FormatAmount(commissions.ToUserCommission)
+			pmPrepData.UserCommissionAmount = FormatAmount(commissions.ToUserCommission)
 		}
 
 		// if merchant enable VAT calculation then we're calculate VAT for payer
-		if order.Project.Merchant.IsVatEnabled == true {
-			vat, err := om.vatManager.CalculateVat(order.PayerData.CountryCodeA2, order.PayerData.Subdivision, pmPreparedData.Amount)
+		if o.Project.Merchant.IsVatEnabled == true {
+			vat, err := om.vatManager.CalculateVat(o.PayerData.CountryCodeA2, o.PayerData.Subdivision, pmPrepData.AmountWithoutCommissions)
 
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 
 			amount += vat
-			pmPreparedData.Vat = FormatAmount(vat)
+			pmPrepData.VatAmount = FormatAmount(vat)
 		}
 
-		pmPreparedData.Amount = FormatAmount(amount)
+		pmPrepData.AmountWithCommissions = FormatAmount(amount)
 
-		pdMap[pm.GroupAlias] = pmPreparedData
+		tOfr := &model.PaymentMethodJsonOrderResponseOrderFormRendering{
+			GroupAlias: pm.GroupAlias,
+			PaymentMethodJsonOrderResponse: pmPrepData,
+		}
+
+		ofr.SlicePaymentMethodJsonOrderResponse = append(ofr.SlicePaymentMethodJsonOrderResponse, pmPrepData)
+		ofr.MapPaymentMethodJsonOrderResponse = append(ofr.MapPaymentMethodJsonOrderResponse, tOfr)
 	}
 
-	order.PaymentMethodsPreparedFormData = pdMap
-
-	return order, projectPms, nil
+	return ofr, nil
 }
 
 func (om *OrderManager) getPaymentMethod(order *model.OrderScalar, pms map[string][]*model.ProjectPaymentModes) (*model.ProjectPaymentModes, error) {

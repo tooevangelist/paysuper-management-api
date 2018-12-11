@@ -93,6 +93,35 @@ definitions:
       price:
         type: number
     type: object
+  model.JsonOrderCreateResponse:
+    properties:
+      account:
+        description: |
+          user account, may be null
+        type: string
+      has_user_commission:
+        description: |
+          flag to show commission amount changed to user in payment form
+        type: boolean
+      has_vat:
+        description: |
+          flag to show VAT commission amount in payment form
+        type: boolean
+      id:
+        description: |
+          order unique identifier
+        type: string
+      inline_form_redirect_url:
+        description: |
+          url to redirect user to inline form in PSP side
+        type: string
+      payment_methods:
+        description: |
+          contain data about payment methods
+        items:
+          $ref: '#/definitions/model.PaymentMethodJsonOrderResponse'
+        type: array
+    type: object
   model.Merchant:
     properties:
       accounting_period:
@@ -533,9 +562,8 @@ definitions:
           URL for payment data verification request to project. This field can be send if it allowed in project admin panel
         type: string
     required:
-    - amount
-    - account
     - project
+    - amount
     type: object
   model.OrderSimple:
     properties:
@@ -640,13 +668,6 @@ definitions:
           object which contains main information about currency
         type: object
     type: object
-  model.OrderUrl:
-    properties:
-      order_url:
-        description: |
-          link for user to payment confirmation form
-        type: string
-    type: object
   model.PayerData:
     properties:
       city:
@@ -683,6 +704,49 @@ definitions:
         description: |
           payer timezone name, get from ip geo location
         type: string
+    type: object
+  model.PaymentMethodJsonOrderResponse:
+    properties:
+      account_regexp:
+        description: |
+          regexp mask for check main requisite of payment method
+        type: string
+      amount_with_commissions:
+        description: |
+          total amount to payment in payment method currency include all possible commissions
+        type: number
+      amount_without_commissions:
+        description: |
+          original price of item in currency of payment method  which buy user
+        type: number
+      currency:
+        description: |
+          3 symbols currency code of payment method by  ISO 4217
+        type: string
+      icon:
+        description: |
+          url to payment method icon
+        type: string
+      id:
+        description: |
+          payment method unique identifier
+        type: string
+      name:
+        description: |
+          payment method name
+        type: string
+      type:
+        description: |
+          payment method type. allowed: bank_card, ewallet, crypto
+        type: string
+      user_commission_amount:
+        description: |
+          amount of commission in payment method currency, which the user pays for the project
+        type: number
+      vat_amount:
+        description: |
+          amount of VAT in payment method currency, which the user pays
+        type: number
     type: object
   model.PaymentMethodParams:
     properties:
@@ -819,6 +883,10 @@ definitions:
         $ref: '#/definitions/model.Merchant'
         type: object
       name:
+        type: string
+      url_fail:
+        type: string
+      url_success:
         type: string
     type: object
   model.ProjectScalar:
@@ -1160,9 +1228,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Object with url to form entering payment requisites
+          description: Object which contain data to render payment form
           schema:
-            $ref: '#/definitions/model.OrderUrl'
+            $ref: '#/definitions/model.JsonOrderCreateResponse'
             type: object
         "400":
           description: Object with error message

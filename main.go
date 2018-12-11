@@ -79,6 +79,7 @@ func main() {
 		GeoDbReader:             geoDbReader,
 		PaymentSystemConfig:     conf.PaymentSystemConfig.Config,
 		PSPAccountingCurrencyA3: conf.PSPAccountingCurrencyA3,
+		HttpScheme:              conf.HttpScheme,
 	}
 
 	server, err := api.NewServer(sInit)

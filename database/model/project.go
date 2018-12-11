@@ -104,7 +104,18 @@ type Project struct {
 }
 
 type ProjectOrder struct {
-	Id       bson.ObjectId `bson:"id" json:"id"`
-	Name     string        `bson:"name" json:"name"`
-	Merchant *Merchant     `bson:"merchant" json:"merchant"`
+	Id         bson.ObjectId `bson:"id" json:"id"`
+	Name       string        `bson:"name" json:"name"`
+	UrlSuccess *string       `bson:"url_success" json:"url_success"`
+	UrlFail    *string       `bson:"url_fail" json:"url_fail"`
+	Merchant   *Merchant     `bson:"merchant" json:"merchant"`
+}
+
+type ProjectJsonOrderResponse struct {
+	// project name
+	Name string `json:"name"`
+	// url to redirect user after successfully completed payment. may be NULL if not set in project settings
+	UrlSuccess *string `json:"url_success"`
+	// url to redirect user after failed payment. may be NULL if not set in project settings
+	UrlFail *string `json:"url_fail"`
 }

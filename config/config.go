@@ -41,6 +41,7 @@ type Config struct {
 	Database
 	PaymentSystemConfig
 	PSPAccountingCurrencyA3 string `envconfig:"PSP_ACCOUNTING_CURRENCY"`
+	HttpScheme              string `envconfig:"HTTP_SCHEME" default:"https"`
 }
 
 func NewConfig() (error, *Config) {

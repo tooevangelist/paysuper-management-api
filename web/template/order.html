@@ -60,18 +60,16 @@
     <div class="payment-methods">
         {{ if not .Order.PaymentMethod }}
             {{ range $i, $pm := .PaymentMethods }}
-                {{ $prepData := index $.Order.PaymentMethodsPreparedFormData $pm.GroupAlias }}
-
                 <div class="item {{ if eq $i 0 }} active {{ end }}" data-form="{{ $pm.GroupAlias }}"
-                     data-amount="{{ $prepData.Amount }}" data-currency="{{ $prepData.Currency.CodeA3 }}"
-                     data-identifier="{{ BsonObjectIdToString $pm.Id }}"
+                     data-amount="{{ $pm.AmountWithCommissions }}" data-currency="{{ $pm.Currency }}"
+                     data-identifier="{{ $pm.Id }}"
 
                     {{ if $.Order.Project.Merchant.IsVatEnabled }}
-                        data-vat="{{ $prepData.Vat }}"
+                        data-vat="{{ $pm.VatAmount }}"
                     {{ end }}
 
                     {{ if $.Order.Project.Merchant.IsCommissionToUserEnabled }}
-                        data-commission="{{ $prepData.ToUserCommissionAmount }}"
+                        data-commission="{{ $pm.UserCommissionAmount }}"
                     {{ end }}
                 >
                     <div class="logo" style="background-image: url('{{ $pm.Icon }}');"></div>

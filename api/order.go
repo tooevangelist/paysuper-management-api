@@ -132,7 +132,7 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param data body model.OrderScalar true "Order create data"
-// @Success 200 {object} model.OrderUrl "Object with url to form entering payment requisites"
+// @Success 200 {object} model.JsonOrderCreateResponse "Object which contain data to render payment form"
 // @Failure 400 {object} model.Error "Object with error message"
 // @Failure 500 {object} model.Error "Object with error message"
 // @Router /api/v1/order [post]
@@ -155,21 +155,34 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	rUrl := "https://" + ctx.Request().Host + "/order/" + nOrder.Id.Hex()
+	oh := &manager.OrderHttp{
+		Host: ctx.Request().Host,
+		Scheme: oApiV1.httpScheme,
+	}
 
-	ou := &model.OrderUrl{OrderUrl: rUrl}
+	jo, err := oApiV1.orderManager.JsonOrderCreatePostProcess(nOrder, oh)
 
-	return ctx.JSON(http.StatusOK, ou)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, jo)
 }
 
 func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
-	id := ctx.Param("id")
+	id := ctx.Param(model.OrderFilterFieldId)
 
 	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid order id")
+		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
 
-	o, projectPms, err := oApiV1.orderManager.GetOrderByIdWithPaymentMethods(id)
+	o := oApiV1.orderManager.FindById(id)
+
+	if o == nil {
+		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
+	}
+
+	projectPms, err := oApiV1.orderManager.GetOrderByIdWithPaymentMethods(o)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -180,7 +193,7 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		orderFormTemplateName,
 		map[string]interface{}{
 			"Order":          o,
-			"PaymentMethods": projectPms,
+			"PaymentMethods": projectPms.MapPaymentMethodJsonOrderResponse,
 		},
 	)
 }
