@@ -1,7 +1,12 @@
 module github.com/ProtocolONE/p1pay.api
 
 require (
+	github.com/DataDog/zstd v1.3.4 // indirect
+	github.com/Shopify/sarama v1.20.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/eapache/go-resiliency v1.1.0 // indirect
+	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
+	github.com/eapache/queue v1.1.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-openapi/jsonpointer v0.17.2 // indirect
@@ -11,6 +16,7 @@ require (
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/golang/protobuf v1.2.0 // indirects
+	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/labstack/echo v3.3.5+incompatible
 	github.com/labstack/gommon v0.2.8 // indirect
@@ -18,7 +24,9 @@ require (
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/oschwald/geoip2-golang v1.2.1
 	github.com/oschwald/maxminddb-golang v1.3.0 // indirect
+	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
+	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sidmal/slug v1.4.2
 	github.com/swaggo/swag v1.4.0 // indirect
