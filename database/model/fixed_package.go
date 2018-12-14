@@ -7,7 +7,7 @@ const (
 )
 
 type OrderFixedPackage struct {
-	Id          int     `bson:"id" json:"id"`
+	Id          string  `bson:"id" json:"id"`
 	Region      string  `bson:"region" json:"region"`
 	Name        string  `bson:"name" json:"name"`
 	CurrencyInt int     `bson:"currency_int" json:"currency_int"`

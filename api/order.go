@@ -6,6 +6,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
+	"github.com/micro/go-micro"
 	"net/http"
 	"net/url"
 )
@@ -18,6 +19,7 @@ type OrderApiV1 struct {
 	*Api
 	orderManager   *manager.OrderManager
 	projectManager *manager.ProjectManager
+	publisher      micro.Publisher
 }
 
 // @Summary Create order with HTML form
@@ -55,6 +57,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 			api.geoDbReader,
 			api.pspAccountingCurrencyA3,
 			api.paymentSystemsSettings,
+			api.publisher,
 		),
 		projectManager: manager.InitProjectManager(api.database, api.logger),
 	}
@@ -70,7 +73,6 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.accessRouteGroup.GET("/order/:id", oApiV1.getOrderJson)
 	api.accessRouteGroup.GET("/order/revenue_dynamic/:period", oApiV1.getRevenueDynamic)
 	api.accessRouteGroup.GET("/order/accounting_payment", oApiV1.getAccountingPaymentCalculation)
-
 
 	return api
 }
@@ -156,7 +158,7 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 	}
 
 	oh := &manager.OrderHttp{
-		Host: ctx.Request().Host,
+		Host:   ctx.Request().Host,
 		Scheme: oApiV1.httpScheme,
 	}
 

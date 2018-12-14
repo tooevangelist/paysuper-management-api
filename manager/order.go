@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"context"
 	"crypto/sha256"
 	"errors"
 	"fmt"
@@ -9,7 +10,10 @@ import (
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
 	"github.com/ProtocolONE/p1pay.api/utils"
+	proto "github.com/ProtocolONE/payone-repository/pkg/proto"
 	"github.com/globalsign/mgo/bson"
+	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/micro/go-micro"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 	"net"
@@ -70,6 +74,7 @@ type OrderManager struct {
 	paymentSystemsSettings *payment_system.PaymentSystemSetting
 	vatManager             *VatManager
 	commissionManager      *CommissionManager
+	publisher              micro.Publisher
 }
 
 type check struct {
@@ -104,6 +109,7 @@ func InitOrderManager(
 	geoDbReader *geoip2.Reader,
 	pspAccountingCurrencyA3 string,
 	paymentSystemsSettings *payment_system.PaymentSystemSetting,
+	publisher micro.Publisher,
 ) *OrderManager {
 	om := &OrderManager{
 		Manager:                &Manager{Database: database, Logger: logger},
@@ -116,6 +122,7 @@ func InitOrderManager(
 		paymentSystemsSettings: paymentSystemsSettings,
 		vatManager:             InitVatManager(database, logger),
 		commissionManager:      InitCommissionManager(database, logger),
+		publisher:              publisher,
 	}
 
 	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)
@@ -232,6 +239,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 			URLCheckAccount:   p.URLCheckAccount,
 			URLProcessPayment: p.URLProcessPayment,
 			Merchant:          p.Merchant,
+			CallbackProtocol:  p.CallbackProtocol,
 		},
 		Description:            fmt.Sprintf(orderDefaultDescription, id.Hex()),
 		ProjectOrderId:         order.OrderId,
@@ -639,15 +647,13 @@ func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, *model.Ord
 	}
 
 	var ofp *model.FixedPackage
-	var ofpId int
 
-	for i, fp := range fps {
+	for _, fp := range fps {
 		if fp.Price != c.order.Amount || fp.Currency.CodeA3 != *c.order.Currency {
 			continue
 		}
 
 		ofp = fp
-		ofpId = i
 	}
 
 	if ofp == nil {
@@ -655,7 +661,7 @@ func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, *model.Ord
 	}
 
 	orderFp := &model.OrderFixedPackage{
-		Id:          ofpId,
+		Id:          ofp.Id,
 		Region:      region,
 		Name:        ofp.Name,
 		CurrencyInt: ofp.CurrencyInt,
@@ -998,6 +1004,10 @@ func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification
 	}
 
 	if !o.CanProcessNotify() {
+		if o.Status == model.OrderStatusNew {
+			return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, orderErrorCanNotCreate)
+		}
+
 		if o.Status == model.OrderStatusPaymentSystemDeclined {
 			return payment_system.NewPaymentResponse(payment_system.PaymentStatusOK, orderErrorOrderDeclined)
 		}
@@ -1027,6 +1037,10 @@ func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification
 		o = res.Order
 
 		if o, err = om.processNotifyPaymentAmounts(o); err != nil {
+			return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
+		}
+
+		if err = om.publisher.Publish(context.Background(), om.getPublisherOrder(o)); err != nil {
 			return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
 		}
 	}
@@ -1378,4 +1392,184 @@ func (om *OrderManager) getValueFromAccountingPaymentReport(v interface{}) float
 	}
 
 	return fV
+}
+
+// temporary method helper to convert model.Order to proto.Order
+func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
+	sProjectParams := make(map[string]string)
+	sPaymentMethodTxnParams := make(map[string]string)
+
+	for k, v := range o.ProjectParams {
+		sProjectParams[k] = v.(string)
+	}
+
+	for k, v := range o.PaymentMethodTxnParams {
+		sPaymentMethodTxnParams[k] = v.(string)
+	}
+
+	pOrder := &proto.Order{
+		Id: o.Id.Hex(),
+		Project: &proto.ProjectOrder{
+			Id:                o.Project.Id.Hex(),
+			Name:              o.Project.Name,
+			UrlSuccess:        *o.Project.UrlSuccess,
+			UrlFail:           *o.Project.UrlFail,
+			NotifyEmails:      o.Project.NotifyEmails,
+			SendNotifyEmail:   o.Project.SendNotifyEmail,
+			SecretKey:         o.Project.SecretKey,
+			UrlCheckAccount:   *o.Project.URLCheckAccount,
+			UrlProcessPayment: *o.Project.URLProcessPayment,
+			CallbackProtocol:  o.Project.CallbackProtocol,
+			Merchant: &proto.Merchant{
+				Id:         o.Project.Merchant.Id.Hex(),
+				ExternalId: o.Project.Merchant.ExternalId,
+				Email:      o.Project.Merchant.Email,
+				Name:       *o.Project.Merchant.Name,
+				Country: &proto.Country{
+					CodeInt:  int32(o.Project.Merchant.Country.CodeInt),
+					CodeA2:   o.Project.Merchant.Country.CodeA2,
+					CodeA3:   o.Project.Merchant.Country.CodeA3,
+					Name:     &proto.Name{En: o.Project.Merchant.Country.Name.EN, Ru: o.Project.Merchant.Country.Name.RU},
+					IsActive: o.Project.Merchant.Country.IsActive,
+				},
+				AccountingPeriod: proto.AccountingPeriod(proto.AccountingPeriod_value[*o.Project.Merchant.AccountingPeriod]),
+				Currency: &proto.Currency{
+					CodeInt: int32(o.Project.Merchant.Currency.CodeInt),
+					CodeA3: o.Project.Merchant.Currency.CodeA3,
+					Name: &proto.Name{En: o.Project.Merchant.Currency.Name.EN, Ru: o.Project.Merchant.Currency.Name.RU},
+					IsActive: o.Project.Merchant.Currency.IsActive,
+				},
+				IsVatEnabled:              o.Project.Merchant.IsVatEnabled,
+				IsCommissionToUserEnabled: o.Project.Merchant.IsCommissionToUserEnabled,
+				Status:                    int32(o.Project.Merchant.Status),
+				CreatedAt:                 &timestamp.Timestamp{Seconds: o.Project.Merchant.CreatedAt.Unix()},
+				UpdatedAt:                 &timestamp.Timestamp{Seconds: o.Project.Merchant.UpdatedAt.Unix()},
+			},
+		},
+		ProjectAccount: o.ProjectAccount,
+		Description: o.Description,
+		ProjectIncomeAmount: o.ProjectIncomeAmount,
+		ProjectIncomeCurrency: &proto.Currency{
+			CodeInt: int32(o.ProjectIncomeCurrency.CodeInt),
+			CodeA3: o.ProjectIncomeCurrency.CodeA3,
+			Name: &proto.Name{En: o.ProjectIncomeCurrency.Name.EN, Ru: o.ProjectIncomeCurrency.Name.RU},
+			IsActive: o.ProjectIncomeCurrency.IsActive,
+		},
+		ProjectOutcomeAmount: o.ProjectOutcomeAmount,
+		ProjectOutcomeCurrency: &proto.Currency{
+			CodeInt: int32(o.ProjectOutcomeCurrency.CodeInt),
+			CodeA3: o.ProjectOutcomeCurrency.CodeA3,
+			Name: &proto.Name{En: o.ProjectOutcomeCurrency.Name.EN, Ru: o.ProjectOutcomeCurrency.Name.RU},
+			IsActive: o.ProjectOutcomeCurrency.IsActive,
+		},
+		ProjectParams: sProjectParams,
+		PayerData: &proto.PayerData{
+			Ip: o.PayerData.Ip,
+			CountryCodeA2: o.PayerData.CountryCodeA2,
+			CountryName: &proto.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
+			City: &proto.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
+			Subdivision: o.PayerData.Subdivision,
+			Timezone: o.PayerData.Timezone,
+		},
+		PaymentMethod: &proto.PaymentMethodOrder{
+			Id: o.PaymentMethod.Id.Hex(),
+			Name: o.PaymentMethod.Name,
+			Params: &proto.PaymentMethodParams{
+				Handler: o.PaymentMethod.Params.Handler,
+				Terminal: o.PaymentMethod.Params.Terminal,
+				ExternalId: o.PaymentMethod.Params.ExternalId,
+				Other: o.PaymentMethod.Params.Other,
+			},
+			PaymentSystem: &proto.PaymentSystem{
+				Id: o.PaymentMethod.PaymentSystem.Id.Hex(),
+				Name: o.PaymentMethod.PaymentSystem.Name,
+				Country: &proto.Country{
+					CodeInt:  int32(o.PaymentMethod.PaymentSystem.Country.CodeInt),
+					CodeA2:   o.PaymentMethod.PaymentSystem.Country.CodeA2,
+					CodeA3:   o.PaymentMethod.PaymentSystem.Country.CodeA3,
+					Name:     &proto.Name{En: o.PaymentMethod.PaymentSystem.Country.Name.EN, Ru:o.PaymentMethod.PaymentSystem.Country.Name.RU},
+					IsActive: o.PaymentMethod.PaymentSystem.Country.IsActive,
+				},
+				AccountingCurrency: &proto.Currency{
+					CodeInt: int32(o.PaymentMethod.PaymentSystem.AccountingCurrency.CodeInt),
+					CodeA3: o.PaymentMethod.PaymentSystem.AccountingCurrency.CodeA3,
+					Name: &proto.Name{En: o.PaymentMethod.PaymentSystem.AccountingCurrency.Name.EN, Ru: o.PaymentMethod.PaymentSystem.AccountingCurrency.Name.RU},
+					IsActive: o.PaymentMethod.PaymentSystem.AccountingCurrency.IsActive,
+				},
+				AccountingPeriod: o.PaymentMethod.PaymentSystem.AccountingPeriod,
+				IsActive: o.PaymentMethod.PaymentSystem.IsActive,
+				CreatedAt: &timestamp.Timestamp{Seconds: o.PaymentMethod.PaymentSystem.CreatedAt.Unix()},
+			},
+			GroupAlias: o.PaymentMethod.GroupAlias,
+		},
+		PaymentMethodTerminalId: o.PaymentMethodTerminalId,
+		PaymentMethodOrderId: o.PaymentMethodOrderId,
+		PaymentMethodOutcomeAmount: o.PaymentMethodOutcomeAmount,
+		PaymentMethodOutcomeCurrency: &proto.Currency{
+			CodeInt: int32(o.PaymentMethodOutcomeCurrency.CodeInt),
+			CodeA3: o.PaymentMethodOutcomeCurrency.CodeA3,
+			Name: &proto.Name{En: o.PaymentMethodOutcomeCurrency.Name.EN, Ru: o.PaymentMethodOutcomeCurrency.Name.RU},
+			IsActive: o.PaymentMethodOutcomeCurrency.IsActive,
+		},
+		PaymentMethodIncomeAmount: o.PaymentMethodIncomeAmount,
+		PaymentMethodIncomeCurrency: &proto.Currency{
+			CodeInt: int32(o.PaymentMethodIncomeCurrency.CodeInt),
+			CodeA3: o.PaymentMethodIncomeCurrency.CodeA3,
+			Name: &proto.Name{En: o.PaymentMethodIncomeCurrency.Name.EN, Ru: o.PaymentMethodIncomeCurrency.Name.RU},
+			IsActive: o.PaymentMethodIncomeCurrency.IsActive,
+		},
+		PaymentMethodIncomeCurrencyA3: o.PaymentMethodIncomeCurrency.CodeA3,
+		PaymentMethodOrderClosedAt: &timestamp.Timestamp{Seconds: o.PaymentMethodOrderClosedAt.Unix()},
+		Status: int32(o.Status),
+		CreatedAt: &timestamp.Timestamp{Seconds: o.CreatedAt.Unix()},
+		UpdatedAt: &timestamp.Timestamp{Seconds: o.UpdatedAt.Unix()},
+		IsJsonRequest: o.IsJsonRequest,
+		AmountInPspAccountingCurrency: o.AmountInPSPAccountingCurrency,
+		AmountInMerchantAccountingCurrency: o.AmountInMerchantAccountingCurrency,
+		AmountOutMerchantAccountingCurrency: o.AmountOutMerchantAccountingCurrency,
+		AmountInPaymentSystemAccountingCurrency: o.AmountInPaymentSystemAccountingCurrency,
+		PaymentMethodPayerAccount: o.PaymentMethodPayerAccount,
+		PaymentMethodTxnParams: sPaymentMethodTxnParams,
+		FixedPackage: &proto.FixedPackage{
+			Id: o.FixedPackage.Id,
+			Name: o.FixedPackage.Name,
+			CurrencyInt: int32(o.FixedPackage.CurrencyInt),
+			Price: o.FixedPackage.Price,
+			IsActive: true,
+		},
+		PaymentRequisites: o.PaymentRequisites,
+		PspFeeAmount: &proto.OrderFeePsp{
+			AmountPaymentMethodCurrency: o.PspFeeAmount.AmountPaymentMethodCurrency,
+			AmountMerchantCurrency: o.PspFeeAmount.AmountMerchantCurrency,
+			AmountPspCurrency: o.PspFeeAmount.AmountPspCurrency,
+		},
+		ProjectFeeAmount: &proto.OrderFee{
+			AmountPaymentMethodCurrency: o.ProjectFeeAmount.AmountPaymentMethodCurrency,
+			AmountMerchantCurrency: o.ProjectFeeAmount.AmountMerchantCurrency,
+		},
+		ToPayerFeeAmount: &proto.OrderFee{
+			AmountPaymentMethodCurrency: o.ToPayerFeeAmount.AmountPaymentMethodCurrency,
+			AmountMerchantCurrency: o.ToPayerFeeAmount.AmountMerchantCurrency,
+		},
+		VatAmount: o.VatAmount,
+		PaymentSystemFeeAmount: &proto.OrderFeePaymentSystem{
+			AmountPaymentMethodCurrency: o.PaymentSystemFeeAmount.AmountPaymentMethodCurrency,
+			AmountMerchantCurrency: o.PaymentSystemFeeAmount.AmountMerchantCurrency,
+			AmountPaymentSystemCurrency: o.PaymentSystemFeeAmount.AmountMerchantCurrency,
+		},
+	}
+
+	if o.ProjectLastRequestedAt != nil {
+		pOrder.ProjectLastRequestedAt = &timestamp.Timestamp{Seconds: o.ProjectLastRequestedAt.Unix()}
+	}
+
+	if o.PayerData.Phone != nil {
+		pOrder.PayerData.Phone = *o.PayerData.Phone
+	}
+
+	if o.PayerData.Email != nil {
+		pOrder.PayerData.Email = *o.PayerData.Email
+	}
+
+	return pOrder
 }

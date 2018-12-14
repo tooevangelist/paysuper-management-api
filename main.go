@@ -1,14 +1,20 @@
 package main
 
 import (
-	"flag"
+	"context"
 	"github.com/ProtocolONE/p1pay.api/api"
 	"github.com/ProtocolONE/p1pay.api/config"
 	"github.com/ProtocolONE/p1pay.api/database"
-	"github.com/globalsign/mgo"
+	"github.com/ProtocolONE/payone-repository/pkg/constant"
+	"github.com/micro/go-micro"
+	_ "github.com/micro/go-plugins/broker/rabbitmq"
+	_ "github.com/micro/go-plugins/transport/grpc"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 // @title Protocol One payment solution swagger documentation
@@ -22,8 +28,8 @@ import (
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host p1payapi.tst.protocol.one
 func main() {
-	migration := flag.String("migration", "", "run database migrations with specified direction")
-	flag.Parse()
+	//migration := flag.String("migration", "", "run database migrations with specified direction")
+	//flag.Parse()
 
 	err, conf := config.NewConfig()
 
@@ -39,7 +45,7 @@ func main() {
 
 	defer db.Close()
 
-	if *migration != "" {
+	/*if *migration != "" {
 		err := database.Migrate(db.Database().(*mgo.Database), *migration)
 
 		if err != nil {
@@ -47,7 +53,7 @@ func main() {
 		}
 
 		return
-	}
+	}*/
 
 	logger, err := zap.NewProduction()
 
@@ -72,6 +78,14 @@ func main() {
 		}
 	}()
 
+	service, publisher, cancelFunc := InitService()
+
+	go func() {
+		if err := service.Run(); err != nil {
+			return
+		}
+	}()
+
 	sInit := &api.ServerInitParams{
 		Config:                  &conf.Jwt,
 		Database:                db,
@@ -80,6 +94,7 @@ func main() {
 		PaymentSystemConfig:     conf.PaymentSystemConfig.Config,
 		PSPAccountingCurrencyA3: conf.PSPAccountingCurrencyA3,
 		HttpScheme:              conf.HttpScheme,
+		Publisher:               publisher,
 	}
 
 	server, err := api.NewServer(sInit)
@@ -93,4 +108,41 @@ func main() {
 	if err != nil {
 		log.Fatalf("server crashed on start with error: %s\n", err)
 	}
+
+	handleOsSignals(cancelFunc)
+}
+
+func InitService() (micro.Service, micro.Publisher, context.CancelFunc) {
+	serviceContext, serviceCancel := context.WithCancel(context.Background())
+
+	service := micro.NewService(
+		micro.Name("go.p1.payone.api"),
+		micro.Version(constant.PayOneMicroserviceVersion),
+		micro.Context(serviceContext),
+	)
+	service.Init()
+	publisher := micro.NewPublisher(constant.PayOneTopicNotifyPaymentName, service.Client())
+
+	return service, publisher, serviceCancel
+}
+
+func handleOsSignals(cancelFunc context.CancelFunc) {
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
+
+	exitChan := make(chan int)
+
+	go func() {
+		for {
+			s := <-signalChan
+			switch s {
+			case os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT:
+				cancelFunc()
+				exitChan <- 0
+			}
+		}
+	}()
+
+	code := <-exitChan
+	os.Exit(code)
 }

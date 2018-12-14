@@ -21,7 +21,7 @@ type CardPayWebHook struct {
 func (wh *WebHook) InitCardPayWebHookRoutes() *WebHook {
 	cpWebHook := &CardPayWebHook{
 		WebHook:      wh,
-		orderManager: manager.InitOrderManager(wh.database, wh.logger, wh.geoDbReader, wh.pspAccountingCurrencyA3, wh.paymentSystemSettings),
+		orderManager: manager.InitOrderManager(wh.database, wh.logger, wh.geoDbReader, wh.pspAccountingCurrencyA3, wh.paymentSystemSettings, wh.publisher),
 	}
 
 	wh.webHookGroup.POST(cardPayWebHookPaymentNotifyPath, cpWebHook.paymentNotify)

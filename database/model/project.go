@@ -104,16 +104,17 @@ type Project struct {
 }
 
 type ProjectOrder struct {
-	Id         bson.ObjectId `bson:"id" json:"id"`
-	Name       string        `bson:"name" json:"name"`
-	UrlSuccess *string       `bson:"url_success" json:"url_success"`
-	UrlFail    *string       `bson:"url_fail" json:"url_fail"`
-	NotifyEmails []string `bson:"notify_emails" json:"notify_emails"`
-	SecretKey string `bson:"secret_key" json:"secret_key"`
-	SendNotifyEmail bool `bson:"send_notify_email" json:"send_notify_email"`
-	URLCheckAccount *string `bson:"url_check_account" json:"url_check_account"`
-	URLProcessPayment *string `bson:"url_process_payment" json:"url_process_payment"`
-	Merchant   *Merchant     `bson:"merchant" json:"merchant"`
+	Id                bson.ObjectId `bson:"id" json:"id"`
+	Name              string        `bson:"name" json:"name"`
+	UrlSuccess        *string       `bson:"url_success" json:"url_success"`
+	UrlFail           *string       `bson:"url_fail" json:"url_fail"`
+	NotifyEmails      []string      `bson:"notify_emails" json:"notify_emails"`
+	SecretKey         string        `bson:"secret_key" json:"secret_key"`
+	SendNotifyEmail   bool          `bson:"send_notify_email" json:"send_notify_email"`
+	URLCheckAccount   *string       `bson:"url_check_account" json:"url_check_account"`
+	URLProcessPayment *string       `bson:"url_process_payment" json:"url_process_payment"`
+	CallbackProtocol  string        `bson:"callback_protocol" json:"callback_protocol"`
+	Merchant          *Merchant     `bson:"merchant" json:"merchant"`
 }
 
 // contain data about project

@@ -5,6 +5,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/labstack/echo"
+	"github.com/micro/go-micro"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
@@ -22,6 +23,8 @@ type WebHook struct {
 	paymentSystemConfig     map[string]interface{}
 	paymentSystemSettings   *payment_system.PaymentSystemSetting
 	rawBody                 string
+
+	publisher micro.Publisher
 }
 
 func InitWebHook(
@@ -33,6 +36,7 @@ func InitWebHook(
 	webHookGroup *echo.Group,
 	paymentSystemConfig map[string]interface{},
 	paymentSystemSettings *payment_system.PaymentSystemSetting,
+	publisher micro.Publisher,
 ) *WebHook {
 	return &WebHook{
 		database:                database,
@@ -43,6 +47,7 @@ func InitWebHook(
 		webHookGroup:            webHookGroup,
 		paymentSystemConfig:     paymentSystemConfig,
 		paymentSystemSettings:   paymentSystemSettings,
+		publisher:               publisher,
 	}
 }
 

@@ -12,6 +12,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/micro/go-micro"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/sidmal/slug"
 	"github.com/ttacon/libphonenumber"
@@ -57,6 +58,7 @@ type ServerInitParams struct {
 	PaymentSystemConfig     map[string]interface{}
 	PSPAccountingCurrencyA3 string
 	HttpScheme              string
+	Publisher               micro.Publisher
 }
 
 type Template struct {
@@ -90,6 +92,8 @@ type Api struct {
 	paymentSystemsSettings  *payment_system.PaymentSystemSetting
 	httpScheme              string
 
+	publisher micro.Publisher
+
 	Merchant
 	GetParams
 	Order
@@ -105,6 +109,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		PaymentSystemConfig:     p.PaymentSystemConfig,
 		pspAccountingCurrencyA3: p.PSPAccountingCurrencyA3,
 		httpScheme:              p.HttpScheme,
+		publisher:               p.Publisher,
 		paymentSystemsSettings: &payment_system.PaymentSystemSetting{
 			Logger: p.Logger,
 		},
@@ -210,6 +215,7 @@ func (api *Api) InitWebHooks() {
 		whGroup,
 		api.PaymentSystemConfig,
 		api.paymentSystemsSettings,
+		api.publisher,
 	)
 
 	whGroup.Use(wh.RawBodyMiddleware)
