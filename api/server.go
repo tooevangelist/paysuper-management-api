@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"github.com/ProtocolONE/p1pay.api/api/webhook"
 	"github.com/ProtocolONE/p1pay.api/config"
@@ -8,6 +9,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/ProtocolONE/p1pay.api/utils"
+	"github.com/ProtocolONE/payone-repository/pkg/constant"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
@@ -20,6 +22,7 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"time"
 )
@@ -58,7 +61,6 @@ type ServerInitParams struct {
 	PaymentSystemConfig     map[string]interface{}
 	PSPAccountingCurrencyA3 string
 	HttpScheme              string
-	Publisher               micro.Publisher
 }
 
 type Template struct {
@@ -92,6 +94,10 @@ type Api struct {
 	paymentSystemsSettings  *payment_system.PaymentSystemSetting
 	httpScheme              string
 
+	service        micro.Service
+	serviceContext context.Context
+	serviceCancel  context.CancelFunc
+
 	publisher micro.Publisher
 
 	Merchant
@@ -109,11 +115,12 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		PaymentSystemConfig:     p.PaymentSystemConfig,
 		pspAccountingCurrencyA3: p.PSPAccountingCurrencyA3,
 		httpScheme:              p.HttpScheme,
-		publisher:               p.Publisher,
 		paymentSystemsSettings: &payment_system.PaymentSystemSetting{
 			Logger: p.Logger,
 		},
 	}
+
+	api.InitService()
 
 	renderer := &Template{
 		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("web/template/*.html")),
@@ -169,7 +176,44 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 }
 
 func (api *Api) Start() error {
-	return api.Http.Start(":3001")
+	go func() {
+		if err := api.service.Run(); err != nil {
+			return
+		}
+	}()
+
+	go func() {
+		if err := api.Http.Start(":3001"); err != nil {
+			api.Http.Logger.Info("shutting down the server")
+		}
+	}()
+
+	return nil
+}
+
+func (api *Api) InitService() {
+	api.serviceContext, api.serviceCancel = context.WithCancel(context.Background())
+
+	api.service = micro.NewService(
+		micro.Name("go.p1.payone.api"),
+		micro.Version(constant.PayOneMicroserviceVersion),
+	)
+	api.service.Init()
+	api.publisher = micro.NewPublisher(constant.PayOneTopicNotifyPaymentName, api.service.Client())
+}
+
+func (api *Api) Stop() {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := api.Http.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown:", err)
+	}
+
+	log.Println("Http server exiting")
+
+	api.serviceCancel()
+	log.Println("Micro server exiting")
 }
 
 func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.HandlerFunc {

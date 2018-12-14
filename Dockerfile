@@ -8,6 +8,9 @@ ENV GO111MODULE=on
 ENV MAXMIND_GEOIP_DB_PATH=/application/etc/maxmind/GeoLite2-City.mmdb
 ENV PSP_ACCOUNTING_CURRENCY=EUR
 ENV PATH_TO_PS_CONFIG=/application/config/parameters/parameters.yml
+ENV MICRO_REGISTRY_ADDRESS=127.0.0.1
+ENV MICRO_BROKER=rabbitmq
+ENV MICRO_BROKER_ADDRESS=127.0.0.1:5672
 
 COPY go.mod go.sum ./
 RUN go mod download
