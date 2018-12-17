@@ -10,7 +10,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
 	"github.com/ProtocolONE/p1pay.api/utils"
-	proto "github.com/ProtocolONE/payone-repository/pkg/proto"
+	proto "github.com/ProtocolONE/payone-repository/pkg/proto/billing"
 	"github.com/globalsign/mgo/bson"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/micro/go-micro"

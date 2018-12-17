@@ -16,6 +16,11 @@ import (
 	"syscall"
 )
 
+var (
+	// service to call
+	serviceName string
+)
+
 // @title Protocol One payment solution swagger documentation
 // @version 1.0
 // @description This is a Protocol One payment solution service.
