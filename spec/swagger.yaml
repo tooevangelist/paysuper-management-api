@@ -460,7 +460,7 @@ definitions:
       currency_int:
         type: integer
       id:
-        type: integer
+        type: string
       name:
         type: string
       price:
@@ -567,8 +567,8 @@ definitions:
           URL for payment data verification request to project. This field can be send if it allowed in project admin panel
         type: string
     required:
-    - project
     - amount
+    - project
     type: object
   model.OrderSimple:
     properties:
@@ -727,6 +727,10 @@ definitions:
       currency:
         description: |
           3 symbols currency code of payment method by  ISO 4217
+        type: string
+      group_alias:
+        description: |
+          payment method group alias
         type: string
       icon:
         description: |
@@ -897,6 +901,8 @@ definitions:
     type: object
   model.ProjectOrder:
     properties:
+      callback_protocol:
+        type: string
       id:
         type: string
       merchant:
@@ -904,7 +910,19 @@ definitions:
         type: object
       name:
         type: string
+      notify_emails:
+        items:
+          type: string
+        type: array
+      secret_key:
+        type: string
+      send_notify_email:
+        type: boolean
+      url_check_account:
+        type: string
       url_fail:
+        type: string
+      url_process_payment:
         type: string
       url_success:
         type: string
@@ -992,8 +1010,8 @@ definitions:
           default url to redirect user after successfully completed payment
         type: string
     required:
-    - callback_protocol
     - name
+    - callback_protocol
     type: object
   model.RevenueDynamicMainData:
     properties:

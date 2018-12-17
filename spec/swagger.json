@@ -1989,7 +1989,7 @@
                     "type": "integer"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -2043,8 +2043,8 @@
         "model.OrderScalar": {
             "type": "object",
             "required": [
-                "project",
-                "amount"
+                "amount",
+                "project"
             ],
             "properties": {
                 "account": {
@@ -2282,6 +2282,10 @@
                     "description": "3 symbols currency code of payment method by  ISO 4217\n",
                     "type": "string"
                 },
+                "group_alias": {
+                    "description": "payment method group alias\n",
+                    "type": "string"
+                },
                 "icon": {
                     "description": "url to payment method icon\n",
                     "type": "string"
@@ -2474,6 +2478,9 @@
         "model.ProjectOrder": {
             "type": "object",
             "properties": {
+                "callback_protocol": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -2484,7 +2491,25 @@
                 "name": {
                     "type": "string"
                 },
+                "notify_emails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "secret_key": {
+                    "type": "string"
+                },
+                "send_notify_email": {
+                    "type": "boolean"
+                },
+                "url_check_account": {
+                    "type": "string"
+                },
                 "url_fail": {
+                    "type": "string"
+                },
+                "url_process_payment": {
                     "type": "string"
                 },
                 "url_success": {
@@ -2495,8 +2520,8 @@
         "model.ProjectScalar": {
             "type": "object",
             "required": [
-                "callback_protocol",
-                "name"
+                "name",
+                "callback_protocol"
             ],
             "properties": {
                 "callback_currency": {

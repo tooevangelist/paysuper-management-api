@@ -54,7 +54,9 @@ type PaymentMethodJsonOrderResponse struct {
 	// url to payment method icon
 	Icon string `json:"icon"`
 	// payment method type. allowed: bank_card, ewallet, crypto
-	Type string `json:"type"`
+	Type       string `json:"type"`
+	// payment method group alias
+	GroupAlias string `json:"group_alias"`
 	// regexp mask for check main requisite of payment method
 	AccountRegexp string `json:"account_regexp"`
 	// total amount to payment in payment method currency include all possible commissions
