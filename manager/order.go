@@ -226,6 +226,12 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 
 	id := bson.NewObjectId()
 
+	uSubdivision := ""
+
+	if len(gRecord.Subdivisions) > 0 {
+		uSubdivision = gRecord.Subdivisions[0].IsoCode
+	}
+
 	nOrder := &model.Order{
 		Id: id,
 		Project: &model.ProjectOrder{
@@ -254,7 +260,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 			CountryCodeA2: gRecord.Country.IsoCode,
 			CountryName:   &model.Name{EN: gRecord.Country.Names["en"], RU: gRecord.Country.Names["ru"]},
 			City:          &model.Name{EN: gRecord.City.Names["en"], RU: gRecord.City.Names["ru"]},
-			Subdivision:   gRecord.Subdivisions[0].IsoCode,
+			Subdivision:   uSubdivision,
 			Timezone:      gRecord.Location.TimeZone,
 			Phone:         order.PayerPhone,
 			Email:         order.PayerEmail,

@@ -109,8 +109,6 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 		IsJsonRequest: false,
 	}
 
-	return ctx.JSON(http.StatusOK, order)
-
 	if err := (&OrderFormBinder{}).Bind(order, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Request data invalid")
 	}
