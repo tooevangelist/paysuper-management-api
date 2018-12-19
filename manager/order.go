@@ -11,9 +11,10 @@ import (
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
 	"github.com/ProtocolONE/p1pay.api/utils"
 	proto "github.com/ProtocolONE/payone-repository/pkg/proto/billing"
+	"github.com/ProtocolONE/payone-repository/tools"
 	"github.com/globalsign/mgo/bson"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/micro/go-micro"
+	"github.com/micro/protobuf/ptypes"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 	"net"
@@ -1414,10 +1415,12 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 		sPaymentMethodTxnParams[k] = v.(string)
 	}
 
+	dbHelper := &tools.DatabaseHelper{}
+
 	pOrder := &proto.Order{
-		Id: o.Id.Hex(),
+		Id: dbHelper.ObjectIdToByte(o.Id),
 		Project: &proto.ProjectOrder{
-			Id:                o.Project.Id.Hex(),
+			Id:                dbHelper.ObjectIdToByte(o.Project.Id),
 			Name:              o.Project.Name,
 			UrlSuccess:        *o.Project.UrlSuccess,
 			UrlFail:           *o.Project.UrlFail,
@@ -1428,7 +1431,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 			UrlProcessPayment: *o.Project.URLProcessPayment,
 			CallbackProtocol:  o.Project.CallbackProtocol,
 			Merchant: &proto.Merchant{
-				Id:         o.Project.Merchant.Id.Hex(),
+				Id:         dbHelper.ObjectIdToByte(o.Project.Merchant.Id),
 				ExternalId: o.Project.Merchant.ExternalId,
 				Email:      o.Project.Merchant.Email,
 				Name:       *o.Project.Merchant.Name,
@@ -1439,7 +1442,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 					Name:     &proto.Name{En: o.Project.Merchant.Country.Name.EN, Ru: o.Project.Merchant.Country.Name.RU},
 					IsActive: o.Project.Merchant.Country.IsActive,
 				},
-				AccountingPeriod: proto.AccountingPeriod(proto.AccountingPeriod_value[*o.Project.Merchant.AccountingPeriod]),
+				AccountingPeriod: *o.Project.Merchant.AccountingPeriod,
 				Currency: &proto.Currency{
 					CodeInt:  int32(o.Project.Merchant.Currency.CodeInt),
 					CodeA3:   o.Project.Merchant.Currency.CodeA3,
@@ -1449,8 +1452,6 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 				IsVatEnabled:              o.Project.Merchant.IsVatEnabled,
 				IsCommissionToUserEnabled: o.Project.Merchant.IsCommissionToUserEnabled,
 				Status:                    int32(o.Project.Merchant.Status),
-				CreatedAt:                 &timestamp.Timestamp{Seconds: o.Project.Merchant.CreatedAt.Unix()},
-				UpdatedAt:                 &timestamp.Timestamp{Seconds: o.Project.Merchant.UpdatedAt.Unix()},
 			},
 		},
 		ProjectAccount:      o.ProjectAccount,
@@ -1479,7 +1480,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 			Timezone:      o.PayerData.Timezone,
 		},
 		PaymentMethod: &proto.PaymentMethodOrder{
-			Id:   o.PaymentMethod.Id.Hex(),
+			Id:   dbHelper.ObjectIdToByte(o.PaymentMethod.Id),
 			Name: o.PaymentMethod.Name,
 			Params: &proto.PaymentMethodParams{
 				Handler:    o.PaymentMethod.Params.Handler,
@@ -1488,7 +1489,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 				Other:      o.PaymentMethod.Params.Other,
 			},
 			PaymentSystem: &proto.PaymentSystem{
-				Id:   o.PaymentMethod.PaymentSystem.Id.Hex(),
+				Id:   dbHelper.ObjectIdToByte(o.PaymentMethod.PaymentSystem.Id),
 				Name: o.PaymentMethod.PaymentSystem.Name,
 				Country: &proto.Country{
 					CodeInt:  int32(o.PaymentMethod.PaymentSystem.Country.CodeInt),
@@ -1505,7 +1506,6 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 				},
 				AccountingPeriod: o.PaymentMethod.PaymentSystem.AccountingPeriod,
 				IsActive:         o.PaymentMethod.PaymentSystem.IsActive,
-				CreatedAt:        &timestamp.Timestamp{Seconds: o.PaymentMethod.PaymentSystem.CreatedAt.Unix()},
 			},
 			GroupAlias: o.PaymentMethod.GroupAlias,
 		},
@@ -1526,10 +1526,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 			IsActive: o.PaymentMethodIncomeCurrency.IsActive,
 		},
 		PaymentMethodIncomeCurrencyA3:           o.PaymentMethodIncomeCurrency.CodeA3,
-		PaymentMethodOrderClosedAt:              &timestamp.Timestamp{Seconds: o.PaymentMethodOrderClosedAt.Unix()},
 		Status:                                  int32(o.Status),
-		CreatedAt:                               &timestamp.Timestamp{Seconds: o.CreatedAt.Unix()},
-		UpdatedAt:                               &timestamp.Timestamp{Seconds: o.UpdatedAt.Unix()},
 		IsJsonRequest:                           o.IsJsonRequest,
 		AmountInPspAccountingCurrency:           o.AmountInPSPAccountingCurrency,
 		AmountInMerchantAccountingCurrency:      o.AmountInMerchantAccountingCurrency,
@@ -1567,7 +1564,103 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 	}
 
 	if o.ProjectLastRequestedAt != nil {
-		pOrder.ProjectLastRequestedAt = &timestamp.Timestamp{Seconds: o.ProjectLastRequestedAt.Unix()}
+		if v, err := ptypes.TimestampProto(*o.ProjectLastRequestedAt); err == nil {
+			pOrder.ProjectLastRequestedAt = v
+		}
+	}
+
+	if v, err := ptypes.TimestampProto(o.CreatedAt); err == nil {
+		pOrder.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.UpdatedAt); err == nil {
+		pOrder.UpdatedAt = v
+	}
+
+	if o.PaymentMethodOrderClosedAt != nil {
+		if v, err := ptypes.TimestampProto(*o.PaymentMethodOrderClosedAt); err == nil {
+			pOrder.PaymentMethodOrderClosedAt = v
+		}
+	}
+
+	if v, err := ptypes.TimestampProto(o.PaymentMethodOutcomeCurrency.CreatedAt); err == nil {
+		pOrder.PaymentMethodOutcomeCurrency.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.PaymentMethodOutcomeCurrency.UpdatedAt); err == nil {
+		pOrder.PaymentMethodOutcomeCurrency.UpdatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.PaymentMethodIncomeCurrency.CreatedAt); err == nil {
+		pOrder.PaymentMethodIncomeCurrency.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.PaymentMethodIncomeCurrency.UpdatedAt); err == nil {
+		pOrder.PaymentMethodIncomeCurrency.UpdatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.PaymentMethod.PaymentSystem.AccountingCurrency.CreatedAt); err == nil {
+		pOrder.PaymentMethod.PaymentSystem.AccountingCurrency.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.PaymentMethod.PaymentSystem.AccountingCurrency.UpdatedAt); err == nil {
+		pOrder.PaymentMethod.PaymentSystem.AccountingCurrency.UpdatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.PaymentMethod.PaymentSystem.Country.CreatedAt); err == nil {
+		pOrder.PaymentMethod.PaymentSystem.Country.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.PaymentMethod.PaymentSystem.Country.UpdatedAt); err == nil {
+		pOrder.PaymentMethod.PaymentSystem.Country.UpdatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.PaymentMethod.PaymentSystem.CreatedAt); err == nil {
+		pOrder.PaymentMethod.PaymentSystem.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.PaymentMethod.PaymentSystem.UpdatedAt); err == nil {
+		pOrder.PaymentMethod.PaymentSystem.UpdatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.ProjectOutcomeCurrency.CreatedAt); err == nil {
+		pOrder.ProjectOutcomeCurrency.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.ProjectOutcomeCurrency.UpdatedAt); err == nil {
+		pOrder.ProjectOutcomeCurrency.UpdatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.ProjectIncomeCurrency.CreatedAt); err == nil {
+		pOrder.ProjectIncomeCurrency.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.ProjectIncomeCurrency.UpdatedAt); err == nil {
+		pOrder.ProjectIncomeCurrency.UpdatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.Project.Merchant.CreatedAt); err == nil {
+		pOrder.Project.Merchant.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.Project.Merchant.UpdatedAt); err == nil {
+		pOrder.Project.Merchant.UpdatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.Project.Merchant.Country.CreatedAt); err == nil {
+		pOrder.Project.Merchant.Country.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.Project.Merchant.Country.UpdatedAt); err == nil {
+		pOrder.Project.Merchant.Country.UpdatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.Project.Merchant.Currency.CreatedAt); err == nil {
+		pOrder.Project.Merchant.Currency.CreatedAt = v
+	}
+
+	if v, err := ptypes.TimestampProto(o.Project.Merchant.Currency.UpdatedAt); err == nil {
+		pOrder.Project.Merchant.Currency.UpdatedAt = v
 	}
 
 	if o.PayerData.Phone != nil {
