@@ -4,6 +4,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/labstack/echo"
+	"log"
 	"net/http"
 )
 
@@ -225,15 +226,17 @@ func (pApiV1 *ProjectApiV1) getFixedPackage(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
-	return ctx.JSON(http.StatusOK, "1")
-
 	p := pApiV1.projectManager.FindProjectById(filters.ProjectId)
+
+	log.Println("DEBUG FP: 1")
 
 	if p == nil {
 		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 
 	fps := pApiV1.projectManager.FindFixedPackage(filters)
+
+	log.Println("DEBUG FP: 2")
 
 	if fps == nil {
 		return ctx.JSON(http.StatusOK, []string{})
