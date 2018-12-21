@@ -194,13 +194,15 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	ts := strconv.FormatInt(time.Now().Unix(), 10);
 	return ctx.Render(
 		http.StatusOK,
 		orderFormTemplateName,
 		map[string]interface{}{
 			"Order":          o,
 			"PaymentMethods": projectPms.MapPaymentMethodJsonOrderResponse,
-			"Token":          gocent.GenerateClientToken(oApiV1.centrifugoSecret, o.Id.Hex(), strconv.FormatInt(time.Now().Unix(), 10), ""),
+			"Token":          gocent.GenerateClientToken(oApiV1.centrifugoSecret, o.Id.Hex(), ts, ""),
+			"Timestamp":      ts,
 		},
 	)
 }

@@ -4,20 +4,19 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/labstack/echo"
-	"log"
 	"net/http"
 )
 
 type ProjectApiV1 struct {
 	*Api
-	projectManager *manager.ProjectManager
+	projectManager  *manager.ProjectManager
 	merchantManager *manager.MerchantManager
 }
 
 func (api *Api) InitProjectRoutes() *Api {
 	pApiV1 := ProjectApiV1{
 		Api:             api,
-		projectManager: manager.InitProjectManager(api.database, api.logger),
+		projectManager:  manager.InitProjectManager(api.database, api.logger),
 		merchantManager: manager.InitMerchantManager(api.database, api.logger),
 	}
 
@@ -214,7 +213,7 @@ func (pApiV1 *ProjectApiV1) delete(ctx echo.Context) error {
 // @Router /api/v1/project/package/{region}/{project_id} [get]
 func (pApiV1 *ProjectApiV1) getFixedPackage(ctx echo.Context) error {
 	filters := &model.FixedPackageFilters{
-		Region: ctx.Param(model.ApiRequestParameterRegion),
+		Region:    ctx.Param(model.ApiRequestParameterRegion),
 		ProjectId: ctx.Param(model.ApiRequestParameterProjectId),
 	}
 
@@ -228,15 +227,11 @@ func (pApiV1 *ProjectApiV1) getFixedPackage(ctx echo.Context) error {
 
 	p := pApiV1.projectManager.FindProjectById(filters.ProjectId)
 
-	log.Println("DEBUG FP: 1")
-
 	if p == nil {
 		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 
 	fps := pApiV1.projectManager.FindFixedPackage(filters)
-
-	log.Println("DEBUG FP: 2")
 
 	if fps == nil {
 		return ctx.JSON(http.StatusOK, []string{})
@@ -250,4 +245,3 @@ func (pApiV1 *ProjectApiV1) getFiltersProjects(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, p)
 }
-
