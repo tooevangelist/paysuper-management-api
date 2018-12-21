@@ -23,6 +23,7 @@ type WebHook struct {
 	paymentSystemConfig     map[string]interface{}
 	paymentSystemSettings   *payment_system.PaymentSystemSetting
 	rawBody                 string
+	centrifugoSecret        string
 
 	publisher micro.Publisher
 }
@@ -37,6 +38,7 @@ func InitWebHook(
 	paymentSystemConfig map[string]interface{},
 	paymentSystemSettings *payment_system.PaymentSystemSetting,
 	publisher micro.Publisher,
+	centrifugoSecret string,
 ) *WebHook {
 	return &WebHook{
 		database:                database,
@@ -48,6 +50,7 @@ func InitWebHook(
 		paymentSystemConfig:     paymentSystemConfig,
 		paymentSystemSettings:   paymentSystemSettings,
 		publisher:               publisher,
+		centrifugoSecret:        centrifugoSecret,
 	}
 }
 

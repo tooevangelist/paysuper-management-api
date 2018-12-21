@@ -225,6 +225,8 @@ func (pApiV1 *ProjectApiV1) getFixedPackage(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
+	return ctx.JSON(http.StatusOK, "1")
+
 	p := pApiV1.projectManager.FindProjectById(filters.ProjectId)
 
 	if p == nil {

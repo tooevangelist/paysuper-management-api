@@ -48,6 +48,7 @@ type Config struct {
 
 	PSPAccountingCurrencyA3 string `envconfig:"PSP_ACCOUNTING_CURRENCY"`
 	HttpScheme              string `envconfig:"HTTP_SCHEME" default:"https"`
+	CentrifugoSecret        string `envconfig:"CENTRIFUGO_SECRET" required:"true"`
 }
 
 func NewConfig() (error, *Config) {

@@ -100,12 +100,24 @@ $(function() {
             cache: false,
             async: false,
             success: function(data) {
-                if (data.hasOwnProperty('redirect_url')) {
-                    $sForm.attr({action: data['redirect_url']}).submit();
+                if (!data.hasOwnProperty('redirect_url')) {
+                    alert('Process will be stop, because we don\'t find required params.');
                     return;
                 }
 
-                alert('Process will be stop, because we don\'t find required params.');
+                $sForm.attr({action: data['redirect_url']}).submit();
+
+                let centrifuge = new Centrifuge('ws://localhost:8002/websocket');
+                centrifuge.setConnectData({"user-agent": navigator.userAgent});
+                centrifuge.setToken(object['order_id']);
+
+                const chanel = "notify:payment#"+object['order_id'];
+
+                var sub = centrifuge.subscribe(chanel, handleMessage)
+                    .on("subscribe", handleSubscribe)
+                    .on("error", handleSubscribeError);
+
+                centrifuge.connect();
             },
             error: function(xhr) {
                 let message = JSON.parse(xhr['responseText']);
@@ -116,4 +128,17 @@ $(function() {
             dataType: 'json'
         });
     });
+
+    function handleSubscribe(ctx) {
+        console.log('Subscribed on channel ' + ctx.channel + ' (resubscribed: ' + ctx.isResubscribe + ', recovered: ' + ctx.recovered + ')');
+        if (ctx.isResubscribe) {
+            console.log("Resubscribe");
+        }
+    }
+    function handleSubscribeError(err) {
+        console.log('Error subscribing on channel ' + err.channel);
+    }
+    function handleMessage(message) {
+        console.log(message);
+    }
 });

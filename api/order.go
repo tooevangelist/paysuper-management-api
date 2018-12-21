@@ -4,11 +4,14 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
+	"github.com/centrifugal/gocent"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/micro/go-micro"
 	"net/http"
 	"net/url"
+	"strconv"
+	"time"
 )
 
 const (
@@ -58,6 +61,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 			api.pspAccountingCurrencyA3,
 			api.paymentSystemsSettings,
 			api.publisher,
+			api.centrifugoSecret,
 		),
 		projectManager: manager.InitProjectManager(api.database, api.logger),
 	}
@@ -196,6 +200,7 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		map[string]interface{}{
 			"Order":          o,
 			"PaymentMethods": projectPms.MapPaymentMethodJsonOrderResponse,
+			"Token":          gocent.GenerateClientToken(oApiV1.centrifugoSecret, o.Id.Hex(), strconv.FormatInt(time.Now().Unix(), 10), ""),
 		},
 	)
 }

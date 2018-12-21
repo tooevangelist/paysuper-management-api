@@ -11,6 +11,7 @@ ENV PATH_TO_PS_CONFIG=/application/config/parameters/parameters.yml
 ENV MICRO_REGISTRY_ADDRESS=127.0.0.1
 ENV MICRO_BROKER=rabbitmq
 ENV MICRO_BROKER_ADDRESS=127.0.0.1:5672
+ENV CENTRIFUGO_SECRET=secret
 
 COPY go.mod go.sum ./
 RUN go mod download

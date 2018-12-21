@@ -61,6 +61,7 @@ type ServerInitParams struct {
 	PaymentSystemConfig     map[string]interface{}
 	PSPAccountingCurrencyA3 string
 	HttpScheme              string
+	CentrifugoSecret        string
 }
 
 type Template struct {
@@ -93,6 +94,7 @@ type Api struct {
 	pspAccountingCurrencyA3 string
 	paymentSystemsSettings  *payment_system.PaymentSystemSetting
 	httpScheme              string
+	centrifugoSecret        string
 
 	service        micro.Service
 	serviceContext context.Context
@@ -115,9 +117,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		PaymentSystemConfig:     p.PaymentSystemConfig,
 		pspAccountingCurrencyA3: p.PSPAccountingCurrencyA3,
 		httpScheme:              p.HttpScheme,
-		paymentSystemsSettings: &payment_system.PaymentSystemSetting{
-			Logger: p.Logger,
-		},
+		paymentSystemsSettings:  &payment_system.PaymentSystemSetting{Logger: p.Logger},
+		centrifugoSecret:        p.CentrifugoSecret,
 	}
 
 	api.InitService()
@@ -260,6 +261,7 @@ func (api *Api) InitWebHooks() {
 		api.PaymentSystemConfig,
 		api.paymentSystemsSettings,
 		api.publisher,
+		api.centrifugoSecret,
 	)
 
 	whGroup.Use(wh.RawBodyMiddleware)

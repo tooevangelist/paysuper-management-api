@@ -12,6 +12,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/utils"
 	proto "github.com/ProtocolONE/payone-repository/pkg/proto/billing"
 	"github.com/ProtocolONE/payone-repository/tools"
+	"github.com/centrifugal/gocent"
 	"github.com/globalsign/mgo/bson"
 	"github.com/micro/go-micro"
 	"github.com/micro/protobuf/ptypes"
@@ -76,6 +77,7 @@ type OrderManager struct {
 	vatManager             *VatManager
 	commissionManager      *CommissionManager
 	publisher              micro.Publisher
+	centrifugoSecret       string
 }
 
 type check struct {
@@ -111,6 +113,7 @@ func InitOrderManager(
 	pspAccountingCurrencyA3 string,
 	paymentSystemsSettings *payment_system.PaymentSystemSetting,
 	publisher micro.Publisher,
+	centrifugoSecret string,
 ) *OrderManager {
 	om := &OrderManager{
 		Manager:                &Manager{Database: database, Logger: logger},
@@ -124,6 +127,7 @@ func InitOrderManager(
 		vatManager:             InitVatManager(database, logger),
 		commissionManager:      InitCommissionManager(database, logger),
 		publisher:              publisher,
+		centrifugoSecret:       centrifugoSecret,
 	}
 
 	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)
@@ -322,6 +326,7 @@ func (om *OrderManager) JsonOrderCreatePostProcess(o *model.Order, oh *OrderHttp
 		},
 		PaymentMethods:        pmPrepData.SlicePaymentMethodJsonOrderResponse,
 		InlineFormRedirectUrl: fmt.Sprintf(model.OrderInlineFormUrlMask, oh.Scheme, oh.Host, o.Id.Hex()),
+		Token:                 gocent.GenerateClientToken(om.centrifugoSecret, o.Id.Hex(), strconv.FormatInt(time.Now().Unix(), 10), ""),
 	}
 
 	if o.ProjectAccount != "" {

@@ -436,6 +436,8 @@ type JsonOrderCreateResponse struct {
 	PaymentMethods []*PaymentMethodJsonOrderResponse `json:"payment_methods"`
 	// url to redirect user to inline form in PSP side
 	InlineFormRedirectUrl string `json:"inline_form_redirect_url"`
+	// access token to websocket private chanel
+	Token string `json:"token"`
 }
 
 func (order *Order) IsComplete() bool {
