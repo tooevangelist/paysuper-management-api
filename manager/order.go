@@ -200,6 +200,13 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		if err != nil {
 			return nil, err
 		}
+
+		if order.Currency == nil || *order.Currency == "" {
+			order.Currency = &ofp.Currency.CodeA3
+			check.order.Currency = order.Currency
+			check.oCurrency = ofp.Currency
+			oCurrency = ofp.Currency
+		}
 	}
 
 	if err = om.checkProjectLimits(check); err != nil {
@@ -275,6 +282,10 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		IsJsonRequest:                      order.IsJsonRequest,
 		FixedPackage:                       ofp,
 		AmountInMerchantAccountingCurrency: FormatAmount(mACAmount),
+	}
+
+	if nOrder.PayerData.CountryCodeA2 == "" && order.Region != nil {
+		nOrder.PayerData.CountryCodeA2 = *order.Region
 	}
 
 	if order.Description != nil {
@@ -672,7 +683,7 @@ func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, *model.Ord
 	var ofp *model.FixedPackage
 
 	for _, fp := range fps {
-		if fp.Price != c.order.Amount || fp.Currency.CodeA3 != *c.order.Currency {
+		if fp.Price != c.order.Amount || (c.order.Currency != nil && fp.Currency.CodeA3 != *c.order.Currency) {
 			continue
 		}
 
@@ -689,6 +700,7 @@ func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, *model.Ord
 		Name:        ofp.Name,
 		CurrencyInt: ofp.CurrencyInt,
 		Price:       ofp.Price,
+		Currency:    ofp.Currency,
 	}
 
 	return gRecord, orderFp, nil
@@ -1435,12 +1447,12 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 	pOrder := &proto.Order{
 		Id: dbHelper.ObjectIdToByte(o.Id),
 		Project: &proto.ProjectOrder{
-			Id:                dbHelper.ObjectIdToByte(o.Project.Id),
-			Name:              o.Project.Name,
-			NotifyEmails:      o.Project.NotifyEmails,
-			SendNotifyEmail:   o.Project.SendNotifyEmail,
-			SecretKey:         o.Project.SecretKey,
-			CallbackProtocol:  o.Project.CallbackProtocol,
+			Id:               dbHelper.ObjectIdToByte(o.Project.Id),
+			Name:             o.Project.Name,
+			NotifyEmails:     o.Project.NotifyEmails,
+			SendNotifyEmail:  o.Project.SendNotifyEmail,
+			SecretKey:        o.Project.SecretKey,
+			CallbackProtocol: o.Project.CallbackProtocol,
 			Merchant: &proto.Merchant{
 				Id:         dbHelper.ObjectIdToByte(o.Project.Merchant.Id),
 				ExternalId: o.Project.Merchant.ExternalId,

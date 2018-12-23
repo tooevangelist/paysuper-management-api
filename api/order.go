@@ -143,6 +143,7 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 // @Router /api/v1/order [post]
 func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 	order := &model.OrderScalar{
+		CreateOrderIp: ctx.RealIP(),
 		IsJsonRequest: true,
 	}
 

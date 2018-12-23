@@ -7,11 +7,12 @@ const (
 )
 
 type OrderFixedPackage struct {
-	Id          string  `bson:"id" json:"id"`
-	Region      string  `bson:"region" json:"region"`
-	Name        string  `bson:"name" json:"name"`
-	CurrencyInt int     `bson:"currency_int" json:"currency_int"`
-	Price       float64 `bson:"price" json:"price"`
+	Id          string    `bson:"id" json:"id"`
+	Region      string    `bson:"region" json:"region"`
+	Name        string    `bson:"name" json:"name"`
+	CurrencyInt int       `bson:"currency_int" json:"currency_int"`
+	Price       float64   `bson:"price" json:"price"`
+	Currency    *Currency `bson:"-" json:"-"`
 }
 
 type FixedPackage struct {
