@@ -112,9 +112,9 @@ $(function() {
 
                 const chanel = "payment:notify#"+object['order_id'];
 
-                centrifuge.subscribe(chanel, handleMessage)
-                    .on("subscribe", handleSubscribe)
-                    .on("error", handleSubscribeError);
+                centrifuge.subscribe(chanel, function (message) {
+                    alert("payment complete with status: " + message.data.status);
+                });
 
                 centrifuge.connect();
             },
@@ -127,17 +127,4 @@ $(function() {
             dataType: 'json'
         });
     });
-
-    function handleSubscribe(ctx) {
-        console.log('Subscribed on channel ' + ctx.channel + ' (resubscribed: ' + ctx.isResubscribe + ', recovered: ' + ctx.recovered + ')');
-        if (ctx.isResubscribe) {
-            console.log("Resubscribe");
-        }
-    }
-    function handleSubscribeError(err) {
-        console.log('Error subscribing on channel ' + err.channel);
-    }
-    function handleMessage(message) {
-        console.log(message);
-    }
 });
