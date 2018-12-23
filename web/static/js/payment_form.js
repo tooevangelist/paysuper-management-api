@@ -107,16 +107,10 @@ $(function() {
 
                 $sForm.attr({action: data['redirect_url']}).submit();
 
-                let centrifuge = new Centrifuge({
-                    url: 'ws://localhost:8000/connection/websocket',
-                    user: object['order_id'],
-                    timestamp: ts,
-                    token: token
-                });
-                //centrifuge.setConnectData({"user-agent": navigator.userAgent});
-                //centrifuge.setToken(object['order_id']);
+                let centrifuge = new Centrifuge('ws://localhost:8000/connection/websocket');
+                centrifuge.setToken(token);
 
-                const chanel = "notify:payment#"+object['order_id'];
+                const chanel = "payment:notify#"+object['order_id'];
 
                 centrifuge.subscribe(chanel, handleMessage)
                     .on("subscribe", handleSubscribe)

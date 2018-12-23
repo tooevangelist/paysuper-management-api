@@ -12,7 +12,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/utils"
 	proto "github.com/ProtocolONE/payone-repository/pkg/proto/billing"
 	"github.com/ProtocolONE/payone-repository/tools"
-	"github.com/centrifugal/gocent"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/micro/go-micro"
 	"github.com/micro/protobuf/ptypes"
@@ -315,6 +315,16 @@ func (om *OrderManager) JsonOrderCreatePostProcess(o *model.Order, oh *OrderHttp
 		return nil, err
 	}
 
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": o.Id.Hex(),
+		"exp": time.Now().Add(time.Minute * 30).Unix(),
+	})
+	tokenString, err := token.SignedString([]byte(om.centrifugoSecret))
+
+	if err != nil {
+		return nil, err
+	}
+
 	jo := &model.JsonOrderCreateResponse{
 		Id:                o.Id.Hex(),
 		HasVat:            o.Project.Merchant.IsVatEnabled,
@@ -326,7 +336,7 @@ func (om *OrderManager) JsonOrderCreatePostProcess(o *model.Order, oh *OrderHttp
 		},
 		PaymentMethods:        pmPrepData.SlicePaymentMethodJsonOrderResponse,
 		InlineFormRedirectUrl: fmt.Sprintf(model.OrderInlineFormUrlMask, oh.Scheme, oh.Host, o.Id.Hex()),
-		Token:                 gocent.GenerateClientToken(om.centrifugoSecret, o.Id.Hex(), strconv.FormatInt(time.Now().Unix(), 10), ""),
+		Token:                 tokenString,
 	}
 
 	if o.ProjectAccount != "" {
@@ -1427,13 +1437,9 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 		Project: &proto.ProjectOrder{
 			Id:                dbHelper.ObjectIdToByte(o.Project.Id),
 			Name:              o.Project.Name,
-			UrlSuccess:        *o.Project.UrlSuccess,
-			UrlFail:           *o.Project.UrlFail,
 			NotifyEmails:      o.Project.NotifyEmails,
 			SendNotifyEmail:   o.Project.SendNotifyEmail,
 			SecretKey:         o.Project.SecretKey,
-			UrlCheckAccount:   *o.Project.URLCheckAccount,
-			UrlProcessPayment: *o.Project.URLProcessPayment,
 			CallbackProtocol:  o.Project.CallbackProtocol,
 			Merchant: &proto.Merchant{
 				Id:         dbHelper.ObjectIdToByte(o.Project.Merchant.Id),
@@ -1674,6 +1680,22 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 
 	if o.PayerData.Email != nil {
 		pOrder.PayerData.Email = *o.PayerData.Email
+	}
+
+	if o.Project.UrlSuccess != nil {
+		pOrder.Project.UrlSuccess = *o.Project.UrlSuccess
+	}
+
+	if o.Project.UrlFail != nil {
+		pOrder.Project.UrlFail = *o.Project.UrlFail
+	}
+
+	if o.Project.URLCheckAccount != nil {
+		pOrder.Project.UrlCheckAccount = *o.Project.URLCheckAccount
+	}
+
+	if o.Project.URLProcessPayment != nil {
+		pOrder.Project.UrlProcessPayment = *o.Project.URLProcessPayment
 	}
 
 	return pOrder

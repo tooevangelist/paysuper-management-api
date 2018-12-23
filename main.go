@@ -85,6 +85,7 @@ func main() {
 		PaymentSystemConfig:     conf.PaymentSystemConfig.Config,
 		PSPAccountingCurrencyA3: conf.PSPAccountingCurrencyA3,
 		HttpScheme:              conf.HttpScheme,
+		CentrifugoSecret:        conf.CentrifugoSecret,
 	}
 
 	server, err := api.NewServer(sInit)
