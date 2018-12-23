@@ -192,7 +192,7 @@ func (rep *Repository) GetAccountingPayment(rdr *model.RevenueDynamicRequest, mI
 				"total_success": []bson.M{
 					{
 						"$match": bson.M{
-							"status":                       model.OrderStatusProjectComplete,
+							"status":                       bson.M{"$in": []int{model.OrderStatusProjectComplete, model.OrderStatusPaymentSystemComplete, model.OrderStatusProjectInProgress, model.OrderStatusProjectPending}},
 							"project_last_requested_at":    bson.M{"$gte": rdr.From, "$lte": rdr.To},
 							"project.merchant.external_id": bson.M{"$eq": mId},
 						},
@@ -207,7 +207,7 @@ func (rep *Repository) GetAccountingPayment(rdr *model.RevenueDynamicRequest, mI
 				"success": []bson.M{
 					{
 						"$match": bson.M{
-							"status":                       model.OrderStatusProjectComplete,
+							"status":                       bson.M{"$in": []int{model.OrderStatusProjectComplete, model.OrderStatusPaymentSystemComplete, model.OrderStatusProjectInProgress, model.OrderStatusProjectPending}},
 							"project_last_requested_at":    bson.M{"$gte": rdr.From, "$lte": rdr.To},
 							"project.merchant.external_id": bson.M{"$eq": mId},
 						},
@@ -252,7 +252,7 @@ func (rep *Repository) GetAccountingPayment(rdr *model.RevenueDynamicRequest, mI
 				"commission": []bson.M{
 					{
 						"$match": bson.M{
-							"status":                       model.OrderStatusChargeback,
+							"status":                       bson.M{"$in": []int{model.OrderStatusProjectComplete, model.OrderStatusPaymentSystemComplete, model.OrderStatusProjectInProgress, model.OrderStatusProjectPending}},
 							"project_last_requested_at":    bson.M{"$gte": rdr.From, "$lte": rdr.To},
 							"project.merchant.external_id": bson.M{"$eq": mId},
 						},

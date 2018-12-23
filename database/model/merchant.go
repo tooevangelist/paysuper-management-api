@@ -53,4 +53,5 @@ type Merchant struct {
 	// date of create merchant in system
 	CreatedAt time.Time `bson:"created_at" json:"created_at"`
 	UpdatedAt time.Time `bson:"updated_at" json:"-"`
+	FirstPaymentAt *time.Time `bson:"first_payment_at" json:"first_payment_at"`
 }
