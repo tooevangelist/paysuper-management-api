@@ -126,6 +126,10 @@ definitions:
         description: |
           contain data about project
         type: object
+      token:
+        description: |
+          access token to websocket private chanel
+        type: string
     type: object
   model.Merchant:
     properties:
@@ -567,8 +571,8 @@ definitions:
           URL for payment data verification request to project. This field can be send if it allowed in project admin panel
         type: string
     required:
-    - amount
     - project
+    - amount
     type: object
   model.OrderSimple:
     properties:

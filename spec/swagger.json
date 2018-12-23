@@ -1634,6 +1634,10 @@
                     "description": "contain data about project\n",
                     "type": "object",
                     "$ref": "#/definitions/model.ProjectJsonOrderResponse"
+                },
+                "token": {
+                    "description": "access token to websocket private chanel\n",
+                    "type": "string"
                 }
             }
         },
@@ -2043,8 +2047,8 @@
         "model.OrderScalar": {
             "type": "object",
             "required": [
-                "amount",
-                "project"
+                "project",
+                "amount"
             ],
             "properties": {
                 "account": {
