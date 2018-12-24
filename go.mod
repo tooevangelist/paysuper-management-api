@@ -3,7 +3,7 @@ module github.com/ProtocolONE/p1pay.api
 require (
 	cloud.google.com/go v0.34.0 // indirect
 	github.com/DataDog/zstd v1.3.4 // indirect
-	github.com/ProtocolONE/payone-repository v1.0.15
+	github.com/ProtocolONE/payone-repository v1.0.30
 	github.com/Shopify/sarama v1.20.0
 	github.com/centrifugal/gocent v1.0.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -44,8 +44,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v0.0.0-20170224212429-dcecefd839c4 // indirect
 	github.com/xakep666/mongo-migrate v0.1.0
-	go.uber.org/atomic v1.3.2 // indirect
-	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.9.1
 	golang.org/x/lint v0.0.0-20181212231659-93c0bb5c8393 // indirect
 	golang.org/x/net v0.0.0-20181217023233-e147a9138326 // indirect

@@ -1422,7 +1422,7 @@ func (om *OrderManager) getValueFromAccountingPaymentReport(v interface{}) float
 		mV := sV[0].(map[string]interface{})
 
 		if vv, ok := mV["total"]; ok {
-			fV = vv.(float64)
+			fV = FormatAmount(vv.(float64))
 		}
 	}
 
@@ -1475,6 +1475,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 				IsVatEnabled:              o.Project.Merchant.IsVatEnabled,
 				IsCommissionToUserEnabled: o.Project.Merchant.IsCommissionToUserEnabled,
 				Status:                    int32(o.Project.Merchant.Status),
+
 			},
 		},
 		ProjectAccount:      o.ProjectAccount,
@@ -1684,6 +1685,12 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 
 	if v, err := ptypes.TimestampProto(o.Project.Merchant.Currency.UpdatedAt); err == nil {
 		pOrder.Project.Merchant.Currency.UpdatedAt = v
+	}
+
+	if o.Project.Merchant.FirstPaymentAt != nil {
+		if v, err := ptypes.TimestampProto(*o.Project.Merchant.FirstPaymentAt); err == nil {
+			pOrder.Project.Merchant.FirstPaymentAt = v
+		}
 	}
 
 	if o.PayerData.Phone != nil {
