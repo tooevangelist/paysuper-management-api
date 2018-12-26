@@ -11,7 +11,7 @@ ENV PATH_TO_PS_CONFIG=/application/config/parameters/parameters.yml
 ENV MICRO_REGISTRY_ADDRESS=p1pay-consul
 ENV MICRO_BROKER=rabbitmq
 ENV MICRO_BROKER_ADDRESS=p1pay-rabbitmq
-ENV CENTRIFUGO_SECRET=secret
+ENV CENTRIFUGO_SECRET=3BHvbrHkThYJ6J8Knd4DCsbL
 
 COPY go.mod go.sum ./
 RUN go mod download
