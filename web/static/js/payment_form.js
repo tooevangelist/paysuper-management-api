@@ -107,7 +107,7 @@ $(function() {
 
                 $sForm.attr({action: data['redirect_url']}).submit();
 
-                let centrifuge = new Centrifuge('ws://localhost:8000/connection/websocket');
+                let centrifuge = new Centrifuge('ws://cf.tst.protocol.one//connection/websocket');
                 centrifuge.setToken(token);
 
                 const chanel = "payment:notify#"+object['order_id'];
