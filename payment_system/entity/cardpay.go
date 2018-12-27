@@ -118,7 +118,7 @@ type CardPayBankCardAccountResponse struct {
 	Holder             string `json:"holder" validate:"required"`
 	IssuingCountryCode string `json:"issuing_country_code" validate:"required"`
 	MaskedPan          string `json:"masked_pan" validate:"required"`
-	Token              string `json:"token" validate:"required"`
+	Token              string `json:"token"`
 }
 
 type CardPayPaymentDataResponse struct {
