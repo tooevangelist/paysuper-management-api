@@ -489,8 +489,6 @@ func (cp *CardPay) getCryptoCurrencyCardPayOrder(cpo *entity.CardPayOrder) (*ent
 }
 
 func (cp *CardPay) checkNotificationRequestSignature(reqRaw string, reqSign string) bool {
-	return true
-
 	h := sha512.New()
 	h.Write([]byte(reqRaw + cp.pmSettings[settingsFieldCallbackSecretWord]))
 
