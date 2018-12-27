@@ -1435,11 +1435,11 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 	sPaymentMethodTxnParams := make(map[string]string)
 
 	for k, v := range o.ProjectParams {
-		sProjectParams[k] = v.(string)
+		sProjectParams[k] = fmt.Sprintf("%s", v)
 	}
 
 	for k, v := range o.PaymentMethodTxnParams {
-		sPaymentMethodTxnParams[k] = v.(string)
+		sPaymentMethodTxnParams[k] = fmt.Sprintf("%s", v)
 	}
 
 	dbHelper := &tools.DatabaseHelper{}
