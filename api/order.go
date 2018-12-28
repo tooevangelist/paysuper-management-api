@@ -4,13 +4,11 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/micro/go-micro"
 	"net/http"
 	"net/url"
-	"time"
 )
 
 const (
@@ -188,31 +186,18 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 
-	projectPms, err := oApiV1.orderManager.GetOrderByIdWithPaymentMethods(o, ctx.Request().Host)
+	oh := &manager.OrderHttp{
+		Host:   ctx.Request().Host,
+		Scheme: oApiV1.httpScheme,
+	}
+
+	jo, err := oApiV1.orderManager.JsonOrderCreatePostProcess(o, oh)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": o.Id.Hex(),
-		"exp": time.Now().Add(time.Minute * 30).Unix(),
-	})
-	tokenString, err := token.SignedString([]byte(oApiV1.centrifugoSecret))
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, model.ResponseMessageUnknownDbError)
-	}
-
-	return ctx.Render(
-		http.StatusOK,
-		orderFormTemplateName,
-		map[string]interface{}{
-			"Order":          o,
-			"PaymentMethods": projectPms.MapPaymentMethodJsonOrderResponse,
-			"Token":          tokenString,
-		},
-	)
+	return ctx.Render(http.StatusOK, orderFormTemplateName, map[string]interface{}{"Order": jo})
 }
 
 // @Summary Get order data

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/ProtocolONE/p1pay.api/api/webhook"
 	"github.com/ProtocolONE/p1pay.api/config"
@@ -50,6 +51,10 @@ var funcMap = template.FuncMap{
 	},
 	"BsonObjectIdToString": func(objectId bson.ObjectId) string {
 		return objectId.Hex()
+	},
+	"Marshal": func(v interface{}) template.JS {
+		a, _ := json.Marshal(v)
+		return template.JS(a)
 	},
 }
 
