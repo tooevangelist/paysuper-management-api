@@ -459,7 +459,7 @@ func (om *OrderManager) ProcessOrderCommissions(o *model.Order) (*model.Order, e
 	}
 
 	o.PaymentSystemFeeAmount.AmountMerchantCurrency = FormatAmount(cCom)
-	o.PaymentMethodOutcomeAmount = pmOutAmount
+	o.PaymentMethodOutcomeAmount = FormatAmount(pmOutAmount)
 
 	return o, nil
 }

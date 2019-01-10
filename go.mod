@@ -28,6 +28,7 @@ require (
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/micro/go-micro v0.15.0
+	github.com/micro/go-plugins v0.17.0
 	github.com/micro/protobuf v0.0.0-20180321161605-ebd3be6d4fdb
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/oschwald/geoip2-golang v1.2.1
