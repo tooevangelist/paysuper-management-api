@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
 	"github.com/ProtocolONE/p1pay.api/payment_system/validator"
 	"github.com/labstack/echo"
@@ -394,7 +395,7 @@ func (cp *CardPay) getCardPayOrder() (*entity.CardPayOrder, error) {
 		PaymentMethod: cp.Order.PaymentMethod.Params.ExternalId,
 		PaymentData: &entity.CardPayPaymentData{
 			Currency: cp.Order.PaymentMethodOutcomeCurrency.CodeA3,
-			Amount:   cp.Order.PaymentMethodOutcomeAmount,
+			Amount:   manager.FormatAmount(cp.Order.PaymentMethodOutcomeAmount),
 		},
 		Customer: &entity.CardPayCustomer{
 			Email:   *cp.Order.PayerData.Email,
