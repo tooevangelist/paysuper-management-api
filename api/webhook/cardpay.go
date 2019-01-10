@@ -64,6 +64,7 @@ func (cpWebHook *CardPayWebHook) paymentNotify(ctx echo.Context) error {
 		httpStatus = http.StatusInternalServerError
 		break
 	case payment_system.PaymentStatusTemporary:
+		httpStatus = http.StatusGone
 		break
 	default:
 		httpStatus = http.StatusOK
