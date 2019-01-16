@@ -80,14 +80,14 @@ spec:
               key: {{ .Chart.Name }}-jwt-secret
         ports:
         - containerPort: {{$deployment.port}}
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: {{ $deployment.healthPort }}
-          initialDelaySeconds: 15
-          timeoutSeconds: 1
-          failureThreshold: 3
-          periodSeconds: 5
+        #livenessProbe:
+        #  httpGet:
+        #    path: /health
+        #    port: {{ $deployment.healthPort }}
+        #  initialDelaySeconds: 15
+        #  timeoutSeconds: 1
+        #  failureThreshold: 3
+        #  periodSeconds: 5
 
         {{/*volumeMounts:
         - name: {{ $deploymentName }}-config
