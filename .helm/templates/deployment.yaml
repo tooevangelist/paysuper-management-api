@@ -1,0 +1,96 @@
+{{- $deployment := .Values.frontend -}}
+{{- $deploymentName := printf "%s-%s" .Release.Name $deployment.name }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $deploymentName }}
+  labels:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    role: {{ $deployment.role }}
+  annotations: 
+    released: {{ .Release.Time}}    
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+      chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+      role: {{ $deployment.role }}
+  replicas: {{ $deployment.replicas }} 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+        role: {{ $deployment.role }}
+    spec:
+      volumes:
+      - name: p1payapi-cardpay
+        secret:
+          secretName: p1payapi-cardpay
+      containers:
+      - name: {{ $deployment.name }}
+        image: {{ $deployment.image }}:{{ $deployment.imageTag }}
+        volumeMounts:
+        - name: p1payapi-cardpay
+          mountPath: /application/config/parameters
+          readOnly: true
+        env:
+        - name: MICRO_SERVER_ADDRESS
+          value: "0.0.0.0:{{ $deployment.port }}"
+        - name: MICRO_REGISTRY
+          value: "mdns"
+        - name: METRICS_PORT
+          value: "{{ $deployment.healthPort }}"
+        - name: MONGO_HOST
+          valueFrom:
+            secretKeyRef:
+              name: {{ $app.name }}-mongo-connection
+              key: MONGO_HOST
+        - name: MONGO_DB
+          valueFrom:
+            secretKeyRef:
+              name: {{ $app.name }}-mongo-connection
+              key: MONGO_DB
+        - name: MONGO_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ $app.name }}-mongo-connection
+              key: MONGO_USER
+        - name: MONGO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ $app.name }}-mongo-connection
+              key: MONGO_PASSWORD
+        - name: JWT_SIGNATURE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ $app.name }}-jwt-secret
+              key: {{ $app.name }}-jwt-secret
+        ports:
+        - containerPort: {{$deployment.port}}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ $deployment.healthPort }}
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+          failureThreshold: 3
+          periodSeconds: 5
+
+        {{/*volumeMounts:
+        - name: {{ $deploymentName }}-config
+          mountPath: /application/etc/
+          readOnly: true
+        */}}

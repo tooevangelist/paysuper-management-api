@@ -19,8 +19,8 @@ jobs:
     - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
     - docker build -t $REPO:$TAG -t $REPO:0.0.$TRAVIS_BUILD_NUMBER .
     - docker push $REPO
-after_success:
-- curl -X POST $JURL/job/deploy-with-helm/build --user $JENKINS_LOGIN:$TOKEN --data-urlencode json='{parameter:[{name:"CHART_NAME", value:"p1payapi"}]}'
+#after_success:
+#- curl -X POST $JURL/job/deploy-with-helm/build --user $JENKINS_LOGIN:$TOKEN --data-urlencode json='{parameter:[{name:"CHART_NAME", value:"p1payapi"}]}'
 notifications:
   email: false
   slack:
