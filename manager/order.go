@@ -681,7 +681,7 @@ func (om *OrderManager) getOrderFixedPackage(c *check) (*proto.GeoIpDataResponse
 	data, err := om.geo.GetIpData(om.ctx, &proto.GeoIpDataRequest{IP: c.order.CreateOrderIp})
 
 	if err != nil {
-		return nil, nil, errors.New(orderErrorPayerRegionUnknown)
+		return nil, nil, errors.New(orderErrorPayerRegionUnknown + " ====> " + err.Error())
 	}
 
 	if region == "" {
