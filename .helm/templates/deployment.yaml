@@ -36,14 +36,14 @@ spec:
         role: {{ $deployment.role }}
     spec:
       volumes:
-      - name: p1payapi-cardpay
+      - name: {{ .Chart.Name }}-cardpay
         secret:
-          secretName: p1payapi-cardpay
+          secretName: {{ .Chart.Name }}-cardpay
       containers:
       - name: {{ $deployment.name }}
         image: {{ $deployment.image }}:{{ $deployment.imageTag }}
         volumeMounts:
-        - name: p1payapi-cardpay
+        - name: {{ .Chart.Name }}-cardpay
           mountPath: /application/config/parameters
           readOnly: true
         env:
@@ -56,28 +56,28 @@ spec:
         - name: MONGO_HOST
           valueFrom:
             secretKeyRef:
-              name: {{ $app.name }}-mongo-connection
+              name: {{ .Chart.Name }}-mongo-connection
               key: MONGO_HOST
         - name: MONGO_DB
           valueFrom:
             secretKeyRef:
-              name: {{ $app.name }}-mongo-connection
+              name: {{ .Chart.Name }}-mongo-connection
               key: MONGO_DB
         - name: MONGO_USER
           valueFrom:
             secretKeyRef:
-              name: {{ $app.name }}-mongo-connection
+              name: {{ .Chart.Name }}-mongo-connection
               key: MONGO_USER
         - name: MONGO_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ $app.name }}-mongo-connection
+              name: {{ .Chart.Name }}-mongo-connection
               key: MONGO_PASSWORD
         - name: JWT_SIGNATURE_SECRET
           valueFrom:
             secretKeyRef:
-              name: {{ $app.name }}-jwt-secret
-              key: {{ $app.name }}-jwt-secret
+              name: {{ .Chart.Name }}-jwt-secret
+              key: {{ .Chart.Name }}-jwt-secret
         ports:
         - containerPort: {{$deployment.port}}
         livenessProbe:
