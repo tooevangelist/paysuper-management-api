@@ -3,7 +3,8 @@ module github.com/ProtocolONE/p1pay.api
 require (
 	cloud.google.com/go v0.34.0 // indirect
 	github.com/DataDog/zstd v1.3.4 // indirect
-	github.com/ProtocolONE/payone-repository v1.0.30
+	github.com/ProtocolONE/geoip-service v0.0.0-20190115152014-a9d29df01dce
+	github.com/ProtocolONE/payone-repository v1.0.65
 	github.com/Shopify/sarama v1.20.0
 	github.com/centrifugal/gocent v1.0.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -27,12 +28,12 @@ require (
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
-	github.com/micro/go-micro v0.15.0
-	github.com/micro/go-plugins v0.17.0
+	github.com/micro/go-grpc v0.6.0
+	github.com/micro/go-micro v0.20.0
+	github.com/micro/go-plugins v0.20.0
 	github.com/micro/protobuf v0.0.0-20180321161605-ebd3be6d4fdb
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/oschwald/maxminddb-golang v1.3.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a // indirect
@@ -47,13 +48,9 @@ require (
 	github.com/xakep666/mongo-migrate v0.1.0
 	go.uber.org/zap v1.9.1
 	golang.org/x/lint v0.0.0-20181212231659-93c0bb5c8393 // indirect
-	golang.org/x/net v0.0.0-20181217023233-e147a9138326 // indirect
 	golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890 // indirect
-	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
-	golang.org/x/sys v0.0.0-20181213200352-4d1cda033e06 // indirect
 	golang.org/x/tools v0.0.0-20181214171254-3c39ce7b6105 // indirect
 	google.golang.org/appengine v1.3.0 // indirect
-	google.golang.org/grpc v1.17.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/go-playground/validator.v9 v9.24.0
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce

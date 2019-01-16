@@ -59,6 +59,9 @@ func (api *Api) InitOrderV1Routes() *Api {
 			api.paymentSystemsSettings,
 			api.publisher,
 			api.centrifugoSecret,
+
+			api.repository,
+			api.geoService,
 		),
 		projectManager: manager.InitProjectManager(api.database, api.logger),
 	}

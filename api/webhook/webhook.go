@@ -2,8 +2,10 @@ package webhook
 
 import (
 	"bytes"
+	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
+	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
 	"github.com/labstack/echo"
 	"github.com/micro/go-micro"
 	"github.com/oschwald/geoip2-golang"
@@ -26,6 +28,8 @@ type WebHook struct {
 	centrifugoSecret        string
 
 	publisher micro.Publisher
+	rep repository.RepositoryService
+	geo proto.GeoIpService
 }
 
 func InitWebHook(
@@ -39,6 +43,8 @@ func InitWebHook(
 	paymentSystemSettings *payment_system.PaymentSystemSetting,
 	publisher micro.Publisher,
 	centrifugoSecret string,
+	repository repository.RepositoryService,
+	geoService proto.GeoIpService,
 ) *WebHook {
 	return &WebHook{
 		database:                database,
@@ -51,6 +57,9 @@ func InitWebHook(
 		paymentSystemSettings:   paymentSystemSettings,
 		publisher:               publisher,
 		centrifugoSecret:        centrifugoSecret,
+
+		rep: repository,
+		geo: geoService,
 	}
 }
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/ProtocolONE/geoip-service/pkg"
+	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/p1pay.api/api/webhook"
 	"github.com/ProtocolONE/p1pay.api/config"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
@@ -11,10 +13,12 @@ import (
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/ProtocolONE/p1pay.api/utils"
 	"github.com/ProtocolONE/payone-repository/pkg/constant"
+	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/micro/go-grpc"
 	"github.com/micro/go-micro"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/sidmal/slug"
@@ -105,7 +109,9 @@ type Api struct {
 	serviceContext context.Context
 	serviceCancel  context.CancelFunc
 
-	publisher micro.Publisher
+	publisher  micro.Publisher
+	repository repository.RepositoryService
+	geoService proto.GeoIpService
 
 	Merchant
 	GetParams
@@ -206,6 +212,15 @@ func (api *Api) InitService() {
 	)
 	api.service.Init()
 	api.publisher = micro.NewPublisher(constant.PayOneTopicNotifyPaymentName, api.service.Client())
+
+	service := grpc.NewService(
+		micro.Name(constant.PayOneRepositoryServiceName),
+		micro.Context(api.serviceContext),
+	)
+	service.Init()
+
+	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, service.Client())
+	api.geoService = proto.NewGeoIpService(geoip.ServiceName, service.Client())
 }
 
 func (api *Api) Stop() {
@@ -267,6 +282,8 @@ func (api *Api) InitWebHooks() {
 		api.paymentSystemsSettings,
 		api.publisher,
 		api.centrifugoSecret,
+		api.repository,
+		api.geoService,
 	)
 
 	whGroup.Use(wh.RawBodyMiddleware)
