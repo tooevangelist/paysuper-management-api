@@ -3,14 +3,14 @@ package entity
 import "time"
 
 const (
-	CardPayPaymentResponseStatusDeclined = "DECLINED"
-	CardPayPaymentResponseStatusAuthorized = "AUTHORIZED"
-	CardPayPaymentResponseStatusCompleted = "COMPLETED"
-	CardPayPaymentResponseStatusCancelled = "CANCELLED"
-	CardPayPaymentResponseStatusRefunded = "REFUNDED"
-	CardPayPaymentResponseStatusPartiallyRefunded = "PARTIALLY_REFUNDED"
-	CardPayPaymentResponseStatusVoided = "VOIDED"
-	CardPayPaymentResponseStatusChargedBack = "CHARGED_BACK"
+	CardPayPaymentResponseStatusDeclined           = "DECLINED"
+	CardPayPaymentResponseStatusAuthorized         = "AUTHORIZED"
+	CardPayPaymentResponseStatusCompleted          = "COMPLETED"
+	CardPayPaymentResponseStatusCancelled          = "CANCELLED"
+	CardPayPaymentResponseStatusRefunded           = "REFUNDED"
+	CardPayPaymentResponseStatusPartiallyRefunded  = "PARTIALLY_REFUNDED"
+	CardPayPaymentResponseStatusVoided             = "VOIDED"
+	CardPayPaymentResponseStatusChargedBack        = "CHARGED_BACK"
 	CardPayPaymentResponseStatusChargebackResolved = "CHARGEBACK_RESOLVED"
 
 	CardPayPaymentResponseHeaderSignature = "Signature"
@@ -78,6 +78,12 @@ type CardPayCryptoCurrencyAccount struct {
 	RollbackAddress string `json:"rollback_address"`
 }
 
+type CardPayReturnUrls struct {
+	CancelUrl string `json:"cancel_url,omitempty"`
+	DeclineUrl string `json:"decline_url,omitempty"`
+	SuccessUrl string `json:"success_url,omitempty"`
+}
+
 type CardPayOrder struct {
 	Request               *CardPayRequest               `json:"request"`
 	MerchantOrder         *CardPayMerchantOrder         `json:"merchant_order"`
@@ -88,6 +94,7 @@ type CardPayOrder struct {
 	Customer              *CardPayCustomer              `json:"customer"`
 	EWalletAccount        *CardPayEWalletAccount        `json:"ewallet_account,omitempty"`
 	CryptoCurrencyAccount *CardPayCryptoCurrencyAccount `json:"cryptocurrency_account,omitempty"`
+	ReturnUrls            *CardPayReturnUrls            `json:"return_urls,omitempty"`
 }
 
 type CardPayOrderResponse struct {

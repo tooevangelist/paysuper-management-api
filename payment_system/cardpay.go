@@ -403,6 +403,19 @@ func (cp *CardPay) getCardPayOrder() (*entity.CardPayOrder, error) {
 		},
 	}
 
+	if len(cp.Order.UrlSuccess) > 0 || len(cp.Order.UrlFail) > 0 {
+		o.ReturnUrls = &entity.CardPayReturnUrls{}
+
+		if len(cp.Order.UrlSuccess) > 0 {
+			o.ReturnUrls.SuccessUrl = cp.Order.UrlSuccess
+		}
+
+		if len(cp.Order.UrlFail) > 0 {
+			o.ReturnUrls.DeclineUrl = cp.Order.UrlFail
+			o.ReturnUrls.CancelUrl = cp.Order.UrlFail
+		}
+	}
+
 	switch cp.Order.PaymentMethod.Params.ExternalId {
 	case cardPayPaymentMethodBankCard:
 		if o, err = cp.geBankCardCardPayOrder(o); err != nil {

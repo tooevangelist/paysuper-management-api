@@ -309,6 +309,14 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		}
 	}
 
+	if order.UrlSuccess != nil {
+		nOrder.UrlSuccess = *order.UrlSuccess
+	}
+
+	if order.UrlFail != nil {
+		nOrder.UrlFail = *order.UrlFail
+	}
+
 	if err = om.Database.Repository(TableOrder).InsertOrder(nOrder); err != nil {
 		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)
 
