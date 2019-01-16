@@ -15,7 +15,7 @@ frontend:
   role: frontend
   image: "p1hub/p1pay.api"
   imageTag: latest
-  port: 8090
+  port: 3001
   healthPort: 8081
   replicas: 1
   service: 

@@ -47,8 +47,8 @@ spec:
           mountPath: /application/config/parameters
           readOnly: true
         env:
-        - name: MICRO_SERVER_ADDRESS
-          value: "0.0.0.0:{{ $deployment.port }}"
+        #- name: MICRO_SERVER_ADDRESS
+        #  value: "0.0.0.0:{{ $deployment.port }}"
         - name: MICRO_REGISTRY
           value: "mdns"
         - name: METRICS_PORT
