@@ -1,5 +1,5 @@
 {{- $endpoint := .Values.frontend -}}
-{{- $endpointSvc := printf "%s-%s" .Release.Name $endpoint.name}}
+{{- $endpointSvc := printf "%s" .Chart.Name}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
