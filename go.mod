@@ -4,7 +4,7 @@ require (
 	cloud.google.com/go v0.34.0 // indirect
 	github.com/DataDog/zstd v1.3.4 // indirect
 	github.com/ProtocolONE/geoip-service v0.0.0-20190115152014-a9d29df01dce
-	github.com/ProtocolONE/payone-repository v1.0.65
+	github.com/ProtocolONE/payone-repository v1.0.69
 	github.com/Shopify/sarama v1.20.0
 	github.com/centrifugal/gocent v1.0.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

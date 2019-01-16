@@ -31,6 +31,7 @@ type PaymentMethod struct {
 	CreatedAt        time.Time            `bson:"created_at" json:"created_at"`
 	UpdatedAt        time.Time            `bson:"updated_at" json:"-"`
 	PaymentSystem    *PaymentSystem       `bson:"payment_system" json:"payment_system"`
+	Currencies       []int32              `bson:"currencies" json:"currencies"`
 	// type of payment method. allowed at current time: bank_card, ewallet, crypto
 	Type string `bson:"type" json:"type"`
 	// regexp mask for check main requisite of payment method
@@ -54,7 +55,7 @@ type PaymentMethodJsonOrderResponse struct {
 	// url to payment method icon
 	Icon string `json:"icon"`
 	// payment method type. allowed: bank_card, ewallet, crypto
-	Type       string `json:"type"`
+	Type string `json:"type"`
 	// payment method group alias
 	GroupAlias string `json:"group_alias"`
 	// regexp mask for check main requisite of payment method
