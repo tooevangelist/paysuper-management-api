@@ -87,6 +87,7 @@ func main() {
 		PSPAccountingCurrencyA3: conf.PSPAccountingCurrencyA3,
 		HttpScheme:              conf.HttpScheme,
 		CentrifugoSecret:        conf.CentrifugoSecret,
+		K8sHost:                 conf.KubernetesHost,
 	}
 
 	server, err := api.NewServer(sInit)

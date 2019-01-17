@@ -49,6 +49,7 @@ type Config struct {
 	PSPAccountingCurrencyA3 string `envconfig:"PSP_ACCOUNTING_CURRENCY"`
 	HttpScheme              string `envconfig:"HTTP_SCHEME" default:"https"`
 	CentrifugoSecret        string `envconfig:"CENTRIFUGO_SECRET" required:"true"`
+	KubernetesHost          string `envconfig:"KUBERNETES_SERVICE_HOST" required:"false"`
 }
 
 func NewConfig() (error, *Config) {

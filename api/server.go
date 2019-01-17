@@ -19,6 +19,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/micro/go-micro"
+	k8s "github.com/micro/kubernetes/go/micro"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/sidmal/slug"
 	"github.com/ttacon/libphonenumber"
@@ -70,6 +71,7 @@ type ServerInitParams struct {
 	PSPAccountingCurrencyA3 string
 	HttpScheme              string
 	CentrifugoSecret        string
+	K8sHost                 string
 }
 
 type Template struct {
@@ -112,6 +114,8 @@ type Api struct {
 	repository repository.RepositoryService
 	geoService proto.GeoIpService
 
+	k8sHost string
+
 	Merchant
 	GetParams
 	Order
@@ -129,6 +133,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		httpScheme:              p.HttpScheme,
 		paymentSystemsSettings:  &payment_system.PaymentSystemSetting{Logger: p.Logger},
 		centrifugoSecret:        p.CentrifugoSecret,
+		k8sHost:                 p.K8sHost,
 	}
 
 	api.InitService()
@@ -205,11 +210,21 @@ func (api *Api) Start() error {
 func (api *Api) InitService() {
 	api.serviceContext, api.serviceCancel = context.WithCancel(context.Background())
 
-	api.service = micro.NewService(
-		micro.Name("go.p1.payone.api"),
+	options := []micro.Option{
+		micro.Name("p1payapi"),
 		micro.Version(constant.PayOneMicroserviceVersion),
-	)
+	}
+
+	if api.k8sHost == "" {
+		api.service = micro.NewService(options...)
+		log.Println("Initialize micro service")
+	} else {
+		api.service = k8s.NewService(options...)
+		log.Println("Initialize k8s service")
+	}
+
 	api.service.Init()
+
 	api.publisher = micro.NewPublisher(constant.PayOneTopicNotifyPaymentName, api.service.Client())
 
 	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, api.service.Client())
