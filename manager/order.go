@@ -5,12 +5,14 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
 	"github.com/ProtocolONE/p1pay.api/utils"
-	proto "github.com/ProtocolONE/payone-repository/pkg/proto/billing"
+	"github.com/ProtocolONE/payone-repository/pkg/proto/billing"
+	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
 	"github.com/ProtocolONE/payone-repository/tools"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
@@ -78,6 +80,9 @@ type OrderManager struct {
 	commissionManager      *CommissionManager
 	publisher              micro.Publisher
 	centrifugoSecret       string
+
+	repository repository.RepositoryService
+	geoService proto.GeoIpService
 }
 
 type check struct {
@@ -114,6 +119,8 @@ func InitOrderManager(
 	paymentSystemsSettings *payment_system.PaymentSystemSetting,
 	publisher micro.Publisher,
 	centrifugoSecret string,
+	repository repository.RepositoryService,
+	geoService proto.GeoIpService,
 ) *OrderManager {
 	om := &OrderManager{
 		Manager:                &Manager{Database: database, Logger: logger},
@@ -128,6 +135,8 @@ func InitOrderManager(
 		commissionManager:      InitCommissionManager(database, logger),
 		publisher:              publisher,
 		centrifugoSecret:       centrifugoSecret,
+		repository:             repository,
+		geoService:             geoService,
 	}
 
 	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)
@@ -1439,7 +1448,7 @@ func (om *OrderManager) getValueFromAccountingPaymentReport(v interface{}) float
 }
 
 // temporary method helper to convert model.Order to proto.Order
-func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
+func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 	sProjectParams := make(map[string]string)
 	sPaymentMethodTxnParams := make(map[string]string)
 
@@ -1451,89 +1460,87 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 		sPaymentMethodTxnParams[k] = fmt.Sprintf("%s", v)
 	}
 
-
-	pOrder := &proto.Order{
+	pOrder := &billing.Order{
 		Id: o.Id.Hex(),
-		Project: &proto.ProjectOrder{
+		Project: &billing.ProjectOrder{
 			Id:               tools.ObjectIdToByte(o.Project.Id),
 			Name:             o.Project.Name,
 			NotifyEmails:     o.Project.NotifyEmails,
 			SendNotifyEmail:  o.Project.SendNotifyEmail,
 			SecretKey:        o.Project.SecretKey,
 			CallbackProtocol: o.Project.CallbackProtocol,
-			Merchant: &proto.Merchant{
+			Merchant: &billing.Merchant{
 				Id:         tools.ObjectIdToByte(o.Project.Merchant.Id),
 				ExternalId: o.Project.Merchant.ExternalId,
 				Email:      o.Project.Merchant.Email,
 				Name:       *o.Project.Merchant.Name,
-				Country: &proto.Country{
+				Country: &billing.Country{
 					CodeInt:  int32(o.Project.Merchant.Country.CodeInt),
 					CodeA2:   o.Project.Merchant.Country.CodeA2,
 					CodeA3:   o.Project.Merchant.Country.CodeA3,
-					Name:     &proto.Name{En: o.Project.Merchant.Country.Name.EN, Ru: o.Project.Merchant.Country.Name.RU},
+					Name:     &billing.Name{En: o.Project.Merchant.Country.Name.EN, Ru: o.Project.Merchant.Country.Name.RU},
 					IsActive: o.Project.Merchant.Country.IsActive,
 				},
 				AccountingPeriod: *o.Project.Merchant.AccountingPeriod,
-				Currency: &proto.Currency{
+				Currency: &billing.Currency{
 					CodeInt:  int32(o.Project.Merchant.Currency.CodeInt),
 					CodeA3:   o.Project.Merchant.Currency.CodeA3,
-					Name:     &proto.Name{En: o.Project.Merchant.Currency.Name.EN, Ru: o.Project.Merchant.Currency.Name.RU},
+					Name:     &billing.Name{En: o.Project.Merchant.Currency.Name.EN, Ru: o.Project.Merchant.Currency.Name.RU},
 					IsActive: o.Project.Merchant.Currency.IsActive,
 				},
 				IsVatEnabled:              o.Project.Merchant.IsVatEnabled,
 				IsCommissionToUserEnabled: o.Project.Merchant.IsCommissionToUserEnabled,
 				Status:                    int32(o.Project.Merchant.Status),
-
 			},
 		},
 		ProjectAccount:      o.ProjectAccount,
 		Description:         o.Description,
 		ProjectIncomeAmount: o.ProjectIncomeAmount,
-		ProjectIncomeCurrency: &proto.Currency{
+		ProjectIncomeCurrency: &billing.Currency{
 			CodeInt:  int32(o.ProjectIncomeCurrency.CodeInt),
 			CodeA3:   o.ProjectIncomeCurrency.CodeA3,
-			Name:     &proto.Name{En: o.ProjectIncomeCurrency.Name.EN, Ru: o.ProjectIncomeCurrency.Name.RU},
+			Name:     &billing.Name{En: o.ProjectIncomeCurrency.Name.EN, Ru: o.ProjectIncomeCurrency.Name.RU},
 			IsActive: o.ProjectIncomeCurrency.IsActive,
 		},
 		ProjectOutcomeAmount: o.ProjectOutcomeAmount,
-		ProjectOutcomeCurrency: &proto.Currency{
+		ProjectOutcomeCurrency: &billing.Currency{
 			CodeInt:  int32(o.ProjectOutcomeCurrency.CodeInt),
 			CodeA3:   o.ProjectOutcomeCurrency.CodeA3,
-			Name:     &proto.Name{En: o.ProjectOutcomeCurrency.Name.EN, Ru: o.ProjectOutcomeCurrency.Name.RU},
+			Name:     &billing.Name{En: o.ProjectOutcomeCurrency.Name.EN, Ru: o.ProjectOutcomeCurrency.Name.RU},
 			IsActive: o.ProjectOutcomeCurrency.IsActive,
 		},
 		ProjectParams: sProjectParams,
-		PayerData: &proto.PayerData{
+		PayerData: &billing.PayerData{
 			Ip:            o.PayerData.Ip,
 			CountryCodeA2: o.PayerData.CountryCodeA2,
-			CountryName:   &proto.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
-			City:          &proto.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
+			CountryName:   &billing.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
+			City:          &billing.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
 			Subdivision:   o.PayerData.Subdivision,
 			Timezone:      o.PayerData.Timezone,
 		},
-		PaymentMethod: &proto.PaymentMethodOrder{
+		PaymentMethod: &billing.PaymentMethodOrder{
 			Id:   o.PaymentMethod.Id.Hex(),
 			Name: o.PaymentMethod.Name,
-			Params: &proto.PaymentMethodParams{
+			Params: &billing.PaymentMethodParams{
 				Handler:    o.PaymentMethod.Params.Handler,
 				Terminal:   o.PaymentMethod.Params.Terminal,
 				ExternalId: o.PaymentMethod.Params.ExternalId,
 				Other:      o.PaymentMethod.Params.Other,
 			},
-			PaymentSystem: &proto.PaymentSystem{
+			PaymentSystem: &billing.PaymentSystem{
 				Id:   tools.ObjectIdToByte(o.PaymentMethod.PaymentSystem.Id),
 				Name: o.PaymentMethod.PaymentSystem.Name,
-				Country: &proto.Country{
+				Country: &billing.Country{
 					CodeInt:  int32(o.PaymentMethod.PaymentSystem.Country.CodeInt),
 					CodeA2:   o.PaymentMethod.PaymentSystem.Country.CodeA2,
 					CodeA3:   o.PaymentMethod.PaymentSystem.Country.CodeA3,
-					Name:     &proto.Name{En: o.PaymentMethod.PaymentSystem.Country.Name.EN, Ru: o.PaymentMethod.PaymentSystem.Country.Name.RU},
+					Name:     &billing.Name{En: o.PaymentMethod.PaymentSystem.Country.Name.EN, Ru: o.PaymentMethod.PaymentSystem.Country.Name.RU},
 					IsActive: o.PaymentMethod.PaymentSystem.Country.IsActive,
 				},
-				AccountingCurrency: &proto.Currency{
+				AccountingCurrency: &billing.Currency{
 					CodeInt:  int32(o.PaymentMethod.PaymentSystem.AccountingCurrency.CodeInt),
 					CodeA3:   o.PaymentMethod.PaymentSystem.AccountingCurrency.CodeA3,
-					Name:     &proto.Name{En: o.PaymentMethod.PaymentSystem.AccountingCurrency.Name.EN, Ru: o.PaymentMethod.PaymentSystem.AccountingCurrency.Name.RU},
+					Name:     &billing.Name{En: o.PaymentMethod.PaymentSystem.AccountingCurrency.Name.EN, Ru: o.PaymentMethod.PaymentSystem.AccountingCurrency.Name.RU},
 					IsActive: o.PaymentMethod.PaymentSystem.AccountingCurrency.IsActive,
 				},
 				AccountingPeriod: o.PaymentMethod.PaymentSystem.AccountingPeriod,
@@ -1544,17 +1551,17 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 		PaymentMethodTerminalId:    o.PaymentMethodTerminalId,
 		PaymentMethodOrderId:       o.PaymentMethodOrderId,
 		PaymentMethodOutcomeAmount: o.PaymentMethodOutcomeAmount,
-		PaymentMethodOutcomeCurrency: &proto.Currency{
+		PaymentMethodOutcomeCurrency: &billing.Currency{
 			CodeInt:  int32(o.PaymentMethodOutcomeCurrency.CodeInt),
 			CodeA3:   o.PaymentMethodOutcomeCurrency.CodeA3,
-			Name:     &proto.Name{En: o.PaymentMethodOutcomeCurrency.Name.EN, Ru: o.PaymentMethodOutcomeCurrency.Name.RU},
+			Name:     &billing.Name{En: o.PaymentMethodOutcomeCurrency.Name.EN, Ru: o.PaymentMethodOutcomeCurrency.Name.RU},
 			IsActive: o.PaymentMethodOutcomeCurrency.IsActive,
 		},
 		PaymentMethodIncomeAmount: o.PaymentMethodIncomeAmount,
-		PaymentMethodIncomeCurrency: &proto.Currency{
+		PaymentMethodIncomeCurrency: &billing.Currency{
 			CodeInt:  int32(o.PaymentMethodIncomeCurrency.CodeInt),
 			CodeA3:   o.PaymentMethodIncomeCurrency.CodeA3,
-			Name:     &proto.Name{En: o.PaymentMethodIncomeCurrency.Name.EN, Ru: o.PaymentMethodIncomeCurrency.Name.RU},
+			Name:     &billing.Name{En: o.PaymentMethodIncomeCurrency.Name.EN, Ru: o.PaymentMethodIncomeCurrency.Name.RU},
 			IsActive: o.PaymentMethodIncomeCurrency.IsActive,
 		},
 		PaymentMethodIncomeCurrencyA3:           o.PaymentMethodIncomeCurrency.CodeA3,
@@ -1566,7 +1573,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 		AmountInPaymentSystemAccountingCurrency: o.AmountInPaymentSystemAccountingCurrency,
 		PaymentMethodPayerAccount:               o.PaymentMethodPayerAccount,
 		PaymentMethodTxnParams:                  sPaymentMethodTxnParams,
-		FixedPackage: &proto.FixedPackage{
+		FixedPackage: &billing.FixedPackage{
 			Id:          o.FixedPackage.Id,
 			Name:        o.FixedPackage.Name,
 			CurrencyInt: int32(o.FixedPackage.CurrencyInt),
@@ -1574,21 +1581,21 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 			IsActive:    true,
 		},
 		PaymentRequisites: o.PaymentRequisites,
-		PspFeeAmount: &proto.OrderFeePsp{
+		PspFeeAmount: &billing.OrderFeePsp{
 			AmountPaymentMethodCurrency: o.PspFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.PspFeeAmount.AmountMerchantCurrency,
 			AmountPspCurrency:           o.PspFeeAmount.AmountPspCurrency,
 		},
-		ProjectFeeAmount: &proto.OrderFee{
+		ProjectFeeAmount: &billing.OrderFee{
 			AmountPaymentMethodCurrency: o.ProjectFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.ProjectFeeAmount.AmountMerchantCurrency,
 		},
-		ToPayerFeeAmount: &proto.OrderFee{
+		ToPayerFeeAmount: &billing.OrderFee{
 			AmountPaymentMethodCurrency: o.ToPayerFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.ToPayerFeeAmount.AmountMerchantCurrency,
 		},
 		VatAmount: o.VatAmount,
-		PaymentSystemFeeAmount: &proto.OrderFeePaymentSystem{
+		PaymentSystemFeeAmount: &billing.OrderFeePaymentSystem{
 			AmountPaymentMethodCurrency: o.PaymentSystemFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.PaymentSystemFeeAmount.AmountMerchantCurrency,
 			AmountPaymentSystemCurrency: o.PaymentSystemFeeAmount.AmountMerchantCurrency,
