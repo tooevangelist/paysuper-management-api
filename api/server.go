@@ -18,7 +18,6 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/micro/go-grpc"
 	"github.com/micro/go-micro"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/sidmal/slug"
@@ -213,14 +212,14 @@ func (api *Api) InitService() {
 	api.service.Init()
 	api.publisher = micro.NewPublisher(constant.PayOneTopicNotifyPaymentName, api.service.Client())
 
-	service := grpc.NewService(
+	/*service := grpc.NewService(
 		micro.Name(constant.PayOneRepositoryServiceName),
 		micro.Context(api.serviceContext),
 	)
-	service.Init()
+	service.Init()*/
 
-	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, service.Client())
-	api.geoService = proto.NewGeoIpService(geoip.ServiceName, service.Client())
+	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, api.service.Client())
+	api.geoService = proto.NewGeoIpService(geoip.ServiceName, api.service.Client())
 }
 
 func (api *Api) Stop() {
