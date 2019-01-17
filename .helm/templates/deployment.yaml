@@ -35,6 +35,7 @@ spec:
         heritage: {{ .Release.Service }}
         role: {{ $deployment.role }}
     spec:
+      serviceAccountName: {{ .Release.Name }}
       volumes:
       - name: {{ .Chart.Name }}-cardpay
         secret:
@@ -47,10 +48,12 @@ spec:
           mountPath: /application/config/parameters
           readOnly: true
         env:
-        #- name: MICRO_SERVER_ADDRESS
-        #  value: "0.0.0.0:{{ $deployment.port }}"
-        #- name: MICRO_REGISTRY
-        #  value: "mdns"
+        - name: MICRO_SERVER_ADDRESS
+          value: "0.0.0.0:{{ $deployment.port }}"
+        - name: MICRO_REGISTRY
+          value: "kubernetes"
+        - name: MICRO_SELECTOR
+          value: "static"
         - name: METRICS_PORT
           value: "{{ $deployment.healthPort }}"
         - name: MONGO_HOST
