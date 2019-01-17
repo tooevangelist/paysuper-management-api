@@ -36,7 +36,6 @@ require (
 	github.com/micro/go-grpc v0.6.0
 	github.com/micro/go-micro v0.21.0
 	github.com/micro/go-plugins v0.20.1-0.20190115144301-8f5658913baa
-	github.com/micro/protobuf v0.0.0-20180321161605-ebd3be6d4fdb
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/oschwald/geoip2-golang v1.2.1
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
