@@ -427,13 +427,21 @@ func (oApiV1 *OrderApiV1) getAccountingPaymentCalculation(ctx echo.Context) erro
 }
 
 func (oApiV1 *OrderApiV1) testRepository(ctx echo.Context) error {
-	_, err := oApiV1.repository.FindPaymentMethodsByCurrency(context.TODO(), &repository.FindByIntValue{Value: 640})
+	d, err := oApiV1.repository.FindPaymentMethodsByCurrency(context.TODO(), &repository.FindByIntValue{Value: 840})
 
-	return ctx.JSON(http.StatusOK, err)
+	if err != nil {
+		return ctx.JSON(http.StatusOK, err)
+	}
+
+	return ctx.JSON(http.StatusOK, d)
 }
 
 func (oApiV1 *OrderApiV1) testGeo(ctx echo.Context) error {
-	_, err := oApiV1.geoService.GetIpData(context.TODO(), &proto.GeoIpDataRequest{IP: "46.32.78.127"})
+	d, err := oApiV1.geoService.GetIpData(context.TODO(), &proto.GeoIpDataRequest{IP: "46.32.78.127"})
 
-	return ctx.JSON(http.StatusOK, err)
+	if err != nil {
+		return  ctx.JSON(http.StatusOK, err)
+	}
+
+	return ctx.JSON(http.StatusOK, d)
 }
