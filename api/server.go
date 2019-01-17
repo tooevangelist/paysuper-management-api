@@ -156,7 +156,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.Http.Use(middleware.Recover())
 	api.Http.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowHeaders: []string{"authorization", "content-type"},
-		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete, http.MethodOptions},
 	}))
 
 	api.
@@ -220,11 +219,8 @@ func (api *Api) InitService() {
 	)
 	service.Init()
 
-	geoService := micro.NewService()
-	geoService.Init()
-
 	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, service.Client())
-	api.geoService = proto.NewGeoIpService(geoip.ServiceName, geoService.Client())
+	api.geoService = proto.NewGeoIpService(geoip.ServiceName, service.Client())
 }
 
 func (api *Api) Stop() {

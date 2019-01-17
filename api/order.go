@@ -1,9 +1,11 @@
 package api
 
 import (
+	"context"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
+	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/micro/go-micro"
@@ -70,6 +72,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.GET("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/api/v1/order", oApiV1.createJson)
+	api.Http.GET("/api/v1/test", oApiV1.test)
 
 	api.Http.POST("/api/v1/payment", oApiV1.processCreatePayment)
 
@@ -419,4 +422,10 @@ func (oApiV1 *OrderApiV1) getAccountingPaymentCalculation(ctx echo.Context) erro
 	}
 
 	return ctx.JSON(http.StatusOK, res)
+}
+
+func (oApiV1 *OrderApiV1) test(ctx echo.Context) error {
+	_, err := oApiV1.repository.FindPaymentMethodsByCurrency(context.TODO(), &repository.FindByIntValue{Value: 640})
+
+	return ctx.JSON(http.StatusOK, err)
 }
