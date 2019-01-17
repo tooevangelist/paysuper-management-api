@@ -7,6 +7,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database"
 	"github.com/globalsign/mgo"
 	_ "github.com/micro/go-plugins/broker/rabbitmq"
+	_ "github.com/micro/go-plugins/registry/kubernetes"
 	_ "github.com/micro/go-plugins/transport/grpc"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
