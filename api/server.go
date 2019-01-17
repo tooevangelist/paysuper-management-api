@@ -219,8 +219,14 @@ func (api *Api) InitService() {
 	)
 	service.Init()
 
+	geoService := grpc.NewService(
+		micro.Name(geoip.ServiceName),
+		micro.Context(api.serviceContext),
+	)
+	geoService.Init()
+
 	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, service.Client())
-	api.geoService = proto.NewGeoIpService(geoip.ServiceName, service.Client())
+	api.geoService = proto.NewGeoIpService(geoip.ServiceName, geoService.Client())
 }
 
 func (api *Api) Stop() {
