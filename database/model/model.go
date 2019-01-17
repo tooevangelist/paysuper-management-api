@@ -25,6 +25,12 @@ const (
 	DBFieldName        = "name"
 	DBFieldPrice       = "price"
 	DBFieldCurrencyInt = "currency_int"
+
+	BankCardFieldBrand         = "card_brand"
+	BankCardFieldType          = "card_type"
+	BankCardFieldCategory      = "card_category"
+	BankCardFieldIssuerName    = "bank_issuer_name"
+	BankCardFieldIssuerCountry = "bank_issuer_country"
 )
 
 var DefaultSort = []string{"_id"}

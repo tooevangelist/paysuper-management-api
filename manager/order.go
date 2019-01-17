@@ -1004,6 +1004,21 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, err.Error())
 	}
 
+	// if it bank card payment, then get data about bank issuer
+	val, ok := data[entity.BankCardFieldPan]
+
+	if ok && len(val) > 0 {
+		binData, err := om.rep.FindBinData(om.ctx, &repository.FindByStringValue{Value: val})
+
+		if err == nil && binData != nil {
+			data[model.BankCardFieldBrand] = binData.GetCardBrand()
+			data[model.BankCardFieldType] = binData.GetCardType()
+			data[model.BankCardFieldCategory] = binData.GetCardCategory()
+			data[model.BankCardFieldIssuerName] = binData.GetBankName()
+			data[model.BankCardFieldIssuerCountry] = binData.GetBankCountryName()
+		}
+	}
+
 	email, _ := data[model.OrderPaymentCreateRequestFieldEmail]
 	o.PayerData.Email = &email
 
