@@ -5,14 +5,12 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
 	"github.com/ProtocolONE/p1pay.api/utils"
-	"github.com/ProtocolONE/payone-repository/pkg/proto/billing"
-	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
+	proto "github.com/ProtocolONE/payone-repository/pkg/proto/billing"
 	"github.com/ProtocolONE/payone-repository/tools"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
@@ -20,6 +18,7 @@ import (
 	"github.com/micro/protobuf/ptypes"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
+	"net"
 	"net/url"
 	"sort"
 	"strconv"
@@ -79,10 +78,6 @@ type OrderManager struct {
 	commissionManager      *CommissionManager
 	publisher              micro.Publisher
 	centrifugoSecret       string
-
-	rep repository.RepositoryService
-	geo proto.GeoIpService
-	ctx context.Context
 }
 
 type check struct {
@@ -119,8 +114,6 @@ func InitOrderManager(
 	paymentSystemsSettings *payment_system.PaymentSystemSetting,
 	publisher micro.Publisher,
 	centrifugoSecret string,
-	repository repository.RepositoryService,
-	geoService proto.GeoIpService,
 ) *OrderManager {
 	om := &OrderManager{
 		Manager:                &Manager{Database: database, Logger: logger},
@@ -135,10 +128,6 @@ func InitOrderManager(
 		commissionManager:      InitCommissionManager(database, logger),
 		publisher:              publisher,
 		centrifugoSecret:       centrifugoSecret,
-
-		rep: repository,
-		geo: geoService,
-		ctx: context.TODO(),
 	}
 
 	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)
@@ -149,7 +138,7 @@ func InitOrderManager(
 func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) {
 	var pm *model.PaymentMethod
 	var pmOutcomeData *pmOutcomeData
-	var gRecord *proto.GeoIpDataResponse
+	var gRecord *geoip2.City
 	var ofp *model.OrderFixedPackage
 	var err error
 
@@ -494,31 +483,36 @@ func (om *OrderManager) FindById(id string) *model.Order {
 }
 
 func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order, host string) (*model.OrderFormRendering, error) {
-	projectPms, err := om.rep.FindPaymentMethodsByCurrency(om.ctx, &repository.FindByIntValue{Value: int32(o.ProjectIncomeCurrency.CodeInt)})
+	projectPms, err := om.projectManager.GetProjectPaymentMethods(o.Project.Id)
 
 	if err != nil {
 		return nil, err
 	}
 
 	ofr := &model.OrderFormRendering{}
-	amount := o.ProjectIncomeAmount
 
-	for _, pm := range projectPms.PaymentMethods {
+	for _, pm := range projectPms {
+		amount, err := om.currencyRateManager.convert(o.ProjectIncomeCurrency.CodeInt, pm.Currency.CodeInt, o.ProjectIncomeAmount)
+
+		if err != nil {
+			return nil, err
+		}
+
 		pmPrepData := &model.PaymentMethodJsonOrderResponse{
-			Id:                       tools.ByteToObjectId(pm.Id).Hex(),
+			Id:                       pm.Id.Hex(),
 			Name:                     pm.Name,
 			Icon:                     fmt.Sprintf(model.OrderInlineFormImagesUrlMask, host, pm.Icon),
 			Type:                     pm.Type,
-			GroupAlias:               pm.Group,
+			GroupAlias:               pm.GroupAlias,
 			AccountRegexp:            pm.AccountRegexp,
-			AmountWithoutCommissions: tools.FormatAmount(amount),
-			Currency:                 o.ProjectIncomeCurrency.CodeA3,
+			AmountWithoutCommissions: FormatAmount(amount),
+			Currency:                 pm.Currency.CodeA3,
 		}
 
 		// if commission to user enabled for merchant then calculate commissions to user
 		// for every allowed payment methods
 		if o.Project.Merchant.IsCommissionToUserEnabled == true {
-			commissions, err := om.commissionManager.CalculateCommission(o.Project.Id, tools.ByteToObjectId(pm.Id), pmPrepData.AmountWithoutCommissions)
+			commissions, err := om.commissionManager.CalculateCommission(o.Project.Id, pm.Id, pmPrepData.AmountWithoutCommissions)
 
 			if err != nil {
 				return nil, err
@@ -543,7 +537,7 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order, host stri
 		pmPrepData.AmountWithCommissions = FormatAmount(amount)
 
 		tOfr := &model.PaymentMethodJsonOrderResponseOrderFormRendering{
-			GroupAlias:                     pm.Group,
+			GroupAlias:                     pm.GroupAlias,
 			PaymentMethodJsonOrderResponse: pmPrepData,
 		}
 
@@ -671,21 +665,22 @@ func (om *OrderManager) checkPaymentMethod(c *check) (*model.PaymentMethod, erro
 	return pm, nil
 }
 
-func (om *OrderManager) getOrderFixedPackage(c *check) (*proto.GeoIpDataResponse, *model.OrderFixedPackage, error) {
+func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, *model.OrderFixedPackage, error) {
 	var region string
 
 	if c.order.Region != nil {
 		region = *c.order.Region
 	}
 
-	data, err := om.geo.GetIpData(om.ctx, &proto.GeoIpDataRequest{IP: c.order.CreateOrderIp})
+	ip := net.ParseIP(c.order.CreateOrderIp)
+	gRecord, err := om.geoDbReader.City(ip)
 
 	if err != nil {
-		return nil, nil, errors.New(orderErrorPayerRegionUnknown + " ====> " + err.Error())
+		return nil, nil, errors.New(orderErrorPayerRegionUnknown)
 	}
 
 	if region == "" {
-		region = data.Country.IsoCode
+		region = gRecord.Country.IsoCode
 	}
 
 	fps, ok := c.project.FixedPackage[region]
@@ -717,7 +712,7 @@ func (om *OrderManager) getOrderFixedPackage(c *check) (*proto.GeoIpDataResponse
 		Currency:    ofp.Currency,
 	}
 
-	return data, orderFp, nil
+	return gRecord, orderFp, nil
 }
 
 func (om *OrderManager) checkSignature(check *check) error {
@@ -1002,21 +997,6 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 
 	if o, err = om.modifyOrderAfterOrderFormSubmit(o, pm); err != nil {
 		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, err.Error())
-	}
-
-	// if it bank card payment, then get data about bank issuer
-	val, ok := data[entity.BankCardFieldPan]
-
-	if ok && len(val) > 0 {
-		binData, err := om.rep.FindBinData(om.ctx, &repository.FindByStringValue{Value: val})
-
-		if err == nil && binData != nil {
-			data[model.BankCardFieldBrand] = binData.GetCardBrand()
-			data[model.BankCardFieldType] = binData.GetCardType()
-			data[model.BankCardFieldCategory] = binData.GetCardCategory()
-			data[model.BankCardFieldIssuerName] = binData.GetBankName()
-			data[model.BankCardFieldIssuerCountry] = binData.GetBankCountryName()
-		}
 	}
 
 	email, _ := data[model.OrderPaymentCreateRequestFieldEmail]
@@ -1459,7 +1439,7 @@ func (om *OrderManager) getValueFromAccountingPaymentReport(v interface{}) float
 }
 
 // temporary method helper to convert model.Order to proto.Order
-func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
+func (om *OrderManager) getPublisherOrder(o *model.Order) *proto.Order {
 	sProjectParams := make(map[string]string)
 	sPaymentMethodTxnParams := make(map[string]string)
 
@@ -1471,87 +1451,89 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		sPaymentMethodTxnParams[k] = fmt.Sprintf("%s", v)
 	}
 
-	pOrder := &billing.Order{
+
+	pOrder := &proto.Order{
 		Id: o.Id.Hex(),
-		Project: &billing.ProjectOrder{
+		Project: &proto.ProjectOrder{
 			Id:               tools.ObjectIdToByte(o.Project.Id),
 			Name:             o.Project.Name,
 			NotifyEmails:     o.Project.NotifyEmails,
 			SendNotifyEmail:  o.Project.SendNotifyEmail,
 			SecretKey:        o.Project.SecretKey,
 			CallbackProtocol: o.Project.CallbackProtocol,
-			Merchant: &billing.Merchant{
+			Merchant: &proto.Merchant{
 				Id:         tools.ObjectIdToByte(o.Project.Merchant.Id),
 				ExternalId: o.Project.Merchant.ExternalId,
 				Email:      o.Project.Merchant.Email,
 				Name:       *o.Project.Merchant.Name,
-				Country: &billing.Country{
+				Country: &proto.Country{
 					CodeInt:  int32(o.Project.Merchant.Country.CodeInt),
 					CodeA2:   o.Project.Merchant.Country.CodeA2,
 					CodeA3:   o.Project.Merchant.Country.CodeA3,
-					Name:     &billing.Name{En: o.Project.Merchant.Country.Name.EN, Ru: o.Project.Merchant.Country.Name.RU},
+					Name:     &proto.Name{En: o.Project.Merchant.Country.Name.EN, Ru: o.Project.Merchant.Country.Name.RU},
 					IsActive: o.Project.Merchant.Country.IsActive,
 				},
 				AccountingPeriod: *o.Project.Merchant.AccountingPeriod,
-				Currency: &billing.Currency{
+				Currency: &proto.Currency{
 					CodeInt:  int32(o.Project.Merchant.Currency.CodeInt),
 					CodeA3:   o.Project.Merchant.Currency.CodeA3,
-					Name:     &billing.Name{En: o.Project.Merchant.Currency.Name.EN, Ru: o.Project.Merchant.Currency.Name.RU},
+					Name:     &proto.Name{En: o.Project.Merchant.Currency.Name.EN, Ru: o.Project.Merchant.Currency.Name.RU},
 					IsActive: o.Project.Merchant.Currency.IsActive,
 				},
 				IsVatEnabled:              o.Project.Merchant.IsVatEnabled,
 				IsCommissionToUserEnabled: o.Project.Merchant.IsCommissionToUserEnabled,
 				Status:                    int32(o.Project.Merchant.Status),
+
 			},
 		},
 		ProjectAccount:      o.ProjectAccount,
 		Description:         o.Description,
 		ProjectIncomeAmount: o.ProjectIncomeAmount,
-		ProjectIncomeCurrency: &billing.Currency{
+		ProjectIncomeCurrency: &proto.Currency{
 			CodeInt:  int32(o.ProjectIncomeCurrency.CodeInt),
 			CodeA3:   o.ProjectIncomeCurrency.CodeA3,
-			Name:     &billing.Name{En: o.ProjectIncomeCurrency.Name.EN, Ru: o.ProjectIncomeCurrency.Name.RU},
+			Name:     &proto.Name{En: o.ProjectIncomeCurrency.Name.EN, Ru: o.ProjectIncomeCurrency.Name.RU},
 			IsActive: o.ProjectIncomeCurrency.IsActive,
 		},
 		ProjectOutcomeAmount: o.ProjectOutcomeAmount,
-		ProjectOutcomeCurrency: &billing.Currency{
+		ProjectOutcomeCurrency: &proto.Currency{
 			CodeInt:  int32(o.ProjectOutcomeCurrency.CodeInt),
 			CodeA3:   o.ProjectOutcomeCurrency.CodeA3,
-			Name:     &billing.Name{En: o.ProjectOutcomeCurrency.Name.EN, Ru: o.ProjectOutcomeCurrency.Name.RU},
+			Name:     &proto.Name{En: o.ProjectOutcomeCurrency.Name.EN, Ru: o.ProjectOutcomeCurrency.Name.RU},
 			IsActive: o.ProjectOutcomeCurrency.IsActive,
 		},
 		ProjectParams: sProjectParams,
-		PayerData: &billing.PayerData{
+		PayerData: &proto.PayerData{
 			Ip:            o.PayerData.Ip,
 			CountryCodeA2: o.PayerData.CountryCodeA2,
-			CountryName:   &billing.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
-			City:          &billing.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
+			CountryName:   &proto.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
+			City:          &proto.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
 			Subdivision:   o.PayerData.Subdivision,
 			Timezone:      o.PayerData.Timezone,
 		},
-		PaymentMethod: &billing.PaymentMethodOrder{
+		PaymentMethod: &proto.PaymentMethodOrder{
 			Id:   o.PaymentMethod.Id.Hex(),
 			Name: o.PaymentMethod.Name,
-			Params: &billing.PaymentMethodParams{
+			Params: &proto.PaymentMethodParams{
 				Handler:    o.PaymentMethod.Params.Handler,
 				Terminal:   o.PaymentMethod.Params.Terminal,
 				ExternalId: o.PaymentMethod.Params.ExternalId,
 				Other:      o.PaymentMethod.Params.Other,
 			},
-			PaymentSystem: &billing.PaymentSystem{
+			PaymentSystem: &proto.PaymentSystem{
 				Id:   tools.ObjectIdToByte(o.PaymentMethod.PaymentSystem.Id),
 				Name: o.PaymentMethod.PaymentSystem.Name,
-				Country: &billing.Country{
+				Country: &proto.Country{
 					CodeInt:  int32(o.PaymentMethod.PaymentSystem.Country.CodeInt),
 					CodeA2:   o.PaymentMethod.PaymentSystem.Country.CodeA2,
 					CodeA3:   o.PaymentMethod.PaymentSystem.Country.CodeA3,
-					Name:     &billing.Name{En: o.PaymentMethod.PaymentSystem.Country.Name.EN, Ru: o.PaymentMethod.PaymentSystem.Country.Name.RU},
+					Name:     &proto.Name{En: o.PaymentMethod.PaymentSystem.Country.Name.EN, Ru: o.PaymentMethod.PaymentSystem.Country.Name.RU},
 					IsActive: o.PaymentMethod.PaymentSystem.Country.IsActive,
 				},
-				AccountingCurrency: &billing.Currency{
+				AccountingCurrency: &proto.Currency{
 					CodeInt:  int32(o.PaymentMethod.PaymentSystem.AccountingCurrency.CodeInt),
 					CodeA3:   o.PaymentMethod.PaymentSystem.AccountingCurrency.CodeA3,
-					Name:     &billing.Name{En: o.PaymentMethod.PaymentSystem.AccountingCurrency.Name.EN, Ru: o.PaymentMethod.PaymentSystem.AccountingCurrency.Name.RU},
+					Name:     &proto.Name{En: o.PaymentMethod.PaymentSystem.AccountingCurrency.Name.EN, Ru: o.PaymentMethod.PaymentSystem.AccountingCurrency.Name.RU},
 					IsActive: o.PaymentMethod.PaymentSystem.AccountingCurrency.IsActive,
 				},
 				AccountingPeriod: o.PaymentMethod.PaymentSystem.AccountingPeriod,
@@ -1562,17 +1544,17 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		PaymentMethodTerminalId:    o.PaymentMethodTerminalId,
 		PaymentMethodOrderId:       o.PaymentMethodOrderId,
 		PaymentMethodOutcomeAmount: o.PaymentMethodOutcomeAmount,
-		PaymentMethodOutcomeCurrency: &billing.Currency{
+		PaymentMethodOutcomeCurrency: &proto.Currency{
 			CodeInt:  int32(o.PaymentMethodOutcomeCurrency.CodeInt),
 			CodeA3:   o.PaymentMethodOutcomeCurrency.CodeA3,
-			Name:     &billing.Name{En: o.PaymentMethodOutcomeCurrency.Name.EN, Ru: o.PaymentMethodOutcomeCurrency.Name.RU},
+			Name:     &proto.Name{En: o.PaymentMethodOutcomeCurrency.Name.EN, Ru: o.PaymentMethodOutcomeCurrency.Name.RU},
 			IsActive: o.PaymentMethodOutcomeCurrency.IsActive,
 		},
 		PaymentMethodIncomeAmount: o.PaymentMethodIncomeAmount,
-		PaymentMethodIncomeCurrency: &billing.Currency{
+		PaymentMethodIncomeCurrency: &proto.Currency{
 			CodeInt:  int32(o.PaymentMethodIncomeCurrency.CodeInt),
 			CodeA3:   o.PaymentMethodIncomeCurrency.CodeA3,
-			Name:     &billing.Name{En: o.PaymentMethodIncomeCurrency.Name.EN, Ru: o.PaymentMethodIncomeCurrency.Name.RU},
+			Name:     &proto.Name{En: o.PaymentMethodIncomeCurrency.Name.EN, Ru: o.PaymentMethodIncomeCurrency.Name.RU},
 			IsActive: o.PaymentMethodIncomeCurrency.IsActive,
 		},
 		PaymentMethodIncomeCurrencyA3:           o.PaymentMethodIncomeCurrency.CodeA3,
@@ -1584,7 +1566,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		AmountInPaymentSystemAccountingCurrency: o.AmountInPaymentSystemAccountingCurrency,
 		PaymentMethodPayerAccount:               o.PaymentMethodPayerAccount,
 		PaymentMethodTxnParams:                  sPaymentMethodTxnParams,
-		FixedPackage: &billing.FixedPackage{
+		FixedPackage: &proto.FixedPackage{
 			Id:          o.FixedPackage.Id,
 			Name:        o.FixedPackage.Name,
 			CurrencyInt: int32(o.FixedPackage.CurrencyInt),
@@ -1592,21 +1574,21 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 			IsActive:    true,
 		},
 		PaymentRequisites: o.PaymentRequisites,
-		PspFeeAmount: &billing.OrderFeePsp{
+		PspFeeAmount: &proto.OrderFeePsp{
 			AmountPaymentMethodCurrency: o.PspFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.PspFeeAmount.AmountMerchantCurrency,
 			AmountPspCurrency:           o.PspFeeAmount.AmountPspCurrency,
 		},
-		ProjectFeeAmount: &billing.OrderFee{
+		ProjectFeeAmount: &proto.OrderFee{
 			AmountPaymentMethodCurrency: o.ProjectFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.ProjectFeeAmount.AmountMerchantCurrency,
 		},
-		ToPayerFeeAmount: &billing.OrderFee{
+		ToPayerFeeAmount: &proto.OrderFee{
 			AmountPaymentMethodCurrency: o.ToPayerFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.ToPayerFeeAmount.AmountMerchantCurrency,
 		},
 		VatAmount: o.VatAmount,
-		PaymentSystemFeeAmount: &billing.OrderFeePaymentSystem{
+		PaymentSystemFeeAmount: &proto.OrderFeePaymentSystem{
 			AmountPaymentMethodCurrency: o.PaymentSystemFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.PaymentSystemFeeAmount.AmountMerchantCurrency,
 			AmountPaymentSystemCurrency: o.PaymentSystemFeeAmount.AmountMerchantCurrency,
