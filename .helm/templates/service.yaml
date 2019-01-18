@@ -13,8 +13,13 @@ metadata:
 spec:
   type: {{ $deployment.service.type }}
   ports:
-  - port: {{ $deployment.service.port }}
+  - name: micro
+    port: {{ $deployment.service.port }}
     targetPort: {{ $deployment.port }}
+    protocol: {{ $deployment.service.protocol }}
+  - name: ingress
+    port: {{ $deployment.ingressPort }}
+    targetPort: {{ $deployment.ingressPort  }}
     protocol: {{ $deployment.service.protocol }}
   selector:
     app: {{ .Chart.Name }}

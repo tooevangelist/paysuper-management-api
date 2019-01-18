@@ -15,12 +15,13 @@ backend:
   role: gobackend
   image: "p1hub/p1pay.api"
   imageTag: latest
-  port: 3001
+  port: 8080
+  ingressPort: 3001
   healthPort: 8081
   replicas: 1
   service: 
     type: ClusterIP
-    port: 8090
+    port: 8080
     protocol: TCP
   
 resources: {}
