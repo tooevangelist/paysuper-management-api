@@ -10,9 +10,9 @@ ingress:
 certIssuer:
   email: admin@protocol.one
 
-frontend:
+backend:
   name: gobackend
-  role: frontend
+  role: gobackend
   image: "p1hub/p1pay.api"
   imageTag: latest
   port: 3001
