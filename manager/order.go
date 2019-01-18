@@ -20,7 +20,6 @@ import (
 	"github.com/micro/go-micro"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
-	"net"
 	"net/url"
 	"sort"
 	"strconv"
@@ -81,8 +80,9 @@ type OrderManager struct {
 	publisher              micro.Publisher
 	centrifugoSecret       string
 
-	repository repository.RepositoryService
-	geoService proto.GeoIpService
+	rep repository.RepositoryService
+	geo proto.GeoIpService
+	ctx context.Context
 }
 
 type check struct {
@@ -135,8 +135,10 @@ func InitOrderManager(
 		commissionManager:      InitCommissionManager(database, logger),
 		publisher:              publisher,
 		centrifugoSecret:       centrifugoSecret,
-		repository:             repository,
-		geoService:             geoService,
+
+		rep: repository,
+		geo: geoService,
+		ctx: context.TODO(),
 	}
 
 	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)
@@ -147,7 +149,7 @@ func InitOrderManager(
 func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) {
 	var pm *model.PaymentMethod
 	var pmOutcomeData *pmOutcomeData
-	var gRecord *geoip2.City
+	var gRecord *proto.GeoIpDataResponse
 	var ofp *model.OrderFixedPackage
 	var err error
 
@@ -492,36 +494,31 @@ func (om *OrderManager) FindById(id string) *model.Order {
 }
 
 func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order, host string) (*model.OrderFormRendering, error) {
-	projectPms, err := om.projectManager.GetProjectPaymentMethods(o.Project.Id)
+	projectPms, err := om.rep.FindPaymentMethodsByCurrency(om.ctx, &repository.FindByIntValue{Value: int32(o.ProjectIncomeCurrency.CodeInt)})
 
 	if err != nil {
 		return nil, err
 	}
 
 	ofr := &model.OrderFormRendering{}
+	amount := o.ProjectIncomeAmount
 
-	for _, pm := range projectPms {
-		amount, err := om.currencyRateManager.convert(o.ProjectIncomeCurrency.CodeInt, pm.Currency.CodeInt, o.ProjectIncomeAmount)
-
-		if err != nil {
-			return nil, err
-		}
-
+	for _, pm := range projectPms.PaymentMethods {
 		pmPrepData := &model.PaymentMethodJsonOrderResponse{
-			Id:                       pm.Id.Hex(),
+			Id:                       tools.ByteToObjectId(pm.Id).Hex(),
 			Name:                     pm.Name,
 			Icon:                     fmt.Sprintf(model.OrderInlineFormImagesUrlMask, host, pm.Icon),
 			Type:                     pm.Type,
-			GroupAlias:               pm.GroupAlias,
+			GroupAlias:               pm.Group,
 			AccountRegexp:            pm.AccountRegexp,
-			AmountWithoutCommissions: FormatAmount(amount),
-			Currency:                 pm.Currency.CodeA3,
+			AmountWithoutCommissions: tools.FormatAmount(amount),
+			Currency:                 o.ProjectIncomeCurrency.CodeA3,
 		}
 
 		// if commission to user enabled for merchant then calculate commissions to user
 		// for every allowed payment methods
 		if o.Project.Merchant.IsCommissionToUserEnabled == true {
-			commissions, err := om.commissionManager.CalculateCommission(o.Project.Id, pm.Id, pmPrepData.AmountWithoutCommissions)
+			commissions, err := om.commissionManager.CalculateCommission(o.Project.Id, tools.ByteToObjectId(pm.Id), pmPrepData.AmountWithoutCommissions)
 
 			if err != nil {
 				return nil, err
@@ -546,7 +543,7 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order, host stri
 		pmPrepData.AmountWithCommissions = FormatAmount(amount)
 
 		tOfr := &model.PaymentMethodJsonOrderResponseOrderFormRendering{
-			GroupAlias:                     pm.GroupAlias,
+			GroupAlias:                     pm.Group,
 			PaymentMethodJsonOrderResponse: pmPrepData,
 		}
 
@@ -674,22 +671,21 @@ func (om *OrderManager) checkPaymentMethod(c *check) (*model.PaymentMethod, erro
 	return pm, nil
 }
 
-func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, *model.OrderFixedPackage, error) {
+func (om *OrderManager) getOrderFixedPackage(c *check) (*proto.GeoIpDataResponse, *model.OrderFixedPackage, error) {
 	var region string
 
 	if c.order.Region != nil {
 		region = *c.order.Region
 	}
 
-	ip := net.ParseIP(c.order.CreateOrderIp)
-	gRecord, err := om.geoDbReader.City(ip)
+	data, err := om.geo.GetIpData(om.ctx, &proto.GeoIpDataRequest{IP: c.order.CreateOrderIp})
 
 	if err != nil {
-		return nil, nil, errors.New(orderErrorPayerRegionUnknown)
+		return nil, nil, errors.New(orderErrorPayerRegionUnknown + " ====> " + err.Error())
 	}
 
 	if region == "" {
-		region = gRecord.Country.IsoCode
+		region = data.Country.IsoCode
 	}
 
 	fps, ok := c.project.FixedPackage[region]
@@ -721,7 +717,7 @@ func (om *OrderManager) getOrderFixedPackage(c *check) (*geoip2.City, *model.Ord
 		Currency:    ofp.Currency,
 	}
 
-	return gRecord, orderFp, nil
+	return data, orderFp, nil
 }
 
 func (om *OrderManager) checkSignature(check *check) error {
@@ -1006,6 +1002,21 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 
 	if o, err = om.modifyOrderAfterOrderFormSubmit(o, pm); err != nil {
 		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, err.Error())
+	}
+
+	// if it bank card payment, then get data about bank issuer
+	val, ok := data[entity.BankCardFieldPan]
+
+	if ok && len(val) > 0 {
+		binData, err := om.rep.FindBinData(om.ctx, &repository.FindByStringValue{Value: val})
+
+		if err == nil && binData != nil {
+			data[model.BankCardFieldBrand] = binData.GetCardBrand()
+			data[model.BankCardFieldType] = binData.GetCardType()
+			data[model.BankCardFieldCategory] = binData.GetCardCategory()
+			data[model.BankCardFieldIssuerName] = binData.GetBankName()
+			data[model.BankCardFieldIssuerCountry] = binData.GetBankCountryName()
+		}
 	}
 
 	email, _ := data[model.OrderPaymentCreateRequestFieldEmail]
