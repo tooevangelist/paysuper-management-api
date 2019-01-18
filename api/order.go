@@ -437,7 +437,6 @@ func (oApiV1 *OrderApiV1) testRepository(ctx echo.Context) error {
 }
 
 func (oApiV1 *OrderApiV1) testGeo(ctx echo.Context) error {
-	//
 	d, err := oApiV1.geoService.GetIpData(context.TODO(), &proto.GeoIpDataRequest{IP: "46.32.78.127"})
 
 	if err != nil {
