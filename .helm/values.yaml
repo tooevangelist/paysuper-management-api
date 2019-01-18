@@ -20,7 +20,7 @@ backend:
   replicas: 1
   service: 
     type: ClusterIP
-    port: 8090
+    port: 8080
     protocol: TCP
   
 resources: {}
