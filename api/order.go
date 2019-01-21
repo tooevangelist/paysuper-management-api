@@ -1,12 +1,9 @@
 package api
 
 import (
-	"context"
-	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/ProtocolONE/p1pay.api/manager"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
-	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/micro/go-micro"
@@ -73,8 +70,6 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.GET("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/order/create", oApiV1.createFromFormData)
 	api.Http.POST("/api/v1/order", oApiV1.createJson)
-	api.Http.GET("/api/v1/test/repository", oApiV1.testRepository)
-	api.Http.GET("/api/v1/test/geo", oApiV1.testGeo)
 
 	api.Http.POST("/api/v1/payment", oApiV1.processCreatePayment)
 
@@ -424,24 +419,4 @@ func (oApiV1 *OrderApiV1) getAccountingPaymentCalculation(ctx echo.Context) erro
 	}
 
 	return ctx.JSON(http.StatusOK, res)
-}
-
-func (oApiV1 *OrderApiV1) testRepository(ctx echo.Context) error {
-	d, err := oApiV1.repository.FindPaymentMethodsByCurrency(context.TODO(), &repository.FindByIntValue{Value: 840})
-
-	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, err)
-	}
-
-	return ctx.JSON(http.StatusOK, d)
-}
-
-func (oApiV1 *OrderApiV1) testGeo(ctx echo.Context) error {
-	d, err := oApiV1.geoService.GetIpData(context.TODO(), &proto.GeoIpDataRequest{IP: "46.32.78.127"})
-
-	if err != nil {
-		return  ctx.JSON(http.StatusBadRequest, err)
-	}
-
-	return ctx.JSON(http.StatusOK, d)
 }

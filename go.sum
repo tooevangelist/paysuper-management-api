@@ -46,6 +46,8 @@ github.com/ProtocolONE/payone-repository v1.0.72 h1:v2RzK4mFMVIQC60a1iOKBPcIMrNT
 github.com/ProtocolONE/payone-repository v1.0.72/go.mod h1:ye3Bm4Sm8iJnj4kO6K38HG3K9U6lWUWfebk7Bs5T7cE=
 github.com/ProtocolONE/payone-repository v1.0.73 h1:365onO1fZv3JCRsiUSIKR/RqOg/TINjG/udg6XA8jeg=
 github.com/ProtocolONE/payone-repository v1.0.73/go.mod h1:ye3Bm4Sm8iJnj4kO6K38HG3K9U6lWUWfebk7Bs5T7cE=
+github.com/ProtocolONE/payone-repository v1.0.75 h1:B9hcoKhLXKwrLTROAR/JloyNEbhFrlTIw616f+sJHUk=
+github.com/ProtocolONE/payone-repository v1.0.75/go.mod h1:ye3Bm4Sm8iJnj4kO6K38HG3K9U6lWUWfebk7Bs5T7cE=
 github.com/PuerkitoBio/purell v1.1.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/Shopify/sarama v1.20.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
