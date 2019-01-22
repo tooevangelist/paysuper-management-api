@@ -76,8 +76,9 @@ type PaymentMethodJsonOrderResponse struct {
 }
 
 type SavedCardResponse struct {
-	Pan    string `json:"pan"`
-	Expire *billing.CardExpire
+	Id     string              `json:"id"`
+	Pan    string              `json:"pan"`
+	Expire *billing.CardExpire `json:"expire"`
 }
 
 // Temporary struct for save backward compatibility for self hosted payment form

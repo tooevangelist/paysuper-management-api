@@ -63,6 +63,8 @@ const (
 	orderSignatureElementsGlue = "|"
 
 	orderDefaultDescription = "Payment by order # %s"
+
+	requestFieldOrderStoredCardId = "stored_card_id"
 )
 
 type OrderManager struct {
@@ -554,7 +556,13 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order, host stri
 					pmPrepData.SavedCards = []*model.SavedCardResponse{}
 
 					for _, v := range rsp.SavedCards {
-						pmPrepData.SavedCards = append(pmPrepData.SavedCards, &model.SavedCardResponse{Pan: v.MaskedPan, Expire: v.Expire})
+						d := &model.SavedCardResponse{
+							Id:     tools.ByteToObjectId(v.Id).Hex(),
+							Pan:    v.MaskedPan,
+							Expire: v.Expire,
+						}
+
+						pmPrepData.SavedCards = append(pmPrepData.SavedCards, d)
 					}
 				}
 			}
@@ -1029,6 +1037,17 @@ func (om *OrderManager) ProcessCreatePayment(iData map[string]interface{}, psSet
 	delete(data, model.OrderPaymentCreateRequestFieldOrderId)
 	delete(data, model.OrderPaymentCreateRequestFieldOPaymentMethodId)
 	delete(data, model.OrderPaymentCreateRequestFieldEmail)
+
+	if val, ok := data[requestFieldOrderStoredCardId]; ok {
+		rsp, err := om.rep.FindSavedCardById(om.ctx, &repository.FindByStringValue{Value: val})
+
+		if err == nil && len(rsp.Pan) > 0 {
+			data[entity.BankCardFieldPan] = rsp.Pan
+			data[entity.BankCardFieldHolder] = rsp.CardHolder
+			data[entity.BankCardFieldMonth] = rsp.Expire.Month
+			data[entity.BankCardFieldYear] = rsp.Expire.Year
+		}
+	}
 
 	// if it bank card payment, then get data about bank issuer
 	val, ok := data[entity.BankCardFieldPan]

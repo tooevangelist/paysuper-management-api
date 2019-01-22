@@ -3,7 +3,7 @@ module github.com/ProtocolONE/p1pay.api
 require (
 	github.com/DataDog/zstd v1.3.5 // indirect
 	github.com/ProtocolONE/geoip-service v0.0.0-20190116165633-2d774a0d7ce9
-	github.com/ProtocolONE/payone-repository v1.0.80
+	github.com/ProtocolONE/payone-repository v1.0.81
 	github.com/Shopify/sarama v1.20.1
 	github.com/centrifugal/gocent v2.0.2+incompatible
 	github.com/coreos/etcd v3.3.11+incompatible // indirect
