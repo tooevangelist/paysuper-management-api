@@ -324,7 +324,7 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 // @Failure 500 {object} payment_system.PaymentResponse "contain error description about error on PSP (P1) side"
 // @Router /api/v1/payment [post]
 func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
-	data := make(map[string]string)
+	data := make(map[string]interface{})
 
 	if err := ctx.Bind(&data); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageInvalidRequestData})

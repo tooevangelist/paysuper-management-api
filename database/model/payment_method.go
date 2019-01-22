@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/ProtocolONE/payone-repository/pkg/proto/billing"
 	"github.com/globalsign/mgo/bson"
 	"time"
 )
@@ -69,7 +70,14 @@ type PaymentMethodJsonOrderResponse struct {
 	// amount of commission in payment method currency, which the user pays for the project
 	UserCommissionAmount float64 `json:"user_commission_amount"`
 	// amount of VAT in payment method currency, which the user pays
-	VatAmount float64 `json:"vat_amount"`
+	VatAmount     float64              `json:"vat_amount"`
+	HasSavedCards *bool                `json:"has_saved_cards,omitempty"`
+	SavedCards    []*SavedCardResponse `json:"saved_cards,omitempty"`
+}
+
+type SavedCardResponse struct {
+	Pan    string `json:"pan"`
+	Expire *billing.CardExpire
 }
 
 // Temporary struct for save backward compatibility for self hosted payment form

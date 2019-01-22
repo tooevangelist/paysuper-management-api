@@ -48,6 +48,16 @@ github.com/ProtocolONE/payone-repository v1.0.73 h1:365onO1fZv3JCRsiUSIKR/RqOg/T
 github.com/ProtocolONE/payone-repository v1.0.73/go.mod h1:ye3Bm4Sm8iJnj4kO6K38HG3K9U6lWUWfebk7Bs5T7cE=
 github.com/ProtocolONE/payone-repository v1.0.75 h1:B9hcoKhLXKwrLTROAR/JloyNEbhFrlTIw616f+sJHUk=
 github.com/ProtocolONE/payone-repository v1.0.75/go.mod h1:ye3Bm4Sm8iJnj4kO6K38HG3K9U6lWUWfebk7Bs5T7cE=
+github.com/ProtocolONE/payone-repository v1.0.76 h1:dZRK/Ldg+zrQqJfjThLTDw4sk1HAv16v6jb8N8dupNw=
+github.com/ProtocolONE/payone-repository v1.0.76/go.mod h1:ye3Bm4Sm8iJnj4kO6K38HG3K9U6lWUWfebk7Bs5T7cE=
+github.com/ProtocolONE/payone-repository v1.0.77 h1:APUVz1XlGghRKtcjMqbrgIFqNZ8bImPFWWH4T0uLFDU=
+github.com/ProtocolONE/payone-repository v1.0.77/go.mod h1:ye3Bm4Sm8iJnj4kO6K38HG3K9U6lWUWfebk7Bs5T7cE=
+github.com/ProtocolONE/payone-repository v1.0.78 h1:75mlUkFdJX3NI3MT+aE9VWINVHDHcIKIB5CPzSE4sDc=
+github.com/ProtocolONE/payone-repository v1.0.78/go.mod h1:ye3Bm4Sm8iJnj4kO6K38HG3K9U6lWUWfebk7Bs5T7cE=
+github.com/ProtocolONE/payone-repository v1.0.79 h1:WiGF0v6W0xBiTRedGeQnKRXJjM/3MGn4SuMUNL3ekcg=
+github.com/ProtocolONE/payone-repository v1.0.79/go.mod h1:s/l7m2TcXaYrxPxsii+Y9Tnbm1z7HV4mUrpdI+RwSQM=
+github.com/ProtocolONE/payone-repository v1.0.80 h1:u2yGCnUAVfe1wo7FIymhXL9BNIrJDPXEWnGZrgGCplk=
+github.com/ProtocolONE/payone-repository v1.0.80/go.mod h1:s/l7m2TcXaYrxPxsii+Y9Tnbm1z7HV4mUrpdI+RwSQM=
 github.com/PuerkitoBio/purell v1.1.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/Shopify/sarama v1.20.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=

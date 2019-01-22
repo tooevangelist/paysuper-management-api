@@ -20,6 +20,7 @@ import (
 	"github.com/micro/go-micro"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
+	"log"
 	"net/url"
 	"sort"
 	"strconv"
@@ -31,7 +32,7 @@ const (
 	orderErrorProjectNotFound                          = "project with specified identifier not found"
 	orderErrorProjectInactive                          = "project with specified identifier is inactive"
 	orderErrorPaymentMethodNotAllowed                  = "payment method not specified for project"
-	orderErrorPaymentMethodNotFound                    = "payment method with specified not found"
+	orderErrorPaymentMethodNotFound                    = "payment method with specified id not found"
 	orderErrorPaymentMethodInactive                    = "payment method with specified is inactive"
 	orderErrorPaymentSystemNotFound                    = "payment system for specified payment method not found"
 	orderErrorPaymentSystemInactive                    = "payment system for specified payment method is inactive"
@@ -542,6 +543,23 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order, host stri
 
 		pmPrepData.AmountWithCommissions = FormatAmount(amount)
 
+		if pm.IsBankCard() == true {
+			req := &repository.SavedCardRequest{Account: o.ProjectAccount, ProjectId: tools.ObjectIdToByte(o.Project.Id)}
+
+			if rsp, err := om.rep.FindSavedCards(om.ctx, req); err == nil {
+				has := len(rsp.SavedCards) > 0
+				pmPrepData.HasSavedCards = &has
+
+				if has == true {
+					pmPrepData.SavedCards = []*model.SavedCardResponse{}
+
+					for _, v := range rsp.SavedCards {
+						pmPrepData.SavedCards = append(pmPrepData.SavedCards, &model.SavedCardResponse{Pan: v.MaskedPan, Expire: v.Expire})
+					}
+				}
+			}
+		}
+
 		tOfr := &model.PaymentMethodJsonOrderResponseOrderFormRendering{
 			GroupAlias:                     pm.Group,
 			PaymentMethodJsonOrderResponse: pmPrepData,
@@ -977,13 +995,14 @@ func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M 
 	return filter
 }
 
-func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings map[string]interface{}) *payment_system.PaymentResponse {
+func (om *OrderManager) ProcessCreatePayment(iData map[string]interface{}, psSettings map[string]interface{}) *payment_system.PaymentResponse {
 	var err error
 
-	if err = om.validateCreatePaymentData(data); err != nil {
+	if err = om.validateCreatePaymentData(iData); err != nil {
 		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, err.Error())
 	}
 
+	data := om.convertCreatePaymentData(iData)
 	o := om.FindById(data[model.OrderPaymentCreateRequestFieldOrderId])
 
 	if o == nil {
@@ -1004,6 +1023,13 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, err.Error())
 	}
 
+	email, _ := data[model.OrderPaymentCreateRequestFieldEmail]
+	o.PayerData.Email = &email
+
+	delete(data, model.OrderPaymentCreateRequestFieldOrderId)
+	delete(data, model.OrderPaymentCreateRequestFieldOPaymentMethodId)
+	delete(data, model.OrderPaymentCreateRequestFieldEmail)
+
 	// if it bank card payment, then get data about bank issuer
 	val, ok := data[entity.BankCardFieldPan]
 
@@ -1017,14 +1043,24 @@ func (om *OrderManager) ProcessCreatePayment(data map[string]string, psSettings 
 			data[model.BankCardFieldIssuerName] = binData.GetBankName()
 			data[model.BankCardFieldIssuerCountry] = binData.GetBankCountryName()
 		}
+
+		if v, ok := iData["store_data"]; ok && v.(bool) == true {
+			req := &repository.SavedCardRequest{
+				Account:    o.ProjectAccount,
+				ProjectId:  tools.ObjectIdToByte(o.Project.Id),
+				Pan:        data[entity.BankCardFieldPan],
+				CardHolder: data[entity.BankCardFieldHolder],
+				Expire: &billing.CardExpire{
+					Month: data[entity.BankCardFieldMonth],
+					Year:  data[entity.BankCardFieldYear],
+				},
+			}
+
+			if _, err := om.rep.InsertSavedCard(om.ctx, req); err != nil {
+				log.Println(err)
+			}
+		}
 	}
-
-	email, _ := data[model.OrderPaymentCreateRequestFieldEmail]
-	o.PayerData.Email = &email
-
-	delete(data, model.OrderPaymentCreateRequestFieldOrderId)
-	delete(data, model.OrderPaymentCreateRequestFieldOPaymentMethodId)
-	delete(data, model.OrderPaymentCreateRequestFieldEmail)
 
 	o.PaymentRequisites = data
 	o.PaymentMethodTerminalId = pm.Params.Terminal
@@ -1172,7 +1208,7 @@ func (om *OrderManager) processNotifyPaymentAmounts(o *model.Order) (*model.Orde
 	return o, nil
 }
 
-func (om *OrderManager) validateCreatePaymentData(data map[string]string) error {
+func (om *OrderManager) validateCreatePaymentData(data map[string]interface{}) error {
 	if _, ok := data[model.OrderPaymentCreateRequestFieldOrderId]; !ok {
 		return errors.New(orderErrorCreatePaymentRequiredFieldIdNotFound)
 	}
@@ -1186,6 +1222,21 @@ func (om *OrderManager) validateCreatePaymentData(data map[string]string) error 
 	}
 
 	return nil
+}
+
+func (om *OrderManager) convertCreatePaymentData(iData map[string]interface{}) map[string]string {
+	data := make(map[string]string)
+
+	for k, v := range iData {
+		switch sv := v.(type) {
+		case bool:
+			continue
+		default:
+			data[k] = fmt.Sprintf("%v", sv)
+		}
+	}
+
+	return data
 }
 
 func (om *OrderManager) modifyOrderAfterOrderFormSubmit(o *model.Order, pm *model.PaymentMethod) (*model.Order, error) {
