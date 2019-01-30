@@ -57,7 +57,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 			api.geoDbReader,
 			api.pspAccountingCurrencyA3,
 			api.paymentSystemsSettings,
-			api.publisher,
+			api.notifierPub,
 			api.centrifugoSecret,
 
 			api.repository,

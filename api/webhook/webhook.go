@@ -6,8 +6,8 @@ import (
 	"github.com/ProtocolONE/p1pay.api/database/dao"
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
+	"github.com/ProtocolONE/rabbitmq/pkg"
 	"github.com/labstack/echo"
-	"github.com/micro/go-micro"
 	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
@@ -27,7 +27,7 @@ type WebHook struct {
 	rawBody                 string
 	centrifugoSecret        string
 
-	publisher micro.Publisher
+	pub *rabbitmq.Broker
 	rep repository.RepositoryService
 	geo proto.GeoIpService
 }
@@ -41,7 +41,7 @@ func InitWebHook(
 	webHookGroup *echo.Group,
 	paymentSystemConfig map[string]interface{},
 	paymentSystemSettings *payment_system.PaymentSystemSetting,
-	publisher micro.Publisher,
+	publisher *rabbitmq.Broker,
 	centrifugoSecret string,
 	repository repository.RepositoryService,
 	geoService proto.GeoIpService,
@@ -55,11 +55,11 @@ func InitWebHook(
 		webHookGroup:            webHookGroup,
 		paymentSystemConfig:     paymentSystemConfig,
 		paymentSystemSettings:   paymentSystemSettings,
-		publisher:               publisher,
 		centrifugoSecret:        centrifugoSecret,
 
 		rep: repository,
 		geo: geoService,
+		pub: publisher,
 	}
 }
 

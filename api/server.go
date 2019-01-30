@@ -14,6 +14,7 @@ import (
 	"github.com/ProtocolONE/p1pay.api/utils"
 	"github.com/ProtocolONE/payone-repository/pkg/constant"
 	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
+	"github.com/ProtocolONE/rabbitmq/pkg"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
@@ -72,6 +73,7 @@ type ServerInitParams struct {
 	HttpScheme              string
 	CentrifugoSecret        string
 	K8sHost                 string
+	AmqpAddress             string
 }
 
 type Template struct {
@@ -110,9 +112,11 @@ type Api struct {
 	serviceContext context.Context
 	serviceCancel  context.CancelFunc
 
-	publisher  micro.Publisher
-	repository repository.RepositoryService
-	geoService proto.GeoIpService
+	publisher   micro.Publisher //todo: delete
+	repository  repository.RepositoryService
+	geoService  proto.GeoIpService
+	AmqpAddress string
+	notifierPub *rabbitmq.Broker
 
 	k8sHost string
 
@@ -134,6 +138,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		paymentSystemsSettings:  &payment_system.PaymentSystemSetting{Logger: p.Logger},
 		centrifugoSecret:        p.CentrifugoSecret,
 		k8sHost:                 p.K8sHost,
+		AmqpAddress:             p.AmqpAddress,
 	}
 
 	api.InitService()
@@ -225,10 +230,16 @@ func (api *Api) InitService() {
 
 	api.service.Init()
 
-	api.publisher = micro.NewPublisher(constant.PayOneTopicNotifyPaymentName, api.service.Client())
-
 	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, api.service.Client())
 	api.geoService = proto.NewGeoIpService(geoip.ServiceName, api.service.Client())
+
+	pub, err := rabbitmq.NewBroker(api.AmqpAddress)
+
+	if err != nil {
+		api.logger.Fatalf("Creating RabbitMQ publisher failed", err, api.AmqpAddress)
+	}
+
+	api.notifierPub = pub
 }
 
 func (api *Api) Stop() {
@@ -288,7 +299,7 @@ func (api *Api) InitWebHooks() {
 		whGroup,
 		api.PaymentSystemConfig,
 		api.paymentSystemsSettings,
-		api.publisher,
+		api.notifierPub,
 		api.centrifugoSecret,
 		api.repository,
 		api.geoService,

@@ -88,6 +88,7 @@ func main() {
 		HttpScheme:              conf.HttpScheme,
 		CentrifugoSecret:        conf.CentrifugoSecret,
 		K8sHost:                 conf.KubernetesHost,
+		AmqpAddress:             conf.AmqpAddress,
 	}
 
 	server, err := api.NewServer(sInit)

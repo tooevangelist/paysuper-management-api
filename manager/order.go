@@ -11,14 +11,16 @@ import (
 	"github.com/ProtocolONE/p1pay.api/payment_system"
 	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
 	"github.com/ProtocolONE/p1pay.api/utils"
+	"github.com/ProtocolONE/payone-repository/pkg/constant"
 	"github.com/ProtocolONE/payone-repository/pkg/proto/billing"
 	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
 	"github.com/ProtocolONE/payone-repository/tools"
+	"github.com/ProtocolONE/rabbitmq/pkg"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/micro/go-micro"
 	"github.com/oschwald/geoip2-golang"
+	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 	"log"
 	"net/url"
@@ -80,12 +82,12 @@ type OrderManager struct {
 	paymentSystemsSettings *payment_system.PaymentSystemSetting
 	vatManager             *VatManager
 	commissionManager      *CommissionManager
-	publisher              micro.Publisher
 	centrifugoSecret       string
 
 	rep repository.RepositoryService
 	geo proto.GeoIpService
 	ctx context.Context
+	pub *rabbitmq.Broker
 }
 
 type check struct {
@@ -120,7 +122,7 @@ func InitOrderManager(
 	geoDbReader *geoip2.Reader,
 	pspAccountingCurrencyA3 string,
 	paymentSystemsSettings *payment_system.PaymentSystemSetting,
-	publisher micro.Publisher,
+	publisher *rabbitmq.Broker,
 	centrifugoSecret string,
 	repository repository.RepositoryService,
 	geoService proto.GeoIpService,
@@ -136,12 +138,12 @@ func InitOrderManager(
 		paymentSystemsSettings: paymentSystemsSettings,
 		vatManager:             InitVatManager(database, logger),
 		commissionManager:      InitCommissionManager(database, logger),
-		publisher:              publisher,
 		centrifugoSecret:       centrifugoSecret,
 
 		rep: repository,
 		geo: geoService,
 		ctx: context.TODO(),
+		pub: publisher,
 	}
 
 	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)
@@ -1159,7 +1161,13 @@ func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification
 			return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
 		}
 
-		if err = om.publisher.Publish(context.Background(), om.getPublisherOrder(o)); err != nil {
+		err = om.pub.Publish(
+			constant.PayOneTopicNotifyPaymentName,
+			om.getPublisherOrder(o),
+			amqp.Table{"x-retry-count": int32(0)},
+		)
+
+		if err != nil {
 			return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
 		}
 	}

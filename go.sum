@@ -60,6 +60,14 @@ github.com/ProtocolONE/payone-repository v1.0.80 h1:u2yGCnUAVfe1wo7FIymhXL9BNIrJ
 github.com/ProtocolONE/payone-repository v1.0.80/go.mod h1:s/l7m2TcXaYrxPxsii+Y9Tnbm1z7HV4mUrpdI+RwSQM=
 github.com/ProtocolONE/payone-repository v1.0.81 h1:CHzbZqtkpvQl3hMx2FRFN9g0lZm79NkMdrbQ+7JoBQ0=
 github.com/ProtocolONE/payone-repository v1.0.81/go.mod h1:s/l7m2TcXaYrxPxsii+Y9Tnbm1z7HV4mUrpdI+RwSQM=
+github.com/ProtocolONE/payone-repository v1.0.82 h1:zY9RqapnvIjde9VdAL3+v8tqw1HYgStBgrx3mbbFMlg=
+github.com/ProtocolONE/payone-repository v1.0.82/go.mod h1:s/l7m2TcXaYrxPxsii+Y9Tnbm1z7HV4mUrpdI+RwSQM=
+github.com/ProtocolONE/payone-repository v1.0.83 h1:HKBYdPt0dI3x/kFWpHP/A3onLEhnnQ/7CcJLv5A6zt0=
+github.com/ProtocolONE/payone-repository v1.0.83/go.mod h1:s/l7m2TcXaYrxPxsii+Y9Tnbm1z7HV4mUrpdI+RwSQM=
+github.com/ProtocolONE/rabbitmq v0.0.0-20190129094754-213bcbf78dd0 h1:2YRH8u+iHBFIJ06x7BB2rLFbCufBWnf1oqDRQFLowpw=
+github.com/ProtocolONE/rabbitmq v0.0.0-20190129094754-213bcbf78dd0/go.mod h1:IfYCs6y+ga+YCqwzkT2IvKPIDaq9atKKC1i9QKOsALg=
+github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c h1:jiH5dizqc7/6rM8WJpKbgcVOMMXohKvenUWBhCN2gyI=
+github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c/go.mod h1:ZnV4uG7YnB4iU8c8co8XU4w7xL0sGaGEw5d9g1THmwk=
 github.com/PuerkitoBio/purell v1.1.0/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
 github.com/Shopify/sarama v1.20.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
@@ -114,6 +122,7 @@ github.com/go-playground/universal-translator v0.16.0 h1:X++omBR/4cE2MNg91AoC3rm
 github.com/go-playground/universal-translator v0.16.0/go.mod h1:1AnU7NaIRDWWzGEKwgtJRd2xk99HeFyHw3yid4rvQIY=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/gogo/protobuf v1.1.1/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
+github.com/gogo/protobuf v1.2.0 h1:xU6/SpYbvkNYiptHJYEDRseDLvYE7wSqhYYNy0QSUzI=
 github.com/gogo/protobuf v1.2.0/go.mod h1:r8qH/GZQm5c6nD/R0oafs1akxWv10x8SbQlK7atdtwQ=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/lint v0.0.0-20180702182130-06c8688daad7/go.mod h1:tluoj9z5200jBnyusfRPU2LqT6J+DAorxEvtC7LHB+E=

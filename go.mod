@@ -3,7 +3,8 @@ module github.com/ProtocolONE/p1pay.api
 require (
 	github.com/DataDog/zstd v1.3.5 // indirect
 	github.com/ProtocolONE/geoip-service v0.0.0-20190116165633-2d774a0d7ce9
-	github.com/ProtocolONE/payone-repository v1.0.81
+	github.com/ProtocolONE/payone-repository v1.0.83
+	github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c
 	github.com/Shopify/sarama v1.20.1
 	github.com/centrifugal/gocent v2.0.2+incompatible
 	github.com/coreos/etcd v3.3.11+incompatible // indirect
@@ -21,7 +22,6 @@ require (
 	github.com/go-openapi/swag v0.18.0 // indirect
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
-	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/golang/lint v0.0.0-20181217174547-8f45f776aaf1 // indirect
 	github.com/golang/mock v1.2.0 // indirect
 	github.com/golang/protobuf v1.2.1-0.20181128192352-1d3f30b51784 // indirects
@@ -49,7 +49,7 @@ require (
 	github.com/sidmal/slug v1.4.2
 	github.com/sirupsen/logrus v1.3.0 // indirect
 	github.com/spf13/afero v1.2.0 // indirect
-	github.com/streadway/amqp v0.0.0-20181205114330-a314942b2fd9 // indirect
+	github.com/streadway/amqp v0.0.0-20181205114330-a314942b2fd9
 	github.com/swaggo/swag v1.4.0 // indirect
 	github.com/ttacon/builder v0.0.0-20170518171403-c099f663e1c2 // indirect
 	github.com/ttacon/libphonenumber v1.0.1

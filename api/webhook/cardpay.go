@@ -20,14 +20,14 @@ type CardPayWebHook struct {
 
 func (wh *WebHook) InitCardPayWebHookRoutes() *WebHook {
 	cpWebHook := &CardPayWebHook{
-		WebHook:      wh,
+		WebHook: wh,
 		orderManager: manager.InitOrderManager(
 			wh.database,
 			wh.logger,
 			wh.geoDbReader,
 			wh.pspAccountingCurrencyA3,
 			wh.paymentSystemSettings,
-			wh.publisher,
+			wh.pub,
 			wh.centrifugoSecret,
 			wh.rep,
 			wh.geo,

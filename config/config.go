@@ -50,6 +50,7 @@ type Config struct {
 	HttpScheme              string `envconfig:"HTTP_SCHEME" default:"https"`
 	CentrifugoSecret        string `envconfig:"CENTRIFUGO_SECRET" required:"true"`
 	KubernetesHost          string `envconfig:"KUBERNETES_SERVICE_HOST" required:"false"`
+	AmqpAddress             string `envconfig:"AMQP_ADDRESS" required:"true" default:"amqp://127.0.0.1:5672"`
 }
 
 func NewConfig() (error, *Config) {
