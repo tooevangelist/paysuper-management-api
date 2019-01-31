@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
@@ -16,7 +15,6 @@ import (
 	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
 	"github.com/ProtocolONE/rabbitmq/pkg"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/micro/go-micro"
@@ -25,8 +23,6 @@ import (
 	"github.com/ttacon/libphonenumber"
 	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
-	"html/template"
-	"io"
 	"log"
 	"net/http"
 	"time"
@@ -35,32 +31,6 @@ import (
 const (
 	apiWebHookGroupPath = "/webhook"
 )
-
-var funcMap = template.FuncMap{
-	"For": func(start, end int) (stream chan int) {
-		stream = make(chan int)
-
-		go func() {
-			for i := start; i <= end; i++ {
-				stream <- i
-			}
-			close(stream)
-		}()
-
-		return
-	},
-	"Now": time.Now,
-	"Increment": func(i int, add int) int {
-		return i + add
-	},
-	"BsonObjectIdToString": func(objectId bson.ObjectId) string {
-		return objectId.Hex()
-	},
-	"Marshal": func(v interface{}) template.JS {
-		a, _ := json.Marshal(v)
-		return template.JS(a)
-	},
-}
 
 type ServerInitParams struct {
 	Config                  *config.Jwt
@@ -72,10 +42,6 @@ type ServerInitParams struct {
 	CentrifugoSecret        string
 	K8sHost                 string
 	AmqpAddress             string
-}
-
-type Template struct {
-	templates *template.Template
 }
 
 type Merchant struct {
@@ -109,7 +75,6 @@ type Api struct {
 	serviceContext context.Context
 	serviceCancel  context.CancelFunc
 
-	publisher   micro.Publisher //todo: delete
 	repository  repository.RepositoryService
 	geoService  proto.GeoIpService
 	AmqpAddress string
@@ -139,10 +104,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 
 	api.InitService()
 
-	renderer := &Template{
-		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("web/template/*.html")),
-	}
-	api.Http.Renderer = renderer
 	api.Http.Static("/", "web/static")
 	api.Http.Static("/spec", "spec")
 
@@ -267,10 +228,6 @@ func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.Hand
 
 		return next(c)
 	}
-}
-
-func (t *Template) Render(w io.Writer, name string, data interface{}, ctx echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
 }
 
 func (api *Api) InitWebHooks() {
