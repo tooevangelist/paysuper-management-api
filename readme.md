@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ProtocolONE/p1pay.api.svg?branch=master)](https://travis-ci.org/ProtocolONE/p1pay.api)[![codecov](https://codecov.io/gh/ProtocolONE/p1pay.api/branch/master/graph/badge.svg)](https://codecov.io/gh/ProtocolONE/p1pay.api)[![Go Report Card](https://goreportcard.com/badge/github.com/ProtocolONE/p1pay.api)](https://goreportcard.com/report/github.com/ProtocolONE/p1pay.api)
+
 The documentation under construction
 
 ### Accounting currency
