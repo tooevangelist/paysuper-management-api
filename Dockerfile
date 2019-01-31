@@ -5,7 +5,6 @@ RUN apk add bash ca-certificates git
 WORKDIR /application
 
 ENV GO111MODULE=on
-ENV MAXMIND_GEOIP_DB_PATH=/application/etc/maxmind/GeoLite2-City.mmdb
 ENV PSP_ACCOUNTING_CURRENCY=EUR
 ENV PATH_TO_PS_CONFIG=/application/config/parameters/parameters.yml
 ENV AMQP_ADDRESS=amqp://p1pay-rabbitmq

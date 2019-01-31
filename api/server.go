@@ -21,7 +21,6 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/micro/go-micro"
 	k8s "github.com/micro/kubernetes/go/micro"
-	"github.com/oschwald/geoip2-golang"
 	"github.com/sidmal/slug"
 	"github.com/ttacon/libphonenumber"
 	"go.uber.org/zap"
@@ -67,7 +66,6 @@ type ServerInitParams struct {
 	Config                  *config.Jwt
 	Database                dao.Database
 	Logger                  *zap.SugaredLogger
-	GeoDbReader             *geoip2.Reader
 	PaymentSystemConfig     map[string]interface{}
 	PSPAccountingCurrencyA3 string
 	HttpScheme              string
@@ -101,7 +99,6 @@ type Api struct {
 	logger                  *zap.SugaredLogger
 	validate                *validator.Validate
 	accessRouteGroup        *echo.Group
-	geoDbReader             *geoip2.Reader
 	PaymentSystemConfig     map[string]interface{}
 	pspAccountingCurrencyA3 string
 	paymentSystemsSettings  *payment_system.PaymentSystemSetting
@@ -131,7 +128,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		database:                p.Database,
 		logger:                  p.Logger,
 		validate:                validator.New(),
-		geoDbReader:             p.GeoDbReader,
 		PaymentSystemConfig:     p.PaymentSystemConfig,
 		pspAccountingCurrencyA3: p.PSPAccountingCurrencyA3,
 		httpScheme:              p.HttpScheme,
@@ -294,7 +290,6 @@ func (api *Api) InitWebHooks() {
 		api.database,
 		api.logger,
 		api.validate,
-		api.geoDbReader,
 		api.pspAccountingCurrencyA3,
 		whGroup,
 		api.PaymentSystemConfig,

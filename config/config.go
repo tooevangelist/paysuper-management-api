@@ -26,25 +26,15 @@ type Jwt struct {
 	Algorithm             string `envconfig:"JWT_ALGORITHM"`
 }
 
-type GeoIP struct {
-	DBPath string `envconfig:"MAXMIND_GEOIP_DB_PATH"`
-}
-
-type KafkaConfig struct {
-	Brokers []string `envconfig:"KAFKA_BROKERS" default:"localhost:9092"`
-}
-
 type PaymentSystemConfig struct {
 	Path   string `envconfig:"PATH_TO_PS_CONFIG"`
 	Config map[string]interface{}
 }
 
 type Config struct {
-	GeoIP
 	Jwt
 	Database
 	PaymentSystemConfig
-	KafkaConfig
 
 	PSPAccountingCurrencyA3 string `envconfig:"PSP_ACCOUNTING_CURRENCY"`
 	HttpScheme              string `envconfig:"HTTP_SCHEME" default:"https"`

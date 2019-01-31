@@ -24,7 +24,6 @@ func (wh *WebHook) InitCardPayWebHookRoutes() *WebHook {
 		orderManager: manager.InitOrderManager(
 			wh.database,
 			wh.logger,
-			wh.geoDbReader,
 			wh.pspAccountingCurrencyA3,
 			wh.paymentSystemSettings,
 			wh.pub,

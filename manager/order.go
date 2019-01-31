@@ -19,7 +19,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/oschwald/geoip2-golang"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 	"log"
@@ -72,7 +71,6 @@ const (
 type OrderManager struct {
 	*Manager
 
-	geoDbReader            *geoip2.Reader
 	projectManager         *ProjectManager
 	paymentSystemManager   *PaymentSystemManager
 	paymentMethodManager   *PaymentMethodManager
@@ -119,7 +117,6 @@ type OrderHttp struct {
 func InitOrderManager(
 	database dao.Database,
 	logger *zap.SugaredLogger,
-	geoDbReader *geoip2.Reader,
 	pspAccountingCurrencyA3 string,
 	paymentSystemsSettings *payment_system.PaymentSystemSetting,
 	publisher *rabbitmq.Broker,
@@ -129,7 +126,6 @@ func InitOrderManager(
 ) *OrderManager {
 	om := &OrderManager{
 		Manager:                &Manager{Database: database, Logger: logger},
-		geoDbReader:            geoDbReader,
 		projectManager:         InitProjectManager(database, logger),
 		paymentSystemManager:   InitPaymentSystemManager(database, logger),
 		paymentMethodManager:   InitPaymentMethodManager(database, logger),

@@ -8,7 +8,6 @@ import (
 	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
 	"github.com/ProtocolONE/rabbitmq/pkg"
 	"github.com/labstack/echo"
-	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
 	"io/ioutil"
@@ -18,7 +17,6 @@ type WebHook struct {
 	database                dao.Database
 	logger                  *zap.SugaredLogger
 	validate                *validator.Validate
-	geoDbReader             *geoip2.Reader
 	pspAccountingCurrencyA3 string
 	webHookGroup            *echo.Group
 	webHookRawBody          string
@@ -36,7 +34,6 @@ func InitWebHook(
 	database dao.Database,
 	logger *zap.SugaredLogger,
 	validate *validator.Validate,
-	geoDbReader *geoip2.Reader,
 	pspAccountingCurrencyA3 string,
 	webHookGroup *echo.Group,
 	paymentSystemConfig map[string]interface{},
@@ -50,7 +47,6 @@ func InitWebHook(
 		database:                database,
 		logger:                  logger,
 		validate:                validate,
-		geoDbReader:             geoDbReader,
 		pspAccountingCurrencyA3: pspAccountingCurrencyA3,
 		webHookGroup:            webHookGroup,
 		paymentSystemConfig:     paymentSystemConfig,

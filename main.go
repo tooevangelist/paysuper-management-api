@@ -9,7 +9,6 @@ import (
 	_ "github.com/micro/go-plugins/broker/rabbitmq"
 	_ "github.com/micro/go-plugins/registry/kubernetes"
 	_ "github.com/micro/go-plugins/transport/grpc"
-	"github.com/oschwald/geoip2-golang"
 	"go.uber.org/zap"
 	"log"
 	"os"
@@ -60,29 +59,26 @@ func main() {
 	if err != nil {
 		log.Fatalf("Application logger initialization failed with error: %s\n", err)
 	}
+
 	defer func() {
 		if err := logger.Sync(); err != nil {
 			return
 		}
 	}()
+
 	sugar := logger.Sugar()
 
-	geoDbReader, err := geoip2.Open(conf.GeoIP.DBPath)
-
-	if err != nil {
-		log.Fatalf("geo ip database load failed with error: %s\n", err)
-	}
 	defer func() {
-		if err := geoDbReader.Close(); err != nil {
+		if err := sugar.Sync(); err != nil {
 			return
 		}
 	}()
+
 
 	sInit := &api.ServerInitParams{
 		Config:                  &conf.Jwt,
 		Database:                db,
 		Logger:                  sugar,
-		GeoDbReader:             geoDbReader,
 		PaymentSystemConfig:     conf.PaymentSystemConfig.Config,
 		PSPAccountingCurrencyA3: conf.PSPAccountingCurrencyA3,
 		HttpScheme:              conf.HttpScheme,

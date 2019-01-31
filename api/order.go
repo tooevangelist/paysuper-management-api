@@ -54,7 +54,6 @@ func (api *Api) InitOrderV1Routes() *Api {
 		orderManager: manager.InitOrderManager(
 			api.database,
 			api.logger,
-			api.geoDbReader,
 			api.pspAccountingCurrencyA3,
 			api.paymentSystemsSettings,
 			api.notifierPub,
