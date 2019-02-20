@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/ttacon/libphonenumber"
 	"gopkg.in/go-playground/validator.v9"
 )

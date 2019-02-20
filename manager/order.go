@@ -6,22 +6,21 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
-	"github.com/ProtocolONE/p1pay.api/database/dao"
-	"github.com/ProtocolONE/p1pay.api/database/model"
-	"github.com/ProtocolONE/p1pay.api/payment_system"
-	"github.com/ProtocolONE/p1pay.api/payment_system/entity"
-	"github.com/ProtocolONE/p1pay.api/utils"
-	"github.com/ProtocolONE/payone-repository/pkg/constant"
-	"github.com/ProtocolONE/payone-repository/pkg/proto/billing"
-	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
-	"github.com/ProtocolONE/payone-repository/tools"
 	"github.com/ProtocolONE/rabbitmq/pkg"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/paysuper/paysuper-management-api/database/dao"
+	"github.com/paysuper/paysuper-management-api/database/model"
+	"github.com/paysuper/paysuper-management-api/payment_system"
+	"github.com/paysuper/paysuper-management-api/payment_system/entity"
+	"github.com/paysuper/paysuper-management-api/utils"
+	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
+	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/entity"
+	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
+	"github.com/paysuper/paysuper-recurring-repository/tools"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
-	"log"
 	"net/url"
 	"sort"
 	"strconv"
@@ -340,7 +339,8 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 
 // Post action after process order to form data to json order create response
 func (om *OrderManager) JsonOrderCreatePostProcess(o *model.Order, oh *OrderHttp) (*model.JsonOrderCreateResponse, error) {
-	pmPrepData, err := om.GetOrderByIdWithPaymentMethods(o, oh.Host)
+	pmPrepData := &model.OrderFormRendering{}
+	err := errors.New("fuck") //om.GetOrderByIdWithPaymentMethods(o, oh.Host)
 
 	if err != nil {
 		return nil, err
@@ -494,7 +494,7 @@ func (om *OrderManager) FindById(id string) *model.Order {
 	return o
 }
 
-func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order, host string) (*model.OrderFormRendering, error) {
+/*func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order, host string) (*model.OrderFormRendering, error) {
 	projectPms, err := om.rep.FindPaymentMethodsByCurrency(om.ctx, &repository.FindByIntValue{Value: int32(o.ProjectIncomeCurrency.CodeInt)})
 
 	if err != nil {
@@ -576,7 +576,7 @@ func (om *OrderManager) GetOrderByIdWithPaymentMethods(o *model.Order, host stri
 	}
 
 	return ofr, nil
-}
+}*/
 
 func (om *OrderManager) getPaymentMethod(order *model.OrderScalar, pms map[string][]*model.ProjectPaymentModes) (*model.ProjectPaymentModes, error) {
 	cpms, ok := pms[*order.PaymentMethod]
@@ -1002,7 +1002,9 @@ func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M 
 }
 
 func (om *OrderManager) ProcessCreatePayment(iData map[string]interface{}, psSettings map[string]interface{}) *payment_system.PaymentResponse {
-	var err error
+	return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, "some error")
+
+	/*var err error
 
 	if err = om.validateCreatePaymentData(iData); err != nil {
 		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, err.Error())
@@ -1064,7 +1066,7 @@ func (om *OrderManager) ProcessCreatePayment(iData map[string]interface{}, psSet
 		if v, ok := iData["store_data"]; ok && v.(bool) == true {
 			req := &repository.SavedCardRequest{
 				Account:    o.ProjectAccount,
-				ProjectId:  tools.ObjectIdToByte(o.Project.Id),
+				ProjectId:  o.Project.Id.Hex(),
 				Pan:        data[entity.BankCardFieldPan],
 				CardHolder: data[entity.BankCardFieldHolder],
 				Expire: &billing.CardExpire{
@@ -1110,7 +1112,7 @@ func (om *OrderManager) ProcessCreatePayment(iData map[string]interface{}, psSet
 		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
 	}
 
-	return res
+	return res*/
 }
 
 func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification, psSettings map[string]interface{}) *payment_system.PaymentResponse {

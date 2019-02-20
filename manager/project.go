@@ -2,9 +2,9 @@ package manager
 
 import (
 	"errors"
-	"github.com/ProtocolONE/p1pay.api/database/dao"
-	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-management-api/database/dao"
+	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/sidmal/slug"
 	"go.uber.org/zap"
 	"strings"
@@ -369,13 +369,13 @@ func (pm *ProjectManager) FindFixedPackage(filters *model.FixedPackageFilters) [
 		}
 
 		ffp := &model.FilteredFixedPackage{
-			Id: vm[model.DBFieldId].(string),
-			Name: vm[model.DBFieldName].(string),
+			Id:    vm[model.DBFieldId].(string),
+			Name:  vm[model.DBFieldName].(string),
 			Price: vm[model.DBFieldPrice].(float64),
 			Currency: &model.SimpleCurrency{
-				Name: c.Name,
+				Name:    c.Name,
 				CodeInt: c.CodeInt,
-				CodeA3: c.CodeA3,
+				CodeA3:  c.CodeA3,
 			},
 		}
 

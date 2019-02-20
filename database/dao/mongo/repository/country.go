@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-management-api/database/model"
 )
 
 func (rep *Repository) FindCountryById(codeInt int) (*model.Country, error) {
@@ -36,4 +36,3 @@ func (rep *Repository) FindAllCountries(limit int, offset int) ([]*model.Country
 
 	return c, err
 }
-

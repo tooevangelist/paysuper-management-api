@@ -1,8 +1,10 @@
 package api
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/model"
+	"bytes"
+	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/labstack/echo"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 )
@@ -40,3 +42,16 @@ func (api *Api) LimitOffsetSortMiddleware(next echo.HandlerFunc) echo.HandlerFun
 		return next(ctx)
 	}
 }
+
+func (api *Api) RawBodyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		buf, _ := ioutil.ReadAll(ctx.Request().Body)
+		rdr := ioutil.NopCloser(bytes.NewBuffer(buf))
+
+		ctx.Request().Body = rdr
+		api.rawBody = string(buf)
+
+		return next(ctx)
+	}
+}
+

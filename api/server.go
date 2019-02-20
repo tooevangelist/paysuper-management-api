@@ -5,12 +5,13 @@ import (
 	"errors"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
-	"github.com/ProtocolONE/p1pay.api/api/webhook"
-	"github.com/ProtocolONE/p1pay.api/config"
-	"github.com/ProtocolONE/p1pay.api/database/dao"
-	"github.com/ProtocolONE/p1pay.api/database/model"
-	"github.com/ProtocolONE/p1pay.api/payment_system"
-	"github.com/ProtocolONE/p1pay.api/utils"
+	"github.com/paysuper/paysuper-management-api/config"
+	"github.com/paysuper/paysuper-management-api/database/dao"
+	"github.com/paysuper/paysuper-management-api/database/model"
+	"github.com/paysuper/paysuper-management-api/payment_system"
+	"github.com/paysuper/paysuper-management-api/utils"
+	"github.com/ProtocolONE/payone-billing-service/pkg"
+	"github.com/ProtocolONE/payone-billing-service/pkg/proto/grpc"
 	"github.com/ProtocolONE/payone-repository/pkg/constant"
 	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
 	"github.com/ProtocolONE/rabbitmq/pkg"
@@ -65,6 +66,7 @@ type Api struct {
 	logger                  *zap.SugaredLogger
 	validate                *validator.Validate
 	accessRouteGroup        *echo.Group
+	webhookRouteGroup       *echo.Group
 	PaymentSystemConfig     map[string]interface{}
 	pspAccountingCurrencyA3 string
 	paymentSystemsSettings  *payment_system.PaymentSystemSetting
@@ -75,12 +77,15 @@ type Api struct {
 	serviceContext context.Context
 	serviceCancel  context.CancelFunc
 
-	repository  repository.RepositoryService
-	geoService  proto.GeoIpService
+	repository     repository.RepositoryService
+	geoService     proto.GeoIpService
+	billingService grpc.BillingService
+
 	AmqpAddress string
 	notifierPub *rabbitmq.Broker
 
 	k8sHost string
+	rawBody string
 
 	Merchant
 	GetParams
@@ -117,6 +122,19 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}))
 	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
 
+	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
+	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
+		data := []interface{}{
+			"request_headers", utils.RequestResponseHeadersToString(ctx.Request().Header),
+			"request_body", string(reqBody),
+			"response_headers", utils.RequestResponseHeadersToString(ctx.Response().Header()),
+			"response_body", string(resBody),
+		}
+
+		api.logger.Infow(ctx.Path(), data...)
+	}))
+	api.webhookRouteGroup.Use(api.RawBodyMiddleware)
+
 	api.Http.Use(api.LimitOffsetSortMiddleware)
 	api.Http.Use(middleware.Logger())
 	api.Http.Use(middleware.Recover())
@@ -130,10 +148,9 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitMerchantRoutes().
 		InitProjectRoutes().
 		InitOrderV1Routes().
-		InitPaymentMethodRoutes()
+		InitPaymentMethodRoutes().
+		InitCardPayWebHookRoutes()
 
-	// init webhook endpoints section
-	api.InitWebHooks()
 
 	api.Http.GET("/docs", func(ctx echo.Context) error {
 		return ctx.Render(http.StatusOK, "docs.html", map[string]interface{}{})
@@ -189,6 +206,7 @@ func (api *Api) InitService() {
 
 	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, api.service.Client())
 	api.geoService = proto.NewGeoIpService(geoip.ServiceName, api.service.Client())
+	api.billingService = grpc.NewBillingService(pkg.ServiceName, api.service.Client())
 
 	pub, err := rabbitmq.NewBroker(api.AmqpAddress)
 
@@ -228,35 +246,4 @@ func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.Hand
 
 		return next(c)
 	}
-}
-
-func (api *Api) InitWebHooks() {
-	whGroup := api.Http.Group(apiWebHookGroupPath)
-	whGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
-		data := []interface{}{
-			"request_headers", utils.RequestResponseHeadersToString(ctx.Request().Header),
-			"request_body", string(reqBody),
-			"response_headers", utils.RequestResponseHeadersToString(ctx.Response().Header()),
-			"response_body", string(resBody),
-		}
-
-		api.logger.Infow(ctx.Path(), data...)
-	}))
-
-	wh := webhook.InitWebHook(
-		api.database,
-		api.logger,
-		api.validate,
-		api.pspAccountingCurrencyA3,
-		whGroup,
-		api.PaymentSystemConfig,
-		api.paymentSystemsSettings,
-		api.notifierPub,
-		api.centrifugoSecret,
-		api.repository,
-		api.geoService,
-	)
-
-	whGroup.Use(wh.RawBodyMiddleware)
-	wh.InitCardPayWebHookRoutes()
 }

@@ -2,9 +2,9 @@ package migrations
 
 import (
 	"errors"
-	"github.com/ProtocolONE/p1pay.api/database/model"
-	"github.com/ProtocolONE/p1pay.api/manager"
-	"github.com/ProtocolONE/p1pay.api/payment_system"
+	"github.com/paysuper/paysuper-management-api/database/model"
+	"github.com/paysuper/paysuper-management-api/manager"
+	"github.com/paysuper/paysuper-management-api/payment_system"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/xakep666/mongo-migrate"
