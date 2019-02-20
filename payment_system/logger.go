@@ -3,7 +3,7 @@ package payment_system
 import (
 	"bytes"
 	"context"
-	"github.com/ProtocolONE/p1pay.api/utils"
+	"github.com/paysuper/paysuper-management-api/utils"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"

@@ -1,7 +1,7 @@
 package migrations
 
 import (
-	"github.com/ProtocolONE/p1pay.api/manager"
+	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/globalsign/mgo"
 	"github.com/xakep666/mongo-migrate"
 )

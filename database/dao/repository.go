@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-management-api/database/model"
 )
 
 type Repository interface {

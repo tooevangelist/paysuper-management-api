@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-management-api/database/model"
 )
 
 func (rep *Repository) FindPaymentMethodById(id bson.ObjectId) (*model.PaymentMethod, error) {

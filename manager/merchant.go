@@ -1,9 +1,9 @@
 package manager
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/dao"
-	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-management-api/database/dao"
+	"github.com/paysuper/paysuper-management-api/database/model"
 	"go.uber.org/zap"
 	"time"
 )

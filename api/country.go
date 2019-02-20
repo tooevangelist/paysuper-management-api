@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/ProtocolONE/p1pay.api/manager"
+	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/labstack/echo"
 	"net/http"
 	"strconv"

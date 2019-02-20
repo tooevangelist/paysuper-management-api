@@ -3,15 +3,15 @@ package manager
 import (
 	"errors"
 	"fmt"
-	"github.com/ProtocolONE/p1pay.api/database/dao"
-	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-management-api/database/dao"
+	"github.com/paysuper/paysuper-management-api/database/model"
 	"go.uber.org/zap"
 )
 
 const (
 	paymentMethodErrorsPaymentSystemsNotFound = "payment systems not found"
-	paymentMethodErrorsPaymentSystemNotFound = "payment system with id \"%s\" not found"
+	paymentMethodErrorsPaymentSystemNotFound  = "payment system with id \"%s\" not found"
 )
 
 type PaymentMethodManager struct {
@@ -21,7 +21,7 @@ type PaymentMethodManager struct {
 
 func InitPaymentMethodManager(database dao.Database, logger *zap.SugaredLogger) *PaymentMethodManager {
 	pmm := &PaymentMethodManager{
-		Manager: &Manager{Database: database, Logger: logger},
+		Manager:              &Manager{Database: database, Logger: logger},
 		paymentSystemManager: InitPaymentSystemManager(database, logger),
 	}
 

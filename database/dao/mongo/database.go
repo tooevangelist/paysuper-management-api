@@ -1,9 +1,9 @@
 package mongo
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/dao"
-	"github.com/ProtocolONE/p1pay.api/database/dao/mongo/repository"
 	"github.com/globalsign/mgo"
+	"github.com/paysuper/paysuper-management-api/database/dao"
+	"github.com/paysuper/paysuper-management-api/database/dao/mongo/repository"
 	"sync"
 )
 
@@ -61,10 +61,10 @@ func (s *Source) Clone() (dao.Database, error) {
 	newSession := s.session.Copy()
 
 	clone := &Source{
-		name:       s.name,
-		connection: s.connection,
-		session:    newSession,
-		database:   newSession.DB(s.database.Name),
+		name:         s.name,
+		connection:   s.connection,
+		session:      newSession,
+		database:     newSession.DB(s.database.Name),
 		repositories: map[string]*repository.Repository{},
 	}
 
@@ -83,9 +83,9 @@ func (s *Source) Repository(name string) dao.Repository {
 		c, err := s.Clone()
 
 		if err != nil {
-			rep = &repository.Repository{ Collection: s.database.C(name)}
+			rep = &repository.Repository{Collection: s.database.C(name)}
 		} else {
-			rep = &repository.Repository{ Collection: c.(*Source).database.C(name)}
+			rep = &repository.Repository{Collection: c.(*Source).database.C(name)}
 		}
 
 		s.repositories[name] = rep
@@ -103,4 +103,3 @@ func (s *Source) Driver() interface{} {
 func (s *Source) Database() interface{} {
 	return s.database
 }
-

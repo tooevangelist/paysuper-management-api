@@ -1,9 +1,12 @@
 package api
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/model"
-	"github.com/ProtocolONE/p1pay.api/manager"
-	"github.com/ProtocolONE/p1pay.api/payment_system"
+	"context"
+	"github.com/paysuper/paysuper-management-api/database/model"
+	"github.com/paysuper/paysuper-management-api/manager"
+	"github.com/paysuper/paysuper-management-api/payment_system"
+	"github.com/ProtocolONE/payone-billing-service/pkg/proto/billing"
+	"github.com/ProtocolONE/payone-billing-service/pkg/proto/grpc"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/micro/go-micro"
@@ -54,7 +57,6 @@ func (api *Api) InitOrderV1Routes() *Api {
 		orderManager: manager.InitOrderManager(
 			api.database,
 			api.logger,
-			api.geoDbReader,
 			api.pspAccountingCurrencyA3,
 			api.paymentSystemsSettings,
 			api.notifierPub,
@@ -108,26 +110,26 @@ func (api *Api) InitOrderV1Routes() *Api {
 // @Failure 500 {string} html "Redirect user to page with error description"
 // @Router /order/create [post]
 func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
-	order := &model.OrderScalar{
-		CreateOrderIp: ctx.RealIP(),
-		IsJsonRequest: false,
+	req := &billing.OrderCreateRequest{
+		PayerIp: ctx.RealIP(),
+		IsJson:  false,
 	}
 
-	if err := (&OrderFormBinder{}).Bind(order, ctx); err != nil {
+	if err := (&OrderFormBinder{}).Bind(req, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Request data invalid")
 	}
 
-	if err := oApiV1.validate.Struct(order); err != nil {
+	if err := oApiV1.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
-	nOrder, err := oApiV1.orderManager.Process(order)
+	order, err := oApiV1.billingService.OrderCreateProcess(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	rUrl := "/order/" + nOrder.Id.Hex()
+	rUrl := "/order/" + order.Id
 
 	return ctx.Redirect(http.StatusFound, rUrl)
 }
@@ -143,31 +145,31 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 // @Failure 500 {object} model.Error "Object with error message"
 // @Router /api/v1/order [post]
 func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
-	order := &model.OrderScalar{
-		CreateOrderIp: ctx.RealIP(),
-		IsJsonRequest: true,
+	req := &billing.OrderCreateRequest{
+		PayerIp: ctx.RealIP(),
+		IsJson:  true,
 	}
 
-	if err := (&OrderJsonBinder{}).Bind(order, ctx); err != nil {
+	if err := (&OrderJsonBinder{}).Bind(req, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
 
-	if err := oApiV1.validate.Struct(order); err != nil {
+	if err := oApiV1.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
-	nOrder, err := oApiV1.orderManager.Process(order)
+	order, err := oApiV1.billingService.OrderCreateProcess(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	oh := &manager.OrderHttp{
-		Host:   ctx.Request().Host,
+	req1 := &grpc.PaymentFormJsonDataRequest{
+		OrderId: order.Id,
 		Scheme: oApiV1.httpScheme,
+		Host:   ctx.Request().Host,
 	}
-
-	jo, err := oApiV1.orderManager.JsonOrderCreatePostProcess(nOrder, oh)
+	jo, err := oApiV1.billingService.PaymentFormJsonDataProcess(context.TODO(), req1)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -183,18 +185,12 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
 
-	o := oApiV1.orderManager.FindById(id)
-
-	if o == nil {
-		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
-	}
-
-	oh := &manager.OrderHttp{
-		Host:   ctx.Request().Host,
+	req := &grpc.PaymentFormJsonDataRequest{
+		OrderId: id,
 		Scheme: oApiV1.httpScheme,
+		Host:   ctx.Request().Host,
 	}
-
-	jo, err := oApiV1.orderManager.JsonOrderCreatePostProcess(o, oh)
+	jo, err := oApiV1.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -324,17 +320,21 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 // @Failure 500 {object} payment_system.PaymentResponse "contain error description about error on PSP (P1) side"
 // @Router /api/v1/payment [post]
 func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
-	data := make(map[string]interface{})
+	data := make(map[string]string)
 
-	if err := ctx.Bind(&data); err != nil {
+	if err := (&PaymentCreateProcessBinder{}).Bind(data, ctx); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageInvalidRequestData})
 	}
 
-	resp := oApiV1.orderManager.ProcessCreatePayment(data, oApiV1.PaymentSystemConfig)
+	rsp, err := oApiV1.billingService.PaymentCreateProcess(context.TODO(), &grpc.PaymentCreateRequest{Data: data})
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageUnknownError})
+	}
 
 	var httpStatus int
 
-	switch resp.Status {
+	switch rsp.Status {
 	case payment_system.PaymentStatusErrorValidation:
 		httpStatus = http.StatusBadRequest
 		break
@@ -348,7 +348,7 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 		httpStatus = http.StatusOK
 	}
 
-	return ctx.JSON(httpStatus, resp)
+	return ctx.JSON(httpStatus, rsp)
 }
 
 // @Summary Get revenue dynamics

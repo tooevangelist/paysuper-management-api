@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/paysuper/paysuper-management-api/database/model"
 	"gopkg.in/mgo.v2/bson"
 )
 

@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-management-api/database/model"
 )
 
 func (rep *Repository) FindCurrencyById(codeInt int) (*model.Currency, error) {
@@ -18,7 +18,7 @@ func (rep *Repository) FindCurrenciesByName(name string) ([]*model.Currency, err
 	r := bson.RegEx{Pattern: ".*" + name + ".*", Options: "i"}
 	err := rep.Collection.Find(
 		bson.M{
-			"$or": []bson.M{ { "code_a3": r }, { "name.en": r }, { "name.ru": r }},
+			"$or":       []bson.M{{"code_a3": r}, {"name.en": r}, {"name.ru": r}},
 			"is_active": true,
 		}).All(&c)
 

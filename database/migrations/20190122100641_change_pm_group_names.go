@@ -1,7 +1,7 @@
 package migrations
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/model"
+	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/ProtocolONE/payone-repository/pkg/constant"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"

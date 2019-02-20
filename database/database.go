@@ -1,10 +1,10 @@
 package database
 
 import (
-	"github.com/ProtocolONE/p1pay.api/config"
-	"github.com/ProtocolONE/p1pay.api/database/dao"
-	"github.com/ProtocolONE/p1pay.api/database/dao/mongo"
-	_ "github.com/ProtocolONE/p1pay.api/database/migrations"
+	"github.com/paysuper/paysuper-management-api/config"
+	"github.com/paysuper/paysuper-management-api/database/dao"
+	"github.com/paysuper/paysuper-management-api/database/dao/mongo"
+	_ "github.com/paysuper/paysuper-management-api/database/migrations"
 	"github.com/globalsign/mgo"
 	"github.com/xakep666/mongo-migrate"
 )

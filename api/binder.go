@@ -3,7 +3,9 @@ package api
 import (
 	"bytes"
 	"errors"
-	"github.com/ProtocolONE/p1pay.api/database/model"
+	"fmt"
+	"github.com/paysuper/paysuper-management-api/database/model"
+	"github.com/ProtocolONE/payone-billing-service/pkg/proto/billing"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"io/ioutil"
@@ -20,12 +22,10 @@ const (
 )
 
 type OrderFormBinder struct{}
-
 type OrderJsonBinder struct{}
-
 type OrderRevenueDynamicRequestBinder struct{}
-
-type OrderAccountingPaymentRequestBinder struct {}
+type OrderAccountingPaymentRequestBinder struct{}
+type PaymentCreateProcessBinder struct{}
 
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	db := new(echo.DefaultBinder)
@@ -35,14 +35,14 @@ func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	}
 
 	params, err := ctx.FormParams()
-	addParams := make(map[string]interface{})
+	addParams := make(map[string]string)
 	rawParams := make(map[string]string)
 
 	if err != nil {
 		return err
 	}
 
-	o := i.(*model.OrderScalar)
+	o := i.(*billing.OrderCreateRequest)
 
 	for key, value := range params {
 		if _, ok := model.OrderReservedWords[key]; !ok {
@@ -53,7 +53,7 @@ func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	}
 
 	o.Other = addParams
-	o.RawRequestParams = rawParams
+	o.RawParams = rawParams
 
 	return
 }
@@ -78,7 +78,7 @@ func (cb *OrderJsonBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 		return err
 	}
 
-	i.(*model.OrderScalar).RawRequestBody = string(buf)
+	i.(*billing.OrderCreateRequest).RawBody = string(buf)
 
 	return
 }
@@ -162,4 +162,31 @@ func OrderPrepareAccountingPaymentRequest(rdr *model.RevenueDynamicRequest, ctx 
 	rdr.To = time.Unix(t, 0)
 
 	return rdr, nil
+}
+
+func (cb *PaymentCreateProcessBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+	db := new(echo.DefaultBinder)
+	untypedData := make(map[string]interface{})
+
+	if err = db.Bind(&untypedData, ctx); err != nil {
+		return
+	}
+
+	data := i.(map[string]string)
+
+	for k, v := range untypedData {
+		switch sv := v.(type) {
+		case bool:
+			data[k] = "0"
+
+			if sv == true {
+				data[k] = "1"
+			}
+			break
+		default:
+			data[k] = fmt.Sprintf("%v", sv)
+		}
+	}
+
+	return
 }

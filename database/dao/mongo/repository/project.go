@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/ProtocolONE/p1pay.api/database/model"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-management-api/database/model"
 )
 
 func (rep *Repository) InsertProject(p *model.Project) error {
@@ -40,7 +40,7 @@ func (rep *Repository) FindFixedPackageByFilters(filters *model.FixedPackageFilt
 	fpSection := "fixed_package." + filters.Region
 	qCond := bson.M{
 		"$and": []bson.M{
-			{ "$eq": []interface{}{"$$fixed_package.is_active", true} },
+			{"$eq": []interface{}{"$$fixed_package.is_active", true}},
 		},
 	}
 

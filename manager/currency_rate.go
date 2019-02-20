@@ -2,7 +2,7 @@ package manager
 
 import (
 	"errors"
-	"github.com/ProtocolONE/p1pay.api/database/dao"
+	"github.com/paysuper/paysuper-management-api/database/dao"
 	"go.uber.org/zap"
 )
 
