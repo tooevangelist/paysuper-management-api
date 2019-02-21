@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/ProtocolONE/payone-repository/pkg/proto/billing"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/entity"
 	"time"
 )
 
@@ -76,9 +76,9 @@ type PaymentMethodJsonOrderResponse struct {
 }
 
 type SavedCardResponse struct {
-	Id     string              `json:"id"`
-	Pan    string              `json:"pan"`
-	Expire *billing.CardExpire `json:"expire"`
+	Id     string             `json:"id"`
+	Pan    string             `json:"pan"`
+	Expire *entity.CardExpire `json:"expire"`
 }
 
 // Temporary struct for save backward compatibility for self hosted payment form

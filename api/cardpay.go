@@ -2,13 +2,13 @@ package api
 
 import (
 	"context"
+	"github.com/labstack/echo"
+	"github.com/paysuper/paysuper-billing-server/pkg"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/paysuper/paysuper-management-api/payment_system/entity"
-	"github.com/ProtocolONE/payone-billing-service/pkg"
-	"github.com/ProtocolONE/payone-billing-service/pkg/proto/billing"
-	"github.com/ProtocolONE/payone-billing-service/pkg/proto/grpc"
-	"github.com/labstack/echo"
 	"net/http"
 )
 
@@ -39,8 +39,8 @@ func (h *CardPayWebHook) paymentCallback(ctx echo.Context) error {
 	}
 
 	req := &grpc.PaymentNotifyRequest{
-		OrderId: st.MerchantOrder.Id,
-		Request: []byte(h.rawBody),
+		OrderId:   st.MerchantOrder.Id,
+		Request:   []byte(h.rawBody),
 		Signature: ctx.Request().Header.Get(entity.CardPayPaymentResponseHeaderSignature),
 	}
 

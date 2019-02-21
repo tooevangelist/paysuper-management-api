@@ -10,15 +10,14 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/globalsign/mgo/bson"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/payment_system"
 	"github.com/paysuper/paysuper-management-api/payment_system/entity"
 	"github.com/paysuper/paysuper-management-api/utils"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
-	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/entity"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
-	"github.com/paysuper/paysuper-recurring-repository/tools"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 	"net/url"
@@ -1550,14 +1549,14 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 	pOrder := &billing.Order{
 		Id: o.Id.Hex(),
 		Project: &billing.ProjectOrder{
-			Id:               tools.ObjectIdToByte(o.Project.Id),
+			Id:               o.Project.Id.Hex(),
 			Name:             o.Project.Name,
 			NotifyEmails:     o.Project.NotifyEmails,
 			SendNotifyEmail:  o.Project.SendNotifyEmail,
 			SecretKey:        o.Project.SecretKey,
 			CallbackProtocol: o.Project.CallbackProtocol,
 			Merchant: &billing.Merchant{
-				Id:         tools.ObjectIdToByte(o.Project.Merchant.Id),
+				Id:         o.Project.Merchant.Id.Hex(),
 				ExternalId: o.Project.Merchant.ExternalId,
 				Email:      o.Project.Merchant.Email,
 				Name:       *o.Project.Merchant.Name,
@@ -1615,7 +1614,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 				Other:      o.PaymentMethod.Params.Other,
 			},
 			PaymentSystem: &billing.PaymentSystem{
-				Id:   tools.ObjectIdToByte(o.PaymentMethod.PaymentSystem.Id),
+				Id:   o.PaymentMethod.PaymentSystem.Id.Hex(),
 				Name: o.PaymentMethod.PaymentSystem.Name,
 				Country: &billing.Country{
 					CodeInt:  int32(o.PaymentMethod.PaymentSystem.Country.CodeInt),
@@ -1633,9 +1632,8 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 				AccountingPeriod: o.PaymentMethod.PaymentSystem.AccountingPeriod,
 				IsActive:         o.PaymentMethod.PaymentSystem.IsActive,
 			},
-			GroupAlias: o.PaymentMethod.GroupAlias,
+			Group: o.PaymentMethod.GroupAlias,
 		},
-		PaymentMethodTerminalId:    o.PaymentMethodTerminalId,
 		PaymentMethodOrderId:       o.PaymentMethodOrderId,
 		PaymentMethodOutcomeAmount: o.PaymentMethodOutcomeAmount,
 		PaymentMethodOutcomeCurrency: &billing.Currency{
@@ -1651,7 +1649,6 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 			Name:     &billing.Name{En: o.PaymentMethodIncomeCurrency.Name.EN, Ru: o.PaymentMethodIncomeCurrency.Name.RU},
 			IsActive: o.PaymentMethodIncomeCurrency.IsActive,
 		},
-		PaymentMethodIncomeCurrencyA3:           o.PaymentMethodIncomeCurrency.CodeA3,
 		Status:                                  int32(o.Status),
 		IsJsonRequest:                           o.IsJsonRequest,
 		AmountInPspAccountingCurrency:           o.AmountInPSPAccountingCurrency,
@@ -1661,11 +1658,16 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		PaymentMethodPayerAccount:               o.PaymentMethodPayerAccount,
 		PaymentMethodTxnParams:                  sPaymentMethodTxnParams,
 		FixedPackage: &billing.FixedPackage{
-			Id:          o.FixedPackage.Id,
-			Name:        o.FixedPackage.Name,
-			CurrencyInt: int32(o.FixedPackage.CurrencyInt),
-			Price:       o.FixedPackage.Price,
-			IsActive:    true,
+			Id:   o.FixedPackage.Id,
+			Name: o.FixedPackage.Name,
+			Currency: &billing.Currency{
+				CodeInt:  int32(o.FixedPackage.CurrencyInt),
+				CodeA3:   o.FixedPackage.Currency.CodeA3,
+				Name:     &billing.Name{En: o.FixedPackage.Currency.Name.EN, Ru: o.FixedPackage.Currency.Name.RU},
+				IsActive: o.FixedPackage.Currency.IsActive,
+			},
+			Price:    o.FixedPackage.Price,
+			IsActive: true,
 		},
 		PaymentRequisites: o.PaymentRequisites,
 		PspFeeAmount: &billing.OrderFeePsp{
@@ -1681,7 +1683,6 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 			AmountPaymentMethodCurrency: o.ToPayerFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.ToPayerFeeAmount.AmountMerchantCurrency,
 		},
-		VatAmount: o.VatAmount,
 		PaymentSystemFeeAmount: &billing.OrderFeePaymentSystem{
 			AmountPaymentMethodCurrency: o.PaymentSystemFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.PaymentSystemFeeAmount.AmountMerchantCurrency,

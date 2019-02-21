@@ -2,13 +2,13 @@ package main
 
 import (
 	"flag"
-	"github.com/ProtocolONE/p1pay.api/api"
-	"github.com/ProtocolONE/p1pay.api/config"
-	"github.com/ProtocolONE/p1pay.api/database"
 	"github.com/globalsign/mgo"
 	_ "github.com/micro/go-plugins/broker/rabbitmq"
 	_ "github.com/micro/go-plugins/registry/kubernetes"
 	_ "github.com/micro/go-plugins/transport/grpc"
+	"github.com/paysuper/paysuper-management-api/api"
+	"github.com/paysuper/paysuper-management-api/config"
+	"github.com/paysuper/paysuper-management-api/database"
 	"go.uber.org/zap"
 	"log"
 	"os"
@@ -73,7 +73,6 @@ func main() {
 			return
 		}
 	}()
-
 
 	sInit := &api.ServerInitParams{
 		Config:                  &conf.Jwt,

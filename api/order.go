@@ -2,14 +2,14 @@ package api
 
 import (
 	"context"
-	"github.com/paysuper/paysuper-management-api/database/model"
-	"github.com/paysuper/paysuper-management-api/manager"
-	"github.com/paysuper/paysuper-management-api/payment_system"
-	"github.com/ProtocolONE/payone-billing-service/pkg/proto/billing"
-	"github.com/ProtocolONE/payone-billing-service/pkg/proto/grpc"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/micro/go-micro"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"github.com/paysuper/paysuper-management-api/database/model"
+	"github.com/paysuper/paysuper-management-api/manager"
+	"github.com/paysuper/paysuper-management-api/payment_system"
 	"net/http"
 	"net/url"
 )
@@ -166,8 +166,8 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 
 	req1 := &grpc.PaymentFormJsonDataRequest{
 		OrderId: order.Id,
-		Scheme: oApiV1.httpScheme,
-		Host:   ctx.Request().Host,
+		Scheme:  oApiV1.httpScheme,
+		Host:    ctx.Request().Host,
 	}
 	jo, err := oApiV1.billingService.PaymentFormJsonDataProcess(context.TODO(), req1)
 
@@ -187,8 +187,8 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 
 	req := &grpc.PaymentFormJsonDataRequest{
 		OrderId: id,
-		Scheme: oApiV1.httpScheme,
-		Host:   ctx.Request().Host,
+		Scheme:  oApiV1.httpScheme,
+		Host:    ctx.Request().Host,
 	}
 	jo, err := oApiV1.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
 

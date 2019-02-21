@@ -5,21 +5,21 @@ import (
 	"errors"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
-	"github.com/paysuper/paysuper-management-api/config"
-	"github.com/paysuper/paysuper-management-api/database/dao"
-	"github.com/paysuper/paysuper-management-api/database/model"
-	"github.com/paysuper/paysuper-management-api/payment_system"
-	"github.com/paysuper/paysuper-management-api/utils"
-	"github.com/ProtocolONE/payone-billing-service/pkg"
-	"github.com/ProtocolONE/payone-billing-service/pkg/proto/grpc"
-	"github.com/ProtocolONE/payone-repository/pkg/constant"
-	"github.com/ProtocolONE/payone-repository/pkg/proto/repository"
 	"github.com/ProtocolONE/rabbitmq/pkg"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/micro/go-micro"
 	k8s "github.com/micro/kubernetes/go/micro"
+	"github.com/paysuper/paysuper-billing-server/pkg"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"github.com/paysuper/paysuper-management-api/config"
+	"github.com/paysuper/paysuper-management-api/database/dao"
+	"github.com/paysuper/paysuper-management-api/database/model"
+	"github.com/paysuper/paysuper-management-api/payment_system"
+	"github.com/paysuper/paysuper-management-api/utils"
+	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
+	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
 	"github.com/sidmal/slug"
 	"github.com/ttacon/libphonenumber"
 	"go.uber.org/zap"
@@ -150,7 +150,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitOrderV1Routes().
 		InitPaymentMethodRoutes().
 		InitCardPayWebHookRoutes()
-
 
 	api.Http.GET("/docs", func(ctx echo.Context) error {
 		return ctx.Render(http.StatusOK, "docs.html", map[string]interface{}{})
