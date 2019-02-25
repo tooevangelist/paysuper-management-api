@@ -194,14 +194,6 @@ func (api *Api) InitService() {
 	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, api.service.Client())
 	api.geoService = proto.NewGeoIpService(geoip.ServiceName, api.service.Client())
 	api.billingService = grpc.NewBillingService(pkg.ServiceName, api.service.Client())
-
-	pub, err := rabbitmq.NewBroker(api.AmqpAddress)
-
-	if err != nil {
-		api.logger.Fatalf("Creating RabbitMQ publisher failed", err, api.AmqpAddress)
-	}
-
-	api.notifierPub = pub
 }
 
 func (api *Api) Stop() {
