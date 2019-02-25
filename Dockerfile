@@ -16,4 +16,4 @@ RUN go mod download
 COPY . ./
 RUN CGO_ENABLED=0 GOOS=linux go build -a -o $GOPATH/bin/paysuper_management_api .
 
-ENTRYPOINT $GOPATH/bin/p1pay_api -migration=up && $GOPATH/bin/paysuper_management_api
+ENTRYPOINT $GOPATH/bin/paysuper_management_api -migration=up && $GOPATH/bin/paysuper_management_api
