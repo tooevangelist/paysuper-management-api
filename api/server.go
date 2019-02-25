@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
@@ -23,6 +24,8 @@ import (
 	"github.com/ttacon/libphonenumber"
 	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
+	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -31,6 +34,17 @@ import (
 const (
 	apiWebHookGroupPath = "/webhook"
 )
+
+var funcMap = template.FuncMap{
+	"Marshal": func(v interface{}) template.JS {
+		a, _ := json.Marshal(v)
+		return template.JS(a)
+	},
+}
+
+type Template struct {
+	templates *template.Template
+}
 
 type ServerInitParams struct {
 	Config                  *config.Jwt
@@ -96,6 +110,11 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}
 
 	api.InitService()
+
+	renderer := &Template{
+		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("web/template/*.html")),
+	}
+	api.Http.Renderer = renderer
 
 	api.Http.Static("/", "web/static")
 	api.Http.Static("/spec", "spec")
@@ -225,4 +244,8 @@ func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.Hand
 
 		return next(c)
 	}
+}
+
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
 }
