@@ -78,10 +78,7 @@ func main() {
 		Config:                  &conf.Jwt,
 		Database:                db,
 		Logger:                  sugar,
-		PaymentSystemConfig:     conf.PaymentSystemConfig.Config,
-		PSPAccountingCurrencyA3: conf.PSPAccountingCurrencyA3,
 		HttpScheme:              conf.HttpScheme,
-		CentrifugoSecret:        conf.CentrifugoSecret,
 		K8sHost:                 conf.KubernetesHost,
 		AmqpAddress:             conf.AmqpAddress,
 	}

@@ -16,7 +16,6 @@ import (
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/model"
-	"github.com/paysuper/paysuper-management-api/payment_system"
 	"github.com/paysuper/paysuper-management-api/utils"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
@@ -37,10 +36,7 @@ type ServerInitParams struct {
 	Config                  *config.Jwt
 	Database                dao.Database
 	Logger                  *zap.SugaredLogger
-	PaymentSystemConfig     map[string]interface{}
-	PSPAccountingCurrencyA3 string
 	HttpScheme              string
-	CentrifugoSecret        string
 	K8sHost                 string
 	AmqpAddress             string
 }
@@ -67,11 +63,7 @@ type Api struct {
 	validate                *validator.Validate
 	accessRouteGroup        *echo.Group
 	webhookRouteGroup       *echo.Group
-	PaymentSystemConfig     map[string]interface{}
-	pspAccountingCurrencyA3 string
-	paymentSystemsSettings  *payment_system.PaymentSystemSetting
 	httpScheme              string
-	centrifugoSecret        string
 
 	service        micro.Service
 	serviceContext context.Context
@@ -98,11 +90,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		database:                p.Database,
 		logger:                  p.Logger,
 		validate:                validator.New(),
-		PaymentSystemConfig:     p.PaymentSystemConfig,
-		pspAccountingCurrencyA3: p.PSPAccountingCurrencyA3,
 		httpScheme:              p.HttpScheme,
-		paymentSystemsSettings:  &payment_system.PaymentSystemSetting{Logger: p.Logger},
-		centrifugoSecret:        p.CentrifugoSecret,
 		k8sHost:                 p.K8sHost,
 		AmqpAddress:             p.AmqpAddress,
 	}

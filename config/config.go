@@ -5,8 +5,6 @@ import (
 	"encoding/base64"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kelseyhightower/envconfig"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 )
 
 const (
@@ -26,19 +24,11 @@ type Jwt struct {
 	Algorithm             string `envconfig:"JWT_ALGORITHM"`
 }
 
-type PaymentSystemConfig struct {
-	Path   string `envconfig:"PATH_TO_PS_CONFIG"`
-	Config map[string]interface{}
-}
-
 type Config struct {
 	Jwt
 	Database
-	PaymentSystemConfig
 
-	PSPAccountingCurrencyA3 string `envconfig:"PSP_ACCOUNTING_CURRENCY"`
 	HttpScheme              string `envconfig:"HTTP_SCHEME" default:"https"`
-	CentrifugoSecret        string `envconfig:"CENTRIFUGO_SECRET" required:"true"`
 	KubernetesHost          string `envconfig:"KUBERNETES_SERVICE_HOST" required:"false"`
 	AmqpAddress             string `envconfig:"AMQP_ADDRESS" required:"true" default:"amqp://127.0.0.1:5672"`
 }
@@ -63,18 +53,6 @@ func NewConfig() (error, *Config) {
 	}
 
 	config.Jwt.SignatureSecret, err = jwt.ParseRSAPublicKeyFromPEM(pemKey)
-
-	if err != nil {
-		return err, nil
-	}
-
-	fYaml, err := ioutil.ReadFile(config.PaymentSystemConfig.Path)
-
-	if err != nil {
-		return err, nil
-	}
-
-	err = yaml.Unmarshal(fYaml, &config.PaymentSystemConfig.Config)
 
 	if err != nil {
 		return err, nil

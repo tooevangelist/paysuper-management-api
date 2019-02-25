@@ -115,10 +115,7 @@ type OrderHttp struct {
 func InitOrderManager(
 	database dao.Database,
 	logger *zap.SugaredLogger,
-	pspAccountingCurrencyA3 string,
-	paymentSystemsSettings *payment_system.PaymentSystemSetting,
 	publisher *rabbitmq.Broker,
-	centrifugoSecret string,
 	repository repository.RepositoryService,
 	geoService proto.GeoIpService,
 ) *OrderManager {
@@ -129,18 +126,14 @@ func InitOrderManager(
 		paymentMethodManager:   InitPaymentMethodManager(database, logger),
 		currencyRateManager:    InitCurrencyRateManager(database, logger),
 		currencyManager:        InitCurrencyManager(database, logger),
-		paymentSystemsSettings: paymentSystemsSettings,
 		vatManager:             InitVatManager(database, logger),
 		commissionManager:      InitCommissionManager(database, logger),
-		centrifugoSecret:       centrifugoSecret,
 
 		rep: repository,
 		geo: geoService,
 		ctx: context.TODO(),
 		pub: publisher,
 	}
-
-	om.pspAccountingCurrency = om.currencyManager.FindByCodeA3(pspAccountingCurrencyA3)
 
 	return om
 }
