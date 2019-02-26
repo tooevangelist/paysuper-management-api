@@ -12,6 +12,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -o app .
 
 FROM alpine:3.9
 WORKDIR /application/
+
+COPY --from=builder /application/spec ./spec
 COPY --from=builder /application/web ./web
 COPY --from=builder /application/app .
 
