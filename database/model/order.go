@@ -165,7 +165,7 @@ type OrderScalar struct {
 	// user unique account in project
 	Account string `query:"PP_ACCOUNT" form:"PP_ACCOUNT" json:"account"`
 	// unique order identifier in project. This field not required, BUT we're recommend send this field always
-	OrderId *string `query:"PP_ORDER_ID" form:"PP_ORDER_ID" json:"order_id"`
+	OrderId string `query:"PP_ORDER_ID" form:"PP_ORDER_ID" json:"order_id"`
 	// order description. If this field not send in request, then we're create standard order description
 	Description *string `query:"PP_DESCRIPTION" form:"PP_DESCRIPTION" json:"description"`
 	// payment method identifier in Protocol One payment solution
@@ -199,7 +199,7 @@ type Order struct {
 	// object described main entities of project in Protocol One payment solution
 	Project *ProjectOrder `bson:"project" json:"project"`
 	// unique order identifier in project. if was send in create order process
-	ProjectOrderId *string `bson:"project_order_id" json:"project_order_id"`
+	ProjectOrderId string `bson:"project_order_id" json:"project_order_id"`
 	// user unique account in project
 	ProjectAccount string `bson:"project_account" json:"project_account"`
 	// order description
@@ -281,7 +281,7 @@ type OrderSimple struct {
 	// user account in project
 	Account string `json:"account"`
 	// unique order identifier in project
-	ProjectOrderId *string `json:"order_id,omitempty"`
+	ProjectOrderId string `json:"order_id"`
 	// data about payer, for example: country, city, ip and etc
 	PayerData *PayerData `json:"payer_data"`
 	// payer payment requisites

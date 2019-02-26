@@ -222,7 +222,7 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		}
 	}
 
-	if order.OrderId != nil {
+	if order.OrderId != "" {
 		if err = om.checkProjectOrderIdUnique(order); err != nil {
 			return nil, err
 		}
@@ -589,11 +589,11 @@ func (om *OrderManager) getPaymentMethod(order *model.OrderScalar, pms map[strin
 }
 
 func (om *OrderManager) checkProjectOrderIdUnique(order *model.OrderScalar) error {
-	if order.OrderId == nil {
+	if order.OrderId == "" {
 		return nil
 	}
 
-	o, err := om.Database.Repository(TableOrder).FindOrderByProjectOrderId(*order.OrderId)
+	o, err := om.Database.Repository(TableOrder).FindOrderByProjectOrderId(order.OrderId)
 
 	if err != nil {
 		om.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableOrder, err)
