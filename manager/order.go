@@ -770,10 +770,7 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 	}
 
 	filter := bson.M{"project.id": bson.M{"$in": pFilter}}
-
-	if len(params.Values) > 0 {
-		f = om.ProcessFilters(params.Values, filter)
-	}
+	f = om.ProcessFilters(params.Values, filter)
 
 	co, err := om.Database.Repository(TableOrder).GetOrdersCountByConditions(f)
 
