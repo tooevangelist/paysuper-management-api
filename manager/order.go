@@ -911,7 +911,11 @@ func (om *OrderManager) preparePaymentRequisites(o *model.Order) map[string]stri
 
 func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M {
 	if id, ok := values[model.OrderFilterFieldId]; ok {
-		filter["_id"] = bson.ObjectIdHex(id[0])
+		if bson.IsObjectIdHex(id[0]) {
+			filter["_id"] = bson.ObjectIdHex(id[0])
+		} else {
+			filter["_id"] = id[0]
+		}
 	}
 
 	if pms, ok := values[model.OrderFilterFieldPaymentMethods]; ok {

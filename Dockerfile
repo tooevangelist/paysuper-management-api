@@ -18,6 +18,4 @@ COPY --from=builder /application/spec ./spec
 COPY --from=builder /application/web ./web
 COPY --from=builder /application/app .
 
-RUN ls -la
-
 ENTRYPOINT ["./app"]
