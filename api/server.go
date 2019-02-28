@@ -46,7 +46,7 @@ var (
 	clientID     = "5c77953f51c0950001436152"
 	clientSecret = "tGtL8HcRDY5X7VxEhyIye2EhiN9YyTJ5Ny0AndLNXQFgKCSgUKE0Ti4X9fHK6Qib"
 	scopes       = []string{"openid", "offline"}
-	redirectURL  = "https://p1payfront.tst.protocol.one/oauth"
+	redirectURL  = "http://127.0.0.1:1323/auth/callback"
 	authDomain   = "https://auth1.tst.protocol.one"
 )
 
@@ -118,14 +118,13 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}
 	api.InitService()
 
-	settings := jwtverifier.Config{
+	jwtVerifierSettings := jwtverifier.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Scopes:       scopes,
 		RedirectURL:  redirectURL,
 		Issuer:       authDomain,
 	}
-	jwtv := jwtverifier.NewJwtVerifier(settings)
 
 	renderer := &Template{
 		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("web/template/*.html")),
@@ -139,7 +138,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
-	api.accessRouteGroup.Use(jwt_middleware.AuthOneJwtWithConfig(jwtv))
+	api.accessRouteGroup.Use(jwt_middleware.AuthOneJwtWithConfig(jwtverifier.NewJwtVerifier(jwtVerifierSettings)))
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
 	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
