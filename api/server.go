@@ -3,11 +3,11 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"github.com/ProtocolONE/authone-jwt-verifier-golang"
+	jwt_middleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/rabbitmq/pkg"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/micro/go-micro"
@@ -42,17 +42,25 @@ var funcMap = template.FuncMap{
 	},
 }
 
+var (
+	clientID     = "5c77953f51c0950001436152"
+	clientSecret = "tGtL8HcRDY5X7VxEhyIye2EhiN9YyTJ5Ny0AndLNXQFgKCSgUKE0Ti4X9fHK6Qib"
+	scopes       = []string{"openid", "offline"}
+	redirectURL  = "http://127.0.0.1:1323/auth/callback"
+	authDomain   = "https://auth1.tst.protocol.one"
+)
+
 type Template struct {
 	templates *template.Template
 }
 
 type ServerInitParams struct {
-	Config                  *config.Jwt
-	Database                dao.Database
-	Logger                  *zap.SugaredLogger
-	HttpScheme              string
-	K8sHost                 string
-	AmqpAddress             string
+	Config      *config.Jwt
+	Database    dao.Database
+	Logger      *zap.SugaredLogger
+	HttpScheme  string
+	K8sHost     string
+	AmqpAddress string
 }
 
 type Merchant struct {
@@ -70,14 +78,14 @@ type Order struct {
 }
 
 type Api struct {
-	Http                    *echo.Echo
-	config                  *config.Config
-	database                dao.Database
-	logger                  *zap.SugaredLogger
-	validate                *validator.Validate
-	accessRouteGroup        *echo.Group
-	webhookRouteGroup       *echo.Group
-	httpScheme              string
+	Http              *echo.Echo
+	config            *config.Config
+	database          dao.Database
+	logger            *zap.SugaredLogger
+	validate          *validator.Validate
+	accessRouteGroup  *echo.Group
+	webhookRouteGroup *echo.Group
+	httpScheme        string
 
 	service        micro.Service
 	serviceContext context.Context
@@ -100,16 +108,23 @@ type Api struct {
 
 func NewServer(p *ServerInitParams) (*Api, error) {
 	api := &Api{
-		Http:                    echo.New(),
-		database:                p.Database,
-		logger:                  p.Logger,
-		validate:                validator.New(),
-		httpScheme:              p.HttpScheme,
-		k8sHost:                 p.K8sHost,
-		AmqpAddress:             p.AmqpAddress,
+		Http:        echo.New(),
+		database:    p.Database,
+		logger:      p.Logger,
+		validate:    validator.New(),
+		httpScheme:  p.HttpScheme,
+		k8sHost:     p.K8sHost,
+		AmqpAddress: p.AmqpAddress,
 	}
-
 	api.InitService()
+
+	jwtVerifierSettings := jwtverifier.Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		Scopes:       scopes,
+		RedirectURL:  redirectURL,
+		Issuer:       authDomain,
+	}
 
 	renderer := &Template{
 		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("web/template/*.html")),
@@ -123,11 +138,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
-	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:    p.Config.SignatureSecret,
-		SigningMethod: p.Config.Algorithm,
-	}))
-	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
+	api.accessRouteGroup.Use(jwt_middleware.AuthOneJwtWithConfig(jwtverifier.NewJwtVerifier(jwtVerifierSettings)))
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
 	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
@@ -227,23 +238,6 @@ func (api *Api) Stop() {
 
 	api.serviceCancel()
 	log.Println("Micro server exiting")
-}
-
-func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		user := c.Get("user").(*jwt.Token)
-		claims := user.Claims.(jwt.MapClaims)
-
-		id, ok := claims["id"]
-
-		if !ok {
-			c.Error(errors.New("merchant identifier not found"))
-		}
-
-		api.Merchant.Identifier = id.(string)
-
-		return next(c)
-	}
 }
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
