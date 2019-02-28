@@ -769,8 +769,21 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 		pFilter = append(pFilter, k)
 	}
 
-	filter := bson.M{"project.id": bson.M{"$in": pFilter}}
-	f = om.ProcessFilters(params.Values, filter)
+	filter := bson.M{"project._id": bson.M{"$in": pFilter}}
+
+	if quickFilter, ok := params.Values[model.OrderFilterFieldQuickFilter]; ok {
+		r := bson.RegEx{Pattern: ".*" + quickFilter[0] + ".*", Options: "i"}
+
+		filter["$or"] = []bson.M{
+			{"project.name": bson.M{ "$regex": r }},
+			{"project_account": bson.M{ "$regex": r }},
+			{"project_order_id": bson.M{ "$regex": r, "$exists": true }},
+			{"fixed_package.name": bson.M{ "$regex": r, "$exists": true }},
+			{"payment_method.name": bson.M{ "$regex": r, "$exists": true }},
+		}
+	} else {
+		f = om.ProcessFilters(params.Values, filter)
+	}
 
 	co, err := om.Database.Repository(TableOrder).GetOrdersCountByConditions(f)
 

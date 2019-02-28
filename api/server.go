@@ -3,11 +3,11 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"github.com/ProtocolONE/authone-jwt-verifier-golang"
-	jwt_middleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
+	"errors"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/rabbitmq/pkg"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/micro/go-micro"
@@ -118,13 +118,13 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}
 	api.InitService()
 
-	jwtVerifierSettings := jwtverifier.Config{
+	/*jwtVerifierSettings := jwtverifier.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Scopes:       scopes,
 		RedirectURL:  redirectURL,
 		Issuer:       authDomain,
-	}
+	}*/
 
 	renderer := &Template{
 		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("web/template/*.html")),
@@ -138,7 +138,13 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
-	api.accessRouteGroup.Use(jwt_middleware.AuthOneJwtWithConfig(jwtverifier.NewJwtVerifier(jwtVerifierSettings)))
+	//api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtWithConfig(jwtverifier.NewJwtVerifier(jwtVerifierSettings)))
+
+	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey:    p.Config.SignatureSecret,
+		SigningMethod: p.Config.Algorithm,
+	}))
+	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
 	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
@@ -242,4 +248,21 @@ func (api *Api) Stop() {
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user := c.Get("user").(*jwt.Token)
+		claims := user.Claims.(jwt.MapClaims)
+
+		id, ok := claims["id"]
+
+		if !ok {
+			c.Error(errors.New("merchant identifier not found"))
+		}
+
+		api.Merchant.Identifier = id.(string)
+
+		return next(c)
+	}
 }

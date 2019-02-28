@@ -47,6 +47,7 @@ const (
 	OrderFilterFieldPMDateTo        = "pm_date_to"
 	OrderFilterFieldProjectDateFrom = "project_date_from"
 	OrderFilterFieldProjectDateTo   = "project_date_to"
+	OrderFilterFieldQuickFilter     = "quick_filter"
 
 	OrderPaymentCreateRequestFieldOrderId          = "order_id"
 	OrderPaymentCreateRequestFieldOPaymentMethodId = "payment_method_id"
@@ -268,7 +269,7 @@ type Order struct {
 	VatAmount float64 `bson:"vat_amount" json:"vat_amount"`
 	// payment system fee for payment operation
 	PaymentSystemFeeAmount *OrderFeePaymentSystem `bson:"ps_fee_amount" json:"ps_fee_amount"`
-	UrlSuccess string `bson:"url_success" json:"url_success"`
+	UrlSuccess             string                 `bson:"url_success" json:"url_success"`
 	// URL for redirect user after failed payment. This field can be send if it allowed in project admin panel
 	UrlFail string `bson:"url_fail" json:"url_fail"`
 }
