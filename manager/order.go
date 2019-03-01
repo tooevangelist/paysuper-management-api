@@ -780,6 +780,7 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 			{"project_order_id": bson.M{ "$regex": r, "$exists": true }},
 			{"fixed_package.name": bson.M{ "$regex": r, "$exists": true }},
 			{"payment_method.name": bson.M{ "$regex": r, "$exists": true }},
+			{"id_string": bson.M{ "$regex": r, "$exists": true }},
 		}
 
 		f = filter

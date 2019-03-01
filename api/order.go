@@ -257,6 +257,7 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 // @Param pm_date_to query integer false "end date when payment was closed to get orders filtered by they"
 // @Param project_date_from query integer false "start date when payment was created to get orders filtered by they"
 // @Param project_date_to query integer false "end date when payment was closed in project to get orders filtered by they"
+// @Param quick_filter query string false "string for full text search in quick filter"
 // @Param limit query integer false "maximum number of returning orders. default value is 100"
 // @Param offset query integer false "offset from which you want to return the list of orders. default value is 0"
 // @Param sort query array false "fields list for sorting"
