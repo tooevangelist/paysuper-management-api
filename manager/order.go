@@ -769,7 +769,7 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 		pFilter = append(pFilter, k)
 	}
 
-	filter := bson.M{"project._id": bson.M{"$in": pFilter}}
+	filter := bson.M{"project.id": bson.M{"$in": pFilter}}
 
 	if quickFilter, ok := params.Values[model.OrderFilterFieldQuickFilter]; ok {
 		r := bson.RegEx{Pattern: ".*" + quickFilter[0] + ".*", Options: "i"}
