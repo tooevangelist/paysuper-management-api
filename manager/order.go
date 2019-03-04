@@ -1004,7 +1004,7 @@ func (om *OrderManager) ProcessFilters(values url.Values, filter bson.M) bson.M 
 	}
 
 	if len(prjDates) > 0 {
-		filter["pm_order_close_date"] = prjDates
+		filter["created_at"] = prjDates
 	}
 
 	return filter
