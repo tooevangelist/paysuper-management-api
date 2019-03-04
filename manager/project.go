@@ -294,15 +294,21 @@ func (pm *ProjectManager) FilterProjects(mId string, fProjects []bson.ObjectId) 
 		return fp, mProjects[0].Merchant, nil
 	}
 
+	fp1 := make(map[bson.ObjectId]string)
+
 	for _, p := range fProjects {
-		if _, ok := fp[p]; ok {
+		if _, ok := fp[p]; !ok {
 			continue
 		}
 
+		fp1[p] = fp[p]
+	}
+
+	if len(fp1) <= 0 {
 		return nil, nil, errors.New(projectErrorAccessDeniedToProject)
 	}
 
-	return fp, mProjects[0].Merchant, nil
+	return fp1, mProjects[0].Merchant, nil
 }
 
 func (pm *ProjectManager) GetProjectPaymentMethods(projectId bson.ObjectId) ([]*model.PaymentMethod, error) {

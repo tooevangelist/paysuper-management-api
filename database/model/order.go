@@ -302,9 +302,9 @@ type OrderSimple struct {
 	// date when payment created
 	CreatedAt int64 `json:"created_at"`
 	// date when payment was confirmed from payment system side
-	ConfirmedAt int64 `json:"confirmed_at,omitempty"`
+	ConfirmedAt int64 `json:"confirmed_at"`
 	// date when project was notification about payment
-	ClosedAt int64 `json:"confirmed_at,omitempty"`
+	ClosedAt int64 `json:"closed_at"`
 	// PSP (P1) fee amount in merchant accounting currency
 	PspFeeAmount *OrderFeePsp `json:"psp_fee"`
 	// payment system fee for payment operation in payment system accounting currency

@@ -40,7 +40,7 @@ type PaymentMethod struct {
 }
 
 type OrderPaymentMethod struct {
-	Id            bson.ObjectId        `bson:"_id" json:"id"`
+	Id            bson.ObjectId        `bson:"id" json:"id"`
 	Name          string               `bson:"name" json:"name"`
 	Params        *PaymentMethodParams `bson:"params" json:"params"`
 	PaymentSystem *PaymentSystem       `bson:"payment_system" json:"payment_system"`
