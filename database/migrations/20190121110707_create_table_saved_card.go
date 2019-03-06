@@ -12,8 +12,8 @@ func init() {
 
 			err := c.EnsureIndex(
 				mgo.Index{
-					Name: "saved_card_account_project_id_pan_unq",
-					Key: []string{"account", "project_id", "pan"},
+					Name:   "saved_card_account_project_id_pan_unq",
+					Key:    []string{"account", "project_id", "pan"},
 					Unique: true,
 				},
 			)
@@ -24,8 +24,8 @@ func init() {
 
 			return c.EnsureIndex(
 				mgo.Index{
-					Name: "saved_card_account_project_id_is_active_idx",
-					Key: []string{"account", "project_id", "is_active"},
+					Name:   "saved_card_account_project_id_is_active_idx",
+					Key:    []string{"account", "project_id", "is_active"},
 					Unique: false,
 				},
 			)
@@ -39,4 +39,3 @@ func init() {
 		return
 	}
 }
-

@@ -120,14 +120,14 @@ func InitOrderManager(
 	geoService proto.GeoIpService,
 ) *OrderManager {
 	om := &OrderManager{
-		Manager:                &Manager{Database: database, Logger: logger},
-		projectManager:         InitProjectManager(database, logger),
-		paymentSystemManager:   InitPaymentSystemManager(database, logger),
-		paymentMethodManager:   InitPaymentMethodManager(database, logger),
-		currencyRateManager:    InitCurrencyRateManager(database, logger),
-		currencyManager:        InitCurrencyManager(database, logger),
-		vatManager:             InitVatManager(database, logger),
-		commissionManager:      InitCommissionManager(database, logger),
+		Manager:              &Manager{Database: database, Logger: logger},
+		projectManager:       InitProjectManager(database, logger),
+		paymentSystemManager: InitPaymentSystemManager(database, logger),
+		paymentMethodManager: InitPaymentMethodManager(database, logger),
+		currencyRateManager:  InitCurrencyRateManager(database, logger),
+		currencyManager:      InitCurrencyManager(database, logger),
+		vatManager:           InitVatManager(database, logger),
+		commissionManager:    InitCommissionManager(database, logger),
 
 		rep: repository,
 		geo: geoService,
@@ -775,12 +775,12 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 		r := bson.RegEx{Pattern: ".*" + quickFilter[0] + ".*", Options: "i"}
 
 		filter["$or"] = []bson.M{
-			{"project.name": bson.M{ "$regex": r }},
-			{"project_account": bson.M{ "$regex": r }},
-			{"project_order_id": bson.M{ "$regex": r, "$exists": true }},
-			{"fixed_package.name": bson.M{ "$regex": r, "$exists": true }},
-			{"payment_method.name": bson.M{ "$regex": r, "$exists": true }},
-			{"id_string": bson.M{ "$regex": r, "$exists": true }},
+			{"project.name": bson.M{"$regex": r}},
+			{"project_account": bson.M{"$regex": r}},
+			{"project_order_id": bson.M{"$regex": r, "$exists": true}},
+			{"fixed_package.name": bson.M{"$regex": r, "$exists": true}},
+			{"payment_method.name": bson.M{"$regex": r, "$exists": true}},
+			{"id_string": bson.M{"$regex": r, "$exists": true}},
 		}
 
 		f = filter

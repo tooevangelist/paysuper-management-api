@@ -51,7 +51,7 @@ type Merchant struct {
 	// merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
 	Status int `bson:"status" json:"status"`
 	// date of create merchant in system
-	CreatedAt time.Time `bson:"created_at" json:"created_at"`
-	UpdatedAt time.Time `bson:"updated_at" json:"-"`
+	CreatedAt      time.Time  `bson:"created_at" json:"created_at"`
+	UpdatedAt      time.Time  `bson:"updated_at" json:"-"`
 	FirstPaymentAt *time.Time `bson:"first_payment_at" json:"first_payment_at"`
 }

@@ -28,9 +28,9 @@ type Config struct {
 	Jwt
 	Database
 
-	HttpScheme              string `envconfig:"HTTP_SCHEME" default:"https"`
-	KubernetesHost          string `envconfig:"KUBERNETES_SERVICE_HOST" required:"false"`
-	AmqpAddress             string `envconfig:"AMQP_ADDRESS" required:"true" default:"amqp://127.0.0.1:5672"`
+	HttpScheme     string `envconfig:"HTTP_SCHEME" default:"https"`
+	KubernetesHost string `envconfig:"KUBERNETES_SERVICE_HOST" required:"false"`
+	AmqpAddress    string `envconfig:"AMQP_ADDRESS" required:"true" default:"amqp://127.0.0.1:5672"`
 }
 
 func NewConfig() (error, *Config) {

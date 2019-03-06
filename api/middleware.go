@@ -2,8 +2,8 @@ package api
 
 import (
 	"bytes"
-	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/labstack/echo"
+	"github.com/paysuper/paysuper-management-api/database/model"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -54,4 +54,3 @@ func (api *Api) RawBodyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(ctx)
 	}
 }
-

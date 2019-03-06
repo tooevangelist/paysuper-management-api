@@ -109,13 +109,13 @@ func NewPaymentResponse(status int, error string) *PaymentResponse {
 	return cpResp
 }
 
-func (pr *PaymentResponse) SetOrder(o *model.Order) *PaymentResponse  {
+func (pr *PaymentResponse) SetOrder(o *model.Order) *PaymentResponse {
 	pr.Order = o
 
 	return pr
 }
 
-func (pr *PaymentResponse) SetError(error string) *PaymentResponse  {
+func (pr *PaymentResponse) SetError(error string) *PaymentResponse {
 	pr.Error = error
 
 	return pr

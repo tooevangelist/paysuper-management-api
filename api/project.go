@@ -1,9 +1,9 @@
 package api
 
 import (
+	"github.com/labstack/echo"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
-	"github.com/labstack/echo"
 	"net/http"
 )
 

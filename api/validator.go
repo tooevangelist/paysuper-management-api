@@ -26,7 +26,7 @@ func ProjectStructValidator(sl validator.StructLevel) {
 	}
 }
 
-func (api *Api) OrderStructValidator(sl validator.StructLevel)  {
+func (api *Api) OrderStructValidator(sl validator.StructLevel) {
 	o := sl.Current().Interface().(model.OrderScalar)
 
 	if o.PayerPhone != nil {
