@@ -24,9 +24,17 @@ type Jwt struct {
 	Algorithm             string `envconfig:"JWT_ALGORITHM"`
 }
 
+type Auth1 struct {
+	Issuer       string `envconfig:"AUTH1_ISSUER" required:"true" default:"https://dev-auth1.tst.protocol.one"`
+	ClientId     string `envconfig:"AUTH1_CLIENTID" required:"true"`
+	ClientSecret string `envconfig:"AUTH1_CLIENTSECRET" required:"true"`
+	RedirectUrl  string `envconfig:"AUTH1_REDIRECTURL" required:"true"`
+}
+
 type Config struct {
 	Jwt
 	Database
+	Auth1
 
 	HttpScheme     string `envconfig:"HTTP_SCHEME" default:"https"`
 	KubernetesHost string `envconfig:"KUBERNETES_SERVICE_HOST" required:"false"`

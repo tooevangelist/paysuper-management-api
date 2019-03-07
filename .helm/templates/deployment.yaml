@@ -81,6 +81,26 @@ spec:
             secretKeyRef:
               name: {{ .Chart.Name }}-jwt-secret
               key: {{ .Chart.Name }}-jwt-secret
+        - name: AUTH1_ISSUER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Chart.Name }}-auth1
+              key: AUTH1_ISSUER
+        - name: AUTH1_CLIENTID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Chart.Name }}-auth1
+              key: AUTH1_CLIENTID
+        - name: AUTH1_CLIENTSECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Chart.Name }}-auth1
+              key: AUTH1_CLIENTSECRET
+        - name: AUTH1_REDIRECTURL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Chart.Name }}-auth1
+              key: AUTH1_REDIRECTURL
         ports:
         - containerPort: {{$deployment.port}}
         #livenessProbe:
@@ -91,9 +111,7 @@ spec:
         #  timeoutSeconds: 1
         #  failureThreshold: 3
         #  periodSeconds: 5
-
-        {{/*volumeMounts:
-        - name: {{ $deploymentName }}-config
-          mountPath: /application/etc/
-          readOnly: true
-        */}}
+        #volumeMounts:
+        #- name: {{ $deploymentName }}-config
+        #  mountPath: /application/etc/
+        #  readOnly: tru
