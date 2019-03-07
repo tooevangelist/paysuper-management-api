@@ -198,7 +198,7 @@ func (pm *ProjectManager) FindProjectsByMerchantIdAndName(mId bson.ObjectId, pNa
 	return p
 }
 
-func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int, offset int) []*model.Project {
+func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int32, offset int32) []*model.Project {
 	p, err := pm.Database.Repository(TableProject).FindProjectsByMerchantId(mId, limit, offset)
 
 	if err != nil {

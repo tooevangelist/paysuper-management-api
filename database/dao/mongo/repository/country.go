@@ -30,9 +30,9 @@ func (rep *Repository) FindCountryByName(name string) ([]*model.Country, error) 
 	return c, err
 }
 
-func (rep *Repository) FindAllCountries(limit int, offset int) ([]*model.Country, error) {
+func (rep *Repository) FindAllCountries(limit int32, offset int32) ([]*model.Country, error) {
 	var c []*model.Country
-	err := rep.Collection.Find(bson.M{"is_active": true}).Limit(limit).Skip(offset).All(&c)
+	err := rep.Collection.Find(bson.M{"is_active": true}).Limit(int(limit)).Skip(int(offset)).All(&c)
 
 	return c, err
 }

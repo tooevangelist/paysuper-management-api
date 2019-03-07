@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/rabbitmq/pkg"
@@ -32,7 +33,31 @@ import (
 )
 
 const (
-	apiWebHookGroupPath = "/webhook"
+	apiWebHookGroupPath  = "/webhook"
+	apiAuthUserGroupPath = "/admin/api/v1"
+
+	LimitDefault  = 100
+	OffsetDefault = 0
+
+	requestParameterId                 = "id"
+	requestParameterName               = "name"
+	requestParameterIsSigned           = "is_signed"
+	requestParameterLastPayoutDateFrom = "last_payout_date_from"
+	requestParameterLastPayoutDateTo   = "last_payout_date_to"
+	requestParameterLastPayoutAmount   = "last_payout_amount"
+	requestParameterMerchantId         = "merchant"
+	requestParameterUserId             = "user"
+	requestParameterSort               = "sort[]"
+	requestParameterLimit              = "limit"
+	requestParameterOffset             = "offset"
+
+	errorIdIsEmpty            = "identifier can't be empty"
+	errorUnknown              = "unknown error. try request later"
+	errorQueryParamsIncorrect = "incorrect query parameters"
+	errorJwtUserIdNotFound    = "user identifier not found in JWT token"
+	errorIncorrectMerchantId  = "incorrect merchant identifier"
+	errorIncorrectUserId      = "incorrect user identifier"
+	errorMessageMask          = "Field validation for '%s' failed on the '%s' tag"
 )
 
 var funcMap = template.FuncMap{
@@ -68,8 +93,8 @@ type Merchant struct {
 }
 
 type GetParams struct {
-	limit  int
-	offset int
+	limit  int32
+	offset int32
 	sort   []string
 }
 
@@ -77,15 +102,27 @@ type Order struct {
 	PayerPhone *libphonenumber.PhoneNumber
 }
 
+type AuthUser struct {
+	Id        string
+	Name      string
+	Roles     map[string]bool
+	Merchants map[string]bool
+}
+
 type Api struct {
-	Http              *echo.Echo
-	config            *config.Config
-	database          dao.Database
-	logger            *zap.SugaredLogger
-	validate          *validator.Validate
+	Http     *echo.Echo
+	config   *config.Config
+	database dao.Database
+	logger   *zap.SugaredLogger
+	validate *validator.Validate
+
 	accessRouteGroup  *echo.Group
 	webhookRouteGroup *echo.Group
-	httpScheme        string
+
+	authUserRouteGroup *echo.Group
+	authUser           *AuthUser
+
+	httpScheme string
 
 	service        micro.Service
 	serviceContext context.Context
@@ -136,6 +173,11 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 
 	api.validate.RegisterStructValidation(ProjectStructValidator, model.ProjectScalar{})
 	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
+	err := api.validate.RegisterValidation("phone", api.PhoneValidator)
+
+	if err != nil {
+		return nil, err
+	}
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 	//api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtWithConfig(jwtverifier.NewJwtVerifier(jwtVerifierSettings)))
@@ -145,6 +187,17 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		SigningMethod: p.Config.Algorithm,
 	}))
 	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
+
+	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
+	api.authUserRouteGroup.Use(
+		middleware.JWTWithConfig(
+			middleware.JWTConfig{
+				SigningKey:    p.Config.SignatureSecret,
+				SigningMethod: p.Config.Algorithm,
+			},
+		),
+	)
+	api.authUserRouteGroup.Use(api.AuthUserMiddleware)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
 	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
@@ -265,4 +318,26 @@ func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.Hand
 
 		return next(c)
 	}
+}
+
+func (api *Api) getValidationError(err error) string {
+	vErr := err.(validator.ValidationErrors)[0]
+
+	return fmt.Sprintf(errorMessageMask, vErr.Field(), vErr.Tag())
+}
+
+func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.HTTPError {
+	err := ctx.Bind(st)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	err = api.validate.Struct(st)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, api.getValidationError(err))
+	}
+
+	return nil
 }

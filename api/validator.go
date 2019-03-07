@@ -26,7 +26,7 @@ func ProjectStructValidator(sl validator.StructLevel) {
 	}
 }
 
-func (api *Api) OrderStructValidator(sl validator.StructLevel)  {
+func (api *Api) OrderStructValidator(sl validator.StructLevel) {
 	o := sl.Current().Interface().(model.OrderScalar)
 
 	if o.PayerPhone != nil {
@@ -38,4 +38,9 @@ func (api *Api) OrderStructValidator(sl validator.StructLevel)  {
 
 		api.Order.PayerPhone = num
 	}
+}
+
+func (api *Api) PhoneValidator(fl validator.FieldLevel) bool {
+	_, err := libphonenumber.Parse(fl.Field().String(), "US")
+	return err == nil
 }
