@@ -15,16 +15,21 @@ type onboardingRoute struct {
 func (api *Api) initOnboardingRoutes() *Api {
 	route := &onboardingRoute{Api: api}
 
-	api.authUserRouteGroup.GET("/merchant", route.listMerchants)
-	api.authUserRouteGroup.GET("/merchant/:id", route.getMerchant)
-	api.authUserRouteGroup.POST("/merchant", route.changeMerchant)
-	api.authUserRouteGroup.PUT("/merchant", route.changeMerchant)
-	api.authUserRouteGroup.PUT("/merchant/:id/change-status", route.changeMerchantStatus)
+	api.authUserRouteGroup.GET("/merchants", route.listMerchants)
+	api.authUserRouteGroup.GET("/merchants/:id", route.getMerchant)
+	api.authUserRouteGroup.POST("/merchants", route.changeMerchant)
+	api.authUserRouteGroup.PUT("/merchants", route.changeMerchant)
+	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
 
-	api.authUserRouteGroup.POST("/notification", route.createNotification)
-	api.authUserRouteGroup.GET("/notification/:id", route.getNotification)
-	api.authUserRouteGroup.GET("/notification", route.listNotifications)
-	api.authUserRouteGroup.PUT("/notification/:id/mark-as-read", route.markAsReadNotification)
+	api.authUserRouteGroup.POST("/merchants/notifications", route.createNotification)
+	api.authUserRouteGroup.GET("/merchants/notifications/:id", route.getNotification)
+	api.authUserRouteGroup.GET("/merchants/notifications", route.listNotifications)
+	api.authUserRouteGroup.PUT("/merchants/notifications/:id/mark-as-read", route.markAsReadNotification)
+
+	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods/:method_id", route.getPaymentMethod)
+	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods", route.listPaymentMethods)
+	api.authUserRouteGroup.POST("/merchants/:merchant_id/methods", route.changePaymentMethod)
+	api.authUserRouteGroup.PUT("/merchants/:merchant_id/methods", route.changePaymentMethod)
 
 	return api
 }
@@ -170,10 +175,10 @@ func (r *onboardingRoute) markAsReadNotification(ctx echo.Context) error {
 
 func (r *onboardingRoute) getPaymentMethod(ctx echo.Context) error {
 	req := &grpc.GetMerchantPaymentMethodRequest{}
-	httpErr := r.onboardingBeforeHandler(req, ctx)
+	err := (&OnboardingGetPaymentMethodBinder{}).Bind(req, ctx)
 
-	if httpErr != nil {
-		return httpErr
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	rsp, err := r.billingService.GetMerchantPaymentMethod(context.TODO(), req)
@@ -187,10 +192,10 @@ func (r *onboardingRoute) getPaymentMethod(ctx echo.Context) error {
 
 func (r *onboardingRoute) listPaymentMethods(ctx echo.Context) error {
 	req := &grpc.ListMerchantPaymentMethodsRequest{}
-	httpErr := r.onboardingBeforeHandler(req, ctx)
+	err := (&OnboardingListPaymentMethodsBinder{}).Bind(req, ctx)
 
-	if httpErr != nil {
-		return httpErr
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	rsp, err := r.billingService.ListMerchantPaymentMethods(context.TODO(), req)
@@ -204,10 +209,16 @@ func (r *onboardingRoute) listPaymentMethods(ctx echo.Context) error {
 
 func (r *onboardingRoute) changePaymentMethod(ctx echo.Context) error {
 	req := &grpc.MerchantPaymentMethodRequest{}
-	httpErr := r.onboardingBeforeHandler(req, ctx)
+	err := (&OnboardingChangePaymentMethodBinder{}).Bind(req, ctx)
 
-	if httpErr != nil {
-		return httpErr
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ChangeMerchantPaymentMethod(context.TODO(), req)

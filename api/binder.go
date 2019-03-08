@@ -29,6 +29,9 @@ type OrderAccountingPaymentRequestBinder struct{}
 type PaymentCreateProcessBinder struct{}
 type OnboardingMerchantListingBinder struct{}
 type OnboardingNotificationsListBinder struct{}
+type OnboardingGetPaymentMethodBinder struct{}
+type OnboardingListPaymentMethodsBinder struct{}
+type OnboardingChangePaymentMethodBinder struct{}
 
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	db := new(echo.DefaultBinder)
@@ -288,6 +291,60 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 			structure.Offset = int32(i)
 		}
 	}
+
+	return nil
+}
+
+func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
+	merchantId := ctx.Param(requestParameterMerchantId)
+	paymentMethodId := ctx.Param(requestParameterPaymentMethodId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	if paymentMethodId == "" || bson.IsObjectIdHex(paymentMethodId) == false {
+		return errors.New(errorIncorrectPaymentMethodId)
+	}
+
+	structure := i.(*grpc.GetMerchantPaymentMethodRequest)
+	structure.MerchantId = merchantId
+	structure.PaymentMethodId = paymentMethodId
+
+	return nil
+}
+
+func (cb *OnboardingListPaymentMethodsBinder) Bind(i interface{}, ctx echo.Context) error {
+	merchantId := ctx.Param(requestParameterMerchantId)
+	paymentMethodName := ctx.QueryParam(requestParameterPaymentMethodName)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	structure := i.(*grpc.ListMerchantPaymentMethodsRequest)
+	structure.MerchantId = merchantId
+	structure.PaymentMethodName = paymentMethodName
+
+	return nil
+}
+
+func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(requestParameterMerchantId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	structure := i.(*grpc.MerchantPaymentMethodRequest)
+	structure.MerchantId = merchantId
 
 	return nil
 }
