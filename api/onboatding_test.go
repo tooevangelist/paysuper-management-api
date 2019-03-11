@@ -24,13 +24,12 @@ var onboardingRoutes = [][]string{
 	{"/admin/api/v1/merchants", http.MethodPost},
 	{"/admin/api/v1/merchants", http.MethodPut},
 	{"/admin/api/v1/merchants/:id/change-status", http.MethodPut},
-	{"/admin/api/v1/merchants/notifications", http.MethodPost},
-	{"/admin/api/v1/merchants/notifications/:id", http.MethodGet},
-	{"/admin/api/v1/merchants/notifications", http.MethodGet},
-	{"/admin/api/v1/merchants/notifications/:id/mark-as-read", http.MethodPut},
+	{"/admin/api/v1/merchants/:merchant_id/notifications", http.MethodPost},
+	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id", http.MethodGet},
+	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id", http.MethodGet},
+	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id/mark-as-read", http.MethodPut},
 	{"/admin/api/v1/merchants/:merchant_id/methods/:method_id", http.MethodGet},
 	{"/admin/api/v1/merchants/:merchant_id/methods", http.MethodGet},
-	{"/admin/api/v1/merchants/:merchant_id/methods", http.MethodPost},
 	{"/admin/api/v1/merchants/:merchant_id/methods", http.MethodPut},
 }
 
@@ -819,9 +818,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/notification/:id")
-	ctx.SetParamNames("id")
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetPath("/merchants/:merchant_id/notifications/:notification_id")
+	ctx.SetParamNames(requestParameterMerchantId, requestParameterNotificationId)
+	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
 
 	err := suite.handler.getNotification(ctx)
 	assert.NoError(suite.T(), err)
@@ -939,9 +938,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/notification/:id/mark-as-read")
-	ctx.SetParamNames("id")
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetPath("/merchants/:merchant_id/notifications/:notification_id/mark-as-read")
+	ctx.SetParamNames(requestParameterMerchantId, requestParameterNotificationId)
+	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
 
 	err := suite.handler.markAsReadNotification(ctx)
 	assert.NoError(suite.T(), err)
@@ -957,7 +956,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_EmptyId_
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/notification/:id/mark-as-read")
+	ctx.SetPath("/merchants/:merchant_id/notifications/:notification_id/mark-as-read")
+	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	err := suite.handler.markAsReadNotification(ctx)
 	assert.Error(suite.T(), err)
@@ -965,7 +966,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_EmptyId_
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIdIsEmpty, httpErr.Message)
+	assert.Equal(suite.T(), errorIncorrectNotificationId, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_BillingServer_Error() {
@@ -975,9 +976,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_BillingS
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/notification/:id/mark-as-read")
-	ctx.SetParamNames("id")
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetPath("/merchants/:merchant_id/notifications/:notification_id/mark-as-read")
+	ctx.SetParamNames(requestParameterMerchantId, requestParameterNotificationId)
+	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
 
 	suite.handler.billingService = mock.NewBillingServerErrorMock()
 	err := suite.handler.markAsReadNotification(ctx)
@@ -1311,4 +1312,96 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BillingServ
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_BindError() {
+	data := &grpc.MerchantChangeStatusRequest{
+		Status:  pkg.MerchantStatusAgreementSigning,
+		Message: "some message",
+	}
+
+	b, err := json.Marshal(data)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:id/change-status")
+
+	err = suite.handler.changeMerchantStatus(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorIncorrectMerchantId, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_BindError() {
+	data := &grpc.NotificationRequest{
+		Title:   "Title",
+		Message: "Message",
+	}
+
+	b, err := json.Marshal(data)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:merchant_id/notifications")
+
+	err = suite.handler.createNotification(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorIncorrectMerchantId, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_IncorrectMerchant_Error() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:merchant_id/notifications/:notification_id")
+	ctx.SetParamNames(requestParameterNotificationId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.getNotification(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorIncorrectMerchantId, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_IncorrectMerchant_Error() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:merchant_id/notifications/:notification_id/mark-as-read")
+	ctx.SetParamNames(requestParameterNotificationId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.markAsReadNotification(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorIncorrectMerchantId, httpErr.Message)
 }
