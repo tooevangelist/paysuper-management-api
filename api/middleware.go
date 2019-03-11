@@ -2,8 +2,10 @@ package api
 
 import (
 	"bytes"
-	"github.com/paysuper/paysuper-management-api/database/model"
+	"errors"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
+	"github.com/paysuper/paysuper-management-api/database/model"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -35,8 +37,8 @@ func (api *Api) LimitOffsetSortMiddleware(next echo.HandlerFunc) echo.HandlerFun
 			sort = s
 		}
 
-		api.limit = limit
-		api.offset = offset
+		api.limit = int32(limit)
+		api.offset = int32(offset)
 		api.sort = sort
 
 		return next(ctx)
@@ -55,3 +57,22 @@ func (api *Api) RawBodyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func (api *Api) AuthUserMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user := c.Get("user").(*jwt.Token)
+		claims := user.Claims.(jwt.MapClaims)
+
+		id, ok := claims["id"]
+
+		if !ok {
+			c.Error(errors.New(errorJwtUserIdNotFound))
+		}
+
+		api.authUser.Id = id.(string)
+		api.authUser.Name = "Temporary user"
+		api.authUser.Merchants = make(map[string]bool)
+		api.authUser.Roles = make(map[string]bool)
+
+		return next(c)
+	}
+}

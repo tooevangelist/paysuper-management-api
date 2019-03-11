@@ -7,6 +7,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"io/ioutil"
 	"strconv"
@@ -26,6 +27,13 @@ type OrderJsonBinder struct{}
 type OrderRevenueDynamicRequestBinder struct{}
 type OrderAccountingPaymentRequestBinder struct{}
 type PaymentCreateProcessBinder struct{}
+type OnboardingMerchantListingBinder struct{}
+type OnboardingChangeMerchantStatusBinder struct{}
+type OnboardingNotificationsListBinder struct{}
+type OnboardingGetPaymentMethodBinder struct{}
+type OnboardingListPaymentMethodsBinder struct{}
+type OnboardingChangePaymentMethodBinder struct{}
+type OnboardingCreateNotificationBinder struct{}
 
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	db := new(echo.DefaultBinder)
@@ -189,4 +197,196 @@ func (cb *PaymentCreateProcessBinder) Bind(i interface{}, ctx echo.Context) (err
 	}
 
 	return
+}
+
+func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+	params := ctx.QueryParams()
+	structure := i.(*grpc.MerchantListingRequest)
+
+	structure.Limit = LimitDefault
+	structure.Offset = OffsetDefault
+
+	if v, ok := params[requestParameterName]; ok {
+		structure.Name = v[0]
+	}
+
+	if v, ok := params[requestParameterIsSigned]; ok {
+		if v[0] == "0" || v[0] == "false" {
+			structure.IsSigned = 2
+		} else {
+			if v[0] == "1" || v[0] == "true" {
+				structure.IsSigned = 2
+			} else {
+				return errors.New(errorQueryParamsIncorrect)
+			}
+		}
+	}
+
+	if v, ok := params[requestParameterLastPayoutDateFrom]; ok {
+		if ts, err := strconv.ParseInt(v[0], 10, 64); err == nil {
+			structure.LastPayoutDateFrom = ts
+		}
+	}
+
+	if v, ok := params[requestParameterLastPayoutDateTo]; ok {
+		if ts, err := strconv.ParseInt(v[0], 10, 64); err == nil {
+			structure.LastPayoutDateTo = ts
+		}
+	}
+
+	if v, ok := params[requestParameterLastPayoutAmount]; ok {
+		if f, err := strconv.ParseFloat(v[0], 64); err == nil {
+			structure.LastPayoutAmount = f
+		}
+	}
+
+	if v, ok := params[requestParameterSort]; ok {
+		structure.Sort = v
+	}
+
+	if v, ok := params[requestParameterLimit]; ok {
+		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
+			structure.Limit = int32(i)
+		}
+	}
+
+	if v, ok := params[requestParameterOffset]; ok {
+		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
+			structure.Offset = int32(i)
+		}
+	}
+
+	return
+}
+
+func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Context) error {
+	params := ctx.QueryParams()
+	structure := i.(*grpc.ListingNotificationRequest)
+
+	structure.Limit = LimitDefault
+	structure.Offset = OffsetDefault
+
+	if v, ok := params[requestParameterMerchantId]; ok {
+		if bson.IsObjectIdHex(v[0]) == false {
+			return errors.New(errorIncorrectMerchantId)
+		}
+
+		structure.MerchantId = v[0]
+	}
+
+	if v, ok := params[requestParameterUserId]; ok {
+		if bson.IsObjectIdHex(v[0]) == false {
+			return errors.New(errorIncorrectUserId)
+		}
+
+		structure.UserId = v[0]
+	}
+
+	if v, ok := params[requestParameterLimit]; ok {
+		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
+			structure.Limit = int32(i)
+		}
+	}
+
+	if v, ok := params[requestParameterOffset]; ok {
+		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
+			structure.Offset = int32(i)
+		}
+	}
+
+	return nil
+}
+
+func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
+	merchantId := ctx.Param(requestParameterMerchantId)
+	paymentMethodId := ctx.Param(requestParameterPaymentMethodId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	if paymentMethodId == "" || bson.IsObjectIdHex(paymentMethodId) == false {
+		return errors.New(errorIncorrectPaymentMethodId)
+	}
+
+	structure := i.(*grpc.GetMerchantPaymentMethodRequest)
+	structure.MerchantId = merchantId
+	structure.PaymentMethodId = paymentMethodId
+
+	return nil
+}
+
+func (cb *OnboardingListPaymentMethodsBinder) Bind(i interface{}, ctx echo.Context) error {
+	merchantId := ctx.Param(requestParameterMerchantId)
+	paymentMethodName := ctx.QueryParam(requestParameterPaymentMethodName)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	structure := i.(*grpc.ListMerchantPaymentMethodsRequest)
+	structure.MerchantId = merchantId
+	structure.PaymentMethodName = paymentMethodName
+
+	return nil
+}
+
+func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(requestParameterMerchantId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	structure := i.(*grpc.MerchantPaymentMethodRequest)
+	structure.MerchantId = merchantId
+
+	return nil
+}
+
+func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(requestParameterId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	structure := i.(*grpc.MerchantChangeStatusRequest)
+	structure.MerchantId = merchantId
+
+	return nil
+}
+
+func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(requestParameterMerchantId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	structure := i.(*grpc.NotificationRequest)
+	structure.MerchantId = merchantId
+
+	return nil
 }

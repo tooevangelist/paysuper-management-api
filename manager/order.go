@@ -62,8 +62,6 @@ const (
 	orderSignatureElementsGlue = "|"
 
 	orderDefaultDescription = "Payment by order # %s"
-
-	requestFieldOrderStoredCardId = "stored_card_id"
 )
 
 type OrderManager struct {
@@ -102,8 +100,8 @@ type FindAll struct {
 	Values   url.Values
 	Projects map[bson.ObjectId]string
 	Merchant *model.Merchant
-	Limit    int
-	Offset   int
+	Limit    int32
+	Offset   int32
 	SortBy   []string
 }
 
@@ -120,14 +118,14 @@ func InitOrderManager(
 	geoService proto.GeoIpService,
 ) *OrderManager {
 	om := &OrderManager{
-		Manager:                &Manager{Database: database, Logger: logger},
-		projectManager:         InitProjectManager(database, logger),
-		paymentSystemManager:   InitPaymentSystemManager(database, logger),
-		paymentMethodManager:   InitPaymentMethodManager(database, logger),
-		currencyRateManager:    InitCurrencyRateManager(database, logger),
-		currencyManager:        InitCurrencyManager(database, logger),
-		vatManager:             InitVatManager(database, logger),
-		commissionManager:      InitCommissionManager(database, logger),
+		Manager:              &Manager{Database: database, Logger: logger},
+		projectManager:       InitProjectManager(database, logger),
+		paymentSystemManager: InitPaymentSystemManager(database, logger),
+		paymentMethodManager: InitPaymentMethodManager(database, logger),
+		currencyRateManager:  InitCurrencyRateManager(database, logger),
+		currencyManager:      InitCurrencyManager(database, logger),
+		vatManager:           InitVatManager(database, logger),
+		commissionManager:    InitCommissionManager(database, logger),
 
 		rep: repository,
 		geo: geoService,
@@ -775,12 +773,12 @@ func (om *OrderManager) FindAll(params *FindAll) (*model.OrderPaginate, error) {
 		r := bson.RegEx{Pattern: ".*" + quickFilter[0] + ".*", Options: "i"}
 
 		filter["$or"] = []bson.M{
-			{"project.name": bson.M{ "$regex": r }},
-			{"project_account": bson.M{ "$regex": r }},
-			{"project_order_id": bson.M{ "$regex": r, "$exists": true }},
-			{"fixed_package.name": bson.M{ "$regex": r, "$exists": true }},
-			{"payment_method.name": bson.M{ "$regex": r, "$exists": true }},
-			{"id_string": bson.M{ "$regex": r, "$exists": true }},
+			{"project.name": bson.M{"$regex": r}},
+			{"project_account": bson.M{"$regex": r}},
+			{"project_order_id": bson.M{"$regex": r, "$exists": true}},
+			{"fixed_package.name": bson.M{"$regex": r, "$exists": true}},
+			{"payment_method.name": bson.M{"$regex": r, "$exists": true}},
+			{"id_string": bson.M{"$regex": r, "$exists": true}},
 		}
 
 		f = filter
@@ -1566,23 +1564,13 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 			SecretKey:        o.Project.SecretKey,
 			CallbackProtocol: o.Project.CallbackProtocol,
 			Merchant: &billing.Merchant{
-				Id:         o.Project.Merchant.Id.Hex(),
-				ExternalId: o.Project.Merchant.ExternalId,
-				Email:      o.Project.Merchant.Email,
-				Name:       *o.Project.Merchant.Name,
+				Id: o.Project.Merchant.Id.Hex(),
 				Country: &billing.Country{
 					CodeInt:  int32(o.Project.Merchant.Country.CodeInt),
 					CodeA2:   o.Project.Merchant.Country.CodeA2,
 					CodeA3:   o.Project.Merchant.Country.CodeA3,
 					Name:     &billing.Name{En: o.Project.Merchant.Country.Name.EN, Ru: o.Project.Merchant.Country.Name.RU},
 					IsActive: o.Project.Merchant.Country.IsActive,
-				},
-				AccountingPeriod: *o.Project.Merchant.AccountingPeriod,
-				Currency: &billing.Currency{
-					CodeInt:  int32(o.Project.Merchant.Currency.CodeInt),
-					CodeA3:   o.Project.Merchant.Currency.CodeA3,
-					Name:     &billing.Name{En: o.Project.Merchant.Currency.Name.EN, Ru: o.Project.Merchant.Currency.Name.RU},
-					IsActive: o.Project.Merchant.Currency.IsActive,
 				},
 				IsVatEnabled:              o.Project.Merchant.IsVatEnabled,
 				IsCommissionToUserEnabled: o.Project.Merchant.IsCommissionToUserEnabled,
@@ -1790,14 +1778,6 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 
 	if v, err := ptypes.TimestampProto(o.Project.Merchant.Country.UpdatedAt); err == nil {
 		pOrder.Project.Merchant.Country.UpdatedAt = v
-	}
-
-	if v, err := ptypes.TimestampProto(o.Project.Merchant.Currency.CreatedAt); err == nil {
-		pOrder.Project.Merchant.Currency.CreatedAt = v
-	}
-
-	if v, err := ptypes.TimestampProto(o.Project.Merchant.Currency.UpdatedAt); err == nil {
-		pOrder.Project.Merchant.Currency.UpdatedAt = v
 	}
 
 	if o.Project.Merchant.FirstPaymentAt != nil {

@@ -15,12 +15,14 @@ require (
 	github.com/micro/go-plugins v0.25.0
 	github.com/micro/kubernetes v0.7.0
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190225090212-53d0d70a258d
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190311091729-f82714a059d2
 	github.com/paysuper/paysuper-recurring-repository v1.0.99
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sidmal/slug v1.4.2
 	github.com/streadway/amqp v0.0.0-20181205114330-a314942b2fd9
+	github.com/stretchr/testify v1.3.0
+	github.com/swaggo/swag v1.4.1 // indirect
 	github.com/ttacon/builder v0.0.0-20170518171403-c099f663e1c2 // indirect
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/xakep666/mongo-migrate v0.1.0
