@@ -1110,7 +1110,7 @@ definitions:
       redirect_url:
         type: string
     type: object
-  TaxRate:
+  taxes.TaxRate:
     properties:
       id:
         type: string
@@ -1125,6 +1125,9 @@ definitions:
       rate:
         type: number
     type: object
+    required:
+      - country
+      - rate
 
   onboarding.Contacts.Authorized:
     properties:
@@ -3160,7 +3163,7 @@ paths:
             type: array
             items:
               type: object
-              $ref: '#/definitions/TaxRate'
+              $ref: '#/definitions/taxes.TaxRate'
         "401":
           description: Unauthorized
           schema:
@@ -3190,14 +3193,14 @@ paths:
           in: body
           name: data
           schema:
-            $ref: '#/definitions/TaxRate'
+            $ref: '#/definitions/taxes.TaxRate'
             type: object
           required: true
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/TaxRate'
+            $ref: '#/definitions/taxes.TaxRate'
             type: object
         "400":
           description: Invalid request data
