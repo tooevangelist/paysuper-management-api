@@ -47,6 +47,7 @@ const (
 	requestParameterLastPayoutAmount   = "last_payout_amount"
 	requestParameterMerchantId         = "merchant_id"
 	requestParameterPaymentMethodId    = "method_id"
+	requestParameterNotificationId     = "notification_id"
 	requestParameterPaymentMethodName  = "method_name"
 	requestParameterUserId             = "user"
 	requestParameterSort               = "sort[]"
@@ -59,22 +60,9 @@ const (
 	errorJwtUserIdNotFound        = "user identifier not found in JWT token"
 	errorIncorrectMerchantId      = "incorrect merchant identifier"
 	errorIncorrectPaymentMethodId = "incorrect payment method identifier"
+	errorIncorrectNotificationId  = "incorrect notification identifier"
 	errorIncorrectUserId          = "incorrect user identifier"
 	errorMessageMask              = "Field validation for '%s' failed on the '%s' tag"
-
-	routeOnboardingListMerchants          = "/merchants"
-	routeOnboardingGetMerchant            = "/merchants/:id"
-	routeOnboardingCreateMerchant         = "/merchants"
-	routeOnboardingUpdateMerchant         = "/merchants"
-	routeOnboardingChangeMerchantStatus   = "/merchants/:id/change-status"
-	routeOnboardingCreateNotification     = "/merchants/notifications"
-	routeOnboardingGetNotification        = "/merchants/notifications/:id"
-	routeOnboardingListNotifications      = "/merchants/notifications"
-	routeOnboardingMarkAsReadNotification = "/merchants/notifications/:id/mark-as-read"
-	routeOnboardingGetPaymentMethod       = "/merchants/:merchant_id/methods/:method_id"
-	routeOnboardingListPaymentMethods     = "/merchants/:merchant_id/methods"
-	routeOnboardingCreatePaymentMethod    = "/merchants/:merchant_id/methods"
-	routeOnboardingUpdatePaymentMethod    = "/merchants/:merchant_id/methods"
 )
 
 var funcMap = template.FuncMap{
@@ -243,7 +231,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitProjectRoutes().
 		InitOrderV1Routes().
 		InitPaymentMethodRoutes().
-		InitCardPayWebHookRoutes()
+		InitCardPayWebHookRoutes().
+		initOnboardingRoutes()
 
 	api.Http.GET("/docs", func(ctx echo.Context) error {
 		return ctx.Render(http.StatusOK, "docs.html", map[string]interface{}{})

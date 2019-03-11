@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -21,10 +22,10 @@ func (api *Api) initOnboardingRoutes() *Api {
 	api.authUserRouteGroup.PUT("/merchants", route.changeMerchant)
 	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
 
-	api.authUserRouteGroup.POST("/merchants/notifications", route.createNotification)
-	api.authUserRouteGroup.GET("/merchants/notifications/:id", route.getNotification)
-	api.authUserRouteGroup.GET("/merchants/notifications", route.listNotifications)
-	api.authUserRouteGroup.PUT("/merchants/notifications/:id/mark-as-read", route.markAsReadNotification)
+	api.authUserRouteGroup.POST("/merchants/:merchant_id/notifications", route.createNotification)
+	api.authUserRouteGroup.GET("/merchants/:merchant_id/notifications/:notification_id", route.getNotification)
+	api.authUserRouteGroup.GET("/merchants/:merchant_id/notifications", route.listNotifications)
+	api.authUserRouteGroup.PUT("/merchants/:merchant_id/notifications/:notification_id/mark-as-read", route.markAsReadNotification)
 
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods/:method_id", route.getPaymentMethod)
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods", route.listPaymentMethods)
@@ -90,10 +91,16 @@ func (r *onboardingRoute) changeMerchant(ctx echo.Context) error {
 
 func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 	req := &grpc.MerchantChangeStatusRequest{}
-	httpErr := r.onboardingBeforeHandler(req, ctx)
+	err := (&OnboardingChangeMerchantStatusBinder{}).Bind(req, ctx)
 
-	if httpErr != nil {
-		return httpErr
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	req.UserId = r.authUser.Id
@@ -108,10 +115,16 @@ func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 
 func (r *onboardingRoute) createNotification(ctx echo.Context) error {
 	req := &grpc.NotificationRequest{}
-	httpErr := r.onboardingBeforeHandler(req, ctx)
+	err := (&OnboardingCreateNotificationBinder{}).Bind(req, ctx)
 
-	if httpErr != nil {
-		return httpErr
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	req.UserId = r.authUser.Id
@@ -125,13 +138,22 @@ func (r *onboardingRoute) createNotification(ctx echo.Context) error {
 }
 
 func (r *onboardingRoute) getNotification(ctx echo.Context) error {
-	id := ctx.Param(requestParameterId)
+	merchantId := ctx.Param(requestParameterMerchantId)
+	notificationId := ctx.Param(requestParameterNotificationId)
 
-	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectMerchantId)
 	}
 
-	rsp, err := r.billingService.GetNotification(context.TODO(), &grpc.FindByIdRequest{Id: id})
+	if notificationId == "" || bson.IsObjectIdHex(notificationId) == false {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectNotificationId)
+	}
+
+	req := &grpc.GetNotificationRequest{
+		MerchantId:     merchantId,
+		NotificationId: notificationId,
+	}
+	rsp, err := r.billingService.GetNotification(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
@@ -158,13 +180,22 @@ func (r *onboardingRoute) listNotifications(ctx echo.Context) error {
 }
 
 func (r *onboardingRoute) markAsReadNotification(ctx echo.Context) error {
-	id := ctx.Param(requestParameterId)
+	merchantId := ctx.Param(requestParameterMerchantId)
+	notificationId := ctx.Param(requestParameterNotificationId)
 
-	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectMerchantId)
 	}
 
-	rsp, err := r.billingService.MarkNotificationAsRead(context.TODO(), &grpc.FindByIdRequest{Id: id})
+	if notificationId == "" || bson.IsObjectIdHex(notificationId) == false {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectNotificationId)
+	}
+
+	req := &grpc.GetNotificationRequest{
+		MerchantId:     merchantId,
+		NotificationId: notificationId,
+	}
+	rsp, err := r.billingService.MarkNotificationAsRead(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

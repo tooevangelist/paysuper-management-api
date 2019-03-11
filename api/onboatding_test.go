@@ -547,6 +547,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_Ok() {
 	rsp = httptest.NewRecorder()
 	ctx = e.NewContext(req, rsp)
 
+	ctx.SetPath("/merchants/:id/change-status")
+	ctx.SetParamNames("id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
 	err = suite.handler.changeMerchantStatus(ctx)
 
 	assert.NoError(suite.T(), err)
@@ -612,10 +616,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_Validation
 	assert.True(suite.T(), len(mRsp.Id) > 0)
 	assert.Equal(suite.T(), pkg.MerchantStatusDraft, mRsp.Status)
 
-	changeStatusReq := &grpc.MerchantChangeStatusRequest{
-		MerchantId: "",
-		Status:     pkg.MerchantStatusAgreementRequested,
-	}
+	changeStatusReq := &grpc.MerchantChangeStatusRequest{}
 	b, err = json.Marshal(changeStatusReq)
 	assert.NoError(suite.T(), err)
 
@@ -624,6 +625,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_Validation
 	rsp = httptest.NewRecorder()
 	ctx = e.NewContext(req, rsp)
 
+	ctx.SetPath("/merchants/:id/change-status")
+	ctx.SetParamNames("id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
 	err = suite.handler.changeMerchantStatus(ctx)
 
 	assert.Error(suite.T(), err)
@@ -631,7 +636,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_Validation
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "MerchantId", httpErr.Message)
+	assert.Regexp(suite.T(), "Status", httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_BillingServerUnavailable_Error() {
@@ -704,6 +709,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_BillingSer
 	rsp = httptest.NewRecorder()
 	ctx = e.NewContext(req, rsp)
 
+	ctx.SetPath("/merchants/:id/change-status")
+	ctx.SetParamNames("id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
 	suite.handler.billingService = mock.NewBillingServerErrorMock()
 	err = suite.handler.changeMerchantStatus(ctx)
 
@@ -732,6 +741,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
+	ctx.SetPath("/merchants/:merchant_id/notifications")
+	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
 	err = suite.handler.createNotification(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusCreated, rsp.Code)
@@ -754,6 +767,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_ValidationEr
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:merchant_id/notifications")
+	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	err = suite.handler.createNotification(ctx)
 	assert.Error(suite.T(), err)
@@ -780,6 +797,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_BillingServe
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:merchant_id/notifications")
+	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	suite.handler.billingService = mock.NewBillingServerErrorMock()
 	err = suite.handler.createNotification(ctx)
@@ -815,13 +836,17 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_EmptyId_Error()
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
+	ctx.SetPath("/merchants/:merchant_id/notifications/:notification_id")
+	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
 	err := suite.handler.getNotification(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIdIsEmpty, httpErr.Message)
+	assert.Equal(suite.T(), errorIncorrectNotificationId, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_BillingServerUnavailable_Error() {
@@ -831,9 +856,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_BillingServerUn
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/notification/:id")
-	ctx.SetParamNames("id")
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetPath("/merchants/:merchant_id/notifications/:notification_id")
+	ctx.SetParamNames(requestParameterMerchantId, requestParameterNotificationId)
+	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
 
 	suite.handler.billingService = mock.NewBillingServerErrorMock()
 	err := suite.handler.getNotification(ctx)

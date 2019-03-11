@@ -248,7 +248,7 @@ func (s *BillingServerOkMock) CreateNotification(
 
 func (s *BillingServerOkMock) GetNotification(
 	ctx context.Context,
-	in *grpc.FindByIdRequest,
+	in *grpc.GetNotificationRequest,
 	opts ...client.CallOption,
 ) (*billing.Notification, error) {
 	return &billing.Notification{}, nil
@@ -264,7 +264,7 @@ func (s *BillingServerOkMock) ListNotifications(
 
 func (s *BillingServerOkMock) MarkNotificationAsRead(
 	ctx context.Context,
-	in *grpc.FindByIdRequest,
+	in *grpc.GetNotificationRequest,
 	opts ...client.CallOption,
 ) (*billing.Notification, error) {
 	return &billing.Notification{}, nil
@@ -414,7 +414,7 @@ func (s *BillingServerErrorMock) CreateNotification(
 
 func (s *BillingServerErrorMock) GetNotification(
 	ctx context.Context,
-	in *grpc.FindByIdRequest,
+	in *grpc.GetNotificationRequest,
 	opts ...client.CallOption,
 ) (*billing.Notification, error) {
 	return nil, errors.New(SomeError)
@@ -430,7 +430,7 @@ func (s *BillingServerErrorMock) ListNotifications(
 
 func (s *BillingServerErrorMock) MarkNotificationAsRead(
 	ctx context.Context,
-	in *grpc.FindByIdRequest,
+	in *grpc.GetNotificationRequest,
 	opts ...client.CallOption,
 ) (*billing.Notification, error) {
 	return nil, errors.New(SomeError)
@@ -569,7 +569,7 @@ func (s *BillingServerSystemErrorMock) CreateNotification(
 
 func (s *BillingServerSystemErrorMock) GetNotification(
 	ctx context.Context,
-	in *grpc.FindByIdRequest,
+	in *grpc.GetNotificationRequest,
 	opts ...client.CallOption,
 ) (*billing.Notification, error) {
 	return &billing.Notification{}, nil
@@ -585,7 +585,7 @@ func (s *BillingServerSystemErrorMock) ListNotifications(
 
 func (s *BillingServerSystemErrorMock) MarkNotificationAsRead(
 	ctx context.Context,
-	in *grpc.FindByIdRequest,
+	in *grpc.GetNotificationRequest,
 	opts ...client.CallOption,
 ) (*billing.Notification, error) {
 	return &billing.Notification{}, nil

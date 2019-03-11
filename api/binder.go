@@ -28,10 +28,12 @@ type OrderRevenueDynamicRequestBinder struct{}
 type OrderAccountingPaymentRequestBinder struct{}
 type PaymentCreateProcessBinder struct{}
 type OnboardingMerchantListingBinder struct{}
+type OnboardingChangeMerchantStatusBinder struct{}
 type OnboardingNotificationsListBinder struct{}
 type OnboardingGetPaymentMethodBinder struct{}
 type OnboardingListPaymentMethodsBinder struct{}
 type OnboardingChangePaymentMethodBinder struct{}
+type OnboardingCreateNotificationBinder struct{}
 
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	db := new(echo.DefaultBinder)
@@ -344,6 +346,46 @@ func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Cont
 	}
 
 	structure := i.(*grpc.MerchantPaymentMethodRequest)
+	structure.MerchantId = merchantId
+
+	return nil
+}
+
+func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(requestParameterId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	structure := i.(*grpc.MerchantChangeStatusRequest)
+	structure.MerchantId = merchantId
+
+	return nil
+}
+
+func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(requestParameterMerchantId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	structure := i.(*grpc.NotificationRequest)
 	structure.MerchantId = merchantId
 
 	return nil
