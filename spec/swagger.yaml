@@ -1712,14 +1712,14 @@ paths:
           required: true
           type: string
         - description: project unique identifier
-          in: query
+          in: path
           name: project_id
           required: true
           type: string
         - description: array of identifiers of fixed packages
           in: query
-          name: id
-          type: array
+          name: id[]
+          type: string
         - description: array of names of fixed packages
           in: query
           name: name[]
@@ -1868,6 +1868,12 @@ paths:
       description: Get full data about merchant
       produces:
         - application/json
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          type: string
+          required: true
       responses:
         "200":
           description: OK
@@ -1902,22 +1908,22 @@ paths:
           in: query
           name: id
           type: string
-        - description: list of projects to get orders filtered by they
+        - description: query array of list of projects to get orders filtered by they
           in: query
-          name: project
-          type: array
-        - description: list of payment methods to get orders filtered by they
+          name: project[]
+          type: string
+        - description: query array of list of payment methods to get orders filtered by they
           in: query
-          name: payment_method
-          type: array
-        - description: list of payer countries to get orders filtered by they
+          name: payment_method[]
+          type: string
+        - description: query array of list of payer countries to get orders filtered by they
           in: query
-          name: country
-          type: array
-        - description: list of orders statuses to get orders filtered by they
+          name: country[]
+          type: string
+        - description: query array of list of orders statuses to get orders filtered by they
           in: query
-          name: status
-          type: array
+          name: status[]
+          type: integer
         - description: payer account on the any side of payment process. for example
             it may be account in project, account in payment system, payer email and
             etc
@@ -1952,10 +1958,10 @@ paths:
           in: query
           name: offset
           type: integer
-        - description: fields list for sorting
+        - description: query array of fields list for sorting
           in: query
-          name: sort
-          type: array
+          name: sort[]
+          type: string
       produces:
         - application/json
       responses:
@@ -2098,10 +2104,10 @@ paths:
           name: to
           required: true
           type: integer
-        - description: list of projects to calculate dynamics of revenue
+        - description: query array of list of projects to calculate dynamics of revenue
           in: query
-          name: project
-          type: array
+          name: project[]
+          type: string
       produces:
         - application/json
       responses:
@@ -2246,7 +2252,7 @@ paths:
       parameters:
         - description: Project identifier
           in: path
-          name: data
+          name: id
           required: true
           type: string
       produces:
