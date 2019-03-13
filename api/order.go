@@ -2,9 +2,11 @@ package api
 
 import (
 	"context"
+	"errors"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/micro/go-micro"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
@@ -12,17 +14,71 @@ import (
 	"github.com/paysuper/paysuper-management-api/payment_system"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 const (
 	orderFormTemplateName = "order.html"
 )
 
-type OrderApiV1 struct {
+type orderRoute struct {
 	*Api
 	orderManager   *manager.OrderManager
 	projectManager *manager.ProjectManager
 	publisher      micro.Publisher
+}
+
+type OrderListRefundsBinder struct{}
+type OrderCreateRefundBinder struct{}
+
+func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
+	params := ctx.QueryParams()
+	orderId := ctx.Param(requestParameterOrderId)
+	limit := int32(LimitDefault)
+	offset := int32(OffsetDefault)
+
+	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
+		return errors.New(errorIncorrectOrderId)
+	}
+
+	if v, ok := params[requestParameterLimit]; ok {
+		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
+			limit = int32(i)
+		}
+	}
+
+	if v, ok := params[requestParameterOffset]; ok {
+		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
+			offset = int32(i)
+		}
+	}
+
+	structure := i.(*grpc.ListRefundsRequest)
+	structure.OrderId = orderId
+	structure.Limit = limit
+	structure.Offset = offset
+
+	return nil
+}
+
+func (b *OrderCreateRefundBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	orderId := ctx.Param(requestParameterOrderId)
+
+	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
+		return errors.New(errorIncorrectOrderId)
+	}
+
+	structure := i.(*grpc.CreateRefundRequest)
+	structure.OrderId = orderId
+
+	return nil
 }
 
 // @Summary Create order with HTML form
@@ -52,7 +108,7 @@ type OrderApiV1 struct {
 // @Failure 500 {string} html "Redirect user to page with error description"
 // @Router /order/create [get]
 func (api *Api) InitOrderV1Routes() *Api {
-	oApiV1 := OrderApiV1{
+	route := orderRoute{
 		Api: api,
 		orderManager: manager.InitOrderManager(
 			api.database,
@@ -64,17 +120,21 @@ func (api *Api) InitOrderV1Routes() *Api {
 		projectManager: manager.InitProjectManager(api.database, api.logger),
 	}
 
-	api.Http.GET("/order/:id", oApiV1.getOrderForm)
-	api.Http.GET("/order/create", oApiV1.createFromFormData)
-	api.Http.POST("/order/create", oApiV1.createFromFormData)
-	api.Http.POST("/api/v1/order", oApiV1.createJson)
+	api.Http.GET("/order/:id", route.getOrderForm)
+	api.Http.GET("/order/create", route.createFromFormData)
+	api.Http.POST("/order/create", route.createFromFormData)
+	api.Http.POST("/api/v1/order", route.createJson)
 
-	api.Http.POST("/api/v1/payment", oApiV1.processCreatePayment)
+	api.Http.POST("/api/v1/payment", route.processCreatePayment)
 
-	api.accessRouteGroup.GET("/order", oApiV1.getOrders)
-	api.accessRouteGroup.GET("/order/:id", oApiV1.getOrderJson)
-	api.accessRouteGroup.GET("/order/revenue_dynamic/:period", oApiV1.getRevenueDynamic)
-	api.accessRouteGroup.GET("/order/accounting_payment", oApiV1.getAccountingPaymentCalculation)
+	api.accessRouteGroup.GET("/order", route.getOrders)
+	api.accessRouteGroup.GET("/order/:id", route.getOrderJson)
+	api.accessRouteGroup.GET("/order/revenue_dynamic/:period", route.getRevenueDynamic)
+	api.accessRouteGroup.GET("/order/accounting_payment", route.getAccountingPaymentCalculation)
+
+	api.authUserRouteGroup.GET("/order/:order_id/refunds", route.listRefunds)
+	api.authUserRouteGroup.GET("/order/:order_id/refunds/:refund_id", route.getRefund)
+	api.authUserRouteGroup.POST("/order/:order_id/refunds", route.createRefund)
 
 	return api
 }
@@ -105,7 +165,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 // @Failure 400 {string} html "Redirect user to page with error description"
 // @Failure 500 {string} html "Redirect user to page with error description"
 // @Router /order/create [post]
-func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
+func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	req := &billing.OrderCreateRequest{
 		PayerIp: ctx.RealIP(),
 		IsJson:  false,
@@ -115,11 +175,11 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Request data invalid")
 	}
 
-	if err := oApiV1.validate.Struct(req); err != nil {
+	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
-	order, err := oApiV1.billingService.OrderCreateProcess(context.TODO(), req)
+	order, err := r.billingService.OrderCreateProcess(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -140,7 +200,7 @@ func (oApiV1 *OrderApiV1) createFromFormData(ctx echo.Context) error {
 // @Failure 400 {object} model.Error "Object with error message"
 // @Failure 500 {object} model.Error "Object with error message"
 // @Router /api/v1/order [post]
-func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
+func (r *orderRoute) createJson(ctx echo.Context) error {
 	req := &billing.OrderCreateRequest{
 		PayerIp: ctx.RealIP(),
 		IsJson:  true,
@@ -150,11 +210,11 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
 
-	if err := oApiV1.validate.Struct(req); err != nil {
+	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
-	order, err := oApiV1.billingService.OrderCreateProcess(context.TODO(), req)
+	order, err := r.billingService.OrderCreateProcess(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -162,10 +222,10 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 
 	req1 := &grpc.PaymentFormJsonDataRequest{
 		OrderId: order.Id,
-		Scheme:  oApiV1.httpScheme,
+		Scheme:  r.httpScheme,
 		Host:    ctx.Request().Host,
 	}
-	jo, err := oApiV1.billingService.PaymentFormJsonDataProcess(context.TODO(), req1)
+	jo, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req1)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -174,7 +234,7 @@ func (oApiV1 *OrderApiV1) createJson(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, jo)
 }
 
-func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
+func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 	id := ctx.Param(model.OrderFilterFieldId)
 
 	if id == "" {
@@ -183,10 +243,10 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 
 	req := &grpc.PaymentFormJsonDataRequest{
 		OrderId: id,
-		Scheme:  oApiV1.httpScheme,
+		Scheme:  r.httpScheme,
 		Host:    ctx.Request().Host,
 	}
-	jo, err := oApiV1.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
+	jo, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -208,14 +268,14 @@ func (oApiV1 *OrderApiV1) getOrderForm(ctx echo.Context) error {
 // @Failure 404 {object} model.Error "Not found"
 // @Failure 500 {object} model.Error "Object with error message"
 // @Router /api/v1/s/order/{id} [get]
-func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
+func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 	id := ctx.Param("id")
 
 	if id == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
 
-	p, merchant, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, []bson.ObjectId{})
+	p, merchant, err := r.projectManager.FilterProjects(r.Merchant.Identifier, []bson.ObjectId{})
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, err)
@@ -225,11 +285,11 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 		Values:   url.Values{"id": []string{id}},
 		Projects: p,
 		Merchant: merchant,
-		Limit:    oApiV1.GetParams.limit,
-		Offset:   oApiV1.GetParams.offset,
+		Limit:    r.GetParams.limit,
+		Offset:   r.GetParams.offset,
 	}
 
-	pOrders, err := oApiV1.orderManager.FindAll(params)
+	pOrders, err := r.orderManager.FindAll(params)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -266,7 +326,7 @@ func (oApiV1 *OrderApiV1) getOrderJson(ctx echo.Context) error {
 // @Failure 401 {object} model.Error "Unauthorized"
 // @Failure 500 {object} model.Error "Object with error message"
 // @Router /api/v1/s/order [get]
-func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
+func (r *orderRoute) getOrders(ctx echo.Context) error {
 	values := ctx.QueryParams()
 
 	var fp []bson.ObjectId
@@ -281,7 +341,7 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 		}
 	}
 
-	p, merchant, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, fp)
+	p, merchant, err := r.projectManager.FilterProjects(r.Merchant.Identifier, fp)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, err)
@@ -291,12 +351,12 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 		Values:   values,
 		Projects: p,
 		Merchant: merchant,
-		Limit:    oApiV1.GetParams.limit,
-		Offset:   oApiV1.GetParams.offset,
-		SortBy:   oApiV1.GetParams.sort,
+		Limit:    r.GetParams.limit,
+		Offset:   r.GetParams.offset,
+		SortBy:   r.GetParams.sort,
 	}
 
-	pOrders, err := oApiV1.orderManager.FindAll(params)
+	pOrders, err := r.orderManager.FindAll(params)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -316,14 +376,14 @@ func (oApiV1 *OrderApiV1) getOrders(ctx echo.Context) error {
 // @Failure 402 {object} payment_system.PaymentResponse "contain error description about error on payment system side"
 // @Failure 500 {object} payment_system.PaymentResponse "contain error description about error on PSP (P1) side"
 // @Router /api/v1/payment [post]
-func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
+func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	data := make(map[string]string)
 
 	if err := (&PaymentCreateProcessBinder{}).Bind(data, ctx); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageInvalidRequestData})
 	}
 
-	rsp, err := oApiV1.billingService.PaymentCreateProcess(context.TODO(), &grpc.PaymentCreateRequest{Data: data})
+	rsp, err := r.billingService.PaymentCreateProcess(context.TODO(), &grpc.PaymentCreateRequest{Data: data})
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageUnknownError})
@@ -363,14 +423,14 @@ func (oApiV1 *OrderApiV1) processCreatePayment(ctx echo.Context) error {
 // @Failure 403 {object} model.Error "Access denied"
 // @Failure 500 {object} model.Error "Object with error message"
 // @Router /api/v1/s/order/revenue_dynamic/{period} [get]
-func (oApiV1 *OrderApiV1) getRevenueDynamic(ctx echo.Context) error {
+func (r *orderRoute) getRevenueDynamic(ctx echo.Context) error {
 	rdr := &model.RevenueDynamicRequest{}
 
 	if err := (&OrderRevenueDynamicRequestBinder{}).Bind(rdr, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	pMap, _, err := oApiV1.projectManager.FilterProjects(oApiV1.Merchant.Identifier, rdr.Project)
+	pMap, _, err := r.projectManager.FilterProjects(r.Merchant.Identifier, rdr.Project)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, err.Error())
@@ -380,7 +440,7 @@ func (oApiV1 *OrderApiV1) getRevenueDynamic(ctx echo.Context) error {
 		rdr.SetProjectsFromMap(pMap)
 	}
 
-	res, err := oApiV1.orderManager.GetRevenueDynamic(rdr)
+	res, err := r.orderManager.GetRevenueDynamic(rdr)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -402,18 +462,92 @@ func (oApiV1 *OrderApiV1) getRevenueDynamic(ctx echo.Context) error {
 // @Failure 403 {object} model.Error "Access denied"
 // @Failure 500 {object} model.Error "Object with error message"
 // @Router /api/v1/s/order/accounting_payment [get]
-func (oApiV1 *OrderApiV1) getAccountingPaymentCalculation(ctx echo.Context) error {
+func (r *orderRoute) getAccountingPaymentCalculation(ctx echo.Context) error {
 	rdr := &model.RevenueDynamicRequest{}
 
 	if err := (&OrderAccountingPaymentRequestBinder{}).Bind(rdr, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := oApiV1.orderManager.GetAccountingPayment(rdr, oApiV1.Merchant.Identifier)
+	res, err := r.orderManager.GetAccountingPayment(rdr, r.Merchant.Identifier)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, res)
+}
+
+func (r *orderRoute) getRefund(ctx echo.Context) error {
+	orderId := ctx.Param(requestParameterOrderId)
+	refundId := ctx.Param(requestParameterRefundId)
+
+	if refundId == "" || bson.IsObjectIdHex(refundId) == false {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectRefundId)
+	}
+
+	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
+	}
+
+	req := &grpc.GetRefundRequest{
+		OrderId:  orderId,
+		RefundId: refundId,
+	}
+	rsp, err := r.billingService.GetRefund(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *orderRoute) listRefunds(ctx echo.Context) error {
+	req := &grpc.ListRefundsRequest{}
+	err := (&OrderListRefundsBinder{}).Bind(req, ctx)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	rsp, err := r.billingService.ListRefunds(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp)
+}
+
+func (r *orderRoute) createRefund(ctx echo.Context) error {
+	req := &grpc.CreateRefundRequest{}
+	err := (&OrderCreateRefundBinder{}).Bind(req, ctx)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req.CreatorId = r.authUser.Id
+	rsp, err := r.billingService.CreateRefund(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusCreated, rsp.Item)
 }

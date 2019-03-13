@@ -612,6 +612,8 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20190308063354-a9f8b94b0c21 h
 github.com/paysuper/paysuper-billing-server v0.0.0-20190308063354-a9f8b94b0c21/go.mod h1:uB20OXuJp3fGUB37vxnTwX9rgpfQYqjEI8ddltZj3uM=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190311091729-f82714a059d2 h1:osYzbZkIkPB/qXwLLcqR8cThtc34GTuU5+G/9iEPXUc=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190311091729-f82714a059d2/go.mod h1:uB20OXuJp3fGUB37vxnTwX9rgpfQYqjEI8ddltZj3uM=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190313083137-7b7841acda38 h1:CUgnxOjbn/Rlvj+69MeC1zmBbdovUAmS33LXOuyW8Es=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190313083137-7b7841acda38/go.mod h1:uB20OXuJp3fGUB37vxnTwX9rgpfQYqjEI8ddltZj3uM=
 github.com/paysuper/paysuper-recurring-repository v1.0.99 h1:3VSKIVwtxMgKUMBjz92GjwBPSqpA1g4bY0N684Rn+6s=
 github.com/paysuper/paysuper-recurring-repository v1.0.99/go.mod h1:5jCFa70wHevei2I6zA0gg5DWSTDIe17P4OPbTFZCMFs=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=

@@ -47,6 +47,8 @@ const (
 	requestParameterLastPayoutAmount   = "last_payout_amount"
 	requestParameterMerchantId         = "merchant_id"
 	requestParameterPaymentMethodId    = "method_id"
+	requestParameterOrderId            = "order_id"
+	requestParameterRefundId           = "refund_id"
 	requestParameterNotificationId     = "notification_id"
 	requestParameterPaymentMethodName  = "method_name"
 	requestParameterUserId             = "user"
@@ -62,6 +64,8 @@ const (
 	errorIncorrectPaymentMethodId = "incorrect payment method identifier"
 	errorIncorrectNotificationId  = "incorrect notification identifier"
 	errorIncorrectUserId          = "incorrect user identifier"
+	errorIncorrectOrderId         = "incorrect order identifier"
+	errorIncorrectRefundId        = "incorrect refund identifier"
 	errorMessageMask              = "Field validation for '%s' failed on the '%s' tag"
 )
 
