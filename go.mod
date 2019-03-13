@@ -11,12 +11,13 @@ require (
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/labstack/echo v3.3.5+incompatible
 	github.com/micro/go-grpc v0.11.0
-	github.com/micro/go-micro v0.26.1
-	github.com/micro/go-plugins v0.25.0
+	github.com/micro/go-micro v1.0.0
+	github.com/micro/go-plugins v1.0.0
 	github.com/micro/kubernetes v0.7.0
 	github.com/oschwald/geoip2-golang v1.2.1
 	github.com/paysuper/paysuper-billing-server v0.0.0-20190313083137-7b7841acda38
 	github.com/paysuper/paysuper-recurring-repository v1.0.99
+	github.com/paysuper/paysuper-tax-service v0.0.0-20190308105725-016a09c27fbd
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sidmal/slug v1.4.2
