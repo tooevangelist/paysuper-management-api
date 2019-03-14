@@ -76,6 +76,8 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.accessRouteGroup.GET("/order/revenue_dynamic/:period", oApiV1.getRevenueDynamic)
 	api.accessRouteGroup.GET("/order/accounting_payment", oApiV1.getAccountingPaymentCalculation)
 
+	api.Http.POST("/api/v1/order/:order_id/bin", route.createJson)
+
 	return api
 }
 

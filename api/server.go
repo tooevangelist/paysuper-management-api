@@ -3,12 +3,10 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/rabbitmq/pkg"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/micro/go-micro"
@@ -187,10 +185,10 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 	//api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtWithConfig(jwtverifier.NewJwtVerifier(jwtVerifierSettings)))
 
-	api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:    p.Config.SignatureSecret,
-		SigningMethod: p.Config.Algorithm,
-	}))
+	//api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+	//	SigningKey:    p.Config.SignatureSecret,
+	//	SigningMethod: p.Config.Algorithm,
+	//}))
 	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
 
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
@@ -311,16 +309,16 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 
 func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user := c.Get("user").(*jwt.Token)
-		claims := user.Claims.(jwt.MapClaims)
+		//user := c.Get("user").(*jwt.Token)
+		//claims := user.Claims.(jwt.MapClaims)
 
-		id, ok := claims["id"]
+		//id, ok := claims["id"]
 
-		if !ok {
-			c.Error(errors.New("merchant identifier not found"))
-		}
+		//if !ok {
+		//	c.Error(errors.New("merchant identifier not found"))
+		//}
 
-		api.Merchant.Identifier = id.(string)
+		api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
 
 		return next(c)
 	}
