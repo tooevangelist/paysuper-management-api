@@ -1,3 +1,4 @@
+swagger: "2.0"
 definitions:
   model.AccountingPayment:
     properties:
@@ -1109,6 +1110,24 @@ definitions:
       redirect_url:
         type: string
     type: object
+  taxes.TaxRate:
+    properties:
+      id:
+        type: string
+      country:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      zip:
+        type: string
+      rate:
+        type: number
+    type: object
+    required:
+      - country
+      - rate
 
   onboarding.Contacts.Authorized:
     properties:
@@ -3102,5 +3121,146 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
             type: object
+  "/admin/api/v1/taxes":
+    get:
+      summary: List all available tax rates in the system
+      tags:
+        - Tax
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: List all available tax rates in the system
+      parameters:
+        - description: country to filter response
+          in: query
+          name: country
+          type: string
+        - description: city to filter response
+          in: query
+          name: city
+          type: string
+        - description: state to filter response
+          in: query
+          name: state
+          type: string
+        - description: zip to filter response
+          in: query
+          name: zip
+          type: string
+        - description: maximum number of returning orders. default value is 100
+          in: query
+          name: limit
+          type: integer
+        - description: offset from which you want to return the list of orders. default value is 0
+          in: query
+          name: offset
+          type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: array
+            items:
+              type: object
+              $ref: '#/definitions/taxes.TaxRate'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+    post:
+      summary: Upsert tax rate data.
+      tags:
+        - Tax
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create or update tax rate data.
+      parameters:
+        - description: Object to upsert
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/taxes.TaxRate'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/taxes.TaxRate'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+  "/admin/api/v1/taxes/{id}":
+    delete:
+      summary: Delete tax rate object
+      description: Mark tax rate object as deleted
+      tags:
+        - Tax
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - description: tax rate object id
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Some unknown error
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
 
-swagger: "2.0"
