@@ -201,14 +201,14 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
 
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
-	api.authUserRouteGroup.Use(
-		middleware.JWTWithConfig(
-			middleware.JWTConfig{
-				SigningKey:    p.Config.SignatureSecret,
-				SigningMethod: p.Config.Algorithm,
-			},
-		),
-	)
+	//api.authUserRouteGroup.Use(
+	//	middleware.JWTWithConfig(
+	//		middleware.JWTConfig{
+	//			SigningKey:    p.Config.SignatureSecret,
+	//			SigningMethod: p.Config.Algorithm,
+	//		},
+	//	),
+	//)
 	api.authUserRouteGroup.Use(api.AuthUserMiddleware)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
