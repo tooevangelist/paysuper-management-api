@@ -23,6 +23,12 @@ backend:
     type: ClusterIP
     port: 8080
     protocol: TCP
+  env:
+  - MONGO_DB
+  - MONGO_HOST
+  - MONGO_PASSWORD
+  - MONGO_USER
+  - JWT_SIGNATURE_SECRET  
   
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
