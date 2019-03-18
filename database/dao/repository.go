@@ -8,12 +8,12 @@ import (
 type Repository interface {
 	FindCurrencyById(int) (*model.Currency, error)
 	FindCurrenciesByName(string) ([]*model.Currency, error)
-	FindAllCurrencies(int, int) ([]*model.Currency, error)
+	FindAllCurrencies(int32, int32) ([]*model.Currency, error)
 	FindCurrencyByCodeA3(string) (*model.Currency, error)
 
 	FindCountryById(int) (*model.Country, error)
 	FindCountryByName(string) ([]*model.Country, error)
-	FindAllCountries(int, int) ([]*model.Country, error)
+	FindAllCountries(int32, int32) ([]*model.Country, error)
 
 	FindMerchantById(id string) (*model.Merchant, error)
 	InsertMerchant(m *model.Merchant) error
@@ -21,7 +21,7 @@ type Repository interface {
 
 	InsertProject(p *model.Project) error
 	UpdateProject(p *model.Project) error
-	FindProjectsByMerchantId(string, int, int) ([]*model.Project, error)
+	FindProjectsByMerchantId(string, int32, int32) ([]*model.Project, error)
 	FindProjectByMerchantIdAndName(bson.ObjectId, string) (*model.Project, error)
 	FindProjectById(bson.ObjectId) (*model.Project, error)
 	FindFixedPackageByFilters(filters *model.FixedPackageFilters) ([]map[string]interface{}, error)
@@ -35,7 +35,7 @@ type Repository interface {
 
 	FindOrderByProjectOrderId(string) (*model.Order, error)
 	FindOrderById(bson.ObjectId) (*model.Order, error)
-	FindAllOrders(filters bson.M, sort []string, limit int, offset int) ([]*model.Order, error)
+	FindAllOrders(filters bson.M, sort []string, limit int32, offset int32) ([]*model.Order, error)
 	GetOrdersCountByConditions(filters bson.M) (int, error)
 	GetRevenueDynamic(*model.RevenueDynamicRequest) ([]map[string]interface{}, error)
 	GetAccountingPayment(rdr *model.RevenueDynamicRequest, mId string) ([]map[string]interface{}, error)

@@ -25,9 +25,9 @@ func (rep *Repository) FindCurrenciesByName(name string) ([]*model.Currency, err
 	return c, err
 }
 
-func (rep *Repository) FindAllCurrencies(limit int, offset int) ([]*model.Currency, error) {
+func (rep *Repository) FindAllCurrencies(limit int32, offset int32) ([]*model.Currency, error) {
 	var c []*model.Currency
-	err := rep.Collection.Find(bson.M{"is_active": true}).Limit(limit).Skip(offset).All(&c)
+	err := rep.Collection.Find(bson.M{"is_active": true}).Limit(int(limit)).Skip(int(offset)).All(&c)
 
 	return c, err
 }

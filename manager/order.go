@@ -62,8 +62,6 @@ const (
 	orderSignatureElementsGlue = "|"
 
 	orderDefaultDescription = "Payment by order # %s"
-
-	requestFieldOrderStoredCardId = "stored_card_id"
 )
 
 type OrderManager struct {
@@ -102,8 +100,8 @@ type FindAll struct {
 	Values   url.Values
 	Projects map[bson.ObjectId]string
 	Merchant *model.Merchant
-	Limit    int
-	Offset   int
+	Limit    int32
+	Offset   int32
 	SortBy   []string
 }
 
@@ -1566,23 +1564,13 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 			SecretKey:        o.Project.SecretKey,
 			CallbackProtocol: o.Project.CallbackProtocol,
 			Merchant: &billing.Merchant{
-				Id:         o.Project.Merchant.Id.Hex(),
-				ExternalId: o.Project.Merchant.ExternalId,
-				Email:      o.Project.Merchant.Email,
-				Name:       *o.Project.Merchant.Name,
+				Id: o.Project.Merchant.Id.Hex(),
 				Country: &billing.Country{
 					CodeInt:  int32(o.Project.Merchant.Country.CodeInt),
 					CodeA2:   o.Project.Merchant.Country.CodeA2,
 					CodeA3:   o.Project.Merchant.Country.CodeA3,
 					Name:     &billing.Name{En: o.Project.Merchant.Country.Name.EN, Ru: o.Project.Merchant.Country.Name.RU},
 					IsActive: o.Project.Merchant.Country.IsActive,
-				},
-				AccountingPeriod: *o.Project.Merchant.AccountingPeriod,
-				Currency: &billing.Currency{
-					CodeInt:  int32(o.Project.Merchant.Currency.CodeInt),
-					CodeA3:   o.Project.Merchant.Currency.CodeA3,
-					Name:     &billing.Name{En: o.Project.Merchant.Currency.Name.EN, Ru: o.Project.Merchant.Currency.Name.RU},
-					IsActive: o.Project.Merchant.Currency.IsActive,
 				},
 				IsVatEnabled:              o.Project.Merchant.IsVatEnabled,
 				IsCommissionToUserEnabled: o.Project.Merchant.IsCommissionToUserEnabled,
@@ -1792,14 +1780,6 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		pOrder.Project.Merchant.Country.UpdatedAt = v
 	}
 
-	if v, err := ptypes.TimestampProto(o.Project.Merchant.Currency.CreatedAt); err == nil {
-		pOrder.Project.Merchant.Currency.CreatedAt = v
-	}
-
-	if v, err := ptypes.TimestampProto(o.Project.Merchant.Currency.UpdatedAt); err == nil {
-		pOrder.Project.Merchant.Currency.UpdatedAt = v
-	}
-
 	if o.Project.Merchant.FirstPaymentAt != nil {
 		if v, err := ptypes.TimestampProto(*o.Project.Merchant.FirstPaymentAt); err == nil {
 			pOrder.Project.Merchant.FirstPaymentAt = v
@@ -1814,20 +1794,20 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		pOrder.PayerData.Email = *o.PayerData.Email
 	}
 
-	if o.Project.UrlSuccess != nil {
-		pOrder.Project.UrlSuccess = *o.Project.UrlSuccess
+	if o.Project.UrlSuccess != "" {
+		pOrder.Project.UrlSuccess = o.Project.UrlSuccess
 	}
 
-	if o.Project.UrlFail != nil {
-		pOrder.Project.UrlFail = *o.Project.UrlFail
+	if o.Project.UrlFail != "" {
+		pOrder.Project.UrlFail = o.Project.UrlFail
 	}
 
-	if o.Project.URLCheckAccount != nil {
-		pOrder.Project.UrlCheckAccount = *o.Project.URLCheckAccount
+	if o.Project.URLCheckAccount != "" {
+		pOrder.Project.UrlCheckAccount = o.Project.URLCheckAccount
 	}
 
-	if o.Project.URLProcessPayment != nil {
-		pOrder.Project.UrlProcessPayment = *o.Project.URLProcessPayment
+	if o.Project.URLProcessPayment != "" {
+		pOrder.Project.UrlProcessPayment = o.Project.URLProcessPayment
 	}
 
 	return pOrder
