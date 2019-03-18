@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/ProtocolONE/authone-jwt-verifier-golang"
 	jwtMiddleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
 	"github.com/ProtocolONE/geoip-service/pkg"
@@ -20,6 +21,8 @@ import (
 	"github.com/paysuper/paysuper-management-api/utils"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
+	taxServiceConst "github.com/paysuper/paysuper-tax-service/pkg"
+	"github.com/paysuper/paysuper-tax-service/proto"
 	"github.com/sidmal/slug"
 	"github.com/ttacon/libphonenumber"
 	"go.uber.org/zap"
@@ -32,7 +35,36 @@ import (
 )
 
 const (
-	apiWebHookGroupPath = "/webhook"
+	apiWebHookGroupPath  = "/webhook"
+	apiAuthUserGroupPath = "/admin/api/v1"
+
+	LimitDefault  = 100
+	OffsetDefault = 0
+
+	requestParameterId                 = "id"
+	requestParameterName               = "name"
+	requestParameterIsSigned           = "is_signed"
+	requestParameterLastPayoutDateFrom = "last_payout_date_from"
+	requestParameterLastPayoutDateTo   = "last_payout_date_to"
+	requestParameterLastPayoutAmount   = "last_payout_amount"
+	requestParameterMerchantId         = "merchant_id"
+	requestParameterPaymentMethodId    = "method_id"
+	requestParameterNotificationId     = "notification_id"
+	requestParameterPaymentMethodName  = "method_name"
+	requestParameterUserId             = "user"
+	requestParameterSort               = "sort[]"
+	requestParameterLimit              = "limit"
+	requestParameterOffset             = "offset"
+
+	errorIdIsEmpty                = "identifier can't be empty"
+	errorUnknown                  = "unknown error. try request later"
+	errorQueryParamsIncorrect     = "incorrect query parameters"
+	errorJwtUserIdNotFound        = "user identifier not found in JWT token"
+	errorIncorrectMerchantId      = "incorrect merchant identifier"
+	errorIncorrectPaymentMethodId = "incorrect payment method identifier"
+	errorIncorrectNotificationId  = "incorrect notification identifier"
+	errorIncorrectUserId          = "incorrect user identifier"
+	errorMessageMask              = "Field validation for '%s' failed on the '%s' tag"
 )
 
 var funcMap = template.FuncMap{
@@ -61,8 +93,8 @@ type Merchant struct {
 }
 
 type GetParams struct {
-	limit  int
-	offset int
+	limit  int32
+	offset int32
 	sort   []string
 }
 
@@ -70,16 +102,28 @@ type Order struct {
 	PayerPhone *libphonenumber.PhoneNumber
 }
 
+type AuthUser struct {
+	Id        string
+	Name      string
+	Roles     map[string]bool
+	Merchants map[string]bool
+}
+
 type Api struct {
-	Http              *echo.Echo
-	config            *config.Config
-	database          dao.Database
-	logger            *zap.SugaredLogger
-	validate          *validator.Validate
+	Http     *echo.Echo
+	config   *config.Config
+	database dao.Database
+	logger   *zap.SugaredLogger
+	validate *validator.Validate
+
 	accessRouteGroup  *echo.Group
 	webhookRouteGroup *echo.Group
-	httpScheme        string
 	jwtVerifier       *jwtverifier.JwtVerifier
+
+	authUserRouteGroup *echo.Group
+	authUser           *AuthUser
+
+	httpScheme string
 
 	service        micro.Service
 	serviceContext context.Context
@@ -88,6 +132,7 @@ type Api struct {
 	repository     repository.RepositoryService
 	geoService     proto.GeoIpService
 	billingService grpc.BillingService
+	taxService     tax_service.TaxService
 
 	AmqpAddress string
 	notifierPub *rabbitmq.Broker
@@ -131,9 +176,32 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 
 	api.validate.RegisterStructValidation(ProjectStructValidator, model.ProjectScalar{})
 	api.validate.RegisterStructValidation(api.OrderStructValidator, model.OrderScalar{})
+	err := api.validate.RegisterValidation("phone", api.PhoneValidator)
+
+	if err != nil {
+		return nil, err
+	}
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
+	//api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtWithConfig(jwtverifier.NewJwtVerifier(jwtVerifierSettings)))
+
+	//api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+	//	SigningKey:    p.Config.SignatureSecret,
+	//	SigningMethod: p.Config.Algorithm,
+	//}))
+	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
 	api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtWithConfig(api.jwtVerifier))
+
+	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
+	api.authUserRouteGroup.Use(
+		middleware.JWTWithConfig(
+			middleware.JWTConfig{
+				SigningKey:    p.Config.SignatureSecret,
+				SigningMethod: p.Config.Algorithm,
+			},
+		),
+	)
+	api.authUserRouteGroup.Use(api.AuthUserMiddleware)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
 	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
@@ -163,6 +231,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitOrderV1Routes().
 		InitPaymentMethodRoutes().
 		InitCardPayWebHookRoutes().
+		initOnboardingRoutes().
+		initTaxesRoutes().
 		InitOauthRoutes()
 
 	api.Http.GET("/docs", func(ctx echo.Context) error {
@@ -220,6 +290,7 @@ func (api *Api) InitService() {
 	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, api.service.Client())
 	api.geoService = proto.NewGeoIpService(geoip.ServiceName, api.service.Client())
 	api.billingService = grpc.NewBillingService(pkg.ServiceName, api.service.Client())
+	api.taxService = tax_service.NewTaxService(taxServiceConst.ServiceName, api.service.Client())
 }
 
 func (api *Api) Stop() {
@@ -238,4 +309,43 @@ func (api *Api) Stop() {
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		//user := c.Get("user").(*jwt.Token)
+		//claims := user.Claims.(jwt.MapClaims)
+
+		//id, ok := claims["id"]
+
+		//if !ok {
+		//	c.Error(errors.New("merchant identifier not found"))
+		//}
+
+		api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
+
+		return next(c)
+	}
+}
+
+func (api *Api) getValidationError(err error) string {
+	vErr := err.(validator.ValidationErrors)[0]
+
+	return fmt.Sprintf(errorMessageMask, vErr.Field(), vErr.Tag())
+}
+
+func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.HTTPError {
+	err := ctx.Bind(st)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	err = api.validate.Struct(st)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, api.getValidationError(err))
+	}
+
+	return nil
 }

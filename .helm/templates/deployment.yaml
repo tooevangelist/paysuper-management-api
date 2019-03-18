@@ -56,51 +56,14 @@ spec:
           value: "static"
         - name: METRICS_PORT
           value: "{{ $deployment.healthPort }}"
-        - name: MONGO_HOST
+
+        {{- range .Values.backend.env }}
+        - name: {{ . }}
           valueFrom:
             secretKeyRef:
-              name: {{ .Chart.Name }}-mongo-connection
-              key: MONGO_HOST
-        - name: MONGO_DB
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-mongo-connection
-              key: MONGO_DB
-        - name: MONGO_USER
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-mongo-connection
-              key: MONGO_USER
-        - name: MONGO_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-mongo-connection
-              key: MONGO_PASSWORD
-        - name: JWT_SIGNATURE_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-jwt-secret
-              key: {{ .Chart.Name }}-jwt-secret
-        - name: AUTH1_ISSUER
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-auth1
-              key: AUTH1_ISSUER
-        - name: AUTH1_CLIENTID
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-auth1
-              key: AUTH1_CLIENTID
-        - name: AUTH1_CLIENTSECRET
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-auth1
-              key: AUTH1_CLIENTSECRET
-        - name: AUTH1_REDIRECTURL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-auth1
-              key: AUTH1_REDIRECTURL
+              name: {{ $deploymentName }}-env
+              key: {{ . }}
+        {{- end }}
         ports:
         - containerPort: {{$deployment.port}}
         #livenessProbe:

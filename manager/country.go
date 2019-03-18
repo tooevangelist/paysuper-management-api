@@ -36,7 +36,7 @@ func (cm *CountryManager) FindByName(name string) []*model.Country {
 	return c
 }
 
-func (cm *CountryManager) FindAll(limit int, offset int) []*model.Country {
+func (cm *CountryManager) FindAll(limit int32, offset int32) []*model.Country {
 	c, err := cm.Database.Repository(TableCountry).FindAllCountries(limit, offset)
 
 	if err != nil {

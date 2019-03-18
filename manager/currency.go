@@ -46,7 +46,7 @@ func (cm *CurrencyManager) FindByName(name string) []*model.Currency {
 	return c
 }
 
-func (cm *CurrencyManager) FindAll(limit int, offset int) []*model.Currency {
+func (cm *CurrencyManager) FindAll(limit int32, offset int32) []*model.Currency {
 	c, err := cm.Database.Repository(TableCurrency).FindAllCurrencies(limit, offset)
 
 	if err != nil {

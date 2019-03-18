@@ -38,13 +38,13 @@ type ProjectScalar struct {
 	// is allow send notifications about successfully completed payment operations to user's emails
 	SendNotifyEmail bool `json:"send_notify_email"`
 	// default url to send request for verification payment data to project
-	URLCheckAccount *string `json:"url_check_account,omitempty" validate:"omitempty,url,max=255"`
+	URLCheckAccount string `json:"url_check_account,omitempty" validate:"omitempty,url,max=255"`
 	// default url to send request for notification about successfully completed payment to project
-	URLProcessPayment *string `json:"url_process_payment,omitempty" validate:"omitempty,url,max=255"`
+	URLProcessPayment string `json:"url_process_payment,omitempty" validate:"omitempty,url,max=255"`
 	// default url to redirect user after failed payment
-	URLRedirectFail *string `json:"url_redirect_fail,omitempty" validate:"omitempty,url,max=255"`
+	URLRedirectFail string `json:"url_redirect_fail,omitempty" validate:"omitempty,url,max=255"`
 	// default url to redirect user after successfully completed payment
-	URLRedirectSuccess *string `json:"url_redirect_success,omitempty" validate:"omitempty,url,max=255"`
+	URLRedirectSuccess string `json:"url_redirect_success,omitempty" validate:"omitempty,url,max=255"`
 	// is project active
 	IsActive bool `json:"is_active,omitempty"`
 	// list of project's fixed packages
@@ -85,13 +85,13 @@ type Project struct {
 	// is allow send notifications about successfully completed payment operations to user's emails
 	SendNotifyEmail bool `bson:"send_notify_email" json:"send_notify_email"`
 	// default url to send request for verification payment data to project
-	URLCheckAccount *string `bson:"url_check_account" json:"url_check_account"`
+	URLCheckAccount string `bson:"url_check_account" json:"url_check_account"`
 	// default url to send request for notification about successfully completed payment to project
-	URLProcessPayment *string `bson:"url_process_payment" json:"url_process_payment"`
+	URLProcessPayment string `bson:"url_process_payment" json:"url_process_payment"`
 	// default url to redirect user after failed payment
-	URLRedirectFail *string `bson:"url_redirect_fail" json:"url_redirect_fail"`
+	URLRedirectFail string `bson:"url_redirect_fail" json:"url_redirect_fail"`
 	// default url to redirect user after successfully completed payment
-	URLRedirectSuccess *string `bson:"url_redirect_success" json:"url_redirect_success"`
+	URLRedirectSuccess string `bson:"url_redirect_success" json:"url_redirect_success"`
 	// is project active
 	IsActive bool `bson:"is_active" json:"is_active"`
 	// date of create project
@@ -106,13 +106,13 @@ type Project struct {
 type ProjectOrder struct {
 	Id                bson.ObjectId `bson:"id" json:"id"`
 	Name              string        `bson:"name" json:"name"`
-	UrlSuccess        *string       `bson:"url_success" json:"url_success"`
-	UrlFail           *string       `bson:"url_fail" json:"url_fail"`
+	UrlSuccess        string        `bson:"url_success" json:"url_success"`
+	UrlFail           string        `bson:"url_fail" json:"url_fail"`
 	NotifyEmails      []string      `bson:"notify_emails" json:"notify_emails"`
 	SecretKey         string        `bson:"secret_key" json:"secret_key"`
 	SendNotifyEmail   bool          `bson:"send_notify_email" json:"send_notify_email"`
-	URLCheckAccount   *string       `bson:"url_check_account" json:"url_check_account"`
-	URLProcessPayment *string       `bson:"url_process_payment" json:"url_process_payment"`
+	URLCheckAccount   string        `bson:"url_check_account" json:"url_check_account"`
+	URLProcessPayment string        `bson:"url_process_payment" json:"url_process_payment"`
 	CallbackProtocol  string        `bson:"callback_protocol" json:"callback_protocol"`
 	Merchant          *Merchant     `bson:"merchant" json:"merchant"`
 }
@@ -122,7 +122,7 @@ type ProjectJsonOrderResponse struct {
 	// project name
 	Name string `json:"name"`
 	// url to redirect user after successfully completed payment. may be NULL if not set in project settings
-	UrlSuccess *string `json:"url_success"`
+	UrlSuccess string `json:"url_success"`
 	// url to redirect user after failed payment. may be NULL if not set in project settings
-	UrlFail *string `json:"url_fail"`
+	UrlFail string `json:"url_fail"`
 }
