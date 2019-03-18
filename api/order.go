@@ -136,6 +136,8 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.authUserRouteGroup.GET("/order/:order_id/refunds/:refund_id", route.getRefund)
 	api.authUserRouteGroup.POST("/order/:order_id/refunds", route.createRefund)
 
+	api.Http.POST("/order/:order_id/change-language", route.changeLanguage)
+
 	return api
 }
 
@@ -167,8 +169,9 @@ func (api *Api) InitOrderV1Routes() *Api {
 // @Router /order/create [post]
 func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	req := &billing.OrderCreateRequest{
-		PayerIp: ctx.RealIP(),
-		IsJson:  false,
+		PayerIp:  ctx.RealIP(),
+		IsJson:   false,
+		Language: ctx.Request().Header.Get(HeaderAcceptLanguage),
 	}
 
 	if err := (&OrderFormBinder{}).Bind(req, ctx); err != nil {
@@ -202,8 +205,9 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 // @Router /api/v1/order [post]
 func (r *orderRoute) createJson(ctx echo.Context) error {
 	req := &billing.OrderCreateRequest{
-		PayerIp: ctx.RealIP(),
-		IsJson:  true,
+		PayerIp:  ctx.RealIP(),
+		IsJson:   true,
+		Language: ctx.Request().Header.Get(HeaderAcceptLanguage),
 	}
 
 	if err := (&OrderJsonBinder{}).Bind(req, ctx); err != nil {
@@ -550,4 +554,14 @@ func (r *orderRoute) createRefund(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusCreated, rsp.Item)
+}
+
+func (r *orderRoute) changeLanguage(ctx echo.Context) error {
+	orderId := ctx.Param(requestParameterOrderId)
+
+	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
+	}
+
+	return nil
 }

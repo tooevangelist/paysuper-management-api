@@ -69,6 +69,8 @@ const (
 	errorIncorrectOrderId         = "incorrect order identifier"
 	errorIncorrectRefundId        = "incorrect refund identifier"
 	errorMessageMask              = "Field validation for '%s' failed on the '%s' tag"
+
+	HeaderAcceptLanguage = "Accept-Language"
 )
 
 var funcMap = template.FuncMap{
