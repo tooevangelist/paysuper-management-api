@@ -183,14 +183,10 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
-	//api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtWithConfig(jwtverifier.NewJwtVerifier(jwtVerifierSettings)))
-
-	//api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-	//	SigningKey:    p.Config.SignatureSecret,
-	//	SigningMethod: p.Config.Algorithm,
-	//}))
-	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
-	api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtWithConfig(api.jwtVerifier))
+	auth1VerifierCallback := func(ui *jwtverifier.UserInfo) {
+		api.Merchant.Identifier = string(ui.UserID)
+	}
+	api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtCallableWithConfig(api.jwtVerifier, auth1VerifierCallback))
 
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
 	api.authUserRouteGroup.Use(
