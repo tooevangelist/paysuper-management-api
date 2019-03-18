@@ -4,14 +4,30 @@ go:
 - 1.11.x
 services:
 - mongodb
+
+stages:
+  - test
+  - name: deploy 
+    if: branch = master
+
 env:
   global:
   - GO111MODULE=on
-install: true
-script:
-- go test ./... -coverprofile=coverage.out -covermode=atomic -p=1
-after_success:
-- bash <(curl -s https://codecov.io/bash)
+
+jobs:
+  include:
+  - stage: test
+    install: true
+    script:
+    - go test ./... -coverprofile=coverage.out -covermode=atomic -p=1
+    after_success:
+    - bash <(curl -s https://codecov.io/bash)
+  - stage: deploy
+    install: true
+    script:
+    - 'curl -H "Content-Type: application/json;" -X POST -d "{\"PROJECT\": \"$TRAVIS_REPO_SLUG\",
+          \"BRANCH\": \"$TRAVIS_BRANCH\"}" $JENKINS'
+
 notifications:
   email: false
   slack:
