@@ -52,7 +52,7 @@ github.com/Microsoft/go-winio v0.4.11/go.mod h1:VhR8bwka0BXejwEJY73c50VrPtXAaKcy
 github.com/NYTimes/gziphandler v1.0.1/go.mod h1:3wb06e3pkSAbeQ52E9H9iFoQsEEwGN64994WTCIhntQ=
 github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5/go.mod h1:lmUJ/7eu/Q8D7ML55dXQrVaamCz2vxCfdQBasLZfHKk=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190228105857-3db8d46773c0/go.mod h1:XNfuS/K3zPtqxoIJwu/yO6jTII2TleXBysce4/xNEOQ=
+github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190318191356-b7545c8f8b91/go.mod h1:XNfuS/K3zPtqxoIJwu/yO6jTII2TleXBysce4/xNEOQ=
 github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742/go.mod h1:HT0K5P2RhETGsI3b9aW1+a0L1PJPMypkDhMecJu2n68=
 github.com/ProtocolONE/go-micro-plugins v0.3.0/go.mod h1:/gvuHZoDRGfxS+ox0fHXuwwsTEVEHWRWKOhzbnozrZ8=
 github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c/go.mod h1:ZnV4uG7YnB4iU8c8co8XU4w7xL0sGaGEw5d9g1THmwk=
