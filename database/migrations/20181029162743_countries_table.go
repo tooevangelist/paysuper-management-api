@@ -1,9 +1,9 @@
 package migrations
 
 import (
+	"github.com/globalsign/mgo"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
-	"github.com/globalsign/mgo"
 	"github.com/xakep666/mongo-migrate"
 	"time"
 )

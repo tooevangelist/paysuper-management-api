@@ -2,11 +2,11 @@ package migrations
 
 import (
 	"errors"
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/paysuper/paysuper-management-api/payment_system"
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
 	"github.com/xakep666/mongo-migrate"
 	"time"
 )
@@ -26,37 +26,37 @@ func init() {
 
 			pms := []interface{}{
 				&model.PaymentMethod{
-					Id: bson.NewObjectId(),
-					Name: "Alipay",
-					PaymentSystem: ps,
-					Currency: cr,
-					GroupAlias: "alipay",
+					Id:               bson.NewObjectId(),
+					Name:             "Alipay",
+					PaymentSystem:    ps,
+					Currency:         cr,
+					GroupAlias:       "alipay",
 					MinPaymentAmount: 0.01,
 					MaxPaymentAmount: 15000.00,
-					IsActive: true,
-					CreatedAt: time.Now(),
-					UpdatedAt: time.Now(),
+					IsActive:         true,
+					CreatedAt:        time.Now(),
+					UpdatedAt:        time.Now(),
 					Params: &model.PaymentMethodParams{
-						Handler: payment_system.PaymentSystemHandlerCardPay,
-						Terminal: "16001",
+						Handler:    payment_system.PaymentSystemHandlerCardPay,
+						Terminal:   "16001",
 						ExternalId: "ALIPAY",
 					},
 					Icon: "/images/alipay_logo.png",
 				},
 				&model.PaymentMethod{
-					Id: bson.NewObjectId(),
-					Name: "Bitcoin",
-					PaymentSystem: ps,
-					Currency: cr,
-					GroupAlias: "bitcoin",
+					Id:               bson.NewObjectId(),
+					Name:             "Bitcoin",
+					PaymentSystem:    ps,
+					Currency:         cr,
+					GroupAlias:       "bitcoin",
 					MinPaymentAmount: 0.01,
 					MaxPaymentAmount: 15000.00,
-					IsActive: true,
-					CreatedAt: time.Now(),
-					UpdatedAt: time.Now(),
+					IsActive:         true,
+					CreatedAt:        time.Now(),
+					UpdatedAt:        time.Now(),
 					Params: &model.PaymentMethodParams{
-						Handler: payment_system.PaymentSystemHandlerCardPay,
-						Terminal: "16007",
+						Handler:    payment_system.PaymentSystemHandlerCardPay,
+						Terminal:   "16007",
 						ExternalId: "BITCOIN",
 					},
 					Icon: "/images/btc_logo.png",

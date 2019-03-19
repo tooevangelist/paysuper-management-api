@@ -56,31 +56,14 @@ spec:
           value: "static"
         - name: METRICS_PORT
           value: "{{ $deployment.healthPort }}"
-        - name: MONGO_HOST
+
+        {{- range .Values.backend.env }}
+        - name: {{ . }}
           valueFrom:
             secretKeyRef:
-              name: {{ .Chart.Name }}-mongo-connection
-              key: MONGO_HOST
-        - name: MONGO_DB
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-mongo-connection
-              key: MONGO_DB
-        - name: MONGO_USER
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-mongo-connection
-              key: MONGO_USER
-        - name: MONGO_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-mongo-connection
-              key: MONGO_PASSWORD
-        - name: JWT_SIGNATURE_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-jwt-secret
-              key: {{ .Chart.Name }}-jwt-secret
+              name: {{ $deploymentName }}-env
+              key: {{ . }}
+        {{- end }}
         ports:
         - containerPort: {{$deployment.port}}
         #livenessProbe:
@@ -91,9 +74,7 @@ spec:
         #  timeoutSeconds: 1
         #  failureThreshold: 3
         #  periodSeconds: 5
-
-        {{/*volumeMounts:
-        - name: {{ $deploymentName }}-config
-          mountPath: /application/etc/
-          readOnly: true
-        */}}
+        #volumeMounts:
+        #- name: {{ $deploymentName }}-config
+        #  mountPath: /application/etc/
+        #  readOnly: tru

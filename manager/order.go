@@ -1794,20 +1794,20 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		pOrder.PayerData.Email = *o.PayerData.Email
 	}
 
-	if o.Project.UrlSuccess != nil {
-		pOrder.Project.UrlSuccess = *o.Project.UrlSuccess
+	if o.Project.UrlSuccess != "" {
+		pOrder.Project.UrlSuccess = o.Project.UrlSuccess
 	}
 
-	if o.Project.UrlFail != nil {
-		pOrder.Project.UrlFail = *o.Project.UrlFail
+	if o.Project.UrlFail != "" {
+		pOrder.Project.UrlFail = o.Project.UrlFail
 	}
 
-	if o.Project.URLCheckAccount != nil {
-		pOrder.Project.UrlCheckAccount = *o.Project.URLCheckAccount
+	if o.Project.URLCheckAccount != "" {
+		pOrder.Project.UrlCheckAccount = o.Project.URLCheckAccount
 	}
 
-	if o.Project.URLProcessPayment != nil {
-		pOrder.Project.UrlProcessPayment = *o.Project.URLProcessPayment
+	if o.Project.URLProcessPayment != "" {
+		pOrder.Project.UrlProcessPayment = o.Project.URLProcessPayment
 	}
 
 	return pOrder

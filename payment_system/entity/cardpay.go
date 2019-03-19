@@ -79,7 +79,7 @@ type CardPayCryptoCurrencyAccount struct {
 }
 
 type CardPayReturnUrls struct {
-	CancelUrl string `json:"cancel_url,omitempty"`
+	CancelUrl  string `json:"cancel_url,omitempty"`
 	DeclineUrl string `json:"decline_url,omitempty"`
 	SuccessUrl string `json:"success_url,omitempty"`
 }
