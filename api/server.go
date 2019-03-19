@@ -228,8 +228,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitPaymentMethodRoutes().
 		InitCardPayWebHookRoutes().
 		initOnboardingRoutes().
-		initTaxesRoutes().
-		InitOauthRoutes()
+		initTaxesRoutes()
 
 	api.Http.GET("/docs", func(ctx echo.Context) error {
 		return ctx.Render(http.StatusOK, "docs.html", map[string]interface{}{})
