@@ -79,6 +79,7 @@ var (
 )
 
 type BillingServerOkMock struct{}
+type BillingServerOkTemporaryMock struct{}
 type BillingServerErrorMock struct{}
 type BillingServerSystemErrorMock struct{}
 
@@ -92,6 +93,10 @@ func NewBillingServerErrorMock() grpc.BillingService {
 
 func NewBillingServerSystemErrorMock() grpc.BillingService {
 	return &BillingServerSystemErrorMock{}
+}
+
+func NewBillingServerOkTemporaryMock() grpc.BillingService {
+	return &BillingServerOkTemporaryMock{}
 }
 
 func (s *BillingServerOkMock) OrderCreateProcess(
@@ -305,6 +310,46 @@ func (s *BillingServerOkMock) ChangeMerchantPaymentMethod(
 	}, nil
 }
 
+func (s *BillingServerOkMock) CreateRefund(
+	ctx context.Context,
+	in *grpc.CreateRefundRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateRefundResponse, error) {
+	return &grpc.CreateRefundResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   &billing.Refund{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) ListRefunds(
+	ctx context.Context,
+	in *grpc.ListRefundsRequest,
+	opts ...client.CallOption,
+) (*grpc.ListRefundsResponse, error) {
+	return &grpc.ListRefundsResponse{}, nil
+}
+
+func (s *BillingServerOkMock) GetRefund(
+	ctx context.Context,
+	in *grpc.GetRefundRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateRefundResponse, error) {
+	return &grpc.CreateRefundResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   &billing.Refund{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) ProcessRefundCallback(
+	ctx context.Context,
+	in *grpc.CallbackRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentNotifyResponse, error) {
+	return &grpc.PaymentNotifyResponse{
+		Status: pkg.ResponseStatusOk,
+	}, nil
+}
+
 func (s *BillingServerErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -463,6 +508,47 @@ func (s *BillingServerErrorMock) ChangeMerchantPaymentMethod(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) CreateRefund(
+	ctx context.Context,
+	in *grpc.CreateRefundRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateRefundResponse, error) {
+	return &grpc.CreateRefundResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) ListRefunds(
+	ctx context.Context,
+	in *grpc.ListRefundsRequest,
+	opts ...client.CallOption,
+) (*grpc.ListRefundsResponse, error) {
+	return &grpc.ListRefundsResponse{}, nil
+}
+
+func (s *BillingServerErrorMock) GetRefund(
+	ctx context.Context,
+	in *grpc.GetRefundRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateRefundResponse, error) {
+	return &grpc.CreateRefundResponse{
+		Status:  pkg.ResponseStatusNotFound,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) ProcessRefundCallback(
+	ctx context.Context,
+	in *grpc.CallbackRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentNotifyResponse, error) {
+	return &grpc.PaymentNotifyResponse{
+		Status: pkg.ResponseStatusNotFound,
+		Error:  SomeError,
+	}, nil
+}
+
 func (s *BillingServerSystemErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -613,4 +699,288 @@ func (s *BillingServerSystemErrorMock) ChangeMerchantPaymentMethod(
 	opts ...client.CallOption,
 ) (*grpc.MerchantPaymentMethodResponse, error) {
 	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) CreateRefund(
+	ctx context.Context,
+	in *grpc.CreateRefundRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateRefundResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) ListRefunds(
+	ctx context.Context,
+	in *grpc.ListRefundsRequest,
+	opts ...client.CallOption,
+) (*grpc.ListRefundsResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) GetRefund(
+	ctx context.Context,
+	in *grpc.GetRefundRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateRefundResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) ProcessRefundCallback(
+	ctx context.Context,
+	in *grpc.CallbackRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentNotifyResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkTemporaryMock) OrderCreateProcess(
+	ctx context.Context,
+	in *billing.OrderCreateRequest,
+	opts ...client.CallOption,
+) (*billing.Order, error) {
+	return &billing.Order{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) PaymentFormJsonDataProcess(
+	ctx context.Context,
+	in *grpc.PaymentFormJsonDataRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentFormJsonDataResponse, error) {
+	return &grpc.PaymentFormJsonDataResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) PaymentCreateProcess(
+	ctx context.Context,
+	in *grpc.PaymentCreateRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentCreateResponse, error) {
+	return &grpc.PaymentCreateResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) PaymentCallbackProcess(
+	ctx context.Context,
+	in *grpc.PaymentNotifyRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentNotifyResponse, error) {
+	return &grpc.PaymentNotifyResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) RebuildCache(
+	ctx context.Context,
+	in *grpc.EmptyRequest,
+	opts ...client.CallOption,
+) (*grpc.EmptyResponse, error) {
+	return &grpc.EmptyResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) UpdateOrder(
+	ctx context.Context,
+	in *billing.Order,
+	opts ...client.CallOption,
+) (*grpc.EmptyResponse, error) {
+	return &grpc.EmptyResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) UpdateMerchant(
+	ctx context.Context,
+	in *billing.Merchant,
+	opts ...client.CallOption,
+) (*grpc.EmptyResponse, error) {
+	return &grpc.EmptyResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetConvertRate(
+	ctx context.Context,
+	in *grpc.ConvertRateRequest,
+	opts ...client.CallOption,
+) (*grpc.ConvertRateResponse, error) {
+	return &grpc.ConvertRateResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetMerchantById(
+	ctx context.Context,
+	in *grpc.FindByIdRequest,
+	opts ...client.CallOption,
+) (*grpc.MerchantGetMerchantResponse, error) {
+	rsp := &grpc.MerchantGetMerchantResponse{
+		Status:  pkg.ResponseStatusOk,
+		Message: "",
+		Item:    OnboardingMerchantMock,
+	}
+
+	return rsp, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ListMerchants(
+	ctx context.Context,
+	in *grpc.MerchantListingRequest,
+	opts ...client.CallOption,
+) (*grpc.Merchants, error) {
+	return &grpc.Merchants{
+		Merchants: []*billing.Merchant{OnboardingMerchantMock, OnboardingMerchantMock, OnboardingMerchantMock},
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ChangeMerchant(
+	ctx context.Context,
+	in *grpc.OnboardingRequest,
+	opts ...client.CallOption,
+) (*billing.Merchant, error) {
+	m := &billing.Merchant{
+		Name:            in.Name,
+		AlternativeName: in.AlternativeName,
+		Website:         in.Website,
+		Country: &billing.Country{
+			CodeInt:  643,
+			CodeA3:   "RUS",
+			CodeA2:   in.Country,
+			IsActive: true,
+		},
+		State:              in.State,
+		Zip:                in.Zip,
+		City:               in.City,
+		Address:            in.Address,
+		AddressAdditional:  in.AddressAdditional,
+		RegistrationNumber: in.RegistrationNumber,
+		TaxId:              in.TaxId,
+		Contacts:           in.Contacts,
+		Banking: &billing.MerchantBanking{
+			Currency: &billing.Currency{
+				CodeInt:  643,
+				CodeA3:   in.Banking.Currency,
+				Name:     &billing.Name{Ru: "Российский рубль", En: "Russian ruble"},
+				IsActive: true,
+			},
+			Name:          in.Banking.Name,
+			Address:       in.Banking.Address,
+			AccountNumber: in.Banking.AccountNumber,
+			Swift:         in.Banking.Swift,
+			Details:       in.Banking.Details,
+		},
+		Status: pkg.MerchantStatusDraft,
+	}
+
+	if in.Id != "" {
+		m.Id = in.Id
+	} else {
+		m.Id = bson.NewObjectId().Hex()
+	}
+
+	return m, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ChangeMerchantStatus(
+	ctx context.Context,
+	in *grpc.MerchantChangeStatusRequest,
+	opts ...client.CallOption,
+) (*billing.Merchant, error) {
+	return &billing.Merchant{Id: in.MerchantId, Status: in.Status}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) CreateNotification(
+	ctx context.Context,
+	in *grpc.NotificationRequest,
+	opts ...client.CallOption,
+) (*billing.Notification, error) {
+	return &billing.Notification{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetNotification(
+	ctx context.Context,
+	in *grpc.GetNotificationRequest,
+	opts ...client.CallOption,
+) (*billing.Notification, error) {
+	return &billing.Notification{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ListNotifications(
+	ctx context.Context,
+	in *grpc.ListingNotificationRequest,
+	opts ...client.CallOption,
+) (*grpc.Notifications, error) {
+	return &grpc.Notifications{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) MarkNotificationAsRead(
+	ctx context.Context,
+	in *grpc.GetNotificationRequest,
+	opts ...client.CallOption,
+) (*billing.Notification, error) {
+	return &billing.Notification{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ListMerchantPaymentMethods(
+	ctx context.Context,
+	in *grpc.ListMerchantPaymentMethodsRequest,
+	opts ...client.CallOption,
+) (*grpc.ListingMerchantPaymentMethod, error) {
+	return &grpc.ListingMerchantPaymentMethod{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetMerchantPaymentMethod(
+	ctx context.Context,
+	in *grpc.GetMerchantPaymentMethodRequest,
+	opts ...client.CallOption,
+) (*billing.MerchantPaymentMethod, error) {
+	return &billing.MerchantPaymentMethod{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ChangeMerchantPaymentMethod(
+	ctx context.Context,
+	in *grpc.MerchantPaymentMethodRequest,
+	opts ...client.CallOption,
+) (*grpc.MerchantPaymentMethodResponse, error) {
+	return &grpc.MerchantPaymentMethodResponse{
+		Status: pkg.ResponseStatusOk,
+		Item: &billing.MerchantPaymentMethod{
+			PaymentMethod: &billing.MerchantPaymentMethodIdentification{
+				Id:   in.PaymentMethod.Id,
+				Name: in.PaymentMethod.Name,
+			},
+			Commission:  in.Commission,
+			Integration: in.Integration,
+			IsActive:    in.IsActive,
+		},
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) CreateRefund(
+	ctx context.Context,
+	in *grpc.CreateRefundRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateRefundResponse, error) {
+	return &grpc.CreateRefundResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   &billing.Refund{},
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ListRefunds(
+	ctx context.Context,
+	in *grpc.ListRefundsRequest,
+	opts ...client.CallOption,
+) (*grpc.ListRefundsResponse, error) {
+	return &grpc.ListRefundsResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetRefund(
+	ctx context.Context,
+	in *grpc.GetRefundRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateRefundResponse, error) {
+	return &grpc.CreateRefundResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   &billing.Refund{},
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ProcessRefundCallback(
+	ctx context.Context,
+	in *grpc.CallbackRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentNotifyResponse, error) {
+	return &grpc.PaymentNotifyResponse{
+		Status: pkg.ResponseStatusOk,
+		Error:  SomeError,
+	}, nil
 }

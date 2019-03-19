@@ -49,6 +49,8 @@ const (
 	requestParameterLastPayoutAmount   = "last_payout_amount"
 	requestParameterMerchantId         = "merchant_id"
 	requestParameterPaymentMethodId    = "method_id"
+	requestParameterOrderId            = "order_id"
+	requestParameterRefundId           = "refund_id"
 	requestParameterNotificationId     = "notification_id"
 	requestParameterPaymentMethodName  = "method_name"
 	requestParameterUserId             = "user"
@@ -64,7 +66,11 @@ const (
 	errorIncorrectPaymentMethodId = "incorrect payment method identifier"
 	errorIncorrectNotificationId  = "incorrect notification identifier"
 	errorIncorrectUserId          = "incorrect user identifier"
+	errorIncorrectOrderId         = "incorrect order identifier"
+	errorIncorrectRefundId        = "incorrect refund identifier"
 	errorMessageMask              = "Field validation for '%s' failed on the '%s' tag"
+
+	HeaderAcceptLanguage = "Accept-Language"
 )
 
 var funcMap = template.FuncMap{
@@ -191,14 +197,14 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtCallableWithConfig(api.jwtVerifier, auth1VerifierCallback))
 
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
-	api.authUserRouteGroup.Use(
-		middleware.JWTWithConfig(
-			middleware.JWTConfig{
-				SigningKey:    p.Config.SignatureSecret,
-				SigningMethod: p.Config.Algorithm,
-			},
-		),
-	)
+	//api.authUserRouteGroup.Use(
+	//	middleware.JWTWithConfig(
+	//		middleware.JWTConfig{
+	//			SigningKey:    p.Config.SignatureSecret,
+	//			SigningMethod: p.Config.Algorithm,
+	//		},
+	//	),
+	//)
 	api.authUserRouteGroup.Use(api.AuthUserMiddleware)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
