@@ -185,6 +185,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 	auth1VerifierCallback := func(ui *jwtverifier.UserInfo) {
 		api.Merchant.Identifier = string(ui.UserID)
+		// TODO: Remove this line after merchant registration is completed.
+		api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
 	}
 	api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtCallableWithConfig(api.jwtVerifier, auth1VerifierCallback))
 
