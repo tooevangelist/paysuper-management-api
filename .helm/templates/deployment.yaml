@@ -63,7 +63,7 @@ spec:
             secretKeyRef:
               name: {{ $deploymentName }}-env
               key: {{ . }}
-        {{- end }}          
+        {{- end }}
         ports:
         - containerPort: {{$deployment.port}}
         #livenessProbe:
@@ -74,9 +74,7 @@ spec:
         #  timeoutSeconds: 1
         #  failureThreshold: 3
         #  periodSeconds: 5
-
-        {{/*volumeMounts:
-        - name: {{ $deploymentName }}-config
-          mountPath: /application/etc/
-          readOnly: true
-        */}}
+        #volumeMounts:
+        #- name: {{ $deploymentName }}-config
+        #  mountPath: /application/etc/
+        #  readOnly: tru

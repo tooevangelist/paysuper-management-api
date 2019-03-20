@@ -1599,7 +1599,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 			CountryCodeA2: o.PayerData.CountryCodeA2,
 			CountryName:   &billing.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
 			City:          &billing.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
-			Subdivision:   o.PayerData.Subdivision,
+			State:         o.PayerData.Subdivision,
 			Timezone:      o.PayerData.Timezone,
 		},
 		PaymentMethod: &billing.PaymentMethodOrder{

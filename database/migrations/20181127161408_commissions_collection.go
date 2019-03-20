@@ -1,10 +1,10 @@
 package migrations
 
 import (
-	"github.com/paysuper/paysuper-management-api/database/model"
-	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-management-api/database/model"
+	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/xakep666/mongo-migrate"
 	"time"
 )

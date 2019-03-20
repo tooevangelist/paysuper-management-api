@@ -14,6 +14,7 @@ import (
 
 const (
 	cardPayWebHookPaymentNotifyPath = "/cardpay/notify"
+	cardPayWebHookRefundNotifyPath  = "/cardpay/refund"
 )
 
 type CardPayWebHook struct {
@@ -23,6 +24,7 @@ type CardPayWebHook struct {
 func (api *Api) InitCardPayWebHookRoutes() *Api {
 	cpWebHook := &CardPayWebHook{Api: api}
 	api.webhookRouteGroup.POST(cardPayWebHookPaymentNotifyPath, cpWebHook.paymentCallback)
+	api.webhookRouteGroup.POST(cardPayWebHookRefundNotifyPath, cpWebHook.refundCallback)
 
 	return api
 }
@@ -69,4 +71,41 @@ func (h *CardPayWebHook) paymentCallback(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(httpStatus, message)
+}
+
+func (h *CardPayWebHook) refundCallback(ctx echo.Context) error {
+	st := &billing.CardPayRefundCallback{}
+	err := ctx.Bind(st)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	err = h.validate.Struct(st)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
+	}
+
+	req := &grpc.CallbackRequest{
+		Handler:   pkg.PaymentSystemHandlerCardPay,
+		Body:      []byte(h.rawBody),
+		Signature: ctx.Request().Header.Get(entity.CardPayPaymentResponseHeaderSignature),
+	}
+
+	rsp, err := h.billingService.ProcessRefundCallback(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Error)
+	}
+
+	if rsp.Error != "" {
+		return ctx.JSON(http.StatusOK, map[string]string{"message": rsp.Error})
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }

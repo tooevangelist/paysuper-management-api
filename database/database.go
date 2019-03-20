@@ -1,11 +1,11 @@
 package database
 
 import (
+	"github.com/globalsign/mgo"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/dao/mongo"
 	_ "github.com/paysuper/paysuper-management-api/database/migrations"
-	"github.com/globalsign/mgo"
 	"github.com/xakep666/mongo-migrate"
 )
 

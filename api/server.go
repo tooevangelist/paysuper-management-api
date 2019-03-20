@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ProtocolONE/authone-jwt-verifier-golang"
+	jwtMiddleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/rabbitmq/pkg"
@@ -47,6 +49,8 @@ const (
 	requestParameterLastPayoutAmount   = "last_payout_amount"
 	requestParameterMerchantId         = "merchant_id"
 	requestParameterPaymentMethodId    = "method_id"
+	requestParameterOrderId            = "order_id"
+	requestParameterRefundId           = "refund_id"
 	requestParameterNotificationId     = "notification_id"
 	requestParameterPaymentMethodName  = "method_name"
 	requestParameterUserId             = "user"
@@ -62,7 +66,11 @@ const (
 	errorIncorrectPaymentMethodId = "incorrect payment method identifier"
 	errorIncorrectNotificationId  = "incorrect notification identifier"
 	errorIncorrectUserId          = "incorrect user identifier"
+	errorIncorrectOrderId         = "incorrect order identifier"
+	errorIncorrectRefundId        = "incorrect refund identifier"
 	errorMessageMask              = "Field validation for '%s' failed on the '%s' tag"
+
+	HeaderAcceptLanguage = "Accept-Language"
 )
 
 var funcMap = template.FuncMap{
@@ -71,14 +79,6 @@ var funcMap = template.FuncMap{
 		return template.JS(a)
 	},
 }
-
-var (
-	clientID     = "5c77953f51c0950001436152"
-	clientSecret = "tGtL8HcRDY5X7VxEhyIye2EhiN9YyTJ5Ny0AndLNXQFgKCSgUKE0Ti4X9fHK6Qib"
-	scopes       = []string{"openid", "offline"}
-	redirectURL  = "http://127.0.0.1:1323/auth/callback"
-	authDomain   = "https://auth1.tst.protocol.one"
-)
 
 type Template struct {
 	templates *template.Template
@@ -91,6 +91,7 @@ type ServerInitParams struct {
 	HttpScheme  string
 	K8sHost     string
 	AmqpAddress string
+	Auth1       *config.Auth1
 }
 
 type Merchant struct {
@@ -123,6 +124,7 @@ type Api struct {
 
 	accessRouteGroup  *echo.Group
 	webhookRouteGroup *echo.Group
+	jwtVerifier       *jwtverifier.JwtVerifier
 
 	authUserRouteGroup *echo.Group
 	authUser           *AuthUser
@@ -161,13 +163,14 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}
 	api.InitService()
 
-	/*jwtVerifierSettings := jwtverifier.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		Scopes:       scopes,
-		RedirectURL:  redirectURL,
-		Issuer:       authDomain,
-	}*/
+	jwtVerifierSettings := jwtverifier.Config{
+		ClientID:     p.Auth1.ClientId,
+		ClientSecret: p.Auth1.ClientSecret,
+		Scopes:       []string{"openid", "offline"},
+		RedirectURL:  p.Auth1.RedirectUrl,
+		Issuer:       p.Auth1.Issuer,
+	}
+	api.jwtVerifier = jwtverifier.NewJwtVerifier(jwtVerifierSettings)
 
 	renderer := &Template{
 		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("web/template/*.html")),
@@ -186,23 +189,22 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
-	//api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtWithConfig(jwtverifier.NewJwtVerifier(jwtVerifierSettings)))
-
-	//api.accessRouteGroup.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-	//	SigningKey:    p.Config.SignatureSecret,
-	//	SigningMethod: p.Config.Algorithm,
-	//}))
-	api.accessRouteGroup.Use(api.SetMerchantIdentifierMiddleware)
+	auth1VerifierCallback := func(ui *jwtverifier.UserInfo) {
+		api.Merchant.Identifier = string(ui.UserID)
+		// TODO: Remove this line after merchant registration is completed.
+		api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
+	}
+	api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtCallableWithConfig(api.jwtVerifier, auth1VerifierCallback))
 
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
-	api.authUserRouteGroup.Use(
-		middleware.JWTWithConfig(
-			middleware.JWTConfig{
-				SigningKey:    p.Config.SignatureSecret,
-				SigningMethod: p.Config.Algorithm,
-			},
-		),
-	)
+	//api.authUserRouteGroup.Use(
+	//	middleware.JWTWithConfig(
+	//		middleware.JWTConfig{
+	//			SigningKey:    p.Config.SignatureSecret,
+	//			SigningMethod: p.Config.Algorithm,
+	//		},
+	//	),
+	//)
 	api.authUserRouteGroup.Use(api.AuthUserMiddleware)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)

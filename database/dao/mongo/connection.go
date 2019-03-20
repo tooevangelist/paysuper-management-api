@@ -40,4 +40,3 @@ func (c Connection) String() (s string) {
 
 	return u.String()
 }
-
