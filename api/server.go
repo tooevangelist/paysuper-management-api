@@ -19,6 +19,8 @@ import (
 	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/utils"
+	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
+	"github.com/paysuper/paysuper-payment-link/proto"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
 	taxServiceConst "github.com/paysuper/paysuper-tax-service/pkg"
@@ -139,6 +141,7 @@ type Api struct {
 	geoService     proto.GeoIpService
 	billingService grpc.BillingService
 	taxService     tax_service.TaxService
+	paylinkService paylink.PaylinkService
 
 	AmqpAddress string
 	notifierPub *rabbitmq.Broker
@@ -294,6 +297,7 @@ func (api *Api) InitService() {
 	api.geoService = proto.NewGeoIpService(geoip.ServiceName, api.service.Client())
 	api.billingService = grpc.NewBillingService(pkg.ServiceName, api.service.Client())
 	api.taxService = tax_service.NewTaxService(taxServiceConst.ServiceName, api.service.Client())
+	api.paylinkService = paylink.NewPaylinkService(paylinkServiceConst.ServiceName, api.service.Client())
 }
 
 func (api *Api) Stop() {

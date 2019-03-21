@@ -2,8 +2,11 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"github.com/amalfra/etag"
 	"github.com/globalsign/mgo/bson"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/labstack/echo"
 	"github.com/micro/go-micro"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -12,13 +15,17 @@ import (
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/paysuper/paysuper-management-api/payment_system"
+	"github.com/paysuper/paysuper-payment-link/proto"
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
+	"time"
 )
 
 const (
-	orderFormTemplateName = "order.html"
+	orderFormTemplateName   = "order.html"
+	paylinkFormTemplateName = "paylink.html"
 )
 
 type orderRoute struct {
@@ -121,6 +128,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	}
 
 	api.Http.GET("/order/:id", route.getOrderForm)
+	api.Http.GET("/paylink/:merchant_id/:id", route.getPaylinkForm)
 	api.Http.GET("/order/create", route.createFromFormData)
 	api.Http.POST("/order/create", route.createFromFormData)
 	api.Http.POST("/api/v1/order", route.createJson)
@@ -257,6 +265,71 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 	}
 
 	return ctx.Render(http.StatusOK, orderFormTemplateName, map[string]interface{}{"Order": jo})
+}
+
+func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
+	id := ctx.Param("id")
+	merchant := ctx.Param("merchant_id")
+
+	if id == "" || merchant == "" {
+		return ctx.Render(http.StatusNotFound, paylinkFormTemplateName, map[string]interface{}{})
+	}
+
+	req := &paylink.PaylinkRequest{
+		Id:         id,
+		MerchantId: merchant,
+	}
+
+	pl, err := r.paylinkService.GetPaylink(context.Background(), req)
+	if err != nil {
+		return ctx.Render(http.StatusNotFound, paylinkFormTemplateName, map[string]interface{}{})
+	}
+
+	value, _ := json.Marshal(pl)
+
+	etagValue := etag.Generate(string(value), true)
+
+	reqHeader := ctx.Request().Header
+	resHeader := ctx.Response().Header()
+
+	match := reqHeader.Get("If-None-Match")
+	if strings.Contains(match, etagValue) {
+		return ctx.NoContent(http.StatusNotModified)
+	}
+
+	updatedTime, _ := ptypes.Timestamp(pl.UpdatedAt)
+	updated := updatedTime.Unix()
+	lastMod := strconv.FormatInt(updated, 10)
+
+	since := reqHeader.Get("If-Modified-Since")
+	n, _ := strconv.ParseInt(since, 10, 64)
+	if updated <= n {
+		return ctx.NoContent(http.StatusNotModified)
+	}
+
+	resHeader.Set("Etag", etagValue)
+	resHeader.Set("Last-Modified", lastMod)
+
+	expiresAt, _ := ptypes.Timestamp(pl.ExpiresAt)
+	expires := int(time.Until(expiresAt).Seconds())
+	resHeader.Set("Cache-Control", "max-age="+strconv.Itoa(expires))
+
+	data := map[string]interface{}{
+		"Id":        pl.GetId(),
+		"Products":  pl.GetProducts(),
+		"ProjectId": pl.ProjectId,
+	}
+
+	// todo: 1 make new order with products from paylink
+
+	// todo: 2 prevent create duplicated unprocessed orders for one user session
+
+	go func() {
+		_, _ = r.paylinkService.IncrPaylinkVisits(context.Background(), req)
+	}()
+
+	err = ctx.Render(http.StatusOK, paylinkFormTemplateName, data)
+	return nil
 }
 
 // @Summary Get order data
