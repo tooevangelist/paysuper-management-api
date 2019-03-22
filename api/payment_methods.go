@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/labstack/echo"
+	"github.com/paysuper/paysuper-management-api/manager"
 	"net/http"
 )
 
@@ -13,7 +13,7 @@ type PaymentMethodApiV1 struct {
 
 func (api *Api) InitPaymentMethodRoutes() *Api {
 	pmApiV1 := PaymentMethodApiV1{
-		Api:             api,
+		Api:            api,
 		projectManager: manager.InitProjectManager(api.database, api.logger),
 	}
 

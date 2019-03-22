@@ -1,10 +1,10 @@
 package migrations
 
 import (
-	"github.com/paysuper/paysuper-management-api/database/model"
-	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-management-api/database/model"
+	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/xakep666/mongo-migrate"
 	"time"
 )
@@ -23,15 +23,15 @@ func init() {
 			}
 
 			pm := &model.PaymentMethod{
-				Id: bson.NewObjectId(),
-				Name: "Bank card",
-				PaymentSystem: ps,
-				GroupAlias: "bank_card",
+				Id:               bson.NewObjectId(),
+				Name:             "Bank card",
+				PaymentSystem:    ps,
+				GroupAlias:       "bank_card",
 				MinPaymentAmount: 0.01,
 				MaxPaymentAmount: 15000.00,
-				IsActive: true,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				IsActive:         true,
+				CreatedAt:        time.Now(),
+				UpdatedAt:        time.Now(),
 			}
 
 			return db.C(manager.TablePaymentMethod).Insert(pm)

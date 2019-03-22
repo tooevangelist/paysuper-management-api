@@ -1,8 +1,8 @@
 package migrations
 
 import (
-	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/globalsign/mgo"
+	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/xakep666/mongo-migrate"
 )
 

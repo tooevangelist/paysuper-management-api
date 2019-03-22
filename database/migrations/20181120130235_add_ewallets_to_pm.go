@@ -2,11 +2,11 @@ package migrations
 
 import (
 	"errors"
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/paysuper/paysuper-management-api/payment_system"
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
 	"github.com/xakep666/mongo-migrate"
 	"time"
 )
@@ -26,55 +26,55 @@ func init() {
 
 			pms := []interface{}{
 				&model.PaymentMethod{
-					Id: bson.NewObjectId(),
-					Name: "Qiwi",
-					PaymentSystem: ps,
-					Currency: cr,
-					GroupAlias: "qiwi",
+					Id:               bson.NewObjectId(),
+					Name:             "Qiwi",
+					PaymentSystem:    ps,
+					Currency:         cr,
+					GroupAlias:       "qiwi",
 					MinPaymentAmount: 0.01,
 					MaxPaymentAmount: 15000.00,
-					IsActive: true,
-					CreatedAt: time.Now(),
-					UpdatedAt: time.Now(),
+					IsActive:         true,
+					CreatedAt:        time.Now(),
+					UpdatedAt:        time.Now(),
 					Params: &model.PaymentMethodParams{
-						Handler: payment_system.PaymentSystemHandlerCardPay,
-						Terminal: "15993",
+						Handler:    payment_system.PaymentSystemHandlerCardPay,
+						Terminal:   "15993",
 						ExternalId: "QIWI",
 					},
 					Icon: "/images/qiwi_logo.png",
 				},
 				&model.PaymentMethod{
-					Id: bson.NewObjectId(),
-					Name: "WebMoney",
-					PaymentSystem: ps,
-					Currency: cr,
-					GroupAlias: "webmoney",
+					Id:               bson.NewObjectId(),
+					Name:             "WebMoney",
+					PaymentSystem:    ps,
+					Currency:         cr,
+					GroupAlias:       "webmoney",
 					MinPaymentAmount: 0.01,
 					MaxPaymentAmount: 15000.00,
-					IsActive: true,
-					CreatedAt: time.Now(),
-					UpdatedAt: time.Now(),
+					IsActive:         true,
+					CreatedAt:        time.Now(),
+					UpdatedAt:        time.Now(),
 					Params: &model.PaymentMethodParams{
-						Handler: payment_system.PaymentSystemHandlerCardPay,
-						Terminal: "15989",
+						Handler:    payment_system.PaymentSystemHandlerCardPay,
+						Terminal:   "15989",
 						ExternalId: "WEBMONEY",
 					},
 					Icon: "/images/wm_logo.png",
 				},
 				&model.PaymentMethod{
-					Id: bson.NewObjectId(),
-					Name: "Neteller",
-					PaymentSystem: ps,
-					Currency: cr,
-					GroupAlias: "neteller",
+					Id:               bson.NewObjectId(),
+					Name:             "Neteller",
+					PaymentSystem:    ps,
+					Currency:         cr,
+					GroupAlias:       "neteller",
 					MinPaymentAmount: 0.01,
 					MaxPaymentAmount: 15000.00,
-					IsActive: true,
-					CreatedAt: time.Now(),
-					UpdatedAt: time.Now(),
+					IsActive:         true,
+					CreatedAt:        time.Now(),
+					UpdatedAt:        time.Now(),
 					Params: &model.PaymentMethodParams{
-						Handler: payment_system.PaymentSystemHandlerCardPay,
-						Terminal: "15997",
+						Handler:    payment_system.PaymentSystemHandlerCardPay,
+						Terminal:   "15997",
 						ExternalId: "NETELLER",
 					},
 					Icon: "",
@@ -89,14 +89,13 @@ func init() {
 
 			var pm *model.PaymentMethod
 
-
 			if err := db.C(manager.TablePaymentMethod).Find(bson.M{"name": "Bank card"}).One(&pm); err != nil {
 				return err
 			}
 
 			pm.Params = &model.PaymentMethodParams{
-				Handler: payment_system.PaymentSystemHandlerCardPay,
-				Terminal: "15985",
+				Handler:    payment_system.PaymentSystemHandlerCardPay,
+				Terminal:   "15985",
 				ExternalId: "BANKCARD",
 			}
 			pm.Icon = "/images/bank_card_logo.png"

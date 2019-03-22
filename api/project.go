@@ -1,9 +1,9 @@
 package api
 
 import (
+	"github.com/labstack/echo"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
-	"github.com/labstack/echo"
 	"net/http"
 )
 
@@ -184,7 +184,7 @@ func (pApiV1 *ProjectApiV1) delete(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Project not found")
 	}
 
-	if p.Merchant.Id.String() != pApiV1.Merchant.Identifier {
+	if p.Merchant.ExternalId != pApiV1.Merchant.Identifier {
 		return echo.NewHTTPError(http.StatusForbidden, model.ResponseMessageAccessDenied)
 	}
 

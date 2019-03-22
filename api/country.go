@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/labstack/echo"
+	"github.com/paysuper/paysuper-management-api/manager"
 	"net/http"
 	"strconv"
 )

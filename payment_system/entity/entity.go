@@ -21,12 +21,12 @@ const (
 )
 
 var PaymentRequisitesNames = map[string]string{
-	BankCardFieldPan: "Card number",
-	BankCardFieldHolder: "Card holder",
-	EWalletFieldIdentifier: "Payment system account",
-	CryptoFieldIdentifier: "Address",
+	BankCardFieldPan:            "Card number",
+	BankCardFieldHolder:         "Card holder",
+	EWalletFieldIdentifier:      "Payment system account",
+	CryptoFieldIdentifier:       "Address",
 	TxnParamsFieldBankCardIs3DS: "Is 3DS Secured",
-	TxnParamsFieldDeclineCode: "Decline code",
+	TxnParamsFieldDeclineCode:   "Decline code",
 	TxnParamsFieldDeclineReason: "Decline reason",
-	TxnParamsFieldCryptoAmount: "Amount in crypto currency",
+	TxnParamsFieldCryptoAmount:  "Amount in crypto currency",
 }

@@ -1,9 +1,9 @@
 package migrations
 
 import (
+	"github.com/globalsign/mgo"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
-	"github.com/globalsign/mgo"
 	"github.com/xakep666/mongo-migrate"
 	"time"
 )
@@ -303,7 +303,7 @@ func init() {
 				return err
 			}
 
-			err = c.EnsureIndex(mgo.Index{Name: "currency_is_active_idx", Key: []string{"is_active"} })
+			err = c.EnsureIndex(mgo.Index{Name: "currency_is_active_idx", Key: []string{"is_active"}})
 
 			if err != nil {
 				return err

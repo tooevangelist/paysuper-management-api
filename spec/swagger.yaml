@@ -1476,12 +1476,16 @@ definitions:
       terminal_password:
         description: "payment method terminal password for authorisation"
         type: string
+      terminal_callback_password:
+        description: "payment method terminal callback password for check control hash"
+        type: string
       integrated:
         description: "if integration has login and password"
         type: boolean
     required:
       - terminal_id
       - terminal_password
+      - terminal_callback_password
 
   onboarding.Merchant.PaymentMethod:
     properties:

@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/labstack/echo"
+	"github.com/paysuper/paysuper-management-api/manager"
 	"net/http"
 	"strconv"
 )
@@ -14,7 +14,7 @@ type CurrencyApiV1 struct {
 
 func (api *Api) InitCurrencyRoutes() *Api {
 	cApiV1 := CurrencyApiV1{
-		Api: api,
+		Api:             api,
 		currencyManager: manager.InitCurrencyManager(api.database, api.logger),
 	}
 
