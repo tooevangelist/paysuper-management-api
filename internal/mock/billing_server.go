@@ -350,6 +350,64 @@ func (s *BillingServerOkMock) ProcessRefundCallback(
 	}, nil
 }
 
+func (s *BillingServerOkMock) PaymentFormLanguageChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangeLangRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentFormDataChangeResponse, error) {
+	return &grpc.PaymentFormDataChangeResponse{
+		Status: pkg.ResponseStatusOk,
+		Item: &grpc.PaymentFormDataChangeResponseItem{
+			UserAddressDataRequired: true,
+			UserIpData: &grpc.UserIpData{
+				Country: &grpc.UserIpDataCountry{
+					Name: "Russia",
+					Code: "RU",
+				},
+				City: "St.Petersburg",
+				Zip:  "190000",
+			},
+		},
+	}, nil
+}
+
+func (s *BillingServerOkMock) PaymentFormPaymentAccountChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangePaymentAccountRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentFormDataChangeResponse, error) {
+	return &grpc.PaymentFormDataChangeResponse{
+		Status: pkg.ResponseStatusOk,
+		Item: &grpc.PaymentFormDataChangeResponseItem{
+			UserAddressDataRequired: true,
+			UserIpData: &grpc.UserIpData{
+				Country: &grpc.UserIpDataCountry{
+					Name: "Russia",
+					Code: "RU",
+				},
+				City: "St.Petersburg",
+				Zip:  "190000",
+			},
+		},
+	}, nil
+}
+
+func (s *BillingServerOkMock) OrderReCalculateAmounts(
+	ctx context.Context,
+	in *grpc.OrderReCalculateAmountsRequest,
+	opts ...client.CallOption,
+) (*grpc.OrderReCalculateAmountsResponse, error) {
+	return &grpc.OrderReCalculateAmountsResponse{
+		Status: pkg.ResponseStatusOk,
+		Item: &grpc.OrderReCalculateAmountsResponseItem{
+			HasVat:      true,
+			Vat:         10,
+			Amount:      10,
+			TotalAmount: 20,
+		},
+	}, nil
+}
+
 func (s *BillingServerErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -549,6 +607,39 @@ func (s *BillingServerErrorMock) ProcessRefundCallback(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) PaymentFormLanguageChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangeLangRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentFormDataChangeResponse, error) {
+	return &grpc.PaymentFormDataChangeResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) PaymentFormPaymentAccountChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangePaymentAccountRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentFormDataChangeResponse, error) {
+	return &grpc.PaymentFormDataChangeResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) OrderReCalculateAmounts(
+	ctx context.Context,
+	in *grpc.OrderReCalculateAmountsRequest,
+	opts ...client.CallOption,
+) (*grpc.OrderReCalculateAmountsResponse, error) {
+	return &grpc.OrderReCalculateAmountsResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
 func (s *BillingServerSystemErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -730,6 +821,30 @@ func (s *BillingServerSystemErrorMock) ProcessRefundCallback(
 	in *grpc.CallbackRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentNotifyResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) PaymentFormLanguageChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangeLangRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentFormDataChangeResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) PaymentFormPaymentAccountChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangePaymentAccountRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentFormDataChangeResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) OrderReCalculateAmounts(
+	ctx context.Context,
+	in *grpc.OrderReCalculateAmountsRequest,
+	opts ...client.CallOption,
+) (*grpc.OrderReCalculateAmountsResponse, error) {
 	return nil, errors.New(SomeError)
 }
 
@@ -983,4 +1098,28 @@ func (s *BillingServerOkTemporaryMock) ProcessRefundCallback(
 		Status: pkg.ResponseStatusOk,
 		Error:  SomeError,
 	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) PaymentFormLanguageChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangeLangRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentFormDataChangeResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkTemporaryMock) PaymentFormPaymentAccountChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangePaymentAccountRequest,
+	opts ...client.CallOption,
+) (*grpc.PaymentFormDataChangeResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkTemporaryMock) OrderReCalculateAmounts(
+	ctx context.Context,
+	in *grpc.OrderReCalculateAmountsRequest,
+	opts ...client.CallOption,
+) (*grpc.OrderReCalculateAmountsResponse, error) {
+	return nil, errors.New(SomeError)
 }

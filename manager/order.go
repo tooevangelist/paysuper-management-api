@@ -1595,12 +1595,12 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		},
 		ProjectParams: sProjectParams,
 		PayerData: &billing.PayerData{
-			Ip:            o.PayerData.Ip,
-			CountryCodeA2: o.PayerData.CountryCodeA2,
-			CountryName:   &billing.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
-			City:          &billing.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
-			State:         o.PayerData.Subdivision,
-			Timezone:      o.PayerData.Timezone,
+			Ip:          o.PayerData.Ip,
+			Country:     o.PayerData.CountryCodeA2,
+			CountryName: &billing.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
+			City:        &billing.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
+			State:       o.PayerData.Subdivision,
+			Timezone:    o.PayerData.Timezone,
 		},
 		PaymentMethod: &billing.PaymentMethodOrder{
 			Id:   o.PaymentMethod.Id.Hex(),

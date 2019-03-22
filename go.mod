@@ -8,6 +8,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/golang/protobuf v1.2.1-0.20181128192352-1d3f30b51784 // indirects
+	github.com/google/uuid v1.1.0
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/labstack/echo v3.3.5+incompatible
 	github.com/micro/go-grpc v0.11.0
@@ -15,7 +16,7 @@ require (
 	github.com/micro/go-plugins v1.0.0
 	github.com/micro/kubernetes v0.7.0
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190317123139-e10a18b1ed76
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190322124620-11b3ae37c21a
 	github.com/paysuper/paysuper-recurring-repository v1.0.99
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190308105725-016a09c27fbd
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
@@ -24,7 +25,6 @@ require (
 	github.com/streadway/amqp v0.0.0-20181205114330-a314942b2fd9
 	github.com/stretchr/testify v1.3.0
 	github.com/swaggo/swag v1.4.1 // indirect
-	github.com/ttacon/builder v0.0.0-20170518171403-c099f663e1c2 // indirect
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/xakep666/mongo-migrate v0.1.0
 	go.uber.org/zap v1.9.1

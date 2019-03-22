@@ -136,7 +136,9 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.authUserRouteGroup.GET("/order/:order_id/refunds/:refund_id", route.getRefund)
 	api.authUserRouteGroup.POST("/order/:order_id/refunds", route.createRefund)
 
-	api.Http.POST("/order/:order_id/change-language", route.changeLanguage)
+	api.Http.PATCH("/api/v1/orders/:order_id/change-language", route.changeLanguage)
+	api.Http.PATCH("/api/v1/orders/:order_id/change-payment-account", route.changePaymentAccount)
+	api.Http.POST("/api/v1/orders/:order_id/calculate-amounts", route.calculateAmounts)
 
 	return api
 }
@@ -169,9 +171,8 @@ func (api *Api) InitOrderV1Routes() *Api {
 // @Router /order/create [post]
 func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	req := &billing.OrderCreateRequest{
-		PayerIp:  ctx.RealIP(),
-		IsJson:   false,
-		Language: ctx.Request().Header.Get(HeaderAcceptLanguage),
+		PayerIp: ctx.RealIP(),
+		IsJson:  false,
 	}
 
 	if err := (&OrderFormBinder{}).Bind(req, ctx); err != nil {
@@ -205,9 +206,8 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 // @Router /api/v1/order [post]
 func (r *orderRoute) createJson(ctx echo.Context) error {
 	req := &billing.OrderCreateRequest{
-		PayerIp:  ctx.RealIP(),
-		IsJson:   true,
-		Language: ctx.Request().Header.Get(HeaderAcceptLanguage),
+		PayerIp: ctx.RealIP(),
+		IsJson:  true,
 	}
 
 	if err := (&OrderJsonBinder{}).Bind(req, ctx); err != nil {
@@ -228,6 +228,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		OrderId: order.Id,
 		Scheme:  r.httpScheme,
 		Host:    ctx.Request().Host,
+		Locale:  ctx.Request().Header.Get(HeaderAcceptLanguage),
 	}
 	jo, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req1)
 
@@ -559,9 +560,101 @@ func (r *orderRoute) createRefund(ctx echo.Context) error {
 func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 	orderId := ctx.Param(requestParameterOrderId)
 
-	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
+	if orderId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
 	}
 
-	return nil
+	req := &grpc.PaymentFormUserChangeLangRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	req.OrderId = orderId
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp, err := r.billingService.PaymentFormLanguageChanged(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *orderRoute) changePaymentAccount(ctx echo.Context) error {
+	orderId := ctx.Param(requestParameterOrderId)
+
+	if orderId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
+	}
+
+	req := &grpc.PaymentFormUserChangePaymentAccountRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	req.OrderId = orderId
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp, err := r.billingService.PaymentFormPaymentAccountChanged(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *orderRoute) calculateAmounts(ctx echo.Context) error {
+	orderId := ctx.Param(requestParameterOrderId)
+
+	if orderId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
+	}
+
+	req := &grpc.OrderReCalculateAmountsRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	req.OrderId = orderId
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp, err := r.billingService.OrderReCalculateAmounts(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
 }

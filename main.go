@@ -75,12 +75,12 @@ func main() {
 	}()
 
 	sInit := &api.ServerInitParams{
-		Config:                  &conf.Jwt,
-		Database:                db,
-		Logger:                  sugar,
-		HttpScheme:              conf.HttpScheme,
-		K8sHost:                 conf.KubernetesHost,
-		AmqpAddress:             conf.AmqpAddress,
+		Config:      &conf.Jwt,
+		Database:    db,
+		Logger:      sugar,
+		HttpScheme:  conf.HttpScheme,
+		K8sHost:     conf.KubernetesHost,
+		AmqpAddress: conf.AmqpAddress,
 	}
 
 	server, err := api.NewServer(sInit)
