@@ -225,10 +225,11 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 	}
 
 	req1 := &grpc.PaymentFormJsonDataRequest{
-		OrderId: order.Id,
+		OrderId: order.Uuid,
 		Scheme:  r.httpScheme,
 		Host:    ctx.Request().Host,
 		Locale:  ctx.Request().Header.Get(HeaderAcceptLanguage),
+		Ip:      ctx.RealIP(),
 	}
 	jo, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req1)
 
@@ -250,6 +251,8 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 		OrderId: id,
 		Scheme:  r.httpScheme,
 		Host:    ctx.Request().Host,
+		Locale:  ctx.Request().Header.Get(HeaderAcceptLanguage),
+		Ip:      ctx.RealIP(),
 	}
 	jo, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
 

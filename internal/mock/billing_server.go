@@ -360,12 +360,9 @@ func (s *BillingServerOkMock) PaymentFormLanguageChanged(
 		Item: &grpc.PaymentFormDataChangeResponseItem{
 			UserAddressDataRequired: true,
 			UserIpData: &grpc.UserIpData{
-				Country: &grpc.UserIpDataCountry{
-					Name: "Russia",
-					Code: "RU",
-				},
-				City: "St.Petersburg",
-				Zip:  "190000",
+				Country: "RU",
+				City:    "St.Petersburg",
+				Zip:     "190000",
 			},
 		},
 	}, nil
@@ -381,12 +378,9 @@ func (s *BillingServerOkMock) PaymentFormPaymentAccountChanged(
 		Item: &grpc.PaymentFormDataChangeResponseItem{
 			UserAddressDataRequired: true,
 			UserIpData: &grpc.UserIpData{
-				Country: &grpc.UserIpDataCountry{
-					Name: "Russia",
-					Code: "RU",
-				},
-				City: "St.Petersburg",
-				Zip:  "190000",
+				Country: "RU",
+				City:    "St.Petersburg",
+				Zip:     "190000",
 			},
 		},
 	}, nil
