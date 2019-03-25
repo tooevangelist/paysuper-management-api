@@ -19,6 +19,8 @@ import (
 	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/utils"
+	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
+	"github.com/paysuper/paysuper-payment-link/proto"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
 	taxServiceConst "github.com/paysuper/paysuper-tax-service/pkg"
@@ -61,7 +63,6 @@ const (
 	errorIdIsEmpty                = "identifier can't be empty"
 	errorUnknown                  = "unknown error. try request later"
 	errorQueryParamsIncorrect     = "incorrect query parameters"
-	errorJwtUserIdNotFound        = "user identifier not found in JWT token"
 	errorIncorrectMerchantId      = "incorrect merchant identifier"
 	errorIncorrectPaymentMethodId = "incorrect payment method identifier"
 	errorIncorrectNotificationId  = "incorrect notification identifier"
@@ -69,6 +70,7 @@ const (
 	errorIncorrectOrderId         = "incorrect order identifier"
 	errorIncorrectRefundId        = "incorrect refund identifier"
 	errorMessageMask              = "Field validation for '%s' failed on the '%s' tag"
+	errorMessageAccessDenied      = "Access denied"
 
 	HeaderAcceptLanguage = "Accept-Language"
 )
@@ -139,6 +141,7 @@ type Api struct {
 	geoService     proto.GeoIpService
 	billingService grpc.BillingService
 	taxService     tax_service.TaxService
+	paylinkService paylink.PaylinkService
 
 	AmqpAddress string
 	notifierPub *rabbitmq.Broker
@@ -195,23 +198,32 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
-	auth1VerifierCallback := func(ui *jwtverifier.UserInfo) {
-		api.Merchant.Identifier = string(ui.UserID)
-		// TODO: Remove this line after merchant registration is completed.
-		api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
-	}
-	api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtCallableWithConfig(api.jwtVerifier, auth1VerifierCallback))
+
+	api.accessRouteGroup.Use(
+		jwtMiddleware.AuthOneJwtCallableWithConfig(
+			api.jwtVerifier,
+			func(ui *jwtverifier.UserInfo) {
+				api.Merchant.Identifier = string(ui.UserID)
+				// TODO: Remove this line after merchant registration is completed.
+				api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
+			},
+		),
+	)
 
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
-	//api.authUserRouteGroup.Use(
-	//	middleware.JWTWithConfig(
-	//		middleware.JWTConfig{
-	//			SigningKey:    p.Config.SignatureSecret,
-	//			SigningMethod: p.Config.Algorithm,
-	//		},
-	//	),
-	//)
-	api.authUserRouteGroup.Use(api.AuthUserMiddleware)
+	api.accessRouteGroup.Use(
+		jwtMiddleware.AuthOneJwtCallableWithConfig(
+			api.jwtVerifier,
+			func(ui *jwtverifier.UserInfo) {
+				api.authUser = &AuthUser{
+					Id:        string(ui.UserID),
+					Name:      "System User",
+					Merchants: make(map[string]bool),
+					Roles:     make(map[string]bool),
+				}
+			},
+		),
+	)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
 	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
@@ -300,6 +312,7 @@ func (api *Api) InitService() {
 	api.geoService = proto.NewGeoIpService(geoip.ServiceName, api.service.Client())
 	api.billingService = grpc.NewBillingService(pkg.ServiceName, api.service.Client())
 	api.taxService = tax_service.NewTaxService(taxServiceConst.ServiceName, api.service.Client())
+	api.paylinkService = paylink.NewPaylinkService(paylinkServiceConst.ServiceName, api.service.Client())
 }
 
 func (api *Api) Stop() {
@@ -357,4 +370,8 @@ func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.
 	}
 
 	return nil
+}
+
+func (api *Api) logError(msg string, data []interface{}) {
+	zap.S().Errorw(fmt.Sprintf("[PAYSUPER_MANAGEMENT_API] %s", msg), data...)
 }
