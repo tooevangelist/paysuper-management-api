@@ -16,7 +16,7 @@ require (
 	github.com/micro/go-plugins v1.0.0
 	github.com/micro/kubernetes v0.7.0
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190324192525-1a56979e1d17
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190325124558-26b777b6db7a
 	github.com/paysuper/paysuper-recurring-repository v1.0.99
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190308105725-016a09c27fbd
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect

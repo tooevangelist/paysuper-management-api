@@ -386,14 +386,14 @@ func (s *BillingServerOkMock) PaymentFormPaymentAccountChanged(
 	}, nil
 }
 
-func (s *BillingServerOkMock) OrderReCalculateAmounts(
+func (s *BillingServerOkMock) ProcessBillingAddress(
 	ctx context.Context,
-	in *grpc.OrderReCalculateAmountsRequest,
+	in *grpc.ProcessBillingAddressRequest,
 	opts ...client.CallOption,
-) (*grpc.OrderReCalculateAmountsResponse, error) {
-	return &grpc.OrderReCalculateAmountsResponse{
+) (*grpc.ProcessBillingAddressResponse, error) {
+	return &grpc.ProcessBillingAddressResponse{
 		Status: pkg.ResponseStatusOk,
-		Item: &grpc.OrderReCalculateAmountsResponseItem{
+		Item: &grpc.ProcessBillingAddressResponseItem{
 			HasVat:      true,
 			Vat:         10,
 			Amount:      10,
@@ -623,12 +623,12 @@ func (s *BillingServerErrorMock) PaymentFormPaymentAccountChanged(
 	}, nil
 }
 
-func (s *BillingServerErrorMock) OrderReCalculateAmounts(
+func (s *BillingServerErrorMock) ProcessBillingAddress(
 	ctx context.Context,
-	in *grpc.OrderReCalculateAmountsRequest,
+	in *grpc.ProcessBillingAddressRequest,
 	opts ...client.CallOption,
-) (*grpc.OrderReCalculateAmountsResponse, error) {
-	return &grpc.OrderReCalculateAmountsResponse{
+) (*grpc.ProcessBillingAddressResponse, error) {
+	return &grpc.ProcessBillingAddressResponse{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil
@@ -834,11 +834,11 @@ func (s *BillingServerSystemErrorMock) PaymentFormPaymentAccountChanged(
 	return nil, errors.New(SomeError)
 }
 
-func (s *BillingServerSystemErrorMock) OrderReCalculateAmounts(
+func (s *BillingServerSystemErrorMock) ProcessBillingAddress(
 	ctx context.Context,
-	in *grpc.OrderReCalculateAmountsRequest,
+	in *grpc.ProcessBillingAddressRequest,
 	opts ...client.CallOption,
-) (*grpc.OrderReCalculateAmountsResponse, error) {
+) (*grpc.ProcessBillingAddressResponse, error) {
 	return nil, errors.New(SomeError)
 }
 
@@ -1110,10 +1110,10 @@ func (s *BillingServerOkTemporaryMock) PaymentFormPaymentAccountChanged(
 	return nil, errors.New(SomeError)
 }
 
-func (s *BillingServerOkTemporaryMock) OrderReCalculateAmounts(
+func (s *BillingServerOkTemporaryMock) ProcessBillingAddress(
 	ctx context.Context,
-	in *grpc.OrderReCalculateAmountsRequest,
+	in *grpc.ProcessBillingAddressRequest,
 	opts ...client.CallOption,
-) (*grpc.OrderReCalculateAmountsResponse, error) {
+) (*grpc.ProcessBillingAddressResponse, error) {
 	return nil, errors.New(SomeError)
 }

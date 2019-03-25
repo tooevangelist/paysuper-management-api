@@ -136,9 +136,9 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.authUserRouteGroup.GET("/order/:order_id/refunds/:refund_id", route.getRefund)
 	api.authUserRouteGroup.POST("/order/:order_id/refunds", route.createRefund)
 
-	api.Http.PATCH("/api/v1/orders/:order_id/change-language", route.changeLanguage)
-	api.Http.PATCH("/api/v1/orders/:order_id/change-payment-account", route.changePaymentAccount)
-	api.Http.POST("/api/v1/orders/:order_id/calculate-amounts", route.calculateAmounts)
+	api.Http.PATCH("/api/v1/orders/:order_id/language", route.changeLanguage)
+	api.Http.PATCH("/api/v1/orders/:order_id/customer", route.changeCustomer)
+	api.Http.POST("/api/v1/orders/:order_id/billing_address", route.processBillingAddress)
 
 	return api
 }
@@ -594,7 +594,7 @@ func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
-func (r *orderRoute) changePaymentAccount(ctx echo.Context) error {
+func (r *orderRoute) changeCustomer(ctx echo.Context) error {
 	orderId := ctx.Param(requestParameterOrderId)
 
 	if orderId == "" {
@@ -628,14 +628,14 @@ func (r *orderRoute) changePaymentAccount(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
-func (r *orderRoute) calculateAmounts(ctx echo.Context) error {
+func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 	orderId := ctx.Param(requestParameterOrderId)
 
 	if orderId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
 	}
 
-	req := &grpc.OrderReCalculateAmountsRequest{}
+	req := &grpc.ProcessBillingAddressRequest{}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -649,7 +649,7 @@ func (r *orderRoute) calculateAmounts(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.OrderReCalculateAmounts(context.TODO(), req)
+	rsp, err := r.billingService.ProcessBillingAddress(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)

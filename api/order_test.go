@@ -316,7 +316,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/change-language")
+	ctx.SetPath("/api/v1/orders/:order_id/language")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
@@ -351,7 +351,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BindError() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/change-language")
+	ctx.SetPath("/api/v1/orders/:order_id/language")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
@@ -373,7 +373,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_ValidationError() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/change-language")
+	ctx.SetPath("/api/v1/orders/:order_id/language")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues("some_value")
 
@@ -395,7 +395,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BillingServerSystemError()
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/change-language")
+	ctx.SetPath("/api/v1/orders/:order_id/language")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
@@ -418,7 +418,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BillingServerErrorResult_E
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/change-language")
+	ctx.SetPath("/api/v1/orders/:order_id/language")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
@@ -441,11 +441,11 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/change-payment-account")
+	ctx.SetPath("/api/v1/orders/:order_id/customer")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
-	err := suite.router.changePaymentAccount(ctx)
+	err := suite.router.changeCustomer(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
@@ -460,7 +460,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_OrderIdEmpty_Error()
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	err := suite.router.changePaymentAccount(ctx)
+	err := suite.router.changeCustomer(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -476,11 +476,11 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BindError() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/change-payment-account")
+	ctx.SetPath("/api/v1/orders/:order_id/customer")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
-	err := suite.router.changePaymentAccount(ctx)
+	err := suite.router.changeCustomer(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -498,11 +498,11 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_ValidationError() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/change-payment-account")
+	ctx.SetPath("/api/v1/orders/:order_id/customer")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
-	err := suite.router.changePaymentAccount(ctx)
+	err := suite.router.changeCustomer(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -520,12 +520,12 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BillingServerSystemE
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/change-payment-account")
+	ctx.SetPath("/api/v1/orders/:order_id/customer")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
 	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
-	err := suite.router.changePaymentAccount(ctx)
+	err := suite.router.changeCustomer(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -543,12 +543,12 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BillingServerErrorRe
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("//api/v1/orders/:order_id/change-payment-account")
+	ctx.SetPath("/api/v1/orders/:order_id/customer")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
 	suite.router.billingService = mock.NewBillingServerErrorMock()
-	err := suite.router.changePaymentAccount(ctx)
+	err := suite.router.changeCustomer(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -566,11 +566,11 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/calculate-amounts")
+	ctx.SetPath("/api/v1/orders/:order_id/billing_address")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
-	err := suite.router.calculateAmounts(ctx)
+	err := suite.router.processBillingAddress(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
@@ -585,7 +585,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_OrderIdEmpty_Error() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	err := suite.router.calculateAmounts(ctx)
+	err := suite.router.processBillingAddress(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -601,11 +601,11 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BindError() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/calculate-amounts")
+	ctx.SetPath("/api/v1/orders/:order_id/billing_address")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
-	err := suite.router.calculateAmounts(ctx)
+	err := suite.router.processBillingAddress(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -623,11 +623,11 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationError() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/calculate-amounts")
+	ctx.SetPath("/api/v1/orders/:order_id/billing_address")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
-	err := suite.router.calculateAmounts(ctx)
+	err := suite.router.processBillingAddress(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -645,12 +645,12 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerSystemError
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/calculate-amounts")
+	ctx.SetPath("/api/v1/orders/:order_id/billing_address")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
 	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
-	err := suite.router.calculateAmounts(ctx)
+	err := suite.router.processBillingAddress(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -668,12 +668,12 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerErrorResult
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/api/v1/orders/:order_id/calculate-amounts")
+	ctx.SetPath("/api/v1/orders/:order_id/billing_address")
 	ctx.SetParamNames(requestParameterOrderId)
 	ctx.SetParamValues(uuid.New().String())
 
 	suite.router.billingService = mock.NewBillingServerErrorMock()
-	err := suite.router.calculateAmounts(ctx)
+	err := suite.router.processBillingAddress(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
