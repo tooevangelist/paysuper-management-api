@@ -325,7 +325,8 @@ func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
 	// todo: 2 prevent create duplicated unprocessed orders for one user session
 
 	go func() {
-		_, _ = r.paylinkService.IncrPaylinkVisits(context.Background(), req)
+		r.paylinkService.IncrPaylinkVisits(context.Background(), req)
+		// todo log warning when IncrPaylinkVisits failed?
 	}()
 
 	err = ctx.Render(http.StatusOK, paylinkFormTemplateName, data)
