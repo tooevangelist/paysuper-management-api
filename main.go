@@ -59,6 +59,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Application logger initialization failed with error: %s\n", err)
 	}
+	zap.ReplaceGlobals(logger)
 
 	defer func() {
 		if err := logger.Sync(); err != nil {

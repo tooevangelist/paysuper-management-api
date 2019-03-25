@@ -42,9 +42,11 @@ func (r *onboardingRoute) getMerchant(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
 	}
 
-	rsp, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{MerchantId: id})
+	req := &grpc.GetMerchantByRequest{MerchantId: id}
+	rsp, err := r.billingService.GetMerchantBy(context.TODO(), req)
 
 	if err != nil {
+		r.logError("Call billing-server method GetMerchantBy failed", []interface{}{"error", err.Error(), "request", req})
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 

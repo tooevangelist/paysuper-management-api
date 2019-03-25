@@ -16,7 +16,7 @@ require (
 	github.com/micro/go-plugins v1.0.0
 	github.com/micro/kubernetes v0.7.0
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190325151136-f5047dbf0cf2
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190325170659-012e1acb60e8
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190325153647-f6af42aadb48
 	github.com/paysuper/paysuper-recurring-repository v1.0.99
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190308105725-016a09c27fbd
@@ -26,7 +26,6 @@ require (
 	github.com/streadway/amqp v0.0.0-20181205114330-a314942b2fd9
 	github.com/stretchr/testify v1.3.0
 	github.com/swaggo/swag v1.4.1 // indirect
-	github.com/ttacon/builder v0.0.0-20170518171403-c099f663e1c2 // indirect
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/xakep666/mongo-migrate v0.1.0
 	go.uber.org/zap v1.9.1

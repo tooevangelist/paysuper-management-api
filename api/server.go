@@ -365,3 +365,7 @@ func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.
 
 	return nil
 }
+
+func (api *Api) logError(msg string, data []interface{}) {
+	zap.S().Errorw(fmt.Sprintf("[PAYSUPER_MANAGEMENT_API] %s", msg), data...)
+}

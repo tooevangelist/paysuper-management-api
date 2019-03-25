@@ -1013,113 +1013,113 @@ func (om *OrderManager) ProcessCreatePayment(iData map[string]interface{}, psSet
 
 	/*var err error
 
-	if err = om.validateCreatePaymentData(iData); err != nil {
-		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, err.Error())
-	}
+	  if err = om.validateCreatePaymentData(iData); err != nil {
+	      return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, err.Error())
+	  }
 
-	data := om.convertCreatePaymentData(iData)
-	o := om.FindById(data[model.OrderPaymentCreateRequestFieldOrderId])
+	  data := om.convertCreatePaymentData(iData)
+	  o := om.FindById(data[model.OrderPaymentCreateRequestFieldOrderId])
 
-	if o == nil {
-		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, orderErrorNotFound)
-	}
+	  if o == nil {
+	      return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, orderErrorNotFound)
+	  }
 
-	if o.IsComplete() == true {
-		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, orderErrorOrderAlreadyComplete)
-	}
+	  if o.IsComplete() == true {
+	      return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, orderErrorOrderAlreadyComplete)
+	  }
 
-	pm := om.paymentMethodManager.FindById(bson.ObjectIdHex(data[model.OrderPaymentCreateRequestFieldOPaymentMethodId]))
+	  pm := om.paymentMethodManager.FindById(bson.ObjectIdHex(data[model.OrderPaymentCreateRequestFieldOPaymentMethodId]))
 
-	if pm == nil {
-		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, orderErrorPaymentMethodNotFound)
-	}
+	  if pm == nil {
+	      return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, orderErrorPaymentMethodNotFound)
+	  }
 
-	if o, err = om.modifyOrderAfterOrderFormSubmit(o, pm); err != nil {
-		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, err.Error())
-	}
+	  if o, err = om.modifyOrderAfterOrderFormSubmit(o, pm); err != nil {
+	      return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorValidation, err.Error())
+	  }
 
-	email, _ := data[model.OrderPaymentCreateRequestFieldEmail]
-	o.PayerData.Email = &email
+	  email, _ := data[model.OrderPaymentCreateRequestFieldEmail]
+	  o.PayerData.Email = &email
 
-	delete(data, model.OrderPaymentCreateRequestFieldOrderId)
-	delete(data, model.OrderPaymentCreateRequestFieldOPaymentMethodId)
-	delete(data, model.OrderPaymentCreateRequestFieldEmail)
+	  delete(data, model.OrderPaymentCreateRequestFieldOrderId)
+	  delete(data, model.OrderPaymentCreateRequestFieldOPaymentMethodId)
+	  delete(data, model.OrderPaymentCreateRequestFieldEmail)
 
-	if val, ok := data[requestFieldOrderStoredCardId]; ok {
-		rsp, err := om.rep.FindSavedCardById(om.ctx, &repository.FindByStringValue{Value: val})
+	  if val, ok := data[requestFieldOrderStoredCardId]; ok {
+	      rsp, err := om.rep.FindSavedCardById(om.ctx, &repository.FindByStringValue{Value: val})
 
-		if err == nil && len(rsp.Pan) > 0 {
-			data[entity.BankCardFieldPan] = rsp.Pan
-			data[entity.BankCardFieldHolder] = rsp.CardHolder
-			data[entity.BankCardFieldMonth] = rsp.Expire.Month
-			data[entity.BankCardFieldYear] = rsp.Expire.Year
-		}
-	}
+	      if err == nil && len(rsp.Pan) > 0 {
+	          data[entity.BankCardFieldPan] = rsp.Pan
+	          data[entity.BankCardFieldHolder] = rsp.CardHolder
+	          data[entity.BankCardFieldMonth] = rsp.Expire.Month
+	          data[entity.BankCardFieldYear] = rsp.Expire.Year
+	      }
+	  }
 
-	// if it bank card payment, then get data about bank issuer
-	val, ok := data[entity.BankCardFieldPan]
+	  // if it bank card payment, then get data about bank issuer
+	  val, ok := data[entity.BankCardFieldPan]
 
-	if ok && len(val) > 0 {
-		binData, err := om.rep.FindBinData(om.ctx, &repository.FindByStringValue{Value: val})
+	  if ok && len(val) > 0 {
+	      binData, err := om.rep.FindBinData(om.ctx, &repository.FindByStringValue{Value: val})
 
-		if err == nil && binData != nil {
-			data[model.BankCardFieldBrand] = binData.GetCardBrand()
-			data[model.BankCardFieldType] = binData.GetCardType()
-			data[model.BankCardFieldCategory] = binData.GetCardCategory()
-			data[model.BankCardFieldIssuerName] = binData.GetBankName()
-			data[model.BankCardFieldIssuerCountry] = binData.GetBankCountryName()
-		}
+	      if err == nil && binData != nil {
+	          data[model.BankCardFieldBrand] = binData.GetCardBrand()
+	          data[model.BankCardFieldType] = binData.GetCardType()
+	          data[model.BankCardFieldCategory] = binData.GetCardCategory()
+	          data[model.BankCardFieldIssuerName] = binData.GetBankName()
+	          data[model.BankCardFieldIssuerCountry] = binData.GetBankCountryName()
+	      }
 
-		if v, ok := iData["store_data"]; ok && v.(bool) == true {
-			req := &repository.SavedCardRequest{
-				Account:    o.ProjectAccount,
-				ProjectId:  o.Project.Id.Hex(),
-				Pan:        data[entity.BankCardFieldPan],
-				CardHolder: data[entity.BankCardFieldHolder],
-				Expire: &billing.CardExpire{
-					Month: data[entity.BankCardFieldMonth],
-					Year:  data[entity.BankCardFieldYear],
-				},
-			}
+	      if v, ok := iData["store_data"]; ok && v.(bool) == true {
+	          req := &repository.SavedCardRequest{
+	              Account:    o.ProjectAccount,
+	              ProjectId:  o.Project.Id.Hex(),
+	              Pan:        data[entity.BankCardFieldPan],
+	              CardHolder: data[entity.BankCardFieldHolder],
+	              Expire: &billing.CardExpire{
+	                  Month: data[entity.BankCardFieldMonth],
+	                  Year:  data[entity.BankCardFieldYear],
+	              },
+	          }
 
-			if _, err := om.rep.InsertSavedCard(om.ctx, req); err != nil {
-				log.Println(err)
-			}
-		}
-	}
+	          if _, err := om.rep.InsertSavedCard(om.ctx, req); err != nil {
+	              log.Println(err)
+	          }
+	      }
+	  }
 
-	o.PaymentRequisites = data
-	o.PaymentMethodTerminalId = pm.Params.Terminal
+	  o.PaymentRequisites = data
+	  o.PaymentMethodTerminalId = pm.Params.Terminal
 
-	if o.ProjectAccount == "" {
-		o.ProjectAccount = email
-	}
+	  if o.ProjectAccount == "" {
+	      o.ProjectAccount = email
+	  }
 
-	if o, err = om.updateOrderAccountingAmounts(o); err != nil {
-		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
-	}
+	  if o, err = om.updateOrderAccountingAmounts(o); err != nil {
+	      return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
+	  }
 
-	handler, err := om.paymentSystemsSettings.GetPaymentHandler(o, psSettings)
+	  handler, err := om.paymentSystemsSettings.GetPaymentHandler(o, psSettings)
 
-	if err != nil {
-		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
-	}
+	  if err != nil {
+	      return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
+	  }
 
-	res := handler.CreatePayment()
+	  res := handler.CreatePayment()
 
-	if res.Status == payment_system.PaymentStatusOK {
-		o.Status = model.OrderStatusPaymentSystemCreate
-	}
+	  if res.Status == payment_system.PaymentStatusOK {
+	      o.Status = model.OrderStatusPaymentSystemCreate
+	  }
 
-	if res.Status == payment_system.PaymentStatusErrorSystem {
-		o.Status = model.OrderStatusPaymentSystemRejectOnCreate
-	}
+	  if res.Status == payment_system.PaymentStatusErrorSystem {
+	      o.Status = model.OrderStatusPaymentSystemRejectOnCreate
+	  }
 
-	if err = om.Database.Repository(TableOrder).UpdateOrder(o); err != nil {
-		return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
-	}
+	  if err = om.Database.Repository(TableOrder).UpdateOrder(o); err != nil {
+	      return payment_system.NewPaymentResponse(payment_system.PaymentStatusErrorSystem, err.Error())
+	  }
 
-	return res*/
+	  return res*/
 }
 
 func (om *OrderManager) ProcessNotifyPayment(opn *model.OrderPaymentNotification, psSettings map[string]interface{}) *payment_system.PaymentResponse {
@@ -1595,12 +1595,12 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		},
 		ProjectParams: sProjectParams,
 		PayerData: &billing.PayerData{
-			Ip:            o.PayerData.Ip,
-			CountryCodeA2: o.PayerData.CountryCodeA2,
-			CountryName:   &billing.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
-			City:          &billing.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
-			State:         o.PayerData.Subdivision,
-			Timezone:      o.PayerData.Timezone,
+			Ip:          o.PayerData.Ip,
+			Country:     o.PayerData.CountryCodeA2,
+			CountryName: &billing.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
+			City:        &billing.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
+			State:       o.PayerData.Subdivision,
+			Timezone:    o.PayerData.Timezone,
 		},
 		PaymentMethod: &billing.PaymentMethodOrder{
 			Id:   o.PaymentMethod.Id.Hex(),
