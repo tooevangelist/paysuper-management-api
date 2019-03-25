@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"github.com/labstack/echo"
-	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"io/ioutil"
 	"net/http"
@@ -53,18 +52,5 @@ func (api *Api) RawBodyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		api.rawBody = string(buf)
 
 		return next(ctx)
-	}
-}
-
-func (api *Api) AuthUserMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		api.authUser = &AuthUser{
-			Id:        pkg.SystemUserId,
-			Name:      "System User",
-			Merchants: make(map[string]bool),
-			Roles:     make(map[string]bool),
-		}
-
-		return next(c)
 	}
 }

@@ -18,6 +18,7 @@ func (api *Api) initOnboardingRoutes() *Api {
 
 	api.authUserRouteGroup.GET("/merchants", route.listMerchants)
 	api.authUserRouteGroup.GET("/merchants/:id", route.getMerchant)
+	api.authUserRouteGroup.GET("/merchants/user", route.getMerchantByUser)
 	api.authUserRouteGroup.POST("/merchants", route.changeMerchant)
 	api.authUserRouteGroup.PUT("/merchants", route.changeMerchant)
 	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
@@ -41,7 +42,25 @@ func (r *onboardingRoute) getMerchant(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
 	}
 
-	rsp, err := r.billingService.GetMerchantById(context.TODO(), &grpc.FindByIdRequest{Id: id})
+	rsp, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{MerchantId: id})
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *onboardingRoute) getMerchantByUser(ctx echo.Context) error {
+	if r.authUser.Id == "" {
+		return echo.NewHTTPError(http.StatusUnauthorized, errorMessageAccessDenied)
+	}
+
+	rsp, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -79,6 +98,7 @@ func (r *onboardingRoute) changeMerchant(ctx echo.Context) error {
 		return httpErr
 	}
 
+	req.UserId = r.authUser.Id
 	rsp, err := r.billingService.ChangeMerchant(context.TODO(), req)
 
 	if err != nil {

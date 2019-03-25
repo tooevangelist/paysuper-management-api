@@ -61,7 +61,6 @@ const (
 	errorIdIsEmpty                = "identifier can't be empty"
 	errorUnknown                  = "unknown error. try request later"
 	errorQueryParamsIncorrect     = "incorrect query parameters"
-	errorJwtUserIdNotFound        = "user identifier not found in JWT token"
 	errorIncorrectMerchantId      = "incorrect merchant identifier"
 	errorIncorrectPaymentMethodId = "incorrect payment method identifier"
 	errorIncorrectNotificationId  = "incorrect notification identifier"
@@ -69,6 +68,7 @@ const (
 	errorIncorrectOrderId         = "incorrect order identifier"
 	errorIncorrectRefundId        = "incorrect refund identifier"
 	errorMessageMask              = "Field validation for '%s' failed on the '%s' tag"
+	errorMessageAccessDenied      = "Access denied"
 
 	HeaderAcceptLanguage = "Accept-Language"
 )
@@ -189,23 +189,32 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}
 
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
-	auth1VerifierCallback := func(ui *jwtverifier.UserInfo) {
-		api.Merchant.Identifier = string(ui.UserID)
-		// TODO: Remove this line after merchant registration is completed.
-		api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
-	}
-	api.accessRouteGroup.Use(jwtMiddleware.AuthOneJwtCallableWithConfig(api.jwtVerifier, auth1VerifierCallback))
+
+	api.accessRouteGroup.Use(
+		jwtMiddleware.AuthOneJwtCallableWithConfig(
+			api.jwtVerifier,
+			func(ui *jwtverifier.UserInfo) {
+				api.Merchant.Identifier = string(ui.UserID)
+				// TODO: Remove this line after merchant registration is completed.
+				api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
+			},
+		),
+	)
 
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
-	//api.authUserRouteGroup.Use(
-	//	middleware.JWTWithConfig(
-	//		middleware.JWTConfig{
-	//			SigningKey:    p.Config.SignatureSecret,
-	//			SigningMethod: p.Config.Algorithm,
-	//		},
-	//	),
-	//)
-	api.authUserRouteGroup.Use(api.AuthUserMiddleware)
+	api.accessRouteGroup.Use(
+		jwtMiddleware.AuthOneJwtCallableWithConfig(
+			api.jwtVerifier,
+			func(ui *jwtverifier.UserInfo) {
+				api.authUser = &AuthUser{
+					Id:        string(ui.UserID),
+					Name:      "System User",
+					Merchants: make(map[string]bool),
+					Roles:     make(map[string]bool),
+				}
+			},
+		),
+	)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
 	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
