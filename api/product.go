@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"errors"
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"net/http"
@@ -35,6 +37,11 @@ func (r *productRoute) getProductsList(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
+	err = r.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
 	res, err := r.billingService.ListProducts(context.TODO(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -46,9 +53,17 @@ func (r *productRoute) getProductsList(ctx echo.Context) error {
 // @Description Get product for authenticated merchant
 // @Example GET /api/v1/s/products/5c99288068add43f74be9c1d
 func (r *productRoute) getProduct(ctx echo.Context) error {
-	req := &grpc.RequestProductById{}
-	err := (&ProductsRequestProductByIdBinder{}).Bind(req, ctx)
 
+	id := ctx.Param("id")
+	if id == "" || bson.IsObjectIdHex(id) == false {
+		return errors.New(errorIncorrectProductId)
+	}
+
+	req := &grpc.RequestProductById{
+		Id: id,
+	}
+
+	err := r.validate.Struct(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -64,9 +79,16 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 // @Description Delete product for authenticated merchant
 // @Example DELETE /api/v1/s/products/5c99288068add43f74be9c1d
 func (r *productRoute) deleteProduct(ctx echo.Context) error {
-	req := &grpc.RequestProductById{}
-	err := (&ProductsRequestProductByIdBinder{}).Bind(req, ctx)
+	id := ctx.Param("id")
+	if id == "" || bson.IsObjectIdHex(id) == false {
+		return errors.New(errorIncorrectProductId)
+	}
 
+	req := &grpc.RequestProductById{
+		Id: id,
+	}
+
+	err := r.validate.Struct(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -105,6 +127,11 @@ func (r *productRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 	req := &grpc.Product{}
 	err := binder.Bind(req, ctx)
 
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	err = r.validate.Struct(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

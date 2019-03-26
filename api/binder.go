@@ -41,7 +41,6 @@ type PaylinksUrlBinder struct{}
 type PaylinksCreateBinder struct{}
 type PaylinksUpdateBinder struct{}
 type ProductsGetProductsListBinder struct{}
-type ProductsRequestProductByIdBinder struct{}
 type ProductsCreateProductBinder struct{}
 type ProductsUpdateProductBinder struct{}
 
@@ -528,45 +527,18 @@ func (b *ProductsGetProductsListBinder) Bind(i interface{}, ctx echo.Context) er
 		}
 	}
 
-	validate := validator.New()
-	err := validate.Struct(structure)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (b *ProductsRequestProductByIdBinder) Bind(i interface{}, ctx echo.Context) error {
-	id := ctx.Param("id")
-	if id == "" || bson.IsObjectIdHex(id) == false {
-		return errors.New(errorIncorrectProductId)
-	}
-
-	structure := i.(*grpc.RequestProductById)
-	structure.Id = id
-
-	validate := validator.New()
-	err := validate.Struct(structure)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func (b *ProductsCreateProductBinder) Bind(i interface{}, ctx echo.Context) error {
 	db := new(echo.DefaultBinder)
 	err := db.Bind(i, ctx)
-
-	structure := i.(*grpc.Product)
-	structure.Id = ""
-
-	validate := validator.New()
-	err = validate.Struct(structure)
 	if err != nil {
 		return err
 	}
+
+	structure := i.(*grpc.Product)
+	structure.Id = ""
 
 	return nil
 }
@@ -578,15 +550,12 @@ func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) erro
 	}
 	db := new(echo.DefaultBinder)
 	err := db.Bind(i, ctx)
-
-	structure := i.(*grpc.Product)
-	structure.Id = id
-
-	validate := validator.New()
-	err = validate.Struct(structure)
 	if err != nil {
 		return err
 	}
+
+	structure := i.(*grpc.Product)
+	structure.Id = id
 
 	return nil
 }
