@@ -1,7 +1,7 @@
 module github.com/paysuper/paysuper-management-api
 
 require (
-	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326082120-fc4cad7e5273
+	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326143220-97d89cf3aeeb
 	github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742
 	github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c
 	github.com/amalfra/etag v0.0.0-20180217025506-c1ee3b8b3121
@@ -17,7 +17,7 @@ require (
 	github.com/micro/go-plugins v1.0.0
 	github.com/micro/kubernetes v0.7.0
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190326065145-5973535ba0e0
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190326124258-9c9e3b5d98fc
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190325153647-f6af42aadb48
 	github.com/paysuper/paysuper-recurring-repository v1.0.99
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190308105725-016a09c27fbd

@@ -58,6 +58,10 @@ github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190319080141-2e7784c
 github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190319080141-2e7784ceb26f/go.mod h1:XNfuS/K3zPtqxoIJwu/yO6jTII2TleXBysce4/xNEOQ=
 github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326082120-fc4cad7e5273 h1:uQ/sV8/J530djfxggt0a1ObQWTgIS1O0rgUbqLisPqY=
 github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326082120-fc4cad7e5273/go.mod h1:XNfuS/K3zPtqxoIJwu/yO6jTII2TleXBysce4/xNEOQ=
+github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326115109-1b41138ef5e1 h1:4Y4kpmj8YPzKWzvuOaEM05/AjnGwSiPdMdezbE+cF0s=
+github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326115109-1b41138ef5e1/go.mod h1:XNfuS/K3zPtqxoIJwu/yO6jTII2TleXBysce4/xNEOQ=
+github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326143220-97d89cf3aeeb h1:pHRQGrczhzsfnOCFse99+CgsGhIs0J0JEX5MAikd9/8=
+github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326143220-97d89cf3aeeb/go.mod h1:XNfuS/K3zPtqxoIJwu/yO6jTII2TleXBysce4/xNEOQ=
 github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742 h1:CRqv69s+RT+rNdqgozciVwupN5aG0/1XD9n6Jql+E64=
 github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742/go.mod h1:HT0K5P2RhETGsI3b9aW1+a0L1PJPMypkDhMecJu2n68=
 github.com/ProtocolONE/go-micro-plugins v0.3.0 h1:LMPWEsMiuJnBa92b+Bsi0CHOGl1LhNR9PwWxCkyvQkM=
@@ -604,6 +608,10 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20190325170659-012e1acb60e8 h
 github.com/paysuper/paysuper-billing-server v0.0.0-20190325170659-012e1acb60e8/go.mod h1:rud83v55dXP9KhdNtdENK6qsgOkbHvn45bRuLIyC+lk=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190326065145-5973535ba0e0 h1:6O+gU+H1za57Frx1f1A8mcZwGy29FCrFBU6zB9c0Fks=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190326065145-5973535ba0e0/go.mod h1:rud83v55dXP9KhdNtdENK6qsgOkbHvn45bRuLIyC+lk=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190326120008-9cc4390f6964 h1:HgXSFt05BBN8m8/yaQAVb4ufsx5RArqooVPgG+suz0M=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190326120008-9cc4390f6964/go.mod h1:rud83v55dXP9KhdNtdENK6qsgOkbHvn45bRuLIyC+lk=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190326124258-9c9e3b5d98fc h1:LZt2chQW7H1CFUys6dV4wy4UfY3i1NI6O9sczgbEbSQ=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190326124258-9c9e3b5d98fc/go.mod h1:rud83v55dXP9KhdNtdENK6qsgOkbHvn45bRuLIyC+lk=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190321154823-00d00bb19c43 h1:CL8XF6BqN9JRFZFC8q89rhviC315LcrsyYcNkLNtj+s=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190321154823-00d00bb19c43/go.mod h1:Vhc5UF0VIHmsCsRt7Aesk/EZ/Ce/BAVNvpSXAU+tP7c=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190325153647-f6af42aadb48 h1:gr0aZLv9GPWtbTYmPlQdAvI5Hs188NlZjpSzsxN2k88=

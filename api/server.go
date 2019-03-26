@@ -216,11 +216,10 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		jwtMiddleware.AuthOneJwtCallableWithConfig(
 			api.jwtVerifier,
 			func(ui *jwtverifier.UserInfo) {
-				userId := string(ui.UserID)
-
 				api.authUser = &AuthUser{
-					Id:        userId,
-					Email:     userId + "@unit.test",
+					Id: ui.UserID,
+					//Email: ui.Email,
+					Email:     ui.UserID + "@paysuper.online",
 					Name:      "System User",
 					Merchants: make(map[string]bool),
 					Roles:     make(map[string]bool),
