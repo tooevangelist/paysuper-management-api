@@ -1,7 +1,7 @@
 module github.com/paysuper/paysuper-management-api
 
 require (
-	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190319080141-2e7784ceb26f
+	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326082120-fc4cad7e5273
 	github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742
 	github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c
 	github.com/amalfra/etag v0.0.0-20180217025506-c1ee3b8b3121

@@ -56,6 +56,8 @@ github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5/go.mod h1:lmUJ/7eu/Q8
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190319080141-2e7784ceb26f h1:9vi3jpdeeU/GtRJH6uZGPWzMXDfaVclYCDKWRMhTRZ4=
 github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190319080141-2e7784ceb26f/go.mod h1:XNfuS/K3zPtqxoIJwu/yO6jTII2TleXBysce4/xNEOQ=
+github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326082120-fc4cad7e5273 h1:uQ/sV8/J530djfxggt0a1ObQWTgIS1O0rgUbqLisPqY=
+github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326082120-fc4cad7e5273/go.mod h1:XNfuS/K3zPtqxoIJwu/yO6jTII2TleXBysce4/xNEOQ=
 github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742 h1:CRqv69s+RT+rNdqgozciVwupN5aG0/1XD9n6Jql+E64=
 github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742/go.mod h1:HT0K5P2RhETGsI3b9aW1+a0L1PJPMypkDhMecJu2n68=
 github.com/ProtocolONE/go-micro-plugins v0.3.0 h1:LMPWEsMiuJnBa92b+Bsi0CHOGl1LhNR9PwWxCkyvQkM=
