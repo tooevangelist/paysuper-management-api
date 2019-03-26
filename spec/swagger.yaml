@@ -100,13 +100,24 @@ definitions:
         description: |
           user account, may be null
         type: string
-      has_user_commission:
-        description: |
-          flag to show commission amount changed to user in payment form
-        type: boolean
       has_vat:
         description: |
           flag to show VAT commission amount in payment form
+        type: boolean
+      vat:
+        description: VAT amount
+        type: number
+      amount:
+        description: order amount without VAT
+        type: number
+      total_amount:
+        description: total order amount with VAT
+        type: number
+      currency:
+        description: order currency
+        type: string
+      user_address_data_required:
+        description: flag to get information about user real geo position
         type: boolean
       id:
         description: |
@@ -721,18 +732,6 @@ definitions:
         description: |
           regexp mask for check main requisite of payment method
         type: string
-      amount_with_commissions:
-        description: |
-          total amount to payment in payment method currency include all possible commissions
-        type: number
-      amount_without_commissions:
-        description: |
-          original price of item in currency of payment method  which buy user
-        type: number
-      currency:
-        description: |
-          3 symbols currency code of payment method by  ISO 4217
-        type: string
       group_alias:
         description: |
           payment method group alias
@@ -753,14 +752,6 @@ definitions:
         description: |
           payment method type. allowed: bank_card, ewallet, crypto
         type: string
-      user_commission_amount:
-        description: |
-          amount of commission in payment method currency, which the user pays for the project
-        type: number
-      vat_amount:
-        description: |
-          amount of VAT in payment method currency, which the user pays
-        type: number
     type: object
   model.PaymentMethodParams:
     properties:

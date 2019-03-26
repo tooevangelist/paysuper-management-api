@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/google/uuid"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/ttacon/libphonenumber"
 	"gopkg.in/go-playground/validator.v9"
@@ -42,5 +43,10 @@ func (api *Api) OrderStructValidator(sl validator.StructLevel) {
 
 func (api *Api) PhoneValidator(fl validator.FieldLevel) bool {
 	_, err := libphonenumber.Parse(fl.Field().String(), "US")
+	return err == nil
+}
+
+func (api *Api) UuidValidator(fl validator.FieldLevel) bool {
+	_, err := uuid.Parse(fl.Field().String())
 	return err == nil
 }

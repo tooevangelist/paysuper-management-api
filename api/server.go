@@ -191,6 +191,12 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		return nil, err
 	}
 
+	err = api.validate.RegisterValidation("uuid", api.UuidValidator)
+
+	if err != nil {
+		return nil, err
+	}
+
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 
 	api.accessRouteGroup.Use(
