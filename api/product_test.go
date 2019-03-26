@@ -60,8 +60,8 @@ func (suite *ProductTestSuite) TestProduct_getProduct_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/product/:id")
-	ctx.SetParamNames("id")
+	ctx.SetPath("/product/:" + requestParameterId)
+	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("5c99391568add439ccf0ffaf")
 
 	err := suite.router.getProduct(ctx)
@@ -77,8 +77,8 @@ func (suite *ProductTestSuite) TestProduct_deleteProduct_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/product/:id")
-	ctx.SetParamNames("id")
+	ctx.SetPath("/product/:" + requestParameterId)
+	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("5c99391568add439ccf0ffaf")
 
 	err := suite.router.deleteProduct(ctx)
@@ -117,8 +117,8 @@ func (suite *ProductTestSuite) TestProduct_updateProduct_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/product/:id")
-	ctx.SetParamNames("id")
+	ctx.SetPath("/product/:" + requestParameterId)
+	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("5c99391568add439ccf0ffaf")
 
 	err := suite.router.updateProduct(ctx)
