@@ -311,14 +311,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateMerchant_ValidationError(
 				Phone: "1234567890",
 			},
 		},
-		Banking: &grpc.OnboardingBanking{
-			Currency:      "RUB",
-			Name:          "Bank name",
-			Address:       "Unknown",
-			AccountNumber: "1234567890",
-			Swift:         "TEST",
-			Details:       "",
-		},
 	}
 
 	b, err := json.Marshal(merchant)
@@ -336,7 +328,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateMerchant_ValidationError(
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Name", httpErr.Message)
+	assert.Regexp(suite.T(), "Banking", httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_CreateMerchant_BillingServiceUnavailable_Error() {
