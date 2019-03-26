@@ -163,9 +163,9 @@ func (s *BillingServerOkMock) GetConvertRate(
 	return &grpc.ConvertRateResponse{}, nil
 }
 
-func (s *BillingServerOkMock) GetMerchantById(
+func (s *BillingServerOkMock) GetMerchantBy(
 	ctx context.Context,
-	in *grpc.FindByIdRequest,
+	in *grpc.GetMerchantByRequest,
 	opts ...client.CallOption,
 ) (*grpc.MerchantGetMerchantResponse, error) {
 	rsp := &grpc.MerchantGetMerchantResponse{
@@ -193,6 +193,10 @@ func (s *BillingServerOkMock) ChangeMerchant(
 	opts ...client.CallOption,
 ) (*billing.Merchant, error) {
 	m := &billing.Merchant{
+		User: &billing.MerchantUser{
+			Id:    bson.NewObjectId().Hex(),
+			Email: "test@unit.test",
+		},
 		Name:            in.Name,
 		AlternativeName: in.AlternativeName,
 		Website:         in.Website,
@@ -466,9 +470,9 @@ func (s *BillingServerErrorMock) GetConvertRate(
 	return &grpc.ConvertRateResponse{}, nil
 }
 
-func (s *BillingServerErrorMock) GetMerchantById(
+func (s *BillingServerErrorMock) GetMerchantBy(
 	ctx context.Context,
-	in *grpc.FindByIdRequest,
+	in *grpc.GetMerchantByRequest,
 	opts ...client.CallOption,
 ) (*grpc.MerchantGetMerchantResponse, error) {
 	return &grpc.MerchantGetMerchantResponse{
@@ -698,9 +702,9 @@ func (s *BillingServerSystemErrorMock) GetConvertRate(
 	return &grpc.ConvertRateResponse{}, nil
 }
 
-func (s *BillingServerSystemErrorMock) GetMerchantById(
+func (s *BillingServerSystemErrorMock) GetMerchantBy(
 	ctx context.Context,
-	in *grpc.FindByIdRequest,
+	in *grpc.GetMerchantByRequest,
 	opts ...client.CallOption,
 ) (*grpc.MerchantGetMerchantResponse, error) {
 	return nil, errors.New("some error")
@@ -906,9 +910,9 @@ func (s *BillingServerOkTemporaryMock) GetConvertRate(
 	return &grpc.ConvertRateResponse{}, nil
 }
 
-func (s *BillingServerOkTemporaryMock) GetMerchantById(
+func (s *BillingServerOkTemporaryMock) GetMerchantBy(
 	ctx context.Context,
-	in *grpc.FindByIdRequest,
+	in *grpc.GetMerchantByRequest,
 	opts ...client.CallOption,
 ) (*grpc.MerchantGetMerchantResponse, error) {
 	rsp := &grpc.MerchantGetMerchantResponse{

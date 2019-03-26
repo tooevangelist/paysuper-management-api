@@ -5,6 +5,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo"
 	"github.com/paysuper/paysuper-billing-server/pkg"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"net/http"
 )
@@ -94,13 +95,22 @@ func (r *onboardingRoute) listMerchants(ctx echo.Context) error {
 
 func (r *onboardingRoute) changeMerchant(ctx echo.Context) error {
 	req := &grpc.OnboardingRequest{}
-	httpErr := r.onboardingBeforeHandler(req, ctx)
+	err := ctx.Bind(req)
 
-	if httpErr != nil {
-		return httpErr
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	req.UserId = r.authUser.Id
+	req.User = &billing.MerchantUser{
+		Id:    r.authUser.Id,
+		Email: r.authUser.Email,
+	}
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
 	rsp, err := r.billingService.ChangeMerchant(context.TODO(), req)
 
 	if err != nil {

@@ -49,7 +49,8 @@ func (suite *OnboardingTestSuite) SetupTest() {
 		validate:       validator.New(),
 		billingService: mock.NewBillingServerOkMock(),
 		authUser: &AuthUser{
-			Id: "ffffffffffffffffffffffff",
+			Id:    "ffffffffffffffffffffffff",
+			Email: "test@unit.test",
 		},
 	}
 

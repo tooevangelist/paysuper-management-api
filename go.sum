@@ -600,6 +600,8 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20190325154540-3acec8c19f49 h
 github.com/paysuper/paysuper-billing-server v0.0.0-20190325154540-3acec8c19f49/go.mod h1:rud83v55dXP9KhdNtdENK6qsgOkbHvn45bRuLIyC+lk=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190325170659-012e1acb60e8 h1:Mo79sxWtIWGv2Zx6XlO+c+TP5ifPZU+8L6bTjRu+RCw=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190325170659-012e1acb60e8/go.mod h1:rud83v55dXP9KhdNtdENK6qsgOkbHvn45bRuLIyC+lk=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190326065145-5973535ba0e0 h1:6O+gU+H1za57Frx1f1A8mcZwGy29FCrFBU6zB9c0Fks=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190326065145-5973535ba0e0/go.mod h1:rud83v55dXP9KhdNtdENK6qsgOkbHvn45bRuLIyC+lk=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190321154823-00d00bb19c43 h1:CL8XF6BqN9JRFZFC8q89rhviC315LcrsyYcNkLNtj+s=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190321154823-00d00bb19c43/go.mod h1:Vhc5UF0VIHmsCsRt7Aesk/EZ/Ce/BAVNvpSXAU+tP7c=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190325153647-f6af42aadb48 h1:gr0aZLv9GPWtbTYmPlQdAvI5Hs188NlZjpSzsxN2k88=

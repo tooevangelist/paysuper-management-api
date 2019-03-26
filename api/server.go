@@ -113,6 +113,7 @@ type Order struct {
 type AuthUser struct {
 	Id        string
 	Name      string
+	Email     string
 	Roles     map[string]bool
 	Merchants map[string]bool
 }
