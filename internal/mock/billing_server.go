@@ -76,6 +76,31 @@ var (
 			},
 		},
 	}
+
+	ProductPrice = &grpc.ProductPrice{
+		Currency: "USD",
+		Amount:   1010.23,
+	}
+
+	Product = &grpc.Product{
+		Id:              "5c99391568add439ccf0ffaf",
+		Object:          "product",
+		Type:            "simple_product",
+		Sku:             "ru_double_yeti_rel",
+		Name:            "Double Yeti",
+		DefaultCurrency: "USD",
+		Enabled:         true,
+		Description:     "Yet another cool game",
+		LongDescription: "Super game steam keys",
+		Url:             "http://mygame.ru/duoble_yeti",
+		Images:          []string{"/home/image.jpg"},
+		Metadata: map[string]string{
+			"SomeKey": "SomeValue",
+		},
+		Prices: []*grpc.ProductPrice{
+			ProductPrice,
+		},
+	}
 )
 
 type BillingServerOkMock struct{}
@@ -1158,6 +1183,84 @@ func (s *BillingServerOkTemporaryMock) ProcessRefundCallback(
 		Status: pkg.ResponseStatusOk,
 		Error:  SomeError,
 	}, nil
+}
+
+func (s *BillingServerOkMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
+	return Product, nil
+}
+
+func (s *BillingServerOkMock) ListProducts(ctx context.Context, in *grpc.ListProductsRequest, opts ...client.CallOption) (*grpc.ListProductsResponse, error) {
+	return &grpc.ListProductsResponse{
+		Limit:  1,
+		Offset: 0,
+		Total:  200,
+		Products: []*grpc.Product{
+			Product,
+		},
+	}, nil
+}
+
+func (s *BillingServerOkMock) GetProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.Product, error) {
+	return Product, nil
+}
+
+func (s *BillingServerOkMock) DeleteProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	return &grpc.EmptyResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
+	return Product, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ListProducts(ctx context.Context, in *grpc.ListProductsRequest, opts ...client.CallOption) (*grpc.ListProductsResponse, error) {
+	return &grpc.ListProductsResponse{
+		Limit:  1,
+		Offset: 0,
+		Total:  200,
+		Products: []*grpc.Product{
+			Product,
+		},
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.Product, error) {
+	return Product, nil
+}
+
+func (s *BillingServerOkTemporaryMock) DeleteProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	return &grpc.EmptyResponse{}, nil
+}
+
+func (s *BillingServerErrorMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
+	return nil, errors.New("Some error")
+}
+
+func (s *BillingServerErrorMock) ListProducts(ctx context.Context, in *grpc.ListProductsRequest, opts ...client.CallOption) (*grpc.ListProductsResponse, error) {
+	return nil, errors.New("Some error")
+}
+
+func (s *BillingServerErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.Product, error) {
+	return nil, errors.New("Some error")
+}
+
+func (s *BillingServerErrorMock) DeleteProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	return nil, errors.New("Some error")
+}
+
+func (s *BillingServerSystemErrorMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
+	return nil, errors.New("Some error")
+}
+
+func (s *BillingServerSystemErrorMock) ListProducts(ctx context.Context, in *grpc.ListProductsRequest, opts ...client.CallOption) (*grpc.ListProductsResponse, error) {
+	return nil, errors.New("Some error")
+}
+
+func (s *BillingServerSystemErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.Product, error) {
+	return nil, errors.New("Some error")
+}
+
+func (s *BillingServerSystemErrorMock) DeleteProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	return nil, errors.New("Some error")
 }
 
 func (s *BillingServerOkTemporaryMock) PaymentFormLanguageChanged(

@@ -47,6 +47,7 @@ const (
 
 	requestParameterId                 = "id"
 	requestParameterName               = "name"
+	requestParameterSku                = "sku"
 	requestParameterIsSigned           = "is_signed"
 	requestParameterLastPayoutDateFrom = "last_payout_date_from"
 	requestParameterLastPayoutDateTo   = "last_payout_date_to"
@@ -263,6 +264,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitCurrencyRoutes().
 		InitCountryRoutes().
 		InitMerchantRoutes().
+		InitProductRoutes().
 		InitProjectRoutes().
 		InitOrderV1Routes().
 		InitPaylinkRoutes().
