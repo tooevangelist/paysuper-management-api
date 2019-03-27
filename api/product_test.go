@@ -40,12 +40,12 @@ func (suite *ProductTestSuite) TearDownTest() {}
 
 func (suite *ProductTestSuite) TestProduct_getProductsList_Ok() {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/product", nil)
+	req := httptest.NewRequest(http.MethodGet, "/products", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/product")
+	ctx.SetPath("/products")
 
 	err := suite.router.getProductsList(ctx)
 	assert.NoError(suite.T(), err)
@@ -55,12 +55,12 @@ func (suite *ProductTestSuite) TestProduct_getProductsList_Ok() {
 
 func (suite *ProductTestSuite) TestProduct_getProduct_Ok() {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/product/5c99391568add439ccf0ffaf", nil)
+	req := httptest.NewRequest(http.MethodGet, "/products/5c99391568add439ccf0ffaf", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/product/:" + requestParameterId)
+	ctx.SetPath("/products/:" + requestParameterId)
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("5c99391568add439ccf0ffaf")
 
@@ -72,12 +72,12 @@ func (suite *ProductTestSuite) TestProduct_getProduct_Ok() {
 
 func (suite *ProductTestSuite) TestProduct_deleteProduct_Ok() {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodDelete, "/product/5c99391568add439ccf0ffaf", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/products/5c99391568add439ccf0ffaf", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/product/:" + requestParameterId)
+	ctx.SetPath("/products/:" + requestParameterId)
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("5c99391568add439ccf0ffaf")
 
@@ -93,12 +93,12 @@ func (suite *ProductTestSuite) TestProduct_createProduct_Ok() {
         "description":  {"en": "Doom II description"}, "long_description": {}}`
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/product", strings.NewReader(bodyJson))
+	req := httptest.NewRequest(http.MethodPost, "/products", strings.NewReader(bodyJson))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/product")
+	ctx.SetPath("/products")
 
 	err := suite.router.createProduct(ctx)
 	assert.NoError(suite.T(), err)
@@ -112,12 +112,12 @@ func (suite *ProductTestSuite) TestProduct_updateProduct_Ok() {
         "description":  {"en": "Doom IV description"}, "long_description": {}}`
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPut, "/product/5c99391568add439ccf0ffaf", strings.NewReader(bodyJson))
+	req := httptest.NewRequest(http.MethodPut, "/products/5c99391568add439ccf0ffaf", strings.NewReader(bodyJson))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/product/:" + requestParameterId)
+	ctx.SetPath("/products/:" + requestParameterId)
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("5c99391568add439ccf0ffaf")
 
