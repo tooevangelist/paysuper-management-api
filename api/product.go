@@ -63,7 +63,7 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 
 	id := ctx.Param("id")
 	if id == "" || bson.IsObjectIdHex(id) == false {
-		return errors.New(errorIncorrectProductId)
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New(errorIncorrectProductId).Error())
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -94,7 +94,7 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 func (r *productRoute) deleteProduct(ctx echo.Context) error {
 	id := ctx.Param("id")
 	if id == "" || bson.IsObjectIdHex(id) == false {
-		return errors.New(errorIncorrectProductId)
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New(errorIncorrectProductId).Error())
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
