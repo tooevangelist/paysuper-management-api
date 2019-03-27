@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/globalsign/mgo/bson"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"net/http"
 )
