@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 )
 
@@ -1400,4 +1401,111 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_Incorrec
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), errorIncorrectMerchantId, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreementType_Ok() {
+	body := `{"agreement_type": 1}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.changeAgreementType(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreementType_BindError() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.changeAgreementType(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreementType_ValidationError() {
+	body := `{"agreement_type": 6}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.changeAgreementType(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Regexp(suite.T(), "AgreementType", httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreementType_BillingServerSystemError() {
+	body := `{"agreement_type": 1}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.changeAgreementType(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreementType_BillingServerReturnError() {
+	body := `{"agreement_type": 1}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerErrorMock()
+	err := suite.handler.changeAgreementType(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
