@@ -2,7 +2,7 @@ package api
 
 import (
 	"bytes"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"io/ioutil"
 	"net/http"

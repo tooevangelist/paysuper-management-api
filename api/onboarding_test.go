@@ -3,7 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -94,14 +94,17 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchant_Ok() {
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	b, err := json.Marshal(mock.OnboardingMerchantMock)
+	err := suite.handler.getMerchant(ctx)
 	assert.NoError(suite.T(), err)
 
-	err = suite.handler.getMerchant(ctx)
-
+	obj := &billing.Merchant{}
+	err = json.Unmarshal(rsp.Body.Bytes(), obj)
 	assert.NoError(suite.T(), err)
+
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.Equal(suite.T(), string(b), rsp.Body.String())
+	assert.Equal(suite.T(), mock.OnboardingMerchantMock.Id, obj.Id)
+	assert.Equal(suite.T(), mock.OnboardingMerchantMock.City, obj.City)
+	assert.Equal(suite.T(), mock.OnboardingMerchantMock.City, obj.City)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetMerchant_BillingServiceUnavailable_Error() {

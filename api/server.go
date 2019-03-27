@@ -3,14 +3,15 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/ProtocolONE/authone-jwt-verifier-golang"
 	jwtMiddleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/rabbitmq/pkg"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/micro/go-micro"
 	k8s "github.com/micro/kubernetes/go/micro"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -33,6 +34,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 )
 
@@ -59,18 +61,22 @@ const (
 	requestParameterSort               = "sort[]"
 	requestParameterLimit              = "limit"
 	requestParameterOffset             = "offset"
+	requestAuthorizationTokenRegex     = "Bearer ([A-z0-9_.-]{10,})"
 
-	errorIdIsEmpty                = "identifier can't be empty"
-	errorUnknown                  = "unknown error. try request later"
-	errorQueryParamsIncorrect     = "incorrect query parameters"
-	errorIncorrectMerchantId      = "incorrect merchant identifier"
-	errorIncorrectPaymentMethodId = "incorrect payment method identifier"
-	errorIncorrectNotificationId  = "incorrect notification identifier"
-	errorIncorrectUserId          = "incorrect user identifier"
-	errorIncorrectOrderId         = "incorrect order identifier"
-	errorIncorrectRefundId        = "incorrect refund identifier"
-	errorMessageMask              = "Field validation for '%s' failed on the '%s' tag"
-	errorMessageAccessDenied      = "Access denied"
+	errorIdIsEmpty                          = "identifier can't be empty"
+	errorUnknown                            = "unknown error. try request later"
+	errorQueryParamsIncorrect               = "incorrect query parameters"
+	errorIncorrectMerchantId                = "incorrect merchant identifier"
+	errorIncorrectPaymentMethodId           = "incorrect payment method identifier"
+	errorIncorrectNotificationId            = "incorrect notification identifier"
+	errorIncorrectUserId                    = "incorrect user identifier"
+	errorIncorrectOrderId                   = "incorrect order identifier"
+	errorIncorrectRefundId                  = "incorrect refund identifier"
+	errorMessageMask                        = "Field validation for '%s' failed on the '%s' tag"
+	errorMessageAuthorizationHeaderNotFound = "authorization header not found"
+	errorMessageAuthorizationTokenNotFound  = "authorization token not found"
+	errorMessageAuthorizedUserNotFound      = "information about authorized user not found"
+	errorMessageAccessDenied                = "Access denied"
 
 	HeaderAcceptLanguage = "Accept-Language"
 )
@@ -217,9 +223,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 			api.jwtVerifier,
 			func(ui *jwtverifier.UserInfo) {
 				api.authUser = &AuthUser{
-					Id: ui.UserID,
-					//Email: ui.Email,
-					Email:     ui.UserID + "@paysuper.online",
+					Id:        ui.UserID,
 					Name:      "System User",
 					Merchants: make(map[string]bool),
 					Roles:     make(map[string]bool),
@@ -227,6 +231,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 			},
 		),
 	)
+	api.authUserRouteGroup.Use(api.getUserDetailsMiddleware)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
 	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
@@ -350,6 +355,33 @@ func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.Hand
 		api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
 
 		return next(c)
+	}
+}
+
+func (api *Api) getUserDetailsMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		auth := ctx.Request().Header.Get(echo.HeaderAuthorization)
+
+		if auth == "" {
+			return errors.New(errorMessageAuthorizationHeaderNotFound)
+		}
+
+		r := regexp.MustCompile(requestAuthorizationTokenRegex)
+		match := r.FindStringSubmatch(auth)
+
+		if len(match) < 1 {
+			return errors.New(errorMessageAuthorizationTokenNotFound)
+		}
+
+		u, err := api.jwtVerifier.GetUserInfo(ctx.Request().Context(), match[1])
+
+		if err != nil {
+			return errors.New(errorMessageAuthorizedUserNotFound)
+		}
+
+		api.authUser.Email = u.Email
+
+		return next(ctx)
 	}
 }
 

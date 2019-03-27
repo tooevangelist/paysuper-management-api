@@ -1,7 +1,7 @@
 module github.com/paysuper/paysuper-management-api
 
 require (
-	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326143220-97d89cf3aeeb
+	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681
 	github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742
 	github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c
 	github.com/amalfra/etag v0.0.0-20180217025506-c1ee3b8b3121
@@ -12,6 +12,7 @@ require (
 	github.com/google/uuid v1.1.0
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/labstack/echo v3.3.5+incompatible
+	github.com/labstack/echo/v4 v4.0.0
 	github.com/micro/go-grpc v0.11.0
 	github.com/micro/go-micro v1.0.0
 	github.com/micro/go-plugins v1.0.0

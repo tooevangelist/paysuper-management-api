@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"net/http"

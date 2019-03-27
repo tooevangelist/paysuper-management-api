@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro/client"
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"github.com/stretchr/testify/assert"
@@ -169,8 +169,13 @@ func (suite *TaxesTestSuite) Test_CreateTax() {
 
 	ctx.SetPath("/taxes")
 	if assert.NoError(suite.T(), suite.handler.setTax(ctx)) {
+		obj1 := &tax_service.TaxRate{}
+		err := json.Unmarshal(rec.Body.Bytes(), obj1)
+		assert.NoError(suite.T(), err)
+
 		assert.Equal(suite.T(), http.StatusOK, rec.Code)
-		assert.Equal(suite.T(), b, rec.Body.Bytes())
+		assert.Equal(suite.T(), obj.Zip, obj1.Zip)
+		assert.Equal(suite.T(), obj.City, obj1.City)
 	}
 }
 

@@ -62,6 +62,8 @@ github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326115109-1b41138
 github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326115109-1b41138ef5e1/go.mod h1:XNfuS/K3zPtqxoIJwu/yO6jTII2TleXBysce4/xNEOQ=
 github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326143220-97d89cf3aeeb h1:pHRQGrczhzsfnOCFse99+CgsGhIs0J0JEX5MAikd9/8=
 github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190326143220-97d89cf3aeeb/go.mod h1:XNfuS/K3zPtqxoIJwu/yO6jTII2TleXBysce4/xNEOQ=
+github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681 h1:mZHDYdTUCFvoiOo0qy4Bw6vxW9M7V23Mu1jGju8ENy4=
+github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681/go.mod h1:8hKJwhygAIt08kuhd1yioYH4B8t7HTsMbRHwoe05k3A=
 github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742 h1:CRqv69s+RT+rNdqgozciVwupN5aG0/1XD9n6Jql+E64=
 github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742/go.mod h1:HT0K5P2RhETGsI3b9aW1+a0L1PJPMypkDhMecJu2n68=
 github.com/ProtocolONE/go-micro-plugins v0.3.0 h1:LMPWEsMiuJnBa92b+Bsi0CHOGl1LhNR9PwWxCkyvQkM=
@@ -444,6 +446,8 @@ github.com/kr/pty v1.1.3/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/labstack/echo v3.3.5+incompatible h1:9PfxPUmasKzeJor9uQTaXLT6WUG/r+vSTmvXxvv3JO4=
 github.com/labstack/echo v3.3.5+incompatible/go.mod h1:0INS7j/VjnFxD4E2wkz67b8cVwCLbBmJyDaka6Cmk1s=
+github.com/labstack/echo/v4 v4.0.0 h1:q1GH+caIXPP7H2StPIdzy/ez9CO0EepqYeUg6vi9SWM=
+github.com/labstack/echo/v4 v4.0.0/go.mod h1:tZv7nai5buKSg5h/8E6zz4LsD/Dqh9/91Mvs7Z5Zyno=
 github.com/labstack/gommon v0.2.8 h1:JvRqmeZcfrHC5u6uVleB4NxxNbzx6gpbJiQknDbKQu0=
 github.com/labstack/gommon v0.2.8/go.mod h1:/tj9csK2iPSBvn+3NLM9e52usepMtrd5ilFYA+wQNJ4=
 github.com/leodido/go-urn v1.1.0 h1:Sm1gr51B1kKyfD2BlRcLSiEkffoG96g6TPv6eRoEiB8=
