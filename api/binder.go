@@ -544,7 +544,7 @@ func (b *ProductsCreateProductBinder) Bind(i interface{}, ctx echo.Context) erro
 }
 
 func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) error {
-	id := ctx.Param("id")
+	id := ctx.Param(requestParameterId)
 	if id == "" || bson.IsObjectIdHex(id) == false {
 		return errors.New(errorIncorrectProductId)
 	}
