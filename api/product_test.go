@@ -88,9 +88,9 @@ func (suite *ProductTestSuite) TestProduct_deleteProduct_Ok() {
 }
 
 func (suite *ProductTestSuite) TestProduct_createProduct_Ok() {
-	bodyJson := `{"object": "product", "type": "simple_product", "sku": "ru_0_doom_2", "name": "Doom II", 
+	bodyJson := `{"object": "product", "type": "simple_product", "sku": "ru_0_doom_2", "name": {"en": "Doom II"}, 
         "default_currency": "USD", "enabled": true, "prices": [{"amount": 12.93, "currency": "USD"}], 
-        "description": "Doom II description", "long_description": ""}`
+        "description":  {"en": "Doom II description"}, "long_description": {}}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/product", strings.NewReader(bodyJson))
@@ -107,9 +107,9 @@ func (suite *ProductTestSuite) TestProduct_createProduct_Ok() {
 }
 
 func (suite *ProductTestSuite) TestProduct_updateProduct_Ok() {
-	bodyJson := `{"object": "product", "type": "simple_product", "sku": "ru_0_doom_4", "name": "Doom IV", 
+	bodyJson := `{"object": "product", "type": "simple_product", "sku": "ru_0_doom_4", "name":  {"en": "Doom IV"}, 
         "default_currency": "USD", "enabled": true, "prices": [{"amount": 112.93, "currency": "USD"}], 
-        "description": "Doom IV description", "long_description": ""}`
+        "description":  {"en": "Doom IV description"}, "long_description": {}}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPut, "/product/5c99391568add439ccf0ffaf", strings.NewReader(bodyJson))

@@ -104,9 +104,9 @@ func (r *productRoute) deleteProduct(ctx echo.Context) error {
 // @Description Create new product for authenticated merchant
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{"object": "product", "type": "simple_product", "sku": "ru_0_doom_2", "name": "Doom II",
+//      -d '{"object": "product", "type": "simple_product", "sku": "ru_0_doom_2", "name": {"en": "Doom II"},
 //          "default_currency": "USD", "enabled": true, "prices": [{"amount": 12.93, "currency": "USD"}],
-//          "description": "Doom II description", "long_description": ""}' \
+//          "description": {"en": "Doom II description"}, "long_description": {}}' \
 //      https://api.paysuper.online/api/v1/s/products
 func (r *productRoute) createProduct(ctx echo.Context) error {
 	return r.createOrUpdateProduct(ctx, &ProductsCreateProductBinder{})
@@ -115,9 +115,9 @@ func (r *productRoute) createProduct(ctx echo.Context) error {
 // @Description Update existing product for authenticated merchant
 // @Example curl -X PUT -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{"object": "product", "type": "simple_product", "sku": "ru_0_doom_4", "name": "Doom IV",
+//      -d '{"object": "product", "type": "simple_product", "sku": "ru_0_doom_4", "name": {"en": "Doom IV"},
 //          "default_currency": "USD", "enabled": true, "prices": [{"amount": 146.00, "currency": "USD"}],
-//          "description": "Doom IV description", "long_description": ""}' \
+//          "description": {"en": "Doom IV description"}, "long_description": {}}' \
 //      https://api.paysuper.online/api/v1/s/products/5c99288068add43f74be9c1d
 func (r *productRoute) updateProduct(ctx echo.Context) error {
 	return r.createOrUpdateProduct(ctx, &ProductsUpdateProductBinder{})
