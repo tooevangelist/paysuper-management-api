@@ -94,6 +94,7 @@ var (
 		LongDescription: map[string]string{"en": "Super game steam keys"},
 		Url:             "http://mygame.ru/duoble_yeti",
 		Images:          []string{"/home/image.jpg"},
+		MerchantId:      "5bdc35de5d1e1100019fb7db",
 		Metadata: map[string]string{
 			"SomeKey": "SomeValue",
 		},
@@ -1200,11 +1201,11 @@ func (s *BillingServerOkMock) ListProducts(ctx context.Context, in *grpc.ListPro
 	}, nil
 }
 
-func (s *BillingServerOkMock) GetProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.Product, error) {
+func (s *BillingServerOkMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
 	return Product, nil
 }
 
-func (s *BillingServerOkMock) DeleteProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+func (s *BillingServerOkMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	return &grpc.EmptyResponse{}, nil
 }
 
@@ -1223,11 +1224,11 @@ func (s *BillingServerOkTemporaryMock) ListProducts(ctx context.Context, in *grp
 	}, nil
 }
 
-func (s *BillingServerOkTemporaryMock) GetProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.Product, error) {
+func (s *BillingServerOkTemporaryMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
 	return Product, nil
 }
 
-func (s *BillingServerOkTemporaryMock) DeleteProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+func (s *BillingServerOkTemporaryMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	return &grpc.EmptyResponse{}, nil
 }
 
@@ -1239,11 +1240,11 @@ func (s *BillingServerErrorMock) ListProducts(ctx context.Context, in *grpc.List
 	return nil, errors.New("Some error")
 }
 
-func (s *BillingServerErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.Product, error) {
+func (s *BillingServerErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
 	return nil, errors.New("Some error")
 }
 
-func (s *BillingServerErrorMock) DeleteProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+func (s *BillingServerErrorMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	return nil, errors.New("Some error")
 }
 
@@ -1255,11 +1256,11 @@ func (s *BillingServerSystemErrorMock) ListProducts(ctx context.Context, in *grp
 	return nil, errors.New("Some error")
 }
 
-func (s *BillingServerSystemErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.Product, error) {
+func (s *BillingServerSystemErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
 	return nil, errors.New("Some error")
 }
 
-func (s *BillingServerSystemErrorMock) DeleteProduct(ctx context.Context, in *grpc.RequestProductById, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+func (s *BillingServerSystemErrorMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	return nil, errors.New("Some error")
 }
 
