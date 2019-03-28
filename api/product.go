@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -20,9 +19,9 @@ func (api *Api) InitProductRoutes() *Api {
 
 	api.authUserRouteGroup.GET("/products", productApiV1.getProductsList)
 	api.authUserRouteGroup.POST("/products", productApiV1.createProduct)
-	api.authUserRouteGroup.GET("/products/:"+requestParameterId, productApiV1.getProduct)
-	api.authUserRouteGroup.PUT("/products/:"+requestParameterId, productApiV1.updateProduct)
-	api.authUserRouteGroup.DELETE("/products/:"+requestParameterId, productApiV1.deleteProduct)
+	api.authUserRouteGroup.GET("/products/:id", productApiV1.getProduct)
+	api.authUserRouteGroup.PUT("/products/:id", productApiV1.updateProduct)
+	api.authUserRouteGroup.DELETE("/products/:id", productApiV1.deleteProduct)
 
 	return api
 }
@@ -63,7 +62,7 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 
 	id := ctx.Param(requestParameterId)
 	if id == "" || bson.IsObjectIdHex(id) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New(errorIncorrectProductId).Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectProductId)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -94,7 +93,7 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 func (r *productRoute) deleteProduct(ctx echo.Context) error {
 	id := ctx.Param(requestParameterId)
 	if id == "" || bson.IsObjectIdHex(id) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New(errorIncorrectProductId).Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectProductId)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
