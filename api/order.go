@@ -274,7 +274,7 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
 
 	req := &paylink.PaylinkRequest{
-		Id: ctx.Param("id"),
+		Id: ctx.Param(requestParameterId),
 	}
 
 	err := r.validate.Struct(req)

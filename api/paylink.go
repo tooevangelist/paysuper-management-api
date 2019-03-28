@@ -17,13 +17,13 @@ func (api *Api) InitPaylinkRoutes() *Api {
 		Api: api,
 	}
 
-	api.authUserRouteGroup.GET("/paylinks/project/:"+requestParameterProjectId, paylinkApiV1.getPaylinksList)
-	api.authUserRouteGroup.GET("/paylinks/:"+requestParameterId, paylinkApiV1.getPaylink)
-	api.authUserRouteGroup.GET("/paylinks/:"+requestParameterId+"/stat", paylinkApiV1.getPaylinkStat)
-	api.authUserRouteGroup.GET("/paylinks/:"+requestParameterId+"/url", paylinkApiV1.getPaylinkUrl)
-	api.authUserRouteGroup.DELETE("/paylinks/:"+requestParameterId, paylinkApiV1.deletePaylink)
+	api.authUserRouteGroup.GET("/paylinks/project/:project_id", paylinkApiV1.getPaylinksList)
+	api.authUserRouteGroup.GET("/paylinks/:id", paylinkApiV1.getPaylink)
+	api.authUserRouteGroup.GET("/paylinks/:id/stat", paylinkApiV1.getPaylinkStat)
+	api.authUserRouteGroup.GET("/paylinks/:id/url", paylinkApiV1.getPaylinkUrl)
+	api.authUserRouteGroup.DELETE("/paylinks/:id", paylinkApiV1.deletePaylink)
 	api.authUserRouteGroup.POST("/paylinks", paylinkApiV1.createPaylink)
-	api.authUserRouteGroup.PUT("/paylinks/:"+requestParameterId, paylinkApiV1.updatePaylink)
+	api.authUserRouteGroup.PUT("/paylinks/:id", paylinkApiV1.updatePaylink)
 
 	return api
 }
