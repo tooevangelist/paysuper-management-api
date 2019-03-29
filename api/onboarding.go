@@ -23,6 +23,7 @@ func (api *Api) initOnboardingRoutes() *Api {
 	api.authUserRouteGroup.POST("/merchants", route.changeMerchant)
 	api.authUserRouteGroup.PUT("/merchants", route.changeMerchant)
 	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
+	api.authUserRouteGroup.PATCH("/merchants/:id/agreement", route.changeAgreementType)
 
 	api.authUserRouteGroup.POST("/merchants/:merchant_id/notifications", route.createNotification)
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/notifications/:notification_id", route.getNotification)
@@ -142,6 +143,34 @@ func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, rsp)
+}
+
+func (r *onboardingRoute) changeAgreementType(ctx echo.Context) error {
+	req := &grpc.ChangeMerchantAgreementTypeRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	req.MerchantId = ctx.Param(requestParameterId)
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp, err := r.billingService.ChangeMerchantAgreementType(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
 func (r *onboardingRoute) createNotification(ctx echo.Context) error {

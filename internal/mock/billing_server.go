@@ -406,6 +406,17 @@ func (s *BillingServerOkMock) ProcessBillingAddress(
 	}, nil
 }
 
+func (s *BillingServerOkMock) ChangeMerchantAgreementType(
+	ctx context.Context,
+	in *grpc.ChangeMerchantAgreementTypeRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	return &grpc.ChangeMerchantAgreementTypeResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   OnboardingMerchantMock,
+	}, nil
+}
+
 func (s *BillingServerErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -638,6 +649,17 @@ func (s *BillingServerErrorMock) ProcessBillingAddress(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) ChangeMerchantAgreementType(
+	ctx context.Context,
+	in *grpc.ChangeMerchantAgreementTypeRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	return &grpc.ChangeMerchantAgreementTypeResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
 func (s *BillingServerSystemErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -843,6 +865,14 @@ func (s *BillingServerSystemErrorMock) ProcessBillingAddress(
 	in *grpc.ProcessBillingAddressRequest,
 	opts ...client.CallOption,
 ) (*grpc.ProcessBillingAddressResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) ChangeMerchantAgreementType(
+	ctx context.Context,
+	in *grpc.ChangeMerchantAgreementTypeRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
 	return nil, errors.New(SomeError)
 }
 
@@ -1120,4 +1150,12 @@ func (s *BillingServerOkTemporaryMock) ProcessBillingAddress(
 	opts ...client.CallOption,
 ) (*grpc.ProcessBillingAddressResponse, error) {
 	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkTemporaryMock) ChangeMerchantAgreementType(
+	ctx context.Context,
+	in *grpc.ChangeMerchantAgreementTypeRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	return nil, nil
 }
