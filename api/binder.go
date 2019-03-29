@@ -527,6 +527,12 @@ func (b *ProductsGetProductsListBinder) Bind(i interface{}, ctx echo.Context) er
 		}
 	}
 
+	if v, ok := params[requestParameterProjectId]; ok {
+		if v[0] != "" {
+			structure.ProjectId = v[0]
+		}
+	}
+
 	return nil
 }
 

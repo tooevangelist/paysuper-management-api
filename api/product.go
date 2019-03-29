@@ -27,7 +27,7 @@ func (api *Api) InitProductRoutes() *Api {
 }
 
 // @Description Get list of products for authenticated merchant
-// @Example GET /admin/api/v1/products?name=car&sku=ru_0&offset=0&limit=10
+// @Example GET /admin/api/v1/products?name=car&sku=ru_0&project_id=5bdc39a95d1e1100019fb7df&offset=0&limit=10
 func (r *productRoute) getProductsList(ctx echo.Context) error {
 	req := &grpc.ListProductsRequest{}
 	err := (&ProductsGetProductsListBinder{}).Bind(req, ctx)
@@ -124,7 +124,7 @@ func (r *productRoute) deleteProduct(ctx echo.Context) error {
 //      -H "Authorization: Bearer %access_token_here%" \
 //      -d '{"object": "product", "type": "simple_product", "sku": "ru_0_doom_2", "name": {"en": "Doom II"},
 //          "default_currency": "USD", "enabled": true, "prices": [{"amount": 12.93, "currency": "USD"}],
-//          "description": {"en": "Doom II description"}, "long_description": {}}' \
+//          "description": {"en": "Doom II description"}, "long_description": {}, "project_id": "5bdc39a95d1e1100019fb7df"}' \
 //      https://api.paysuper.online/admin/api/v1/products
 func (r *productRoute) createProduct(ctx echo.Context) error {
 	return r.createOrUpdateProduct(ctx, &ProductsCreateProductBinder{})
@@ -135,7 +135,7 @@ func (r *productRoute) createProduct(ctx echo.Context) error {
 //      -H "Authorization: Bearer %access_token_here%" \
 //      -d '{"object": "product", "type": "simple_product", "sku": "ru_0_doom_4", "name": {"en": "Doom IV"},
 //          "default_currency": "USD", "enabled": true, "prices": [{"amount": 146.00, "currency": "USD"}],
-//          "description": {"en": "Doom IV description"}, "long_description": {}}' \
+//          "description": {"en": "Doom IV description"}, "long_description": {}, "project_id": "5bdc39a95d1e1100019fb7df"}' \
 //      https://api.paysuper.online/admin/api/v1/products/5c99288068add43f74be9c1d
 func (r *productRoute) updateProduct(ctx echo.Context) error {
 	return r.createOrUpdateProduct(ctx, &ProductsUpdateProductBinder{})
