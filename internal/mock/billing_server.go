@@ -417,6 +417,17 @@ func (s *BillingServerOkMock) ChangeMerchantAgreementType(
 	}, nil
 }
 
+func (s *BillingServerOkMock) ProcessMerchantAgreement(
+	ctx context.Context,
+	in *grpc.SignMerchantRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	return &grpc.ChangeMerchantAgreementTypeResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   OnboardingMerchantMock,
+	}, nil
+}
+
 func (s *BillingServerErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -660,6 +671,17 @@ func (s *BillingServerErrorMock) ChangeMerchantAgreementType(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) ProcessMerchantAgreement(
+	ctx context.Context,
+	in *grpc.SignMerchantRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	return &grpc.ChangeMerchantAgreementTypeResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
 func (s *BillingServerSystemErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -871,6 +893,14 @@ func (s *BillingServerSystemErrorMock) ProcessBillingAddress(
 func (s *BillingServerSystemErrorMock) ChangeMerchantAgreementType(
 	ctx context.Context,
 	in *grpc.ChangeMerchantAgreementTypeRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) ProcessMerchantAgreement(
+	ctx context.Context,
+	in *grpc.SignMerchantRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
 	return nil, errors.New(SomeError)
@@ -1158,4 +1188,12 @@ func (s *BillingServerOkTemporaryMock) ChangeMerchantAgreementType(
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
 	return nil, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ProcessMerchantAgreement(
+	ctx context.Context,
+	in *grpc.SignMerchantRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	return &grpc.ChangeMerchantAgreementTypeResponse{}, nil
 }
