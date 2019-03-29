@@ -1135,7 +1135,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_Ok() {
 
 	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
 	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
-	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
+	ctx.SetParamValues(bson.NewObjectId().Hex(), pm.PaymentMethod.Id)
 
 	err = suite.handler.changePaymentMethod(ctx)
 	assert.NoError(suite.T(), err)
@@ -1257,7 +1257,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BillingServ
 
 	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
 	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
-	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
+	ctx.SetParamValues(bson.NewObjectId().Hex(), pm.PaymentMethod.Id)
 
 	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
 	err = suite.handler.changePaymentMethod(ctx)
@@ -1300,7 +1300,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BillingServ
 
 	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
 	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
-	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
+	ctx.SetParamValues(bson.NewObjectId().Hex(), pm.PaymentMethod.Id)
 
 	suite.handler.billingService = mock.NewBillingServerErrorMock()
 	err = suite.handler.changePaymentMethod(ctx)
