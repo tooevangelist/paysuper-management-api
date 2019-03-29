@@ -206,6 +206,10 @@ func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context)
 	structure.Limit = LimitDefault
 	structure.Offset = OffsetDefault
 
+	if v, ok := params[requestParameterQuickSearch]; ok {
+		structure.QuickSearch = v[0]
+	}
+
 	if v, ok := params[requestParameterName]; ok {
 		structure.Name = v[0]
 	}

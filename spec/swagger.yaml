@@ -2609,6 +2609,10 @@ paths:
         - application/json
       description: Get list of merchants
       parameters:
+        - description: string to quick search by merchant name or user owner email
+          in: query
+          name: quick_search
+          type: string
         - description: merchant name
           in: query
           name: name

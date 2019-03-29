@@ -61,6 +61,7 @@ const (
 	requestParameterSort               = "sort[]"
 	requestParameterLimit              = "limit"
 	requestParameterOffset             = "offset"
+	requestParameterQuickSearch        = "quick_search"
 	requestAuthorizationTokenRegex     = "Bearer ([A-z0-9_.-]{10,})"
 
 	errorIdIsEmpty                          = "identifier can't be empty"
