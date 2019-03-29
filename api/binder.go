@@ -340,13 +340,19 @@ func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Cont
 	}
 
 	merchantId := ctx.Param(requestParameterMerchantId)
+	methodId := ctx.Param(requestParameterPaymentMethodId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
 		return errors.New(errorIncorrectMerchantId)
 	}
 
+	if methodId == "" || bson.IsObjectIdHex(methodId) == false {
+		return errors.New(errorIncorrectPaymentMethodId)
+	}
+
 	structure := i.(*grpc.MerchantPaymentMethodRequest)
 	structure.MerchantId = merchantId
+	structure.PaymentMethod.Id = methodId
 
 	return nil
 }

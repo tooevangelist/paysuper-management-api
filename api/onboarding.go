@@ -31,7 +31,7 @@ func (api *Api) initOnboardingRoutes() *Api {
 
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods/:method_id", route.getPaymentMethod)
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods", route.listPaymentMethods)
-	api.authUserRouteGroup.PUT("/merchants/:merchant_id/methods", route.changePaymentMethod)
+	api.authUserRouteGroup.PUT("/merchants/:merchant_id/methods/:method_id", route.changePaymentMethod)
 
 	return api
 }

@@ -3151,27 +3151,27 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
             type: object
-    put:
-      summary: Change parameters of payment method for merchant
+
+  "/admin/api/v1/merchants/{merchant_id}/methods/{method_id}":
+    get:
+      summary: Get parameters of payment method for merchant
       tags:
         - Onboarding
       consumes:
-        - application/json
+        - application/x-www-form-urlencoded
       produces:
         - application/json
-      description: Change parameters of payment method for merchant
+      description: Get parameters of payment method for merchant
       parameters:
         - description: merchant identifier
           in: path
           name: merchant_id
           type: string
           required: true
-        - description: payment method parameters
-          in: body
-          name: data
-          schema:
-            $ref: '#/definitions/onboarding.Merchant.PaymentMethod'
-            type: object
+        - description: payment method identifier
+          in: path
+          name: method_id
+          type: string
           required: true
       responses:
         "200":
@@ -3204,17 +3204,15 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
             type: object
-
-  "/admin/api/v1/merchants/{merchant_id}/methods/{method_id}":
-    get:
-      summary: Get parameters of payment method for merchant
+    put:
+      summary: Change parameters of payment method for merchant
       tags:
         - Onboarding
       consumes:
-        - application/x-www-form-urlencoded
+        - application/json
       produces:
         - application/json
-      description: Get parameters of payment method for merchant
+      description: Change parameters of payment method for merchant
       parameters:
         - description: merchant identifier
           in: path
@@ -3225,6 +3223,13 @@ paths:
           in: path
           name: method_id
           type: string
+          required: true
+        - description: payment method parameters
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Merchant.PaymentMethod'
+            type: object
           required: true
       responses:
         "200":

@@ -30,7 +30,7 @@ var onboardingRoutes = [][]string{
 	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id/mark-as-read", http.MethodPut},
 	{"/admin/api/v1/merchants/:merchant_id/methods/:method_id", http.MethodGet},
 	{"/admin/api/v1/merchants/:merchant_id/methods", http.MethodGet},
-	{"/admin/api/v1/merchants/:merchant_id/methods", http.MethodPut},
+	{"/admin/api/v1/merchants/:merchant_id/methods/:method_id", http.MethodPut},
 }
 
 type OnboardingTestSuite struct {
@@ -1132,9 +1132,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/merchants/:merchant_id/methods")
-	ctx.SetParamNames(requestParameterMerchantId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
+	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
+	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
 
 	err = suite.handler.changePaymentMethod(ctx)
 	assert.NoError(suite.T(), err)
@@ -1172,7 +1172,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BindingErro
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/merchants/:merchant_id/methods")
+	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
 
 	err = suite.handler.changePaymentMethod(ctx)
 	assert.Error(suite.T(), err)
@@ -1186,10 +1186,11 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BindingErro
 func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_ValidationError() {
 	pm := &grpc.MerchantPaymentMethodRequest{
 		PaymentMethod: &billing.MerchantPaymentMethodIdentification{
+			Id:   bson.NewObjectId().Hex(),
 			Name: "Unit test",
 		},
 		Commission: &billing.MerchantPaymentMethodCommissions{
-			Fee: 3,
+			Fee: -1,
 			PerTransaction: &billing.MerchantPaymentMethodPerTransactionCommission{
 				Fee:      4,
 				Currency: "USD",
@@ -1211,9 +1212,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_ValidationE
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/merchants/:merchant_id/methods")
-	ctx.SetParamNames(requestParameterMerchantId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
+	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
+	ctx.SetParamValues(bson.NewObjectId().Hex(), pm.PaymentMethod.Id)
 
 	err = suite.handler.changePaymentMethod(ctx)
 	assert.Error(suite.T(), err)
@@ -1221,7 +1222,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_ValidationE
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Id", httpErr.Message)
+	assert.Regexp(suite.T(), "Fee", httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BillingServer_Error() {
@@ -1253,9 +1254,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BillingServ
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/merchants/:merchant_id/methods")
-	ctx.SetParamNames(requestParameterMerchantId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
+	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
+	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
 
 	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
 	err = suite.handler.changePaymentMethod(ctx)
@@ -1296,9 +1297,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BillingServ
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/merchants/:merchant_id/methods")
-	ctx.SetParamNames(requestParameterMerchantId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
+	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
+	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
 
 	suite.handler.billingService = mock.NewBillingServerErrorMock()
 	err = suite.handler.changePaymentMethod(ctx)
