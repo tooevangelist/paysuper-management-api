@@ -186,11 +186,11 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_Ok() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 
-	var m []*billing.Merchant
+	var m *grpc.MerchantListingResponse
 	err = json.Unmarshal(rsp.Body.Bytes(), &m)
 	assert.NoError(suite.T(), err)
-	assert.Len(suite.T(), m, 3)
-	assert.Equal(suite.T(), mock.OnboardingMerchantMock.Id, m[0].Id)
+	assert.Equal(suite.T(), int32(3), m.Count)
+	assert.Equal(suite.T(), mock.OnboardingMerchantMock.Id, m.Items[0].Id)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_BindingError() {

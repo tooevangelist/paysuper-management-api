@@ -92,7 +92,7 @@ func (r *onboardingRoute) listMerchants(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
-	return ctx.JSON(http.StatusOK, rsp.Merchants)
+	return ctx.JSON(http.StatusOK, rsp)
 }
 
 func (r *onboardingRoute) changeMerchant(ctx echo.Context) error {

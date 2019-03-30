@@ -181,9 +181,10 @@ func (s *BillingServerOkMock) ListMerchants(
 	ctx context.Context,
 	in *grpc.MerchantListingRequest,
 	opts ...client.CallOption,
-) (*grpc.Merchants, error) {
-	return &grpc.Merchants{
-		Merchants: []*billing.Merchant{OnboardingMerchantMock, OnboardingMerchantMock, OnboardingMerchantMock},
+) (*grpc.MerchantListingResponse, error) {
+	return &grpc.MerchantListingResponse{
+		Count: 3,
+		Items: []*billing.Merchant{OnboardingMerchantMock, OnboardingMerchantMock, OnboardingMerchantMock},
 	}, nil
 }
 
@@ -507,8 +508,8 @@ func (s *BillingServerErrorMock) ListMerchants(
 	ctx context.Context,
 	in *grpc.MerchantListingRequest,
 	opts ...client.CallOption,
-) (*grpc.Merchants, error) {
-	return &grpc.Merchants{}, nil
+) (*grpc.MerchantListingResponse, error) {
+	return &grpc.MerchantListingResponse{}, nil
 }
 
 func (s *BillingServerErrorMock) ChangeMerchant(
@@ -758,7 +759,7 @@ func (s *BillingServerSystemErrorMock) ListMerchants(
 	ctx context.Context,
 	in *grpc.MerchantListingRequest,
 	opts ...client.CallOption,
-) (*grpc.Merchants, error) {
+) (*grpc.MerchantListingResponse, error) {
 	return nil, errors.New(SomeError)
 }
 
@@ -988,9 +989,10 @@ func (s *BillingServerOkTemporaryMock) ListMerchants(
 	ctx context.Context,
 	in *grpc.MerchantListingRequest,
 	opts ...client.CallOption,
-) (*grpc.Merchants, error) {
-	return &grpc.Merchants{
-		Merchants: []*billing.Merchant{OnboardingMerchantMock, OnboardingMerchantMock, OnboardingMerchantMock},
+) (*grpc.MerchantListingResponse, error) {
+	return &grpc.MerchantListingResponse{
+		Count: 3,
+		Items: []*billing.Merchant{OnboardingMerchantMock, OnboardingMerchantMock, OnboardingMerchantMock},
 	}, nil
 }
 
