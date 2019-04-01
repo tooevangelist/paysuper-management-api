@@ -47,6 +47,7 @@ const (
 
 	requestParameterId                 = "id"
 	requestParameterName               = "name"
+	requestParameterSku                = "sku"
 	requestParameterIsSigned           = "is_signed"
 	requestParameterLastPayoutDateFrom = "last_payout_date_from"
 	requestParameterLastPayoutDateTo   = "last_payout_date_to"
@@ -69,20 +70,21 @@ const (
 	requestAuthorizationTokenRegex     = "Bearer ([A-z0-9_.-]{10,})"
 
 	errorIdIsEmpty                          = "identifier can't be empty"
-	errorUnknown                            = "unknown error. try request later"
-	errorQueryParamsIncorrect               = "incorrect query parameters"
 	errorIncorrectMerchantId                = "incorrect merchant identifier"
-	errorIncorrectPaymentMethodId           = "incorrect payment method identifier"
 	errorIncorrectNotificationId            = "incorrect notification identifier"
-	errorIncorrectUserId                    = "incorrect user identifier"
 	errorIncorrectOrderId                   = "incorrect order identifier"
+	errorIncorrectPaymentMethodId           = "incorrect payment method identifier"
+	errorIncorrectProductId                 = "incorrect product identifier"
 	errorIncorrectRefundId                  = "incorrect refund identifier"
 	errorIncorrectPaylinkId                 = "incorrect paylink identifier"
-	errorMessageMask                        = "Field validation for '%s' failed on the '%s' tag"
+	errorIncorrectUserId                    = "incorrect user identifier"
+	errorMessageAccessDenied                = "access denied"
 	errorMessageAuthorizationHeaderNotFound = "authorization header not found"
 	errorMessageAuthorizationTokenNotFound  = "authorization token not found"
 	errorMessageAuthorizedUserNotFound      = "information about authorized user not found"
-	errorMessageAccessDenied                = "Access denied"
+	errorMessageMask                        = "field validation for '%s' failed on the '%s' tag"
+	errorQueryParamsIncorrect               = "incorrect query parameters"
+	errorUnknown                            = "unknown error. try request later"
 
 	HeaderAcceptLanguage = "Accept-Language"
 )
@@ -263,6 +265,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitCurrencyRoutes().
 		InitCountryRoutes().
 		InitMerchantRoutes().
+		InitProductRoutes().
 		InitProjectRoutes().
 		InitOrderV1Routes().
 		InitPaylinkRoutes().

@@ -39,6 +39,9 @@ type PaylinksListBinder struct{}
 type PaylinksUrlBinder struct{}
 type PaylinksCreateBinder struct{}
 type PaylinksUpdateBinder struct{}
+type ProductsGetProductsListBinder struct{}
+type ProductsCreateProductBinder struct{}
+type ProductsUpdateProductBinder struct{}
 
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	db := new(echo.DefaultBinder)
@@ -480,6 +483,83 @@ func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
 	}
 
 	structure := i.(*paylink.CreatePaylinkRequest)
+	structure.Id = id
+
+	return nil
+}
+
+func (b *ProductsGetProductsListBinder) Bind(i interface{}, ctx echo.Context) error {
+	limit := int32(LimitDefault)
+	offset := int32(OffsetDefault)
+
+	params := ctx.QueryParams()
+
+	if v, ok := params[requestParameterLimit]; ok {
+		i, err := strconv.ParseInt(v[0], 10, 32)
+		if err != nil {
+			return err
+		}
+		limit = int32(i)
+	}
+
+	if v, ok := params[requestParameterOffset]; ok {
+		i, err := strconv.ParseInt(v[0], 10, 32)
+		if err != nil {
+			return err
+		}
+		offset = int32(i)
+	}
+
+	structure := i.(*grpc.ListProductsRequest)
+	structure.Limit = limit
+	structure.Offset = offset
+
+	if v, ok := params[requestParameterName]; ok {
+		if v[0] != "" {
+			structure.Name = v[0]
+		}
+	}
+
+	if v, ok := params[requestParameterSku]; ok {
+		if v[0] != "" {
+			structure.Sku = v[0]
+		}
+	}
+
+	if v, ok := params[requestParameterProjectId]; ok {
+		if v[0] != "" {
+			structure.ProjectId = v[0]
+		}
+	}
+
+	return nil
+}
+
+func (b *ProductsCreateProductBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+	if err != nil {
+		return err
+	}
+
+	structure := i.(*grpc.Product)
+	structure.Id = ""
+
+	return nil
+}
+
+func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) error {
+	id := ctx.Param(requestParameterId)
+	if id == "" || bson.IsObjectIdHex(id) == false {
+		return errors.New(errorIncorrectProductId)
+	}
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+	if err != nil {
+		return err
+	}
+
+	structure := i.(*grpc.Product)
 	structure.Id = id
 
 	return nil

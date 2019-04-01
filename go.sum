@@ -628,6 +628,8 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20190329175943-41301c21d35d h
 github.com/paysuper/paysuper-billing-server v0.0.0-20190329175943-41301c21d35d/go.mod h1:rud83v55dXP9KhdNtdENK6qsgOkbHvn45bRuLIyC+lk=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190330063148-f8b43285bbd8 h1:+hPUcwJa/FAiYLUH/bOIqvq7UCWJSPeVbg/gLYIGH08=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190330063148-f8b43285bbd8/go.mod h1:rud83v55dXP9KhdNtdENK6qsgOkbHvn45bRuLIyC+lk=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190401084719-62a861f67743 h1:qmF1CR/Cfwdlk5UcfrVsUIxoUfS49J9jrrb3piB7vKg=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190401084719-62a861f67743/go.mod h1:b7etd8V5EuWd6JImmt8yMGX41C82IAUb+Fq2kw71ZdE=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190321154823-00d00bb19c43 h1:CL8XF6BqN9JRFZFC8q89rhviC315LcrsyYcNkLNtj+s=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190321154823-00d00bb19c43/go.mod h1:Vhc5UF0VIHmsCsRt7Aesk/EZ/Ce/BAVNvpSXAU+tP7c=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190325153647-f6af42aadb48 h1:gr0aZLv9GPWtbTYmPlQdAvI5Hs188NlZjpSzsxN2k88=
@@ -766,6 +768,7 @@ github.com/spf13/viper v1.2.1/go.mod h1:P4AexN0a+C9tGAnUFNwDMYYZv3pjFuvmeiMyKRaN
 github.com/spf13/viper v1.3.1/go.mod h1:ZiWeW+zYFKm7srdB9IoDzzZXaJaI5eL9QjNiN/DMA2s=
 github.com/src-d/gcfg v1.4.0/go.mod h1:p/UMsR43ujA89BJY9duynAwIpvqEujIH/jFlfL7jWoI=
 github.com/stevvooe/resumable v0.0.0-20180830230917-22b14a53ba50/go.mod h1:1pdIZTAHUz+HDKDVZ++5xg/duPlhKAIzw9qy42CWYp4=
+github.com/stoewer/go-strcase v1.0.2/go.mod h1:eLfe5bL3qbL7ep/KafHzthxejrOF5J3xmt03uL5tzek=
 github.com/streadway/amqp v0.0.0-20181107104731-27835f1a64e9/go.mod h1:1WNBiOZtZQLpVAyu0iTduoJL9hEsMloAK5XWrtW0xdY=
 github.com/streadway/amqp v0.0.0-20181205114330-a314942b2fd9 h1:37QTz/gdHBLQcsmgMTnQDSWCtKzJ7YnfI2M2yTdr4BQ=
 github.com/streadway/amqp v0.0.0-20181205114330-a314942b2fd9/go.mod h1:1WNBiOZtZQLpVAyu0iTduoJL9hEsMloAK5XWrtW0xdY=
