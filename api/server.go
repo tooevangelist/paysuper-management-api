@@ -52,6 +52,7 @@ const (
 	requestParameterLastPayoutDateTo   = "last_payout_date_to"
 	requestParameterLastPayoutAmount   = "last_payout_amount"
 	requestParameterMerchantId         = "merchant_id"
+	requestParameterProjectId          = "project_id"
 	requestParameterPaymentMethodId    = "method_id"
 	requestParameterOrderId            = "order_id"
 	requestParameterRefundId           = "refund_id"
@@ -62,6 +63,9 @@ const (
 	requestParameterLimit              = "limit"
 	requestParameterOffset             = "offset"
 	requestParameterQuickSearch        = "quick_search"
+	requestParameterUtmSource          = "utm_source"
+	requestParameterUtmMedium          = "utm_medium"
+	requestParameterUtmCampagin        = "utm_campagin"
 	requestAuthorizationTokenRegex     = "Bearer ([A-z0-9_.-]{10,})"
 
 	errorIdIsEmpty                          = "identifier can't be empty"
@@ -73,6 +77,7 @@ const (
 	errorIncorrectUserId                    = "incorrect user identifier"
 	errorIncorrectOrderId                   = "incorrect order identifier"
 	errorIncorrectRefundId                  = "incorrect refund identifier"
+	errorIncorrectPaylinkId                 = "incorrect paylink identifier"
 	errorMessageMask                        = "Field validation for '%s' failed on the '%s' tag"
 	errorMessageAuthorizationHeaderNotFound = "authorization header not found"
 	errorMessageAuthorizationTokenNotFound  = "authorization token not found"
@@ -260,6 +265,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitMerchantRoutes().
 		InitProjectRoutes().
 		InitOrderV1Routes().
+		InitPaylinkRoutes().
 		InitPaymentMethodRoutes().
 		InitCardPayWebHookRoutes().
 		initOnboardingRoutes().

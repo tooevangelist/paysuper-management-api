@@ -128,7 +128,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	}
 
 	api.Http.GET("/order/:id", route.getOrderForm)
-	api.Http.GET("/paylink/:merchant_id/:id", route.getPaylinkForm)
+	api.Http.GET("/paylink/:id", route.getPaylinkForm)
 	api.Http.GET("/order/create", route.createFromFormData)
 	api.Http.POST("/order/create", route.createFromFormData)
 	api.Http.POST("/api/v1/order", route.createJson)
@@ -272,16 +272,14 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 }
 
 func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
-	id := ctx.Param("id")
-	merchant := ctx.Param("merchant_id")
-
-	if id == "" || merchant == "" {
-		return ctx.Render(http.StatusNotFound, paylinkFormTemplateName, map[string]interface{}{})
-	}
 
 	req := &paylink.PaylinkRequest{
-		Id:         id,
-		MerchantId: merchant,
+		Id: ctx.Param(requestParameterId),
+	}
+
+	err := r.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	pl, err := r.paylinkService.GetPaylink(context.Background(), req)
