@@ -9,6 +9,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
+	"github.com/paysuper/paysuper-payment-link/proto"
 	"io/ioutil"
 	"strconv"
 	"time"
@@ -34,6 +35,13 @@ type OnboardingGetPaymentMethodBinder struct{}
 type OnboardingListPaymentMethodsBinder struct{}
 type OnboardingChangePaymentMethodBinder struct{}
 type OnboardingCreateNotificationBinder struct{}
+type PaylinksListBinder struct{}
+type PaylinksUrlBinder struct{}
+type PaylinksCreateBinder struct{}
+type PaylinksUpdateBinder struct{}
+type ProductsGetProductsListBinder struct{}
+type ProductsCreateProductBinder struct{}
+type ProductsUpdateProductBinder struct{}
 
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	db := new(echo.DefaultBinder)
@@ -397,6 +405,162 @@ func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Contex
 
 	structure := i.(*grpc.NotificationRequest)
 	structure.MerchantId = merchantId
+
+	return nil
+}
+
+func (b *PaylinksListBinder) Bind(i interface{}, ctx echo.Context) error {
+	params := ctx.QueryParams()
+	structure := i.(*paylink.GetPaylinksRequest)
+
+	structure.Limit = LimitDefault
+	structure.Offset = OffsetDefault
+
+	if v, ok := params[requestParameterLimit]; ok {
+		i, err := strconv.ParseInt(v[0], 10, 32)
+		if err != nil {
+			return err
+		}
+		structure.Limit = uint32(i)
+	}
+
+	if v, ok := params[requestParameterOffset]; ok {
+		i, err := strconv.ParseInt(v[0], 10, 32)
+		if err != nil {
+			return err
+		}
+		structure.Offset = uint32(i)
+	}
+
+	structure.ProjectId = ctx.Param(requestParameterProjectId)
+
+	return nil
+}
+
+func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
+	params := ctx.QueryParams()
+	structure := i.(*paylink.GetPaylinkURLRequest)
+
+	structure.Id = ctx.Param(requestParameterId)
+
+	if v, ok := params[requestParameterUtmSource]; ok {
+		structure.UtmSource = v[0]
+	}
+
+	if v, ok := params[requestParameterUtmMedium]; ok {
+		structure.UtmMedium = v[0]
+	}
+
+	if v, ok := params[requestParameterUtmCampagin]; ok {
+		structure.UtmCampagin = v[0]
+	}
+
+	return nil
+}
+
+func (b *PaylinksCreateBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+	if err != nil {
+		return err
+	}
+
+	structure := i.(*paylink.CreatePaylinkRequest)
+	structure.Id = ""
+
+	return nil
+}
+
+func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
+	id := ctx.Param(requestParameterId)
+	if id == "" {
+		return errors.New(errorIncorrectPaylinkId)
+	}
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+	if err != nil {
+		return err
+	}
+
+	structure := i.(*paylink.CreatePaylinkRequest)
+	structure.Id = id
+
+	return nil
+}
+
+func (b *ProductsGetProductsListBinder) Bind(i interface{}, ctx echo.Context) error {
+	limit := int32(LimitDefault)
+	offset := int32(OffsetDefault)
+
+	params := ctx.QueryParams()
+
+	if v, ok := params[requestParameterLimit]; ok {
+		i, err := strconv.ParseInt(v[0], 10, 32)
+		if err != nil {
+			return err
+		}
+		limit = int32(i)
+	}
+
+	if v, ok := params[requestParameterOffset]; ok {
+		i, err := strconv.ParseInt(v[0], 10, 32)
+		if err != nil {
+			return err
+		}
+		offset = int32(i)
+	}
+
+	structure := i.(*grpc.ListProductsRequest)
+	structure.Limit = limit
+	structure.Offset = offset
+
+	if v, ok := params[requestParameterName]; ok {
+		if v[0] != "" {
+			structure.Name = v[0]
+		}
+	}
+
+	if v, ok := params[requestParameterSku]; ok {
+		if v[0] != "" {
+			structure.Sku = v[0]
+		}
+	}
+
+	if v, ok := params[requestParameterProjectId]; ok {
+		if v[0] != "" {
+			structure.ProjectId = v[0]
+		}
+	}
+
+	return nil
+}
+
+func (b *ProductsCreateProductBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+	if err != nil {
+		return err
+	}
+
+	structure := i.(*grpc.Product)
+	structure.Id = ""
+
+	return nil
+}
+
+func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) error {
+	id := ctx.Param(requestParameterId)
+	if id == "" || bson.IsObjectIdHex(id) == false {
+		return errors.New(errorIncorrectProductId)
+	}
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+	if err != nil {
+		return err
+	}
+
+	structure := i.(*grpc.Product)
+	structure.Id = id
 
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -53,6 +54,16 @@ func (suite *OnboardingTestSuite) SetupTest() {
 			Id:    "ffffffffffffffffffffffff",
 			Email: "test@unit.test",
 		},
+		config: &config.Config{
+			S3: config.S3{
+				AccessKeyId: "paysuperagreements",
+				SecretKey:   "Gp2gi2tcm243tmc",
+				Endpoint:    "psstatic.protocol.one",
+				BucketName:  "paysuperagreements",
+				Region:      "us-west-2",
+				Secure:      false,
+			},
+		},
 	}
 
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
@@ -65,7 +76,8 @@ func (suite *OnboardingTestSuite) SetupTest() {
 func (suite *OnboardingTestSuite) TearDownTest() {}
 
 func (suite *OnboardingTestSuite) TestOnboarding_InitRoutes_Ok() {
-	api := suite.api.initOnboardingRoutes()
+	api, err := suite.api.initOnboardingRoutes()
+	assert.NoError(suite.T(), err)
 	assert.NotNil(suite.T(), api)
 
 	routes := api.Http.Routes()
@@ -1511,7 +1523,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreementType_BillingServ
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_Ok() {
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_Ok() {
 	body := `{"has_merchant_signature": true, "agreement_sent_via_mail": true}`
 
 	e := echo.New()
@@ -1524,13 +1536,13 @@ func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_Ok() {
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	err := suite.handler.singAgreement(ctx)
+	err := suite.handler.changeAgreement(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_BindError() {
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BindError() {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPatch, "/", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -1541,7 +1553,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_BindError() {
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	err := suite.handler.singAgreement(ctx)
+	err := suite.handler.changeAgreement(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -1550,7 +1562,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_BindError() {
 	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_ValidationError() {
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_ValidationError() {
 	body := `{"has_merchant_signature": true, "agreement_sent_via_mail": true}`
 
 	e := echo.New()
@@ -1561,7 +1573,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_ValidationError()
 
 	ctx.SetPath("/admin/api/v1/merchants/:id/agreement-sign")
 
-	err := suite.handler.singAgreement(ctx)
+	err := suite.handler.changeAgreement(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -1570,7 +1582,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_ValidationError()
 	assert.Regexp(suite.T(), "MerchantId", httpErr.Message)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_BillingServerSystemError() {
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerSystemError() {
 	body := `{"has_merchant_signature": true, "agreement_sent_via_mail": true}`
 
 	e := echo.New()
@@ -1584,7 +1596,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_BillingServerSyst
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
-	err := suite.handler.singAgreement(ctx)
+	err := suite.handler.changeAgreement(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -1593,7 +1605,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_BillingServerSyst
 	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_BillingServerReturnError() {
+func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerReturnError() {
 	body := `{"has_merchant_signature": true, "agreement_sent_via_mail": true}`
 
 	e := echo.New()
@@ -1607,7 +1619,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SingAgreement_BillingServerRetu
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	suite.handler.billingService = mock.NewBillingServerErrorMock()
-	err := suite.handler.singAgreement(ctx)
+	err := suite.handler.changeAgreement(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)

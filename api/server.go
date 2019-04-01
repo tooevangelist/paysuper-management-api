@@ -47,11 +47,13 @@ const (
 
 	requestParameterId                 = "id"
 	requestParameterName               = "name"
+	requestParameterSku                = "sku"
 	requestParameterIsSigned           = "is_signed"
 	requestParameterLastPayoutDateFrom = "last_payout_date_from"
 	requestParameterLastPayoutDateTo   = "last_payout_date_to"
 	requestParameterLastPayoutAmount   = "last_payout_amount"
 	requestParameterMerchantId         = "merchant_id"
+	requestParameterProjectId          = "project_id"
 	requestParameterPaymentMethodId    = "method_id"
 	requestParameterOrderId            = "order_id"
 	requestParameterRefundId           = "refund_id"
@@ -63,26 +65,31 @@ const (
 	requestParameterOffset             = "offset"
 	requestParameterQuickSearch        = "quick_search"
 	requestParameterFile               = "file"
+	requestParameterUtmSource          = "utm_source"
+	requestParameterUtmMedium          = "utm_medium"
+	requestParameterUtmCampagin        = "utm_campagin"
 	requestAuthorizationTokenRegex     = "Bearer ([A-z0-9_.-]{10,})"
 
 	errorIdIsEmpty                          = "identifier can't be empty"
-	errorUnknown                            = "unknown error. try request later"
-	errorQueryParamsIncorrect               = "incorrect query parameters"
 	errorIncorrectMerchantId                = "incorrect merchant identifier"
-	errorIncorrectPaymentMethodId           = "incorrect payment method identifier"
 	errorIncorrectNotificationId            = "incorrect notification identifier"
-	errorIncorrectUserId                    = "incorrect user identifier"
 	errorIncorrectOrderId                   = "incorrect order identifier"
+	errorIncorrectPaymentMethodId           = "incorrect payment method identifier"
+	errorIncorrectProductId                 = "incorrect product identifier"
 	errorIncorrectRefundId                  = "incorrect refund identifier"
-	errorMessageMask                        = "Field validation for '%s' failed on the '%s' tag"
+	errorIncorrectPaylinkId                 = "incorrect paylink identifier"
+	errorIncorrectUserId                    = "incorrect user identifier"
+	errorMessageAccessDenied                = "access denied"
 	errorMessageAuthorizationHeaderNotFound = "authorization header not found"
 	errorMessageAuthorizationTokenNotFound  = "authorization token not found"
 	errorMessageAuthorizedUserNotFound      = "information about authorized user not found"
+	errorMessageMask                        = "field validation for '%s' failed on the '%s' tag"
+	errorQueryParamsIncorrect               = "incorrect query parameters"
+	errorUnknown                            = "unknown error. try request later"
 	errorMessageAgreementNotGenerated       = "agreement for merchant not generated early"
 	errorMessageAgreementNotFound           = "agreement for merchant not found"
 	errorMessageAgreementUploadMaxSize      = "agreement document max upload size can't be greater than %d"
 	errorMessageAgreementContentType        = "agreement document type must be a pdf "
-	errorMessageAccessDenied                = "Access denied"
 
 	HeaderAcceptLanguage = "Accept-Language"
 
@@ -266,8 +273,10 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitCurrencyRoutes().
 		InitCountryRoutes().
 		InitMerchantRoutes().
+		InitProductRoutes().
 		InitProjectRoutes().
 		InitOrderV1Routes().
+		InitPaylinkRoutes().
 		InitPaymentMethodRoutes().
 		InitCardPayWebHookRoutes().
 		initTaxesRoutes()

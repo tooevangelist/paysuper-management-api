@@ -65,8 +65,8 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.PATCH("/merchants/:id/agreement/change", route.changeAgreement)
 	api.authUserRouteGroup.PATCH("/merchants/:id/agreement/merchant-sign", route.agreementSignByMerchant)
 	api.authUserRouteGroup.GET("/merchants/:id/agreement", route.getAgreement)
-	api.Http.GET("/merchants/:id/agreement/document", route.getAgreementDocument)
-	api.Http.POST("/merchants/:id/agreement/document", route.uploadAgreementDocument)
+	api.authUserRouteGroup.GET("/merchants/:id/agreement/document", route.getAgreementDocument)
+	api.authUserRouteGroup.POST("/merchants/:id/agreement/document", route.uploadAgreementDocument)
 
 	api.authUserRouteGroup.POST("/merchants/:merchant_id/notifications", route.createNotification)
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/notifications/:notification_id", route.getNotification)
