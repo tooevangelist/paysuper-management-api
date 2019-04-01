@@ -1303,3 +1303,21 @@ func (s *BillingServerOkTemporaryMock) ProcessMerchantAgreement(
 ) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
 	return &grpc.ChangeMerchantAgreementTypeResponse{}, nil
 }
+
+// temporary stubs to prevent tests failure
+
+func (s *BillingServerOkMock) SetMerchantS3Agreement(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) SetMerchantS3Agreement(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) SetMerchantS3Agreement(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) SetMerchantS3Agreement(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	panic("implement me")
+}

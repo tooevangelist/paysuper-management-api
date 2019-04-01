@@ -9,7 +9,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
-	"gopkg.in/go-playground/validator.v9"
 	"github.com/paysuper/paysuper-payment-link/proto"
 	"io/ioutil"
 	"strconv"
