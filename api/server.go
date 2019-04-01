@@ -62,6 +62,7 @@ const (
 	requestParameterLimit              = "limit"
 	requestParameterOffset             = "offset"
 	requestParameterQuickSearch        = "quick_search"
+	requestParameterFile               = "file"
 	requestAuthorizationTokenRegex     = "Bearer ([A-z0-9_.-]{10,})"
 
 	errorIdIsEmpty                          = "identifier can't be empty"
@@ -77,9 +78,15 @@ const (
 	errorMessageAuthorizationHeaderNotFound = "authorization header not found"
 	errorMessageAuthorizationTokenNotFound  = "authorization token not found"
 	errorMessageAuthorizedUserNotFound      = "information about authorized user not found"
+	errorMessageAgreementNotGenerated       = "agreement for merchant not generated early"
+	errorMessageAgreementNotFound           = "agreement for merchant not found"
+	errorMessageAgreementUploadMaxSize      = "agreement document max upload size can't be greater than %d"
+	errorMessageAgreementContentType        = "agreement document type must be a pdf "
 	errorMessageAccessDenied                = "Access denied"
 
 	HeaderAcceptLanguage = "Accept-Language"
+
+	agreementPageTemplateName = "agreement.html"
 )
 
 var funcMap = template.FuncMap{
@@ -94,7 +101,7 @@ type Template struct {
 }
 
 type ServerInitParams struct {
-	Config      *config.Jwt
+	Config      *config.Config
 	Database    dao.Database
 	Logger      *zap.SugaredLogger
 	HttpScheme  string
@@ -171,6 +178,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		httpScheme:  p.HttpScheme,
 		k8sHost:     p.K8sHost,
 		AmqpAddress: p.AmqpAddress,
+		config:      p.Config,
 	}
 	api.InitService()
 
@@ -262,8 +270,13 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitOrderV1Routes().
 		InitPaymentMethodRoutes().
 		InitCardPayWebHookRoutes().
-		initOnboardingRoutes().
 		initTaxesRoutes()
+
+	_, err = api.initOnboardingRoutes()
+
+	if err != nil {
+		return nil, err
+	}
 
 	api.Http.GET("/docs", func(ctx echo.Context) error {
 		return ctx.Render(http.StatusOK, "docs.html", map[string]interface{}{})

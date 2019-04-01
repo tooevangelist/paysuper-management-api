@@ -76,7 +76,7 @@ func main() {
 	}()
 
 	sInit := &api.ServerInitParams{
-		Config:      &conf.Jwt,
+		Config:      conf,
 		Database:    db,
 		Logger:      sugar,
 		HttpScheme:  conf.HttpScheme,

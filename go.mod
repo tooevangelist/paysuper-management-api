@@ -4,12 +4,16 @@ require (
 	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681
 	github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742
 	github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c
+	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.4.1
 	github.com/amalfra/etag v0.0.0-20180217025506-c1ee3b8b3121
+	github.com/aws/aws-sdk-go v1.19.6
 	github.com/centrifugal/gocent v2.0.2+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
+	github.com/go-ini/ini v1.42.0 // indirect
 	github.com/golang/protobuf v1.3.1 // indirects
 	github.com/google/uuid v1.1.0
+	github.com/jung-kurt/gofpdf v1.0.2
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/labstack/echo v3.3.5+incompatible
 	github.com/labstack/echo/v4 v4.0.0
@@ -17,8 +21,9 @@ require (
 	github.com/micro/go-micro v1.0.0
 	github.com/micro/go-plugins v1.0.0
 	github.com/micro/kubernetes v0.7.0
+	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190330063148-f8b43285bbd8
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190401082201-55491128478b
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190325153647-f6af42aadb48
 	github.com/paysuper/paysuper-recurring-repository v1.0.99
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190308105725-016a09c27fbd

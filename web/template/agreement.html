@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Agreement No. {{.AgreementNumber}}</title>
+</head>
+<body>
+    <h1 style="text-align: center;">Agreement No. ______________</h1>
+
+    <table border="0" width="100%">
+        <tr style="padding-bottom: 20px;">
+            <td style="text-align: center; font-weight: bold;">Company</td>
+            <td style="text-align: center; font-weight: bold;">Contractor</td>
+        </tr>
+        <tr>
+            <td style="text-align: left; vertical-align: top;">
+                PaySuper company requisites
+            </td>
+            <td style="text-align: left; vertical-align: top;">
+                Name: {{ .Merchant.Name }}<br/>
+                Address: {{ .Merchant.Zip }}, {{ .Merchant.Country.Name.En }}
+                    {{ if .Merchant.State }},{{ .Merchant.State }}{{ end }},{{ .Merchant.City }},{{ .Merchant.Address}}<br/>
+                Registration Number: {{ .Merchant.RegistrationNumber }}
+                Tax Id: {{ .Merchant.TaxId }}<br/><br/>
+                Bank:<br />
+                Name: {{ .Merchant.Banking.Name }}<br/>
+                Address: {{ .Merchant.Banking.Address }}<br/>
+                Account Number: {{ .Merchant.Banking.AccountNumber }}<br/>
+                Account Currency: {{ .Merchant.Banking.Currency.Name.En }}<br/>
+                Swift: {{ .Merchant.Banking.Swift }}<br/><br/>
+                Person:<br/>
+                Name: {{ .Merchant.Contacts.Authorized.Name }}<br/>
+                Position: {{ .Merchant.Contacts.Authorized.Position }}<br/>
+                Email: {{ .Merchant.Contacts.Authorized.Email }}<br/>
+                Phone: {{ .Merchant.Contacts.Authorized.Phone }}
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
