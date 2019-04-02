@@ -1177,7 +1177,7 @@ definitions:
         description: any details abount merchant accounting bank
         type: string
 
-  onboarding.Merchan.LastPayout:
+  onboarding.Merchant.LastPayout:
     properties:
       date:
         description: date in unix timestamp when was last payout to merchant
@@ -1244,13 +1244,22 @@ definitions:
         type: integer
       last_payout:
         description: contain information about last payout to merchant
-        $ref: "#/definitions/onboarding.Merchan.LastPayout"
+        $ref: "#/definitions/onboarding.Merchant.LastPayout"
       is_signed:
         description: agreement between merchant and system fully signed
         type: boolean
       payment_methods:
         description: list of payment methods activated to merchant
         type: object
+      agreement_type:
+        description: "type of agreement which merchant selected. possible values: 0 - type not select; 1 - paper agreement; 1 - e-sign agreement;"
+        type: integer
+      agreement_sent_via_mail:
+        description: "mark agreement as sent via post"
+        type: boolean
+      mail_tracking_link:
+        description: "link to tracking package with agreement in post"
+        type: string
 
   onboarding.Merchant.Onboarding.Request:
     properties:
@@ -1540,6 +1549,50 @@ definitions:
         type: string
     required:
       - amount
+
+  onboarding.Merchant.ChangeAgreementDataRequest:
+    properties:
+      has_psp_signature:
+        description: "flag for set peysuper signature on the agreement"
+        type: boolean
+      has_merchant_signature:
+        description: "flag for set merchant signature on the agreement"
+        type: boolean
+      agreement_sent_via_mail:
+        description: "mark agreement as sent via email"
+        type: boolean
+      mail_tracking_link:
+        description: "tracking link to mail"
+        type: string
+
+  onboarding.Merchant.PrintableAgreementData.Metadata:
+    properties:
+      name:
+        description: agreement file name
+        type: string
+      extension:
+        description: agreement file extension
+        type: string
+      content_type:
+        description: agreement file content type
+        type: string
+      size:
+        description: agreement file size in Kb
+        type: integer
+    required:
+      - name
+      - extension
+      - content_type
+      - size
+
+  onboarding.Merchant.PrintableAgreementData.Response:
+    properties:
+      url:
+        description: link to download printable agreement
+        type: string
+      metadata:
+        description: agreement file metadata
+        $ref: '#/definitions/onboarding.Merchant.PrintableAgreementData.Metadata'
 
 host: p1payapi.tst.protocol.one
 info:
@@ -3267,7 +3320,7 @@ paths:
             $ref: '#/definitions/model.Error'
             type: object
 
-  "/admin/api/v1/merchants/{id}/agreement":
+  "/admin/api/v1/merchants/{id}/agreement-type":
     patch:
       summary: Set merchant agreement type
       tags:
@@ -3591,6 +3644,250 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/order.Refund'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+
+  "/admin/api/v1/merchants/{id}/agreement/change":
+    patch:
+      summary: Change information about merchant agreement
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Change information about merchant agreement
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: data for change
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Merchant.ChangeAgreementDataRequest'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+
+  "/admin/api/v1/merchants/{id}/agreement/merchant-sign":
+    patch:
+      summary: Set merchant signature on the agreement
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Set merchant signature on the agreement
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+
+  "/admin/api/v1/merchants/{id}/agreement":
+    get:
+      summary: Generate agreement
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Generate agreement for merchant and return data about printable agreement
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant.PrintableAgreementData.Response'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+
+  "/admin/api/v1/merchants/{id}/agreement/document":
+    get:
+      summary: Download merchant agreement
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/pdf
+      description: Download merchant agreement
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+            type: object
+    post:
+      summary: Upload merchant agreement
+      tags:
+        - Onboarding
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      description: Upload new version of merchant agreement
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant.PrintableAgreementData.Response'
             type: object
         "400":
           description: Invalid request data

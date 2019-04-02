@@ -23,7 +23,7 @@ const (
 	agreementFileMask      = "agreement_%s.pdf"
 	agreementContentType   = "application/pdf"
 	agreementExtension     = "pdf"
-	agreementUrlMask       = "%s://%s/merchants/%s/agreement/document"
+	agreementUrlMask       = "%s://%s/admin/api/v1/merchants/%s/agreement/document"
 	agreementUploadMaxSize = 3145728
 )
 
