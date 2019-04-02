@@ -20,9 +20,9 @@ env:
   - secure: B52LkTAJSICFGEHhZzNhUtX1485qvn2Le0m2lz4tcqFC4CcvYTUqpE76xzNO9PpzyUkhBbK/PlEOhF95EeieYK0MQPtUFJOeh8RWIZ1wmIIvYt4jBVwc2HAfQlARH8SCznfXGzo1lLul67oybbvDxeEaIuKdk1EQDDpGljq7nzIGTGo5jq4YnPGNW7uBK/o13Fl/Owjd1ziQbrsUZJHFLKWFX32URSgQOvy/DV6ZJrqVeWsffJfGAlR/QVPtiMpVeijX55W8i6OJjcruWK1hR4C4ooNGfdF+iCD/7JzekpQP+rwa87lxFghm8g80d/lIq6CRl2RYj5VhylBlH7E2rn8IBT7le3olM8C2Qy5qDEbNL0lOTm8/rpK6hEpYJ2kMcRdNnvrRfvKS0P4sIoFNz1GzncmyO6l1quivvTFSoefv3bCqp57LkHmJKomCBLl4yltXcmEODa15pElIApkwKMmOAVmxubk6BUjV1n/o3IexRIgH5ugh7bVxdACrAz4Gq+4Q8nHzu+fVsd1OTIHHA+z0St08VCG2xpOwyjeCZU5itEiAVrTCuDAJqegbsSTW9q98BlGABlcjNCtHgPi3WW5Ckf9pdp2uPA04Kq2zvslG7KNvDtwxXtbzJzPeLBqX/NHu021ppEXM/9v9XlrbP1jZVXB0tQ9iHio09cO09Jg=
   - secure: LznyL/Pm3o0yiIJV36D/PMu7vpq0tJUjEsP2TZqbiR3YDHmn6IGZweJK1fISMVCsSW8NKz0bJnh6TwEckyA/SF9XK8XhkT9C1ZzcQn/LloF9k8XZZaZUFRepL7xp3ZL5lGqxmVeb4H5h7SDIhbEft5eyUrslGQtjms8h71qkuHvPE57iNeO+NPxNe2mR1tfoJxLT4L/lYy0bu8L77QcPncpZk6pMuGtka9108rrbUwTF0IokyGlwpjgpbH8wY41SVbWxhutCUzuA4STgxDNUtfLig+k8WRTGce6WTQa+J/dP/7sn8SrXyfO9yxfdrdwX6pdEPvyIS4oi3FdqpiRnU8kQDxng/RsDgIUDSooFiRB7PK1/EBp64nq9gV9vLEGlI/cVF9UjayockftCgT0M9oP1qbUNtxczjGAe8+VBuQcW2Z48/eu67mEt+FQN1pzcOZcYhyOqxhfGjKUqtyQozGvbJ8+NcZxcFmcFnrzB3Kk3aq+SPGxvEjgycI3XYV8PIpGKcG7cYvvgGbVk9rD2l+pAn8pYgQrAsWIrQxHmuOEWM2/74W/W/xyVPDswjoOVkQeEFK5v7qzTzz3Zj46N4PDMQAgbBVh9vDAdMsvS2v+JW53L0/eoiQV5JS7My/QPmHIyNmJPu8YRXfsFDldO6WWNJ0QBlRGcdy0NsEl2WTM=
 before_install:
-  - wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.trusty_i386.deb
-  - sudo dpkg -i wkhtmltox_0.12.5-1.trusty_i386.deb
-  - sudo apt -f install
+  - wget https://downloads.wkhtmltopdf.org/0.12/0.12.4/wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
+  - tar xf wkhtmltox-0.12.4_linux-generic-amd64.tar.xz
+  - sudo mv wkhtmltox/bin/wkhtmltopdf /usr/local/bin
 jobs:
   include:
   - stage: test
