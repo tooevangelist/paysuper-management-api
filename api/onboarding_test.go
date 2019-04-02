@@ -3,7 +3,10 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo/v4"
+	"github.com/minio/minio-go"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -13,9 +16,17 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
 	"gopkg.in/mgo.v2/bson"
+	"html/template"
+	"image"
+	"image/color"
+	"image/png"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -46,6 +57,10 @@ func Test_Onboarding(t *testing.T) {
 }
 
 func (suite *OnboardingTestSuite) SetupTest() {
+	s3Cfg := config.S3{}
+	err := envconfig.Process("", &s3Cfg)
+	assert.NoError(suite.T(), err)
+
 	suite.api = &Api{
 		Http:           echo.New(),
 		validate:       validator.New(),
@@ -55,22 +70,34 @@ func (suite *OnboardingTestSuite) SetupTest() {
 			Email: "test@unit.test",
 		},
 		config: &config.Config{
-			S3: config.S3{
-				AccessKeyId: "paysuperagreements",
-				SecretKey:   "Gp2gi2tcm243tmc",
-				Endpoint:    "psstatic.protocol.one",
-				BucketName:  "paysuperagreements",
-				Region:      "us-west-2",
-				Secure:      false,
-			},
+			S3: s3Cfg,
 		},
 	}
 
+	renderer := &Template{
+		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("../web/template/*.html")),
+	}
+	suite.api.Http.Renderer = renderer
+
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
-	err := suite.api.validate.RegisterValidation("phone", suite.api.PhoneValidator)
+	err = suite.api.validate.RegisterValidation("phone", suite.api.PhoneValidator)
 	assert.NoError(suite.T(), err)
 
-	suite.handler = &onboardingRoute{Api: suite.api}
+	mClt, err := minio.New(
+		suite.api.config.S3.Endpoint,
+		suite.api.config.S3.AccessKeyId,
+		suite.api.config.S3.SecretKey,
+		suite.api.config.S3.Secure,
+	)
+	assert.NoError(suite.T(), err)
+
+	err = mClt.MakeBucket(suite.api.config.S3.BucketName, suite.api.config.S3.Region)
+	assert.NoError(suite.T(), err)
+
+	suite.handler = &onboardingRoute{
+		Api:  suite.api,
+		mClt: mClt,
+	}
 }
 
 func (suite *OnboardingTestSuite) TearDownTest() {}
@@ -1626,4 +1653,666 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerRe
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_AgreementMerchantSign_Ok() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/merchant-sign")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.agreementMerchantSign(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_AgreementMerchantSign_ValidationError() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err := suite.handler.agreementMerchantSign(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Regexp(suite.T(), "MerchantId", httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_AgreementMerchantSign_BillingServerSystemError() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/merchant-sign")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.agreementMerchantSign(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_AgreementMerchantSign_BillingServerSResultError() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/merchant-sign")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerErrorMock()
+	err := suite.handler.agreementMerchantSign(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.generateAgreement(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	data := &OnboardingFileData{}
+	err = json.Unmarshal(rsp.Body.Bytes(), data)
+	assert.NoError(suite.T(), err)
+
+	assert.NotEmpty(suite.T(), data.Url)
+	assert.NotNil(suite.T(), data.Metadata)
+	assert.NotEmpty(suite.T(), data.Metadata.Name)
+	assert.NotEmpty(suite.T(), data.Metadata.Extension)
+	assert.NotEmpty(suite.T(), data.Metadata.ContentType)
+	assert.True(suite.T(), data.Metadata.Size > 0)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_MerchantIdInvalid_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.handler.generateAgreement(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_BillingServerSystemError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.generateAgreement(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_BillingServerResultError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerErrorMock()
+	err := suite.handler.generateAgreement(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_SetMerchantS3AgreementRequest_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId)
+
+	err := suite.handler.generateAgreement(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExist_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.OnboardingMerchantMock.Id)
+
+	buf := new(bytes.Buffer)
+	data := map[string]interface{}{"Merchant": mock.OnboardingMerchantMock}
+	err := ctx.Echo().Renderer.Render(buf, agreementPageTemplateName, data, ctx)
+	assert.NoError(suite.T(), err)
+
+	pdf, err := wkhtmltopdf.NewPDFGenerator()
+	assert.NoError(suite.T(), err)
+
+	pdf.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buf.String())))
+	err = pdf.Create()
+	assert.NoError(suite.T(), err)
+
+	filePath := os.TempDir() + string(os.PathSeparator) + mock.SomeAgreementName
+	err = pdf.WriteFile(filePath)
+	assert.NoError(suite.T(), err)
+
+	_, err = suite.handler.mClt.FPutObject(suite.api.config.S3.BucketName, mock.SomeAgreementName, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
+	assert.NoError(suite.T(), err)
+
+	err = suite.handler.generateAgreement(ctx)
+	assert.NoError(suite.T(), err)
+
+	fData := &OnboardingFileData{}
+	err = json.Unmarshal(rsp.Body.Bytes(), fData)
+	assert.NoError(suite.T(), err)
+
+	assert.NotEmpty(suite.T(), fData.Url)
+	assert.NotNil(suite.T(), fData.Metadata)
+	assert.NotEmpty(suite.T(), fData.Metadata.Name)
+	assert.NotEmpty(suite.T(), fData.Metadata.Extension)
+	assert.NotEmpty(suite.T(), fData.Metadata.ContentType)
+	assert.True(suite.T(), fData.Metadata.Size > 0)
+
+	err = suite.handler.mClt.RemoveObject(suite.api.config.S3.BucketName, mock.SomeAgreementName)
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExist_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId2)
+
+	err := suite.handler.generateAgreement(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), "The specified key does not exist.", httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId1)
+
+	buf := new(bytes.Buffer)
+	data := map[string]interface{}{"Merchant": mock.OnboardingMerchantMock}
+	err := ctx.Echo().Renderer.Render(buf, agreementPageTemplateName, data, ctx)
+	assert.NoError(suite.T(), err)
+
+	pdf, err := wkhtmltopdf.NewPDFGenerator()
+	assert.NoError(suite.T(), err)
+
+	pdf.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buf.String())))
+	err = pdf.Create()
+	assert.NoError(suite.T(), err)
+
+	filePath := os.TempDir() + string(os.PathSeparator) + mock.SomeAgreementName1
+	err = pdf.WriteFile(filePath)
+	assert.NoError(suite.T(), err)
+
+	_, err = suite.handler.mClt.FPutObject(suite.api.config.S3.BucketName, mock.SomeAgreementName1, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
+	assert.NoError(suite.T(), err)
+
+	err = suite.handler.getAgreementDocument(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+	assert.Equal(suite.T(), agreementContentType, rsp.Header().Get(echo.HeaderContentType))
+
+	err = suite.handler.mClt.RemoveObject(suite.api.config.S3.BucketName, mock.SomeAgreementName1)
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_MerchantIdIncorrect_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+
+	err := suite.handler.getAgreementDocument(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_BillingServerSystemError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.getAgreementDocument(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_BillingServerReturnError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerErrorMock()
+	err := suite.handler.getAgreementDocument(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_AgreementNotGenerated_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.getAgreementDocument(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageAgreementNotGenerated, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_AgreementFileNotExist_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId2)
+
+	err := suite.handler.getAgreementDocument(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), "The specified key does not exist.", httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_Ok() {
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEMultipartForm)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	buf := new(bytes.Buffer)
+	data := map[string]interface{}{"Merchant": mock.OnboardingMerchantMock}
+	err := ctx.Echo().Renderer.Render(buf, agreementPageTemplateName, data, ctx)
+	assert.NoError(suite.T(), err)
+
+	pdf, err := wkhtmltopdf.NewPDFGenerator()
+	assert.NoError(suite.T(), err)
+
+	pdf.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buf.String())))
+	err = pdf.Create()
+	assert.NoError(suite.T(), err)
+
+	filePath := os.TempDir() + string(os.PathSeparator) + mock.SomeAgreementName1
+	err = pdf.WriteFile(filePath)
+	assert.NoError(suite.T(), err)
+
+	params := map[string]string{}
+	req1, err := suite.newFileUploadRequest("/", params, requestParameterFile, filePath)
+	assert.NoError(suite.T(), err)
+
+	rsp1 := httptest.NewRecorder()
+	ctx1 := suite.api.Http.NewContext(req1, rsp1)
+
+	ctx1.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx1.SetParamNames(requestParameterId)
+	ctx1.SetParamValues(bson.NewObjectId().Hex())
+
+	err = suite.handler.uploadAgreementDocument(ctx1)
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), rsp1.Body.String())
+
+	fData := &OnboardingFileData{}
+	err = json.Unmarshal(rsp1.Body.Bytes(), fData)
+	assert.NoError(suite.T(), err)
+
+	assert.NotEmpty(suite.T(), fData.Url)
+	assert.NotNil(suite.T(), fData.Metadata)
+	assert.NotEmpty(suite.T(), fData.Metadata.Name)
+	assert.NotEmpty(suite.T(), fData.Metadata.Extension)
+	assert.NotEmpty(suite.T(), fData.Metadata.ContentType)
+	assert.True(suite.T(), fData.Metadata.Size > 0)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_MerchantIdInvalid_Error() {
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEMultipartForm)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.handler.uploadAgreementDocument(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_BillingServerSystemError() {
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEMultipartForm)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.uploadAgreementDocument(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_BillingServerResultError() {
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEMultipartForm)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerErrorMock()
+	err := suite.handler.uploadAgreementDocument(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_NotMultipartForm_Error() {
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEMultipartForm)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.uploadAgreementDocument(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), "no multipart boundary param in Content-Type", httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_UploadFileValidationError() {
+	img := image.NewRGBA(image.Rect(0, 0, 100, 50))
+	img.Set(2, 3, color.RGBA{R: 255, G: 0, B: 0, A: 255})
+
+	fPath := os.TempDir() + string(os.PathSeparator) + "out.png"
+	f, err := os.OpenFile(fPath, os.O_WRONLY|os.O_CREATE, 0600)
+	assert.NoError(suite.T(), err)
+
+	defer func() {
+		if err := f.Close(); err != nil {
+			return
+		}
+	}()
+
+	err = png.Encode(f, img)
+	assert.NoError(suite.T(), err)
+
+	params := map[string]string{}
+	req, err := suite.newFileUploadRequest("/", params, requestParameterFile, fPath)
+	assert.NoError(suite.T(), err)
+
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err = suite.handler.uploadAgreementDocument(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageAgreementContentType, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_SetMerchantS3AgreementRequest_Error() {
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEMultipartForm)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	buf := new(bytes.Buffer)
+	data := map[string]interface{}{"Merchant": mock.OnboardingMerchantMock}
+	err := ctx.Echo().Renderer.Render(buf, agreementPageTemplateName, data, ctx)
+	assert.NoError(suite.T(), err)
+
+	pdf, err := wkhtmltopdf.NewPDFGenerator()
+	assert.NoError(suite.T(), err)
+
+	pdf.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buf.String())))
+	err = pdf.Create()
+	assert.NoError(suite.T(), err)
+
+	filePath := os.TempDir() + string(os.PathSeparator) + mock.SomeAgreementName1
+	err = pdf.WriteFile(filePath)
+	assert.NoError(suite.T(), err)
+
+	params := map[string]string{}
+	req1, err := suite.newFileUploadRequest("/", params, requestParameterFile, filePath)
+	assert.NoError(suite.T(), err)
+
+	rsp1 := httptest.NewRecorder()
+	ctx1 := suite.api.Http.NewContext(req1, rsp1)
+
+	ctx1.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx1.SetParamNames(requestParameterId)
+	ctx1.SetParamValues(mock.SomeMerchantId)
+
+	err = suite.handler.uploadAgreementDocument(ctx1)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_S3UploadError() {
+	req := httptest.NewRequest(http.MethodPost, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEMultipartForm)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	buf := new(bytes.Buffer)
+	data := map[string]interface{}{"Merchant": mock.OnboardingMerchantMock}
+	err := ctx.Echo().Renderer.Render(buf, agreementPageTemplateName, data, ctx)
+	assert.NoError(suite.T(), err)
+
+	pdf, err := wkhtmltopdf.NewPDFGenerator()
+	assert.NoError(suite.T(), err)
+
+	pdf.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buf.String())))
+	err = pdf.Create()
+	assert.NoError(suite.T(), err)
+
+	filePath := os.TempDir() + string(os.PathSeparator) + mock.SomeAgreementName1
+	err = pdf.WriteFile(filePath)
+	assert.NoError(suite.T(), err)
+
+	params := map[string]string{}
+	req1, err := suite.newFileUploadRequest("/", params, requestParameterFile, filePath)
+	assert.NoError(suite.T(), err)
+
+	rsp1 := httptest.NewRecorder()
+	ctx1 := suite.api.Http.NewContext(req1, rsp1)
+
+	ctx1.SetPath("/admin/api/v1/merchants/:id/agreement/document")
+	ctx1.SetParamNames(requestParameterId)
+	ctx1.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.api.config.S3.BucketName = "fake_bucket"
+	err = suite.handler.uploadAgreementDocument(ctx1)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), "unexpected EOF", httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) newFileUploadRequest(
+	uri string,
+	params map[string]string,
+	paramName, path string,
+) (*http.Request, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err := file.Close(); err != nil {
+			return
+		}
+	}()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
+
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(part, file)
+
+	for key, val := range params {
+		_ = writer.WriteField(key, val)
+	}
+
+	err = writer.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	req := httptest.NewRequest(http.MethodPost, uri, body)
+	req.Header.Set(echo.HeaderContentType, writer.FormDataContentType())
+
+	return req, err
 }

@@ -32,6 +32,18 @@ type onboardingRoute struct {
 	mClt *minio.Client
 }
 
+type OnboardingFileMetadata struct {
+	Name        string `json:"name"`
+	Extension   string `json:"extension"`
+	ContentType string `json:"content_type"`
+	Size        int64  `json:"size"`
+}
+
+type OnboardingFileData struct {
+	Url      string                  `json:"url"`
+	Metadata *OnboardingFileMetadata `json:"metadata"`
+}
+
 func (api *Api) initOnboardingRoutes() (*Api, error) {
 	route := &onboardingRoute{Api: api}
 
@@ -63,8 +75,8 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 
 	api.authUserRouteGroup.PATCH("/merchants/:id/agreement-type", route.changeAgreementType)
 	api.authUserRouteGroup.PATCH("/merchants/:id/agreement/change", route.changeAgreement)
-	api.authUserRouteGroup.PATCH("/merchants/:id/agreement/merchant-sign", route.agreementSignByMerchant)
-	api.authUserRouteGroup.GET("/merchants/:id/agreement", route.getAgreement)
+	api.authUserRouteGroup.PATCH("/merchants/:id/agreement/merchant-sign", route.agreementMerchantSign)
+	api.authUserRouteGroup.GET("/merchants/:id/agreement", route.generateAgreement)
 	api.authUserRouteGroup.GET("/merchants/:id/agreement/document", route.getAgreementDocument)
 	api.authUserRouteGroup.POST("/merchants/:id/agreement/document", route.uploadAgreementDocument)
 
@@ -401,7 +413,7 @@ func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
-func (r *onboardingRoute) agreementSignByMerchant(ctx echo.Context) error {
+func (r *onboardingRoute) agreementMerchantSign(ctx echo.Context) error {
 	req := &grpc.SignMerchantRequest{
 		MerchantId:           ctx.Param(requestParameterId),
 		HasMerchantSignature: true,
@@ -431,7 +443,7 @@ func (r *onboardingRoute) agreementSignByMerchant(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
-func (r *onboardingRoute) getAgreement(ctx echo.Context) error {
+func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 	merchantId := ctx.Param(requestParameterId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
@@ -671,22 +683,14 @@ func (r *onboardingRoute) getAgreementStructure(
 		return nil, errors.New(errorMessageAgreementNotFound)
 	}
 
-	data := struct {
-		Url      string `json:"url"`
-		Metadata struct {
-			Name        string `json:"name"`
-			Extension   string `json:"extension"`
-			ContentType string `json:"content_type"`
-			Size        int64  `json:"size"`
-		} `json:"metadata"`
-	}{
+	data := &OnboardingFileData{
 		Url: fmt.Sprintf(agreementUrlMask, r.config.HttpScheme, ctx.Request().Host, merchantId),
-		Metadata: struct {
-			Name        string `json:"name"`
-			Extension   string `json:"extension"`
-			ContentType string `json:"content_type"`
-			Size        int64  `json:"size"`
-		}{Name: fi.Name(), Extension: ext, ContentType: ct, Size: fi.Size()},
+		Metadata: &OnboardingFileMetadata{
+			Name:        fi.Name(),
+			Extension:   ext,
+			ContentType: ct,
+			Size:        fi.Size(),
+		},
 	}
 
 	return data, nil

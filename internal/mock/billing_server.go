@@ -11,10 +11,17 @@ import (
 )
 
 const (
-	SomeError = "some error"
+	SomeError          = "some error"
+	SomeAgreementName  = "some_name.pdf"
+	SomeAgreementName1 = "some_name1.pdf"
+	SomeAgreementName2 = "some_name2.pdf"
 )
 
 var (
+	SomeMerchantId  = bson.NewObjectId().Hex()
+	SomeMerchantId1 = bson.NewObjectId().Hex()
+	SomeMerchantId2 = bson.NewObjectId().Hex()
+
 	OnboardingMerchantMock = &billing.Merchant{
 		Id:   bson.NewObjectId().Hex(),
 		Name: "Unit test",
@@ -194,6 +201,20 @@ func (s *BillingServerOkMock) GetMerchantBy(
 	in *grpc.GetMerchantByRequest,
 	opts ...client.CallOption,
 ) (*grpc.MerchantGetMerchantResponse, error) {
+	if in.MerchantId == OnboardingMerchantMock.Id {
+		OnboardingMerchantMock.S3AgreementName = SomeAgreementName
+	} else {
+		if in.MerchantId == SomeMerchantId1 {
+			OnboardingMerchantMock.S3AgreementName = SomeAgreementName1
+		} else {
+			if in.MerchantId == SomeMerchantId2 {
+				OnboardingMerchantMock.S3AgreementName = SomeAgreementName2
+			} else {
+				OnboardingMerchantMock.S3AgreementName = ""
+			}
+		}
+	}
+
 	rsp := &grpc.MerchantGetMerchantResponse{
 		Status:  pkg.ResponseStatusOk,
 		Message: "",
@@ -455,6 +476,23 @@ func (s *BillingServerOkMock) ProcessMerchantAgreement(
 	}, nil
 }
 
+func (s *BillingServerOkMock) SetMerchantS3Agreement(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	rsp := &grpc.ChangeMerchantAgreementTypeResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   OnboardingMerchantMock,
+	}
+
+	if in.MerchantId == SomeMerchantId {
+		return nil, errors.New(SomeError)
+	}
+
+	return rsp, nil
+}
+
 func (s *BillingServerErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -709,6 +747,17 @@ func (s *BillingServerErrorMock) ProcessMerchantAgreement(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) SetMerchantS3Agreement(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	return &grpc.ChangeMerchantAgreementTypeResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
 func (s *BillingServerSystemErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -928,6 +977,14 @@ func (s *BillingServerSystemErrorMock) ChangeMerchantAgreementType(
 func (s *BillingServerSystemErrorMock) ProcessMerchantAgreement(
 	ctx context.Context,
 	in *grpc.SignMerchantRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) SetMerchantS3Agreement(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
 	return nil, errors.New(SomeError)
@@ -1233,35 +1290,35 @@ func (s *BillingServerOkTemporaryMock) DeleteProduct(ctx context.Context, in *gr
 }
 
 func (s *BillingServerErrorMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
-	return nil, errors.New("Some error")
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerErrorMock) ListProducts(ctx context.Context, in *grpc.ListProductsRequest, opts ...client.CallOption) (*grpc.ListProductsResponse, error) {
-	return nil, errors.New("Some error")
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
-	return nil, errors.New("Some error")
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerErrorMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
-	return nil, errors.New("Some error")
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerSystemErrorMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
-	return nil, errors.New("Some error")
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerSystemErrorMock) ListProducts(ctx context.Context, in *grpc.ListProductsRequest, opts ...client.CallOption) (*grpc.ListProductsResponse, error) {
-	return nil, errors.New("Some error")
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerSystemErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
-	return nil, errors.New("Some error")
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerSystemErrorMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
-	return nil, errors.New("Some error")
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerOkTemporaryMock) PaymentFormLanguageChanged(
@@ -1304,20 +1361,10 @@ func (s *BillingServerOkTemporaryMock) ProcessMerchantAgreement(
 	return &grpc.ChangeMerchantAgreementTypeResponse{}, nil
 }
 
-// temporary stubs to prevent tests failure
-
-func (s *BillingServerOkMock) SetMerchantS3Agreement(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerOkTemporaryMock) SetMerchantS3Agreement(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerErrorMock) SetMerchantS3Agreement(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerSystemErrorMock) SetMerchantS3Agreement(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	panic("implement me")
+func (s *BillingServerOkTemporaryMock) SetMerchantS3Agreement(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+	return &grpc.ChangeMerchantAgreementTypeResponse{}, nil
 }
