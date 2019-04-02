@@ -482,6 +482,10 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, fData)
 	}
 
+	if rsp.Item.CanGenerateAgreement() == false {
+		return echo.NewHTTPError(http.StatusBadRequest, errorMessageAgreementCanNotBeGenerate)
+	}
+
 	buf := new(bytes.Buffer)
 	data := map[string]interface{}{"Merchant": rsp.Item}
 

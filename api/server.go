@@ -89,7 +89,8 @@ const (
 	errorMessageAgreementNotGenerated       = "agreement for merchant not generated early"
 	errorMessageAgreementNotFound           = "agreement for merchant not found"
 	errorMessageAgreementUploadMaxSize      = "agreement document max upload size can't be greater than %d"
-	errorMessageAgreementContentType        = "agreement document type must be a pdf "
+	errorMessageAgreementContentType        = "agreement document type must be a pdf"
+	errorMessageAgreementCanNotBeGenerate   = "agreement can't be generated for not checked merchant data"
 
 	HeaderAcceptLanguage = "Accept-Language"
 

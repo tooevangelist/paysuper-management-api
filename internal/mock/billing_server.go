@@ -21,6 +21,7 @@ var (
 	SomeMerchantId  = bson.NewObjectId().Hex()
 	SomeMerchantId1 = bson.NewObjectId().Hex()
 	SomeMerchantId2 = bson.NewObjectId().Hex()
+	SomeMerchantId3 = bson.NewObjectId().Hex()
 
 	OnboardingMerchantMock = &billing.Merchant{
 		Id:   bson.NewObjectId().Hex(),
@@ -58,7 +59,7 @@ var (
 		},
 		IsVatEnabled:              true,
 		IsCommissionToUserEnabled: true,
-		Status:                    pkg.MerchantStatusDraft,
+		Status:                    pkg.MerchantStatusApproved,
 		LastPayout:                &billing.MerchantLastPayout{},
 		IsSigned:                  true,
 		PaymentMethods: map[string]*billing.MerchantPaymentMethod{
@@ -213,6 +214,12 @@ func (s *BillingServerOkMock) GetMerchantBy(
 				OnboardingMerchantMock.S3AgreementName = ""
 			}
 		}
+	}
+
+	if in.MerchantId == SomeMerchantId3 {
+		OnboardingMerchantMock.Status = pkg.MerchantStatusDraft
+	} else {
+		OnboardingMerchantMock.Status = pkg.MerchantStatusApproved
 	}
 
 	rsp := &grpc.MerchantGetMerchantResponse{

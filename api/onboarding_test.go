@@ -2316,3 +2316,22 @@ func (suite *OnboardingTestSuite) newFileUploadRequest(
 
 	return req, err
 }
+
+func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_MerchantDataNotChecked_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId3)
+
+	err := suite.handler.generateAgreement(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageAgreementCanNotBeGenerate, httpErr.Message)
+}
