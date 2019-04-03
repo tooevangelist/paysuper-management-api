@@ -1252,7 +1252,7 @@ definitions:
         description: list of payment methods activated to merchant
         type: object
       agreement_type:
-        description: "type of agreement which merchant selected. possible values: 0 - type not select; 1 - paper agreement; 1 - e-sign agreement;"
+        description: "type of agreement which merchant selected. possible values: 0 - type not select; 1 - paper agreement; 2 - e-sign agreement;"
         type: integer
       agreement_sent_via_mail:
         description: "mark agreement as sent via post"
@@ -1593,6 +1593,14 @@ definitions:
       metadata:
         description: agreement file metadata
         $ref: '#/definitions/onboarding.Merchant.PrintableAgreementData.Metadata'
+
+  onboarding.Merchant.ChangeAgreementType.Request:
+    properties:
+      agreement_type:
+        description: "type of agreement which merchant selected. possible values: 1 - paper agreement; 2 - e-sign agreement;"
+        type: integer
+    required:
+      - agreement_type
 
 host: p1payapi.tst.protocol.one
 info:
@@ -3335,6 +3343,13 @@ paths:
           in: path
           name: id
           type: string
+          required: true
+        - description: data to change agreement type
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Merchant.ChangeAgreementType.Request'
+            type: object
           required: true
       responses:
         "200":
