@@ -909,13 +909,16 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_Ok() {
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set(requestParameterMerchantId, bson.NewObjectId().Hex())
 	q.Set(requestParameterUserId, bson.NewObjectId().Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:merchant_id/notifications")
+	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	err := suite.handler.listNotifications(ctx)
 	assert.NoError(suite.T(), err)
@@ -928,13 +931,16 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_ValidationErr
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set(requestParameterMerchantId, bson.NewObjectId().Hex())
 	q.Set(requestParameterUserId, "invalid_object_id")
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:merchant_id/notifications")
+	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	err := suite.handler.listNotifications(ctx)
 	assert.Error(suite.T(), err)
@@ -949,13 +955,16 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BillingServer
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set(requestParameterMerchantId, bson.NewObjectId().Hex())
 	q.Set(requestParameterUserId, bson.NewObjectId().Hex())
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:merchant_id/notifications")
+	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	suite.handler.billingService = mock.NewBillingServerErrorMock()
 	err := suite.handler.listNotifications(ctx)

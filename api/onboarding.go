@@ -291,7 +291,7 @@ func (r *onboardingRoute) listNotifications(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return ctx.JSON(http.StatusOK, rsp.Notifications)
+	return ctx.JSON(http.StatusOK, rsp)
 }
 
 func (r *onboardingRoute) markAsReadNotification(ctx echo.Context) error {

@@ -68,6 +68,7 @@ const (
 	requestParameterUtmSource          = "utm_source"
 	requestParameterUtmMedium          = "utm_medium"
 	requestParameterUtmCampagin        = "utm_campagin"
+	requestParameterIsSystem           = "is_system"
 	requestAuthorizationTokenRegex     = "Bearer ([A-z0-9_.-]{10,})"
 
 	errorIdIsEmpty                          = "identifier can't be empty"

@@ -1419,6 +1419,15 @@ definitions:
         description: dete of last update notification in unix timestamp format
         type: integer
 
+  onboarding.Merchant.Notifications:
+    properties:
+      count:
+        description: total number of filtered notifications
+        type: integer
+      items:
+        description: list of filtered notifications
+        $ref: '#/definitions/onboarding.Merchant.Notification'
+
   onboarding.Merchant.Notification.CreateRequest:
     properties:
       title:
@@ -2981,12 +2990,28 @@ paths:
           name: merchant_id
           type: string
           required: true
+        - description: user who sent notification
+          in: query
+          name: user
+          type: string
+        - description: "flag to filter return notification: 0 - return only notification; 1 - return only history"
+          in: query
+          name: is_system
+          type: integer
+        - description: limit of returning records
+          in: query
+          name: limit
+          type: integer
+        - description: offset of returning records
+          in: query
+          name: offset
+          type: integer
       responses:
         "200":
           description: OK
           schema:
             items:
-              $ref: '#/definitions/onboarding.Merchant.Notification'
+              $ref: '#/definitions/onboarding.Merchant.Notifications'
             type: array
         "400":
           description: Invalid request data

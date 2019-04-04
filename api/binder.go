@@ -278,13 +278,13 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 	structure.Limit = LimitDefault
 	structure.Offset = OffsetDefault
 
-	if v, ok := params[requestParameterMerchantId]; ok {
-		if bson.IsObjectIdHex(v[0]) == false {
-			return errors.New(errorIncorrectMerchantId)
-		}
+	merchantId := ctx.Param(requestParameterMerchantId)
 
-		structure.MerchantId = v[0]
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
 	}
+
+	structure.MerchantId = merchantId
 
 	if v, ok := params[requestParameterUserId]; ok {
 		if bson.IsObjectIdHex(v[0]) == false {
@@ -292,6 +292,14 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 		}
 
 		structure.UserId = v[0]
+	}
+
+	if v, ok := params[requestParameterIsSystem]; ok {
+		if v[0] == "0" || v[0] == "false" {
+			structure.IsSystem = 1
+		} else {
+			structure.IsSystem = 2
+		}
 	}
 
 	if v, ok := params[requestParameterLimit]; ok {
