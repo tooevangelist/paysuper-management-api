@@ -133,6 +133,14 @@ func NewBillingServerOkTemporaryMock() grpc.BillingService {
 	return &BillingServerOkTemporaryMock{}
 }
 
+func (s *BillingServerOkMock) GetProductsForOrder(
+	ctx context.Context,
+	in *grpc.GetProductsForOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.ListProductsResponse, error) {
+	return &grpc.ListProductsResponse{}, nil
+}
+
 func (s *BillingServerOkMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -495,6 +503,14 @@ func (s *BillingServerOkMock) SetMerchantS3Agreement(
 	return rsp, nil
 }
 
+func (s *BillingServerErrorMock) GetProductsForOrder(
+	ctx context.Context,
+	in *grpc.GetProductsForOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.ListProductsResponse, error) {
+	return &grpc.ListProductsResponse{}, nil
+}
+
 func (s *BillingServerErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -749,6 +765,14 @@ func (s *BillingServerErrorMock) SetMerchantS3Agreement(
 	}, nil
 }
 
+func (s *BillingServerSystemErrorMock) GetProductsForOrder(
+	ctx context.Context,
+	in *grpc.GetProductsForOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.ListProductsResponse, error) {
+	return &grpc.ListProductsResponse{}, nil
+}
+
 func (s *BillingServerSystemErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
@@ -971,6 +995,14 @@ func (s *BillingServerSystemErrorMock) SetMerchantS3Agreement(
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantDataResponse, error) {
 	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkTemporaryMock) GetProductsForOrder(
+	ctx context.Context,
+	in *grpc.GetProductsForOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.ListProductsResponse, error) {
+	return &grpc.ListProductsResponse{}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) OrderCreateProcess(

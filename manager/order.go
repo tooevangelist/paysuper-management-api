@@ -1655,7 +1655,8 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		AmountInPaymentSystemAccountingCurrency: o.AmountInPaymentSystemAccountingCurrency,
 		PaymentMethodPayerAccount:               o.PaymentMethodPayerAccount,
 		PaymentMethodTxnParams:                  sPaymentMethodTxnParams,
-		FixedPackage: &billing.FixedPackage{
+		// TODO: Add products support
+		/*FixedPackage: &billing.FixedPackage{
 			Id:   o.FixedPackage.Id,
 			Name: o.FixedPackage.Name,
 			Currency: &billing.Currency{
@@ -1666,7 +1667,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 			},
 			Price:    o.FixedPackage.Price,
 			IsActive: true,
-		},
+		},*/
 		PaymentRequisites: o.PaymentRequisites,
 		PspFeeAmount: &billing.OrderFeePsp{
 			AmountPaymentMethodCurrency: o.PspFeeAmount.AmountPaymentMethodCurrency,

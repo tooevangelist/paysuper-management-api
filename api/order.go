@@ -2,11 +2,9 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"github.com/amalfra/etag"
+	"fmt"
 	"github.com/globalsign/mgo/bson"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -19,12 +17,11 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
-	"time"
 )
 
 const (
 	orderFormTemplateName   = "order.html"
+	orderInlineFormUrlMask  = "%s://%s/order/%s"
 	paylinkFormTemplateName = "paylink.html"
 )
 
@@ -271,10 +268,13 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 	return ctx.Render(http.StatusOK, orderFormTemplateName, map[string]interface{}{"Order": jo})
 }
 
+// Create order from payment link and redirect to order payment form
 func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
 
+	paylinkId := ctx.Param(requestParameterId)
+
 	req := &paylink.PaylinkRequest{
-		Id: ctx.Param(requestParameterId),
+		Id: paylinkId,
 	}
 
 	err := r.validate.Struct(req)
@@ -287,52 +287,29 @@ func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
 		return ctx.Render(http.StatusNotFound, paylinkFormTemplateName, map[string]interface{}{})
 	}
 
-	value, _ := json.Marshal(pl)
-
-	etagValue := etag.Generate(string(value), true)
-
-	reqHeader := ctx.Request().Header
-	resHeader := ctx.Response().Header()
-
-	match := reqHeader.Get("If-None-Match")
-	if strings.Contains(match, etagValue) {
-		return ctx.NoContent(http.StatusNotModified)
+	oReq := &billing.OrderCreateRequest{
+		ProjectId: pl.ProjectId,
+		PayerIp:   ctx.RealIP(),
+		Products:  pl.Products,
+		Metadata: map[string]string{
+			"PaylinkId": paylinkId,
+		},
 	}
 
-	updatedTime, _ := ptypes.Timestamp(pl.UpdatedAt)
-	updated := updatedTime.Unix()
-	lastMod := strconv.FormatInt(updated, 10)
-
-	since := reqHeader.Get("If-Modified-Since")
-	n, _ := strconv.ParseInt(since, 10, 64)
-	if updated <= n {
-		return ctx.NoContent(http.StatusNotModified)
+	order, err := r.billingService.OrderCreateProcess(context.Background(), oReq)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	resHeader.Set("Etag", etagValue)
-	resHeader.Set("Last-Modified", lastMod)
-
-	expiresAt, _ := ptypes.Timestamp(pl.ExpiresAt)
-	expires := int(time.Until(expiresAt).Seconds())
-	resHeader.Set("Cache-Control", "max-age="+strconv.Itoa(expires))
-
-	data := map[string]interface{}{
-		"Id":        pl.GetId(),
-		"Products":  pl.GetProducts(),
-		"ProjectId": pl.ProjectId,
-	}
-
-	// todo: 1 make new order with products from paylink
-
-	// todo: 2 prevent create duplicated unprocessed orders for one user session
+	InlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Id)
 
 	go func() {
-		r.paylinkService.IncrPaylinkVisits(context.Background(), req)
-		// todo log warning when IncrPaylinkVisits failed?
+		_, err := r.paylinkService.IncrPaylinkVisits(context.Background(), req)
+		if err != nil {
+			r.logError("Cannot update paylink stat", []interface{}{"error", err.Error(), "request", req})
+		}
 	}()
-
-	err = ctx.Render(http.StatusOK, paylinkFormTemplateName, data)
-	return nil
+	return ctx.Redirect(http.StatusFound, InlineFormRedirectUrl)
 }
 
 // @Summary Get order data
