@@ -1389,6 +1389,15 @@ definitions:
     required:
       - status
 
+  onboarding.Merchant.Notification.Statuses:
+    properties:
+      from:
+        description: status before changes
+        type: integer
+      to:
+        description: status after changes
+        type: integer
+
   onboarding.Merchant.Notification:
     properties:
       id:
@@ -1412,6 +1421,9 @@ definitions:
       is_read:
         description: receiver read notification
         type: boolean
+      statuses:
+        description: statuses "from -> to" for system notification. for not system notification this field will be equal NULL
+        $ref: '#/definitions/onboarding.Merchant.Notification.Statuses'
       created_at:
         description: dete of create notification in unix timestamp format
         type: integer
