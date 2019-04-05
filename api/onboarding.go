@@ -73,9 +73,7 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.PUT("/merchants", route.changeMerchant)
 	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
 
-	api.authUserRouteGroup.PATCH("/merchants/:id/agreement-type", route.changeAgreementType)
-	api.authUserRouteGroup.PATCH("/merchants/:id/agreement/change", route.changeAgreement)
-	api.authUserRouteGroup.PATCH("/merchants/:id/agreement/merchant-sign", route.agreementMerchantSign)
+	api.authUserRouteGroup.PATCH("/merchants/:id/agreement", route.changeAgreement)
 	api.authUserRouteGroup.GET("/merchants/:id/agreement", route.generateAgreement)
 	api.authUserRouteGroup.GET("/merchants/:id/agreement/document", route.getAgreementDocument)
 	api.authUserRouteGroup.POST("/merchants/:id/agreement/document", route.uploadAgreementDocument)
@@ -198,34 +196,6 @@ func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, rsp)
-}
-
-func (r *onboardingRoute) changeAgreementType(ctx echo.Context) error {
-	req := &grpc.ChangeMerchantDataRequest{}
-	err := ctx.Bind(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
-	}
-
-	req.MerchantId = ctx.Param(requestParameterId)
-	err = r.validate.Struct(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	rsp, err := r.billingService.ChangeMerchantData(context.TODO(), req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
-	}
-
-	if rsp.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
 func (r *onboardingRoute) createNotification(ctx echo.Context) error {
@@ -399,37 +369,7 @@ func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
 
 	if err != nil {
 		r.logError(
-			`Call billing server method "ProcessMerchantAgreement" failed`,
-			[]interface{}{"error", err.Error(), "request", req},
-		)
-
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
-	}
-
-	if rsp.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, rsp.Item)
-}
-
-func (r *onboardingRoute) agreementMerchantSign(ctx echo.Context) error {
-	req := &grpc.ChangeMerchantDataRequest{
-		MerchantId:           ctx.Param(requestParameterId),
-		HasMerchantSignature: true,
-	}
-
-	err := r.validate.Struct(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	rsp, err := r.billingService.ChangeMerchantData(context.TODO(), req)
-
-	if err != nil {
-		r.logError(
-			`Call billing server method "ProcessMerchantAgreement" failed`,
+			`Call billing server method "ChangeMerchantData" failed`,
 			[]interface{}{"error", err.Error(), "request", req},
 		)
 
