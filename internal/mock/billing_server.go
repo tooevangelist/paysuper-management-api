@@ -461,23 +461,12 @@ func (s *BillingServerOkMock) ProcessBillingAddress(
 	}, nil
 }
 
-func (s *BillingServerOkMock) ChangeMerchantAgreementType(
+func (s *BillingServerOkMock) ChangeMerchantData(
 	ctx context.Context,
-	in *grpc.ChangeMerchantAgreementTypeRequest,
+	in *grpc.ChangeMerchantDataRequest,
 	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	return &grpc.ChangeMerchantAgreementTypeResponse{
-		Status: pkg.ResponseStatusOk,
-		Item:   OnboardingMerchantMock,
-	}, nil
-}
-
-func (s *BillingServerOkMock) ProcessMerchantAgreement(
-	ctx context.Context,
-	in *grpc.SignMerchantRequest,
-	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	return &grpc.ChangeMerchantAgreementTypeResponse{
+) (*grpc.ChangeMerchantDataResponse, error) {
+	return &grpc.ChangeMerchantDataResponse{
 		Status: pkg.ResponseStatusOk,
 		Item:   OnboardingMerchantMock,
 	}, nil
@@ -487,8 +476,8 @@ func (s *BillingServerOkMock) SetMerchantS3Agreement(
 	ctx context.Context,
 	in *grpc.SetMerchantS3AgreementRequest,
 	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	rsp := &grpc.ChangeMerchantAgreementTypeResponse{
+) (*grpc.ChangeMerchantDataResponse, error) {
+	rsp := &grpc.ChangeMerchantDataResponse{
 		Status: pkg.ResponseStatusOk,
 		Item:   OnboardingMerchantMock,
 	}
@@ -732,23 +721,12 @@ func (s *BillingServerErrorMock) ProcessBillingAddress(
 	}, nil
 }
 
-func (s *BillingServerErrorMock) ChangeMerchantAgreementType(
+func (s *BillingServerErrorMock) ChangeMerchantData(
 	ctx context.Context,
-	in *grpc.ChangeMerchantAgreementTypeRequest,
+	in *grpc.ChangeMerchantDataRequest,
 	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	return &grpc.ChangeMerchantAgreementTypeResponse{
-		Status:  pkg.ResponseStatusBadData,
-		Message: SomeError,
-	}, nil
-}
-
-func (s *BillingServerErrorMock) ProcessMerchantAgreement(
-	ctx context.Context,
-	in *grpc.SignMerchantRequest,
-	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	return &grpc.ChangeMerchantAgreementTypeResponse{
+) (*grpc.ChangeMerchantDataResponse, error) {
+	return &grpc.ChangeMerchantDataResponse{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil
@@ -758,8 +736,8 @@ func (s *BillingServerErrorMock) SetMerchantS3Agreement(
 	ctx context.Context,
 	in *grpc.SetMerchantS3AgreementRequest,
 	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	return &grpc.ChangeMerchantAgreementTypeResponse{
+) (*grpc.ChangeMerchantDataResponse, error) {
+	return &grpc.ChangeMerchantDataResponse{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil
@@ -973,19 +951,11 @@ func (s *BillingServerSystemErrorMock) ProcessBillingAddress(
 	return nil, errors.New(SomeError)
 }
 
-func (s *BillingServerSystemErrorMock) ChangeMerchantAgreementType(
+func (s *BillingServerSystemErrorMock) ChangeMerchantData(
 	ctx context.Context,
-	in *grpc.ChangeMerchantAgreementTypeRequest,
+	in *grpc.ChangeMerchantDataRequest,
 	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	return nil, errors.New(SomeError)
-}
-
-func (s *BillingServerSystemErrorMock) ProcessMerchantAgreement(
-	ctx context.Context,
-	in *grpc.SignMerchantRequest,
-	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+) (*grpc.ChangeMerchantDataResponse, error) {
 	return nil, errors.New(SomeError)
 }
 
@@ -993,7 +963,7 @@ func (s *BillingServerSystemErrorMock) SetMerchantS3Agreement(
 	ctx context.Context,
 	in *grpc.SetMerchantS3AgreementRequest,
 	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
+) (*grpc.ChangeMerchantDataResponse, error) {
 	return nil, errors.New(SomeError)
 }
 
@@ -1352,26 +1322,18 @@ func (s *BillingServerOkTemporaryMock) ProcessBillingAddress(
 	return nil, errors.New(SomeError)
 }
 
-func (s *BillingServerOkTemporaryMock) ChangeMerchantAgreementType(
+func (s *BillingServerOkTemporaryMock) ChangeMerchantData(
 	ctx context.Context,
-	in *grpc.ChangeMerchantAgreementTypeRequest,
+	in *grpc.ChangeMerchantDataRequest,
 	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	return nil, nil
-}
-
-func (s *BillingServerOkTemporaryMock) ProcessMerchantAgreement(
-	ctx context.Context,
-	in *grpc.SignMerchantRequest,
-	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	return &grpc.ChangeMerchantAgreementTypeResponse{}, nil
+) (*grpc.ChangeMerchantDataResponse, error) {
+	return &grpc.ChangeMerchantDataResponse{}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) SetMerchantS3Agreement(
 	ctx context.Context,
 	in *grpc.SetMerchantS3AgreementRequest,
 	opts ...client.CallOption,
-) (*grpc.ChangeMerchantAgreementTypeResponse, error) {
-	return &grpc.ChangeMerchantAgreementTypeResponse{}, nil
+) (*grpc.ChangeMerchantDataResponse, error) {
+	return &grpc.ChangeMerchantDataResponse{}, nil
 }

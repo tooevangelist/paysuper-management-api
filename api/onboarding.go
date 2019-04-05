@@ -201,7 +201,7 @@ func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 }
 
 func (r *onboardingRoute) changeAgreementType(ctx echo.Context) error {
-	req := &grpc.ChangeMerchantAgreementTypeRequest{}
+	req := &grpc.ChangeMerchantDataRequest{}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -215,7 +215,7 @@ func (r *onboardingRoute) changeAgreementType(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ChangeMerchantAgreementType(context.TODO(), req)
+	rsp, err := r.billingService.ChangeMerchantData(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -381,7 +381,7 @@ func (r *onboardingRoute) changePaymentMethod(ctx echo.Context) error {
 }
 
 func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
-	req := &grpc.SignMerchantRequest{}
+	req := &grpc.ChangeMerchantDataRequest{}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -395,7 +395,7 @@ func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ProcessMerchantAgreement(context.TODO(), req)
+	rsp, err := r.billingService.ChangeMerchantData(context.TODO(), req)
 
 	if err != nil {
 		r.logError(
@@ -414,7 +414,7 @@ func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
 }
 
 func (r *onboardingRoute) agreementMerchantSign(ctx echo.Context) error {
-	req := &grpc.SignMerchantRequest{
+	req := &grpc.ChangeMerchantDataRequest{
 		MerchantId:           ctx.Param(requestParameterId),
 		HasMerchantSignature: true,
 	}
@@ -425,7 +425,7 @@ func (r *onboardingRoute) agreementMerchantSign(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ProcessMerchantAgreement(context.TODO(), req)
+	rsp, err := r.billingService.ChangeMerchantData(context.TODO(), req)
 
 	if err != nil {
 		r.logError(
