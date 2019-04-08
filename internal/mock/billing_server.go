@@ -59,7 +59,7 @@ var (
 		},
 		IsVatEnabled:              true,
 		IsCommissionToUserEnabled: true,
-		Status:                    pkg.MerchantStatusApproved,
+		Status:                    pkg.MerchantStatusOnReview,
 		LastPayout:                &billing.MerchantLastPayout{},
 		IsSigned:                  true,
 		PaymentMethods: map[string]*billing.MerchantPaymentMethod{
@@ -219,7 +219,7 @@ func (s *BillingServerOkMock) GetMerchantBy(
 	if in.MerchantId == SomeMerchantId3 {
 		OnboardingMerchantMock.Status = pkg.MerchantStatusDraft
 	} else {
-		OnboardingMerchantMock.Status = pkg.MerchantStatusApproved
+		OnboardingMerchantMock.Status = pkg.MerchantStatusOnReview
 	}
 
 	rsp := &grpc.MerchantGetMerchantResponse{

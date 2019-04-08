@@ -651,11 +651,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_Validation
 	assert.True(suite.T(), len(mRsp.Id) > 0)
 	assert.Equal(suite.T(), pkg.MerchantStatusDraft, mRsp.Status)
 
-	changeStatusReq := &grpc.MerchantChangeStatusRequest{}
-	b, err = json.Marshal(changeStatusReq)
-	assert.NoError(suite.T(), err)
-
-	req = httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(b))
+	req = httptest.NewRequest(http.MethodPut, "/", strings.NewReader(`{"status": 33}`))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp = httptest.NewRecorder()
 	ctx = e.NewContext(req, rsp)
