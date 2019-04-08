@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/globalsign/mgo/bson"
+	"github.com/google/go-querystring/query"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -14,6 +15,7 @@ import (
 	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/paysuper/paysuper-management-api/payment_system"
 	"github.com/paysuper/paysuper-payment-link/proto"
+	"go.uber.org/zap"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -287,12 +289,21 @@ func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
 		return ctx.Render(http.StatusNotFound, paylinkFormTemplateName, map[string]interface{}{})
 	}
 
+	utmQuery := &UtmQueryParams{}
+	err = (&PaylinksProcessUrlBinder{}).Bind(utmQuery, ctx)
+	if err != nil {
+		r.logError("Utm query binding failed", []interface{}{"error", err.Error(), "request", req})
+	}
+
 	oReq := &billing.OrderCreateRequest{
 		ProjectId: pl.ProjectId,
 		PayerIp:   ctx.RealIP(),
 		Products:  pl.Products,
 		Metadata: map[string]string{
-			"PaylinkId": paylinkId,
+			"PaylinkId":   paylinkId,
+			"UtmSource":   utmQuery.UtmSource,
+			"UtmMedium":   utmQuery.UtmMedium,
+			"UtmCampaign": utmQuery.UtmCampaign,
 		},
 	}
 
@@ -302,6 +313,16 @@ func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
 	}
 
 	InlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Id)
+
+	q, err := query.Values(utmQuery)
+	if err == nil {
+		encodedQuery := q.Encode()
+		if encodedQuery != "" {
+			InlineFormRedirectUrl += "?" + encodedQuery
+		}
+	} else {
+		r.logError("Utm query encoding failed", []interface{}{"error", err.Error(), "request", req})
+	}
 
 	go func() {
 		_, err := r.paylinkService.IncrPaylinkVisits(context.Background(), req)

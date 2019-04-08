@@ -25,6 +25,12 @@ const (
 	binderErrorUnknownRevenuePeriod = "unknown revenue period"
 )
 
+type UtmQueryParams struct {
+	UtmSource   string `url:"utm_source,omitempty"`
+	UtmMedium   string `url:"utm_medium,omitempty"`
+	UtmCampaign string `url:"utm_campaign,omitempty"`
+}
+
 type OrderFormBinder struct{}
 type OrderJsonBinder struct{}
 type OrderRevenueDynamicRequestBinder struct{}
@@ -38,6 +44,7 @@ type OnboardingChangePaymentMethodBinder struct{}
 type OnboardingCreateNotificationBinder struct{}
 type PaylinksListBinder struct{}
 type PaylinksUrlBinder struct{}
+type PaylinksProcessUrlBinder struct{}
 type PaylinksCreateBinder struct{}
 type PaylinksUpdateBinder struct{}
 type ProductsGetProductsListBinder struct{}
@@ -385,8 +392,6 @@ func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
 	params := ctx.QueryParams()
 	structure := i.(*paylink.GetPaylinkURLRequest)
 
-	structure.Id = ctx.Param(requestParameterId)
-
 	if v, ok := params[requestParameterUtmSource]; ok {
 		structure.UtmSource = v[0]
 	}
@@ -428,6 +433,25 @@ func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
 
 	structure := i.(*paylink.CreatePaylinkRequest)
 	structure.Id = id
+
+	return nil
+}
+
+func (b *PaylinksProcessUrlBinder) Bind(i interface{}, ctx echo.Context) error {
+	params := ctx.QueryParams()
+	structure := i.(*UtmQueryParams)
+
+	if v, ok := params[requestParameterUtmSource]; ok {
+		structure.UtmSource = v[0]
+	}
+
+	if v, ok := params[requestParameterUtmMedium]; ok {
+		structure.UtmMedium = v[0]
+	}
+
+	if v, ok := params[requestParameterUtmCampaign]; ok {
+		structure.UtmCampaign = v[0]
+	}
 
 	return nil
 }
