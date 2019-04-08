@@ -2,10 +2,12 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
@@ -42,6 +44,9 @@ type PaylinksUpdateBinder struct{}
 type ProductsGetProductsListBinder struct{}
 type ProductsCreateProductBinder struct{}
 type ProductsUpdateProductBinder struct{}
+type ChangeMerchantDataRequestBinder struct {
+	*Api
+}
 
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	db := new(echo.DefaultBinder)
@@ -569,6 +574,85 @@ func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) erro
 
 	structure := i.(*grpc.Product)
 	structure.Id = id
+
+	return nil
+}
+
+func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) error {
+	req := make(map[string]interface{})
+
+	db := new(echo.DefaultBinder)
+	err := db.Bind(&req, ctx)
+
+	if err != nil {
+		return errors.New(errorQueryParamsIncorrect)
+	}
+
+	merchantId := ctx.Param(requestParameterId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	mReq := &grpc.GetMerchantByRequest{MerchantId: merchantId}
+	mRsp, err := b.billingService.GetMerchantBy(context.Background(), mReq)
+
+	if err != nil {
+		b.logError(`Call billing server method "GetMerchantBy" failed`, []interface{}{"error", err.Error(), "request", mReq})
+		return errors.New(errorUnknown)
+	}
+
+	if mRsp.Status != pkg.ResponseStatusOk {
+		return errors.New(mRsp.Message)
+	}
+
+	structure := i.(*grpc.ChangeMerchantDataRequest)
+	structure.MerchantId = merchantId
+	structure.AgreementType = mRsp.Item.AgreementType
+	structure.HasMerchantSignature = mRsp.Item.HasMerchantSignature
+	structure.HasPspSignature = mRsp.Item.HasPspSignature
+	structure.AgreementSentViaMail = mRsp.Item.AgreementSentViaMail
+	structure.MailTrackingLink = mRsp.Item.MailTrackingLink
+
+	if v, ok := req[requestParameterAgreementType]; ok {
+		if tv, ok := v.(float64); !ok {
+			return errors.New(errorMessageAgreementTypeIncorrectType)
+		} else {
+			structure.AgreementType = int32(tv)
+		}
+	}
+
+	if v, ok := req[requestParameterHasMerchantSignature]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageHasMerchantSignatureIncorrectType)
+		} else {
+			structure.HasMerchantSignature = tv
+		}
+	}
+
+	if v, ok := req[requestParameterHasPspSignature]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageHasPspSignatureIncorrectType)
+		} else {
+			structure.HasPspSignature = tv
+		}
+	}
+
+	if v, ok := req[requestParameterAgreementSentViaMail]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageAgreementSentViaMailIncorrectType)
+		} else {
+			structure.AgreementSentViaMail = tv
+		}
+	}
+
+	if v, ok := req[requestParameterMailTrackingLink]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageMailTrackingLinkIncorrectType)
+		} else {
+			structure.MailTrackingLink = tv
+		}
+	}
 
 	return nil
 }

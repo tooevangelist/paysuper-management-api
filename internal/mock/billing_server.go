@@ -466,10 +466,16 @@ func (s *BillingServerOkMock) ChangeMerchantData(
 	in *grpc.ChangeMerchantDataRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantDataResponse, error) {
-	return &grpc.ChangeMerchantDataResponse{
+	rsp := &grpc.ChangeMerchantDataResponse{
 		Status: pkg.ResponseStatusOk,
 		Item:   OnboardingMerchantMock,
-	}, nil
+	}
+
+	if in.MerchantId == SomeMerchantId {
+		return nil, errors.New(SomeError)
+	}
+
+	return rsp, nil
 }
 
 func (s *BillingServerOkMock) SetMerchantS3Agreement(

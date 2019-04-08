@@ -352,13 +352,13 @@ func (r *onboardingRoute) changePaymentMethod(ctx echo.Context) error {
 
 func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
 	req := &grpc.ChangeMerchantDataRequest{}
-	err := ctx.Bind(req)
+	binder := &ChangeMerchantDataRequestBinder{Api: r.Api}
+	err := binder.Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	req.MerchantId = ctx.Param(requestParameterId)
 	err = r.validate.Struct(req)
 
 	if err != nil {

@@ -1478,7 +1478,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BindError() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/admin/api/v1/merchants/:id/agreement-sign")
+	ctx.SetPath("/admin/api/v1/merchants/:id")
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
@@ -1492,7 +1492,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BindError() {
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_ValidationError() {
-	body := `{"has_merchant_signature": true, "agreement_sent_via_mail": true}`
+	body := `{"has_merchant_signature": true, "agreement_type": 3}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(body))
@@ -1500,7 +1500,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_ValidationError
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/admin/api/v1/merchants/:id/agreement-sign")
+	ctx.SetPath("/admin/api/v1/merchants/:id")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	err := suite.handler.changeAgreement(ctx)
 	assert.Error(suite.T(), err)
@@ -1508,7 +1510,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_ValidationError
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "MerchantId", httpErr.Message)
+	assert.Regexp(suite.T(), "AgreementType", httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerSystemError() {
@@ -1520,11 +1522,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerSy
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/admin/api/v1/merchants/:id/agreement-sign")
+	ctx.SetPath("/admin/api/v1/merchants/:id")
 	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetParamValues(mock.SomeMerchantId)
 
-	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
 	err := suite.handler.changeAgreement(ctx)
 	assert.Error(suite.T(), err)
 
