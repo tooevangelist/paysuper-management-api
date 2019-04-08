@@ -67,7 +67,7 @@ const (
 	requestParameterFile                 = "file"
 	requestParameterUtmSource            = "utm_source"
 	requestParameterUtmMedium            = "utm_medium"
-	requestParameterUtmCampagin          = "utm_campagin"
+	requestParameterUtmCampaign          = "utm_campaign"
 	requestParameterIsSystem             = "is_system"
 	requestParameterAgreementType        = "agreement_type"
 	requestParameterHasMerchantSignature = "has_merchant_signature"

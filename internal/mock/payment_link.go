@@ -38,7 +38,7 @@ var (
 	}
 
 	url = &paylink.GetPaylinkUrlResponse{
-		Url: "http://paysuprt.online/paylink/21784001599a47e5a69ac28f7af2ec22?utm_campagin=campagin1%26campagin2&utm_medium=123&utm_source=myUtm+Source",
+		Url: "http://paysuprt.online/paylink/21784001599a47e5a69ac28f7af2ec22?utm_campaign=campaign1%26campaign2&utm_medium=123&utm_source=myUtm+Source",
 	}
 )
 
