@@ -464,8 +464,8 @@ func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
 		structure.UtmMedium = v[0]
 	}
 
-	if v, ok := params[requestParameterUtmCampagin]; ok {
-		structure.UtmCampagin = v[0]
+	if v, ok := params[requestParameterUtmCampaign]; ok {
+		structure.UtmCampaign = v[0]
 	}
 
 	return nil
