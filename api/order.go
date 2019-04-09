@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/globalsign/mgo/bson"
-	"github.com/google/go-querystring/query"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -15,16 +14,15 @@ import (
 	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/paysuper/paysuper-management-api/payment_system"
 	"github.com/paysuper/paysuper-payment-link/proto"
-	"go.uber.org/zap"
 	"net/http"
 	"net/url"
 	"strconv"
 )
 
 const (
-	orderFormTemplateName   = "order.html"
-	orderInlineFormUrlMask  = "%s://%s/order/%s"
-	paylinkFormTemplateName = "paylink.html"
+	orderFormTemplateName  = "order.html"
+	orderInlineFormUrlMask = "%s://%s/order/%s"
+	errorTemplateName      = "error.html"
 )
 
 type orderRoute struct {
@@ -281,56 +279,55 @@ func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
 
 	err := r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		r.logError("Cannot validate request", []interface{}{"error", err.Error(), "request", req})
+		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
 	pl, err := r.paylinkService.GetPaylink(context.Background(), req)
 	if err != nil {
-		return ctx.Render(http.StatusNotFound, paylinkFormTemplateName, map[string]interface{}{})
-	}
-
-	utmQuery := &UtmQueryParams{}
-	err = (&PaylinksProcessUrlBinder{}).Bind(utmQuery, ctx)
-	if err != nil {
-		r.logError("Utm query binding failed", []interface{}{"error", err.Error(), "request", req})
+		return ctx.Render(http.StatusNotFound, errorTemplateName, map[string]interface{}{})
 	}
 
 	oReq := &billing.OrderCreateRequest{
 		ProjectId: pl.ProjectId,
 		PayerIp:   ctx.RealIP(),
 		Products:  pl.Products,
-		Metadata: map[string]string{
-			"PaylinkId":   paylinkId,
-			"UtmSource":   utmQuery.UtmSource,
-			"UtmMedium":   utmQuery.UtmMedium,
-			"UtmCampaign": utmQuery.UtmCampaign,
+		PrivateMetadata: map[string]string{
+			"PaylinkId": paylinkId,
 		},
+	}
+	params := ctx.QueryParams()
+	if v, ok := params[requestParameterUtmSource]; ok {
+		oReq.PrivateMetadata[requestParameterUtmSource] = v[0]
+	}
+	if v, ok := params[requestParameterUtmMedium]; ok {
+		oReq.PrivateMetadata[requestParameterUtmMedium] = v[0]
+	}
+	if v, ok := params[requestParameterUtmCampaign]; ok {
+		oReq.PrivateMetadata[requestParameterUtmCampaign] = v[0]
 	}
 
 	order, err := r.billingService.OrderCreateProcess(context.Background(), oReq)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		r.logError("Cannot create order for paylink", []interface{}{"error", err.Error(), "request", req})
+		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
-	InlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Id)
-
-	q, err := query.Values(utmQuery)
-	if err == nil {
-		encodedQuery := q.Encode()
-		if encodedQuery != "" {
-			InlineFormRedirectUrl += "?" + encodedQuery
-		}
-	} else {
-		r.logError("Utm query encoding failed", []interface{}{"error", err.Error(), "request", req})
+	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Id)
+	qs := ctx.QueryString()
+	if qs != "" {
+		inlineFormRedirectUrl += "?" + qs
 	}
 
 	go func() {
-		_, err := r.paylinkService.IncrPaylinkVisits(context.Background(), req)
+		_, err := r.paylinkService.IncrPaylinkVisits(context.Background(), &paylink.PaylinkRequest{
+			Id: paylinkId,
+		})
 		if err != nil {
 			r.logError("Cannot update paylink stat", []interface{}{"error", err.Error(), "request", req})
 		}
 	}()
-	return ctx.Redirect(http.StatusFound, InlineFormRedirectUrl)
+	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)
 }
 
 // @Summary Get order data

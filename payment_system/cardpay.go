@@ -373,6 +373,17 @@ func (cp *CardPay) getToken(pmKey string) *Token {
 func (cp *CardPay) getCardPayOrder() (*entity.CardPayOrder, error) {
 	var err error
 
+	items := []*entity.CardPayItem{}
+
+	for _, it := range cp.Order.Items {
+		items = append(items, &entity.CardPayItem{
+			Name:        it.Name,
+			Description: it.Description,
+			Count:       1,
+			Price:       it.Amount,
+		})
+	}
+
 	o := &entity.CardPayOrder{
 		Request: &entity.CardPayRequest{
 			Id:   uuid.NewV4().String(),
@@ -381,14 +392,7 @@ func (cp *CardPay) getCardPayOrder() (*entity.CardPayOrder, error) {
 		MerchantOrder: &entity.CardPayMerchantOrder{
 			Id:          cp.Order.Id.Hex(),
 			Description: cp.Order.Description,
-			Items: []*entity.CardPayItem{
-				{
-					Name:        cp.Order.FixedPackage.Name,
-					Description: cp.Order.FixedPackage.Name,
-					Count:       1,
-					Price:       cp.Order.FixedPackage.Price,
-				},
-			},
+			Items:       items,
 		},
 		Description:   cp.Order.Description,
 		PaymentMethod: cp.Order.PaymentMethod.Params.ExternalId,
