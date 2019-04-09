@@ -138,6 +138,12 @@ func (r *onboardingRoute) listMerchants(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
 	rsp, err := r.billingService.ListMerchants(context.TODO(), req)
 
 	if err != nil {

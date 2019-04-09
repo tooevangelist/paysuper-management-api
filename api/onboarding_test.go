@@ -252,6 +252,26 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_BindingError() {
 	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
 }
 
+func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_ValidationError() {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set(requestParameterOffset, "-10")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err := suite.handler.listMerchants(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Regexp(suite.T(), "Offset", httpErr.Message)
+}
+
 func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_BillingServiceUnavailable_Error() {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)

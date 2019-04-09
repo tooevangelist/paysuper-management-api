@@ -2715,6 +2715,12 @@ paths:
           in: query
           name: last_payout_amount
           type: integer
+        - description: array of merchant statuses
+          in: query
+          name: status
+          type: array
+          items:
+            type: integer
         - description: maximum number of returning orders. default value is 100
           in: query
           name: limit
