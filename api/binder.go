@@ -213,18 +213,18 @@ func (cb *PaymentCreateProcessBinder) Bind(i interface{}, ctx echo.Context) (err
 }
 
 func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+	db := new(echo.DefaultBinder)
+	err = db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
 	params := ctx.QueryParams()
 	structure := i.(*grpc.MerchantListingRequest)
 
-	structure.Limit = LimitDefault
-	structure.Offset = OffsetDefault
-
-	if v, ok := params[requestParameterQuickSearch]; ok {
-		structure.QuickSearch = v[0]
-	}
-
-	if v, ok := params[requestParameterName]; ok {
-		structure.Name = v[0]
+	if structure.Limit <= 0 {
+		structure.Limit = LimitDefault
 	}
 
 	if v, ok := params[requestParameterIsSigned]; ok {
@@ -236,40 +236,6 @@ func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context)
 			} else {
 				return errors.New(errorQueryParamsIncorrect)
 			}
-		}
-	}
-
-	if v, ok := params[requestParameterLastPayoutDateFrom]; ok {
-		if ts, err := strconv.ParseInt(v[0], 10, 64); err == nil {
-			structure.LastPayoutDateFrom = ts
-		}
-	}
-
-	if v, ok := params[requestParameterLastPayoutDateTo]; ok {
-		if ts, err := strconv.ParseInt(v[0], 10, 64); err == nil {
-			structure.LastPayoutDateTo = ts
-		}
-	}
-
-	if v, ok := params[requestParameterLastPayoutAmount]; ok {
-		if f, err := strconv.ParseFloat(v[0], 64); err == nil {
-			structure.LastPayoutAmount = f
-		}
-	}
-
-	if v, ok := params[requestParameterSort]; ok {
-		structure.Sort = v
-	}
-
-	if v, ok := params[requestParameterLimit]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			structure.Limit = int32(i)
-		}
-	}
-
-	if v, ok := params[requestParameterOffset]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			structure.Offset = int32(i)
 		}
 	}
 
