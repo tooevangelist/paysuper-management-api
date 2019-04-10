@@ -36,15 +36,11 @@ func (cm *CountryManager) FindByName(name string) []*model.Country {
 	return c
 }
 
-func (cm *CountryManager) FindAll(limit int32, offset int32) []*model.Country {
+func (cm *CountryManager) FindAll(limit int32, offset int32) *model.CountryItems {
 	c, err := cm.Database.Repository(TableCountry).FindAllCountries(limit, offset)
 
 	if err != nil {
 		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCountry, err)
-	}
-
-	if c == nil {
-		return []*model.Country{}
 	}
 
 	return c
