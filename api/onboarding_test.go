@@ -943,6 +943,30 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_Ok() {
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
+func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BindError() {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set(requestParameterOffset, "some_invalid_value")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:merchant_id/notifications")
+	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.listNotifications(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+}
+
 func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_ValidationError() {
 	e := echo.New()
 
@@ -964,7 +988,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_ValidationErr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIncorrectUserId, httpErr.Message)
+	assert.Regexp(suite.T(), "UserId", httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BillingServerError() {
@@ -1143,7 +1167,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_ValidationEr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIncorrectMerchantId, httpErr.Message)
+	assert.Regexp(suite.T(), "MerchantId", httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_BillingServer_Error() {

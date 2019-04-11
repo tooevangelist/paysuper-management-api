@@ -34,7 +34,6 @@ type OnboardingMerchantListingBinder struct{}
 type OnboardingChangeMerchantStatusBinder struct{}
 type OnboardingNotificationsListBinder struct{}
 type OnboardingGetPaymentMethodBinder struct{}
-type OnboardingListPaymentMethodsBinder struct{}
 type OnboardingChangePaymentMethodBinder struct{}
 type OnboardingCreateNotificationBinder struct{}
 type PaylinksListBinder struct{}
@@ -243,26 +242,19 @@ func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context)
 }
 
 func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Context) error {
-	params := ctx.QueryParams()
-	structure := i.(*grpc.ListingNotificationRequest)
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
 
-	structure.Limit = LimitDefault
-	structure.Offset = OffsetDefault
-
-	merchantId := ctx.Param(requestParameterMerchantId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return errors.New(errorIncorrectMerchantId)
+	if err != nil {
+		return err
 	}
 
-	structure.MerchantId = merchantId
+	params := ctx.QueryParams()
+	structure := i.(*grpc.ListingNotificationRequest)
+	structure.MerchantId = ctx.Param(requestParameterMerchantId)
 
-	if v, ok := params[requestParameterUserId]; ok {
-		if bson.IsObjectIdHex(v[0]) == false {
-			return errors.New(errorIncorrectUserId)
-		}
-
-		structure.UserId = v[0]
+	if structure.Limit <= 0 {
+		structure.Limit = LimitDefault
 	}
 
 	if v, ok := params[requestParameterIsSystem]; ok {
@@ -270,18 +262,6 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 			structure.IsSystem = 1
 		} else {
 			structure.IsSystem = 2
-		}
-	}
-
-	if v, ok := params[requestParameterLimit]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			structure.Limit = int32(i)
-		}
-	}
-
-	if v, ok := params[requestParameterOffset]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			structure.Offset = int32(i)
 		}
 	}
 
@@ -303,21 +283,6 @@ func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context
 	structure := i.(*grpc.GetMerchantPaymentMethodRequest)
 	structure.MerchantId = merchantId
 	structure.PaymentMethodId = paymentMethodId
-
-	return nil
-}
-
-func (cb *OnboardingListPaymentMethodsBinder) Bind(i interface{}, ctx echo.Context) error {
-	merchantId := ctx.Param(requestParameterMerchantId)
-	paymentMethodName := ctx.QueryParam(requestParameterPaymentMethodName)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return errors.New(errorIncorrectMerchantId)
-	}
-
-	structure := i.(*grpc.ListMerchantPaymentMethodsRequest)
-	structure.MerchantId = merchantId
-	structure.PaymentMethodName = paymentMethodName
 
 	return nil
 }

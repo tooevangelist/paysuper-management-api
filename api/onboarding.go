@@ -258,7 +258,13 @@ func (r *onboardingRoute) listNotifications(ctx echo.Context) error {
 	err := (&OnboardingNotificationsListBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListNotifications(context.TODO(), req)
@@ -314,10 +320,17 @@ func (r *onboardingRoute) getPaymentMethod(ctx echo.Context) error {
 
 func (r *onboardingRoute) listPaymentMethods(ctx echo.Context) error {
 	req := &grpc.ListMerchantPaymentMethodsRequest{}
-	err := (&OnboardingListPaymentMethodsBinder{}).Bind(req, ctx)
+	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	req.MerchantId = ctx.Param(requestParameterMerchantId)
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListMerchantPaymentMethods(context.TODO(), req)
