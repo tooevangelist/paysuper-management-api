@@ -32,7 +32,7 @@ type ProjectScalar struct {
 	// list of emails to send notifications about successfully completed payment operations
 	NotifyEmails []string `json:"notify_emails" validate:"unique"`
 	// is allow create order only with amounts from fixed packages list
-	OnlyFixedAmounts bool `json:"only_fixed_amounts"`
+	IsProductsCheckout bool `json:"is_products_checkout"`
 	// secret key for create check hash for request about order statuses changes
 	SecretKey string `json:"secret_key" validate:"max=255"`
 	// is allow send notifications about successfully completed payment operations to user's emails
@@ -79,7 +79,7 @@ type Project struct {
 	// list of emails to send notifications about successfully completed payment operations
 	NotifyEmails []string `bson:"notify_emails" json:"notify_emails"`
 	// is allow create order only with amounts from fixed packages list
-	OnlyFixedAmounts bool `bson:"only_fixed_amounts" json:"only_fixed_amounts"`
+	IsProductsCheckout bool `bson:"is_products_checkout" json:"is_products_checkout"`
 	// secret key for create check hash for request about order statuses changes
 	SecretKey string `bson:"secret_key" json:"secret_key"`
 	// is allow send notifications about successfully completed payment operations to user's emails

@@ -49,7 +49,7 @@ func (pm *ProjectManager) Create(ps *model.ProjectScalar) (*model.Project, error
 		CreateInvoiceAllowedUrls:   ps.CreateInvoiceAllowedUrls,
 		IsAllowDynamicNotifyUrls:   ps.IsAllowDynamicNotifyUrls,
 		IsAllowDynamicRedirectUrls: ps.IsAllowDynamicRedirectUrls,
-		OnlyFixedAmounts:           ps.OnlyFixedAmounts,
+		IsProductsCheckout:         ps.IsProductsCheckout,
 		FixedPackage:               pm.processFixedPackages(ps.FixedPackage, true),
 		SecretKey:                  ps.SecretKey,
 		URLCheckAccount:            ps.URLCheckAccount,
@@ -120,8 +120,8 @@ func (pm *ProjectManager) Update(p *model.Project, pn *model.ProjectScalar) (*mo
 		p.IsAllowDynamicRedirectUrls = pn.IsAllowDynamicRedirectUrls
 	}
 
-	if p.OnlyFixedAmounts != pn.OnlyFixedAmounts {
-		p.OnlyFixedAmounts = pn.OnlyFixedAmounts
+	if p.IsProductsCheckout != pn.IsProductsCheckout {
+		p.IsProductsCheckout = pn.IsProductsCheckout
 	}
 
 	if p.SecretKey != pn.SecretKey {

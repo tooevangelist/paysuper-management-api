@@ -847,9 +847,9 @@ definitions:
         items:
           type: string
         type: array
-      only_fixed_amounts:
+      is_products_checkout:
         description: |
-          is allow create order only with amounts from fixed packages list
+          is allow create order only with amounts from products list
         type: boolean
       payment_methods:
         description: |
@@ -977,7 +977,7 @@ definitions:
         items:
           type: string
         type: array
-      only_fixed_amounts:
+      is_products_checkout:
         description: |
           is allow create order only with amounts from fixed packages list
         type: boolean

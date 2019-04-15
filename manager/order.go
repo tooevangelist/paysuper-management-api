@@ -140,7 +140,6 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	var pm *model.PaymentMethod
 	var pmOutcomeData *pmOutcomeData
 	var gRecord *proto.GeoIpDataResponse
-	var ofp *model.OrderFixedPackage
 	var err error
 
 	p := om.projectManager.FindProjectById(order.ProjectId)
@@ -194,21 +193,6 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 	}
 
 	check.paymentMethod = pm
-
-	if p.OnlyFixedAmounts == true {
-		gRecord, ofp, err = om.getOrderFixedPackage(check)
-
-		if err != nil {
-			return nil, err
-		}
-
-		if order.Currency == nil || *order.Currency == "" {
-			order.Currency = &ofp.Currency.CodeA3
-			check.order.Currency = order.Currency
-			check.oCurrency = ofp.Currency
-			oCurrency = ofp.Currency
-		}
-	}
 
 	if err = om.checkProjectLimits(check); err != nil {
 		return nil, err
@@ -281,7 +265,6 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		Status:                             model.OrderStatusNew,
 		CreatedAt:                          time.Now(),
 		IsJsonRequest:                      order.IsJsonRequest,
-		FixedPackage:                       ofp,
 		AmountInMerchantAccountingCurrency: FormatAmount(mACAmount),
 	}
 
@@ -832,7 +815,6 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 					Name:    oValue.ProjectIncomeCurrency.Name,
 				},
 			},
-			FixedPackage: oValue.FixedPackage,
 			Status: &model.Status{
 				Status:      oValue.Status,
 				Name:        model.OrderStatusesNames[oValue.Status],
@@ -1655,19 +1637,8 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		AmountInPaymentSystemAccountingCurrency: o.AmountInPaymentSystemAccountingCurrency,
 		PaymentMethodPayerAccount:               o.PaymentMethodPayerAccount,
 		PaymentMethodTxnParams:                  sPaymentMethodTxnParams,
-		FixedPackage: &billing.FixedPackage{
-			Id:   o.FixedPackage.Id,
-			Name: o.FixedPackage.Name,
-			Currency: &billing.Currency{
-				CodeInt:  int32(o.FixedPackage.CurrencyInt),
-				CodeA3:   o.FixedPackage.Currency.CodeA3,
-				Name:     &billing.Name{En: o.FixedPackage.Currency.Name.EN, Ru: o.FixedPackage.Currency.Name.RU},
-				IsActive: o.FixedPackage.Currency.IsActive,
-			},
-			Price:    o.FixedPackage.Price,
-			IsActive: true,
-		},
-		PaymentRequisites: o.PaymentRequisites,
+		Items:                                   o.Items,
+		PaymentRequisites:                       o.PaymentRequisites,
 		PspFeeAmount: &billing.OrderFeePsp{
 			AmountPaymentMethodCurrency: o.PspFeeAmount.AmountPaymentMethodCurrency,
 			AmountMerchantCurrency:      o.PspFeeAmount.AmountMerchantCurrency,
