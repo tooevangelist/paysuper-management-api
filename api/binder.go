@@ -385,7 +385,8 @@ func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
 	params := ctx.QueryParams()
 	structure := i.(*paylink.GetPaylinkURLRequest)
 
-	structure.Id = ctx.Param(requestParameterId)
+	id := ctx.Param(requestParameterId)
+	structure.Id = id
 
 	if v, ok := params[requestParameterUtmSource]; ok {
 		structure.UtmSource = v[0]
