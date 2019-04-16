@@ -7,7 +7,7 @@ import (
 
 func (rep *Repository) FindMerchantById(id string) (*model.Merchant, error) {
 	var m *model.Merchant
-	err := rep.Collection.Find(bson.M{"external_id": id}).One(&m)
+	err := rep.Collection.Find(bson.M{"user.id": id}).One(&m)
 
 	return m, err
 }
