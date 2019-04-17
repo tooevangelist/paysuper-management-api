@@ -38,6 +38,7 @@ backend:
   - S3_ENDPOINT
   - S3_BUCKET_NAME
   - S3_REGION
+  - ENVIRONMENT
   
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

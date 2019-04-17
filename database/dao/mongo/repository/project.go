@@ -15,7 +15,7 @@ func (rep *Repository) UpdateProject(p *model.Project) error {
 
 func (rep *Repository) FindProjectsByMerchantId(mId string, limit int32, offset int32) ([]*model.Project, error) {
 	var p []*model.Project
-	err := rep.Collection.Find(bson.M{"merchant.external_id": mId}).Limit(int(limit)).Skip(int(offset)).All(&p)
+	err := rep.Collection.Find(bson.M{"merchant.user.id": mId}).Limit(int(limit)).Skip(int(offset)).All(&p)
 
 	return p, err
 }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
@@ -98,11 +99,7 @@ func (pApiV1 *ProjectApiV1) create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Merchant not found")
 	}
 
-	if ps.Merchant.Status < model.MerchantStatusCompleted {
-		return echo.NewHTTPError(http.StatusBadRequest, "Merchant data not set")
-	}
-
-	if p := pApiV1.projectManager.FindProjectsByMerchantIdAndName(ps.Merchant.Id, ps.Name); p != nil {
+	if p := pApiV1.projectManager.FindProjectsByMerchantIdAndName(bson.ObjectIdHex(ps.Merchant.Id), ps.Name); p != nil {
 		return ctx.JSON(http.StatusCreated, p)
 	}
 
@@ -136,7 +133,7 @@ func (pApiV1 *ProjectApiV1) update(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Project not found")
 	}
 
-	if p.Merchant.ExternalId != pApiV1.Merchant.Identifier {
+	if p.Merchant.User.Id != pApiV1.Merchant.Identifier {
 		return echo.NewHTTPError(http.StatusForbidden, "Access denied")
 	}
 
@@ -150,7 +147,7 @@ func (pApiV1 *ProjectApiV1) update(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
-	pf := pApiV1.projectManager.FindProjectsByMerchantIdAndName(p.Merchant.Id, ps.Name)
+	pf := pApiV1.projectManager.FindProjectsByMerchantIdAndName(bson.ObjectIdHex(p.Merchant.Id), ps.Name)
 
 	if pf != nil && pf.Id != p.Id {
 		return echo.NewHTTPError(http.StatusBadRequest, "Project with received name already exist")
@@ -184,7 +181,7 @@ func (pApiV1 *ProjectApiV1) delete(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Project not found")
 	}
 
-	if p.Merchant.ExternalId != pApiV1.Merchant.Identifier {
+	if p.Merchant.User.Id != pApiV1.Merchant.Identifier {
 		return echo.NewHTTPError(http.StatusForbidden, model.ResponseMessageAccessDenied)
 	}
 

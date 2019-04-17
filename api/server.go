@@ -241,9 +241,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		jwtMiddleware.AuthOneJwtCallableWithConfig(
 			api.jwtVerifier,
 			func(ui *jwtverifier.UserInfo) {
-				api.Merchant.Identifier = string(ui.UserID)
-				// TODO: Remove this line after merchant registration is completed.
-				api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
+				api.Merchant.Identifier = ui.UserID
 			},
 		),
 	)
@@ -391,23 +389,6 @@ func (api *Api) Stop() {
 
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
-}
-
-func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		//user := c.Get("user").(*jwt.Token)
-		//claims := user.Claims.(jwt.MapClaims)
-
-		//id, ok := claims["id"]
-
-		//if !ok {
-		//	c.Error(errors.New("merchant identifier not found"))
-		//}
-
-		api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
-
-		return next(c)
-	}
 }
 
 func (api *Api) getUserDetailsMiddleware(next echo.HandlerFunc) echo.HandlerFunc {

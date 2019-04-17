@@ -710,6 +710,8 @@ github.com/paysuper/paysuper-payment-link v0.0.0-20190401082336-aa36adc99443 h1:
 github.com/paysuper/paysuper-payment-link v0.0.0-20190401082336-aa36adc99443/go.mod h1:jcQ0WSq/oSidIl4OQBRKvzXJtRsy0BX/QJqx1pkMDjU=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190408102122-e82f2921e70c h1:Z3ILMXfuaYCOfdwH5DjvtHrWGRwsSS1RCfwmd1BA+ag=
 github.com/paysuper/paysuper-payment-link v0.0.0-20190408102122-e82f2921e70c/go.mod h1:jcQ0WSq/oSidIl4OQBRKvzXJtRsy0BX/QJqx1pkMDjU=
+github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c h1:fBFTfwVqz+sRppaBxVDVbK/t+1wrm/C1C7c0zNDOUiI=
+github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c/go.mod h1:jcQ0WSq/oSidIl4OQBRKvzXJtRsy0BX/QJqx1pkMDjU=
 github.com/paysuper/paysuper-recurring-repository v1.0.99 h1:3VSKIVwtxMgKUMBjz92GjwBPSqpA1g4bY0N684Rn+6s=
 github.com/paysuper/paysuper-recurring-repository v1.0.99/go.mod h1:5jCFa70wHevei2I6zA0gg5DWSTDIe17P4OPbTFZCMFs=
 github.com/paysuper/paysuper-recurring-repository v1.0.101-0.20190417080120-d79dde7c536a h1:v/A3psQRLMreJnkafjNc/W+cht3V/XPR1U6Pl319kPE=

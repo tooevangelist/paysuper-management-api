@@ -213,7 +213,7 @@ type Order struct {
 	// order amount send to project in notification request
 	ProjectOutcomeAmount float64 `bson:"project_outcome_amount" json:"project_outcome_amount"`
 	// order currency send to project in notification request
-	ProjectOutcomeCurrency *Currency `bson:"project_outcome_currency" json:"project_outcome_currency"`
+	ProjectOutcomeCurrency *billing.Currency `bson:"project_outcome_currency" json:"project_outcome_currency"`
 	// date of last notification request to project
 	ProjectLastRequestedAt *time.Time `bson:"project_last_requested_at" json:"project_last_requested_at,omitempty"`
 	// any project params which received from project in request of create of order

@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"time"
 )
 
@@ -50,26 +51,26 @@ type ProjectScalar struct {
 	// list of project's fixed packages
 	FixedPackage map[string][]*FixedPackage `json:"fixed_package,omitempty"`
 
-	Merchant *Merchant `json:"-"`
+	Merchant *billing.Merchant `json:"-"`
 }
 
 type Project struct {
 	// unique project identifier
 	Id bson.ObjectId `bson:"_id" json:"id"`
 	// full object of currency which described currency to send payment notification
-	CallbackCurrency *Currency `bson:"callback_currency" json:"callback_currency"`
+	CallbackCurrency *billing.Currency `bson:"callback_currency" json:"callback_currency"`
 	// protocol identifier to send payment notification. Now available: default
 	CallbackProtocol string `bson:"callback_protocol" json:"callback_protocol"`
 	// list of urls rom which you can send a request to create an order
 	CreateInvoiceAllowedUrls []string `bson:"create_invoice_allowed_urls" json:"create_invoice_allowed_urls"`
 	// full object of merchant which describes project's owner
-	Merchant *Merchant `bson:"merchant" json:"-"`
+	Merchant *billing.Merchant `bson:"merchant" json:"-"`
 	// is allow send dynamic notification urls in request to create an order
 	IsAllowDynamicNotifyUrls bool `bson:"is_allow_dynamic_notify_urls" json:"is_allow_dynamic_notify_urls"`
 	// is allow send dynamic user's redirect urls in request to create an order
 	IsAllowDynamicRedirectUrls bool `bson:"is_allow_dynamic_redirect_urls" json:"is_allow_dynamic_redirect_urls"`
 	// full object of currency which describes currency for amount's limit
-	LimitsCurrency *Currency `bson:"limits_currency" json:"limits_currency"`
+	LimitsCurrency *billing.Currency `bson:"limits_currency" json:"limits_currency"`
 	// maximal amount allowed for create order
 	MaxPaymentAmount float64 `bson:"max_payment_amount" json:"max_payment_amount"`
 	// minimal amount allowed for create order
@@ -104,17 +105,17 @@ type Project struct {
 }
 
 type ProjectOrder struct {
-	Id                bson.ObjectId `bson:"id" json:"id"`
-	Name              string        `bson:"name" json:"name"`
-	UrlSuccess        string        `bson:"url_success" json:"url_success"`
-	UrlFail           string        `bson:"url_fail" json:"url_fail"`
-	NotifyEmails      []string      `bson:"notify_emails" json:"notify_emails"`
-	SecretKey         string        `bson:"secret_key" json:"secret_key"`
-	SendNotifyEmail   bool          `bson:"send_notify_email" json:"send_notify_email"`
-	URLCheckAccount   string        `bson:"url_check_account" json:"url_check_account"`
-	URLProcessPayment string        `bson:"url_process_payment" json:"url_process_payment"`
-	CallbackProtocol  string        `bson:"callback_protocol" json:"callback_protocol"`
-	Merchant          *Merchant     `bson:"merchant" json:"merchant"`
+	Id                bson.ObjectId     `bson:"id" json:"id"`
+	Name              string            `bson:"name" json:"name"`
+	UrlSuccess        string            `bson:"url_success" json:"url_success"`
+	UrlFail           string            `bson:"url_fail" json:"url_fail"`
+	NotifyEmails      []string          `bson:"notify_emails" json:"notify_emails"`
+	SecretKey         string            `bson:"secret_key" json:"secret_key"`
+	SendNotifyEmail   bool              `bson:"send_notify_email" json:"send_notify_email"`
+	URLCheckAccount   string            `bson:"url_check_account" json:"url_check_account"`
+	URLProcessPayment string            `bson:"url_process_payment" json:"url_process_payment"`
+	CallbackProtocol  string            `bson:"callback_protocol" json:"callback_protocol"`
+	Merchant          *billing.Merchant `bson:"merchant" json:"merchant"`
 }
 
 // contain data about project

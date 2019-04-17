@@ -99,7 +99,7 @@ type pmOutcomeData struct {
 type FindAll struct {
 	Values   url.Values
 	Projects map[bson.ObjectId]string
-	Merchant *model.Merchant
+	Merchant *billing.Merchant
 	Limit    int32
 	Offset   int32
 	SortBy   []string
@@ -218,8 +218,8 @@ func (om *OrderManager) Process(order *model.OrderScalar) (*model.Order, error) 
 		return nil, errors.New(orderErrorDynamicRedirectUrlsNotAllowed)
 	}
 
-	mACAmount, _ := om.currencyRateManager.convert(oCurrency.CodeInt, p.Merchant.Currency.CodeInt, order.Amount)
-	pOutAmount, _ := om.currencyRateManager.convert(oCurrency.CodeInt, p.CallbackCurrency.CodeInt, order.Amount)
+	mACAmount, _ := om.currencyRateManager.convert(oCurrency.CodeInt, int(p.Merchant.Banking.Currency.CodeInt), order.Amount)
+	pOutAmount, _ := om.currencyRateManager.convert(oCurrency.CodeInt, int(p.CallbackCurrency.CodeInt), order.Amount)
 
 	id := bson.NewObjectId()
 
@@ -378,7 +378,7 @@ func (om *OrderManager) ProcessOrderCommissions(o *model.Order) (*model.Order, e
 
 	var cCom float64
 
-	mAccCur := o.Project.Merchant.Currency.CodeInt
+	mAccCur := o.Project.Merchant.Banking.Currency.CodeInt
 	pmOutCur := o.PaymentMethodOutcomeCurrency.CodeInt
 
 	totalCommission := commissions.PMCommission + commissions.PspCommission
@@ -396,7 +396,7 @@ func (om *OrderManager) ProcessOrderCommissions(o *model.Order) (*model.Order, e
 		}
 
 		// convert amount of fee shifted to user to accounting currency of merchant
-		if cCom, err = om.currencyRateManager.convert(pmOutCur, mAccCur, commissions.ToUserCommission); err != nil {
+		if cCom, err = om.currencyRateManager.convert(pmOutCur, int(mAccCur), commissions.ToUserCommission); err != nil {
 			return nil, err
 		}
 
@@ -408,7 +408,7 @@ func (om *OrderManager) ProcessOrderCommissions(o *model.Order) (*model.Order, e
 	}
 
 	// convert amount of fee to project to accounting currency of merchant
-	if cCom, err = om.currencyRateManager.convert(pmOutCur, mAccCur, totalCommission); err != nil {
+	if cCom, err = om.currencyRateManager.convert(pmOutCur, int(mAccCur), totalCommission); err != nil {
 		return nil, err
 	}
 
@@ -419,7 +419,7 @@ func (om *OrderManager) ProcessOrderCommissions(o *model.Order) (*model.Order, e
 	}
 
 	// convert PSP amount of fee to accounting currency of merchant
-	if cCom, err = om.currencyRateManager.convert(pmOutCur, mAccCur, commissions.PspCommission); err != nil {
+	if cCom, err = om.currencyRateManager.convert(pmOutCur, int(mAccCur), commissions.PspCommission); err != nil {
 		return nil, err
 	}
 
@@ -447,7 +447,7 @@ func (om *OrderManager) ProcessOrderCommissions(o *model.Order) (*model.Order, e
 	o.PaymentSystemFeeAmount.AmountPaymentSystemCurrency = FormatAmount(cCom)
 
 	// convert payment system amount of fee to accounting currency of merchant
-	if cCom, err = om.currencyRateManager.convert(pmOutCur, mAccCur, commissions.PMCommission); err != nil {
+	if cCom, err = om.currencyRateManager.convert(pmOutCur, int(mAccCur), commissions.PMCommission); err != nil {
 		return nil, err
 	}
 
@@ -592,7 +592,7 @@ func (om *OrderManager) checkProjectLimits(c *check) error {
 	cAmount := c.order.Amount
 
 	if c.oCurrency != nil && c.oCurrency.CodeA3 != c.project.LimitsCurrency.CodeA3 {
-		cAmount, err = om.currencyRateManager.convert(c.oCurrency.CodeInt, c.project.LimitsCurrency.CodeInt, c.order.Amount)
+		cAmount, err = om.currencyRateManager.convert(c.oCurrency.CodeInt, int(c.project.LimitsCurrency.CodeInt), c.order.Amount)
 
 		if err != nil {
 			return err
@@ -839,9 +839,9 @@ func (om *OrderManager) transformOrders(orders []*model.Order, params *FindAll) 
 			tOrder.ProjectAmountOutcome = &model.OrderSimpleAmountObject{
 				Amount: oValue.AmountOutMerchantAccountingCurrency,
 				Currency: &model.SimpleCurrency{
-					CodeInt: params.Merchant.Currency.CodeInt,
-					CodeA3:  params.Merchant.Currency.CodeA3,
-					Name:    params.Merchant.Currency.Name,
+					CodeInt: int(params.Merchant.Banking.Currency.CodeInt),
+					CodeA3:  params.Merchant.Banking.Currency.CodeA3,
+					Name:    &model.Name{EN: params.Merchant.Banking.Currency.Name.En},
 				},
 			}
 		}
@@ -1177,7 +1177,7 @@ func (om *OrderManager) processNotifyPaymentAmounts(o *model.Order) (*model.Orde
 
 	o.ProjectOutcomeAmount, err = om.currencyRateManager.convert(
 		o.PaymentMethodIncomeCurrency.CodeInt,
-		o.ProjectOutcomeCurrency.CodeInt,
+		int(o.ProjectOutcomeCurrency.CodeInt),
 		o.PaymentMethodIncomeAmount,
 	)
 
@@ -1201,7 +1201,7 @@ func (om *OrderManager) processNotifyPaymentAmounts(o *model.Order) (*model.Orde
 
 	o.AmountOutMerchantAccountingCurrency, err = om.currencyRateManager.convert(
 		o.PaymentMethodIncomeCurrency.CodeInt,
-		o.Project.Merchant.Currency.CodeInt,
+		int(o.Project.Merchant.Banking.Currency.CodeInt),
 		o.PaymentMethodIncomeAmount,
 	)
 
@@ -1431,7 +1431,7 @@ func (om *OrderManager) updateOrderAccountingAmounts(o *model.Order) (*model.Ord
 	o.AmountInPSPAccountingCurrency = FormatAmount(cAmount)
 
 	// calculate and save order amount in merchant accounting currency
-	cAmount, err = om.currencyRateManager.convert(o.ProjectIncomeCurrency.CodeInt, o.Project.Merchant.Currency.CodeInt, o.ProjectIncomeAmount)
+	cAmount, err = om.currencyRateManager.convert(o.ProjectIncomeCurrency.CodeInt, int(o.Project.Merchant.Banking.Currency.CodeInt), o.ProjectIncomeAmount)
 
 	if err != nil {
 		return nil, err
@@ -1546,12 +1546,12 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 			SecretKey:        o.Project.SecretKey,
 			CallbackProtocol: o.Project.CallbackProtocol,
 			Merchant: &billing.Merchant{
-				Id: o.Project.Merchant.Id.Hex(),
+				Id: o.Project.Merchant.Id,
 				Country: &billing.Country{
 					CodeInt:  int32(o.Project.Merchant.Country.CodeInt),
 					CodeA2:   o.Project.Merchant.Country.CodeA2,
 					CodeA3:   o.Project.Merchant.Country.CodeA3,
-					Name:     &billing.Name{En: o.Project.Merchant.Country.Name.EN, Ru: o.Project.Merchant.Country.Name.RU},
+					Name:     &billing.Name{En: o.Project.Merchant.Country.Name.En, Ru: o.Project.Merchant.Country.Name.Ru},
 					IsActive: o.Project.Merchant.Country.IsActive,
 				},
 				IsVatEnabled:              o.Project.Merchant.IsVatEnabled,
@@ -1572,7 +1572,7 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		ProjectOutcomeCurrency: &billing.Currency{
 			CodeInt:  int32(o.ProjectOutcomeCurrency.CodeInt),
 			CodeA3:   o.ProjectOutcomeCurrency.CodeA3,
-			Name:     &billing.Name{En: o.ProjectOutcomeCurrency.Name.EN, Ru: o.ProjectOutcomeCurrency.Name.RU},
+			Name:     &billing.Name{En: o.ProjectOutcomeCurrency.Name.En, Ru: o.ProjectOutcomeCurrency.Name.Ru},
 			IsActive: o.ProjectOutcomeCurrency.IsActive,
 		},
 		ProjectParams: sProjectParams,
@@ -1719,42 +1719,12 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		pOrder.PaymentMethod.PaymentSystem.UpdatedAt = v
 	}
 
-	if v, err := ptypes.TimestampProto(o.ProjectOutcomeCurrency.CreatedAt); err == nil {
-		pOrder.ProjectOutcomeCurrency.CreatedAt = v
-	}
-
-	if v, err := ptypes.TimestampProto(o.ProjectOutcomeCurrency.UpdatedAt); err == nil {
-		pOrder.ProjectOutcomeCurrency.UpdatedAt = v
-	}
-
 	if v, err := ptypes.TimestampProto(o.ProjectIncomeCurrency.CreatedAt); err == nil {
 		pOrder.ProjectIncomeCurrency.CreatedAt = v
 	}
 
 	if v, err := ptypes.TimestampProto(o.ProjectIncomeCurrency.UpdatedAt); err == nil {
 		pOrder.ProjectIncomeCurrency.UpdatedAt = v
-	}
-
-	if v, err := ptypes.TimestampProto(o.Project.Merchant.CreatedAt); err == nil {
-		pOrder.Project.Merchant.CreatedAt = v
-	}
-
-	if v, err := ptypes.TimestampProto(o.Project.Merchant.UpdatedAt); err == nil {
-		pOrder.Project.Merchant.UpdatedAt = v
-	}
-
-	if v, err := ptypes.TimestampProto(o.Project.Merchant.Country.CreatedAt); err == nil {
-		pOrder.Project.Merchant.Country.CreatedAt = v
-	}
-
-	if v, err := ptypes.TimestampProto(o.Project.Merchant.Country.UpdatedAt); err == nil {
-		pOrder.Project.Merchant.Country.UpdatedAt = v
-	}
-
-	if o.Project.Merchant.FirstPaymentAt != nil {
-		if v, err := ptypes.TimestampProto(*o.Project.Merchant.FirstPaymentAt); err == nil {
-			pOrder.Project.Merchant.FirstPaymentAt = v
-		}
 	}
 
 	if o.PayerData.Phone != nil {
