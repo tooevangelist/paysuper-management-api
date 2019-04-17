@@ -53,6 +53,9 @@ func (suite *OrderTestSuite) SetupTest() {
 
 	err := suite.api.validate.RegisterValidation("uuid", suite.api.UuidValidator)
 	assert.NoError(suite.T(), err, "Uuid validator registration failed")
+
+	err = suite.api.validate.RegisterValidation("phone", suite.api.PhoneValidator)
+	assert.NoError(suite.T(), err)
 }
 
 func (suite *OrderTestSuite) TearDownTest() {}
