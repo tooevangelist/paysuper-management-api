@@ -98,10 +98,6 @@ func (pApiV1 *ProjectApiV1) create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Merchant not found")
 	}
 
-	if ps.Merchant.Status < model.MerchantStatusCompleted {
-		return echo.NewHTTPError(http.StatusBadRequest, "Merchant data not set")
-	}
-
 	if p := pApiV1.projectManager.FindProjectsByMerchantIdAndName(ps.Merchant.Id, ps.Name); p != nil {
 		return ctx.JSON(http.StatusCreated, p)
 	}
