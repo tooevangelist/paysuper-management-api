@@ -17,7 +17,7 @@ type ProjectScalar struct {
 	// ISO 4217 numeric currency code to send payment notification
 	CallbackCurrency *int `json:"callback_currency,omitempty" validate:"omitempty,numeric"`
 	// protocol identifier to send payment notification. Now available: default
-	CallbackProtocol string `json:"callback_protocol" validate:"required,oneof=default"`
+	CallbackProtocol string `json:"callback_protocol" validate:"required,oneof=default,empty"`
 	// list of urls rom which you can send a request to create an order
 	CreateInvoiceAllowedUrls []string `json:"create_invoice_allowed_urls" validate:"unique"`
 	// is allow send dynamic notification urls in request to create an order
