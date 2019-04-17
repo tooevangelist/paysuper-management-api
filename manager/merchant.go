@@ -2,6 +2,7 @@ package manager
 
 import (
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"go.uber.org/zap"
@@ -14,7 +15,7 @@ func InitMerchantManager(database dao.Database, logger *zap.SugaredLogger) *Merc
 	return &MerchantManager{Database: database, Logger: logger}
 }
 
-func (mm *MerchantManager) FindById(id string) *model.Merchant {
+func (mm *MerchantManager) FindById(id string) *billing.Merchant {
 	m, err := mm.Database.Repository(TableMerchant).FindMerchantById(id)
 
 	if err != nil {
@@ -67,51 +68,46 @@ func (mm *MerchantManager) Create(ms *model.MerchantScalar) (*model.Merchant, er
 	return m, err
 }
 
-func (mm *MerchantManager) Update(m *model.Merchant, mn *model.MerchantScalar) (*model.Merchant, error) {
-	if mn.Currency != nil && (m.Currency == nil || m.Currency.CodeInt != *mn.Currency) {
-		cur, err := mm.Database.Repository(TableCurrency).FindCurrencyById(*mn.Currency)
+func (mm *MerchantManager) Update(m *billing.Merchant, mn *model.MerchantScalar) (*billing.Merchant, error) {
+	if mn.Currency != nil && (m.Banking.Currency == nil || int(m.Banking.Currency.CodeInt) != *mn.Currency) {
+		c, err := mm.Database.Repository(TableCurrency).FindCurrencyById(*mn.Currency)
 
 		if err == nil {
-			m.Currency = cur
+			m.Banking.Currency = &billing.Currency{
+				CodeInt:  int32(c.CodeInt),
+				CodeA3:   c.CodeA3,
+				Name:     &billing.Name{En: c.Name.EN, Ru: c.Name.RU},
+				IsActive: c.IsActive,
+			}
 		}
 	}
 
-	if mn.Country != nil && (m.Country == nil || m.Country.CodeInt != *mn.Country) {
+	if mn.Country != nil && (m.Country == nil || int(m.Country.CodeInt) != *mn.Country) {
 		ctr, err := mm.Database.Repository(TableCountry).FindCountryById(*mn.Country)
 
 		if err == nil {
-			m.Country = ctr
+			m.Country = &billing.Country{
+				CodeInt:  int32(ctr.CodeInt),
+				CodeA2:   ctr.CodeA2,
+				CodeA3:   ctr.CodeA3,
+				Name:     &billing.Name{En: ctr.Name.EN, Ru: ctr.Name.RU},
+				IsActive: ctr.IsActive,
+			}
 		}
 	}
 
-	if mn.Email != nil && m.Email != *mn.Email {
-		m.Email = *mn.Email
+	if mn.Email != nil && m.User.Email != *mn.Email {
+		m.User.Email = *mn.Email
 	}
 
-	if mn.Name != nil && m.Name != mn.Name {
-		m.Name = mn.Name
-	}
-
-	if mn.AccountingPeriod != nil && m.AccountingPeriod != mn.AccountingPeriod {
-		m.AccountingPeriod = mn.AccountingPeriod
-	}
-
-	if mm.IsComplete(m) {
-		m.Status = model.MerchantStatusCompleted
-	}
-
-	m.UpdatedAt = time.Now()
-
-	err := mm.Database.Repository(TableMerchant).UpdateMerchant(m)
-
-	if err != nil {
-		return nil, err
+	if mn.Name != nil && m.Name != *mn.Name {
+		m.Name = *mn.Name
 	}
 
 	return m, nil
 }
 
-func (mm *MerchantManager) Delete(m *model.Merchant) error {
+func (mm *MerchantManager) Delete(m *billing.Merchant) error {
 	m.Status = model.MerchantStatusDeleted
 
 	return mm.Database.Repository(TableMerchant).UpdateMerchant(m)

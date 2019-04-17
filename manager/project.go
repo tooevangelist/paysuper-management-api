@@ -3,6 +3,7 @@ package manager
 import (
 	"errors"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/sidmal/slug"
@@ -63,18 +64,28 @@ func (pm *ProjectManager) Create(ps *model.ProjectScalar) (*model.Project, error
 		UpdatedAt:                  time.Now(),
 	}
 
-	p.LimitsCurrency = p.Merchant.Currency
-	p.CallbackCurrency = p.Merchant.Currency
+	p.LimitsCurrency = p.Merchant.Banking.Currency
+	p.CallbackCurrency = p.Merchant.Banking.Currency
 
 	if ps.LimitsCurrency != nil {
 		if c := pm.currencyManager.FindByCodeInt(*ps.LimitsCurrency); c != nil {
-			p.LimitsCurrency = c
+			p.LimitsCurrency = &billing.Currency{
+				CodeInt:  int32(c.CodeInt),
+				CodeA3:   c.CodeA3,
+				Name:     &billing.Name{En: c.Name.EN, Ru: c.Name.RU},
+				IsActive: c.IsActive,
+			}
 		}
 	}
 
 	if ps.CallbackCurrency != nil {
 		if c := pm.currencyManager.FindByCodeInt(*ps.CallbackCurrency); c != nil {
-			p.CallbackCurrency = c
+			p.CallbackCurrency = &billing.Currency{
+				CodeInt:  int32(c.CodeInt),
+				CodeA3:   c.CodeA3,
+				Name:     &billing.Name{En: c.Name.EN, Ru: c.Name.RU},
+				IsActive: c.IsActive,
+			}
 		}
 	}
 
@@ -152,15 +163,25 @@ func (pm *ProjectManager) Update(p *model.Project, pn *model.ProjectScalar) (*mo
 		p.IsActive = pn.IsActive
 	}
 
-	if pn.LimitsCurrency != nil && (p.LimitsCurrency == nil || p.LimitsCurrency.CodeInt != *pn.LimitsCurrency) {
+	if pn.LimitsCurrency != nil && (p.LimitsCurrency == nil || int(p.LimitsCurrency.CodeInt) != *pn.LimitsCurrency) {
 		if c := pm.currencyManager.FindByCodeInt(*pn.LimitsCurrency); c != nil {
-			p.LimitsCurrency = c
+			p.LimitsCurrency = &billing.Currency{
+				CodeInt:  int32(c.CodeInt),
+				CodeA3:   c.CodeA3,
+				Name:     &billing.Name{En: c.Name.EN, Ru: c.Name.RU},
+				IsActive: c.IsActive,
+			}
 		}
 	}
 
-	if pn.CallbackCurrency != nil && (p.CallbackCurrency == nil || p.CallbackCurrency.CodeInt != *pn.CallbackCurrency) {
+	if pn.CallbackCurrency != nil && (p.CallbackCurrency == nil || int(p.CallbackCurrency.CodeInt) != *pn.CallbackCurrency) {
 		if c := pm.currencyManager.FindByCodeInt(*pn.CallbackCurrency); c != nil {
-			p.CallbackCurrency = c
+			p.CallbackCurrency = &billing.Currency{
+				CodeInt:  int32(c.CodeInt),
+				CodeA3:   c.CodeA3,
+				Name:     &billing.Name{En: c.Name.EN, Ru: c.Name.RU},
+				IsActive: c.IsActive,
+			}
 		}
 	}
 
@@ -277,7 +298,7 @@ func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model
 	return fixedPackages
 }
 
-func (pm *ProjectManager) FilterProjects(mId string, fProjects []bson.ObjectId) (map[bson.ObjectId]string, *model.Merchant, error) {
+func (pm *ProjectManager) FilterProjects(mId string, fProjects []bson.ObjectId) (map[bson.ObjectId]string, *billing.Merchant, error) {
 	mProjects := pm.FindProjectsByMerchantId(mId, model.DefaultLimit, model.DefaultOffset)
 
 	if len(mProjects) <= 0 {
