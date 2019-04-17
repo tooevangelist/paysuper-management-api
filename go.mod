@@ -21,9 +21,9 @@ require (
 	github.com/micro/kubernetes v0.7.0
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190415090259-76fe1f658bb6
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190417174205-a4b20a19a0fb
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190408102122-e82f2921e70c
-	github.com/paysuper/paysuper-recurring-repository v1.0.99
+	github.com/paysuper/paysuper-recurring-repository v1.0.101-0.20190417080120-d79dde7c536a
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190308105725-016a09c27fbd
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/satori/go.uuid v1.2.0

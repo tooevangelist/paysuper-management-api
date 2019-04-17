@@ -1,17 +1,23 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/globalsign/mgo/bson"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
+	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 type OrderTestSuite struct {
@@ -32,7 +38,15 @@ func (suite *OrderTestSuite) SetupTest() {
 		authUser: &AuthUser{
 			Id: "ffffffffffffffffffffffff",
 		},
+		config: &config.Config{
+			Environment: "test",
+		},
 	}
+
+	renderer := &Template{
+		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("../web/template/*.html")),
+	}
+	suite.api.Http.Renderer = renderer
 
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
 	suite.router = &orderRoute{Api: suite.api}
@@ -674,6 +688,397 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerErrorResult
 
 	suite.router.billingService = mock.NewBillingServerErrorMock()
 	err := suite.router.processBillingAddress(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_Ok() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:     bson.NewObjectId().Hex(),
+		PaymentMethod: "BANKCARD",
+		Currency:      "RUB",
+		Amount:        100,
+		Description:   "unit test",
+		OrderId:       bson.NewObjectId().Hex(),
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err = suite.router.createJson(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	var response *CreateOrderJsonProjectResponse
+	err = json.Unmarshal(rsp.Body.Bytes(), &response)
+	assert.NoError(suite.T(), err)
+	assert.NotNil(suite.T(), response.PaymentFormData)
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_Ok() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:     bson.NewObjectId().Hex(),
+		PaymentMethod: "BANKCARD",
+		Currency:      "RUB",
+		Amount:        100,
+		Description:   "unit test",
+		OrderId:       bson.NewObjectId().Hex(),
+		User: &billing.Customer{
+			ExternalId:    bson.NewObjectId().Hex(),
+			Ip:            "127.0.0.1",
+			Locale:        "ru",
+			Name:          "Unit Test",
+			Email:         "test@unit.test",
+			EmailVerified: true,
+			Metadata:      map[string]string{"field1": "val1", "field2": "val2"},
+		},
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(HeaderXApiSignatureHeader, "signature")
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err = suite.router.createJson(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_BindError() {
+	body := `{"project_id": "` + bson.NewObjectId().Hex() + `", "amount": "qwerty"}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err := suite.router.createJson(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_EmptyRequestSignature_Error() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:     bson.NewObjectId().Hex(),
+		PaymentMethod: "BANKCARD",
+		Currency:      "RUB",
+		Amount:        100,
+		Description:   "unit test",
+		OrderId:       bson.NewObjectId().Hex(),
+		User: &billing.Customer{
+			ExternalId:    bson.NewObjectId().Hex(),
+			Ip:            "127.0.0.1",
+			Locale:        "ru",
+			Name:          "Unit Test",
+			Email:         "test@unit.test",
+			EmailVerified: true,
+			Metadata:      map[string]string{"field1": "val1", "field2": "val2"},
+		},
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err = suite.router.createJson(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageSignatureHeaderIsEmpty, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_BillingServerSystemError() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:     bson.NewObjectId().Hex(),
+		PaymentMethod: "BANKCARD",
+		Currency:      "RUB",
+		Amount:        100,
+		Description:   "unit test",
+		OrderId:       bson.NewObjectId().Hex(),
+		User: &billing.Customer{
+			ExternalId:    bson.NewObjectId().Hex(),
+			Ip:            "127.0.0.1",
+			Locale:        "ru",
+			Name:          "Unit Test",
+			Email:         "test@unit.test",
+			EmailVerified: true,
+			Metadata:      map[string]string{"field1": "val1", "field2": "val2"},
+		},
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(HeaderXApiSignatureHeader, "signature")
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
+	err = suite.router.createJson(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_BillingServerResultFail_Error() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:     bson.NewObjectId().Hex(),
+		PaymentMethod: "BANKCARD",
+		Currency:      "RUB",
+		Amount:        100,
+		Description:   "unit test",
+		OrderId:       bson.NewObjectId().Hex(),
+		User: &billing.Customer{
+			ExternalId:    bson.NewObjectId().Hex(),
+			Ip:            "127.0.0.1",
+			Locale:        "ru",
+			Name:          "Unit Test",
+			Email:         "test@unit.test",
+			EmailVerified: true,
+			Metadata:      map[string]string{"field1": "val1", "field2": "val2"},
+		},
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(HeaderXApiSignatureHeader, "signature")
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	suite.router.billingService = mock.NewBillingServerErrorMock()
+	err = suite.router.createJson(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_ValidationError() {
+	body := `{"amount": 10}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err := suite.router.createJson(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Regexp(suite.T(), "ProjectId", httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_OrderCreateError() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:     mock.SomeMerchantId,
+		PaymentMethod: "BANKCARD",
+		Currency:      "RUB",
+		Amount:        100,
+		Description:   "unit test",
+		OrderId:       bson.NewObjectId().Hex(),
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err = suite.router.createJson(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_PaymentFormJsonDataProcessError() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:     mock.SomeMerchantId1,
+		PaymentMethod: "BANKCARD",
+		Currency:      "RUB",
+		Amount:        100,
+		Description:   "unit test",
+		OrderId:       bson.NewObjectId().Hex(),
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err = suite.router.createJson(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError1, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_ProductionEnvironment_Ok() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:     bson.NewObjectId().Hex(),
+		PaymentMethod: "BANKCARD",
+		Currency:      "RUB",
+		Amount:        100,
+		Description:   "unit test",
+		OrderId:       bson.NewObjectId().Hex(),
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	suite.router.config.Environment = EnvironmentProduction
+	err = suite.router.createJson(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	var response *CreateOrderJsonProjectResponse
+	err = json.Unmarshal(rsp.Body.Bytes(), &response)
+	assert.NoError(suite.T(), err)
+	assert.Nil(suite.T(), response.PaymentFormData)
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrderForm_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/order/:id")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(uuid.New().String())
+
+	err := suite.router.getOrderForm(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+	assert.Equal(suite.T(), echo.MIMETextHTMLCharsetUTF8, rsp.Header().Get(echo.HeaderContentType))
+
+	cookies := rsp.Result().Cookies()
+	assert.True(suite.T(), len(cookies) == 1)
+	assert.Equal(suite.T(), CustomerTokenCookiesName, cookies[0].Name)
+	assert.True(suite.T(), cookies[0].HttpOnly)
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrderForm_TokenCookieExist_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	cookie := new(http.Cookie)
+	cookie.Name = CustomerTokenCookiesName
+	cookie.Value = bson.NewObjectId().Hex()
+	cookie.Expires = time.Now().Add(time.Second * CustomerTokenCookiesLifetime)
+	cookie.HttpOnly = true
+	ctx.SetCookie(cookie)
+
+	req.AddCookie(cookie)
+
+	ctx.SetPath("/order/:id")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId1)
+
+	err := suite.router.getOrderForm(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+	assert.Equal(suite.T(), echo.MIMETextHTMLCharsetUTF8, rsp.Header().Get(echo.HeaderContentType))
+
+	cookies := rsp.Result().Cookies()
+	assert.True(suite.T(), len(cookies) == 1)
+	assert.Equal(suite.T(), cookie.Name, cookies[0].Name)
+	assert.Equal(suite.T(), cookie.Value, cookies[0].Value)
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrderForm_ParameterIdNotFound_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.getOrderForm(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/order/:id")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.router.getOrderForm(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)

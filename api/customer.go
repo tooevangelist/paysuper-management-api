@@ -1,34 +1,63 @@
 package api
 
-import "github.com/minio/minio-go"
+import (
+	"context"
+	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"net/http"
+)
 
 type customerRoute struct {
 	*Api
 }
 
-func (api *Api) initOnboardingRoutes() (*Api, error) {
+func (api *Api) initCustomerRoutes() (*Api, error) {
 	route := &customerRoute{Api: api}
-
-	api.authUserRouteGroup.GET("/merchants", route.listMerchants)
-	api.authUserRouteGroup.GET("/merchants/:id", route.getMerchant)
-	api.authUserRouteGroup.GET("/merchants/user", route.getMerchantByUser)
-	api.authUserRouteGroup.POST("/merchants", route.changeMerchant)
-	api.authUserRouteGroup.PUT("/merchants", route.changeMerchant)
-	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
-	api.authUserRouteGroup.PATCH("/merchants/:id", route.changeAgreement)
-
-	api.authUserRouteGroup.GET("/merchants/:id/agreement", route.generateAgreement)
-	api.authUserRouteGroup.GET("/merchants/:id/agreement/document", route.getAgreementDocument)
-	api.authUserRouteGroup.POST("/merchants/:id/agreement/document", route.uploadAgreementDocument)
-
-	api.authUserRouteGroup.POST("/merchants/:merchant_id/notifications", route.createNotification)
-	api.authUserRouteGroup.GET("/merchants/:merchant_id/notifications/:notification_id", route.getNotification)
-	api.authUserRouteGroup.GET("/merchants/:merchant_id/notifications", route.listNotifications)
-	api.authUserRouteGroup.PUT("/merchants/:merchant_id/notifications/:notification_id/mark-as-read", route.markAsReadNotification)
-
-	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods/:method_id", route.getPaymentMethod)
-	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods", route.listPaymentMethods)
-	api.authUserRouteGroup.PUT("/merchants/:merchant_id/methods/:method_id", route.changePaymentMethod)
+	api.apiAuthProjectGroup.POST("/customers", route.createCustomer)
 
 	return api, nil
+}
+
+func (r *customerRoute) createCustomer(ctx echo.Context) error {
+	req := &billing.Customer{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req1 := &grpc.CheckProjectRequestSignatureRequest{
+		Body:      r.rawBody,
+		ProjectId: req.ProjectId,
+		Signature: r.reqSignature,
+	}
+	rsp1, err := r.billingService.CheckProjectRequestSignature(context.TODO(), req1)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp1.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp1.Status), rsp1.Message)
+	}
+
+	rsp, err := r.billingService.ChangeCustomer(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]string{"token": rsp.Item.Token})
 }

@@ -93,12 +93,16 @@ func (cb *OrderJsonBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	}
 
 	db := new(echo.DefaultBinder)
-
 	if err = db.Bind(i, ctx); err != nil {
 		return err
 	}
 
-	i.(*billing.OrderCreateRequest).RawBody = string(buf)
+	structure := i.(*billing.OrderCreateRequest)
+	structure.RawBody = string(buf)
+
+	if structure.User != nil {
+		structure.User.ProjectId = structure.ProjectId
+	}
 
 	return
 }

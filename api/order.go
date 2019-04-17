@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 const (
@@ -30,6 +31,12 @@ type orderRoute struct {
 	orderManager   *manager.OrderManager
 	projectManager *manager.ProjectManager
 	publisher      micro.Publisher
+}
+
+type CreateOrderJsonProjectResponse struct {
+	Id              string                            `json:"id"`
+	PaymentFormUrl  string                            `json:"payment_form_url"`
+	PaymentFormData *grpc.PaymentFormJsonDataResponse `json:"payment_form_data,omitempty"`
 }
 
 type OrderListRefundsBinder struct{}
@@ -128,6 +135,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.GET("/paylink/:id", route.getPaylinkForm)
 	api.Http.GET("/order/create", route.createFromFormData)
 	api.Http.POST("/order/create", route.createFromFormData)
+
 	api.Http.POST("/api/v1/order", route.createJson)
 
 	api.Http.POST("/api/v1/payment", route.processCreatePayment)
@@ -199,27 +207,46 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	return ctx.Redirect(http.StatusFound, rUrl)
 }
 
-// @Summary Create order with json request
-// @Description Create a payment order use POST JSON request
-// @Tags Payment Order
-// @Accept json
-// @Produce json
-// @Param data body model.OrderScalar true "Order create data"
-// @Success 200 {object} model.JsonOrderCreateResponse "Object which contain data to render payment form"
-// @Failure 400 {object} model.Error "Object with error message"
-// @Failure 500 {object} model.Error "Object with error message"
-// @Router /api/v1/order [post]
+// Create order from json request.
+// Order can be create:
+// 1) By project host2host request with sending user (customer) information.
+// 2) By payment form client request with sending prepare created user (customer) identification token.
+// 3) By payment form client request without anything user identification information.
 func (r *orderRoute) createJson(ctx echo.Context) error {
-	req := &billing.OrderCreateRequest{
-		PayerIp: ctx.RealIP(),
-		IsJson:  true,
+	req := &billing.OrderCreateRequest{}
+	err := (&OrderJsonBinder{}).Bind(req, ctx)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	if err := (&OrderJsonBinder{}).Bind(req, ctx); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
+	// If request contain user object then paysuper must check request signature
+	if req.User != nil {
+		signature := ctx.Request().Header.Get(HeaderXApiSignatureHeader)
+
+		if signature == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, errorMessageSignatureHeaderIsEmpty)
+		}
+
+		req1 := &grpc.CheckProjectRequestSignatureRequest{
+			Body:      req.RawBody,
+			ProjectId: req.ProjectId,
+			Signature: signature,
+		}
+		rsp1, err := r.billingService.CheckProjectRequestSignature(context.TODO(), req1)
+
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		}
+
+		if rsp1.Status != pkg.ResponseStatusOk {
+			return echo.NewHTTPError(int(rsp1.Status), rsp1.Message)
+		}
 	}
 
-	if err := r.validate.Struct(req); err != nil {
+	err = r.validate.Struct(req)
+
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
@@ -229,28 +256,40 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	req1 := &grpc.PaymentFormJsonDataRequest{
-		OrderId: order.Uuid,
-		Scheme:  r.httpScheme,
-		Host:    ctx.Request().Host,
-		Locale:  ctx.Request().Header.Get(HeaderAcceptLanguage),
-		Ip:      ctx.RealIP(),
-	}
-	jo, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req1)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	response := &CreateOrderJsonProjectResponse{
+		Id:             order.Id,
+		PaymentFormUrl: fmt.Sprintf(pkg.OrderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Id),
 	}
 
-	return ctx.JSON(http.StatusOK, jo)
+	// If not production environment then return data to payment form
+	if r.isProductionEnvironment() != true {
+		req2 := &grpc.PaymentFormJsonDataRequest{
+			OrderId: order.Uuid,
+			Scheme:  r.httpScheme,
+			Host:    ctx.Request().Host,
+			Locale:  ctx.Request().Header.Get(HeaderAcceptLanguage),
+			Ip:      ctx.RealIP(),
+		}
+		rsp2, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req2)
+
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		response.PaymentFormData = rsp2
+	}
+
+	return ctx.JSON(http.StatusOK, response)
 }
 
 func (r *orderRoute) getOrderForm(ctx echo.Context) error {
-	id := ctx.Param(model.OrderFilterFieldId)
+	id := ctx.Param(requestParameterId)
 
 	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
+
+	tokenCookie, err := ctx.Cookie(CustomerTokenCookiesName)
 
 	req := &grpc.PaymentFormJsonDataRequest{
 		OrderId: id,
@@ -259,13 +298,27 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 		Locale:  ctx.Request().Header.Get(HeaderAcceptLanguage),
 		Ip:      ctx.RealIP(),
 	}
-	jo, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
+
+	if err == nil && tokenCookie != nil && tokenCookie.Value != "" {
+		req.Token = tokenCookie.Value
+	}
+
+	rsp, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return ctx.Render(http.StatusOK, orderFormTemplateName, map[string]interface{}{"Order": jo})
+	if rsp.HasCustomerToken == false {
+		cookie := new(http.Cookie)
+		cookie.Name = CustomerTokenCookiesName
+		cookie.Value = rsp.CustomerToken
+		cookie.Expires = time.Now().Add(time.Second * CustomerTokenCookiesLifetime)
+		cookie.HttpOnly = true
+		ctx.SetCookie(cookie)
+	}
+
+	return ctx.Render(http.StatusOK, orderFormTemplateName, map[string]interface{}{"Order": rsp})
 }
 
 // Create order from payment link and redirect to order payment form
@@ -458,7 +511,13 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageInvalidRequestData})
 	}
 
-	rsp, err := r.billingService.PaymentCreateProcess(context.TODO(), &grpc.PaymentCreateRequest{Data: data})
+	req := &grpc.PaymentCreateRequest{
+		Data:           data,
+		AcceptLanguage: ctx.Request().Header.Get(HeaderAcceptLanguage),
+		UserAgent:      ctx.Request().Header.Get(HeaderUserAgent),
+		Ip:             ctx.RealIP(),
+	}
+	rsp, err := r.billingService.PaymentCreateProcess(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageUnknownError})
@@ -641,6 +700,9 @@ func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
+	req.AcceptLanguage = ctx.Request().Header.Get(HeaderAcceptLanguage)
+	req.UserAgent = ctx.Request().Header.Get(HeaderUserAgent)
+	req.Ip = ctx.RealIP()
 	req.OrderId = orderId
 	err = r.validate.Struct(req)
 
@@ -675,6 +737,9 @@ func (r *orderRoute) changeCustomer(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
+	req.AcceptLanguage = ctx.Request().Header.Get(HeaderAcceptLanguage)
+	req.UserAgent = ctx.Request().Header.Get(HeaderUserAgent)
+	req.Ip = ctx.RealIP()
 	req.OrderId = orderId
 	err = r.validate.Struct(req)
 
@@ -709,6 +774,9 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
+	req.AcceptLanguage = ctx.Request().Header.Get(HeaderAcceptLanguage)
+	req.UserAgent = ctx.Request().Header.Get(HeaderUserAgent)
+	req.Ip = ctx.RealIP()
 	req.OrderId = orderId
 	err = r.validate.Struct(req)
 

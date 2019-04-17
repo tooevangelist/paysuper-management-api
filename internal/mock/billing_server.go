@@ -12,6 +12,7 @@ import (
 
 const (
 	SomeError          = "some error"
+	SomeError1         = "some error1"
 	SomeAgreementName  = "some_name.pdf"
 	SomeAgreementName1 = "some_name1.pdf"
 	SomeAgreementName2 = "some_name2.pdf"
@@ -146,6 +147,14 @@ func (s *BillingServerOkMock) OrderCreateProcess(
 	in *billing.OrderCreateRequest,
 	opts ...client.CallOption,
 ) (*billing.Order, error) {
+	if in.ProjectId == SomeMerchantId {
+		return nil, errors.New(SomeError)
+	}
+
+	if in.ProjectId == SomeMerchantId1 {
+		return &billing.Order{Id: SomeMerchantId2, Uuid: SomeMerchantId2}, nil
+	}
+
 	return &billing.Order{}, nil
 }
 
@@ -154,7 +163,47 @@ func (s *BillingServerOkMock) PaymentFormJsonDataProcess(
 	in *grpc.PaymentFormJsonDataRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormJsonDataResponse, error) {
-	return &grpc.PaymentFormJsonDataResponse{}, nil
+	if in.OrderId == SomeMerchantId2 {
+		return nil, errors.New(SomeError1)
+	}
+
+	rsp := &grpc.PaymentFormJsonDataResponse{
+		Id:          bson.NewObjectId().Hex(),
+		Account:     bson.NewObjectId().Hex(),
+		HasVat:      false,
+		Vat:         0,
+		Amount:      10,
+		TotalAmount: 10,
+		Currency:    "RUB",
+		Project: &grpc.PaymentFormJsonDataProject{
+			Name:       bson.NewObjectId().Hex(),
+			UrlSuccess: "",
+			UrlFail:    "",
+		},
+		PaymentMethods: []*billing.PaymentFormPaymentMethod{
+			{
+				Id:            bson.NewObjectId().Hex(),
+				Name:          "Bank card",
+				Icon:          "",
+				Type:          "bank_card",
+				Group:         "BANKCARD",
+				AccountRegexp: "^(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$",
+				HasSavedCards: false,
+			},
+		},
+		Token:                 bson.NewObjectId().Hex(),
+		InlineFormRedirectUrl: "",
+		HasCustomerToken:      false,
+		CustomerToken:         bson.NewObjectId().Hex(),
+	}
+
+	if in.OrderId == SomeMerchantId1 {
+		rsp.HasCustomerToken = true
+	} else {
+		rsp.HasCustomerToken = false
+	}
+
+	return rsp, nil
 }
 
 func (s *BillingServerOkMock) PaymentCreateProcess(
@@ -503,6 +552,27 @@ func (s *BillingServerOkMock) SetMerchantS3Agreement(
 	return rsp, nil
 }
 
+func (s *BillingServerOkMock) ChangeCustomer(
+	ctx context.Context,
+	in *billing.Customer,
+	opts ...client.CallOption,
+) (*grpc.ChangeCustomerResponse, error) {
+	return &grpc.ChangeCustomerResponse{
+		Status: pkg.ResponseStatusOk,
+		Item: &billing.Customer{
+			Token: bson.NewObjectId().Hex(),
+		},
+	}, nil
+}
+
+func (s *BillingServerOkMock) CheckProjectRequestSignature(
+	ctx context.Context,
+	in *grpc.CheckProjectRequestSignatureRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
+}
+
 func (s *BillingServerErrorMock) GetProductsForOrder(
 	ctx context.Context,
 	in *grpc.GetProductsForOrderRequest,
@@ -765,6 +835,32 @@ func (s *BillingServerErrorMock) SetMerchantS3Agreement(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) ChangeCustomer(
+	ctx context.Context,
+	in *billing.Customer,
+	opts ...client.CallOption,
+) (*grpc.ChangeCustomerResponse, error) {
+	return &grpc.ChangeCustomerResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) CheckProjectRequestSignature(
+	ctx context.Context,
+	in *grpc.CheckProjectRequestSignatureRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	if in.ProjectId == SomeMerchantId {
+		return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
+	}
+
+	return &grpc.CheckProjectRequestSignatureResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
 func (s *BillingServerSystemErrorMock) GetProductsForOrder(
 	ctx context.Context,
 	in *grpc.GetProductsForOrderRequest,
@@ -786,7 +882,7 @@ func (s *BillingServerSystemErrorMock) PaymentFormJsonDataProcess(
 	in *grpc.PaymentFormJsonDataRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormJsonDataResponse, error) {
-	return &grpc.PaymentFormJsonDataResponse{}, nil
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerSystemErrorMock) PaymentCreateProcess(
@@ -994,6 +1090,26 @@ func (s *BillingServerSystemErrorMock) SetMerchantS3Agreement(
 	in *grpc.SetMerchantS3AgreementRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantDataResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) ChangeCustomer(
+	ctx context.Context,
+	in *billing.Customer,
+	opts ...client.CallOption,
+) (*grpc.ChangeCustomerResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) CheckProjectRequestSignature(
+	ctx context.Context,
+	in *grpc.CheckProjectRequestSignatureRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	if in.ProjectId == SomeMerchantId {
+		return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
+	}
+
 	return nil, errors.New(SomeError)
 }
 
@@ -1256,6 +1372,22 @@ func (s *BillingServerOkTemporaryMock) ProcessRefundCallback(
 		Status: pkg.ResponseStatusOk,
 		Error:  SomeError,
 	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ChangeCustomer(
+	ctx context.Context,
+	in *billing.Customer,
+	opts ...client.CallOption,
+) (*grpc.ChangeCustomerResponse, error) {
+	return &grpc.ChangeCustomerResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) CheckProjectRequestSignature(
+	ctx context.Context,
+	in *grpc.CheckProjectRequestSignatureRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{}, nil
 }
 
 func (s *BillingServerOkMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
