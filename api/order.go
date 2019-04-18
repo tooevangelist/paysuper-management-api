@@ -419,7 +419,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	p, merchant, err := r.projectManager.FilterProjects(r.Merchant.Identifier, fp)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, err)
+		return echo.NewHTTPError(http.StatusForbidden, err.Error())
 	}
 
 	params := &manager.FindAll{
@@ -434,7 +434,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	pOrders, err := r.orderManager.FindAll(params)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, pOrders)
