@@ -350,6 +350,8 @@ func (r *onboardingRoute) changePaymentMethod(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	req.UserId = r.authUser.Id
+
 	err = r.validate.Struct(req)
 
 	if err != nil {
