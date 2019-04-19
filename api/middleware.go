@@ -54,15 +54,3 @@ func (api *Api) RawBodyMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(ctx)
 	}
 }
-
-func (api *Api) RequestSignatureMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		signature := ctx.Request().Header.Get(HeaderXApiSignatureHeader)
-
-		if signature == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, errorMessageSignatureHeaderIsEmpty)
-		}
-
-		return next(ctx)
-	}
-}

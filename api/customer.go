@@ -5,7 +5,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
-	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"net/http"
 )
 
@@ -34,19 +33,10 @@ func (r *customerRoute) createCustomer(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	req1 := &grpc.CheckProjectRequestSignatureRequest{
-		Body:      r.rawBody,
-		ProjectId: req.ProjectId,
-		Signature: r.reqSignature,
-	}
-	rsp1, err := r.billingService.CheckProjectRequestSignature(context.TODO(), req1)
+	err = r.checkProjectAuthRequestSignature(ctx, req.ProjectId)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
-	}
-
-	if rsp1.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(rsp1.Status), rsp1.Message)
+		return err
 	}
 
 	rsp, err := r.billingService.ChangeCustomer(context.TODO(), req)

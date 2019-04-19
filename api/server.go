@@ -287,7 +287,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		api.logger.Infow(ctx.Path(), data...)
 	}))
 	api.apiAuthProjectGroup.Use(api.RawBodyMiddleware)
-	api.apiAuthProjectGroup.Use(api.RequestSignatureMiddleware)
 
 	api.Http.Use(api.LimitOffsetSortMiddleware)
 	api.Http.Use(middleware.Logger())
@@ -446,4 +445,25 @@ func (api *Api) logError(msg string, data []interface{}) {
 
 func (api *Api) isProductionEnvironment() bool {
 	return api.config.Environment == EnvironmentProduction
+}
+
+func (api *Api) checkProjectAuthRequestSignature(ctx echo.Context, projectId string) error {
+	signature := ctx.Request().Header.Get(HeaderXApiSignatureHeader)
+
+	if signature == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorMessageSignatureHeaderIsEmpty)
+	}
+
+	req := &grpc.CheckProjectRequestSignatureRequest{Body: api.rawBody, ProjectId: projectId, Signature: signature}
+	rsp, err := api.billingService.CheckProjectRequestSignature(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return nil
 }

@@ -220,34 +220,19 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	// If request contain user object then paysuper must check request signature
-	if req.User != nil {
-		signature := ctx.Request().Header.Get(HeaderXApiSignatureHeader)
-
-		if signature == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, errorMessageSignatureHeaderIsEmpty)
-		}
-
-		req1 := &grpc.CheckProjectRequestSignatureRequest{
-			Body:      req.RawBody,
-			ProjectId: req.ProjectId,
-			Signature: signature,
-		}
-		rsp1, err := r.billingService.CheckProjectRequestSignature(context.TODO(), req1)
-
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
-		}
-
-		if rsp1.Status != pkg.ResponseStatusOk {
-			return echo.NewHTTPError(int(rsp1.Status), rsp1.Message)
-		}
-	}
-
 	err = r.validate.Struct(req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
+	}
+
+	// If request contain user object then paysuper must check request signature
+	if req.User != nil {
+		err = r.checkProjectAuthRequestSignature(ctx, req.ProjectId)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	order, err := r.billingService.OrderCreateProcess(context.TODO(), req)

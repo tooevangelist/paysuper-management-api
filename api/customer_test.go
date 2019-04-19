@@ -42,7 +42,6 @@ func (suite *CustomerTestSuite) SetupTest() {
 
 	suite.api.apiAuthProjectGroup = suite.api.Http.Group(apiAuthProjectGroupPath)
 	suite.api.apiAuthProjectGroup.Use(suite.api.RawBodyMiddleware)
-	suite.api.apiAuthProjectGroup.Use(suite.api.RequestSignatureMiddleware)
 
 	err := suite.api.validate.RegisterValidation("phone", suite.api.PhoneValidator)
 	assert.NoError(suite.T(), err)
@@ -100,6 +99,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_Ok() {
 
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(HeaderXApiSignatureHeader, "signature")
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
@@ -189,6 +189,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestS
 
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(HeaderXApiSignatureHeader, "signature")
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
@@ -228,6 +229,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestS
 
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(HeaderXApiSignatureHeader, "signature")
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
@@ -267,6 +269,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_Syste
 
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(HeaderXApiSignatureHeader, "signature")
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
@@ -306,6 +309,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_Resul
 
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	req.Header.Set(HeaderXApiSignatureHeader, "signature")
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
