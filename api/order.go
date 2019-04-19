@@ -125,7 +125,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	}
 
 	api.Http.GET("/order/:id", route.getOrderForm)
-	api.Http.GET("/paylink/:id", route.getPaylinkForm)
+	api.Http.GET("/paylink/:id", route.getOrderForPaylink)
 	api.Http.GET("/order/create", route.createFromFormData)
 	api.Http.POST("/order/create", route.createFromFormData)
 	api.Http.POST("/api/v1/order", route.createJson)
@@ -269,7 +269,7 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 }
 
 // Create order from payment link and redirect to order payment form
-func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
+func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 
 	paylinkId := ctx.Param(requestParameterId)
 
@@ -313,7 +313,7 @@ func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
 		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
-	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Id)
+	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Uuid)
 	qs := ctx.QueryString()
 	if qs != "" {
 		inlineFormRedirectUrl += "?" + qs
