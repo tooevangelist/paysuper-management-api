@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
@@ -16,7 +15,6 @@ import (
 	"github.com/paysuper/paysuper-payment-link/proto"
 	"net/http"
 	"net/url"
-	"strconv"
 )
 
 const (
@@ -35,31 +33,19 @@ type orderRoute struct {
 type OrderListRefundsBinder struct{}
 
 func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
-	params := ctx.QueryParams()
-	orderId := ctx.Param(requestParameterOrderId)
-	limit := int32(LimitDefault)
-	offset := int32(OffsetDefault)
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
 
-	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
-		return errors.New(errorIncorrectOrderId)
-	}
-
-	if v, ok := params[requestParameterLimit]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			limit = int32(i)
-		}
-	}
-
-	if v, ok := params[requestParameterOffset]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			offset = int32(i)
-		}
+	if err != nil {
+		return err
 	}
 
 	structure := i.(*grpc.ListRefundsRequest)
-	structure.OrderId = orderId
-	structure.Limit = limit
-	structure.Offset = offset
+	structure.OrderId = ctx.Param(requestParameterOrderId)
+
+	if structure.Limit <= 0 {
+		structure.Limit = LimitDefault
+	}
 
 	return nil
 }
@@ -533,21 +519,17 @@ func (r *orderRoute) getAccountingPaymentCalculation(ctx echo.Context) error {
 }
 
 func (r *orderRoute) getRefund(ctx echo.Context) error {
-	orderId := ctx.Param(requestParameterOrderId)
-	refundId := ctx.Param(requestParameterRefundId)
-
-	if refundId == "" || bson.IsObjectIdHex(refundId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectRefundId)
-	}
-
-	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
-	}
-
 	req := &grpc.GetRefundRequest{
-		OrderId:  orderId,
-		RefundId: refundId,
+		OrderId:  ctx.Param(requestParameterOrderId),
+		RefundId: ctx.Param(requestParameterRefundId),
 	}
+
+	err := r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
 	rsp, err := r.billingService.GetRefund(context.TODO(), req)
 
 	if err != nil {
@@ -567,6 +549,12 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListRefunds(context.TODO(), req)

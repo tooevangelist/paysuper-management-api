@@ -1549,7 +1549,7 @@ definitions:
         type: string
       currency:
         description: "refund currency"
-        $ref: '#/definitions/model.Currency'
+        type: string
       status:
         description: "refund status. available statuses: 0 - refund was created; 1 - refund rejected on payment system side; 2 - refund in processing on payment system side; 3 - refund successfully completed;"
         type: integer

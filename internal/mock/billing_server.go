@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/globalsign/mgo/bson"
+	"github.com/google/uuid"
 	"github.com/micro/go-micro/client"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -384,7 +385,21 @@ func (s *BillingServerOkMock) CreateRefund(
 ) (*grpc.CreateRefundResponse, error) {
 	return &grpc.CreateRefundResponse{
 		Status: pkg.ResponseStatusOk,
-		Item:   &billing.Refund{},
+		Item: &billing.Refund{
+			Id:         bson.NewObjectId().Hex(),
+			Order:      &billing.RefundOrder{Id: bson.NewObjectId().Hex(), Uuid: uuid.New().String()},
+			ExternalId: "",
+			Amount:     10,
+			CreatorId:  "",
+			Reason:     SomeError,
+			Currency: &billing.Currency{
+				CodeInt:  643,
+				CodeA3:   "RUB",
+				Name:     &billing.Name{Ru: "Российский рубль", En: "Russian ruble"},
+				IsActive: true,
+			},
+			Status: 0,
+		},
 	}, nil
 }
 
@@ -393,7 +408,41 @@ func (s *BillingServerOkMock) ListRefunds(
 	in *grpc.ListRefundsRequest,
 	opts ...client.CallOption,
 ) (*grpc.ListRefundsResponse, error) {
-	return &grpc.ListRefundsResponse{}, nil
+	return &grpc.ListRefundsResponse{
+		Count: 2,
+		Items: []*billing.Refund{
+			{
+				Id:         bson.NewObjectId().Hex(),
+				Order:      &billing.RefundOrder{Id: bson.NewObjectId().Hex(), Uuid: uuid.New().String()},
+				ExternalId: "",
+				Amount:     10,
+				CreatorId:  "",
+				Reason:     SomeError,
+				Currency: &billing.Currency{
+					CodeInt:  643,
+					CodeA3:   "RUB",
+					Name:     &billing.Name{Ru: "Российский рубль", En: "Russian ruble"},
+					IsActive: true,
+				},
+				Status: 0,
+			},
+			{
+				Id:         bson.NewObjectId().Hex(),
+				Order:      &billing.RefundOrder{Id: bson.NewObjectId().Hex(), Uuid: uuid.New().String()},
+				ExternalId: "",
+				Amount:     10,
+				CreatorId:  "",
+				Reason:     SomeError,
+				Currency: &billing.Currency{
+					CodeInt:  643,
+					CodeA3:   "RUB",
+					Name:     &billing.Name{Ru: "Российский рубль", En: "Russian ruble"},
+					IsActive: true,
+				},
+				Status: 0,
+			},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) GetRefund(
@@ -403,7 +452,21 @@ func (s *BillingServerOkMock) GetRefund(
 ) (*grpc.CreateRefundResponse, error) {
 	return &grpc.CreateRefundResponse{
 		Status: pkg.ResponseStatusOk,
-		Item:   &billing.Refund{},
+		Item: &billing.Refund{
+			Id:         bson.NewObjectId().Hex(),
+			Order:      &billing.RefundOrder{Id: bson.NewObjectId().Hex(), Uuid: uuid.New().String()},
+			ExternalId: "",
+			Amount:     10,
+			CreatorId:  "",
+			Reason:     SomeError,
+			Currency: &billing.Currency{
+				CodeInt:  643,
+				CodeA3:   "RUB",
+				Name:     &billing.Name{Ru: "Российский рубль", En: "Russian ruble"},
+				IsActive: true,
+			},
+			Status: 0,
+		},
 	}, nil
 }
 
