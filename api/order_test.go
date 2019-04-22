@@ -211,7 +211,7 @@ func (suite *OrderTestSuite) TestOrder_CreateRefund_Ok() {
 
 	ctx.SetPath("/order/:order_id/refunds")
 	ctx.SetParamNames(requestParameterOrderId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetParamValues(uuid.New().String())
 
 	err := suite.router.createRefund(ctx)
 	assert.NoError(suite.T(), err)
@@ -220,7 +220,7 @@ func (suite *OrderTestSuite) TestOrder_CreateRefund_Ok() {
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateRefund_BindError() {
-	data := `{"amount": 10, "reason": "test"}`
+	data := `{"amount": "qwerty", "reason": "test"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(data))
@@ -229,6 +229,8 @@ func (suite *OrderTestSuite) TestOrder_CreateRefund_BindError() {
 	ctx := e.NewContext(req, rsp)
 
 	ctx.SetPath("/order/:order_id/refunds")
+	ctx.SetParamNames(requestParameterOrderId)
+	ctx.SetParamValues(uuid.New().String())
 
 	err := suite.router.createRefund(ctx)
 	assert.Error(suite.T(), err)
@@ -236,7 +238,7 @@ func (suite *OrderTestSuite) TestOrder_CreateRefund_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIncorrectOrderId, httpErr.Message)
+	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateRefund_ValidationError() {
@@ -250,7 +252,7 @@ func (suite *OrderTestSuite) TestOrder_CreateRefund_ValidationError() {
 
 	ctx.SetPath("/order/:order_id/refunds")
 	ctx.SetParamNames(requestParameterOrderId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetParamValues(uuid.New().String())
 
 	err := suite.router.createRefund(ctx)
 	assert.Error(suite.T(), err)
@@ -272,7 +274,7 @@ func (suite *OrderTestSuite) TestOrder_CreateRefund_BillingServerError() {
 
 	ctx.SetPath("/order/:order_id/refunds")
 	ctx.SetParamNames(requestParameterOrderId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetParamValues(uuid.New().String())
 
 	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
 	err := suite.router.createRefund(ctx)
@@ -295,7 +297,7 @@ func (suite *OrderTestSuite) TestOrder_CreateRefund_BillingServer_CreateError() 
 
 	ctx.SetPath("/order/:order_id/refunds")
 	ctx.SetParamNames(requestParameterOrderId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetParamValues(uuid.New().String())
 
 	suite.router.billingService = mock.NewBillingServerErrorMock()
 	err := suite.router.createRefund(ctx)

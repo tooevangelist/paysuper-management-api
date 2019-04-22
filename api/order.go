@@ -33,7 +33,6 @@ type orderRoute struct {
 }
 
 type OrderListRefundsBinder struct{}
-type OrderCreateRefundBinder struct{}
 
 func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
 	params := ctx.QueryParams()
@@ -61,26 +60,6 @@ func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
 	structure.OrderId = orderId
 	structure.Limit = limit
 	structure.Offset = offset
-
-	return nil
-}
-
-func (b *OrderCreateRefundBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-
-	if err != nil {
-		return err
-	}
-
-	orderId := ctx.Param(requestParameterOrderId)
-
-	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
-		return errors.New(errorIncorrectOrderId)
-	}
-
-	structure := i.(*grpc.CreateRefundRequest)
-	structure.OrderId = orderId
 
 	return nil
 }
@@ -601,12 +580,13 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 
 func (r *orderRoute) createRefund(ctx echo.Context) error {
 	req := &grpc.CreateRefundRequest{}
-	err := (&OrderCreateRefundBinder{}).Bind(req, ctx)
+	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
+	req.OrderId = ctx.Param(requestParameterOrderId)
 	err = r.validate.Struct(req)
 
 	if err != nil {
