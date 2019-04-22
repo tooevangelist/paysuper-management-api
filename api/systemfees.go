@@ -13,7 +13,7 @@ type systemFeeRoute struct {
 }
 
 func (api *Api) InitSystemFeeRoutes() *Api {
-	systemFeeApiV1 := systemFeeRoute{
+	systemFeeApiV1 := &systemFeeRoute{
 		Api: api,
 	}
 
@@ -44,8 +44,7 @@ func (r *systemFeeRoute) getSystemFeesList(ctx echo.Context) error {
 func (r *systemFeeRoute) addSystemFee(ctx echo.Context) error {
 	req := &billing.AddSystemFeesRequest{}
 
-	db := new(echo.DefaultBinder)
-	err := db.Bind(req, ctx)
+	err := ctx.Bind(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
