@@ -668,27 +668,6 @@ func (s *BillingServerOkMock) DeleteProject(
 	return &grpc.ChangeProjectResponse{Status: pkg.ResponseStatusOk}, nil
 }
 
-func (s *BillingServerOkMock) ChangeCustomer(
-	ctx context.Context,
-	in *billing.Customer,
-	opts ...client.CallOption,
-) (*grpc.ChangeCustomerResponse, error) {
-	return &grpc.ChangeCustomerResponse{
-		Status: pkg.ResponseStatusOk,
-		Item: &billing.Customer{
-			Token: bson.NewObjectId().Hex(),
-		},
-	}, nil
-}
-
-func (s *BillingServerOkMock) CheckProjectRequestSignature(
-	ctx context.Context,
-	in *grpc.CheckProjectRequestSignatureRequest,
-	opts ...client.CallOption,
-) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
-}
-
 func (s *BillingServerErrorMock) GetProductsForOrder(
 	ctx context.Context,
 	in *grpc.GetProductsForOrderRequest,
@@ -1020,25 +999,6 @@ func (s *BillingServerErrorMock) DeleteProject(
 	}, nil
 }
 
-func (s *BillingServerErrorMock) ChangeCustomer(
-	ctx context.Context,
-	in *billing.Customer,
-	opts ...client.CallOption,
-) (*grpc.ChangeCustomerResponse, error) {
-	return &grpc.ChangeCustomerResponse{
-		Status:  pkg.ResponseStatusBadData,
-		Message: SomeError,
-	}, nil
-}
-
-func (s *BillingServerErrorMock) CheckProjectRequestSignature(
-	ctx context.Context,
-	in *grpc.CheckProjectRequestSignatureRequest,
-	opts ...client.CallOption,
-) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusBadData}, nil
-}
-
 func (s *BillingServerSystemErrorMock) GetProductsForOrder(
 	ctx context.Context,
 	in *grpc.GetProductsForOrderRequest,
@@ -1316,22 +1276,6 @@ func (s *BillingServerSystemErrorMock) DeleteProject(
 	in *grpc.GetProjectRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeProjectResponse, error) {
-	return nil, errors.New(SomeError)
-}
-
-func (s *BillingServerSystemErrorMock) ChangeCustomer(
-	ctx context.Context,
-	in *billing.Customer,
-	opts ...client.CallOption,
-) (*grpc.ChangeCustomerResponse, error) {
-	return nil, errors.New(SomeError)
-}
-
-func (s *BillingServerSystemErrorMock) CheckProjectRequestSignature(
-	ctx context.Context,
-	in *grpc.CheckProjectRequestSignatureRequest,
-	opts ...client.CallOption,
-) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return nil, errors.New(SomeError)
 }
 
@@ -1641,22 +1585,6 @@ func (s *BillingServerOkTemporaryMock) DeleteProject(
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil
-}
-
-func (s *BillingServerOkTemporaryMock) ChangeCustomer(
-	ctx context.Context,
-	in *billing.Customer,
-	opts ...client.CallOption,
-) (*grpc.ChangeCustomerResponse, error) {
-	return nil, errors.New(SomeError)
-}
-
-func (s *BillingServerOkTemporaryMock) CheckProjectRequestSignature(
-	ctx context.Context,
-	in *grpc.CheckProjectRequestSignatureRequest,
-	opts ...client.CallOption,
-) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerOkMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
