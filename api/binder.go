@@ -621,6 +621,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	}
 
 	structure := i.(*billing.Project)
+	structure.MerchantId = pRsp.Item.MerchantId
 	structure.Name = pRsp.Item.Name
 	structure.Image = pRsp.Item.Image
 	structure.CallbackCurrency = pRsp.Item.CallbackCurrency
