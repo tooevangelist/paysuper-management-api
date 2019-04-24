@@ -785,14 +785,23 @@ definitions:
     type: object
   model.Project:
     properties:
+      id:
+        description: |
+          unique project identifier
+        type: string
+      merchant_id:
+        description: project merchant id
+        type: string
+      image:
+        description: url to project logo
+        type: string
       callback_currency:
-        $ref: '#/definitions/model.Currency'
+        type: string
         description: |
           full object of currency which described currency to send payment notification
-        type: object
       callback_protocol:
         description: |
-          protocol identifier to send payment notification. Now available: default
+          protocol identifier to send payment notification. Now available: default, empty
         type: string
       create_invoice_allowed_urls:
         description: |
@@ -800,22 +809,9 @@ definitions:
         items:
           type: string
         type: array
-      created_at:
-        description: |
-          date of create project
-        type: string
-      fixed_package:
-        description: |
-          list of project's fixed packages
-        type: object
-      id:
-        description: |
-          unique project identifier
-        type: string
-      is_active:
-        description: |
-          is project active
-        type: boolean
+      status:
+        description: "project status. now available: 0 - new project; 1 - project successfully complete integration tests; 2 - project fail one or more integration test; 3 - project in production; 4 - project deleted"
+        type: integer
       is_allow_dynamic_notify_urls:
         description: |
           is allow send dynamic notification urls in request to create an order
@@ -825,10 +821,8 @@ definitions:
           is allow send dynamic user's redirect urls in request to create an order
         type: boolean
       limits_currency:
-        $ref: '#/definitions/model.Currency'
-        description: |
-          full object of currency which describes currency for amount's limit
-        type: object
+        description: currency for amount's limit
+        type: string
       max_payment_amount:
         description: |
           maximal amount allowed for create order
@@ -838,9 +832,8 @@ definitions:
           minimal amount allowed for create order
         type: number
       name:
-        description: |
-          project name
-        type: string
+        description: "project names map in other language: {\"en\": \"project name\", \"ru\": \"имя проекта\"}"
+        type: object
       notify_emails:
         description: |
           list of emails to send notifications about successfully completed payment operations
@@ -851,10 +844,6 @@ definitions:
         description: |
           is allow create order only with amounts from products list
         type: boolean
-      payment_methods:
-        description: |
-          list of payment methods allowed to project
-        type: object
       secret_key:
         description: |
           secret key for create check hash for request about order statuses changes
@@ -879,6 +868,15 @@ definitions:
         description: |
           default url to redirect user after successfully completed payment
         type: string
+      products_count:
+        description: count of project's products
+        type: integer
+      created_at:
+        description: date of create merchant in system in unix timestamp
+        type: object
+      updated_at:
+        description: date of update merchant in system in unix timestamp
+        type: object
     type: object
   model.ProjectJsonOrderResponse:
     properties:
@@ -1840,56 +1838,6 @@ paths:
       summary: Create payment
       tags:
         - Payment Order
-  /api/v1/project/package/{region}/{project_id}:
-    get:
-      consumes:
-        - application/x-www-form-urlencoded
-      description: Get list of project's fixed packages by filters
-      parameters:
-        - description: 2 symbols region code by ISO 3166-1
-          in: path
-          name: region
-          required: true
-          type: string
-        - description: project unique identifier
-          in: path
-          name: project_id
-          required: true
-          type: string
-        - description: array of identifiers of fixed packages
-          in: query
-          name: id[]
-          type: string
-        - description: array of names of fixed packages
-          in: query
-          name: name[]
-          type: string
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.FilteredFixedPackage'
-            type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-            type: object
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-            type: object
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-            type: object
-      summary: Get project's fixed packages
-      tags:
-        - Project
   /api/v1/s/merchant:
     delete:
       consumes:
@@ -2279,10 +2227,10 @@ paths:
       summary: Get revenue dynamics
       tags:
         - Payment Order
-  /api/v1/s/project:
+  /admin/api/v1/project:
     get:
       consumes:
-        - application/json
+        - application/x-www-form-urlencoded
       description: Get list of project for authenticated merchant
       produces:
         - application/json
@@ -2316,7 +2264,7 @@ paths:
           name: data
           required: true
           schema:
-            $ref: '#/definitions/model.ProjectScalar'
+            $ref: '#/definitions/model.Project'
             type: object
       produces:
         - application/json
@@ -2344,10 +2292,10 @@ paths:
       summary: Create project
       tags:
         - Project
-  /api/v1/s/project/{id}:
+  /admin/api/v1/project/{id}:
     delete:
       consumes:
-        - application/json
+        - application/x-www-form-urlencoded
       description: Delete project for authenticated merchant
       parameters:
         - description: Project identifier
@@ -2421,7 +2369,7 @@ paths:
       summary: Get project
       tags:
         - Project
-    put:
+    patch:
       consumes:
         - application/json
       description: Update project for authenticated merchant
@@ -2431,7 +2379,7 @@ paths:
           name: data
           required: true
           schema:
-            $ref: '#/definitions/model.ProjectScalar'
+            $ref: '#/definitions/model.Project'
             type: object
         - description: Project identifier
           in: path
