@@ -812,7 +812,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	}
 
 	if v, ok := req[requestParameterStatus]; ok {
-		if tv, ok := v.(int); !ok {
+		if tv, ok := v.(float64); !ok {
 			return errors.New(errorMessageStatusIncorrectType)
 		} else {
 			structure.Status = int32(tv)
