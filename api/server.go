@@ -38,69 +38,6 @@ import (
 	"time"
 )
 
-const (
-	apiWebHookGroupPath  = "/webhook"
-	apiAuthUserGroupPath = "/admin/api/v1"
-
-	LimitDefault  = 100
-	OffsetDefault = 0
-
-	requestParameterId                   = "id"
-	requestParameterName                 = "name"
-	requestParameterSku                  = "sku"
-	requestParameterIsSigned             = "is_signed"
-	requestParameterMerchantId           = "merchant_id"
-	requestParameterProjectId            = "project_id"
-	requestParameterPaymentMethodId      = "method_id"
-	requestParameterOrderId              = "order_id"
-	requestParameterRefundId             = "refund_id"
-	requestParameterNotificationId       = "notification_id"
-	requestParameterUserId               = "user"
-	requestParameterLimit                = "limit"
-	requestParameterOffset               = "offset"
-	requestParameterFile                 = "file"
-	requestParameterUtmSource            = "utm_source"
-	requestParameterUtmMedium            = "utm_medium"
-	requestParameterUtmCampaign          = "utm_campaign"
-	requestParameterIsSystem             = "is_system"
-	requestParameterAgreementType        = "agreement_type"
-	requestParameterHasMerchantSignature = "has_merchant_signature"
-	requestParameterHasPspSignature      = "has_psp_signature"
-	requestParameterAgreementSentViaMail = "agreement_sent_via_mail"
-	requestParameterMailTrackingLink     = "mail_tracking_link"
-	requestAuthorizationTokenRegex       = "Bearer ([A-z0-9_.-]{10,})"
-
-	errorIdIsEmpty                                = "identifier can't be empty"
-	errorIncorrectMerchantId                      = "incorrect merchant identifier"
-	errorIncorrectNotificationId                  = "incorrect notification identifier"
-	errorIncorrectOrderId                         = "incorrect order identifier"
-	errorIncorrectPaymentMethodId                 = "incorrect payment method identifier"
-	errorIncorrectProductId                       = "incorrect product identifier"
-	errorIncorrectRefundId                        = "incorrect refund identifier"
-	errorIncorrectPaylinkId                       = "incorrect paylink identifier"
-	errorMessageAccessDenied                      = "access denied"
-	errorMessageAuthorizationHeaderNotFound       = "authorization header not found"
-	errorMessageAuthorizationTokenNotFound        = "authorization token not found"
-	errorMessageAuthorizedUserNotFound            = "information about authorized user not found"
-	errorMessageMask                              = "field validation for '%s' failed on the '%s' tag"
-	errorQueryParamsIncorrect                     = "incorrect query parameters"
-	errorUnknown                                  = "unknown error. try request later"
-	errorMessageAgreementNotGenerated             = "agreement for merchant not generated early"
-	errorMessageAgreementNotFound                 = "agreement for merchant not found"
-	errorMessageAgreementUploadMaxSize            = "agreement document max upload size can't be greater than %d"
-	errorMessageAgreementContentType              = "agreement document type must be a pdf"
-	errorMessageAgreementCanNotBeGenerate         = "agreement can't be generated for not checked merchant data"
-	errorMessageAgreementTypeIncorrectType        = "agreement type parameter have incorrect type"
-	errorMessageHasMerchantSignatureIncorrectType = "merchant signature parameter has incorrect type"
-	errorMessageHasPspSignatureIncorrectType      = "paysuper signature parameter has incorrect type"
-	errorMessageAgreementSentViaMailIncorrectType = "agreement sent via email parameter has incorrect type"
-	errorMessageMailTrackingLinkIncorrectType     = "mail tracking link parameter has incorrect type"
-
-	HeaderAcceptLanguage = "Accept-Language"
-
-	agreementPageTemplateName = "agreement.html"
-)
-
 var funcMap = template.FuncMap{
 	"Marshal": func(v interface{}) template.JS {
 		a, _ := json.Marshal(v)
