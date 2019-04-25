@@ -797,8 +797,7 @@ definitions:
         type: string
       callback_currency:
         type: string
-        description: |
-          full object of currency which described currency to send payment notification
+        description: currency to send payment notification
       callback_protocol:
         description: |
           protocol identifier to send payment notification. Now available: default, empty
@@ -1631,7 +1630,7 @@ definitions:
         type: string
       callback_currency:
         type: string
-        description: full object of currency which described currency to send payment notification
+        description: currency to send payment notification
       callback_protocol:
         description: "protocol identifier to send payment notification. Now available: default, empty"
         type: string
