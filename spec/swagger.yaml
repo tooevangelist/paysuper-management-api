@@ -1639,10 +1639,10 @@ definitions:
         items:
           type: string
         type: array
-      is_allow_dynamic_notify_urls:
+      allow_dynamic_notify_urls:
         description: is allow send dynamic notification urls in request to create an order
         type: boolean
-      is_allow_dynamic_redirect_urls:
+      allow_dynamic_redirect_urls:
         description: is allow send dynamic user's redirect urls in request to create an order
         type: boolean
       limits_currency:
