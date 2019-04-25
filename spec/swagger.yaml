@@ -1621,6 +1621,74 @@ definitions:
     required:
       - agreement_type
 
+  projects.CreateRequest:
+    properties:
+      merchant_id:
+        description: project merchant id
+        type: string
+      image:
+        description: url to project logo
+        type: string
+      callback_currency:
+        type: string
+        description: full object of currency which described currency to send payment notification
+      callback_protocol:
+        description: "protocol identifier to send payment notification. Now available: default, empty"
+        type: string
+      create_invoice_allowed_urls:
+        description: list of urls rom which you can send a request to create an order
+        items:
+          type: string
+        type: array
+      status:
+        description: "project status. now available: 0 - new project; 1 - project successfully complete integration tests; 2 - project fail one or more integration test; 3 - project in production; 4 - project deleted"
+        type: integer
+      is_allow_dynamic_notify_urls:
+        description: is allow send dynamic notification urls in request to create an order
+        type: boolean
+      is_allow_dynamic_redirect_urls:
+        description: is allow send dynamic user's redirect urls in request to create an order
+        type: boolean
+      limits_currency:
+        description: currency for amount's limit
+        type: string
+      max_payment_amount:
+        description: maximal amount allowed for create order
+        type: number
+      min_payment_amount:
+        description: minimal amount allowed for create order
+        type: number
+      name:
+        description: "project names map in other language: {\"en\": \"project name\", \"ru\": \"имя проекта\"}"
+        type: object
+      notify_emails:
+        description: list of emails to send notifications about successfully completed payment operations
+        items:
+          type: string
+        type: array
+      is_products_checkout:
+        description: is allow create order only with amounts from products list
+        type: boolean
+      secret_key:
+        description: secret key for create check hash for request about order statuses changes
+        type: string
+      send_notify_email:
+        description: is allow send notifications about successfully completed payment operations to user's emails
+        type: boolean
+      url_check_account:
+        description: default url to send request for verification payment data to project
+        type: string
+      url_process_payment:
+        description: |
+          default url to send request for notification about successfully completed payment to project
+        type: string
+      url_redirect_fail:
+        description: default url to redirect user after failed payment
+        type: string
+      url_redirect_success:
+        description: default url to redirect user after successfully completed payment
+        type: string
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -2227,7 +2295,7 @@ paths:
       summary: Get revenue dynamics
       tags:
         - Payment Order
-  /admin/api/v1/project:
+  /admin/api/v1/projects:
     get:
       consumes:
         - application/x-www-form-urlencoded
@@ -2293,7 +2361,7 @@ paths:
           name: data
           required: true
           schema:
-            $ref: '#/definitions/model.Project'
+            $ref: '#/definitions/projects.CreateRequest'
             type: object
       produces:
         - application/json
@@ -2321,7 +2389,7 @@ paths:
       summary: Create project
       tags:
         - Project
-  /admin/api/v1/project/{id}:
+  /admin/api/v1/projects/{id}:
     delete:
       consumes:
         - application/x-www-form-urlencoded
