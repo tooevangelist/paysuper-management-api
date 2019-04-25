@@ -680,10 +680,16 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	}
 
 	if v, ok := req[requestParameterCreateOrderAllowedUrls]; ok {
-		if tv, ok := v.([]string); !ok {
+		tv, ok := v.([]interface{})
+
+		if !ok {
 			return errors.New(errorMessageCreateOrderAllowedUrlsIncorrectType)
-		} else {
-			structure.CreateOrderAllowedUrls = tv
+		}
+
+		structure.CreateOrderAllowedUrls = []string{}
+
+		for _, tvv := range tv {
+			structure.CreateOrderAllowedUrls = append(structure.CreateOrderAllowedUrls, tvv.(string))
 		}
 	}
 
@@ -728,10 +734,16 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	}
 
 	if v, ok := req[requestParameterNotifyEmails]; ok {
-		if tv, ok := v.([]string); !ok {
+		tv, ok := v.([]interface{})
+
+		if !ok {
 			return errors.New(errorMessageNotifyEmailsIncorrectType)
-		} else {
-			structure.NotifyEmails = tv
+		}
+
+		structure.NotifyEmails = []string{}
+
+		for _, tvv := range tv {
+			structure.NotifyEmails = append(structure.NotifyEmails, tvv.(string))
 		}
 	}
 
