@@ -811,11 +811,11 @@ definitions:
       status:
         description: "project status. now available: 0 - new project; 1 - project successfully complete integration tests; 2 - project fail one or more integration test; 3 - project in production; 4 - project deleted"
         type: integer
-      is_allow_dynamic_notify_urls:
+      allow_dynamic_notify_urls:
         description: |
           is allow send dynamic notification urls in request to create an order
         type: boolean
-      is_allow_dynamic_redirect_urls:
+      allow_dynamic_redirect_urls:
         description: |
           is allow send dynamic user's redirect urls in request to create an order
         type: boolean
@@ -920,92 +920,7 @@ definitions:
       url_success:
         type: string
     type: object
-  model.ProjectScalar:
-    properties:
-      callback_currency:
-        description: |
-          ISO 4217 numeric currency code to send payment notification
-        type: integer
-      callback_protocol:
-        description: |
-          protocol identifier to send payment notification. Now available: default
-        type: string
-      create_invoice_allowed_urls:
-        description: |
-          list of urls rom which you can send a request to create an order
-        items:
-          type: string
-        type: array
-      fixed_package:
-        description: |
-          list of project's fixed packages
-        type: object
-      is_active:
-        description: |
-          is project active
-        type: boolean
-      is_allow_dynamic_notify_urls:
-        description: |
-          is allow send dynamic notification urls in request to create an order
-        type: boolean
-      is_allow_dynamic_redirect_urls:
-        description: |
-          is allow send dynamic user's redirect urls in request to create an order
-        type: boolean
-      limits_currency:
-        description: |
-          ISO 4217 numeric currency code for limit amounts
-        type: integer
-      max_payment_amount:
-        description: |
-          maximal amount allowed for create order
-        type: number
-      min_payment_amount:
-        description: |
-          minimal amount allowed for create order
-        type: number
-      name:
-        description: |
-          project name
-        type: string
-      notify_emails:
-        description: |
-          list of emails to send notifications about successfully completed payment operations
-        items:
-          type: string
-        type: array
-      is_products_checkout:
-        description: |
-          is allow create order only with amounts from fixed packages list
-        type: boolean
-      secret_key:
-        description: |
-          secret key for create check hash for request about order statuses changes
-        type: string
-      send_notify_email:
-        description: |
-          is allow send notifications about successfully completed payment operations to user's emails
-        type: boolean
-      url_check_account:
-        description: |
-          default url to send request for verification payment data to project
-        type: string
-      url_process_payment:
-        description: |
-          default url to send request for notification about successfully completed payment to project
-        type: string
-      url_redirect_fail:
-        description: |
-          default url to redirect user after failed payment
-        type: string
-      url_redirect_success:
-        description: |
-          default url to redirect user after successfully completed payment
-        type: string
-    required:
-      - name
-      - callback_protocol
-    type: object
+
   model.RevenueDynamicMainData:
     properties:
       avg:
