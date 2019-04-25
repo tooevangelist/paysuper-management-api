@@ -644,10 +644,14 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.Status = pRsp.Item.Status
 
 	if v, ok := req[requestParameterName]; ok {
-		if tv, ok := v.(map[string]string); !ok {
+		tv, ok := v.(map[string]interface{})
+
+		if !ok || len(tv) <= 0 {
 			return errors.New(errorMessageNameIncorrectType)
-		} else {
-			structure.Name = tv
+		}
+
+		for k, tvv := range tv {
+			structure.Name[k] = tvv.(string)
 		}
 	}
 
