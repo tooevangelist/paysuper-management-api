@@ -2234,6 +2234,35 @@ paths:
       description: Get list of project for authenticated merchant
       produces:
         - application/json
+      parameters:
+        - description: merchant identifier
+          in: query
+          name: merchant_id
+          type: string
+        - description: string to quick search by project name
+          in: query
+          name: quick_search
+          type: string
+        - description: array of project statuses
+          in: query
+          name: status
+          type: array
+          items:
+            type: integer
+        - description: fields list for sorting
+          in: query
+          name: sort
+          type: array
+          items:
+            type: string
+        - description: maximum number of returning records. default value is 100
+          in: query
+          name: limit
+          type: integer
+        - description: offset from which you want to return the list of records. default value is 0
+          in: query
+          name: offset
+          type: integer
       responses:
         "200":
           description: OK
