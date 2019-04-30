@@ -28,7 +28,7 @@ func (r *projectRoute) createProject(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	err = r.validate.Struct(req)
