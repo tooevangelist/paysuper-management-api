@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -22,7 +23,7 @@ var customersRoutes = [][]string{
 
 type CustomerTestSuite struct {
 	suite.Suite
-	router *customerRoute
+	router *tokenRoute
 	api    *Api
 }
 
@@ -47,13 +48,13 @@ func (suite *CustomerTestSuite) SetupTest() {
 	assert.NoError(suite.T(), err)
 
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
-	suite.router = &customerRoute{Api: suite.api}
+	suite.router = &tokenRoute{Api: suite.api}
 }
 
 func (suite *CustomerTestSuite) TearDownTest() {}
 
 func (suite *CustomerTestSuite) TestCustomer_InitCustomerRoutes_Ok() {
-	api, err := suite.api.initCustomerRoutes()
+	api, err := suite.api.initTokenRoutes()
 	assert.NoError(suite.T(), err)
 	assert.NotNil(suite.T(), api)
 
@@ -74,23 +75,37 @@ func (suite *CustomerTestSuite) TestCustomer_InitCustomerRoutes_Ok() {
 }
 
 func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_Ok() {
-	body := &billing.Customer{
-		ProjectId:     bson.NewObjectId().Hex(),
-		ExternalId:    bson.NewObjectId().Hex(),
-		Email:         "test@unit.test",
-		EmailVerified: true,
-		Phone:         "9123456789",
-		Ip:            "127.0.0.1",
-		Locale:        "ru",
-		Metadata: map[string]string{
-			"field1": "value1",
-			"field2": "value2",
+	body := &grpc.TokenRequest{
+		User: &billing.TokenUser{
+			Id: bson.NewObjectId().Hex(),
+			Email: &billing.TokenUserEmailValue{
+				Value: "test@unit.test",
+			},
+			Phone: &billing.TokenUserPhoneValue{
+				Value: "1234567890",
+			},
+			Name: &billing.TokenUserValue{
+				Value: "Unit Test",
+			},
+			Ip: &billing.TokenUserIpValue{
+				Value: "127.0.0.1",
+			},
+			Locale: &billing.TokenUserLocaleValue{
+				Value: "ru",
+			},
+			Address: &billing.OrderBillingAddress{
+				Country:    "RU",
+				City:       "St.Petersburg",
+				PostalCode: "190000",
+				State:      "SPE",
+			},
 		},
-		Address: &billing.OrderBillingAddress{
-			Country:    "US",
-			City:       "New York",
-			PostalCode: "000000",
-			State:      "CA",
+		Settings: &billing.TokenSettings{
+			OrderId:     bson.NewObjectId().Hex(),
+			ProjectId:   bson.NewObjectId().Hex(),
+			Currency:    "RUB",
+			Amount:      100,
+			Description: "test payment",
 		},
 	}
 
@@ -103,7 +118,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	err = suite.router.createCustomer(ctx)
+	err = suite.router.createToken(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
@@ -117,7 +132,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_BindError() {
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	err := suite.router.createCustomer(ctx)
+	err := suite.router.createToken(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -127,22 +142,37 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_BindError() {
 }
 
 func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ValidationError() {
-	body := &billing.Customer{
-		ExternalId:    bson.NewObjectId().Hex(),
-		Email:         "test@unit.test",
-		EmailVerified: true,
-		Phone:         "9123456789",
-		Ip:            "127.0.0.1",
-		Locale:        "ru",
-		Metadata: map[string]string{
-			"field1": "value1",
-			"field2": "value2",
+	body := &grpc.TokenRequest{
+		User: &billing.TokenUser{
+			Id: bson.NewObjectId().Hex(),
+			Email: &billing.TokenUserEmailValue{
+				Value: "test@unit.test",
+			},
+			Phone: &billing.TokenUserPhoneValue{
+				Value: "1234567890",
+			},
+			Name: &billing.TokenUserValue{
+				Value: "Unit Test",
+			},
+			Ip: &billing.TokenUserIpValue{
+				Value: "127.0.0.1",
+			},
+			Locale: &billing.TokenUserLocaleValue{
+				Value: "ru",
+			},
+			Address: &billing.OrderBillingAddress{
+				Country:    "RU",
+				City:       "St.Petersburg",
+				PostalCode: "190000",
+				State:      "SPE",
+			},
 		},
-		Address: &billing.OrderBillingAddress{
-			Country:    "US",
-			City:       "New York",
-			PostalCode: "000000",
-			State:      "CA",
+		Settings: &billing.TokenSettings{
+			OrderId:     bson.NewObjectId().Hex(),
+			ProjectId:   bson.NewObjectId().Hex(),
+			Currency:    "RUB",
+			Amount:      -100,
+			Description: "test payment",
 		},
 	}
 
@@ -154,33 +184,47 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ValidationError() {
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	err = suite.router.createCustomer(ctx)
+	err = suite.router.createToken(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "ProjectId", httpErr.Message)
+	assert.Regexp(suite.T(), "Amount", httpErr.Message)
 }
 
 func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestSignature_System_Error() {
-	body := &billing.Customer{
-		ProjectId:     bson.NewObjectId().Hex(),
-		ExternalId:    bson.NewObjectId().Hex(),
-		Email:         "test@unit.test",
-		EmailVerified: true,
-		Phone:         "9123456789",
-		Ip:            "127.0.0.1",
-		Locale:        "ru",
-		Metadata: map[string]string{
-			"field1": "value1",
-			"field2": "value2",
+	body := &grpc.TokenRequest{
+		User: &billing.TokenUser{
+			Id: bson.NewObjectId().Hex(),
+			Email: &billing.TokenUserEmailValue{
+				Value: "test@unit.test",
+			},
+			Phone: &billing.TokenUserPhoneValue{
+				Value: "1234567890",
+			},
+			Name: &billing.TokenUserValue{
+				Value: "Unit Test",
+			},
+			Ip: &billing.TokenUserIpValue{
+				Value: "127.0.0.1",
+			},
+			Locale: &billing.TokenUserLocaleValue{
+				Value: "ru",
+			},
+			Address: &billing.OrderBillingAddress{
+				Country:    "RU",
+				City:       "St.Petersburg",
+				PostalCode: "190000",
+				State:      "SPE",
+			},
 		},
-		Address: &billing.OrderBillingAddress{
-			Country:    "US",
-			City:       "New York",
-			PostalCode: "000000",
-			State:      "CA",
+		Settings: &billing.TokenSettings{
+			OrderId:     bson.NewObjectId().Hex(),
+			ProjectId:   bson.NewObjectId().Hex(),
+			Currency:    "RUB",
+			Amount:      100,
+			Description: "test payment",
 		},
 	}
 
@@ -194,7 +238,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestS
 	ctx := suite.api.Http.NewContext(req, rsp)
 
 	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
-	err = suite.router.createCustomer(ctx)
+	err = suite.router.createToken(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -204,23 +248,37 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestS
 }
 
 func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestSignature_ResultError() {
-	body := &billing.Customer{
-		ProjectId:     bson.NewObjectId().Hex(),
-		ExternalId:    bson.NewObjectId().Hex(),
-		Email:         "test@unit.test",
-		EmailVerified: true,
-		Phone:         "9123456789",
-		Ip:            "127.0.0.1",
-		Locale:        "ru",
-		Metadata: map[string]string{
-			"field1": "value1",
-			"field2": "value2",
+	body := &grpc.TokenRequest{
+		User: &billing.TokenUser{
+			Id: bson.NewObjectId().Hex(),
+			Email: &billing.TokenUserEmailValue{
+				Value: "test@unit.test",
+			},
+			Phone: &billing.TokenUserPhoneValue{
+				Value: "1234567890",
+			},
+			Name: &billing.TokenUserValue{
+				Value: "Unit Test",
+			},
+			Ip: &billing.TokenUserIpValue{
+				Value: "127.0.0.1",
+			},
+			Locale: &billing.TokenUserLocaleValue{
+				Value: "ru",
+			},
+			Address: &billing.OrderBillingAddress{
+				Country:    "RU",
+				City:       "St.Petersburg",
+				PostalCode: "190000",
+				State:      "SPE",
+			},
 		},
-		Address: &billing.OrderBillingAddress{
-			Country:    "US",
-			City:       "New York",
-			PostalCode: "000000",
-			State:      "CA",
+		Settings: &billing.TokenSettings{
+			OrderId:     bson.NewObjectId().Hex(),
+			ProjectId:   bson.NewObjectId().Hex(),
+			Currency:    "RUB",
+			Amount:      100,
+			Description: "test payment",
 		},
 	}
 
@@ -234,7 +292,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestS
 	ctx := suite.api.Http.NewContext(req, rsp)
 
 	suite.router.billingService = mock.NewBillingServerErrorMock()
-	err = suite.router.createCustomer(ctx)
+	err = suite.router.createToken(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -244,23 +302,37 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestS
 }
 
 func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_System_Error() {
-	body := &billing.Customer{
-		ProjectId:     mock.SomeMerchantId,
-		ExternalId:    bson.NewObjectId().Hex(),
-		Email:         "test@unit.test",
-		EmailVerified: true,
-		Phone:         "9123456789",
-		Ip:            "127.0.0.1",
-		Locale:        "ru",
-		Metadata: map[string]string{
-			"field1": "value1",
-			"field2": "value2",
+	body := &grpc.TokenRequest{
+		User: &billing.TokenUser{
+			Id: bson.NewObjectId().Hex(),
+			Email: &billing.TokenUserEmailValue{
+				Value: "test@unit.test",
+			},
+			Phone: &billing.TokenUserPhoneValue{
+				Value: "1234567890",
+			},
+			Name: &billing.TokenUserValue{
+				Value: "Unit Test",
+			},
+			Ip: &billing.TokenUserIpValue{
+				Value: "127.0.0.1",
+			},
+			Locale: &billing.TokenUserLocaleValue{
+				Value: "ru",
+			},
+			Address: &billing.OrderBillingAddress{
+				Country:    "RU",
+				City:       "St.Petersburg",
+				PostalCode: "190000",
+				State:      "SPE",
+			},
 		},
-		Address: &billing.OrderBillingAddress{
-			Country:    "US",
-			City:       "New York",
-			PostalCode: "000000",
-			State:      "CA",
+		Settings: &billing.TokenSettings{
+			OrderId:     bson.NewObjectId().Hex(),
+			ProjectId:   bson.NewObjectId().Hex(),
+			Currency:    "RUB",
+			Amount:      100,
+			Description: "test payment",
 		},
 	}
 
@@ -274,7 +346,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_Syste
 	ctx := suite.api.Http.NewContext(req, rsp)
 
 	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
-	err = suite.router.createCustomer(ctx)
+	err = suite.router.createToken(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -284,23 +356,37 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_Syste
 }
 
 func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_ResultError() {
-	body := &billing.Customer{
-		ProjectId:     mock.SomeMerchantId,
-		ExternalId:    bson.NewObjectId().Hex(),
-		Email:         "test@unit.test",
-		EmailVerified: true,
-		Phone:         "9123456789",
-		Ip:            "127.0.0.1",
-		Locale:        "ru",
-		Metadata: map[string]string{
-			"field1": "value1",
-			"field2": "value2",
+	body := &grpc.TokenRequest{
+		User: &billing.TokenUser{
+			Id: bson.NewObjectId().Hex(),
+			Email: &billing.TokenUserEmailValue{
+				Value: "test@unit.test",
+			},
+			Phone: &billing.TokenUserPhoneValue{
+				Value: "1234567890",
+			},
+			Name: &billing.TokenUserValue{
+				Value: "Unit Test",
+			},
+			Ip: &billing.TokenUserIpValue{
+				Value: "127.0.0.1",
+			},
+			Locale: &billing.TokenUserLocaleValue{
+				Value: "ru",
+			},
+			Address: &billing.OrderBillingAddress{
+				Country:    "RU",
+				City:       "St.Petersburg",
+				PostalCode: "190000",
+				State:      "SPE",
+			},
 		},
-		Address: &billing.OrderBillingAddress{
-			Country:    "US",
-			City:       "New York",
-			PostalCode: "000000",
-			State:      "CA",
+		Settings: &billing.TokenSettings{
+			OrderId:     bson.NewObjectId().Hex(),
+			ProjectId:   bson.NewObjectId().Hex(),
+			Currency:    "RUB",
+			Amount:      100,
+			Description: "test payment",
 		},
 	}
 
@@ -314,7 +400,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_Resul
 	ctx := suite.api.Http.NewContext(req, rsp)
 
 	suite.router.billingService = mock.NewBillingServerErrorMock()
-	err = suite.router.createCustomer(ctx)
+	err = suite.router.createToken(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)

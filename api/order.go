@@ -274,7 +274,7 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	tokenCookie, err := ctx.Cookie(CustomerTokenCookiesName)
+	cookie, err := ctx.Cookie(CustomerTokenCookiesName)
 
 	req := &grpc.PaymentFormJsonDataRequest{
 		OrderId: id,
@@ -284,8 +284,8 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 		Ip:      ctx.RealIP(),
 	}
 
-	if err == nil && tokenCookie != nil && tokenCookie.Value != "" {
-		req.Token = tokenCookie.Value
+	if err == nil && cookie != nil && cookie.Value != "" {
+		req.Cookie = cookie.Value
 	}
 
 	rsp, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
@@ -294,10 +294,10 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	if rsp.HasCustomerToken == false {
+	if rsp.Cookie != "" && rsp.Cookie != req.Cookie {
 		cookie := new(http.Cookie)
 		cookie.Name = CustomerTokenCookiesName
-		cookie.Value = rsp.CustomerToken
+		cookie.Value = rsp.Cookie
 		cookie.Expires = time.Now().Add(time.Second * CustomerTokenCookiesLifetime)
 		cookie.HttpOnly = true
 		ctx.SetCookie(cookie)
@@ -759,9 +759,6 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	req.AcceptLanguage = ctx.Request().Header.Get(HeaderAcceptLanguage)
-	req.UserAgent = ctx.Request().Header.Get(HeaderUserAgent)
-	req.Ip = ctx.RealIP()
 	req.OrderId = orderId
 	err = r.validate.Struct(req)
 

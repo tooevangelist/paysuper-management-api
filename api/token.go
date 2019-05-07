@@ -4,23 +4,23 @@ import (
 	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
-	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"net/http"
 )
 
-type customerRoute struct {
+type tokenRoute struct {
 	*Api
 }
 
-func (api *Api) initCustomerRoutes() (*Api, error) {
-	route := &customerRoute{Api: api}
-	api.apiAuthProjectGroup.POST("/customers", route.createCustomer)
+func (api *Api) initTokenRoutes() (*Api, error) {
+	route := &tokenRoute{Api: api}
+	api.apiAuthProjectGroup.POST("/tokens", route.createToken)
 
 	return api, nil
 }
 
-func (r *customerRoute) createCustomer(ctx echo.Context) error {
-	req := &billing.Customer{}
+func (r *tokenRoute) createToken(ctx echo.Context) error {
+	req := &grpc.TokenRequest{}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -33,13 +33,13 @@ func (r *customerRoute) createCustomer(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	err = r.checkProjectAuthRequestSignature(ctx, req.ProjectId)
+	err = r.checkProjectAuthRequestSignature(ctx, req.Settings.ProjectId)
 
 	if err != nil {
 		return err
 	}
 
-	rsp, err := r.billingService.ChangeCustomer(context.TODO(), req)
+	rsp, err := r.billingService.CreateToken(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -49,5 +49,5 @@ func (r *customerRoute) createCustomer(ctx echo.Context) error {
 		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]string{"token": rsp.Item.Token})
+	return ctx.JSON(http.StatusOK, map[string]string{"token": rsp.Token})
 }
