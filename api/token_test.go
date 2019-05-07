@@ -17,21 +17,21 @@ import (
 	"testing"
 )
 
-var customersRoutes = [][]string{
-	{"/api/v1/customers", http.MethodPost},
+var tokenRoutes = [][]string{
+	{"/api/v1/tokens", http.MethodPost},
 }
 
-type CustomerTestSuite struct {
+type TokenTestSuite struct {
 	suite.Suite
 	router *tokenRoute
 	api    *Api
 }
 
 func Test_Customer(t *testing.T) {
-	suite.Run(t, new(CustomerTestSuite))
+	suite.Run(t, new(TokenTestSuite))
 }
 
-func (suite *CustomerTestSuite) SetupTest() {
+func (suite *TokenTestSuite) SetupTest() {
 	suite.api = &Api{
 		Http:           echo.New(),
 		validate:       validator.New(),
@@ -51,9 +51,9 @@ func (suite *CustomerTestSuite) SetupTest() {
 	suite.router = &tokenRoute{Api: suite.api}
 }
 
-func (suite *CustomerTestSuite) TearDownTest() {}
+func (suite *TokenTestSuite) TearDownTest() {}
 
-func (suite *CustomerTestSuite) TestCustomer_InitCustomerRoutes_Ok() {
+func (suite *TokenTestSuite) TestToken_InitCustomerRoutes_Ok() {
 	api, err := suite.api.initTokenRoutes()
 	assert.NoError(suite.T(), err)
 	assert.NotNil(suite.T(), api)
@@ -61,7 +61,7 @@ func (suite *CustomerTestSuite) TestCustomer_InitCustomerRoutes_Ok() {
 	routes := api.Http.Routes()
 	routeCount := 0
 
-	for _, v := range customersRoutes {
+	for _, v := range tokenRoutes {
 		for _, r := range routes {
 			if v[0] != r.Path || v[1] != r.Method {
 				continue
@@ -71,10 +71,10 @@ func (suite *CustomerTestSuite) TestCustomer_InitCustomerRoutes_Ok() {
 		}
 	}
 
-	assert.Len(suite.T(), customersRoutes, routeCount)
+	assert.Len(suite.T(), tokenRoutes, routeCount)
 }
 
-func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_Ok() {
+func (suite *TokenTestSuite) TestToken_CreateToken_Ok() {
 	body := &grpc.TokenRequest{
 		User: &billing.TokenUser{
 			Id: bson.NewObjectId().Hex(),
@@ -101,7 +101,6 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_Ok() {
 			},
 		},
 		Settings: &billing.TokenSettings{
-			OrderId:     bson.NewObjectId().Hex(),
 			ProjectId:   bson.NewObjectId().Hex(),
 			Currency:    "RUB",
 			Amount:      100,
@@ -124,8 +123,8 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_Ok() {
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
-func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_BindError() {
-	body := `{"email_verified": "qwerty", "metadata": "qwerty"}`
+func (suite *TokenTestSuite) TestToken_CreateToken_BindError() {
+	body := `{"user": "qwerty", "metadata": "qwerty"}`
 
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -141,7 +140,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_BindError() {
 	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
 }
 
-func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ValidationError() {
+func (suite *TokenTestSuite) TestToken_CreateToken_ValidationError() {
 	body := &grpc.TokenRequest{
 		User: &billing.TokenUser{
 			Id: bson.NewObjectId().Hex(),
@@ -168,7 +167,6 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ValidationError() {
 			},
 		},
 		Settings: &billing.TokenSettings{
-			OrderId:     bson.NewObjectId().Hex(),
 			ProjectId:   bson.NewObjectId().Hex(),
 			Currency:    "RUB",
 			Amount:      -100,
@@ -193,7 +191,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ValidationError() {
 	assert.Regexp(suite.T(), "Amount", httpErr.Message)
 }
 
-func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestSignature_System_Error() {
+func (suite *TokenTestSuite) TestToken_CreateToken_CheckProjectRequestSignature_System_Error() {
 	body := &grpc.TokenRequest{
 		User: &billing.TokenUser{
 			Id: bson.NewObjectId().Hex(),
@@ -220,7 +218,6 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestS
 			},
 		},
 		Settings: &billing.TokenSettings{
-			OrderId:     bson.NewObjectId().Hex(),
 			ProjectId:   bson.NewObjectId().Hex(),
 			Currency:    "RUB",
 			Amount:      100,
@@ -247,7 +244,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestS
 	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
-func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestSignature_ResultError() {
+func (suite *TokenTestSuite) TestToken_CreateToken_CheckProjectRequestSignature_ResultError() {
 	body := &grpc.TokenRequest{
 		User: &billing.TokenUser{
 			Id: bson.NewObjectId().Hex(),
@@ -274,7 +271,6 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestS
 			},
 		},
 		Settings: &billing.TokenSettings{
-			OrderId:     bson.NewObjectId().Hex(),
 			ProjectId:   bson.NewObjectId().Hex(),
 			Currency:    "RUB",
 			Amount:      100,
@@ -301,7 +297,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_CheckProjectRequestS
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
-func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_System_Error() {
+func (suite *TokenTestSuite) TestToken_CreateToken_ChangeCustomer_System_Error() {
 	body := &grpc.TokenRequest{
 		User: &billing.TokenUser{
 			Id: bson.NewObjectId().Hex(),
@@ -328,7 +324,6 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_Syste
 			},
 		},
 		Settings: &billing.TokenSettings{
-			OrderId:     bson.NewObjectId().Hex(),
 			ProjectId:   bson.NewObjectId().Hex(),
 			Currency:    "RUB",
 			Amount:      100,
@@ -355,7 +350,7 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_Syste
 	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
-func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_ResultError() {
+func (suite *TokenTestSuite) TestToken_CreateToken_ChangeCustomer_ResultError() {
 	body := &grpc.TokenRequest{
 		User: &billing.TokenUser{
 			Id: bson.NewObjectId().Hex(),
@@ -382,7 +377,6 @@ func (suite *CustomerTestSuite) TestCustomer_CreateCustomer_ChangeCustomer_Resul
 			},
 		},
 		Settings: &billing.TokenSettings{
-			OrderId:     bson.NewObjectId().Hex(),
 			ProjectId:   bson.NewObjectId().Hex(),
 			Currency:    "RUB",
 			Amount:      100,

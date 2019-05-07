@@ -747,7 +747,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_Ok() {
 		Amount:        100,
 		Description:   "unit test",
 		OrderId:       bson.NewObjectId().Hex(),
-		User: &billing.Customer{
+		User: &billing.OrderUser{
 			ExternalId:    bson.NewObjectId().Hex(),
 			Ip:            "127.0.0.1",
 			Locale:        "ru",
@@ -800,7 +800,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_EmptyRequestSignature
 		Amount:        100,
 		Description:   "unit test",
 		OrderId:       bson.NewObjectId().Hex(),
-		User: &billing.Customer{
+		User: &billing.OrderUser{
 			ExternalId:    bson.NewObjectId().Hex(),
 			Ip:            "127.0.0.1",
 			Locale:        "ru",
@@ -837,7 +837,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_BillingServerSystemEr
 		Amount:        100,
 		Description:   "unit test",
 		OrderId:       bson.NewObjectId().Hex(),
-		User: &billing.Customer{
+		User: &billing.OrderUser{
 			ExternalId:    bson.NewObjectId().Hex(),
 			Ip:            "127.0.0.1",
 			Locale:        "ru",
@@ -876,7 +876,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_BillingServerResultFa
 		Amount:        100,
 		Description:   "unit test",
 		OrderId:       bson.NewObjectId().Hex(),
-		User: &billing.Customer{
+		User: &billing.OrderUser{
 			ExternalId:    bson.NewObjectId().Hex(),
 			Ip:            "127.0.0.1",
 			Locale:        "ru",
@@ -944,6 +944,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_OrderCreateError() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
+	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
 	err = suite.router.createJson(ctx)
 	assert.Error(suite.T(), err)
 
@@ -972,13 +973,14 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_PaymentFormJsonDataProcessErro
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
+	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
 	err = suite.router.createJson(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError1, httpErr.Message)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateJson_ProductionEnvironment_Ok() {
@@ -1060,7 +1062,8 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_TokenCookieExist_Ok() {
 	assert.Equal(suite.T(), echo.MIMETextHTMLCharsetUTF8, rsp.Header().Get(echo.HeaderContentType))
 
 	cookies := rsp.Result().Cookies()
-	assert.True(suite.T(), len(cookies) == 1)
+
+	assert.True(suite.T(), len(cookies) > 1)
 	assert.Equal(suite.T(), cookie.Name, cookies[0].Name)
 	assert.Equal(suite.T(), cookie.Value, cookies[0].Value)
 }

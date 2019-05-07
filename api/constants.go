@@ -1,8 +1,9 @@
 package api
 
 const (
-	apiWebHookGroupPath  = "/webhook"
-	apiAuthUserGroupPath = "/admin/api/v1"
+	apiWebHookGroupPath     = "/webhook"
+	apiAuthProjectGroupPath = "/api/v1"
+	apiAuthUserGroupPath    = "/admin/api/v1"
 
 	LimitDefault  = 100
 	OffsetDefault = 0
@@ -96,8 +97,15 @@ const (
 	errorMessageUrlRedirectFailIncorrectType          = "url redirect fail parameter has incorrect type"
 	errorMessageUrlRedirectSuccessIncorrectType       = "url redirect success parameter has incorrect type"
 	errorMessageStatusIncorrectType                   = "status parameter has incorrect type"
+	errorMessageSignatureHeaderIsEmpty                = "header with request signature can't be empty"
 
-	HeaderAcceptLanguage = "Accept-Language"
+	HeaderAcceptLanguage      = "Accept-Language"
+	HeaderUserAgent           = "User-Agent"
+	HeaderXApiSignatureHeader = "X-API-SIGNATURE"
+
+	EnvironmentProduction        = "prod"
+	CustomerTokenCookiesName     = "_ps_ctkn"
+	CustomerTokenCookiesLifetime = 2592000
 
 	agreementPageTemplateName = "agreement.html"
 )

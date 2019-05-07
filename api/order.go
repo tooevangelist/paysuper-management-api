@@ -15,7 +15,6 @@ import (
 	"github.com/paysuper/paysuper-payment-link/proto"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 )
 

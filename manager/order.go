@@ -1555,14 +1555,6 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 			IsActive: o.ProjectIncomeCurrency.IsActive,
 		},
 		ProjectParams: sProjectParams,
-		PayerData: &billing.PayerData{
-			Ip:          o.PayerData.Ip,
-			Country:     o.PayerData.CountryCodeA2,
-			CountryName: &billing.Name{En: o.PayerData.CountryName.EN, Ru: o.PayerData.CountryName.RU},
-			City:        &billing.Name{En: o.PayerData.City.EN, Ru: o.PayerData.City.RU},
-			State:       o.PayerData.Subdivision,
-			Timezone:    o.PayerData.Timezone,
-		},
 		PaymentMethod: &billing.PaymentMethodOrder{
 			Id:   o.PaymentMethod.Id.Hex(),
 			Name: o.PaymentMethod.Name,
@@ -1704,14 +1696,6 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 
 	if v, err := ptypes.TimestampProto(o.ProjectIncomeCurrency.UpdatedAt); err == nil {
 		pOrder.ProjectIncomeCurrency.UpdatedAt = v
-	}
-
-	if o.PayerData.Phone != nil {
-		pOrder.PayerData.Phone = *o.PayerData.Phone
-	}
-
-	if o.PayerData.Email != nil {
-		pOrder.PayerData.Email = *o.PayerData.Email
 	}
 
 	if o.Project.UrlSuccess != "" {
