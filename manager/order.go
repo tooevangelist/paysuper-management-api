@@ -1540,24 +1540,10 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 		Id: o.Id.Hex(),
 		Project: &billing.ProjectOrder{
 			Id:               o.Project.Id.Hex(),
-			Name:             o.Project.Name,
 			NotifyEmails:     o.Project.NotifyEmails,
 			SendNotifyEmail:  o.Project.SendNotifyEmail,
 			SecretKey:        o.Project.SecretKey,
 			CallbackProtocol: o.Project.CallbackProtocol,
-			Merchant: &billing.Merchant{
-				Id: o.Project.Merchant.Id,
-				Country: &billing.Country{
-					CodeInt:  int32(o.Project.Merchant.Country.CodeInt),
-					CodeA2:   o.Project.Merchant.Country.CodeA2,
-					CodeA3:   o.Project.Merchant.Country.CodeA3,
-					Name:     &billing.Name{En: o.Project.Merchant.Country.Name.En, Ru: o.Project.Merchant.Country.Name.Ru},
-					IsActive: o.Project.Merchant.Country.IsActive,
-				},
-				IsVatEnabled:              o.Project.Merchant.IsVatEnabled,
-				IsCommissionToUserEnabled: o.Project.Merchant.IsCommissionToUserEnabled,
-				Status:                    int32(o.Project.Merchant.Status),
-			},
 		},
 		ProjectAccount:      o.ProjectAccount,
 		Description:         o.Description,
@@ -1567,13 +1553,6 @@ func (om *OrderManager) getPublisherOrder(o *model.Order) *billing.Order {
 			CodeA3:   o.ProjectIncomeCurrency.CodeA3,
 			Name:     &billing.Name{En: o.ProjectIncomeCurrency.Name.EN, Ru: o.ProjectIncomeCurrency.Name.RU},
 			IsActive: o.ProjectIncomeCurrency.IsActive,
-		},
-		ProjectOutcomeAmount: o.ProjectOutcomeAmount,
-		ProjectOutcomeCurrency: &billing.Currency{
-			CodeInt:  int32(o.ProjectOutcomeCurrency.CodeInt),
-			CodeA3:   o.ProjectOutcomeCurrency.CodeA3,
-			Name:     &billing.Name{En: o.ProjectOutcomeCurrency.Name.En, Ru: o.ProjectOutcomeCurrency.Name.Ru},
-			IsActive: o.ProjectOutcomeCurrency.IsActive,
 		},
 		ProjectParams: sProjectParams,
 		PayerData: &billing.PayerData{

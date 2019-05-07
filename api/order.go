@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
@@ -40,39 +39,8 @@ type CreateOrderJsonProjectResponse struct {
 }
 
 type OrderListRefundsBinder struct{}
-type OrderCreateRefundBinder struct{}
 
 func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
-	params := ctx.QueryParams()
-	orderId := ctx.Param(requestParameterOrderId)
-	limit := int32(LimitDefault)
-	offset := int32(OffsetDefault)
-
-	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
-		return errors.New(errorIncorrectOrderId)
-	}
-
-	if v, ok := params[requestParameterLimit]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			limit = int32(i)
-		}
-	}
-
-	if v, ok := params[requestParameterOffset]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			offset = int32(i)
-		}
-	}
-
-	structure := i.(*grpc.ListRefundsRequest)
-	structure.OrderId = orderId
-	structure.Limit = limit
-	structure.Offset = offset
-
-	return nil
-}
-
-func (b *OrderCreateRefundBinder) Bind(i interface{}, ctx echo.Context) error {
 	db := new(echo.DefaultBinder)
 	err := db.Bind(i, ctx)
 
@@ -80,14 +48,12 @@ func (b *OrderCreateRefundBinder) Bind(i interface{}, ctx echo.Context) error {
 		return err
 	}
 
-	orderId := ctx.Param(requestParameterOrderId)
+	structure := i.(*grpc.ListRefundsRequest)
+	structure.OrderId = ctx.Param(requestParameterOrderId)
 
-	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
-		return errors.New(errorIncorrectOrderId)
+	if structure.Limit <= 0 {
+		structure.Limit = LimitDefault
 	}
-
-	structure := i.(*grpc.CreateRefundRequest)
-	structure.OrderId = orderId
 
 	return nil
 }
@@ -132,7 +98,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	}
 
 	api.Http.GET("/order/:id", route.getOrderForm)
-	api.Http.GET("/paylink/:id", route.getPaylinkForm)
+	api.Http.GET("/paylink/:id", route.getOrderForPaylink)
 	api.Http.GET("/order/create", route.createFromFormData)
 	api.Http.POST("/order/create", route.createFromFormData)
 
@@ -307,7 +273,7 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 }
 
 // Create order from payment link and redirect to order payment form
-func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
+func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 
 	paylinkId := ctx.Param(requestParameterId)
 
@@ -351,7 +317,7 @@ func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
 		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
-	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Id)
+	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Uuid)
 	qs := ctx.QueryString()
 	if qs != "" {
 		inlineFormRedirectUrl += "?" + qs
@@ -457,7 +423,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	p, merchant, err := r.projectManager.FilterProjects(r.Merchant.Identifier, fp)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, err)
+		return echo.NewHTTPError(http.StatusForbidden, err.Error())
 	}
 
 	params := &manager.FindAll{
@@ -472,7 +438,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	pOrders, err := r.orderManager.FindAll(params)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, pOrders)
@@ -598,21 +564,17 @@ func (r *orderRoute) getAccountingPaymentCalculation(ctx echo.Context) error {
 }
 
 func (r *orderRoute) getRefund(ctx echo.Context) error {
-	orderId := ctx.Param(requestParameterOrderId)
-	refundId := ctx.Param(requestParameterRefundId)
-
-	if refundId == "" || bson.IsObjectIdHex(refundId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectRefundId)
-	}
-
-	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
-	}
-
 	req := &grpc.GetRefundRequest{
-		OrderId:  orderId,
-		RefundId: refundId,
+		OrderId:  ctx.Param(requestParameterOrderId),
+		RefundId: ctx.Param(requestParameterRefundId),
 	}
+
+	err := r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
 	rsp, err := r.billingService.GetRefund(context.TODO(), req)
 
 	if err != nil {
@@ -634,6 +596,12 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
 	rsp, err := r.billingService.ListRefunds(context.TODO(), req)
 
 	if err != nil {
@@ -645,12 +613,13 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 
 func (r *orderRoute) createRefund(ctx echo.Context) error {
 	req := &grpc.CreateRefundRequest{}
-	err := (&OrderCreateRefundBinder{}).Bind(req, ctx)
+	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
+	req.OrderId = ctx.Param(requestParameterOrderId)
 	err = r.validate.Struct(req)
 
 	if err != nil {
