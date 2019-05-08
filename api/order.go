@@ -443,22 +443,14 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, pOrders)
 }
 
-// @Summary Create payment
-// @Description Create payment by order
-// @Tags Payment Order
-// @Accept json
-// @Produce json
-// @Param data body model.OrderCreatePaymentRequest true "data to create payment"
-// @Success 200 {object} payment_system.PaymentResponse "contain url to redirect user"
-// @Failure 400 {object} payment_system.PaymentResponse "contain error description about data validation error"
-// @Failure 402 {object} payment_system.PaymentResponse "contain error description about error on payment system side"
-// @Failure 500 {object} payment_system.PaymentResponse "contain error description about error on PSP (P1) side"
-// @Router /api/v1/payment [post]
+// Create payment by order
+// route POST /api/v1/payment
 func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	data := make(map[string]string)
+	err := (&PaymentCreateProcessBinder{}).Bind(data, ctx)
 
-	if err := (&PaymentCreateProcessBinder{}).Bind(data, ctx); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageInvalidRequestData})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
 
 	req := &grpc.PaymentCreateRequest{
@@ -470,7 +462,7 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentCreateProcess(context.TODO(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageUnknownError})
+		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageUnknownError)
 	}
 
 	var httpStatus int
