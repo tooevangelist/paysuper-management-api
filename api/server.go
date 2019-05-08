@@ -88,9 +88,10 @@ type Api struct {
 	logger   *zap.SugaredLogger
 	validate *validator.Validate
 
-	accessRouteGroup  *echo.Group
-	webhookRouteGroup *echo.Group
-	jwtVerifier       *jwtverifier.JwtVerifier
+	accessRouteGroup    *echo.Group
+	webhookRouteGroup   *echo.Group
+	apiAuthProjectGroup *echo.Group
+	jwtVerifier         *jwtverifier.JwtVerifier
 
 	authUserRouteGroup *echo.Group
 	authUser           *AuthUser
@@ -110,8 +111,9 @@ type Api struct {
 	AmqpAddress string
 	notifierPub *rabbitmq.Broker
 
-	k8sHost string
-	rawBody string
+	k8sHost      string
+	rawBody      string
+	reqSignature string
 
 	Merchant
 	GetParams
@@ -203,6 +205,19 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		api.logger.Infow(ctx.Path(), data...)
 	}))
 	api.webhookRouteGroup.Use(api.RawBodyMiddleware)
+
+	api.apiAuthProjectGroup = api.Http.Group(apiAuthProjectGroupPath)
+	api.apiAuthProjectGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
+		data := []interface{}{
+			"request_headers", utils.RequestResponseHeadersToString(ctx.Request().Header),
+			"request_body", string(reqBody),
+			"response_headers", utils.RequestResponseHeadersToString(ctx.Response().Header()),
+			"response_body", string(resBody),
+		}
+
+		api.logger.Infow(ctx.Path(), data...)
+	}))
+	api.apiAuthProjectGroup.Use(api.RawBodyMiddleware)
 
 	api.Http.Use(api.LimitOffsetSortMiddleware)
 	api.Http.Use(middleware.Logger())
@@ -358,4 +373,29 @@ func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.
 
 func (api *Api) logError(msg string, data []interface{}) {
 	zap.S().Errorw(fmt.Sprintf("[PAYSUPER_MANAGEMENT_API] %s", msg), data...)
+}
+
+func (api *Api) isProductionEnvironment() bool {
+	return api.config.Environment == EnvironmentProduction
+}
+
+func (api *Api) checkProjectAuthRequestSignature(ctx echo.Context, projectId string) error {
+	signature := ctx.Request().Header.Get(HeaderXApiSignatureHeader)
+
+	if signature == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorMessageSignatureHeaderIsEmpty)
+	}
+
+	req := &grpc.CheckProjectRequestSignatureRequest{Body: api.rawBody, ProjectId: projectId, Signature: signature}
+	rsp, err := api.billingService.CheckProjectRequestSignature(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return nil
 }

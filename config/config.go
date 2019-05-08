@@ -49,6 +49,7 @@ type Config struct {
 	HttpScheme     string `envconfig:"HTTP_SCHEME" default:"https"`
 	KubernetesHost string `envconfig:"KUBERNETES_SERVICE_HOST" required:"false"`
 	AmqpAddress    string `envconfig:"AMQP_ADDRESS" required:"true" default:"amqp://127.0.0.1:5672"`
+	Environment    string `envconfig:"ENVIRONMENT" default:"test"`
 }
 
 func NewConfig() (error, *Config) {

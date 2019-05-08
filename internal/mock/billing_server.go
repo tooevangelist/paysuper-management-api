@@ -201,7 +201,9 @@ func (s *BillingServerOkMock) PaymentFormJsonDataProcess(
 	in *grpc.PaymentFormJsonDataRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormJsonDataResponse, error) {
-	return &grpc.PaymentFormJsonDataResponse{}, nil
+	return &grpc.PaymentFormJsonDataResponse{
+		Cookie: bson.NewObjectId().Hex(),
+	}, nil
 }
 
 func (s *BillingServerOkMock) PaymentCreateProcess(
@@ -668,6 +670,26 @@ func (s *BillingServerOkMock) DeleteProject(
 	return &grpc.ChangeProjectResponse{Status: pkg.ResponseStatusOk}, nil
 }
 
+func (s *BillingServerOkMock) CreateToken(
+	ctx context.Context,
+	in *grpc.TokenRequest,
+	opts ...client.CallOption,
+) (*grpc.TokenResponse, error) {
+	return &grpc.TokenResponse{
+		Status: pkg.ResponseStatusOk,
+	}, nil
+}
+
+func (s *BillingServerOkMock) CheckProjectRequestSignature(
+	ctx context.Context,
+	in *grpc.CheckProjectRequestSignatureRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{
+		Status: pkg.ResponseStatusOk,
+	}, nil
+}
+
 func (s *BillingServerErrorMock) GetProductsForOrder(
 	ctx context.Context,
 	in *grpc.GetProductsForOrderRequest,
@@ -999,6 +1021,28 @@ func (s *BillingServerErrorMock) DeleteProject(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) CreateToken(
+	ctx context.Context,
+	in *grpc.TokenRequest,
+	opts ...client.CallOption,
+) (*grpc.TokenResponse, error) {
+	return &grpc.TokenResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) CheckProjectRequestSignature(
+	ctx context.Context,
+	in *grpc.CheckProjectRequestSignatureRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
 func (s *BillingServerSystemErrorMock) GetProductsForOrder(
 	ctx context.Context,
 	in *grpc.GetProductsForOrderRequest,
@@ -1012,7 +1056,7 @@ func (s *BillingServerSystemErrorMock) OrderCreateProcess(
 	in *billing.OrderCreateRequest,
 	opts ...client.CallOption,
 ) (*billing.Order, error) {
-	return &billing.Order{}, nil
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerSystemErrorMock) PaymentFormJsonDataProcess(
@@ -1020,7 +1064,7 @@ func (s *BillingServerSystemErrorMock) PaymentFormJsonDataProcess(
 	in *grpc.PaymentFormJsonDataRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormJsonDataResponse, error) {
-	return &grpc.PaymentFormJsonDataResponse{}, nil
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerSystemErrorMock) PaymentCreateProcess(
@@ -1276,6 +1320,22 @@ func (s *BillingServerSystemErrorMock) DeleteProject(
 	in *grpc.GetProjectRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeProjectResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) CreateToken(
+	ctx context.Context,
+	in *grpc.TokenRequest,
+	opts ...client.CallOption,
+) (*grpc.TokenResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) CheckProjectRequestSignature(
+	ctx context.Context,
+	in *grpc.CheckProjectRequestSignatureRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return nil, errors.New(SomeError)
 }
 
@@ -1585,6 +1645,22 @@ func (s *BillingServerOkTemporaryMock) DeleteProject(
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) CreateToken(
+	ctx context.Context,
+	in *grpc.TokenRequest,
+	opts ...client.CallOption,
+) (*grpc.TokenResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkTemporaryMock) CheckProjectRequestSignature(
+	ctx context.Context,
+	in *grpc.CheckProjectRequestSignatureRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerOkMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
