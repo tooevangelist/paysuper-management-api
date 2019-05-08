@@ -82,18 +82,7 @@ definitions:
           text error description
         type: string
     type: object
-  model.FilteredFixedPackage:
-    properties:
-      currency:
-        $ref: '#/definitions/model.SimpleCurrency'
-        type: object
-      id:
-        type: string
-      name:
-        type: string
-      price:
-        type: number
-    type: object
+
   model.JsonOrderCreateResponse:
     properties:
       account:
@@ -1600,6 +1589,143 @@ definitions:
         description: default url to redirect user after successfully completed payment
         type: string
 
+  order.BillingAddress:
+    properties:
+      country:
+        description: 2 chars country code in upper registry by ISO 3166-1
+        type: string
+      city:
+        description: city name
+        type: string
+      postal_code:
+        description: zip code
+        type: string
+      state:
+        description: state code by ISO 3166-2
+        type: string
+
+  token.TokenRequest.ValueVerified:
+    properties:
+      value:
+        description: parameter value
+        type: string
+      verified:
+        description: "is parameter was verified in project side. for example: user verify email"
+        type: boolean
+    required:
+      - value
+
+  token.TokenRequest.Value:
+    properties:
+      value:
+        description: parameter value
+        type: string
+    required:
+      - value
+
+  token.TokenRequest.User:
+    properties:
+      id:
+        description: user identifier in project
+        type: string
+      email:
+        description: object which contain information about user email
+        $ref: '#/definitions/token.TokenRequest.ValueVerified'
+      phone:
+        description: object which contain information about user phone
+        $ref: '#/definitions/token.TokenRequest.ValueVerified'
+      name:
+        description: object which contain information about user real name
+        $ref: '#/definitions/token.TokenRequest.Value'
+      ip:
+        description: object which contain information about user ip
+        $ref: '#/definitions/token.TokenRequest.Value'
+      locale:
+        description: object which contain information about user locale. value in this object must contain 2 characters language code in lower registry by ISO 639-1
+        $ref: '#/definitions/token.TokenRequest.Value'
+      address:
+        description: object which contain information about user address
+        $ref: '#/definitions/order.BillingAddress'
+      metadata:
+        description: object can contain any other information about user. object must contain only string values.
+        type: object
+
+  token.TokenRequest.Settings.ReturnUrl:
+    properties:
+      success:
+        description: url to redirect user after payment was successfully completed
+        type: string
+      fail:
+        description: url to redirect user after payment failed
+        type: string
+
+  token.TokenRequest.Settings.Item:
+    properties:
+      sku:
+        description: sku identifier
+        type: string
+      amount:
+        description: item price
+        type: number
+      currency:
+        description: item price currency. 3 characters currency code in upper registry by ISO 4217
+        type: string
+    required:
+      - sku
+      - amount
+      - currency
+
+  token.TokenRequest.Settings:
+    properties:
+      project_id:
+        description: project identifier
+        type: string
+      return_url:
+        description: object contain urls for redirect user after payment ended
+        $ref: '#/definitions/token.TokenRequest.Settings.ReturnUrl'
+      currency:
+        description: 3 characters currency code in upper registry by ISO 4217
+        type: string
+      amount:
+        description: payment amount. this field is required if project use simple checkout payment to process payments.
+        type: number
+      payment_method:
+        description: predefined payment method identifier
+        type: string
+      items:
+        description: object contain information about items which user want to buy. this field is required if project not use simple checkout payment to process payments.
+        type: array
+        items:
+          $ref: '#/definitions/token.TokenRequest.Settings.Item'
+      description:
+        description: payment description
+        type: string
+      metadata:
+        description: object can contain any other information about payment. object must contain only string values. this object will return in project notification about payment.
+        type: object
+    required:
+      - project_id
+
+  token.TokenRequest:
+    properties:
+      user:
+        description: object which contain any information about payer
+        $ref: '#/definitions/token.TokenRequest.User'
+      settings:
+        description: object which contain information to process payment
+        $ref: '#/definitions/token.TokenRequest.Settings'
+    required:
+      - user
+      - settings
+
+  token.TokenResponse:
+    properties:
+      token:
+        description: payment token
+        type: string
+    required:
+      - token
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -1613,6 +1739,14 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Protocol One payment solution swagger documentation
   version: "1.0"
+
+securityDefinitions:
+  XAPISignatureHeader:
+    type: apiKey
+    in: header
+    name: X-API-SIGNATURE
+    description: must contain sha512 hash of concationation request body and project secret key
+
 paths:
   /api/v1/country:
     get:
@@ -1638,7 +1772,6 @@ paths:
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Get list of countries
       tags:
         - Country
@@ -1660,22 +1793,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Country'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Get country by numeric ISO 3166-1 code
       tags:
         - Country
@@ -1703,7 +1832,6 @@ paths:
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Get list of currencies
       tags:
         - Currency
@@ -1725,22 +1853,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Currency'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Get currency by numeric ISO 4217 code
       tags:
         - Currency
@@ -1756,7 +1880,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/model.OrderScalar'
-            type: object
       produces:
         - application/json
       responses:
@@ -1764,17 +1887,14 @@ paths:
           description: Object which contain data to render payment form
           schema:
             $ref: '#/definitions/model.JsonOrderCreateResponse'
-            type: object
         "400":
           description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Create order with json request
       tags:
         - Payment Order
@@ -1790,7 +1910,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/model.OrderCreatePaymentRequest'
-            type: object
       produces:
         - application/json
       responses:
@@ -1798,22 +1917,18 @@ paths:
           description: contain url to redirect user
           schema:
             $ref: '#/definitions/payment_system.PaymentResponse'
-            type: object
         "400":
           description: contain error description about data validation error
           schema:
             $ref: '#/definitions/payment_system.PaymentResponse'
-            type: object
         "402":
           description: contain error description about error on payment system side
           schema:
             $ref: '#/definitions/payment_system.PaymentResponse'
-            type: object
         "500":
           description: contain error description about error on PSP (P1) side
           schema:
             $ref: '#/definitions/payment_system.PaymentResponse'
-            type: object
       summary: Create payment
       tags:
         - Payment Order
@@ -1833,17 +1948,14 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Delete merchant
       tags:
         - Merchant
@@ -1866,22 +1978,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Merchant'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Create merchant
       tags:
         - Merchant
@@ -1896,7 +2004,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/model.MerchantScalar'
-            type: object
       produces:
         - application/json
       responses:
@@ -1904,27 +2011,22 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Merchant'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Update merchant
       tags:
         - Merchant
@@ -1946,22 +2048,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Merchant'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Get merchant
       tags:
         - Merchant
@@ -2036,22 +2134,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.OrderPaginate'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Get orders
       tags:
         - Payment Order
@@ -2073,32 +2167,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Order'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Get order data
       tags:
         - Payment Order
@@ -2125,27 +2213,22 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.AccountingPayment'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Get accounting payment amounts by accounting period of merchant
       tags:
         - Payment Order
@@ -2182,27 +2265,22 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.RevenueDynamicResult'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Get revenue dynamics
       tags:
         - Payment Order
@@ -2253,12 +2331,10 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: List projects
       tags:
         - Project
@@ -2281,22 +2357,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Project'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Create project
       tags:
         - Project
@@ -2322,22 +2394,18 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Delete project
       tags:
         - Project
@@ -2358,22 +2426,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Project'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Project not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Get project
       tags:
         - Project
@@ -2401,32 +2465,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Project'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
       summary: Update project
       tags:
         - Project
@@ -2700,22 +2758,18 @@ paths:
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
     post:
       summary: Create new merchant in system
       tags:
@@ -2731,7 +2785,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/onboarding.Merchant.CreateRequest'
-            type: object
       responses:
         "200":
           description: OK
@@ -2743,22 +2796,18 @@ paths:
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
     put:
       summary: Update merchant data in system
       tags:
@@ -2774,7 +2823,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/onboarding.Merchant.UpdateRequest'
-            type: object
       responses:
         "200":
           description: OK
@@ -2786,22 +2834,18 @@ paths:
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{id}":
     get:
@@ -2824,32 +2868,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/user":
     get:
@@ -2866,32 +2904,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{id}/change-status":
     put:
@@ -2921,32 +2953,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{merchant_id}/notifications":
     get:
@@ -2991,27 +3017,22 @@ paths:
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
     post:
       summary: Create new notification
       tags:
@@ -3039,27 +3060,22 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant.Notification'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{merchant_id}/notifications/{notification_id}":
     get:
@@ -3087,32 +3103,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant.Notification'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{merchant_id}/notifications/{notification_id}/mark-as-read":
     put:
@@ -3140,32 +3150,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant.Notification'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{merchant_id}/methods":
     get:
@@ -3199,22 +3203,18 @@ paths:
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{merchant_id}/methods/{method_id}":
     get:
@@ -3242,32 +3242,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant.PaymentMethod'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
     put:
       summary: Change parameters of payment method for merchant
       tags:
@@ -3300,32 +3294,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant.PaymentMethod'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{id}/agreement-type":
     patch:
@@ -3355,32 +3343,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/taxes":
     get:
@@ -3429,17 +3411,14 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
     post:
       summary: Upsert tax rate data.
       tags:
@@ -3462,32 +3441,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/taxes.TaxRate'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
   "/admin/api/v1/taxes/{id}":
     delete:
       summary: Delete tax rate object
@@ -3513,17 +3486,14 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/order/{order_id}/refunds":
     get:
@@ -3562,22 +3532,18 @@ paths:
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
     post:
       summary: Create new refund to order
       tags:
@@ -3605,32 +3571,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/order.Refund'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/order/{order_id}/refunds/{refund_id}":
     get:
@@ -3658,32 +3618,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/order.Refund'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{id}/agreement/change":
     patch:
@@ -3713,32 +3667,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{id}/agreement/merchant-sign":
     patch:
@@ -3761,32 +3709,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{id}/agreement":
     get:
@@ -3809,32 +3751,26 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant.PrintableAgreementData.Response'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
 
   "/admin/api/v1/merchants/{id}/agreement/document":
     get:
@@ -3861,27 +3797,22 @@ paths:
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
     post:
       summary: Upload merchant agreement
       tags:
@@ -3902,29 +3833,61 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.Merchant.PrintableAgreementData.Response'
-            type: object
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "403":
           description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "404":
           description: Object not found
           schema:
             $ref: '#/definitions/model.Error'
-            type: object
         "500":
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
+
+  "/api/v1/tokens":
+    post:
+      security:
+        - XAPISignatureHeader: []
+      summary: Create token
+      tags:
+        - Token
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create token for process payment token create
+      parameters:
+        - description: Data to process payment
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/token.TokenRequest'
             type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/token.TokenResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
