@@ -1134,6 +1134,27 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_BillingServer_
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
+func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_BillingServerSystemError() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchant/:merchant_id/payment-method/:payment_method_id")
+	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
+	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.getPaymentMethod(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
 func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_Ok() {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)

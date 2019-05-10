@@ -403,8 +403,10 @@ func (s *BillingServerOkMock) GetMerchantPaymentMethod(
 	ctx context.Context,
 	in *grpc.GetMerchantPaymentMethodRequest,
 	opts ...client.CallOption,
-) (*billing.MerchantPaymentMethod, error) {
-	return &billing.MerchantPaymentMethod{}, nil
+) (*grpc.GetMerchantPaymentMethodResponse, error) {
+	return &grpc.GetMerchantPaymentMethodResponse{
+		Status: pkg.ResponseStatusOk,
+	}, nil
 }
 
 func (s *BillingServerOkMock) ChangeMerchantPaymentMethod(
@@ -841,8 +843,11 @@ func (s *BillingServerErrorMock) GetMerchantPaymentMethod(
 	ctx context.Context,
 	in *grpc.GetMerchantPaymentMethodRequest,
 	opts ...client.CallOption,
-) (*billing.MerchantPaymentMethod, error) {
-	return nil, errors.New(SomeError)
+) (*grpc.GetMerchantPaymentMethodResponse, error) {
+	return &grpc.GetMerchantPaymentMethodResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
 }
 
 func (s *BillingServerErrorMock) ChangeMerchantPaymentMethod(
@@ -1191,8 +1196,8 @@ func (s *BillingServerSystemErrorMock) GetMerchantPaymentMethod(
 	ctx context.Context,
 	in *grpc.GetMerchantPaymentMethodRequest,
 	opts ...client.CallOption,
-) (*billing.MerchantPaymentMethod, error) {
-	return &billing.MerchantPaymentMethod{}, nil
+) (*grpc.GetMerchantPaymentMethodResponse, error) {
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerSystemErrorMock) ChangeMerchantPaymentMethod(
@@ -1548,8 +1553,8 @@ func (s *BillingServerOkTemporaryMock) GetMerchantPaymentMethod(
 	ctx context.Context,
 	in *grpc.GetMerchantPaymentMethodRequest,
 	opts ...client.CallOption,
-) (*billing.MerchantPaymentMethod, error) {
-	return &billing.MerchantPaymentMethod{}, nil
+) (*grpc.GetMerchantPaymentMethodResponse, error) {
+	return &grpc.GetMerchantPaymentMethodResponse{}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) ChangeMerchantPaymentMethod(

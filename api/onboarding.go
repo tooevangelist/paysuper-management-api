@@ -312,10 +312,14 @@ func (r *onboardingRoute) getPaymentMethod(ctx echo.Context) error {
 	rsp, err := r.billingService.GetMerchantPaymentMethod(context.TODO(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
-	return ctx.JSON(http.StatusOK, rsp)
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
 func (r *onboardingRoute) listPaymentMethods(ctx echo.Context) error {

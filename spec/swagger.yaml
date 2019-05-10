@@ -1474,6 +1474,8 @@ definitions:
 
   onboarding.Merchant.ChangeAgreementDataRequest:
     properties:
+      agreement_type:
+        description: "merchant agreement type. allowed values: 1 - paper agreement; 2 - e-sign agreement;"
       has_psp_signature:
         description: "flag for set peysuper signature on the agreement"
         type: boolean
@@ -2888,6 +2890,53 @@ paths:
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
+    patch:
+      summary: Change merchant information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Change merchant agreement information
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: data for change
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Merchant.ChangeAgreementDataRequest'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/merchants/user":
     get:
@@ -3618,97 +3667,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/order.Refund'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Object not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error on server side
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/merchants/{id}/agreement/change":
-    patch:
-      summary: Change information about merchant agreement
-      tags:
-        - Onboarding
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Change information about merchant agreement
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          type: string
-          required: true
-        - description: data for change
-          in: body
-          name: data
-          schema:
-            $ref: '#/definitions/onboarding.Merchant.ChangeAgreementDataRequest'
-            type: object
-          required: true
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/onboarding.Merchant'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Object not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error on server side
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/merchants/{id}/agreement/merchant-sign":
-    patch:
-      summary: Set merchant signature on the agreement
-      tags:
-        - Onboarding
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description: Set merchant signature on the agreement
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          type: string
-          required: true
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/onboarding.Merchant'
         "400":
           description: Invalid request data
           schema:
