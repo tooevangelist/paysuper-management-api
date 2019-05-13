@@ -1,9 +1,11 @@
 package manager
 
 import (
+	"context"
 	"errors"
 	"github.com/globalsign/mgo/bson"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/sidmal/slug"
@@ -28,14 +30,21 @@ type ProjectManager struct {
 	merchantManager       *MerchantManager
 	currencyManager       *CurrencyManager
 	paymentMethodsManager *PaymentMethodManager
+
+	billingService grpc.BillingService
 }
 
-func InitProjectManager(database dao.Database, logger *zap.SugaredLogger) *ProjectManager {
+func InitProjectManager(
+	database dao.Database,
+	logger *zap.SugaredLogger,
+	billingService grpc.BillingService,
+) *ProjectManager {
 	pm := &ProjectManager{
 		Manager:               &Manager{Database: database, Logger: logger},
 		merchantManager:       InitMerchantManager(database, logger),
 		currencyManager:       InitCurrencyManager(database, logger),
 		paymentMethodsManager: InitPaymentMethodManager(database, logger),
+		billingService:        billingService,
 	}
 
 	return pm
@@ -219,7 +228,7 @@ func (pm *ProjectManager) FindProjectsByMerchantIdAndName(mId bson.ObjectId, pNa
 	return p
 }
 
-func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int32, offset int32) []*model.Project {
+func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int32, offset int32) []*billing.Project {
 	p, err := pm.Database.Repository(TableProject).FindProjectsByMerchantId(mId, limit, offset)
 
 	if err != nil {
@@ -227,7 +236,7 @@ func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int32, offs
 	}
 
 	if p == nil {
-		return []*model.Project{}
+		return []*billing.Project{}
 	}
 
 	return p
@@ -240,7 +249,7 @@ func (pm *ProjectManager) FindProjectsMainData(mId string) map[string]string {
 
 	if len(p) > 0 {
 		for _, v := range p {
-			pmd[v.Id.Hex()] = v.Name
+			pmd[v.Id] = v.Name["en"]
 		}
 	}
 
@@ -299,20 +308,25 @@ func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model
 }
 
 func (pm *ProjectManager) FilterProjects(mId string, fProjects []bson.ObjectId) (map[bson.ObjectId]string, *billing.Merchant, error) {
-	mProjects := pm.FindProjectsByMerchantId(mId, model.DefaultLimit, model.DefaultOffset)
+	req := &grpc.ListProjectsRequest{
+		MerchantId: mId,
+		Limit:      model.DefaultLimit,
+		Offset:     model.DefaultOffset,
+	}
+	rsp, err := pm.billingService.ListProjects(context.TODO(), req)
 
-	if len(mProjects) <= 0 {
+	if err != nil || rsp.Count <= 0 {
 		return nil, nil, errors.New(projectErrorMerchantNotHaveProjects)
 	}
 
 	var fp = make(map[bson.ObjectId]string)
 
-	for _, p := range mProjects {
-		fp[p.Id] = p.Name
+	for _, p := range rsp.Items {
+		fp[bson.ObjectIdHex(p.Id)] = p.Name["en"]
 	}
 
 	if len(fProjects) <= 0 {
-		return fp, mProjects[0].Merchant, nil
+		return fp, nil, nil
 	}
 
 	fp1 := make(map[bson.ObjectId]string)
@@ -329,7 +343,7 @@ func (pm *ProjectManager) FilterProjects(mId string, fProjects []bson.ObjectId) 
 		return nil, nil, errors.New(projectErrorAccessDeniedToProject)
 	}
 
-	return fp1, mProjects[0].Merchant, nil
+	return fp1, nil, nil
 }
 
 func (pm *ProjectManager) GetProjectPaymentMethods(projectId bson.ObjectId) ([]*model.PaymentMethod, error) {
@@ -422,7 +436,7 @@ func (pm *ProjectManager) GetProjectsPaymentMethodsByMerchantMainData(mId string
 	}
 
 	for _, project := range projects {
-		projectPms, err := pm.GetProjectPaymentMethods(project.Id)
+		projectPms, err := pm.GetProjectPaymentMethods(bson.ObjectIdHex(project.Id))
 
 		if err != nil || len(projectPms) <= 0 {
 			continue

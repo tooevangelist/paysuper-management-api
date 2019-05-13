@@ -22,7 +22,7 @@ type Repository interface {
 
 	InsertProject(p *model.Project) error
 	UpdateProject(p *model.Project) error
-	FindProjectsByMerchantId(string, int32, int32) ([]*model.Project, error)
+	FindProjectsByMerchantId(string, int32, int32) ([]*billing.Project, error)
 	FindProjectByMerchantIdAndName(bson.ObjectId, string) (*model.Project, error)
 	FindProjectById(bson.ObjectId) (*model.Project, error)
 	FindFixedPackageByFilters(filters *model.FixedPackageFilters) ([]map[string]interface{}, error)

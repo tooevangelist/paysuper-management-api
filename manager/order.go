@@ -119,7 +119,7 @@ func InitOrderManager(
 ) *OrderManager {
 	om := &OrderManager{
 		Manager:              &Manager{Database: database, Logger: logger},
-		projectManager:       InitProjectManager(database, logger),
+		projectManager:       InitProjectManager(database, logger, nil),
 		paymentSystemManager: InitPaymentSystemManager(database, logger),
 		paymentMethodManager: InitPaymentMethodManager(database, logger),
 		currencyRateManager:  InitCurrencyRateManager(database, logger),

@@ -14,7 +14,7 @@ type PaymentMethodApiV1 struct {
 func (api *Api) InitPaymentMethodRoutes() *Api {
 	pmApiV1 := PaymentMethodApiV1{
 		Api:            api,
-		projectManager: manager.InitProjectManager(api.database, api.logger),
+		projectManager: manager.InitProjectManager(api.database, api.logger, nil),
 	}
 
 	api.accessRouteGroup.GET("/payment_method/merchant", pmApiV1.getMerchantPaymentMethodsForFilters)

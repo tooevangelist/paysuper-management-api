@@ -93,7 +93,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 			api.repository,
 			api.geoService,
 		),
-		projectManager: manager.InitProjectManager(api.database, api.logger),
+		projectManager: manager.InitProjectManager(api.database, api.logger, api.billingService),
 	}
 
 	api.Http.GET("/order/:id", route.getOrderForm)
@@ -105,7 +105,8 @@ func (api *Api) InitOrderV1Routes() *Api {
 
 	api.Http.POST("/api/v1/payment", route.processCreatePayment)
 
-	api.accessRouteGroup.GET("/order", route.getOrders)
+	api.authUserRouteGroup.GET("/order", route.getOrders)
+
 	api.accessRouteGroup.GET("/order/:id", route.getOrderJson)
 	api.accessRouteGroup.GET("/order/revenue_dynamic/:period", route.getRevenueDynamic)
 	api.accessRouteGroup.GET("/order/accounting_payment", route.getAccountingPaymentCalculation)
@@ -419,7 +420,17 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 		}
 	}
 
-	p, merchant, err := r.projectManager.FilterProjects(r.Merchant.Identifier, fp)
+	rsp, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	p, _, err := r.projectManager.FilterProjects(rsp.Item.Id, fp)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, err.Error())
@@ -428,7 +439,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	params := &manager.FindAll{
 		Values:   values,
 		Projects: p,
-		Merchant: merchant,
+		Merchant: rsp.Item,
 		Limit:    r.GetParams.limit,
 		Offset:   r.GetParams.offset,
 		SortBy:   r.GetParams.sort,
