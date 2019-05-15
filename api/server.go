@@ -218,6 +218,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		api.logger.Infow(ctx.Path(), data...)
 	}))
 	api.apiAuthProjectGroup.Use(api.RawBodyMiddleware)
+	api.Http.Use(api.RawBodyMiddleware)
 
 	api.Http.Use(api.LimitOffsetSortMiddleware)
 	api.Http.Use(middleware.Logger())
