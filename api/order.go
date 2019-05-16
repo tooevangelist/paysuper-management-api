@@ -11,7 +11,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
-	"github.com/paysuper/paysuper-management-api/payment_system"
 	"github.com/paysuper/paysuper-payment-link/proto"
 	"net/http"
 	"net/url"
@@ -476,23 +475,11 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageUnknownError)
 	}
 
-	var httpStatus int
-
-	switch rsp.Status {
-	case payment_system.PaymentStatusErrorValidation:
-		httpStatus = http.StatusBadRequest
-		break
-	case payment_system.PaymentStatusErrorSystem:
-		httpStatus = http.StatusInternalServerError
-		break
-	case payment_system.CreatePaymentStatusErrorPaymentSystem:
-		httpStatus = http.StatusPaymentRequired
-		break
-	default:
-		httpStatus = http.StatusOK
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
 	}
 
-	return ctx.JSON(httpStatus, rsp)
+	return ctx.JSON(http.StatusOK, rsp)
 }
 
 // @Summary Get revenue dynamics
