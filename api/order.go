@@ -479,7 +479,12 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, rsp)
+	body := map[string]interface{}{
+		"redirect_url":  rsp.RedirectUrl,
+		"need_redirect": rsp.NeedRedirect,
+	}
+
+	return ctx.JSON(http.StatusOK, body)
 }
 
 // @Summary Get revenue dynamics
