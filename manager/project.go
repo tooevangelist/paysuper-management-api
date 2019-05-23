@@ -3,6 +3,8 @@ package manager
 import (
 	"errors"
 	"github.com/globalsign/mgo/bson"
+	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/sidmal/slug"
@@ -277,24 +279,60 @@ func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model
 	return fixedPackages
 }
 
-func (pm *ProjectManager) FilterProjects(mId string, fProjects []bson.ObjectId) (map[bson.ObjectId]string, *model.Merchant, error) {
+func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) (map[string]string, *billing.Merchant, error) {
 	mProjects := pm.FindProjectsByMerchantId(mId, model.DefaultLimit, model.DefaultOffset)
 
 	if len(mProjects) <= 0 {
 		return nil, nil, errors.New(projectErrorMerchantNotHaveProjects)
 	}
 
-	var fp = make(map[bson.ObjectId]string)
+	var fp = make(map[string]string)
 
 	for _, p := range mProjects {
-		fp[p.Id] = p.Name
+		fp[p.Id.Hex()] = p.Name
+	}
+
+	merchant := &billing.Merchant{
+		Name:                      *mProjects[0].Merchant.Name,
+		UpdatedAt:                 &timestamp.Timestamp{Seconds: mProjects[0].Merchant.UpdatedAt.Unix()},
+		Status:                    int32(mProjects[0].Merchant.Status),
+		IsVatEnabled:              mProjects[0].Merchant.IsVatEnabled,
+		IsCommissionToUserEnabled: mProjects[0].Merchant.IsCommissionToUserEnabled,
+		Id:                        mProjects[0].Merchant.Id.Hex(),
+		FirstPaymentAt:            &timestamp.Timestamp{Seconds: mProjects[0].Merchant.FirstPaymentAt.Unix()},
+		CreatedAt:                 &timestamp.Timestamp{Seconds: mProjects[0].Merchant.CreatedAt.Unix()},
+		Country: &billing.Country{
+			CodeInt:  int32(mProjects[0].Merchant.Country.CodeInt),
+			CodeA2:   mProjects[0].Merchant.Country.CodeA2,
+			CodeA3:   mProjects[0].Merchant.Country.CodeA3,
+			IsActive: mProjects[0].Merchant.Country.IsActive,
+			Name: &billing.Name{
+				En: mProjects[0].Merchant.Country.Name.EN,
+				Ru: mProjects[0].Merchant.Country.Name.RU,
+			},
+		},
+		User: &billing.MerchantUser{
+			Id:    mProjects[0].Merchant.ExternalId,
+			Email: mProjects[0].Merchant.Email,
+		},
+		Banking: &billing.MerchantBanking{
+			Currency: &billing.Currency{
+				Name: &billing.Name{
+					En: mProjects[0].Merchant.Currency.Name.EN,
+					Ru: mProjects[0].Merchant.Currency.Name.RU,
+				},
+				IsActive: mProjects[0].Merchant.Currency.IsActive,
+				CodeInt:  int32(mProjects[0].Merchant.Currency.CodeInt),
+				CodeA3:   mProjects[0].Merchant.Currency.CodeA3,
+			},
+		},
 	}
 
 	if len(fProjects) <= 0 {
-		return fp, mProjects[0].Merchant, nil
+		return fp, merchant, nil
 	}
 
-	fp1 := make(map[bson.ObjectId]string)
+	fp1 := make(map[string]string)
 
 	for _, p := range fProjects {
 		if _, ok := fp[p]; !ok {
@@ -308,7 +346,7 @@ func (pm *ProjectManager) FilterProjects(mId string, fProjects []bson.ObjectId) 
 		return nil, nil, errors.New(projectErrorAccessDeniedToProject)
 	}
 
-	return fp1, mProjects[0].Merchant, nil
+	return fp1, merchant, nil
 }
 
 func (pm *ProjectManager) GetProjectPaymentMethods(projectId bson.ObjectId) ([]*model.PaymentMethod, error) {
