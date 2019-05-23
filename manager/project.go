@@ -1,10 +1,11 @@
 package manager
 
 import (
+	"context"
 	"errors"
 	"github.com/globalsign/mgo/bson"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/sidmal/slug"
@@ -29,14 +30,21 @@ type ProjectManager struct {
 	merchantManager       *MerchantManager
 	currencyManager       *CurrencyManager
 	paymentMethodsManager *PaymentMethodManager
+
+	billingService grpc.BillingService
 }
 
-func InitProjectManager(database dao.Database, logger *zap.SugaredLogger) *ProjectManager {
+func InitProjectManager(
+	database dao.Database,
+	logger *zap.SugaredLogger,
+	billingService grpc.BillingService,
+) *ProjectManager {
 	pm := &ProjectManager{
 		Manager:               &Manager{Database: database, Logger: logger},
 		merchantManager:       InitMerchantManager(database, logger),
 		currencyManager:       InitCurrencyManager(database, logger),
 		paymentMethodsManager: InitPaymentMethodManager(database, logger),
+		billingService:        billingService,
 	}
 
 	return pm
@@ -51,7 +59,7 @@ func (pm *ProjectManager) Create(ps *model.ProjectScalar) (*model.Project, error
 		CreateInvoiceAllowedUrls:   ps.CreateInvoiceAllowedUrls,
 		IsAllowDynamicNotifyUrls:   ps.IsAllowDynamicNotifyUrls,
 		IsAllowDynamicRedirectUrls: ps.IsAllowDynamicRedirectUrls,
-		OnlyFixedAmounts:           ps.OnlyFixedAmounts,
+		IsProductsCheckout:         ps.IsProductsCheckout,
 		FixedPackage:               pm.processFixedPackages(ps.FixedPackage, true),
 		SecretKey:                  ps.SecretKey,
 		URLCheckAccount:            ps.URLCheckAccount,
@@ -65,18 +73,28 @@ func (pm *ProjectManager) Create(ps *model.ProjectScalar) (*model.Project, error
 		UpdatedAt:                  time.Now(),
 	}
 
-	p.LimitsCurrency = p.Merchant.Currency
-	p.CallbackCurrency = p.Merchant.Currency
+	p.LimitsCurrency = p.Merchant.Banking.Currency
+	p.CallbackCurrency = p.Merchant.Banking.Currency
 
 	if ps.LimitsCurrency != nil {
 		if c := pm.currencyManager.FindByCodeInt(*ps.LimitsCurrency); c != nil {
-			p.LimitsCurrency = c
+			p.LimitsCurrency = &billing.Currency{
+				CodeInt:  int32(c.CodeInt),
+				CodeA3:   c.CodeA3,
+				Name:     &billing.Name{En: c.Name.EN, Ru: c.Name.RU},
+				IsActive: c.IsActive,
+			}
 		}
 	}
 
 	if ps.CallbackCurrency != nil {
 		if c := pm.currencyManager.FindByCodeInt(*ps.CallbackCurrency); c != nil {
-			p.CallbackCurrency = c
+			p.CallbackCurrency = &billing.Currency{
+				CodeInt:  int32(c.CodeInt),
+				CodeA3:   c.CodeA3,
+				Name:     &billing.Name{En: c.Name.EN, Ru: c.Name.RU},
+				IsActive: c.IsActive,
+			}
 		}
 	}
 
@@ -122,8 +140,8 @@ func (pm *ProjectManager) Update(p *model.Project, pn *model.ProjectScalar) (*mo
 		p.IsAllowDynamicRedirectUrls = pn.IsAllowDynamicRedirectUrls
 	}
 
-	if p.OnlyFixedAmounts != pn.OnlyFixedAmounts {
-		p.OnlyFixedAmounts = pn.OnlyFixedAmounts
+	if p.IsProductsCheckout != pn.IsProductsCheckout {
+		p.IsProductsCheckout = pn.IsProductsCheckout
 	}
 
 	if p.SecretKey != pn.SecretKey {
@@ -154,15 +172,25 @@ func (pm *ProjectManager) Update(p *model.Project, pn *model.ProjectScalar) (*mo
 		p.IsActive = pn.IsActive
 	}
 
-	if pn.LimitsCurrency != nil && (p.LimitsCurrency == nil || p.LimitsCurrency.CodeInt != *pn.LimitsCurrency) {
+	if pn.LimitsCurrency != nil && (p.LimitsCurrency == nil || int(p.LimitsCurrency.CodeInt) != *pn.LimitsCurrency) {
 		if c := pm.currencyManager.FindByCodeInt(*pn.LimitsCurrency); c != nil {
-			p.LimitsCurrency = c
+			p.LimitsCurrency = &billing.Currency{
+				CodeInt:  int32(c.CodeInt),
+				CodeA3:   c.CodeA3,
+				Name:     &billing.Name{En: c.Name.EN, Ru: c.Name.RU},
+				IsActive: c.IsActive,
+			}
 		}
 	}
 
-	if pn.CallbackCurrency != nil && (p.CallbackCurrency == nil || p.CallbackCurrency.CodeInt != *pn.CallbackCurrency) {
+	if pn.CallbackCurrency != nil && (p.CallbackCurrency == nil || int(p.CallbackCurrency.CodeInt) != *pn.CallbackCurrency) {
 		if c := pm.currencyManager.FindByCodeInt(*pn.CallbackCurrency); c != nil {
-			p.CallbackCurrency = c
+			p.CallbackCurrency = &billing.Currency{
+				CodeInt:  int32(c.CodeInt),
+				CodeA3:   c.CodeA3,
+				Name:     &billing.Name{En: c.Name.EN, Ru: c.Name.RU},
+				IsActive: c.IsActive,
+			}
 		}
 	}
 
@@ -200,7 +228,7 @@ func (pm *ProjectManager) FindProjectsByMerchantIdAndName(mId bson.ObjectId, pNa
 	return p
 }
 
-func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int32, offset int32) []*model.Project {
+func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int32, offset int32) []*billing.Project {
 	p, err := pm.Database.Repository(TableProject).FindProjectsByMerchantId(mId, limit, offset)
 
 	if err != nil {
@@ -208,7 +236,7 @@ func (pm *ProjectManager) FindProjectsByMerchantId(mId string, limit int32, offs
 	}
 
 	if p == nil {
-		return []*model.Project{}
+		return []*billing.Project{}
 	}
 
 	return p
@@ -221,7 +249,7 @@ func (pm *ProjectManager) FindProjectsMainData(mId string) map[string]string {
 
 	if len(p) > 0 {
 		for _, v := range p {
-			pmd[v.Id.Hex()] = v.Name
+			pmd[v.Id] = v.Name["en"]
 		}
 	}
 
@@ -280,56 +308,25 @@ func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model
 }
 
 func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) (map[string]string, *billing.Merchant, error) {
-	mProjects := pm.FindProjectsByMerchantId(mId, model.DefaultLimit, model.DefaultOffset)
+	req := &grpc.ListProjectsRequest{
+		MerchantId: mId,
+		Limit:      model.DefaultLimit,
+		Offset:     model.DefaultOffset,
+	}
+	rsp, err := pm.billingService.ListProjects(context.TODO(), req)
 
-	if len(mProjects) <= 0 {
+	if err != nil || rsp.Count <= 0 {
 		return nil, nil, errors.New(projectErrorMerchantNotHaveProjects)
 	}
 
 	var fp = make(map[string]string)
 
-	for _, p := range mProjects {
-		fp[p.Id.Hex()] = p.Name
-	}
-
-	merchant := &billing.Merchant{
-		Name:                      *mProjects[0].Merchant.Name,
-		UpdatedAt:                 &timestamp.Timestamp{Seconds: mProjects[0].Merchant.UpdatedAt.Unix()},
-		Status:                    int32(mProjects[0].Merchant.Status),
-		IsVatEnabled:              mProjects[0].Merchant.IsVatEnabled,
-		IsCommissionToUserEnabled: mProjects[0].Merchant.IsCommissionToUserEnabled,
-		Id:                        mProjects[0].Merchant.Id.Hex(),
-		FirstPaymentAt:            &timestamp.Timestamp{Seconds: mProjects[0].Merchant.FirstPaymentAt.Unix()},
-		CreatedAt:                 &timestamp.Timestamp{Seconds: mProjects[0].Merchant.CreatedAt.Unix()},
-		Country: &billing.Country{
-			CodeInt:  int32(mProjects[0].Merchant.Country.CodeInt),
-			CodeA2:   mProjects[0].Merchant.Country.CodeA2,
-			CodeA3:   mProjects[0].Merchant.Country.CodeA3,
-			IsActive: mProjects[0].Merchant.Country.IsActive,
-			Name: &billing.Name{
-				En: mProjects[0].Merchant.Country.Name.EN,
-				Ru: mProjects[0].Merchant.Country.Name.RU,
-			},
-		},
-		User: &billing.MerchantUser{
-			Id:    mProjects[0].Merchant.ExternalId,
-			Email: mProjects[0].Merchant.Email,
-		},
-		Banking: &billing.MerchantBanking{
-			Currency: &billing.Currency{
-				Name: &billing.Name{
-					En: mProjects[0].Merchant.Currency.Name.EN,
-					Ru: mProjects[0].Merchant.Currency.Name.RU,
-				},
-				IsActive: mProjects[0].Merchant.Currency.IsActive,
-				CodeInt:  int32(mProjects[0].Merchant.Currency.CodeInt),
-				CodeA3:   mProjects[0].Merchant.Currency.CodeA3,
-			},
-		},
+	for _, p := range rsp.Items {
+		fp[p.Id] = p.Name["en"]
 	}
 
 	if len(fProjects) <= 0 {
-		return fp, merchant, nil
+		return fp, nil, nil
 	}
 
 	fp1 := make(map[string]string)
@@ -346,7 +343,7 @@ func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) (map[st
 		return nil, nil, errors.New(projectErrorAccessDeniedToProject)
 	}
 
-	return fp1, merchant, nil
+	return fp1, nil, nil
 }
 
 func (pm *ProjectManager) GetProjectPaymentMethods(projectId bson.ObjectId) ([]*model.PaymentMethod, error) {
@@ -439,7 +436,7 @@ func (pm *ProjectManager) GetProjectsPaymentMethodsByMerchantMainData(mId string
 	}
 
 	for _, project := range projects {
-		projectPms, err := pm.GetProjectPaymentMethods(project.Id)
+		projectPms, err := pm.GetProjectPaymentMethods(bson.ObjectIdHex(project.Id))
 
 		if err != nil || len(projectPms) <= 0 {
 			continue

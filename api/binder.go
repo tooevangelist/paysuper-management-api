@@ -2,10 +2,12 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
@@ -32,7 +34,6 @@ type OnboardingMerchantListingBinder struct{}
 type OnboardingChangeMerchantStatusBinder struct{}
 type OnboardingNotificationsListBinder struct{}
 type OnboardingGetPaymentMethodBinder struct{}
-type OnboardingListPaymentMethodsBinder struct{}
 type OnboardingChangePaymentMethodBinder struct{}
 type OnboardingCreateNotificationBinder struct{}
 type PaylinksListBinder struct{}
@@ -42,6 +43,12 @@ type PaylinksUpdateBinder struct{}
 type ProductsGetProductsListBinder struct{}
 type ProductsCreateProductBinder struct{}
 type ProductsUpdateProductBinder struct{}
+type ChangeMerchantDataRequestBinder struct {
+	*Api
+}
+type ChangeProjectRequestBinder struct {
+	*Api
+}
 
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	db := new(echo.DefaultBinder)
@@ -89,12 +96,12 @@ func (cb *OrderJsonBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	}
 
 	db := new(echo.DefaultBinder)
-
 	if err = db.Bind(i, ctx); err != nil {
 		return err
 	}
 
-	i.(*billing.OrderCreateRequest).RawBody = string(buf)
+	structure := i.(*billing.OrderCreateRequest)
+	structure.RawBody = string(buf)
 
 	return
 }
@@ -208,18 +215,18 @@ func (cb *PaymentCreateProcessBinder) Bind(i interface{}, ctx echo.Context) (err
 }
 
 func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+	db := new(echo.DefaultBinder)
+	err = db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
 	params := ctx.QueryParams()
 	structure := i.(*grpc.MerchantListingRequest)
 
-	structure.Limit = LimitDefault
-	structure.Offset = OffsetDefault
-
-	if v, ok := params[requestParameterQuickSearch]; ok {
-		structure.QuickSearch = v[0]
-	}
-
-	if v, ok := params[requestParameterName]; ok {
-		structure.Name = v[0]
+	if structure.Limit <= 0 {
+		structure.Limit = LimitDefault
 	}
 
 	if v, ok := params[requestParameterIsSigned]; ok {
@@ -234,64 +241,23 @@ func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context)
 		}
 	}
 
-	if v, ok := params[requestParameterLastPayoutDateFrom]; ok {
-		if ts, err := strconv.ParseInt(v[0], 10, 64); err == nil {
-			structure.LastPayoutDateFrom = ts
-		}
-	}
-
-	if v, ok := params[requestParameterLastPayoutDateTo]; ok {
-		if ts, err := strconv.ParseInt(v[0], 10, 64); err == nil {
-			structure.LastPayoutDateTo = ts
-		}
-	}
-
-	if v, ok := params[requestParameterLastPayoutAmount]; ok {
-		if f, err := strconv.ParseFloat(v[0], 64); err == nil {
-			structure.LastPayoutAmount = f
-		}
-	}
-
-	if v, ok := params[requestParameterSort]; ok {
-		structure.Sort = v
-	}
-
-	if v, ok := params[requestParameterLimit]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			structure.Limit = int32(i)
-		}
-	}
-
-	if v, ok := params[requestParameterOffset]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			structure.Offset = int32(i)
-		}
-	}
-
 	return
 }
 
 func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Context) error {
-	params := ctx.QueryParams()
-	structure := i.(*grpc.ListingNotificationRequest)
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
 
-	structure.Limit = LimitDefault
-	structure.Offset = OffsetDefault
-
-	merchantId := ctx.Param(requestParameterMerchantId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return errors.New(errorIncorrectMerchantId)
+	if err != nil {
+		return err
 	}
 
-	structure.MerchantId = merchantId
+	params := ctx.QueryParams()
+	structure := i.(*grpc.ListingNotificationRequest)
+	structure.MerchantId = ctx.Param(requestParameterMerchantId)
 
-	if v, ok := params[requestParameterUserId]; ok {
-		if bson.IsObjectIdHex(v[0]) == false {
-			return errors.New(errorIncorrectUserId)
-		}
-
-		structure.UserId = v[0]
+	if structure.Limit <= 0 {
+		structure.Limit = LimitDefault
 	}
 
 	if v, ok := params[requestParameterIsSystem]; ok {
@@ -299,18 +265,6 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 			structure.IsSystem = 1
 		} else {
 			structure.IsSystem = 2
-		}
-	}
-
-	if v, ok := params[requestParameterLimit]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			structure.Limit = int32(i)
-		}
-	}
-
-	if v, ok := params[requestParameterOffset]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			structure.Offset = int32(i)
 		}
 	}
 
@@ -332,21 +286,6 @@ func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context
 	structure := i.(*grpc.GetMerchantPaymentMethodRequest)
 	structure.MerchantId = merchantId
 	structure.PaymentMethodId = paymentMethodId
-
-	return nil
-}
-
-func (cb *OnboardingListPaymentMethodsBinder) Bind(i interface{}, ctx echo.Context) error {
-	merchantId := ctx.Param(requestParameterMerchantId)
-	paymentMethodName := ctx.QueryParam(requestParameterPaymentMethodName)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return errors.New(errorIncorrectMerchantId)
-	}
-
-	structure := i.(*grpc.ListMerchantPaymentMethodsRequest)
-	structure.MerchantId = merchantId
-	structure.PaymentMethodName = paymentMethodName
 
 	return nil
 }
@@ -449,7 +388,8 @@ func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
 	params := ctx.QueryParams()
 	structure := i.(*paylink.GetPaylinkURLRequest)
 
-	structure.Id = ctx.Param(requestParameterId)
+	id := ctx.Param(requestParameterId)
+	structure.Id = id
 
 	if v, ok := params[requestParameterUtmSource]; ok {
 		structure.UtmSource = v[0]
@@ -459,8 +399,8 @@ func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
 		structure.UtmMedium = v[0]
 	}
 
-	if v, ok := params[requestParameterUtmCampagin]; ok {
-		structure.UtmCampagin = v[0]
+	if v, ok := params[requestParameterUtmCampaign]; ok {
+		structure.UtmCampaign = v[0]
 	}
 
 	return nil
@@ -569,6 +509,316 @@ func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) erro
 
 	structure := i.(*grpc.Product)
 	structure.Id = id
+
+	return nil
+}
+
+func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) error {
+	req := make(map[string]interface{})
+
+	db := new(echo.DefaultBinder)
+	err := db.Bind(&req, ctx)
+
+	if err != nil {
+		return errors.New(errorQueryParamsIncorrect)
+	}
+
+	merchantId := ctx.Param(requestParameterId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return errors.New(errorIncorrectMerchantId)
+	}
+
+	mReq := &grpc.GetMerchantByRequest{MerchantId: merchantId}
+	mRsp, err := b.billingService.GetMerchantBy(context.Background(), mReq)
+
+	if err != nil {
+		b.logError(`Call billing server method "GetMerchantBy" failed`, []interface{}{"error", err.Error(), "request", mReq})
+		return errors.New(errorUnknown)
+	}
+
+	if mRsp.Status != pkg.ResponseStatusOk {
+		return errors.New(mRsp.Message)
+	}
+
+	structure := i.(*grpc.ChangeMerchantDataRequest)
+	structure.MerchantId = merchantId
+	structure.AgreementType = mRsp.Item.AgreementType
+	structure.HasMerchantSignature = mRsp.Item.HasMerchantSignature
+	structure.HasPspSignature = mRsp.Item.HasPspSignature
+	structure.AgreementSentViaMail = mRsp.Item.AgreementSentViaMail
+	structure.MailTrackingLink = mRsp.Item.MailTrackingLink
+
+	if v, ok := req[requestParameterAgreementType]; ok {
+		if tv, ok := v.(float64); !ok {
+			return errors.New(errorMessageAgreementTypeIncorrectType)
+		} else {
+			structure.AgreementType = int32(tv)
+		}
+	}
+
+	if v, ok := req[requestParameterHasMerchantSignature]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageHasMerchantSignatureIncorrectType)
+		} else {
+			structure.HasMerchantSignature = tv
+		}
+	}
+
+	if v, ok := req[requestParameterHasPspSignature]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageHasPspSignatureIncorrectType)
+		} else {
+			structure.HasPspSignature = tv
+		}
+	}
+
+	if v, ok := req[requestParameterAgreementSentViaMail]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageAgreementSentViaMailIncorrectType)
+		} else {
+			structure.AgreementSentViaMail = tv
+		}
+	}
+
+	if v, ok := req[requestParameterMailTrackingLink]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageMailTrackingLinkIncorrectType)
+		} else {
+			structure.MailTrackingLink = tv
+		}
+	}
+
+	return nil
+}
+
+func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error {
+	req := make(map[string]interface{})
+
+	db := new(echo.DefaultBinder)
+	err := db.Bind(&req, ctx)
+
+	if err != nil {
+		return errors.New(errorQueryParamsIncorrect)
+	}
+
+	projectId := ctx.Param(requestParameterId)
+
+	if projectId == "" || bson.IsObjectIdHex(projectId) == false {
+		return errors.New(errorIncorrectProjectId)
+	}
+
+	pReq := &grpc.GetProjectRequest{ProjectId: projectId}
+	pRsp, err := b.billingService.GetProject(context.Background(), pReq)
+
+	if err != nil {
+		b.logError(`Call billing server method "GetProject" failed`, []interface{}{"error", err.Error(), "request", pReq})
+		return errors.New(errorUnknown)
+	}
+
+	if pRsp.Status != pkg.ResponseStatusOk {
+		return errors.New(pRsp.Message)
+	}
+
+	structure := i.(*billing.Project)
+	structure.Id = projectId
+	structure.MerchantId = pRsp.Item.MerchantId
+	structure.Name = pRsp.Item.Name
+	structure.Image = pRsp.Item.Image
+	structure.CallbackCurrency = pRsp.Item.CallbackCurrency
+	structure.CallbackProtocol = pRsp.Item.CallbackProtocol
+	structure.CreateOrderAllowedUrls = pRsp.Item.CreateOrderAllowedUrls
+	structure.AllowDynamicNotifyUrls = pRsp.Item.AllowDynamicNotifyUrls
+	structure.AllowDynamicRedirectUrls = pRsp.Item.AllowDynamicRedirectUrls
+	structure.LimitsCurrency = pRsp.Item.LimitsCurrency
+	structure.MinPaymentAmount = pRsp.Item.MinPaymentAmount
+	structure.MaxPaymentAmount = pRsp.Item.MaxPaymentAmount
+	structure.NotifyEmails = pRsp.Item.NotifyEmails
+	structure.IsProductsCheckout = pRsp.Item.IsProductsCheckout
+	structure.SecretKey = pRsp.Item.SecretKey
+	structure.SignatureRequired = pRsp.Item.SignatureRequired
+	structure.SendNotifyEmail = pRsp.Item.SendNotifyEmail
+	structure.UrlCheckAccount = pRsp.Item.UrlCheckAccount
+	structure.UrlProcessPayment = pRsp.Item.UrlProcessPayment
+	structure.UrlRedirectFail = pRsp.Item.UrlRedirectFail
+	structure.UrlRedirectSuccess = pRsp.Item.UrlRedirectSuccess
+	structure.Status = pRsp.Item.Status
+
+	if v, ok := req[requestParameterName]; ok {
+		tv, ok := v.(map[string]interface{})
+
+		if !ok || len(tv) <= 0 {
+			return errors.New(errorMessageNameIncorrectType)
+		}
+
+		for k, tvv := range tv {
+			structure.Name[k] = tvv.(string)
+		}
+	}
+
+	if v, ok := req[requestParameterImage]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageImageIncorrectType)
+		} else {
+			structure.Image = tv
+		}
+	}
+
+	if v, ok := req[requestParameterCallbackCurrency]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageCallbackCurrencyIncorrectType)
+		} else {
+			structure.CallbackCurrency = tv
+		}
+	}
+
+	if v, ok := req[requestParameterCallbackProtocol]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageCallbackProtocolIncorrectType)
+		} else {
+			structure.CallbackProtocol = tv
+		}
+	}
+
+	if v, ok := req[requestParameterCreateOrderAllowedUrls]; ok {
+		tv, ok := v.([]interface{})
+
+		if !ok {
+			return errors.New(errorMessageCreateOrderAllowedUrlsIncorrectType)
+		}
+
+		structure.CreateOrderAllowedUrls = []string{}
+
+		for _, tvv := range tv {
+			structure.CreateOrderAllowedUrls = append(structure.CreateOrderAllowedUrls, tvv.(string))
+		}
+	}
+
+	if v, ok := req[requestParameterAllowDynamicNotifyUrls]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageAllowDynamicNotifyUrlsIncorrectType)
+		} else {
+			structure.AllowDynamicNotifyUrls = tv
+		}
+	}
+
+	if v, ok := req[requestParameterAllowDynamicRedirectUrls]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageAllowDynamicRedirectUrlsIncorrectType)
+		} else {
+			structure.AllowDynamicRedirectUrls = tv
+		}
+	}
+
+	if v, ok := req[requestParameterLimitsCurrency]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageLimitsCurrencyIncorrectType)
+		} else {
+			structure.LimitsCurrency = tv
+		}
+	}
+
+	if v, ok := req[requestParameterMinPaymentAmount]; ok {
+		if tv, ok := v.(float64); !ok {
+			return errors.New(errorMessageMinPaymentAmountIncorrectType)
+		} else {
+			structure.MinPaymentAmount = tv
+		}
+	}
+
+	if v, ok := req[requestParameterMaxPaymentAmount]; ok {
+		if tv, ok := v.(float64); !ok {
+			return errors.New(errorMessageMaxPaymentAmountIncorrectType)
+		} else {
+			structure.MaxPaymentAmount = tv
+		}
+	}
+
+	if v, ok := req[requestParameterNotifyEmails]; ok {
+		tv, ok := v.([]interface{})
+
+		if !ok {
+			return errors.New(errorMessageNotifyEmailsIncorrectType)
+		}
+
+		structure.NotifyEmails = []string{}
+
+		for _, tvv := range tv {
+			structure.NotifyEmails = append(structure.NotifyEmails, tvv.(string))
+		}
+	}
+
+	if v, ok := req[requestParameterIsProductsCheckout]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageIsProductsCheckoutIncorrectType)
+		} else {
+			structure.IsProductsCheckout = tv
+		}
+	}
+
+	if v, ok := req[requestParameterSecretKey]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageSecretKeyIncorrectType)
+		} else {
+			structure.SecretKey = tv
+		}
+	}
+
+	if v, ok := req[requestParameterSignatureRequired]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageSignatureRequiredIncorrectType)
+		} else {
+			structure.SignatureRequired = tv
+		}
+	}
+
+	if v, ok := req[requestParameterSendNotifyEmail]; ok {
+		if tv, ok := v.(bool); !ok {
+			return errors.New(errorMessageSendNotifyEmailIncorrectType)
+		} else {
+			structure.SendNotifyEmail = tv
+		}
+	}
+
+	if v, ok := req[requestParameterUrlCheckAccount]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageUrlCheckAccountIncorrectType)
+		} else {
+			structure.UrlCheckAccount = tv
+		}
+	}
+
+	if v, ok := req[requestParameterUrlProcessPayment]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageUrlProcessPaymentIncorrectType)
+		} else {
+			structure.UrlProcessPayment = tv
+		}
+	}
+
+	if v, ok := req[requestParameterUrlRedirectFail]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageUrlRedirectFailIncorrectType)
+		} else {
+			structure.UrlRedirectFail = tv
+		}
+	}
+
+	if v, ok := req[requestParameterUrlRedirectSuccess]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageUrlRedirectSuccessIncorrectType)
+		} else {
+			structure.UrlRedirectSuccess = tv
+		}
+	}
+
+	if v, ok := req[requestParameterStatus]; ok {
+		if tv, ok := v.(float64); !ok {
+			return errors.New(errorMessageStatusIncorrectType)
+		} else {
+			structure.Status = int32(tv)
+		}
+	}
 
 	return nil
 }

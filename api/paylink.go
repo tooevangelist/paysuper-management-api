@@ -101,7 +101,7 @@ func (r *paylinkRoute) getPaylinkStat(ctx echo.Context) error {
 }
 
 // @Description paylink public url
-// @Example GET /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22/url?utm_source=3wefwe&utm_medium=njytrn&utm_campagin=bdfbh5
+// @Example GET /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22/url?utm_source=3wefwe&utm_medium=njytrn&utm_campaign=bdfbh5
 func (r *paylinkRoute) getPaylinkUrl(ctx echo.Context) error {
 	req := &paylink.GetPaylinkURLRequest{}
 	err := (&PaylinksUrlBinder{}).Bind(req, ctx)

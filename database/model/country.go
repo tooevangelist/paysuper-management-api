@@ -17,3 +17,8 @@ type Country struct {
 	CreatedAt time.Time `bson:"created_at" json:"created_at"`
 	UpdatedAt time.Time `bson:"updated_at" json:"-"`
 }
+
+type CountryItems struct {
+	Count int        `json:"count"`
+	Items []*Country `json:"items"`
+}

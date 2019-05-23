@@ -38,66 +38,6 @@ import (
 	"time"
 )
 
-const (
-	apiWebHookGroupPath  = "/webhook"
-	apiAuthUserGroupPath = "/admin/api/v1"
-
-	LimitDefault  = 100
-	OffsetDefault = 0
-
-	requestParameterId                 = "id"
-	requestParameterName               = "name"
-	requestParameterSku                = "sku"
-	requestParameterIsSigned           = "is_signed"
-	requestParameterLastPayoutDateFrom = "last_payout_date_from"
-	requestParameterLastPayoutDateTo   = "last_payout_date_to"
-	requestParameterLastPayoutAmount   = "last_payout_amount"
-	requestParameterMerchantId         = "merchant_id"
-	requestParameterProjectId          = "project_id"
-	requestParameterPaymentMethodId    = "method_id"
-	requestParameterOrderId            = "order_id"
-	requestParameterRefundId           = "refund_id"
-	requestParameterNotificationId     = "notification_id"
-	requestParameterPaymentMethodName  = "method_name"
-	requestParameterUserId             = "user"
-	requestParameterSort               = "sort[]"
-	requestParameterLimit              = "limit"
-	requestParameterOffset             = "offset"
-	requestParameterQuickSearch        = "quick_search"
-	requestParameterFile               = "file"
-	requestParameterUtmSource          = "utm_source"
-	requestParameterUtmMedium          = "utm_medium"
-	requestParameterUtmCampagin        = "utm_campagin"
-	requestParameterIsSystem           = "is_system"
-	requestAuthorizationTokenRegex     = "Bearer ([A-z0-9_.-]{10,})"
-
-	errorIdIsEmpty                          = "identifier can't be empty"
-	errorIncorrectMerchantId                = "incorrect merchant identifier"
-	errorIncorrectNotificationId            = "incorrect notification identifier"
-	errorIncorrectOrderId                   = "incorrect order identifier"
-	errorIncorrectPaymentMethodId           = "incorrect payment method identifier"
-	errorIncorrectProductId                 = "incorrect product identifier"
-	errorIncorrectRefundId                  = "incorrect refund identifier"
-	errorIncorrectPaylinkId                 = "incorrect paylink identifier"
-	errorIncorrectUserId                    = "incorrect user identifier"
-	errorMessageAccessDenied                = "access denied"
-	errorMessageAuthorizationHeaderNotFound = "authorization header not found"
-	errorMessageAuthorizationTokenNotFound  = "authorization token not found"
-	errorMessageAuthorizedUserNotFound      = "information about authorized user not found"
-	errorMessageMask                        = "field validation for '%s' failed on the '%s' tag"
-	errorQueryParamsIncorrect               = "incorrect query parameters"
-	errorUnknown                            = "unknown error. try request later"
-	errorMessageAgreementNotGenerated       = "agreement for merchant not generated early"
-	errorMessageAgreementNotFound           = "agreement for merchant not found"
-	errorMessageAgreementUploadMaxSize      = "agreement document max upload size can't be greater than %d"
-	errorMessageAgreementContentType        = "agreement document type must be a pdf"
-	errorMessageAgreementCanNotBeGenerate   = "agreement can't be generated for not checked merchant data"
-
-	HeaderAcceptLanguage = "Accept-Language"
-
-	agreementPageTemplateName = "agreement.html"
-)
-
 var funcMap = template.FuncMap{
 	"Marshal": func(v interface{}) template.JS {
 		a, _ := json.Marshal(v)
@@ -148,9 +88,10 @@ type Api struct {
 	logger   *zap.SugaredLogger
 	validate *validator.Validate
 
-	accessRouteGroup  *echo.Group
-	webhookRouteGroup *echo.Group
-	jwtVerifier       *jwtverifier.JwtVerifier
+	accessRouteGroup    *echo.Group
+	webhookRouteGroup   *echo.Group
+	apiAuthProjectGroup *echo.Group
+	jwtVerifier         *jwtverifier.JwtVerifier
 
 	authUserRouteGroup *echo.Group
 	authUser           *AuthUser
@@ -170,8 +111,9 @@ type Api struct {
 	AmqpAddress string
 	notifierPub *rabbitmq.Broker
 
-	k8sHost string
-	rawBody string
+	k8sHost      string
+	rawBody      string
+	reqSignature string
 
 	Merchant
 	GetParams
@@ -228,12 +170,12 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		jwtMiddleware.AuthOneJwtCallableWithConfig(
 			api.jwtVerifier,
 			func(ui *jwtverifier.UserInfo) {
-				api.Merchant.Identifier = string(ui.UserID)
-				// TODO: Remove this line after merchant registration is completed.
-				api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
+				api.Merchant.Identifier = ui.UserID
 			},
 		),
 	)
+	api.accessRouteGroup.Use(middleware.Logger())
+	api.accessRouteGroup.Use(middleware.Recover())
 
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
 	api.authUserRouteGroup.Use(
@@ -264,6 +206,20 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}))
 	api.webhookRouteGroup.Use(api.RawBodyMiddleware)
 
+	api.apiAuthProjectGroup = api.Http.Group(apiAuthProjectGroupPath)
+	api.apiAuthProjectGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
+		data := []interface{}{
+			"request_headers", utils.RequestResponseHeadersToString(ctx.Request().Header),
+			"request_body", string(reqBody),
+			"response_headers", utils.RequestResponseHeadersToString(ctx.Response().Header()),
+			"response_body", string(resBody),
+		}
+
+		api.logger.Infow(ctx.Path(), data...)
+	}))
+	api.apiAuthProjectGroup.Use(api.RawBodyMiddleware)
+	api.Http.Use(api.RawBodyMiddleware)
+
 	api.Http.Use(api.LimitOffsetSortMiddleware)
 	api.Http.Use(middleware.Logger())
 	api.Http.Use(middleware.Recover())
@@ -281,6 +237,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitPaylinkRoutes().
 		InitPaymentMethodRoutes().
 		InitCardPayWebHookRoutes().
+		InitSystemFeeRoutes().
 		initTaxesRoutes()
 
 	_, err = api.initOnboardingRoutes()
@@ -366,23 +323,6 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func (api *Api) SetMerchantIdentifierMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		//user := c.Get("user").(*jwt.Token)
-		//claims := user.Claims.(jwt.MapClaims)
-
-		//id, ok := claims["id"]
-
-		//if !ok {
-		//	c.Error(errors.New("merchant identifier not found"))
-		//}
-
-		api.Merchant.Identifier = "5be2c3022b9bb6000765d132"
-
-		return next(c)
-	}
-}
-
 func (api *Api) getUserDetailsMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		auth := ctx.Request().Header.Get(echo.HeaderAuthorization)
@@ -434,4 +374,29 @@ func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.
 
 func (api *Api) logError(msg string, data []interface{}) {
 	zap.S().Errorw(fmt.Sprintf("[PAYSUPER_MANAGEMENT_API] %s", msg), data...)
+}
+
+func (api *Api) isProductionEnvironment() bool {
+	return api.config.Environment == EnvironmentProduction
+}
+
+func (api *Api) checkProjectAuthRequestSignature(ctx echo.Context, projectId string) error {
+	signature := ctx.Request().Header.Get(HeaderXApiSignatureHeader)
+
+	if signature == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorMessageSignatureHeaderIsEmpty)
+	}
+
+	req := &grpc.CheckProjectRequestSignatureRequest{Body: api.rawBody, ProjectId: projectId, Signature: signature}
+	rsp, err := api.billingService.CheckProjectRequestSignature(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return nil
 }

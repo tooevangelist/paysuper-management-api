@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"time"
 )
 
@@ -212,7 +213,7 @@ type Order struct {
 	// order amount send to project in notification request
 	ProjectOutcomeAmount float64 `bson:"project_outcome_amount" json:"project_outcome_amount"`
 	// order currency send to project in notification request
-	ProjectOutcomeCurrency *Currency `bson:"project_outcome_currency" json:"project_outcome_currency"`
+	ProjectOutcomeCurrency *billing.Currency `bson:"project_outcome_currency" json:"project_outcome_currency"`
 	// date of last notification request to project
 	ProjectLastRequestedAt *time.Time `bson:"project_last_requested_at" json:"project_last_requested_at,omitempty"`
 	// any project params which received from project in request of create of order
@@ -256,9 +257,9 @@ type Order struct {
 	PaymentMethodPayerAccount string `bson:"pm_account" json:"pm_account"`
 	// any params received in request of payment system about payment
 	PaymentMethodTxnParams map[string]interface{} `bson:"pm_txn_params" json:"pm_txn_params"`
-	// fixed package which buy payer
-	FixedPackage      *OrderFixedPackage `bson:"fixed_package" json:"fixed_package"`
-	PaymentRequisites map[string]string  `bson:"payment_requisites" json:"-"`
+	// product items which buy payer
+	Items             []*billing.OrderItem `bson:"items" json:"items"`
+	PaymentRequisites map[string]string    `bson:"payment_requisites" json:"-"`
 	// PSP (P1) fee amount
 	PspFeeAmount *OrderFeePsp `bson:"psp_fee_amount" json:"psp_amount_fee_amount"`
 	// fee is charged with the project for the operation

@@ -2,11 +2,8 @@ package api
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"github.com/amalfra/etag"
+	"fmt"
 	"github.com/globalsign/mgo/bson"
-	"github.com/golang/protobuf/ptypes"
 	_struct "github.com/golang/protobuf/ptypes/struct"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro"
@@ -15,60 +12,32 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
-	"github.com/paysuper/paysuper-management-api/payment_system"
 	"github.com/paysuper/paysuper-payment-link/proto"
 	"net/http"
-	"strconv"
-	"strings"
 	"time"
 )
 
 const (
-	orderFormTemplateName   = "order.html"
-	paylinkFormTemplateName = "paylink.html"
+	orderFormTemplateName  = "order.html"
+	orderInlineFormUrlMask = "%s://%s/order/%s"
+	errorTemplateName      = "error.html"
 )
 
 type orderRoute struct {
 	*Api
-	orderManager   *manager.OrderManager
 	projectManager *manager.ProjectManager
 	publisher      micro.Publisher
 }
 
-type OrderListRefundsBinder struct{}
-type OrderCreateRefundBinder struct{}
-
-func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
-	params := ctx.QueryParams()
-	orderId := ctx.Param(requestParameterOrderId)
-	limit := int32(LimitDefault)
-	offset := int32(OffsetDefault)
-
-	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
-		return errors.New(errorIncorrectOrderId)
-	}
-
-	if v, ok := params[requestParameterLimit]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			limit = int32(i)
-		}
-	}
-
-	if v, ok := params[requestParameterOffset]; ok {
-		if i, err := strconv.ParseInt(v[0], 10, 32); err == nil {
-			offset = int32(i)
-		}
-	}
-
-	structure := i.(*grpc.ListRefundsRequest)
-	structure.OrderId = orderId
-	structure.Limit = limit
-	structure.Offset = offset
-
-	return nil
+type CreateOrderJsonProjectResponse struct {
+	Id              string                            `json:"id"`
+	PaymentFormUrl  string                            `json:"payment_form_url"`
+	PaymentFormData *grpc.PaymentFormJsonDataResponse `json:"payment_form_data,omitempty"`
 }
 
-func (b *OrderCreateRefundBinder) Bind(i interface{}, ctx echo.Context) error {
+type OrderListRefundsBinder struct{}
+
+func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
 	db := new(echo.DefaultBinder)
 	err := db.Bind(i, ctx)
 
@@ -76,14 +45,12 @@ func (b *OrderCreateRefundBinder) Bind(i interface{}, ctx echo.Context) error {
 		return err
 	}
 
-	orderId := ctx.Param(requestParameterOrderId)
+	structure := i.(*grpc.ListRefundsRequest)
+	structure.OrderId = ctx.Param(requestParameterOrderId)
 
-	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
-		return errors.New(errorIncorrectOrderId)
+	if structure.Limit <= 0 {
+		structure.Limit = LimitDefault
 	}
-
-	structure := i.(*grpc.CreateRefundRequest)
-	structure.OrderId = orderId
 
 	return nil
 }
@@ -117,18 +84,20 @@ func (b *OrderCreateRefundBinder) Bind(i interface{}, ctx echo.Context) error {
 func (api *Api) InitOrderV1Routes() *Api {
 	route := orderRoute{
 		Api:            api,
-		projectManager: manager.InitProjectManager(api.database, api.logger),
+		projectManager: manager.InitProjectManager(api.database, api.logger, api.billingService),
 	}
 
 	api.Http.GET("/order/:id", route.getOrderForm)
-	api.Http.GET("/paylink/:id", route.getPaylinkForm)
+	api.Http.GET("/paylink/:id", route.getOrderForPaylink)
 	api.Http.GET("/order/create", route.createFromFormData)
 	api.Http.POST("/order/create", route.createFromFormData)
+
 	api.Http.POST("/api/v1/order", route.createJson)
 
 	api.Http.POST("/api/v1/payment", route.processCreatePayment)
 
-	api.accessRouteGroup.GET("/order", route.getOrders)
+	api.authUserRouteGroup.GET("/order", route.getOrders)
+
 	api.accessRouteGroup.GET("/order/:id", route.getOrderJson)
 	api.accessRouteGroup.GET("/order/revenue_dynamic/:period", route.getRevenueDynamic)
 	api.accessRouteGroup.GET("/order/accounting_payment", route.getAccountingPaymentCalculation)
@@ -195,28 +164,32 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	return ctx.Redirect(http.StatusFound, rUrl)
 }
 
-// @Summary Create order with json request
-// @Description Create a payment order use POST JSON request
-// @Tags Payment Order
-// @Accept json
-// @Produce json
-// @Param data body model.OrderScalar true "Order create data"
-// @Success 200 {object} model.JsonOrderCreateResponse "Object which contain data to render payment form"
-// @Failure 400 {object} model.Error "Object with error message"
-// @Failure 500 {object} model.Error "Object with error message"
-// @Router /api/v1/order [post]
+// Create order from json request.
+// Order can be create:
+// 1) By project host2host request with sending user (customer) information.
+// 2) By payment form client request with sending prepare created user (customer) identification token.
+// 3) By payment form client request without anything user identification information.
 func (r *orderRoute) createJson(ctx echo.Context) error {
-	req := &billing.OrderCreateRequest{
-		PayerIp: ctx.RealIP(),
-		IsJson:  true,
+	req := &billing.OrderCreateRequest{}
+	err := (&OrderJsonBinder{}).Bind(req, ctx)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	if err := (&OrderJsonBinder{}).Bind(req, ctx); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
-	}
+	err = r.validate.Struct(req)
 
-	if err := r.validate.Struct(req); err != nil {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
+	}
+
+	// If request contain user object then paysuper must check request signature
+	if req.User != nil {
+		err = r.checkProjectAuthRequestSignature(ctx, req.ProjectId)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	order, err := r.billingService.OrderCreateProcess(context.TODO(), req)
@@ -225,28 +198,40 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	req1 := &grpc.PaymentFormJsonDataRequest{
-		OrderId: order.Uuid,
-		Scheme:  r.httpScheme,
-		Host:    ctx.Request().Host,
-		Locale:  ctx.Request().Header.Get(HeaderAcceptLanguage),
-		Ip:      ctx.RealIP(),
-	}
-	jo, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req1)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	response := &CreateOrderJsonProjectResponse{
+		Id:             order.Uuid,
+		PaymentFormUrl: fmt.Sprintf(pkg.OrderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Uuid),
 	}
 
-	return ctx.JSON(http.StatusOK, jo)
+	// If not production environment then return data to payment form
+	if r.isProductionEnvironment() != true {
+		req2 := &grpc.PaymentFormJsonDataRequest{
+			OrderId: order.Uuid,
+			Scheme:  r.httpScheme,
+			Host:    ctx.Request().Host,
+			Locale:  ctx.Request().Header.Get(HeaderAcceptLanguage),
+			Ip:      ctx.RealIP(),
+		}
+		rsp2, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req2)
+
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+
+		response.PaymentFormData = rsp2
+	}
+
+	return ctx.JSON(http.StatusOK, response)
 }
 
 func (r *orderRoute) getOrderForm(ctx echo.Context) error {
-	id := ctx.Param(model.OrderFilterFieldId)
+	id := ctx.Param(requestParameterId)
 
 	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
+
+	cookie, err := ctx.Cookie(CustomerTokenCookiesName)
 
 	req := &grpc.PaymentFormJsonDataRequest{
 		OrderId: id,
@@ -255,77 +240,89 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 		Locale:  ctx.Request().Header.Get(HeaderAcceptLanguage),
 		Ip:      ctx.RealIP(),
 	}
-	jo, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
+
+	if err == nil && cookie != nil && cookie.Value != "" {
+		req.Cookie = cookie.Value
+	}
+
+	rsp, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return ctx.Render(http.StatusOK, orderFormTemplateName, map[string]interface{}{"Order": jo})
+	if rsp.Cookie != "" && rsp.Cookie != req.Cookie {
+		cookie := new(http.Cookie)
+		cookie.Name = CustomerTokenCookiesName
+		cookie.Value = rsp.Cookie
+		cookie.Expires = time.Now().Add(time.Second * CustomerTokenCookiesLifetime)
+		cookie.HttpOnly = true
+		ctx.SetCookie(cookie)
+	}
+
+	return ctx.Render(http.StatusOK, orderFormTemplateName, map[string]interface{}{"Order": rsp})
 }
 
-func (r *orderRoute) getPaylinkForm(ctx echo.Context) error {
+// Create order from payment link and redirect to order payment form
+func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
+
+	paylinkId := ctx.Param(requestParameterId)
 
 	req := &paylink.PaylinkRequest{
-		Id: ctx.Param(requestParameterId),
+		Id: paylinkId,
 	}
 
 	err := r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		r.logError("Cannot validate request", []interface{}{"error", err.Error(), "request", req})
+		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
 	pl, err := r.paylinkService.GetPaylink(context.Background(), req)
 	if err != nil {
-		return ctx.Render(http.StatusNotFound, paylinkFormTemplateName, map[string]interface{}{})
+		return ctx.Render(http.StatusNotFound, errorTemplateName, map[string]interface{}{})
 	}
 
-	value, _ := json.Marshal(pl)
-
-	etagValue := etag.Generate(string(value), true)
-
-	reqHeader := ctx.Request().Header
-	resHeader := ctx.Response().Header()
-
-	match := reqHeader.Get("If-None-Match")
-	if strings.Contains(match, etagValue) {
-		return ctx.NoContent(http.StatusNotModified)
+	oReq := &billing.OrderCreateRequest{
+		ProjectId: pl.ProjectId,
+		PayerIp:   ctx.RealIP(),
+		Products:  pl.Products,
+		PrivateMetadata: map[string]string{
+			"PaylinkId": paylinkId,
+		},
+	}
+	params := ctx.QueryParams()
+	if v, ok := params[requestParameterUtmSource]; ok {
+		oReq.PrivateMetadata[requestParameterUtmSource] = v[0]
+	}
+	if v, ok := params[requestParameterUtmMedium]; ok {
+		oReq.PrivateMetadata[requestParameterUtmMedium] = v[0]
+	}
+	if v, ok := params[requestParameterUtmCampaign]; ok {
+		oReq.PrivateMetadata[requestParameterUtmCampaign] = v[0]
 	}
 
-	updatedTime, _ := ptypes.Timestamp(pl.UpdatedAt)
-	updated := updatedTime.Unix()
-	lastMod := strconv.FormatInt(updated, 10)
-
-	since := reqHeader.Get("If-Modified-Since")
-	n, _ := strconv.ParseInt(since, 10, 64)
-	if updated <= n {
-		return ctx.NoContent(http.StatusNotModified)
+	order, err := r.billingService.OrderCreateProcess(context.Background(), oReq)
+	if err != nil {
+		r.logError("Cannot create order for paylink", []interface{}{"error", err.Error(), "request", req})
+		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
-	resHeader.Set("Etag", etagValue)
-	resHeader.Set("Last-Modified", lastMod)
-
-	expiresAt, _ := ptypes.Timestamp(pl.ExpiresAt)
-	expires := int(time.Until(expiresAt).Seconds())
-	resHeader.Set("Cache-Control", "max-age="+strconv.Itoa(expires))
-
-	data := map[string]interface{}{
-		"Id":        pl.GetId(),
-		"Products":  pl.GetProducts(),
-		"ProjectId": pl.ProjectId,
+	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Uuid)
+	qs := ctx.QueryString()
+	if qs != "" {
+		inlineFormRedirectUrl += "?" + qs
 	}
-
-	// todo: 1 make new order with products from paylink
-
-	// todo: 2 prevent create duplicated unprocessed orders for one user session
 
 	go func() {
-		r.paylinkService.IncrPaylinkVisits(context.Background(), req)
-		// todo log warning when IncrPaylinkVisits failed?
+		_, err := r.paylinkService.IncrPaylinkVisits(context.Background(), &paylink.PaylinkRequest{
+			Id: paylinkId,
+		})
+		if err != nil {
+			r.logError("Cannot update paylink stat", []interface{}{"error", err.Error(), "request", req})
+		}
 	}()
-
-	err = ctx.Render(http.StatusOK, paylinkFormTemplateName, data)
-	return nil
+	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)
 }
 
 // @Summary Get order data
@@ -363,16 +360,16 @@ func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 		Offset:   r.GetParams.offset,
 	}
 
-	pOrders, err := r.billingService.FindAllOrders(context.TODO(), params)
+	rsp, err := r.billingService.FindAllOrders(context.TODO(), params)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	if pOrders.Count == 0 {
+	if rsp.Count == 0 {
 		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 
-	return ctx.JSON(http.StatusOK, pOrders.Items[0])
+	return ctx.JSON(http.StatusOK, rsp.Items[0])
 }
 
 // @Summary Get orders
@@ -414,9 +411,18 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 		}
 	}
 
-	p, merchant, err := r.projectManager.FilterProjects(r.Merchant.Identifier, fp)
+	rsp, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	p, _, err := r.projectManager.FilterProjects(rsp.Item.Id, fp)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, err.Error())
 	}
 
 	var vals map[string]*_struct.ListValue
@@ -429,60 +435,51 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	params := &grpc.FindAllOrdersRequest{
 		Values:   vals,
 		Projects: p,
-		Merchant: merchant,
+		Merchant: rsp.Item,
 		Limit:    r.GetParams.limit,
 		Offset:   r.GetParams.offset,
 	}
 
 	pOrders, err := r.billingService.FindAllOrders(context.TODO(), params)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return ctx.JSON(http.StatusOK, pOrders)
 }
 
-// @Summary Create payment
-// @Description Create payment by order
-// @Tags Payment Order
-// @Accept json
-// @Produce json
-// @Param data body model.OrderCreatePaymentRequest true "data to create payment"
-// @Success 200 {object} payment_system.PaymentResponse "contain url to redirect user"
-// @Failure 400 {object} payment_system.PaymentResponse "contain error description about data validation error"
-// @Failure 402 {object} payment_system.PaymentResponse "contain error description about error on payment system side"
-// @Failure 500 {object} payment_system.PaymentResponse "contain error description about error on PSP (P1) side"
-// @Router /api/v1/payment [post]
+// Create payment by order
+// route POST /api/v1/payment
 func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	data := make(map[string]string)
-
-	if err := (&PaymentCreateProcessBinder{}).Bind(data, ctx); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageInvalidRequestData})
-	}
-
-	rsp, err := r.billingService.PaymentCreateProcess(context.TODO(), &grpc.PaymentCreateRequest{Data: data})
+	err := (&PaymentCreateProcessBinder{}).Bind(data, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, map[string]string{"error": model.ResponseMessageUnknownError})
+		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
 
-	var httpStatus int
+	req := &grpc.PaymentCreateRequest{
+		Data:           data,
+		AcceptLanguage: ctx.Request().Header.Get(HeaderAcceptLanguage),
+		UserAgent:      ctx.Request().Header.Get(HeaderUserAgent),
+		Ip:             ctx.RealIP(),
+	}
+	rsp, err := r.billingService.PaymentCreateProcess(context.TODO(), req)
 
-	switch rsp.Status {
-	case payment_system.PaymentStatusErrorValidation:
-		httpStatus = http.StatusBadRequest
-		break
-	case payment_system.PaymentStatusErrorSystem:
-		httpStatus = http.StatusInternalServerError
-		break
-	case payment_system.CreatePaymentStatusErrorPaymentSystem:
-		httpStatus = http.StatusPaymentRequired
-		break
-	default:
-		httpStatus = http.StatusOK
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageUnknownError)
 	}
 
-	return ctx.JSON(httpStatus, rsp)
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	body := map[string]interface{}{
+		"redirect_url":  rsp.RedirectUrl,
+		"need_redirect": rsp.NeedRedirect,
+	}
+
+	return ctx.JSON(http.StatusOK, body)
 }
 
 // @Summary Get revenue dynamics
@@ -559,21 +556,17 @@ func (r *orderRoute) getAccountingPaymentCalculation(ctx echo.Context) error {
 }
 
 func (r *orderRoute) getRefund(ctx echo.Context) error {
-	orderId := ctx.Param(requestParameterOrderId)
-	refundId := ctx.Param(requestParameterRefundId)
-
-	if refundId == "" || bson.IsObjectIdHex(refundId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectRefundId)
-	}
-
-	if orderId == "" || bson.IsObjectIdHex(orderId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
-	}
-
 	req := &grpc.GetRefundRequest{
-		OrderId:  orderId,
-		RefundId: refundId,
+		OrderId:  ctx.Param(requestParameterOrderId),
+		RefundId: ctx.Param(requestParameterRefundId),
 	}
+
+	err := r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
 	rsp, err := r.billingService.GetRefund(context.TODO(), req)
 
 	if err != nil {
@@ -595,6 +588,12 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
 	rsp, err := r.billingService.ListRefunds(context.TODO(), req)
 
 	if err != nil {
@@ -606,12 +605,13 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 
 func (r *orderRoute) createRefund(ctx echo.Context) error {
 	req := &grpc.CreateRefundRequest{}
-	err := (&OrderCreateRefundBinder{}).Bind(req, ctx)
+	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
+	req.OrderId = ctx.Param(requestParameterOrderId)
 	err = r.validate.Struct(req)
 
 	if err != nil {
@@ -646,6 +646,9 @@ func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
+	req.AcceptLanguage = ctx.Request().Header.Get(HeaderAcceptLanguage)
+	req.UserAgent = ctx.Request().Header.Get(HeaderUserAgent)
+	req.Ip = ctx.RealIP()
 	req.OrderId = orderId
 	err = r.validate.Struct(req)
 
@@ -680,6 +683,9 @@ func (r *orderRoute) changeCustomer(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
+	req.AcceptLanguage = ctx.Request().Header.Get(HeaderAcceptLanguage)
+	req.UserAgent = ctx.Request().Header.Get(HeaderUserAgent)
+	req.Ip = ctx.RealIP()
 	req.OrderId = orderId
 	err = r.validate.Struct(req)
 

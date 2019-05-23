@@ -82,13 +82,13 @@ func (mApiV1 *MerchantApiV1) create(ctx echo.Context) error {
 		return ctx.JSON(http.StatusCreated, m)
 	}
 
-	m, err = mApiV1.merchantManager.Create(ms)
+	m1, err := mApiV1.merchantManager.Create(ms)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Merchant create failed")
 	}
 
-	return ctx.JSON(http.StatusCreated, m)
+	return ctx.JSON(http.StatusCreated, m1)
 }
 
 // @Summary Update merchant
@@ -126,13 +126,13 @@ func (mApiV1 *MerchantApiV1) update(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "Merchant not found")
 	}
 
-	m, err = mApiV1.merchantManager.Update(m, ms)
+	m1, err := mApiV1.merchantManager.Update(m, ms)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Merchant update failed")
 	}
 
-	return ctx.JSON(http.StatusOK, m)
+	return ctx.JSON(http.StatusOK, m1)
 }
 
 // @Summary Delete merchant

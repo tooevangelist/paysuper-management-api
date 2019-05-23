@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-management-api/database/model"
 )
 
@@ -13,9 +14,9 @@ func (rep *Repository) UpdateProject(p *model.Project) error {
 	return rep.Collection.UpdateId(p.Id, p)
 }
 
-func (rep *Repository) FindProjectsByMerchantId(mId string, limit int32, offset int32) ([]*model.Project, error) {
-	var p []*model.Project
-	err := rep.Collection.Find(bson.M{"merchant.external_id": mId}).Limit(int(limit)).Skip(int(offset)).All(&p)
+func (rep *Repository) FindProjectsByMerchantId(mId string, limit int32, offset int32) ([]*billing.Project, error) {
+	var p []*billing.Project
+	err := rep.Collection.Find(bson.M{"merchant_id": bson.ObjectIdHex(mId)}).Limit(int(limit)).Skip(int(offset)).All(&p)
 
 	return p, err
 }

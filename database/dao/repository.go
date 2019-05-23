@@ -2,6 +2,7 @@ package dao
 
 import (
 	"github.com/globalsign/mgo/bson"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-management-api/database/model"
 )
 
@@ -13,15 +14,15 @@ type Repository interface {
 
 	FindCountryById(int) (*model.Country, error)
 	FindCountryByName(string) ([]*model.Country, error)
-	FindAllCountries(int32, int32) ([]*model.Country, error)
+	FindAllCountries(int32, int32) (*model.CountryItems, error)
 
-	FindMerchantById(id string) (*model.Merchant, error)
+	FindMerchantById(id string) (*billing.Merchant, error)
 	InsertMerchant(m *model.Merchant) error
-	UpdateMerchant(m *model.Merchant) error
+	UpdateMerchant(m *billing.Merchant) error
 
 	InsertProject(p *model.Project) error
 	UpdateProject(p *model.Project) error
-	FindProjectsByMerchantId(string, int32, int32) ([]*model.Project, error)
+	FindProjectsByMerchantId(string, int32, int32) ([]*billing.Project, error)
 	FindProjectByMerchantIdAndName(bson.ObjectId, string) (*model.Project, error)
 	FindProjectById(bson.ObjectId) (*model.Project, error)
 	FindFixedPackageByFilters(filters *model.FixedPackageFilters) ([]map[string]interface{}, error)

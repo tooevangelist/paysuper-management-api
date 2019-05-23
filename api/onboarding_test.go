@@ -252,6 +252,26 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_BindingError() {
 	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
 }
 
+func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_ValidationError() {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set(requestParameterOffset, "-10")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err := suite.handler.listMerchants(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Regexp(suite.T(), "Offset", httpErr.Message)
+}
+
 func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_BillingServiceUnavailable_Error() {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -651,11 +671,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_Validation
 	assert.True(suite.T(), len(mRsp.Id) > 0)
 	assert.Equal(suite.T(), pkg.MerchantStatusDraft, mRsp.Status)
 
-	changeStatusReq := &grpc.MerchantChangeStatusRequest{}
-	b, err = json.Marshal(changeStatusReq)
-	assert.NoError(suite.T(), err)
-
-	req = httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(b))
+	req = httptest.NewRequest(http.MethodPut, "/", strings.NewReader(`{"status": 33}`))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp = httptest.NewRecorder()
 	ctx = e.NewContext(req, rsp)
@@ -927,6 +943,30 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_Ok() {
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
+func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BindError() {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set(requestParameterOffset, "some_invalid_value")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchants/:merchant_id/notifications")
+	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err := suite.handler.listNotifications(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+}
+
 func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_ValidationError() {
 	e := echo.New()
 
@@ -948,7 +988,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_ValidationErr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIncorrectUserId, httpErr.Message)
+	assert.Regexp(suite.T(), "UserId", httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BillingServerError() {
@@ -1094,6 +1134,27 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_BillingServer_
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
+func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_BillingServerSystemError() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/merchant/:merchant_id/payment-method/:payment_method_id")
+	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
+	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
+
+	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.getPaymentMethod(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
 func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_Ok() {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -1127,7 +1188,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_ValidationEr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIncorrectMerchantId, httpErr.Message)
+	assert.Regexp(suite.T(), "MerchantId", httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_BillingServer_Error() {
@@ -1478,7 +1539,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BindError() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/admin/api/v1/merchants/:id/agreement-sign")
+	ctx.SetPath("/admin/api/v1/merchants/:id")
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
@@ -1492,7 +1553,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BindError() {
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_ValidationError() {
-	body := `{"has_merchant_signature": true, "agreement_sent_via_mail": true}`
+	body := `{"has_merchant_signature": true, "agreement_type": 3}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(body))
@@ -1500,7 +1561,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_ValidationError
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/admin/api/v1/merchants/:id/agreement-sign")
+	ctx.SetPath("/admin/api/v1/merchants/:id")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	err := suite.handler.changeAgreement(ctx)
 	assert.Error(suite.T(), err)
@@ -1508,7 +1571,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_ValidationError
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "MerchantId", httpErr.Message)
+	assert.Regexp(suite.T(), "AgreementType", httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerSystemError() {
@@ -1520,11 +1583,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerSy
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/admin/api/v1/merchants/:id/agreement-sign")
+	ctx.SetPath("/admin/api/v1/merchants/:id")
 	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
+	ctx.SetParamValues(mock.SomeMerchantId)
 
-	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
 	err := suite.handler.changeAgreement(ctx)
 	assert.Error(suite.T(), err)
 
