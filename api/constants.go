@@ -109,6 +109,7 @@ const (
 	HeaderAcceptLanguage      = "Accept-Language"
 	HeaderUserAgent           = "User-Agent"
 	HeaderXApiSignatureHeader = "X-API-SIGNATURE"
+	HeaderReferer             = "referer"
 
 	EnvironmentProduction        = "prod"
 	CustomerTokenCookiesName     = "_ps_ctkn"
