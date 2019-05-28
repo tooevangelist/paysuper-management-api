@@ -3,8 +3,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/globalsign/mgo/bson"
-	_struct "github.com/golang/protobuf/ptypes/struct"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -97,10 +95,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.POST("/api/v1/payment", route.processCreatePayment)
 
 	api.authUserRouteGroup.GET("/order", route.getOrders)
-
 	api.accessRouteGroup.GET("/order/:id", route.getOrderJson)
-	api.accessRouteGroup.GET("/order/revenue_dynamic/:period", route.getRevenueDynamic)
-	api.accessRouteGroup.GET("/order/accounting_payment", route.getAccountingPaymentCalculation)
 
 	api.authUserRouteGroup.GET("/order/:order_id/refunds", route.listRefunds)
 	api.authUserRouteGroup.GET("/order/:order_id/refunds/:refund_id", route.getRefund)
@@ -339,28 +334,32 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 // @Failure 500 {object} model.Error "Object with error message"
 // @Router /api/v1/s/order/{id} [get]
 func (r *orderRoute) getOrderJson(ctx echo.Context) error {
-	id := ctx.Param("id")
-	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
-	}
+	req := &grpc.ListOrdersRequest{}
+	err := ctx.Bind(req)
 
-	p, merchant, err := r.projectManager.FilterProjects(r.Merchant.Identifier, []string{""})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, err)
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	var values map[string]*_struct.ListValue
-	values["id"] = &_struct.ListValue{Values: []*_struct.Value{{Kind: &_struct.Value_StringValue{id}}}}
-
-	params := &grpc.FindAllOrdersRequest{
-		Values:   values,
-		Projects: p,
-		Merchant: merchant,
-		Limit:    r.GetParams.limit,
-		Offset:   r.GetParams.offset,
+	if req.Limit <= 0 {
+		req.Limit = LimitDefault
 	}
 
-	rsp, err := r.billingService.FindAllOrders(context.TODO(), params)
+	if req.Offset <= 0 {
+		req.Offset = OffsetDefault
+	}
+
+	err = r.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req.Project, _, err = r.projectManager.FilterProjects("", []string{})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusForbidden, err.Error())
+	}
+
+	rsp, err := r.billingService.FindAllOrders(context.TODO(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -397,50 +396,32 @@ func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 // @Failure 500 {object} model.Error "Object with error message"
 // @Router /api/v1/s/order [get]
 func (r *orderRoute) getOrders(ctx echo.Context) error {
-	values := ctx.QueryParams()
+	req := &grpc.ListOrdersRequest{}
+	err := ctx.Bind(req)
 
-	var fp []string
-
-	if fProjects, ok := values[model.OrderFilterFieldProjects]; ok {
-		for _, project := range fProjects {
-			if bson.IsObjectIdHex(project) == false {
-				return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageProjectIdIsInvalid)
-			}
-
-			fp = append(fp, project)
-		}
-	}
-
-	rsp, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	if rsp.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	if req.Limit <= 0 {
+		req.Limit = LimitDefault
 	}
 
-	p, _, err := r.projectManager.FilterProjects(rsp.Item.Id, fp)
+	if req.Offset <= 0 {
+		req.Offset = OffsetDefault
+	}
+
+	err = r.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req.Project, _, err = r.projectManager.FilterProjects("", []string{})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusForbidden, err.Error())
 	}
 
-	var vals map[string]*_struct.ListValue
-	for key, val := range values {
-		for _, val2 := range val {
-			vals[key] = &_struct.ListValue{Values: []*_struct.Value{{Kind: &_struct.Value_StringValue{val2}}}}
-		}
-	}
-
-	params := &grpc.FindAllOrdersRequest{
-		Values:   vals,
-		Projects: p,
-		Merchant: rsp.Item,
-		Limit:    r.GetParams.limit,
-		Offset:   r.GetParams.offset,
-	}
-
-	pOrders, err := r.billingService.FindAllOrders(context.TODO(), params)
+	pOrders, err := r.billingService.FindAllOrders(context.TODO(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -480,79 +461,6 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, body)
-}
-
-// @Summary Get revenue dynamics
-// @Description Get revenue dynamics by merchant or project
-// @Tags Payment Order
-// @Accept application/x-www-form-urlencoded
-// @Produce json
-// @Param period path string true "period to group revenue dynamics data. now allowed next values: hour, day, week, month, year"
-// @Param from query int true "period start in unix timestamp"
-// @Param to query int true "period end in unix timestamp"
-// @Param project query array false "list of projects to calculate dynamics of revenue"
-// @Success 200 {object} model.RevenueDynamicResult "OK"
-// @Failure 400 {object} model.Error "Invalid request data"
-// @Failure 401 {object} model.Error "Unauthorized"
-// @Failure 403 {object} model.Error "Access denied"
-// @Failure 500 {object} model.Error "Object with error message"
-// @Router /api/v1/s/order/revenue_dynamic/{period} [get]
-func (r *orderRoute) getRevenueDynamic(ctx echo.Context) error {
-	rdr := &grpc.RevenueDynamicRequest{}
-
-	if err := (&OrderRevenueDynamicRequestBinder{}).Bind(rdr, ctx); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	pMap, _, err := r.projectManager.FilterProjects(r.Merchant.Identifier, rdr.Project)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, err.Error())
-	}
-
-	if len(rdr.Project) <= 0 {
-		for k := range pMap {
-			rdr.Project = append(rdr.Project, k)
-		}
-	}
-
-	res, err := r.billingService.GetRevenueDynamic(context.TODO(), rdr)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return ctx.JSON(http.StatusOK, res)
-}
-
-// @Summary Get accounting payment amounts by accounting period of merchant
-// @Description accounting payment by accounting period of merchant
-// @Tags Payment Order
-// @Accept application/x-www-form-urlencoded
-// @Produce json
-// @Param from query int true "period start in unix timestamp"
-// @Param to query int true "period end in unix timestamp"
-// @Success 200 {object} model.AccountingPayment "OK"
-// @Failure 400 {object} model.Error "Invalid request data"
-// @Failure 401 {object} model.Error "Unauthorized"
-// @Failure 403 {object} model.Error "Access denied"
-// @Failure 500 {object} model.Error "Object with error message"
-// @Router /api/v1/s/order/accounting_payment [get]
-func (r *orderRoute) getAccountingPaymentCalculation(ctx echo.Context) error {
-	rdr := &grpc.RevenueDynamicRequest{
-		MerchantIdentifier: r.Merchant.Identifier,
-	}
-
-	if err := (&OrderAccountingPaymentRequestBinder{}).Bind(rdr, ctx); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	res, err := r.billingService.GetAccountingPayment(context.TODO(), rdr)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return ctx.JSON(http.StatusOK, res)
 }
 
 func (r *orderRoute) getRefund(ctx echo.Context) error {

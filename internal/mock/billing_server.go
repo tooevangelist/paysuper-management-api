@@ -656,14 +656,6 @@ func (s *BillingServerOkMock) GetProject(
 	}, nil
 }
 
-func (s *BillingServerOkMock) ListProjects(
-	ctx context.Context,
-	in *grpc.ListProjectsRequest,
-	opts ...client.CallOption,
-) (*grpc.ListProjectsResponse, error) {
-	return &grpc.ListProjectsResponse{}, nil
-}
-
 func (s *BillingServerOkMock) DeleteProject(
 	ctx context.Context,
 	in *grpc.GetProjectRequest,
@@ -1007,14 +999,6 @@ func (s *BillingServerErrorMock) GetProject(
 	}, nil
 }
 
-func (s *BillingServerErrorMock) ListProjects(
-	ctx context.Context,
-	in *grpc.ListProjectsRequest,
-	opts ...client.CallOption,
-) (*grpc.ListProjectsResponse, error) {
-	return &grpc.ListProjectsResponse{}, nil
-}
-
 func (s *BillingServerErrorMock) DeleteProject(
 	ctx context.Context,
 	in *grpc.GetProjectRequest,
@@ -1309,14 +1293,6 @@ func (s *BillingServerSystemErrorMock) GetProject(
 		}, nil
 	}
 
-	return nil, errors.New(SomeError)
-}
-
-func (s *BillingServerSystemErrorMock) ListProjects(
-	ctx context.Context,
-	in *grpc.ListProjectsRequest,
-	opts ...client.CallOption,
-) (*grpc.ListProjectsResponse, error) {
 	return nil, errors.New(SomeError)
 }
 
@@ -1633,14 +1609,6 @@ func (s *BillingServerOkTemporaryMock) GetProject(
 	return nil, errors.New(SomeError)
 }
 
-func (s *BillingServerOkTemporaryMock) ListProjects(
-	ctx context.Context,
-	in *grpc.ListProjectsRequest,
-	opts ...client.CallOption,
-) (*grpc.ListProjectsResponse, error) {
-	return nil, errors.New(SomeError)
-}
-
 func (s *BillingServerOkTemporaryMock) DeleteProject(
 	ctx context.Context,
 	in *grpc.GetProjectRequest,
@@ -1784,4 +1752,36 @@ func (s *BillingServerOkTemporaryMock) SetMerchantS3Agreement(
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantDataResponse, error) {
 	return &grpc.ChangeMerchantDataResponse{}, nil
+}
+
+func (s *BillingServerOkMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
+	return &billing.OrderPaginate{Count: 1, Items: []*billing.Order{}}, nil
+}
+
+func (s *BillingServerErrorMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkTemporaryMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
+	return &billing.OrderPaginate{}, nil
+}
+
+func (s *BillingServerOkMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
+	return &grpc.ListProjectsResponse{Count: 1, Items: []*billing.Project{{Id: "id"}}}, nil
+}
+
+func (s *BillingServerErrorMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkTemporaryMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
+	return &grpc.ListProjectsResponse{}, nil
 }

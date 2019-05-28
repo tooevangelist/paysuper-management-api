@@ -9,6 +9,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
+	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
@@ -44,12 +45,12 @@ func (suite *OrderTestSuite) SetupTest() {
 	}
 
 	renderer := &Template{
-		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("../web/template/*.html")),
+		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("web/template/*.html")),
 	}
 	suite.api.Http.Renderer = renderer
 
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
-	suite.router = &orderRoute{Api: suite.api}
+	suite.router = &orderRoute{Api: suite.api, projectManager: manager.InitProjectManager(nil, nil, mock.NewBillingServerOkMock())}
 
 	err := suite.api.validate.RegisterValidation("uuid", suite.api.UuidValidator)
 	assert.NoError(suite.T(), err, "Uuid validator registration failed")
@@ -1100,5 +1101,37 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/order")
+
+	err := suite.router.getOrders(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_BillingServerError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/order")
+
+	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.router.getOrders(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }

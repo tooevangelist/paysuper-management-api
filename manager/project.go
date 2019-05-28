@@ -307,7 +307,7 @@ func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model
 	return fixedPackages
 }
 
-func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) (map[string]string, *billing.Merchant, error) {
+func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) ([]string, *billing.Merchant, error) {
 	req := &grpc.ListProjectsRequest{
 		MerchantId: mId,
 		Limit:      model.DefaultLimit,
@@ -319,24 +319,30 @@ func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) (map[st
 		return nil, nil, errors.New(projectErrorMerchantNotHaveProjects)
 	}
 
-	var fp = make(map[string]string)
+	var fp []string
 
 	for _, p := range rsp.Items {
-		fp[p.Id] = p.Name["en"]
+		fp = append(fp, p.Id)
 	}
 
 	if len(fProjects) <= 0 {
 		return fp, nil, nil
 	}
 
-	fp1 := make(map[string]string)
+	var fp1 []string
+	var exists bool
 
 	for _, p := range fProjects {
-		if _, ok := fp[p]; !ok {
-			continue
+		exists = false
+		for _, id := range fp {
+			if id == p {
+				exists = true
+			}
 		}
 
-		fp1[p] = fp[p]
+		if exists != true {
+			fp1 = append(fp1, p)
+		}
 	}
 
 	if len(fp1) <= 0 {
