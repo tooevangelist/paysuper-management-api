@@ -908,7 +908,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_BillingServerResultFa
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateJson_ValidationError() {
-	body := `{"amount": 10}`
+	body := `{"amount": -10}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
@@ -922,7 +922,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "ProjectId", httpErr.Message)
+	assert.Regexp(suite.T(), "Amount", httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateJson_OrderCreateError() {
