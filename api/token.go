@@ -12,11 +12,11 @@ type tokenRoute struct {
 	*Api
 }
 
-func (api *Api) initTokenRoutes() (*Api, error) {
+func (api *Api) initTokenRoutes() *Api {
 	route := &tokenRoute{Api: api}
 	api.apiAuthProjectGroup.POST("/tokens", route.createToken)
 
-	return api, nil
+	return api
 }
 
 func (r *tokenRoute) createToken(ctx echo.Context) error {

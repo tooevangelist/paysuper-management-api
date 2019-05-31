@@ -54,8 +54,7 @@ func (suite *TokenTestSuite) SetupTest() {
 func (suite *TokenTestSuite) TearDownTest() {}
 
 func (suite *TokenTestSuite) TestToken_InitCustomerRoutes_Ok() {
-	api, err := suite.api.initTokenRoutes()
-	assert.NoError(suite.T(), err)
+	api := suite.api.initTokenRoutes()
 	assert.NotNil(suite.T(), api)
 
 	routes := api.Http.Routes()
