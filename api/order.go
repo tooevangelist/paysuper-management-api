@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/globalsign/mgo/bson"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -80,7 +82,7 @@ func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
 // @Failure 500 {string} html "Redirect user to page with error description"
 // @Router /order/create [get]
 func (api *Api) InitOrderV1Routes() *Api {
-	route := orderRoute{
+	route := &orderRoute{
 		Api:            api,
 		projectManager: manager.InitProjectManager(api.database, api.logger, api.billingService),
 	}
@@ -95,7 +97,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.POST("/api/v1/payment", route.processCreatePayment)
 
 	api.authUserRouteGroup.GET("/order", route.getOrders)
-	api.accessRouteGroup.GET("/order/:id", route.getOrderJson)
+	api.authUserRouteGroup.GET("/order/:id", route.getOrderJson)
 
 	api.authUserRouteGroup.GET("/order/:order_id/refunds", route.listRefunds)
 	api.authUserRouteGroup.GET("/order/:order_id/refunds/:refund_id", route.getRefund)
@@ -332,41 +334,34 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 // @Failure 500 {object} model.Error "Object with error message"
 // @Router /api/v1/s/order/{id} [get]
 func (r *orderRoute) getOrderJson(ctx echo.Context) error {
-	req := &grpc.ListOrdersRequest{}
-	err := ctx.Bind(req)
+	id := ctx.Param(requestParameterId)
+	if id == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
+	}
 
+	if _, err := uuid.Parse(id); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
+	}
+
+	merchantId := ctx.Param(requestParameterId)
+	if merchantId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectMerchantId)
+	}
+
+	if bson.IsObjectIdHex(merchantId) == false {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectMerchantId)
+	}
+
+	rsp, err := r.billingService.GetOrder(context.TODO(), &grpc.GetOrderRequest{Id: id, Merchant: merchantId})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
 
-	if req.Limit <= 0 {
-		req.Limit = LimitDefault
-	}
-
-	if req.Offset <= 0 {
-		req.Offset = OffsetDefault
-	}
-
-	err = r.validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	req.Project, _, err = r.projectManager.FilterProjects("", []string{})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, err.Error())
-	}
-
-	rsp, err := r.billingService.FindAllOrders(context.TODO(), req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	if rsp.Count == 0 {
+	if rsp == nil {
 		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 
-	return ctx.JSON(http.StatusOK, rsp.Items[0])
+	return ctx.JSON(http.StatusOK, rsp)
 }
 
 // @Summary Get orders

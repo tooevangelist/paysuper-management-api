@@ -45,7 +45,7 @@ func (suite *OrderTestSuite) SetupTest() {
 	}
 
 	renderer := &Template{
-		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("web/template/*.html")),
+		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("../web/template/*.html")),
 	}
 	suite.api.Http.Renderer = renderer
 
