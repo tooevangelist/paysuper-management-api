@@ -98,6 +98,9 @@ const (
 	errorMessageUrlRedirectSuccessIncorrectType       = "url redirect success parameter has incorrect type"
 	errorMessageStatusIncorrectType                   = "status parameter has incorrect type"
 	errorMessageSignatureHeaderIsEmpty                = "header with request signature can't be empty"
+	errorMessageMerchantNotHaveProjects               = "merchant not have projects"
+	errorMessageAccessDeniedToProject                 = "one or more projects in filter are not a projects of merchant"
+	errorMessageOrdersNotFound                        = "orders not found"
 
 	HeaderAcceptLanguage      = "Accept-Language"
 	HeaderUserAgent           = "User-Agent"

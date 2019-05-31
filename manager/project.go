@@ -1,7 +1,6 @@
 package manager
 
 import (
-	"context"
 	"errors"
 	"github.com/globalsign/mgo/bson"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -18,10 +17,8 @@ const (
 	minPaymentAmount float64 = 0
 	maxPaymentAmount float64 = 15000
 
-	projectErrorMerchantNotHaveProjects = "merchant not have projects"
-	projectErrorAccessDeniedToProject   = "one or more projects in filter are not a projects of merchant"
-	projectErrorNotFound                = "project with specified identifier not found"
-	projectErrorNotHasPaymentMethods    = "project not has connected payment methods"
+	projectErrorNotFound             = "project with specified identifier not found"
+	projectErrorNotHasPaymentMethods = "project not has connected payment methods"
 )
 
 type ProjectManager struct {
@@ -305,51 +302,6 @@ func (pm *ProjectManager) processFixedPackages(fixedPackages map[string][]*model
 	}
 
 	return fixedPackages
-}
-
-func (pm *ProjectManager) FilterProjects(mId string, fProjects []string) ([]string, *billing.Merchant, error) {
-	req := &grpc.ListProjectsRequest{
-		MerchantId: mId,
-		Limit:      model.DefaultLimit,
-		Offset:     model.DefaultOffset,
-	}
-	rsp, err := pm.billingService.ListProjects(context.TODO(), req)
-
-	if err != nil || rsp.Count <= 0 {
-		return nil, nil, errors.New(projectErrorMerchantNotHaveProjects)
-	}
-
-	var fp []string
-
-	for _, p := range rsp.Items {
-		fp = append(fp, p.Id)
-	}
-
-	if len(fProjects) <= 0 {
-		return fp, nil, nil
-	}
-
-	var fp1 []string
-	var exists bool
-
-	for _, p := range fProjects {
-		exists = false
-		for _, id := range fp {
-			if id == p {
-				exists = true
-			}
-		}
-
-		if exists != true {
-			fp1 = append(fp1, p)
-		}
-	}
-
-	if len(fp1) <= 0 {
-		return nil, nil, errors.New(projectErrorAccessDeniedToProject)
-	}
-
-	return fp1, nil, nil
 }
 
 func (pm *ProjectManager) GetProjectPaymentMethods(projectId bson.ObjectId) ([]*model.PaymentMethod, error) {
