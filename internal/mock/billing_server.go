@@ -1779,9 +1779,25 @@ func (s *BillingServerErrorMock) ListProjects(ctx context.Context, in *grpc.List
 }
 
 func (s *BillingServerSystemErrorMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
-	return nil, errors.New(SomeError)
+	return &grpc.ListProjectsResponse{Count: 1, Items: []*billing.Project{{Id: "id"}}}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
 	return &grpc.ListProjectsResponse{}, nil
+}
+
+func (s *BillingServerOkMock) GetOrder(ctx context.Context, in *grpc.GetOrderRequest, opts ...client.CallOption) (*billing.Order, error) {
+	return &billing.Order{}, nil
+}
+
+func (s *BillingServerErrorMock) GetOrder(ctx context.Context, in *grpc.GetOrderRequest, opts ...client.CallOption) (*billing.Order, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) GetOrder(ctx context.Context, in *grpc.GetOrderRequest, opts ...client.CallOption) (*billing.Order, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkTemporaryMock) GetOrder(ctx context.Context, in *grpc.GetOrderRequest, opts ...client.CallOption) (*billing.Order, error) {
+	return &billing.Order{}, nil
 }

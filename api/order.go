@@ -417,7 +417,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 
 	pOrders, err := r.billingService.FindAllOrders(context.TODO(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageOrdersNotFound)
+		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
 	}
 
 	return ctx.JSON(http.StatusOK, pOrders)
@@ -649,7 +649,6 @@ func (r *orderRoute) FilterProjects(mId string, fProjects []string) ([]string, *
 		Offset:     model.DefaultOffset,
 	}
 	rsp, err := r.billingService.ListProjects(context.TODO(), req)
-
 	if err != nil || rsp.Count <= 0 {
 		return nil, nil, errors.New(errorMessageMerchantNotHaveProjects)
 	}

@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -16,6 +17,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -1132,6 +1134,45 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_BillingServerError() {
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageOrdersNotFound, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Id() {
+	q := make(url.Values)
+	q.Set(requestParameterId, bson.NewObjectId().Hex())
+	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "Id", "uuid"))
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Project() {
+	q := url.Values{requestParameterProject: []string{"foo"}}
+	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "Project[0]", "hexadecimal"))
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_PaymentMethod() {
+	q := url.Values{requestParameterPaymentMethod: []string{"foo"}}
+	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "PaymentMethod[0]", "hexadecimal"))
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Country() {
+	q := url.Values{requestParameterCountry: []string{"foo"}}
+	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "Country[0]", "len"))
+}
+
+func (suite *OrderTestSuite) testGetOrdersBindError(q url.Values, error string) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/order")
+
+	err := suite.router.getOrders(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), error, httpErr.Message)
 }
