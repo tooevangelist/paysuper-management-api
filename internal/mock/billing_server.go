@@ -1779,7 +1779,7 @@ func (s *BillingServerErrorMock) ListProjects(ctx context.Context, in *grpc.List
 }
 
 func (s *BillingServerSystemErrorMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
-	return &grpc.ListProjectsResponse{Count: 1, Items: []*billing.Project{{Id: "id"}}}, nil
+	return nil, errors.New(SomeError)
 }
 
 func (s *BillingServerOkTemporaryMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
