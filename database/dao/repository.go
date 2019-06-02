@@ -34,15 +34,6 @@ type Repository interface {
 	FindAllPaymentMethods() ([]*model.PaymentMethod, error)
 	FindPaymentMethodsByIds([]bson.ObjectId) ([]*model.PaymentMethod, error)
 
-	FindOrderByProjectOrderId(string) (*model.Order, error)
-	FindOrderById(bson.ObjectId) (*model.Order, error)
-	FindAllOrders(filters bson.M, sort []string, limit int32, offset int32) ([]*model.Order, error)
-	GetOrdersCountByConditions(filters bson.M) (int, error)
-	GetRevenueDynamic(*model.RevenueDynamicRequest) ([]map[string]interface{}, error)
-	GetAccountingPayment(rdr *model.RevenueDynamicRequest, mId string) ([]map[string]interface{}, error)
-	InsertOrder(*model.Order) error
-	UpdateOrder(*model.Order) error
-
 	FindCurrenciesPair(int, int) (*model.CurrencyRate, error)
 
 	FindCommissionByProjectIdAndPaymentMethodId(projectId bson.ObjectId, pmId bson.ObjectId) (*model.Commission, error)

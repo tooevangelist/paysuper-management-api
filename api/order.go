@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/globalsign/mgo/bson"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -13,7 +13,6 @@ import (
 	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/paysuper/paysuper-payment-link/proto"
 	"net/http"
-	"net/url"
 	"time"
 )
 
@@ -25,7 +24,6 @@ const (
 
 type orderRoute struct {
 	*Api
-	orderManager   *manager.OrderManager
 	projectManager *manager.ProjectManager
 	publisher      micro.Publisher
 }
@@ -83,15 +81,8 @@ func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
 // @Failure 500 {string} html "Redirect user to page with error description"
 // @Router /order/create [get]
 func (api *Api) InitOrderV1Routes() *Api {
-	route := orderRoute{
-		Api: api,
-		orderManager: manager.InitOrderManager(
-			api.database,
-			api.logger,
-			api.notifierPub,
-			api.repository,
-			api.geoService,
-		),
+	route := &orderRoute{
+		Api:            api,
 		projectManager: manager.InitProjectManager(api.database, api.logger, api.billingService),
 	}
 
@@ -105,10 +96,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.POST("/api/v1/payment", route.processCreatePayment)
 
 	api.authUserRouteGroup.GET("/order", route.getOrders)
-
-	api.accessRouteGroup.GET("/order/:id", route.getOrderJson)
-	api.accessRouteGroup.GET("/order/revenue_dynamic/:period", route.getRevenueDynamic)
-	api.accessRouteGroup.GET("/order/accounting_payment", route.getAccountingPaymentCalculation)
+	api.authUserRouteGroup.GET("/order/:id", route.getOrderJson)
 
 	api.authUserRouteGroup.GET("/order/:order_id/refunds", route.listRefunds)
 	api.authUserRouteGroup.GET("/order/:order_id/refunds/:refund_id", route.getRefund)
@@ -331,124 +319,66 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)
 }
 
-// @Summary Get order data
-// @Description Get full object with order data
-// @Tags Payment Order
-// @Accept json
-// @Produce json
-// @Param id path string true "Order unique identifier"
-// @Success 200 {object} model.Order "OK"
-// @Failure 400 {object} model.Error "Invalid request data"
-// @Failure 401 {object} model.Error "Unauthorized"
-// @Failure 403 {object} model.Error "Access denied"
-// @Failure 404 {object} model.Error "Not found"
-// @Failure 500 {object} model.Error "Object with error message"
-// @Router /api/v1/s/order/{id} [get]
+// Get full object with order data
+// Route GET /api/v1/s/order/{id}
 func (r *orderRoute) getOrderJson(ctx echo.Context) error {
-	id := ctx.Param("id")
+	id := ctx.Param(requestParameterId)
 
 	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
+		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
 	}
 
-	p, merchant, err := r.projectManager.FilterProjects(r.Merchant.Identifier, []bson.ObjectId{})
+	if _, err := uuid.Parse(id); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
+	}
+
+	req := &grpc.GetOrderRequest{
+		Id: id,
+	}
+	rsp, err := r.billingService.GetOrder(context.TODO(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, err)
+		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
 	}
 
-	params := &manager.FindAll{
-		Values:   url.Values{"id": []string{id}},
-		Projects: p,
-		Merchant: merchant,
-		Limit:    r.GetParams.limit,
-		Offset:   r.GetParams.offset,
-	}
-
-	pOrders, err := r.orderManager.FindAll(params)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	if pOrders.Count == 0 {
+	if rsp == nil {
 		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
 	}
 
-	return ctx.JSON(http.StatusOK, pOrders.Items[0])
+	return ctx.JSON(http.StatusOK, rsp)
 }
 
-// @Summary Get orders
-// @Description Get orders list
-// @Tags Payment Order
-// @Accept json
-// @Produce json
-// @Param id query string false "order unique identifier"
-// @Param project query array false "list of projects to get orders filtered by they"
-// @Param payment_method query array false "list of payment methods to get orders filtered by they"
-// @Param country query array false "list of payer countries to get orders filtered by they"
-// @Param status query array false "list of orders statuses to get orders filtered by they"
-// @Param account query string false "payer account on the any side of payment process. for example it may be account in project, account in payment system, payer email and etc"
-// @Param pm_date_from query integer false "start date when payment was closed to get orders filtered by they"
-// @Param pm_date_to query integer false "end date when payment was closed to get orders filtered by they"
-// @Param project_date_from query integer false "start date when payment was created to get orders filtered by they"
-// @Param project_date_to query integer false "end date when payment was closed in project to get orders filtered by they"
-// @Param quick_filter query string false "string for full text search in quick filter"
-// @Param limit query integer false "maximum number of returning orders. default value is 100"
-// @Param offset query integer false "offset from which you want to return the list of orders. default value is 0"
-// @Param sort query array false "fields list for sorting"
-// @Success 200 {object} model.OrderPaginate "OK"
-// @Failure 404 {object} model.Error "Invalid request data"
-// @Failure 401 {object} model.Error "Unauthorized"
-// @Failure 500 {object} model.Error "Object with error message"
-// @Router /api/v1/s/order [get]
+// Get orders list
+// Route GET /api/v1/s/order
 func (r *orderRoute) getOrders(ctx echo.Context) error {
-	values := ctx.QueryParams()
-
-	var fp []bson.ObjectId
-
-	if fProjects, ok := values[model.OrderFilterFieldProjects]; ok {
-		for _, project := range fProjects {
-			if bson.IsObjectIdHex(project) == false {
-				return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageProjectIdIsInvalid)
-			}
-
-			fp = append(fp, bson.ObjectIdHex(project))
-		}
-	}
-
-	rsp, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	req := &grpc.ListOrdersRequest{}
+	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	if rsp.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	if req.Limit <= 0 {
+		req.Limit = LimitDefault
 	}
 
-	p, _, err := r.projectManager.FilterProjects(rsp.Item.Id, fp)
+	if req.Offset <= 0 {
+		req.Offset = OffsetDefault
+	}
+
+	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	params := &manager.FindAll{
-		Values:   values,
-		Projects: p,
-		Merchant: rsp.Item,
-		Limit:    r.GetParams.limit,
-		Offset:   r.GetParams.offset,
-		SortBy:   r.GetParams.sort,
-	}
-
-	pOrders, err := r.orderManager.FindAll(params)
+	rsp, err := r.billingService.FindAllOrders(context.TODO(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
 	}
 
-	return ctx.JSON(http.StatusOK, pOrders)
+	return ctx.JSON(http.StatusOK, rsp)
 }
 
 // Create payment by order
@@ -483,76 +413,6 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, body)
-}
-
-// @Summary Get revenue dynamics
-// @Description Get revenue dynamics by merchant or project
-// @Tags Payment Order
-// @Accept application/x-www-form-urlencoded
-// @Produce json
-// @Param period path string true "period to group revenue dynamics data. now allowed next values: hour, day, week, month, year"
-// @Param from query int true "period start in unix timestamp"
-// @Param to query int true "period end in unix timestamp"
-// @Param project query array false "list of projects to calculate dynamics of revenue"
-// @Success 200 {object} model.RevenueDynamicResult "OK"
-// @Failure 400 {object} model.Error "Invalid request data"
-// @Failure 401 {object} model.Error "Unauthorized"
-// @Failure 403 {object} model.Error "Access denied"
-// @Failure 500 {object} model.Error "Object with error message"
-// @Router /api/v1/s/order/revenue_dynamic/{period} [get]
-func (r *orderRoute) getRevenueDynamic(ctx echo.Context) error {
-	rdr := &model.RevenueDynamicRequest{}
-
-	if err := (&OrderRevenueDynamicRequestBinder{}).Bind(rdr, ctx); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	pMap, _, err := r.projectManager.FilterProjects(r.Merchant.Identifier, rdr.Project)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, err.Error())
-	}
-
-	if len(rdr.Project) <= 0 {
-		rdr.SetProjectsFromMap(pMap)
-	}
-
-	res, err := r.orderManager.GetRevenueDynamic(rdr)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return ctx.JSON(http.StatusOK, res)
-}
-
-// @Summary Get accounting payment amounts by accounting period of merchant
-// @Description accounting payment by accounting period of merchant
-// @Tags Payment Order
-// @Accept application/x-www-form-urlencoded
-// @Produce json
-// @Param from query int true "period start in unix timestamp"
-// @Param to query int true "period end in unix timestamp"
-// @Success 200 {object} model.AccountingPayment "OK"
-// @Failure 400 {object} model.Error "Invalid request data"
-// @Failure 401 {object} model.Error "Unauthorized"
-// @Failure 403 {object} model.Error "Access denied"
-// @Failure 500 {object} model.Error "Object with error message"
-// @Router /api/v1/s/order/accounting_payment [get]
-func (r *orderRoute) getAccountingPaymentCalculation(ctx echo.Context) error {
-	rdr := &model.RevenueDynamicRequest{}
-
-	if err := (&OrderAccountingPaymentRequestBinder{}).Bind(rdr, ctx); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	res, err := r.orderManager.GetAccountingPayment(rdr, r.Merchant.Identifier)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return ctx.JSON(http.StatusOK, res)
 }
 
 func (r *orderRoute) getRefund(ctx echo.Context) error {

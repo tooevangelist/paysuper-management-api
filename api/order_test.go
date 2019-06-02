@@ -3,18 +3,21 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
+	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
 	"html/template"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -49,7 +52,7 @@ func (suite *OrderTestSuite) SetupTest() {
 	suite.api.Http.Renderer = renderer
 
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
-	suite.router = &orderRoute{Api: suite.api}
+	suite.router = &orderRoute{Api: suite.api, projectManager: manager.InitProjectManager(nil, nil, mock.NewBillingServerOkMock())}
 
 	err := suite.api.validate.RegisterValidation("uuid", suite.api.UuidValidator)
 	assert.NoError(suite.T(), err, "Uuid validator registration failed")
@@ -1101,4 +1104,75 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/order")
+
+	err := suite.router.getOrders(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_BillingServerError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/order")
+
+	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.router.getOrders(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageOrdersNotFound, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Id() {
+	q := make(url.Values)
+	q.Set(requestParameterId, bson.NewObjectId().Hex())
+	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "Id", "uuid"))
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Project() {
+	q := url.Values{requestParameterProject: []string{"foo"}}
+	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "Project[0]", "hexadecimal"))
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_PaymentMethod() {
+	q := url.Values{requestParameterPaymentMethod: []string{"foo"}}
+	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "PaymentMethod[0]", "hexadecimal"))
+}
+
+func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Country() {
+	q := url.Values{requestParameterCountry: []string{"foo"}}
+	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "Country[0]", "len"))
+}
+
+func (suite *OrderTestSuite) testGetOrdersBindError(q url.Values, error string) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/order")
+
+	err := suite.router.getOrders(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), error, httpErr.Message)
 }
