@@ -2,9 +2,7 @@ package api
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"github.com/globalsign/mgo/bson"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro"
@@ -321,21 +319,11 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)
 }
 
-// @Summary Get order data
-// @Description Get full object with order data
-// @Tags Payment Order
-// @Accept json
-// @Produce json
-// @Param id path string true "Order unique identifier"
-// @Success 200 {object} model.Order "OK"
-// @Failure 400 {object} model.Error "Invalid request data"
-// @Failure 401 {object} model.Error "Unauthorized"
-// @Failure 403 {object} model.Error "Access denied"
-// @Failure 404 {object} model.Error "Not found"
-// @Failure 500 {object} model.Error "Object with error message"
-// @Router /api/v1/s/order/{id} [get]
+// Get full object with order data
+// Route GET /api/v1/s/order/{id}
 func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 	id := ctx.Param(requestParameterId)
+
 	if id == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
 	}
@@ -344,16 +332,11 @@ func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
 	}
 
-	merchantId := ctx.Param(requestParameterId)
-	if merchantId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectMerchantId)
+	req := &grpc.GetOrderRequest{
+		Id: id,
 	}
+	rsp, err := r.billingService.GetOrder(context.TODO(), req)
 
-	if bson.IsObjectIdHex(merchantId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectMerchantId)
-	}
-
-	rsp, err := r.billingService.GetOrder(context.TODO(), &grpc.GetOrderRequest{Id: id, Merchant: merchantId})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
 	}
@@ -365,30 +348,8 @@ func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp)
 }
 
-// @Summary Get orders
-// @Description Get orders list
-// @Tags Payment Order
-// @Accept json
-// @Produce json
-// @Param id query string false "order unique identifier"
-// @Param project query array false "list of projects to get orders filtered by they"
-// @Param payment_method query array false "list of payment methods to get orders filtered by they"
-// @Param country query array false "list of payer countries to get orders filtered by they"
-// @Param status query array false "list of orders statuses to get orders filtered by they"
-// @Param account query string false "payer account on the any side of payment process. for example it may be account in project, account in payment system, payer email and etc"
-// @Param pm_date_from query integer false "start date when payment was closed to get orders filtered by they"
-// @Param pm_date_to query integer false "end date when payment was closed to get orders filtered by they"
-// @Param project_date_from query integer false "start date when payment was created to get orders filtered by they"
-// @Param project_date_to query integer false "end date when payment was closed in project to get orders filtered by they"
-// @Param quick_filter query string false "string for full text search in quick filter"
-// @Param limit query integer false "maximum number of returning orders. default value is 100"
-// @Param offset query integer false "offset from which you want to return the list of orders. default value is 0"
-// @Param sort query array false "fields list for sorting"
-// @Success 200 {object} model.OrderPaginate "OK"
-// @Failure 404 {object} model.Error "Invalid request data"
-// @Failure 401 {object} model.Error "Unauthorized"
-// @Failure 500 {object} model.Error "Object with error message"
-// @Router /api/v1/s/order [get]
+// Get orders list
+// Route GET /api/v1/s/order
 func (r *orderRoute) getOrders(ctx echo.Context) error {
 	req := &grpc.ListOrdersRequest{}
 	err := ctx.Bind(req)
@@ -406,21 +367,18 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	}
 
 	err = r.validate.Struct(req)
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	req.Project, _, err = r.FilterProjects("", []string{})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusForbidden, errorUnknown)
-	}
+	rsp, err := r.billingService.FindAllOrders(context.TODO(), req)
 
-	pOrders, err := r.billingService.FindAllOrders(context.TODO(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
 	}
 
-	return ctx.JSON(http.StatusOK, pOrders)
+	return ctx.JSON(http.StatusOK, rsp)
 }
 
 // Create payment by order
@@ -640,48 +598,4 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, rsp.Item)
-}
-
-func (r *orderRoute) FilterProjects(mId string, fProjects []string) ([]string, *billing.Merchant, error) {
-	req := &grpc.ListProjectsRequest{
-		MerchantId: mId,
-		Limit:      model.DefaultLimit,
-		Offset:     model.DefaultOffset,
-	}
-	rsp, err := r.billingService.ListProjects(context.TODO(), req)
-	if err != nil || rsp.Count <= 0 {
-		return nil, nil, errors.New(errorMessageMerchantNotHaveProjects)
-	}
-
-	var fp []string
-
-	for _, p := range rsp.Items {
-		fp = append(fp, p.Id)
-	}
-
-	if len(fProjects) <= 0 {
-		return fp, nil, nil
-	}
-
-	var fp1 []string
-	var exists bool
-
-	for _, p := range fProjects {
-		exists = false
-		for _, id := range fp {
-			if id == p {
-				exists = true
-			}
-		}
-
-		if exists != true {
-			fp1 = append(fp1, p)
-		}
-	}
-
-	if len(fp1) <= 0 {
-		return nil, nil, errors.New(errorMessageAccessDeniedToProject)
-	}
-
-	return fp1, nil, nil
 }
