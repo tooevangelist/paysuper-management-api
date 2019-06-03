@@ -188,10 +188,31 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		}
 	}
 
-	order, err := r.billingService.OrderCreateProcess(context.TODO(), req)
+	var order *billing.Order
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	// If request contain prepared order identifier than try to get order by this identifier
+	if req.PspOrderUuid != "" {
+		req1 := &grpc.IsOrderCanBePayingRequest{
+			OrderId:   req.PspOrderUuid,
+			ProjectId: req.ProjectId,
+		}
+		rsp1, err := r.billingService.IsOrderCanBePaying(context.TODO(), req1)
+
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		}
+
+		if rsp1.Status != pkg.ResponseStatusOk {
+			return echo.NewHTTPError(int(rsp1.Status), rsp1.Message)
+		}
+
+		order = rsp1.Item
+	} else {
+		order, err = r.billingService.OrderCreateProcess(context.TODO(), req)
+
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
 	}
 
 	response := &CreateOrderJsonProjectResponse{

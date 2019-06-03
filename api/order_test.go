@@ -1176,3 +1176,74 @@ func (suite *OrderTestSuite) testGetOrdersBindError(q url.Values, error string) 
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), error, httpErr.Message)
 }
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_WithPreparedOrderId_Ok() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:    bson.NewObjectId().Hex(),
+		PspOrderUuid: uuid.New().String(),
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err = suite.router.createJson(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_WithPreparedOrderId_BillingServiceSystemError() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:    bson.NewObjectId().Hex(),
+		PspOrderUuid: uuid.New().String(),
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
+	err = suite.router.createJson(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_CreateJson_WithPreparedOrderId_BillingServiceResultError() {
+	order := &billing.OrderCreateRequest{
+		ProjectId:    bson.NewObjectId().Hex(),
+		PspOrderUuid: uuid.New().String(),
+	}
+
+	b, err := json.Marshal(order)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	suite.router.billingService = mock.NewBillingServerErrorMock()
+	err = suite.router.createJson(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}

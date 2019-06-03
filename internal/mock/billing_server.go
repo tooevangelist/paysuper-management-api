@@ -1801,3 +1801,44 @@ func (s *BillingServerSystemErrorMock) GetOrder(ctx context.Context, in *grpc.Ge
 func (s *BillingServerOkTemporaryMock) GetOrder(ctx context.Context, in *grpc.GetOrderRequest, opts ...client.CallOption) (*billing.Order, error) {
 	return &billing.Order{}, nil
 }
+
+func (s *BillingServerOkMock) IsOrderCanBePaying(
+	ctx context.Context,
+	in *grpc.IsOrderCanBePayingRequest,
+	opts ...client.CallOption,
+) (*grpc.IsOrderCanBePayingResponse, error) {
+	return &grpc.IsOrderCanBePayingResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   &billing.Order{},
+	}, nil
+}
+
+func (s *BillingServerErrorMock) IsOrderCanBePaying(
+	ctx context.Context,
+	in *grpc.IsOrderCanBePayingRequest,
+	opts ...client.CallOption,
+) (*grpc.IsOrderCanBePayingResponse, error) {
+	return &grpc.IsOrderCanBePayingResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerSystemErrorMock) IsOrderCanBePaying(
+	ctx context.Context,
+	in *grpc.IsOrderCanBePayingRequest,
+	opts ...client.CallOption,
+) (*grpc.IsOrderCanBePayingResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkTemporaryMock) IsOrderCanBePaying(
+	ctx context.Context,
+	in *grpc.IsOrderCanBePayingRequest,
+	opts ...client.CallOption,
+) (*grpc.IsOrderCanBePayingResponse, error) {
+	return &grpc.IsOrderCanBePayingResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   &billing.Order{},
+	}, nil
+}
