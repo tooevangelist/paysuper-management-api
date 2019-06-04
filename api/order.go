@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -343,19 +342,16 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 // Get full object with order data
 // Route GET /api/v1/s/order/{id}
 func (r *orderRoute) getOrderJson(ctx echo.Context) error {
-	id := ctx.Param(requestParameterId)
-
-	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
-	}
-
-	if _, err := uuid.Parse(id); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorIdIsEmpty)
-	}
-
 	req := &grpc.GetOrderRequest{
-		Id: id,
+		Id: ctx.Param(requestParameterId),
 	}
+
+	err := r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
 	rsp, err := r.billingService.GetOrder(context.TODO(), req)
 
 	if err != nil {
