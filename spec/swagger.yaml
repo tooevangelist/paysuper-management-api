@@ -483,7 +483,7 @@ definitions:
         description: |
           array of selected orders
         items:
-          $ref: '#/definitions/model.OrderSimple'
+          $ref: '#/definitions/model.Order'
         type: array
     type: object
   model.OrderPaymentMethod:
@@ -574,109 +574,6 @@ definitions:
     required:
       - project
       - amount
-    type: object
-  model.OrderSimple:
-    properties:
-      account:
-        description: |
-          user account in project
-        type: string
-      confirmed_at:
-        description: |
-          date when project was notification about payment
-        type: integer
-      created_at:
-        description: |
-          date when payment created
-        type: integer
-      fixed_package:
-        $ref: '#/definitions/model.OrderFixedPackage'
-        description: |
-          object which contains main information about fixed package which was buy
-        type: object
-      id:
-        description: |
-          unique order identifier in Protocol One
-        type: string
-      order_id:
-        description: |
-          unique order identifier in project
-        type: string
-      payer_data:
-        $ref: '#/definitions/model.PayerData'
-        description: |
-          data about payer, for example: country, city, ip and etc
-        type: object
-      payment_method:
-        $ref: '#/definitions/model.SimpleItem'
-        description: |
-          object which contains main information about payment method
-        type: object
-      payment_method_amount_income:
-        $ref: '#/definitions/model.OrderSimpleAmountObject'
-        description: |
-          object which contains main information about finances of payment system which received of payment system
-        type: object
-      payment_requisites:
-        description: |
-          payer payment requisites
-        type: object
-      project:
-        $ref: '#/definitions/model.SimpleItem'
-        description: |
-          object which contains main information about project
-        type: object
-      project_amount_income:
-        $ref: '#/definitions/model.OrderSimpleAmountObject'
-        description: |
-          object which contains main information about accounting finances of project which received of project
-        type: object
-      project_amount_outcome:
-        $ref: '#/definitions/model.OrderSimpleAmountObject'
-        description: |
-          object which contains main information about accounting finances of project which will send to project
-        type: object
-      project_fee_amount:
-        $ref: '#/definitions/model.OrderFee'
-        description: |
-          fee is charged with the project for the operation in merchant accounting currency
-        type: object
-      ps_fee_amount:
-        $ref: '#/definitions/model.OrderFeePaymentSystem'
-        description: |
-          payment system fee for payment operation in payment system accounting currency
-        type: object
-      psp_fee:
-        $ref: '#/definitions/model.OrderFeePsp'
-        description: |
-          PSP (P1) fee amount in merchant accounting currency
-        type: object
-      status:
-        $ref: '#/definitions/model.Status'
-        description: |
-          object which contains main information about payment status
-        type: object
-      to_payer_fee_amount:
-        $ref: '#/definitions/model.OrderFee'
-        description: |
-          value of fee which added to payer amount in merchant accounting currency
-        type: object
-      vat_amount:
-        description: |
-          vat amount in payment system accounting currency
-        type: number
-    type: object
-  model.OrderSimpleAmountObject:
-    properties:
-      amount:
-        description: |
-          amount value
-        type: number
-      currency:
-        $ref: '#/definitions/model.SimpleCurrency'
-        description: |
-          object which contains main information about currency
-        type: object
     type: object
   model.PayerData:
     properties:
@@ -2129,6 +2026,15 @@ paths:
           in: query
           name: sort[]
           type: string
+        - description: multiple field search string - order unique identifier, user external identifier,
+            project order identifier, project name, payment method name
+          in: query
+          name: quick_search
+          type: string
+        - description: query array of merchant identifier list
+          in: query
+          name: merchant
+          type: string[]
       produces:
         - application/json
       responses:
@@ -2136,21 +2042,17 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.OrderPaginate'
-        "401":
-          description: Unauthorized
+        "400":
+          description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
         "404":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
       summary: Get orders
       tags:
-        - Payment Order
+        - Order
   /api/v1/s/order/{id}:
     get:
       consumes:
@@ -2173,25 +2075,13 @@ paths:
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
       summary: Get order data
       tags:
-        - Payment Order
+        - Order
   /api/v1/s/order/accounting_payment:
     get:
       consumes:
