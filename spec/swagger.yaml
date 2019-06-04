@@ -1962,7 +1962,7 @@ paths:
       summary: Get merchant
       tags:
         - Merchant
-  /api/v1/s/order:
+  /admin/api/v1/order:
     get:
       consumes:
         - application/json
@@ -2053,7 +2053,7 @@ paths:
       summary: Get orders
       tags:
         - Order
-  /api/v1/s/order/{id}:
+  /admin/api/v1/order/{id}:
     get:
       consumes:
         - application/json
