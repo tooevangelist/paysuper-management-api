@@ -325,10 +325,7 @@ func init() {
 				vat := &model.Vat{
 					Id: bson.NewObjectId(),
 					Country: &model.SimpleCountry{
-						CodeInt: c.CodeInt,
-						CodeA2:  c.CodeA2,
-						CodeA3:  c.CodeA3,
-						Name:    c.Name,
+						CodeA2: c.IsoCodeA2,
 					},
 					SubdivisionCode: v.Subdivision,
 					Vat:             v.Value,

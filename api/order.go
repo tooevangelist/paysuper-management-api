@@ -104,6 +104,8 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.PATCH("/api/v1/orders/:order_id/language", route.changeLanguage)
 	api.Http.PATCH("/api/v1/orders/:order_id/customer", route.changeCustomer)
 	api.Http.POST("/api/v1/orders/:order_id/billing_address", route.processBillingAddress)
+	api.Http.POST("/api/v1/orders/:order_id/notify_sale", route.notifySale)
+	api.Http.POST("/api/v1/orders/:order_id/notify_new_region", route.notifyNewRegion)
 
 	return api
 }
@@ -621,4 +623,76 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+/*
+Switching sales notifications for order customer
+POST /api/v1/orders/:order_id/notify_sale
+@Accept multipart/form-data
+@Produce no content
+@Param email query string, optional
+@Param enableNotification query bool, required
+*/
+func (r *orderRoute) notifySale(ctx echo.Context) error {
+	orderId := ctx.Param(requestParameterOrderId)
+
+	if orderId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
+	}
+
+	req := &grpc.SetUserNotifyRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	req.OrderUuid = orderId
+	err = r.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	_, err = r.billingService.SetUserNotifySales(context.TODO(), req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
+}
+
+/*
+Switching notifications customer about new regions allowed to make payments
+POST /api/v1/orders/:order_id/notify_new_region
+@Accept multipart/form-data
+@Produce no content
+@Param email query string, optional
+@Param enableNotification query bool, required
+*/
+func (r *orderRoute) notifyNewRegion(ctx echo.Context) error {
+	orderId := ctx.Param(requestParameterOrderId)
+
+	if orderId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
+	}
+
+	req := &grpc.SetUserNotifyRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	req.OrderUuid = orderId
+	err = r.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	_, err = r.billingService.SetUserNotifyNewRegion(context.TODO(), req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
 }

@@ -12,8 +12,7 @@ type Repository interface {
 	FindAllCurrencies(int32, int32) ([]*model.Currency, error)
 	FindCurrencyByCodeA3(string) (*model.Currency, error)
 
-	FindCountryById(int) (*model.Country, error)
-	FindCountryByName(string) ([]*model.Country, error)
+	FindCountryByIsoCodeA2(string) (*model.Country, error)
 	FindAllCountries(int32, int32) (*model.CountryItems, error)
 
 	FindMerchantById(id string) (*billing.Merchant, error)

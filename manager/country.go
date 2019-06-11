@@ -12,25 +12,11 @@ func InitCountryManager(database dao.Database, logger *zap.SugaredLogger) *Count
 	return &CountryManager{Database: database, Logger: logger}
 }
 
-func (cm *CountryManager) FindByCodeInt(codeInt int) *model.Country {
-	c, err := cm.Database.Repository(TableCountry).FindCountryById(codeInt)
+func (cm *CountryManager) FindByIsoCodeA2(isoCodeA2 string) *model.Country {
+	c, err := cm.Database.Repository(TableCountry).FindCountryByIsoCodeA2(isoCodeA2)
 
 	if err != nil {
 		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCountry, err)
-	}
-
-	return c
-}
-
-func (cm *CountryManager) FindByName(name string) []*model.Country {
-	c, err := cm.Database.Repository(TableCountry).FindCountryByName(name)
-
-	if err != nil {
-		cm.Logger.Errorf("Query from table \"%s\" ended with error: %s", TableCountry, err)
-	}
-
-	if c == nil {
-		return []*model.Country{}
 	}
 
 	return c

@@ -67,10 +67,7 @@ type SimpleCurrency struct {
 }
 
 type SimpleCountry struct {
-	CodeInt int    `bson:"code_int" json:"code_int"`
-	CodeA2  string `bson:"code_a2" json:"code_a2"`
-	CodeA3  string `bson:"code_a3" json:"code_a3"`
-	Name    *Name  `bson:"code_name" json:"name"`
+	CodeA2 string `bson:"code_a2" json:"code_a2"`
 }
 
 type OrderSimpleAmountObject struct {

@@ -44,7 +44,7 @@ func (mm *MerchantManager) Create(ms *model.MerchantScalar) (*model.Merchant, er
 	}
 
 	if ms.Country != nil {
-		ctr, err := mm.Database.Repository(TableCountry).FindCountryById(*ms.Country)
+		ctr, err := mm.Database.Repository(TableCountry).FindCountryByIsoCodeA2(*ms.Country)
 
 		if err == nil {
 			m.Country = ctr
@@ -82,17 +82,11 @@ func (mm *MerchantManager) Update(m *billing.Merchant, mn *model.MerchantScalar)
 		}
 	}
 
-	if mn.Country != nil && (m.Country == nil || int(m.Country.CodeInt) != *mn.Country) {
-		ctr, err := mm.Database.Repository(TableCountry).FindCountryById(*mn.Country)
+	if mn.Country != nil && (m.Country == "" || m.Country != *mn.Country) {
+		ctr, err := mm.Database.Repository(TableCountry).FindCountryByIsoCodeA2(*mn.Country)
 
 		if err == nil {
-			m.Country = &billing.Country{
-				CodeInt:  int32(ctr.CodeInt),
-				CodeA2:   ctr.CodeA2,
-				CodeA3:   ctr.CodeA3,
-				Name:     &billing.Name{En: ctr.Name.EN, Ru: ctr.Name.RU},
-				IsActive: ctr.IsActive,
-			}
+			m.Country = ctr.IsoCodeA2
 		}
 	}
 
