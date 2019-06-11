@@ -144,6 +144,8 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Request data invalid")
 	}
 
+	req.IssuerUrl = ctx.Request().Header.Get(HeaderReferer)
+
 	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
@@ -186,6 +188,8 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 			return err
 		}
 	}
+
+	req.IssuerUrl = ctx.Request().Header.Get(HeaderReferer)
 
 	var order *billing.Order
 
@@ -304,6 +308,8 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 		PrivateMetadata: map[string]string{
 			"PaylinkId": paylinkId,
 		},
+		IssuerUrl:  ctx.Request().Header.Get(HeaderReferer),
+		IsEmbedded: false,
 	}
 	params := ctx.QueryParams()
 	if v, ok := params[requestParameterUtmSource]; ok {
