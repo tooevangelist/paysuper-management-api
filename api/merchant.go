@@ -1,7 +1,9 @@
 package api
 
 import (
+	"context"
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
 	"net/http"
@@ -37,13 +39,21 @@ func (api *Api) InitMerchantRoutes() *Api {
 // @Failure 500 {object} model.Error "Some unknown error"
 // @Router /api/v1/s/merchant/{id} [get]
 func (mApiV1 *MerchantApiV1) get(ctx echo.Context) error {
-	m := mApiV1.merchantManager.FindById(mApiV1.Merchant.Identifier)
+	req := &grpc.GetMerchantByRequest{
+		UserId: mApiV1.Merchant.Identifier,
+	}
 
-	if m == nil {
+	res, err := mApiV1.billingService.GetMerchantBy(context.TODO(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Unknown error")
+	}
+
+	if res == nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Merchant not found")
 	}
 
-	return ctx.JSON(http.StatusOK, m)
+	return ctx.JSON(int(res.Status), res.Item)
 }
 
 // @Summary Create merchant

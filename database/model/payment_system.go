@@ -8,7 +8,7 @@ import (
 type PaymentSystem struct {
 	Id                 bson.ObjectId `bson:"_id" json:"id"`
 	Name               string        `bson:"name" json:"name"`
-	Country            *Country      `bson:"country" json:"country"`
+	Country            string        `bson:"country" json:"country"`
 	AccountingCurrency *Currency     `bson:"accounting_currency" json:"accounting_currency"`
 	AccountingPeriod   string        `bson:"accounting_period" json:"accounting_period"`
 	IsActive           bool          `bson:"is_active" json:"is_active"`

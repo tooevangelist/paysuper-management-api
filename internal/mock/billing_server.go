@@ -1821,6 +1821,10 @@ func (s *BillingServerOkMock) SetUserNotifyNewRegion(ctx context.Context, in *gr
 	panic("implement me")
 }
 
+func (s *BillingServerOkMock) GetCountriesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CountriesList, error) {
+	panic("implement me")
+}
+
 func (s *BillingServerErrorMock) IsOrderCanBePaying(
 	ctx context.Context,
 	in *grpc.IsOrderCanBePayingRequest,
@@ -1856,6 +1860,10 @@ func (s *BillingServerErrorMock) SetUserNotifyNewRegion(ctx context.Context, in 
 	panic("implement me")
 }
 
+func (s *BillingServerErrorMock) GetCountriesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CountriesList, error) {
+	panic("implement me")
+}
+
 func (s *BillingServerSystemErrorMock) IsOrderCanBePaying(
 	ctx context.Context,
 	in *grpc.IsOrderCanBePayingRequest,
@@ -1885,6 +1893,10 @@ func (s *BillingServerSystemErrorMock) SetUserNotifySales(ctx context.Context, i
 }
 
 func (s *BillingServerSystemErrorMock) SetUserNotifyNewRegion(ctx context.Context, in *grpc.SetUserNotifyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetCountriesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CountriesList, error) {
 	panic("implement me")
 }
 
@@ -1920,5 +1932,8 @@ func (s *BillingServerOkTemporaryMock) SetUserNotifySales(ctx context.Context, i
 }
 
 func (s *BillingServerOkTemporaryMock) SetUserNotifyNewRegion(ctx context.Context, in *grpc.SetUserNotifyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+func (s *BillingServerOkTemporaryMock) GetCountriesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CountriesList, error) {
 	panic("implement me")
 }

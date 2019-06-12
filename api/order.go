@@ -628,10 +628,8 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 /*
 Switching sales notifications for order customer
 POST /api/v1/orders/:order_id/notify_sale
-@Accept multipart/form-data
-@Produce no content
-@Param email query string, optional
-@Param enableNotification query bool, required
+@Param [email] string
+@Param enableNotification string true|false
 */
 func (r *orderRoute) notifySale(ctx echo.Context) error {
 	orderId := ctx.Param(requestParameterOrderId)
@@ -663,16 +661,14 @@ func (r *orderRoute) notifySale(ctx echo.Context) error {
 
 /*
 Switching notifications customer about new regions allowed to make payments
-POST /api/v1/orders/:order_id/notify_new_region
-@Accept multipart/form-data
-@Produce no content
-@Param email query string, optional
-@Param enableNotification query bool, required
+POST /api/v1/orders/:order_uuid/notify_new_region
+@Param [email] string
+@Param enableNotification string true|false
 */
 func (r *orderRoute) notifyNewRegion(ctx echo.Context) error {
-	orderId := ctx.Param(requestParameterOrderId)
+	orderUuid := ctx.Param(requestParameterOrderId)
 
-	if orderId == "" {
+	if orderUuid == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
 	}
 
@@ -683,7 +679,7 @@ func (r *orderRoute) notifyNewRegion(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	req.OrderUuid = orderId
+	req.OrderUuid = orderUuid
 	err = r.validate.Struct(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
