@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -39,7 +38,7 @@ func (r *tokenRoute) createToken(ctx echo.Context) error {
 		return err
 	}
 
-	rsp, err := r.billingService.CreateToken(context.TODO(), req)
+	rsp, err := r.billingService.CreateToken(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)

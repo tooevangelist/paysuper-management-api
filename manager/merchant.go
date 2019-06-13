@@ -31,6 +31,7 @@ func (mm *MerchantManager) Create(ms *model.MerchantScalar) (*model.Merchant, er
 		Email:      *ms.Email,
 		ExternalId: ms.Id,
 		Status:     model.MerchantStatusCreated,
+		Country:    ms.Country,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	}
@@ -40,14 +41,6 @@ func (mm *MerchantManager) Create(ms *model.MerchantScalar) (*model.Merchant, er
 
 		if err == nil {
 			m.Currency = cur
-		}
-	}
-
-	if ms.Country != nil {
-		ctr, err := mm.Database.Repository(TableCountry).FindCountryById(*ms.Country)
-
-		if err == nil {
-			m.Country = ctr
 		}
 	}
 
@@ -82,18 +75,8 @@ func (mm *MerchantManager) Update(m *billing.Merchant, mn *model.MerchantScalar)
 		}
 	}
 
-	if mn.Country != nil && (m.Country == nil || int(m.Country.CodeInt) != *mn.Country) {
-		ctr, err := mm.Database.Repository(TableCountry).FindCountryById(*mn.Country)
-
-		if err == nil {
-			m.Country = &billing.Country{
-				CodeInt:  int32(ctr.CodeInt),
-				CodeA2:   ctr.CodeA2,
-				CodeA3:   ctr.CodeA3,
-				Name:     &billing.Name{En: ctr.Name.EN, Ru: ctr.Name.RU},
-				IsActive: ctr.IsActive,
-			}
-		}
+	if mn.Country != "" {
+		m.Country = mn.Country
 	}
 
 	if mn.Email != nil && m.User.Email != *mn.Email {
@@ -114,5 +97,5 @@ func (mm *MerchantManager) Delete(m *billing.Merchant) error {
 }
 
 func (mm *MerchantManager) IsComplete(m *model.Merchant) bool {
-	return m.ExternalId != "" && m.Name != nil && m.Country != nil && m.Currency != nil && m.AccountingPeriod != nil
+	return m.ExternalId != "" && m.Name != nil && m.Country != "" && m.Currency != nil && m.AccountingPeriod != nil
 }

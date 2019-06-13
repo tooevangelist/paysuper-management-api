@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -25,7 +24,7 @@ func (api *Api) InitSystemFeeRoutes() *Api {
 // @Description Get list of actual system fees
 // @Example GET /admin/api/v1/systemfees
 func (r *systemFeeRoute) getSystemFeesList(ctx echo.Context) error {
-	systemFees, err := r.billingService.GetActualSystemFeesList(context.TODO(), &grpc.EmptyRequest{})
+	systemFees, err := r.billingService.GetActualSystemFeesList(ctx.Request().Context(), &grpc.EmptyRequest{})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
@@ -55,7 +54,7 @@ func (r *systemFeeRoute) addSystemFee(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	_, err = r.billingService.AddSystemFees(context.TODO(), req)
+	_, err = r.billingService.AddSystemFees(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

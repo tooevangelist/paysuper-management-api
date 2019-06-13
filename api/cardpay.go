@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -46,7 +45,7 @@ func (h *CardPayWebHook) paymentCallback(ctx echo.Context) error {
 		Signature: ctx.Request().Header.Get(entity.CardPayPaymentResponseHeaderSignature),
 	}
 
-	rsp, err := h.billingService.PaymentCallbackProcess(context.TODO(), req)
+	rsp, err := h.billingService.PaymentCallbackProcess(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageUnknownError)
@@ -93,7 +92,7 @@ func (h *CardPayWebHook) refundCallback(ctx echo.Context) error {
 		Signature: ctx.Request().Header.Get(entity.CardPayPaymentResponseHeaderSignature),
 	}
 
-	rsp, err := h.billingService.ProcessRefundCallback(context.TODO(), req)
+	rsp, err := h.billingService.ProcessRefundCallback(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)

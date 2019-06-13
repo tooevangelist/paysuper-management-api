@@ -20,7 +20,7 @@ type MerchantScalar struct {
 	// merchant company legal name
 	Name *string `json:"name" validate:"omitempty,min=3,max=255"`
 	// numeric ISO 3166-1 country code
-	Country *int `json:"country" validate:"omitempty,numeric"`
+	Country string `json:"country" validate:"omitempty,alpha,len=2"`
 	// period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year
 	AccountingPeriod *string `json:"accounting_period" validate:"omitempty,oneof=day week 2week month quarter half-year year"`
 	// numeric ISO 4217 currency code describes merchant's accounting currency
@@ -39,7 +39,7 @@ type Merchant struct {
 	// merchant company legal name
 	Name *string `bson:"name" json:"name"`
 	// full object of country where merchant company registered
-	Country *Country `bson:"country" json:"country"`
+	Country string `bson:"country" json:"country"`
 	// period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year
 	AccountingPeriod *string `bson:"accounting_period" json:"accounting_period"`
 	// full object describes merchant's accounting currency

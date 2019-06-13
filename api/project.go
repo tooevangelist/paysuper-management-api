@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -37,7 +36,7 @@ func (r *projectRoute) createProject(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ChangeProject(context.TODO(), req)
+	rsp, err := r.billingService.ChangeProject(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -65,7 +64,7 @@ func (r *projectRoute) updateProject(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ChangeProject(context.TODO(), req)
+	rsp, err := r.billingService.ChangeProject(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -89,7 +88,7 @@ func (r *projectRoute) getProject(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.GetProject(context.TODO(), req)
+	rsp, err := r.billingService.GetProject(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -120,7 +119,7 @@ func (r *projectRoute) listProjects(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ListProjects(context.TODO(), req)
+	rsp, err := r.billingService.ListProjects(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -140,7 +139,7 @@ func (r *projectRoute) deleteProject(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.DeleteProject(context.TODO(), req)
+	rsp, err := r.billingService.DeleteProject(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)

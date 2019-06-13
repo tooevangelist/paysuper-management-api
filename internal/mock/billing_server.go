@@ -26,17 +26,11 @@ var (
 	SomeMerchantId3 = bson.NewObjectId().Hex()
 
 	OnboardingMerchantMock = &billing.Merchant{
-		Id:   bson.NewObjectId().Hex(),
-		Name: "Unit test",
-		Country: &billing.Country{
-			CodeInt:  643,
-			CodeA2:   "RU",
-			CodeA3:   "RUS",
-			Name:     &billing.Name{Ru: "Россия", En: "Russia (Russian Federation)"},
-			IsActive: true,
-		},
-		Zip:  "190000",
-		City: "St.Petersburg",
+		Id:      bson.NewObjectId().Hex(),
+		Name:    "Unit test",
+		Country: "RU",
+		Zip:     "190000",
+		City:    "St.Petersburg",
 		Contacts: &billing.MerchantContact{
 			Authorized: &billing.MerchantContactAuthorized{
 				Name:     "Unit Test",
@@ -309,15 +303,10 @@ func (s *BillingServerOkMock) ChangeMerchant(
 			Id:    bson.NewObjectId().Hex(),
 			Email: "test@unit.test",
 		},
-		Name:            in.Name,
-		AlternativeName: in.AlternativeName,
-		Website:         in.Website,
-		Country: &billing.Country{
-			CodeInt:  643,
-			CodeA3:   "RUS",
-			CodeA2:   in.Country,
-			IsActive: true,
-		},
+		Name:               in.Name,
+		AlternativeName:    in.AlternativeName,
+		Website:            in.Website,
+		Country:            "RU",
 		State:              in.State,
 		Zip:                in.Zip,
 		City:               in.City,
@@ -1435,15 +1424,10 @@ func (s *BillingServerOkTemporaryMock) ChangeMerchant(
 	opts ...client.CallOption,
 ) (*billing.Merchant, error) {
 	m := &billing.Merchant{
-		Name:            in.Name,
-		AlternativeName: in.AlternativeName,
-		Website:         in.Website,
-		Country: &billing.Country{
-			CodeInt:  643,
-			CodeA3:   "RUS",
-			CodeA2:   in.Country,
-			IsActive: true,
-		},
+		Name:               in.Name,
+		AlternativeName:    in.AlternativeName,
+		Website:            in.Website,
+		Country:            "RU",
 		State:              in.State,
 		Zip:                in.Zip,
 		City:               in.City,
@@ -1813,6 +1797,34 @@ func (s *BillingServerOkMock) IsOrderCanBePaying(
 	}, nil
 }
 
+func (s *BillingServerOkMock) GetCountry(ctx context.Context, in *billing.GetCountryRequest, opts ...client.CallOption) (*billing.Country, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) UpdateCountry(ctx context.Context, in *billing.Country, opts ...client.CallOption) (*billing.Country, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPriceGroup(ctx context.Context, in *billing.GetPriceGroupRequest, opts ...client.CallOption) (*billing.PriceGroup, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) UpdatePriceGroup(ctx context.Context, in *billing.PriceGroup, opts ...client.CallOption) (*billing.PriceGroup, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) SetUserNotifySales(ctx context.Context, in *grpc.SetUserNotifyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) SetUserNotifyNewRegion(ctx context.Context, in *grpc.SetUserNotifyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetCountriesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CountriesList, error) {
+	panic("implement me")
+}
+
 func (s *BillingServerErrorMock) IsOrderCanBePaying(
 	ctx context.Context,
 	in *grpc.IsOrderCanBePayingRequest,
@@ -1824,12 +1836,68 @@ func (s *BillingServerErrorMock) IsOrderCanBePaying(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) GetCountry(ctx context.Context, in *billing.GetCountryRequest, opts ...client.CallOption) (*billing.Country, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) UpdateCountry(ctx context.Context, in *billing.Country, opts ...client.CallOption) (*billing.Country, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) GetPriceGroup(ctx context.Context, in *billing.GetPriceGroupRequest, opts ...client.CallOption) (*billing.PriceGroup, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) UpdatePriceGroup(ctx context.Context, in *billing.PriceGroup, opts ...client.CallOption) (*billing.PriceGroup, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) SetUserNotifySales(ctx context.Context, in *grpc.SetUserNotifyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) SetUserNotifyNewRegion(ctx context.Context, in *grpc.SetUserNotifyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) GetCountriesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CountriesList, error) {
+	panic("implement me")
+}
+
 func (s *BillingServerSystemErrorMock) IsOrderCanBePaying(
 	ctx context.Context,
 	in *grpc.IsOrderCanBePayingRequest,
 	opts ...client.CallOption,
 ) (*grpc.IsOrderCanBePayingResponse, error) {
 	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) GetCountry(ctx context.Context, in *billing.GetCountryRequest, opts ...client.CallOption) (*billing.Country, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) UpdateCountry(ctx context.Context, in *billing.Country, opts ...client.CallOption) (*billing.Country, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetPriceGroup(ctx context.Context, in *billing.GetPriceGroupRequest, opts ...client.CallOption) (*billing.PriceGroup, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) UpdatePriceGroup(ctx context.Context, in *billing.PriceGroup, opts ...client.CallOption) (*billing.PriceGroup, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) SetUserNotifySales(ctx context.Context, in *grpc.SetUserNotifyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) SetUserNotifyNewRegion(ctx context.Context, in *grpc.SetUserNotifyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetCountriesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CountriesList, error) {
+	panic("implement me")
 }
 
 func (s *BillingServerOkTemporaryMock) IsOrderCanBePaying(
@@ -1841,4 +1909,31 @@ func (s *BillingServerOkTemporaryMock) IsOrderCanBePaying(
 		Status: pkg.ResponseStatusOk,
 		Item:   &billing.Order{},
 	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetCountry(ctx context.Context, in *billing.GetCountryRequest, opts ...client.CallOption) (*billing.Country, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) UpdateCountry(ctx context.Context, in *billing.Country, opts ...client.CallOption) (*billing.Country, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPriceGroup(ctx context.Context, in *billing.GetPriceGroupRequest, opts ...client.CallOption) (*billing.PriceGroup, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) UpdatePriceGroup(ctx context.Context, in *billing.PriceGroup, opts ...client.CallOption) (*billing.PriceGroup, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) SetUserNotifySales(ctx context.Context, in *grpc.SetUserNotifyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) SetUserNotifyNewRegion(ctx context.Context, in *grpc.SetUserNotifyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+func (s *BillingServerOkTemporaryMock) GetCountriesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CountriesList, error) {
+	panic("implement me")
 }

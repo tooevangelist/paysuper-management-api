@@ -98,7 +98,7 @@ func (r *onboardingRoute) getMerchant(ctx echo.Context) error {
 	}
 
 	req := &grpc.GetMerchantByRequest{MerchantId: id}
-	rsp, err := r.billingService.GetMerchantBy(context.TODO(), req)
+	rsp, err := r.billingService.GetMerchantBy(ctx.Request().Context(), req)
 
 	if err != nil {
 		r.logError("Call billing-server method GetMerchantBy failed", []interface{}{"error", err.Error(), "request", req})
@@ -117,7 +117,7 @@ func (r *onboardingRoute) getMerchantByUser(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, errorMessageAccessDenied)
 	}
 
-	rsp, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	rsp, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -144,7 +144,7 @@ func (r *onboardingRoute) listMerchants(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ListMerchants(context.TODO(), req)
+	rsp, err := r.billingService.ListMerchants(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -171,7 +171,7 @@ func (r *onboardingRoute) changeMerchant(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ChangeMerchant(context.TODO(), req)
+	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -195,7 +195,7 @@ func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 	}
 
 	req.UserId = r.authUser.Id
-	rsp, err := r.billingService.ChangeMerchantStatus(context.TODO(), req)
+	rsp, err := r.billingService.ChangeMerchantStatus(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -219,7 +219,7 @@ func (r *onboardingRoute) createNotification(ctx echo.Context) error {
 	}
 
 	req.UserId = r.authUser.Id
-	rsp, err := r.billingService.CreateNotification(context.TODO(), req)
+	rsp, err := r.billingService.CreateNotification(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -244,7 +244,7 @@ func (r *onboardingRoute) getNotification(ctx echo.Context) error {
 		MerchantId:     merchantId,
 		NotificationId: notificationId,
 	}
-	rsp, err := r.billingService.GetNotification(context.TODO(), req)
+	rsp, err := r.billingService.GetNotification(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
@@ -267,7 +267,7 @@ func (r *onboardingRoute) listNotifications(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ListNotifications(context.TODO(), req)
+	rsp, err := r.billingService.ListNotifications(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -292,7 +292,7 @@ func (r *onboardingRoute) markAsReadNotification(ctx echo.Context) error {
 		MerchantId:     merchantId,
 		NotificationId: notificationId,
 	}
-	rsp, err := r.billingService.MarkNotificationAsRead(context.TODO(), req)
+	rsp, err := r.billingService.MarkNotificationAsRead(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -309,7 +309,7 @@ func (r *onboardingRoute) getPaymentMethod(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	rsp, err := r.billingService.GetMerchantPaymentMethod(context.TODO(), req)
+	rsp, err := r.billingService.GetMerchantPaymentMethod(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -337,7 +337,7 @@ func (r *onboardingRoute) listPaymentMethods(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ListMerchantPaymentMethods(context.TODO(), req)
+	rsp, err := r.billingService.ListMerchantPaymentMethods(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -362,7 +362,7 @@ func (r *onboardingRoute) changePaymentMethod(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ChangeMerchantPaymentMethod(context.TODO(), req)
+	rsp, err := r.billingService.ChangeMerchantPaymentMethod(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -390,7 +390,7 @@ func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ChangeMerchantData(context.TODO(), req)
+	rsp, err := r.billingService.ChangeMerchantData(ctx.Request().Context(), req)
 
 	if err != nil {
 		r.logError(

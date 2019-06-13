@@ -104,6 +104,8 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.Http.PATCH("/api/v1/orders/:order_id/language", route.changeLanguage)
 	api.Http.PATCH("/api/v1/orders/:order_id/customer", route.changeCustomer)
 	api.Http.POST("/api/v1/orders/:order_id/billing_address", route.processBillingAddress)
+	api.Http.POST("/api/v1/orders/:order_id/notify_sale", route.notifySale)
+	api.Http.POST("/api/v1/orders/:order_id/notify_new_region", route.notifyNewRegion)
 
 	return api
 }
@@ -150,7 +152,7 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
 	}
 
-	order, err := r.billingService.OrderCreateProcess(context.TODO(), req)
+	order, err := r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -199,7 +201,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 			OrderId:   req.PspOrderUuid,
 			ProjectId: req.ProjectId,
 		}
-		rsp1, err := r.billingService.IsOrderCanBePaying(context.TODO(), req1)
+		rsp1, err := r.billingService.IsOrderCanBePaying(ctx.Request().Context(), req1)
 
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -211,7 +213,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 
 		order = rsp1.Item
 	} else {
-		order, err = r.billingService.OrderCreateProcess(context.TODO(), req)
+		order, err = r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
 
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -230,7 +232,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 			Scheme:  r.httpScheme,
 			Host:    ctx.Request().Host,
 		}
-		rsp2, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req2)
+		rsp2, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req2)
 
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -263,7 +265,7 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 		req.Cookie = cookie.Value
 	}
 
-	rsp, err := r.billingService.PaymentFormJsonDataProcess(context.TODO(), req)
+	rsp, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -358,7 +360,7 @@ func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.GetOrder(context.TODO(), req)
+	rsp, err := r.billingService.GetOrder(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
@@ -395,7 +397,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.FindAllOrders(context.TODO(), req)
+	rsp, err := r.billingService.FindAllOrders(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
@@ -420,7 +422,7 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 		UserAgent:      ctx.Request().Header.Get(HeaderUserAgent),
 		Ip:             ctx.RealIP(),
 	}
-	rsp, err := r.billingService.PaymentCreateProcess(context.TODO(), req)
+	rsp, err := r.billingService.PaymentCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageUnknownError)
@@ -450,7 +452,7 @@ func (r *orderRoute) getRefund(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.GetRefund(context.TODO(), req)
+	rsp, err := r.billingService.GetRefund(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -477,7 +479,7 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ListRefunds(context.TODO(), req)
+	rsp, err := r.billingService.ListRefunds(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -502,7 +504,7 @@ func (r *orderRoute) createRefund(ctx echo.Context) error {
 	}
 
 	req.CreatorId = r.authUser.Id
-	rsp, err := r.billingService.CreateRefund(context.TODO(), req)
+	rsp, err := r.billingService.CreateRefund(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -539,7 +541,7 @@ func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.PaymentFormLanguageChanged(context.TODO(), req)
+	rsp, err := r.billingService.PaymentFormLanguageChanged(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -576,7 +578,7 @@ func (r *orderRoute) changeCustomer(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.PaymentFormPaymentAccountChanged(context.TODO(), req)
+	rsp, err := r.billingService.PaymentFormPaymentAccountChanged(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -610,7 +612,7 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.ProcessBillingAddress(context.TODO(), req)
+	rsp, err := r.billingService.ProcessBillingAddress(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -621,4 +623,72 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+/*
+Switching sales notifications for order customer
+POST /api/v1/orders/:order_id/notify_sale
+@Param [email] string
+@Param enableNotification string true|false
+*/
+func (r *orderRoute) notifySale(ctx echo.Context) error {
+	orderId := ctx.Param(requestParameterOrderId)
+
+	if orderId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
+	}
+
+	req := &grpc.SetUserNotifyRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	req.OrderUuid = orderId
+	err = r.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	_, err = r.billingService.SetUserNotifySales(ctx.Request().Context(), req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
+}
+
+/*
+Switching notifications customer about new regions allowed to make payments
+POST /api/v1/orders/:order_uuid/notify_new_region
+@Param [email] string
+@Param enableNotification string true|false
+*/
+func (r *orderRoute) notifyNewRegion(ctx echo.Context) error {
+	orderUuid := ctx.Param(requestParameterOrderId)
+
+	if orderUuid == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectOrderId)
+	}
+
+	req := &grpc.SetUserNotifyRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+	}
+
+	req.OrderUuid = orderUuid
+	err = r.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	_, err = r.billingService.SetUserNotifyNewRegion(ctx.Request().Context(), req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
 }
