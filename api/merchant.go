@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
@@ -43,7 +42,7 @@ func (mApiV1 *MerchantApiV1) get(ctx echo.Context) error {
 		UserId: mApiV1.Merchant.Identifier,
 	}
 
-	res, err := mApiV1.billingService.GetMerchantBy(context.TODO(), req)
+	res, err := mApiV1.billingService.GetMerchantBy(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Unknown error")

@@ -389,7 +389,7 @@ func (api *Api) checkProjectAuthRequestSignature(ctx echo.Context, projectId str
 	}
 
 	req := &grpc.CheckProjectRequestSignatureRequest{Body: api.rawBody, ProjectId: projectId, Signature: signature}
-	rsp, err := api.billingService.CheckProjectRequestSignature(context.TODO(), req)
+	rsp, err := api.billingService.CheckProjectRequestSignature(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)

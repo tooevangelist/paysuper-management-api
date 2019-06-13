@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -36,7 +35,7 @@ func (r *productRoute) getProductsList(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	merchant, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
@@ -48,7 +47,7 @@ func (r *productRoute) getProductsList(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := r.billingService.ListProducts(context.TODO(), req)
+	res, err := r.billingService.ListProducts(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -65,7 +64,7 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectProductId)
 	}
 
-	merchant, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
@@ -80,7 +79,7 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := r.billingService.GetProduct(context.TODO(), req)
+	res, err := r.billingService.GetProduct(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -96,7 +95,7 @@ func (r *productRoute) deleteProduct(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectProductId)
 	}
 
-	merchant, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
@@ -111,7 +110,7 @@ func (r *productRoute) deleteProduct(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	_, err = r.billingService.DeleteProduct(context.TODO(), req)
+	_, err = r.billingService.DeleteProduct(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -149,7 +148,7 @@ func (r *productRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	merchant, err := r.billingService.GetMerchantBy(context.TODO(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
@@ -161,7 +160,7 @@ func (r *productRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	res, err := r.billingService.CreateOrUpdateProduct(context.TODO(), req)
+	res, err := r.billingService.CreateOrUpdateProduct(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-tax-service/proto"
@@ -25,7 +24,7 @@ func (api *Api) initTaxesRoutes() *Api {
 
 func (r *taxesRoute) getTaxes(ctx echo.Context) error {
 	req := r.bindGetTaxes(ctx)
-	res, err := r.taxService.GetRates(context.TODO(), req)
+	res, err := r.taxService.GetRates(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -82,7 +81,7 @@ func (r *taxesRoute) setTax(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request param: "+err.Error())
 	}
 
-	res, err := r.taxService.CreateOrUpdate(context.TODO(), req)
+	res, err := r.taxService.CreateOrUpdate(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -101,7 +100,7 @@ func (r *taxesRoute) deleteTax(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
 	}
 
-	res, err := r.taxService.DeleteRateById(context.TODO(), &tax_service.DeleteRateRequest{Id: uint32(value)})
+	res, err := r.taxService.DeleteRateById(ctx.Request().Context(), &tax_service.DeleteRateRequest{Id: uint32(value)})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
