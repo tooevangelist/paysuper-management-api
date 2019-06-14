@@ -10,7 +10,6 @@ require (
 	github.com/centrifugal/gocent v2.0.2+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
-	github.com/go-ini/ini v1.42.0 // indirect
 	github.com/golang/protobuf v1.3.1 // indirects
 	github.com/google/uuid v1.1.1
 	github.com/kelseyhightower/envconfig v1.3.0
@@ -22,7 +21,7 @@ require (
 	github.com/micro/kubernetes v0.7.0
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190613143824-9f7d0e26b828
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190614085524-65105608a369
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c
 	github.com/paysuper/paysuper-recurring-repository v1.0.107
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190308105725-016a09c27fbd
