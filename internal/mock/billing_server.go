@@ -1937,3 +1937,43 @@ func (s *BillingServerOkTemporaryMock) SetUserNotifyNewRegion(ctx context.Contex
 func (s *BillingServerOkTemporaryMock) GetCountriesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CountriesList, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkMock) FindByZipCode(
+	ctx context.Context,
+	in *grpc.FindByZipCodeRequest,
+	opts ...client.CallOption,
+) (*grpc.FindByZipCodeResponse, error) {
+	return &grpc.FindByZipCodeResponse{
+		Count: 1,
+		Items: []*billing.ZipCode{
+			{
+				Zip:     in.Zip,
+				Country: in.Country,
+			},
+		},
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) FindByZipCode(
+	ctx context.Context,
+	in *grpc.FindByZipCodeRequest,
+	opts ...client.CallOption,
+) (*grpc.FindByZipCodeResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerErrorMock) FindByZipCode(
+	ctx context.Context,
+	in *grpc.FindByZipCodeRequest,
+	opts ...client.CallOption,
+) (*grpc.FindByZipCodeResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) FindByZipCode(
+	ctx context.Context,
+	in *grpc.FindByZipCodeRequest,
+	opts ...client.CallOption,
+) (*grpc.FindByZipCodeResponse, error) {
+	return nil, errors.New(SomeError)
+}

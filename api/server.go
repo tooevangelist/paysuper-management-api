@@ -245,7 +245,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitCardPayWebHookRoutes().
 		InitSystemFeeRoutes().
 		initTaxesRoutes().
-		initTokenRoutes()
+		initTokenRoutes().
+		initZipCodeRoutes()
 
 	_, err = api.initOnboardingRoutes()
 
