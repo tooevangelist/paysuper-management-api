@@ -59,6 +59,9 @@ func (suite *OrderTestSuite) SetupTest() {
 
 	err = suite.api.validate.RegisterValidation("phone", suite.api.PhoneValidator)
 	assert.NoError(suite.T(), err)
+
+	err = suite.api.validate.RegisterValidation("zip_usa", suite.api.ZipUsaValidator)
+	assert.NoError(suite.T(), err)
 }
 
 func (suite *OrderTestSuite) TearDownTest() {}

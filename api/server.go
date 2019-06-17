@@ -164,6 +164,12 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		return nil, err
 	}
 
+	err = api.validate.RegisterValidation("zip_usa", api.ZipUsaValidator)
+
+	if err != nil {
+		return nil, err
+	}
+
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 
 	api.accessRouteGroup.Use(
