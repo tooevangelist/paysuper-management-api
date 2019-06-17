@@ -591,7 +591,26 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BillingServerErrorRe
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_Ok() {
-	body := `{"country": "US", "city": "Washington", "zip": "98001"}`
+	body := `{"country": "US", "zip": "98001"}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/api/v1/orders/:order_id/billing_address")
+	ctx.SetParamNames(requestParameterOrderId)
+	ctx.SetParamValues(uuid.New().String())
+
+	err := suite.router.processBillingAddress(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OrderTestSuite) TestOrder_CalculateAmounts_NoUSA_Ok() {
+	body := `{"country": "RU"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
@@ -610,7 +629,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_Ok() {
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_OrderIdEmpty_Error() {
-	body := `{"country": "US", "city": "Washington", "zip": "98001"}`
+	body := `{"country": "US", "zip": "98001"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
@@ -648,7 +667,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BindError() {
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationError() {
-	body := `{"country": "some_value", "city": "Washington", "zip": "98001"}`
+	body := `{"country": "some_value", "zip": "98001"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
@@ -670,7 +689,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationError() {
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerSystemError() {
-	body := `{"country": "US", "city": "Washington", "zip": "98001"}`
+	body := `{"country": "US", "zip": "98001"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
@@ -693,7 +712,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerSystemError
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerErrorResult_Error() {
-	body := `{"country": "US", "city": "Washington", "zip": "98001"}`
+	body := `{"country": "US", "zip": "98001"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
