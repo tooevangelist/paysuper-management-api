@@ -108,7 +108,7 @@ func (suite *OrderTestSuite) TestOrder_GetRefund_RefundIdEmpty_Error() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "RefundId", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("RefundId"), httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetRefund_OrderIdEmpty_Error() {
@@ -128,7 +128,7 @@ func (suite *OrderTestSuite) TestOrder_GetRefund_OrderIdEmpty_Error() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "OrderId", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("OrderId"), httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetRefund_BillingServerError() {
@@ -207,7 +207,7 @@ func (suite *OrderTestSuite) TestOrder_ListRefunds_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "OrderId", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("OrderId"), httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_ListRefunds_BillingServerError() {
@@ -269,7 +269,7 @@ func (suite *OrderTestSuite) TestOrder_CreateRefund_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateRefund_ValidationError() {
@@ -291,7 +291,7 @@ func (suite *OrderTestSuite) TestOrder_CreateRefund_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Amount", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Amount"), httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateRefund_BillingServerError() {
@@ -394,7 +394,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_ChangeLanguage_ValidationError() {
@@ -416,7 +416,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "OrderId", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("OrderId"), httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BillingServerSystemError() {
@@ -519,7 +519,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_ValidationError() {
@@ -541,7 +541,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "MethodId", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("MethodId"), httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BillingServerSystemError() {
@@ -663,7 +663,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationError() {
@@ -685,7 +685,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Country", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Country"), httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerSystemError() {
@@ -814,7 +814,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_EmptyRequestSignature_Error() {
@@ -947,7 +947,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Amount", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Amount"), httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateJson_OrderCreateError() {
@@ -1105,7 +1105,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_ParameterIdNotFound_Error() 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
@@ -1125,7 +1125,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrders_Ok() {
@@ -1196,7 +1196,7 @@ func (suite *OrderTestSuite) testGetOrdersBindError(q url.Values, error string) 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), error, httpErr.Message)
+	assert.Equal(suite.T(), newValidationError(error), httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateJson_WithPreparedOrderId_Ok() {

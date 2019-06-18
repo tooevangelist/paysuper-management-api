@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-tax-service/proto"
+	"go.uber.org/zap"
 	"net/http"
 	"strconv"
 )
@@ -27,7 +28,8 @@ func (r *taxesRoute) getTaxes(ctx echo.Context) error {
 	res, err := r.taxService.GetRates(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res.Rates)
@@ -78,12 +80,13 @@ func (r *taxesRoute) setTax(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad request param: "+err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
 	}
 
 	res, err := r.taxService.CreateOrUpdate(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -102,7 +105,8 @@ func (r *taxesRoute) deleteTax(ctx echo.Context) error {
 
 	res, err := r.taxService.DeleteRateById(ctx.Request().Context(), &tax_service.DeleteRateRequest{Id: uint32(value)})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

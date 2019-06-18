@@ -45,11 +45,11 @@ func (mApiV1 *MerchantApiV1) get(ctx echo.Context) error {
 	res, err := mApiV1.billingService.GetMerchantBy(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Unknown error")
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
 	if res == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Merchant not found")
+		return echo.NewHTTPError(http.StatusNotFound, errorMerchantNotFound)
 	}
 
 	return ctx.JSON(int(res.Status), res.Item)
@@ -72,17 +72,17 @@ func (mApiV1 *MerchantApiV1) create(ctx echo.Context) error {
 	err := ctx.Bind(ms)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad request param: "+err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
 	}
 
 	err = mApiV1.validate.Struct(ms)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
 	}
 
 	if ms.Email == nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Email field is required")
+		return echo.NewHTTPError(http.StatusBadRequest, errorEmailFieldIsRequired)
 	}
 
 	m := mApiV1.merchantManager.FindById(ms.Id)
@@ -94,7 +94,7 @@ func (mApiV1 *MerchantApiV1) create(ctx echo.Context) error {
 	m1, err := mApiV1.merchantManager.Create(ms)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Merchant create failed")
+		return echo.NewHTTPError(http.StatusInternalServerError, errorMerchantCreateFailed)
 	}
 
 	return ctx.JSON(http.StatusCreated, m1)
@@ -118,7 +118,7 @@ func (mApiV1 *MerchantApiV1) update(ctx echo.Context) error {
 	err := ctx.Bind(ms)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad request param: "+err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
 	}
 
 	ms.Id = mApiV1.Merchant.Identifier
@@ -126,19 +126,19 @@ func (mApiV1 *MerchantApiV1) update(ctx echo.Context) error {
 	err = mApiV1.validate.Struct(ms)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
 	}
 
 	m := mApiV1.merchantManager.FindById(ms.Id)
 
 	if m == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Merchant not found")
+		return echo.NewHTTPError(http.StatusNotFound, errorMerchantNotFound)
 	}
 
 	m1, err := mApiV1.merchantManager.Update(m, ms)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Merchant update failed")
+		return echo.NewHTTPError(http.StatusInternalServerError, errorMerchantUpdateFailed)
 	}
 
 	return ctx.JSON(http.StatusOK, m1)
@@ -158,13 +158,13 @@ func (mApiV1 *MerchantApiV1) delete(ctx echo.Context) error {
 	m := mApiV1.merchantManager.FindById(mApiV1.Merchant.Identifier)
 
 	if m == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Merchant not found")
+		return echo.NewHTTPError(http.StatusNotFound, errorMerchantNotFound)
 	}
 
 	err := mApiV1.merchantManager.Delete(m)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Merchant delete failed")
+		return echo.NewHTTPError(http.StatusInternalServerError, errorMerchantDeleteFailed)
 	}
 
 	return ctx.NoContent(http.StatusOK)

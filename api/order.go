@@ -8,9 +8,9 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/paysuper/paysuper-payment-link/proto"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -143,22 +143,26 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	}
 
 	if err := (&OrderFormBinder{}).Bind(req, ctx); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Request data invalid")
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	req.IssuerUrl = ctx.Request().Header.Get(HeaderReferer)
 
 	if err := r.validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
 	}
 
-	order, err := r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
+	orderResponse, err := r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
-	rUrl := "/order/" + order.Id
+	if orderResponse.Status != http.StatusOK {
+		return echo.NewHTTPError(int(orderResponse.Status), orderResponse.Message)
+	}
+
+	rUrl := "/order/" + orderResponse.Item.Id
 
 	return ctx.Redirect(http.StatusFound, rUrl)
 }
@@ -173,27 +177,30 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 	err := (&OrderJsonBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
 	}
 
 	// If request contain user object then paysuper must check request signature
 	if req.User != nil {
-		err = r.checkProjectAuthRequestSignature(ctx, req.ProjectId)
+		httpErr := r.checkProjectAuthRequestSignature(ctx, req.ProjectId)
 
-		if err != nil {
-			return err
+		if httpErr != nil {
+			return httpErr
 		}
 	}
 
 	req.IssuerUrl = ctx.Request().Header.Get(HeaderReferer)
 
-	var order *billing.Order
+	var (
+		order         *billing.Order
+		orderResponse *grpc.OrderCreateProcessResponse
+	)
 
 	// If request contain prepared order identifier than try to get order by this identifier
 	if req.PspOrderUuid != "" {
@@ -213,11 +220,17 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 
 		order = rsp1.Item
 	} else {
-		order, err = r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
+		orderResponse, err = r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
 
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 		}
+
+		if orderResponse.Status != http.StatusOK {
+			return echo.NewHTTPError(int(orderResponse.Status), orderResponse.Message)
+		}
+
+		order = orderResponse.Item
 	}
 
 	response := &CreateOrderJsonProjectResponse{
@@ -235,7 +248,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		rsp2, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req2)
 
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 		}
 
 		response.PaymentFormData = rsp2
@@ -248,7 +261,7 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 	id := ctx.Param(requestParameterId)
 
 	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	cookie, err := ctx.Cookie(CustomerTokenCookiesName)
@@ -268,7 +281,7 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
 	if rsp.Cookie != "" && rsp.Cookie != req.Cookie {
@@ -294,7 +307,7 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 
 	err := r.validate.Struct(req)
 	if err != nil {
-		r.logError("Cannot validate request", []interface{}{"error", err.Error(), "request", req})
+		zap.S().Errorf("Cannot validate request", "error", err.Error(), "request", req)
 		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
@@ -324,13 +337,17 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 		oReq.PrivateMetadata[requestParameterUtmCampaign] = v[0]
 	}
 
-	order, err := r.billingService.OrderCreateProcess(context.Background(), oReq)
+	orderResponse, err := r.billingService.OrderCreateProcess(context.Background(), oReq)
 	if err != nil {
-		r.logError("Cannot create order for paylink", []interface{}{"error", err.Error(), "request", req})
+		zap.S().Errorf("Cannot create order for paylink", "error", err.Error(), "request", req)
 		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
-	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Uuid)
+	if orderResponse.Status != http.StatusOK {
+		return echo.NewHTTPError(int(orderResponse.Status), orderResponse.Message)
+	}
+
+	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, orderResponse.Item.Uuid)
 	qs := ctx.QueryString()
 	if qs != "" {
 		inlineFormRedirectUrl += "?" + qs
@@ -341,7 +358,7 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 			Id: paylinkId,
 		})
 		if err != nil {
-			r.logError("Cannot update paylink stat", []interface{}{"error", err.Error(), "request", req})
+			zap.S().Errorf("Cannot update paylink stat", "error", err.Error(), "request", req)
 		}
 	}()
 	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)
@@ -357,7 +374,8 @@ func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 	err := r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.GetOrder(ctx.Request().Context(), req)
@@ -367,7 +385,7 @@ func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 	}
 
 	if rsp == nil {
-		return echo.NewHTTPError(http.StatusNotFound, model.ResponseMessageNotFound)
+		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
 	}
 
 	return ctx.JSON(http.StatusOK, rsp)
@@ -380,7 +398,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	if req.Limit <= 0 {
@@ -394,7 +412,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.FindAllOrders(ctx.Request().Context(), req)
@@ -413,7 +431,7 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	err := (&PaymentCreateProcessBinder{}).Bind(data, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	req := &grpc.PaymentCreateRequest{
@@ -425,7 +443,7 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageUnknownError)
+		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
 	if rsp.Status != pkg.ResponseStatusOk {
@@ -449,7 +467,7 @@ func (r *orderRoute) getRefund(ctx echo.Context) error {
 	err := r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.GetRefund(ctx.Request().Context(), req)
@@ -470,13 +488,13 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 	err := (&OrderListRefundsBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.ListRefunds(ctx.Request().Context(), req)
@@ -493,14 +511,14 @@ func (r *orderRoute) createRefund(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req.OrderId = ctx.Param(requestParameterOrderId)
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	req.CreatorId = r.authUser.Id
@@ -528,7 +546,7 @@ func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req.AcceptLanguage = ctx.Request().Header.Get(HeaderAcceptLanguage)
@@ -538,7 +556,7 @@ func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.PaymentFormLanguageChanged(ctx.Request().Context(), req)
@@ -565,7 +583,7 @@ func (r *orderRoute) changeCustomer(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req.AcceptLanguage = ctx.Request().Header.Get(HeaderAcceptLanguage)
@@ -575,7 +593,7 @@ func (r *orderRoute) changeCustomer(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.PaymentFormPaymentAccountChanged(ctx.Request().Context(), req)
@@ -602,14 +620,14 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req.OrderId = orderId
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.ProcessBillingAddress(ctx.Request().Context(), req)
@@ -642,13 +660,13 @@ func (r *orderRoute) notifySale(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req.OrderUuid = orderId
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	_, err = r.billingService.SetUserNotifySales(ctx.Request().Context(), req)
@@ -676,13 +694,13 @@ func (r *orderRoute) notifyNewRegion(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req.OrderUuid = orderUuid
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	_, err = r.billingService.SetUserNotifyNewRegion(ctx.Request().Context(), req)
