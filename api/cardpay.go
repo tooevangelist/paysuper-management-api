@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	cardPayWebHookPaymentNotifyPath = "/cardpay/notify"
+	cardPayWebHookPaymentNotifyPath = "/cardpay/payment"
 	cardPayWebHookRefundNotifyPath  = "/cardpay/refund"
 )
 
