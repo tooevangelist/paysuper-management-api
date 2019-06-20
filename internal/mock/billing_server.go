@@ -1977,3 +1977,207 @@ func (s *BillingServerSystemErrorMock) FindByZipCode(
 ) (*grpc.FindByZipCodeResponse, error) {
 	return nil, errors.New(SomeError)
 }
+
+func (s *BillingServerOkMock) CreateOrUpdatePaymentMethod(
+	ctx context.Context,
+	in *billing.PaymentMethod,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodResponse, error) {
+	return &grpc.ChangePaymentMethodResponse{
+		Status: pkg.StatusOK,
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) CreateOrUpdatePaymentMethod(
+	ctx context.Context,
+	in *billing.PaymentMethod,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerErrorMock) CreateOrUpdatePaymentMethod(
+	ctx context.Context,
+	in *billing.PaymentMethod,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) CreateOrUpdatePaymentMethod(
+	ctx context.Context,
+	in *billing.PaymentMethod,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkMock) CreateOrUpdatePaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.ChangePaymentMethodParamsRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodParamsResponse, error) {
+	return &grpc.ChangePaymentMethodParamsResponse{
+		Status: pkg.StatusOK,
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) CreateOrUpdatePaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.ChangePaymentMethodParamsRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodParamsResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerErrorMock) CreateOrUpdatePaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.ChangePaymentMethodParamsRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodParamsResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) CreateOrUpdatePaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.ChangePaymentMethodParamsRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodParamsResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkMock) DeletePaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.GetPaymentMethodProductionSettingsRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodParamsResponse, error) {
+	return &grpc.ChangePaymentMethodParamsResponse{
+		Status: pkg.StatusOK,
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) DeletePaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.GetPaymentMethodProductionSettingsRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodParamsResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerErrorMock) DeletePaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.GetPaymentMethodProductionSettingsRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodParamsResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) DeletePaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.GetPaymentMethodProductionSettingsRequest,
+	opts ...client.CallOption,
+) (*grpc.ChangePaymentMethodParamsResponse, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkMock) GetPaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.GetPaymentMethodProductionSettingsRequest,
+	opts ...client.CallOption,
+) (*billing.PaymentMethodParams, error) {
+	return &billing.PaymentMethodParams{
+		Currency: "RUB",
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetPaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.GetPaymentMethodProductionSettingsRequest,
+	opts ...client.CallOption,
+) (*billing.PaymentMethodParams, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerErrorMock) GetPaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.GetPaymentMethodProductionSettingsRequest,
+	opts ...client.CallOption,
+) (*billing.PaymentMethodParams, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) GetPaymentMethodProductionSettings(
+	ctx context.Context,
+	in *grpc.GetPaymentMethodProductionSettingsRequest,
+	opts ...client.CallOption,
+) (*billing.PaymentMethodParams, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkMock) GetCurrency(
+	ctx context.Context,
+	in *billing.GetCurrencyRequest,
+	opts ...client.CallOption,
+) (*billing.Currency, error) {
+	return &billing.Currency{
+		CodeA3: "RUB",
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetCurrency(
+	ctx context.Context,
+	in *billing.GetCurrencyRequest,
+	opts ...client.CallOption,
+) (*billing.Currency, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerErrorMock) GetCurrency(
+	ctx context.Context,
+	in *billing.GetCurrencyRequest,
+	opts ...client.CallOption,
+) (*billing.Currency, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) GetCurrency(
+	ctx context.Context,
+	in *billing.GetCurrencyRequest,
+	opts ...client.CallOption,
+) (*billing.Currency, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerOkMock) GetCurrencyList(
+	ctx context.Context,
+	in *grpc.GetCurrencyListRequest,
+	opts ...client.CallOption,
+) (*billing.CurrencyList, error) {
+	return &billing.CurrencyList{
+		Currency: []*billing.Currency{},
+	}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetCurrencyList(
+	ctx context.Context,
+	in *grpc.GetCurrencyListRequest,
+	opts ...client.CallOption,
+) (*billing.CurrencyList, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerErrorMock) GetCurrencyList(
+	ctx context.Context,
+	in *grpc.GetCurrencyListRequest,
+	opts ...client.CallOption,
+) (*billing.CurrencyList, error) {
+	return nil, errors.New(SomeError)
+}
+
+func (s *BillingServerSystemErrorMock) GetCurrencyList(
+	ctx context.Context,
+	in *grpc.GetCurrencyListRequest,
+	opts ...client.CallOption,
+) (*billing.CurrencyList, error) {
+	return nil, errors.New(SomeError)
+}

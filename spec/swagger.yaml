@@ -1760,8 +1760,33 @@ paths:
           description: Not found
           schema:
             $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error
+      summary: Get currency by numeric ISO 4217 code
+      tags:
+        - Currency
+  /api/v1/currency/name:
+    get:
+      consumes:
+        - application/json
+      description: Get currency object by alpha code
+      parameters:
+        - description: numeric ISO 4217 currency code
+          in: path
+          name: name
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Currency'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
           schema:
             $ref: '#/definitions/model.Error'
       summary: Get currency by numeric ISO 4217 code
@@ -1831,137 +1856,6 @@ paths:
       summary: Create payment
       tags:
         - Payment Order
-  /api/v1/s/merchant:
-    delete:
-      consumes:
-        - application/json
-      description: Mark merchant as deleted
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error
-          schema:
-            $ref: '#/definitions/model.Error'
-      summary: Delete merchant
-      tags:
-        - Merchant
-    post:
-      consumes:
-        - application/json
-      description: Create new merchant
-      parameters:
-        - description: Creating merchant data
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/model.MerchantScalar'
-            type: object
-      produces:
-        - application/json
-      responses:
-        "201":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Merchant'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error
-          schema:
-            $ref: '#/definitions/model.Error'
-      summary: Create merchant
-      tags:
-        - Merchant
-    put:
-      consumes:
-        - application/json
-      description: Update merchant data
-      parameters:
-        - description: Merchant object with new data
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/model.MerchantScalar'
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Merchant'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error
-          schema:
-            $ref: '#/definitions/model.Error'
-      summary: Update merchant
-      tags:
-        - Merchant
-  /api/v1/s/merchant/{id}:
-    get:
-      consumes:
-        - application/json
-      description: Get full data about merchant
-      produces:
-        - application/json
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          type: string
-          required: true
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Merchant'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error
-          schema:
-            $ref: '#/definitions/model.Error'
-      summary: Get merchant
-      tags:
-        - Merchant
   /admin/api/v1/order:
     get:
       consumes:

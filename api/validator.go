@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/ttacon/libphonenumber"
@@ -59,4 +60,10 @@ func (api *Api) UuidValidator(fl validator.FieldLevel) bool {
 func (api *Api) ZipUsaValidator(fl validator.FieldLevel) bool {
 	match, err := regexp.MatchString(zipUsaRegexp, fl.Field().String())
 	return match == true && err == nil
+}
+
+func getFirstValidationError(err error) string {
+	vErr := err.(validator.ValidationErrors)[0]
+
+	return fmt.Sprintf(errorMessageMask, vErr.Field(), vErr.Tag())
 }

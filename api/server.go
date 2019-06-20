@@ -236,12 +236,10 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.
 		InitCurrencyRoutes().
 		InitCountryRoutes().
-		InitMerchantRoutes().
 		InitProductRoutes().
 		InitProjectRoutes().
 		InitOrderV1Routes().
 		InitPaylinkRoutes().
-		InitPaymentMethodRoutes().
 		InitCardPayWebHookRoutes().
 		InitSystemFeeRoutes().
 		initTaxesRoutes().

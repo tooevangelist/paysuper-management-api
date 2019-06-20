@@ -4,7 +4,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-management-api/manager"
 	"net/http"
 )
 
@@ -49,7 +48,7 @@ func (cApiV1 *CountryApiV1) getById(ctx echo.Context) error {
 	}
 	err := cApiV1.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, manager.GetFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, getFirstValidationError(err))
 	}
 
 	res, err := cApiV1.billingService.GetCountry(ctx.Request().Context(), req)

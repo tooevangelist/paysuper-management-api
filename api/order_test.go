@@ -10,7 +10,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
-	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
@@ -52,7 +51,7 @@ func (suite *OrderTestSuite) SetupTest() {
 	suite.api.Http.Renderer = renderer
 
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
-	suite.router = &orderRoute{Api: suite.api, projectManager: manager.InitProjectManager(nil, nil, mock.NewBillingServerOkMock())}
+	suite.router = &orderRoute{Api: suite.api}
 
 	err := suite.api.validate.RegisterValidation("uuid", suite.api.UuidValidator)
 	assert.NoError(suite.T(), err, "Uuid validator registration failed")

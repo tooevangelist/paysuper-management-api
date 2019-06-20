@@ -3,7 +3,6 @@ package mongo
 import (
 	"github.com/globalsign/mgo"
 	"github.com/paysuper/paysuper-management-api/database/dao"
-	"github.com/paysuper/paysuper-management-api/database/dao/mongo/repository"
 	"sync"
 )
 
@@ -11,7 +10,6 @@ type Source struct {
 	name           string
 	connection     dao.Connection
 	session        *mgo.Session
-	repositories   map[string]*repository.Repository
 	database       *mgo.Database
 	repositoriesMu sync.Mutex
 }
@@ -43,7 +41,6 @@ func (s *Source) open() error {
 
 	s.session.SetMode(mgo.Monotonic, true)
 
-	s.repositories = map[string]*repository.Repository{}
 	s.database = s.session.DB("")
 
 	return nil
@@ -54,44 +51,6 @@ func (s *Source) Close() {
 	if s.session != nil {
 		s.session.Close()
 	}
-}
-
-// Clone returns a cloned db.Database session.
-func (s *Source) Clone() (dao.Database, error) {
-	newSession := s.session.Copy()
-
-	clone := &Source{
-		name:         s.name,
-		connection:   s.connection,
-		session:      newSession,
-		database:     newSession.DB(s.database.Name),
-		repositories: map[string]*repository.Repository{},
-	}
-
-	return clone, nil
-}
-
-// Repository returns a repository by name.
-func (s *Source) Repository(name string) dao.Repository {
-	s.repositoriesMu.Lock()
-	defer s.repositoriesMu.Unlock()
-
-	var rep *repository.Repository
-	var ok bool
-
-	if rep, ok = s.repositories[name]; !ok {
-		c, err := s.Clone()
-
-		if err != nil {
-			rep = &repository.Repository{Collection: s.database.C(name)}
-		} else {
-			rep = &repository.Repository{Collection: c.(*Source).database.C(name)}
-		}
-
-		s.repositories[name] = rep
-	}
-
-	return rep
 }
 
 // Driver returns the underlying *mgo.Session instance.
