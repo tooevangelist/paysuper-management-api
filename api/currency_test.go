@@ -42,46 +42,6 @@ func (suite *CurrencyTestSuite) SetupTest() {
 
 func (suite *CurrencyTestSuite) TearDownTest() {}
 
-func (suite *CurrencyTestSuite) TestCurrency_ListCurrency_BindingError_Limit() {
-	e := echo.New()
-
-	q := make(url.Values)
-	q.Set(requestParameterLimit, "a")
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/currency?"+q.Encode(), nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	err := suite.router.get(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
-}
-
-func (suite *CurrencyTestSuite) TestCurrency_ListCurrency_BindingError_Offset() {
-	e := echo.New()
-
-	q := make(url.Values)
-	q.Set(requestParameterOffset, "a")
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/currency?"+q.Encode(), nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	err := suite.router.get(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
-}
-
 func (suite *CurrencyTestSuite) TestCurrency_ListCurrency_Ok() {
 	e := echo.New()
 
@@ -115,7 +75,7 @@ func (suite *CurrencyTestSuite) TestCurrency_GetByName_BindingError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), "field validation for 'A3' failed on the 'alpha' tag", httpErr.Message)
+	assert.Equal(suite.T(), "field validation for 'CurrencyCode' failed on the 'alpha' tag", httpErr.Message)
 }
 
 func (suite *CurrencyTestSuite) TestCurrency_GetByName_NotFound() {

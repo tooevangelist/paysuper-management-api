@@ -252,7 +252,7 @@ func (s *BillingServerOkMock) GetMerchantBy(
 	ctx context.Context,
 	in *grpc.GetMerchantByRequest,
 	opts ...client.CallOption,
-) (*grpc.MerchantGetMerchantResponse, error) {
+) (*grpc.GetMerchantResponse, error) {
 	if in.MerchantId == OnboardingMerchantMock.Id {
 		OnboardingMerchantMock.S3AgreementName = SomeAgreementName
 	} else {
@@ -273,7 +273,7 @@ func (s *BillingServerOkMock) GetMerchantBy(
 		OnboardingMerchantMock.Status = pkg.MerchantStatusOnReview
 	}
 
-	rsp := &grpc.MerchantGetMerchantResponse{
+	rsp := &grpc.GetMerchantResponse{
 		Status:  pkg.ResponseStatusOk,
 		Message: "",
 		Item:    OnboardingMerchantMock,
@@ -749,8 +749,8 @@ func (s *BillingServerErrorMock) GetMerchantBy(
 	ctx context.Context,
 	in *grpc.GetMerchantByRequest,
 	opts ...client.CallOption,
-) (*grpc.MerchantGetMerchantResponse, error) {
-	return &grpc.MerchantGetMerchantResponse{
+) (*grpc.GetMerchantResponse, error) {
+	return &grpc.GetMerchantResponse{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil
@@ -1097,7 +1097,7 @@ func (s *BillingServerSystemErrorMock) GetMerchantBy(
 	ctx context.Context,
 	in *grpc.GetMerchantByRequest,
 	opts ...client.CallOption,
-) (*grpc.MerchantGetMerchantResponse, error) {
+) (*grpc.GetMerchantResponse, error) {
 	return nil, errors.New("some error")
 }
 
@@ -1397,8 +1397,8 @@ func (s *BillingServerOkTemporaryMock) GetMerchantBy(
 	ctx context.Context,
 	in *grpc.GetMerchantByRequest,
 	opts ...client.CallOption,
-) (*grpc.MerchantGetMerchantResponse, error) {
-	rsp := &grpc.MerchantGetMerchantResponse{
+) (*grpc.GetMerchantResponse, error) {
+	rsp := &grpc.GetMerchantResponse{
 		Status:  pkg.ResponseStatusOk,
 		Message: "",
 		Item:    OnboardingMerchantMock,
@@ -2150,7 +2150,7 @@ func (s *BillingServerSystemErrorMock) GetCurrency(
 
 func (s *BillingServerOkMock) GetCurrencyList(
 	ctx context.Context,
-	in *grpc.GetCurrencyListRequest,
+	in *grpc.EmptyRequest,
 	opts ...client.CallOption,
 ) (*billing.CurrencyList, error) {
 	return &billing.CurrencyList{
@@ -2160,7 +2160,7 @@ func (s *BillingServerOkMock) GetCurrencyList(
 
 func (s *BillingServerOkTemporaryMock) GetCurrencyList(
 	ctx context.Context,
-	in *grpc.GetCurrencyListRequest,
+	in *grpc.EmptyRequest,
 	opts ...client.CallOption,
 ) (*billing.CurrencyList, error) {
 	return nil, errors.New(SomeError)
@@ -2168,7 +2168,7 @@ func (s *BillingServerOkTemporaryMock) GetCurrencyList(
 
 func (s *BillingServerErrorMock) GetCurrencyList(
 	ctx context.Context,
-	in *grpc.GetCurrencyListRequest,
+	in *grpc.EmptyRequest,
 	opts ...client.CallOption,
 ) (*billing.CurrencyList, error) {
 	return nil, errors.New(SomeError)
@@ -2176,7 +2176,7 @@ func (s *BillingServerErrorMock) GetCurrencyList(
 
 func (s *BillingServerSystemErrorMock) GetCurrencyList(
 	ctx context.Context,
-	in *grpc.GetCurrencyListRequest,
+	in *grpc.EmptyRequest,
 	opts ...client.CallOption,
 ) (*billing.CurrencyList, error) {
 	return nil, errors.New(SomeError)

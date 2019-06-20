@@ -704,7 +704,7 @@ func (_m *BillingService) GetCurrency(ctx context.Context, in *billing.GetCurren
 }
 
 // GetCurrencyList provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) GetCurrencyList(ctx context.Context, in *grpc.GetCurrencyListRequest, opts ...client.CallOption) (*billing.CurrencyList, error) {
+func (_m *BillingService) GetCurrencyList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CurrencyList, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -715,7 +715,7 @@ func (_m *BillingService) GetCurrencyList(ctx context.Context, in *grpc.GetCurre
 	ret := _m.Called(_ca...)
 
 	var r0 *billing.CurrencyList
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetCurrencyListRequest, ...client.CallOption) *billing.CurrencyList); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) *billing.CurrencyList); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
@@ -724,7 +724,7 @@ func (_m *BillingService) GetCurrencyList(ctx context.Context, in *grpc.GetCurre
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetCurrencyListRequest, ...client.CallOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -734,7 +734,7 @@ func (_m *BillingService) GetCurrencyList(ctx context.Context, in *grpc.GetCurre
 }
 
 // GetMerchantBy provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) GetMerchantBy(ctx context.Context, in *grpc.GetMerchantByRequest, opts ...client.CallOption) (*grpc.MerchantGetMerchantResponse, error) {
+func (_m *BillingService) GetMerchantBy(ctx context.Context, in *grpc.GetMerchantByRequest, opts ...client.CallOption) (*grpc.GetMerchantResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -744,12 +744,12 @@ func (_m *BillingService) GetMerchantBy(ctx context.Context, in *grpc.GetMerchan
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *grpc.MerchantGetMerchantResponse
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetMerchantByRequest, ...client.CallOption) *grpc.MerchantGetMerchantResponse); ok {
+	var r0 *grpc.GetMerchantResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetMerchantByRequest, ...client.CallOption) *grpc.GetMerchantResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*grpc.MerchantGetMerchantResponse)
+			r0 = ret.Get(0).(*grpc.GetMerchantResponse)
 		}
 	}
 

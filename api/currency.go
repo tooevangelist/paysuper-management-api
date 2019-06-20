@@ -27,27 +27,7 @@ func (api *Api) InitCurrencyRoutes() *Api {
 // get list of currencies
 // GET /api/v1/currency
 func (cApiV1 *CurrencyApiV1) get(ctx echo.Context) error {
-	req := &grpc.GetCurrencyListRequest{}
-	err := ctx.Bind(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
-	}
-
-	if req.Limit <= 0 {
-		req.Limit = LimitDefault
-	}
-
-	if req.Offset <= 0 {
-		req.Offset = OffsetDefault
-	}
-
-	err = cApiV1.validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, getFirstValidationError(err))
-	}
-
-	res, err := cApiV1.billingService.GetCurrencyList(ctx.Request().Context(), req)
+	res, err := cApiV1.billingService.GetCurrencyList(ctx.Request().Context(), &grpc.EmptyRequest{})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Currency list error")
 	}
@@ -59,7 +39,7 @@ func (cApiV1 *CurrencyApiV1) get(ctx echo.Context) error {
 // GET /api/v1/currency/name
 func (cApiV1 *CurrencyApiV1) getByName(ctx echo.Context) error {
 	req := &billing.GetCurrencyRequest{
-		A3: ctx.QueryParam("name"),
+		CurrencyCode: ctx.QueryParam("name"),
 	}
 	err := ctx.Bind(req)
 
@@ -90,7 +70,7 @@ func (cApiV1 *CurrencyApiV1) getById(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
 	}
 
-	req := &billing.GetCurrencyRequest{Int: int32(i)}
+	req := &billing.GetCurrencyRequest{CurrencyInt: int32(i)}
 	err = cApiV1.validate.Struct(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, getFirstValidationError(err))
