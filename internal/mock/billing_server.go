@@ -2217,3 +2217,35 @@ func (s *BillingServerSystemErrorMock) FindByZipCode(
 ) (*grpc.FindByZipCodeResponse, error) {
 	return nil, errors.New(SomeError)
 }
+
+func (s *BillingServerOkMock) CreateAccountingEntry(
+	ctx context.Context,
+	in *grpc.CreateAccountingEntryRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateAccountingEntryRequest, error) {
+	return &grpc.CreateAccountingEntryRequest{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) CreateAccountingEntry(
+	ctx context.Context,
+	in *grpc.CreateAccountingEntryRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateAccountingEntryRequest, error) {
+	return &grpc.CreateAccountingEntryRequest{}, nil
+}
+
+func (s *BillingServerErrorMock) CreateAccountingEntry(
+	ctx context.Context,
+	in *grpc.CreateAccountingEntryRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateAccountingEntryRequest, error) {
+	return &grpc.CreateAccountingEntryRequest{}, nil
+}
+
+func (s *BillingServerSystemErrorMock) CreateAccountingEntry(
+	ctx context.Context,
+	in *grpc.CreateAccountingEntryRequest,
+	opts ...client.CallOption,
+) (*grpc.CreateAccountingEntryRequest, error) {
+	return nil, errors.New(SomeError)
+}
