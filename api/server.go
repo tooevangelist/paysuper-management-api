@@ -243,7 +243,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitPaylinkRoutes().
 		InitPaymentMethodRoutes().
 		InitCardPayWebHookRoutes().
-		InitSystemFeeRoutes().
+		InitPaymentCostRoutes().
 		initTaxesRoutes().
 		initTokenRoutes().
 		initZipCodeRoutes()
