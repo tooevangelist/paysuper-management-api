@@ -17,7 +17,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
-	"github.com/paysuper/paysuper-management-api/database/dao"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-management-api/utils"
 	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
@@ -51,7 +50,6 @@ type Template struct {
 
 type ServerInitParams struct {
 	Config      *config.Config
-	Database    dao.Database
 	Logger      *zap.SugaredLogger
 	HttpScheme  string
 	K8sHost     string
@@ -84,7 +82,6 @@ type AuthUser struct {
 type Api struct {
 	Http     *echo.Echo
 	config   *config.Config
-	database dao.Database
 	logger   *zap.SugaredLogger
 	validate *validator.Validate
 
@@ -123,7 +120,6 @@ type Api struct {
 func NewServer(p *ServerInitParams) (*Api, error) {
 	api := &Api{
 		Http:        echo.New(),
-		database:    p.Database,
 		logger:      p.Logger,
 		validate:    validator.New(),
 		httpScheme:  p.HttpScheme,

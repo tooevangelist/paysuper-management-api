@@ -6,15 +6,6 @@ const (
 	FixedPackageSlugSeparator = "_"
 )
 
-type OrderFixedPackage struct {
-	Id          string    `bson:"id" json:"id"`
-	Region      string    `bson:"region" json:"region"`
-	Name        string    `bson:"name" json:"name"`
-	CurrencyInt int       `bson:"currency_int" json:"currency_int"`
-	Price       float64   `bson:"price" json:"price"`
-	Currency    *Currency `bson:"-" json:"-"`
-}
-
 type FixedPackage struct {
 	// unique identifier of package
 	Id string `bson:"id" json:"id" validate:"required,max=255"`
@@ -31,18 +22,4 @@ type FixedPackage struct {
 	UpdatedAt time.Time `bson:"updated_at" json:"-"`
 	// full object of currency to package price
 	Currency *Currency `json:"currency"`
-}
-
-type FixedPackageFilters struct {
-	Ids       []string `query:"id[]"`
-	ProjectId string   `validate:"required,hexadecimal"`
-	Region    string   `validate:"required,alpha,len=2"`
-	Names     []string `query:"name[]"`
-}
-
-type FilteredFixedPackage struct {
-	Id       string          `json:"id"`
-	Name     string          `json:"name"`
-	Price    float64         `json:"price"`
-	Currency *SimpleCurrency `json:"currency"`
 }

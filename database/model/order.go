@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"time"
@@ -38,22 +37,6 @@ const (
 	OrderStatusPaymentSystemDeclined       = 11
 	OrderStatusPaymentSystemCanceled       = 12
 
-	OrderFilterFieldProjects        = "project[]"
-	OrderFilterFieldId              = "id"
-	OrderFilterFieldPaymentMethods  = "payment_method[]"
-	OrderFilterFieldCountries       = "country[]"
-	OrderFilterFieldStatuses        = "status[]"
-	OrderFilterFieldAccount         = "account"
-	OrderFilterFieldPMDateFrom      = "pm_date_from"
-	OrderFilterFieldPMDateTo        = "pm_date_to"
-	OrderFilterFieldProjectDateFrom = "project_date_from"
-	OrderFilterFieldProjectDateTo   = "project_date_to"
-	OrderFilterFieldQuickFilter     = "quick_filter"
-
-	OrderPaymentCreateRequestFieldOrderId          = "order_id"
-	OrderPaymentCreateRequestFieldOPaymentMethodId = "payment_method_id"
-	OrderPaymentCreateRequestFieldEmail            = "email"
-
 	OrderRevenueDynamicRequestFieldFrom    = "from"
 	OrderRevenueDynamicRequestFieldTo      = "to"
 	OrderRevenueDynamicRequestFieldProject = "project[]"
@@ -64,18 +47,6 @@ const (
 	RevenueDynamicRequestPeriodWeek  = "week"
 	RevenueDynamicRequestPeriodMonth = "month"
 	RevenueDynamicRequestPeriodYear  = "year"
-
-	RevenueDynamicFacetFieldId            = "_id"
-	RevenueDynamicFacetFieldTotal         = "total"
-	RevenueDynamicFacetFieldRevenue       = "revenue"
-	RevenueDynamicFacetFieldRefund        = "refund"
-	RevenueDynamicFacetFieldPointsRevenue = "points_revenue"
-	RevenueDynamicFacetFieldPointsRefund  = "points_refund"
-	RevenueDynamicFacetFieldCount         = "count"
-	RevenueDynamicFacetFieldAvg           = "avg"
-
-	OrderInlineFormUrlMask       = "%s://%s/order/%s"
-	OrderInlineFormImagesUrlMask = "//%s%s"
 )
 
 var OrderReservedWords = map[string]bool{
@@ -94,38 +65,6 @@ var OrderReservedWords = map[string]bool{
 	orderFieldPayerEmail:    true,
 	orderFieldPayerPhone:    true,
 	orderFieldRegion:        true,
-}
-
-var OrderStatusesDescription = map[int]string{
-	OrderStatusNew:                         "Project create new payment order in P1.",
-	OrderStatusPaymentSystemCreate:         "Payment order was create in payment system.",
-	OrderStatusPaymentSystemRejectOnCreate: "Payment system reject create order request.",
-	OrderStatusPaymentSystemReject:         "Payment notification request from payment system was reject. Possible reasons: incorrect amount or currency.",
-	OrderStatusPaymentSystemComplete:       "Payment notification request from payment system successfully complete.",
-	OrderStatusProjectInProgress:           "P1 started sending notification request about payment to project.",
-	OrderStatusProjectComplete:             "Project successfully processed notification about payment from P1",
-	OrderStatusProjectPending:              "Project can't processed notification about payment from P1 and limit of notification attempts was ended.",
-	OrderStatusProjectReject:               "Project reject notification about payment from P1. This payment is candidate to refund.",
-	OrderStatusRefund:                      "Payment was refunded to payer",
-	OrderStatusChargeback:                  "Customer's chargeback claim was received",
-	OrderStatusPaymentSystemDeclined:       "Payment system declined payment",
-	OrderStatusPaymentSystemCanceled:       "User canceled payment on payment system side",
-}
-
-var OrderStatusesNames = map[int]string{
-	OrderStatusNew:                         "New",
-	OrderStatusPaymentSystemCreate:         "In payment",
-	OrderStatusPaymentSystemRejectOnCreate: "Error",
-	OrderStatusPaymentSystemReject:         "Error",
-	OrderStatusPaymentSystemComplete:       "Paid",
-	OrderStatusProjectInProgress:           "In progress",
-	OrderStatusProjectComplete:             "Completed",
-	OrderStatusProjectPending:              "Pending",
-	OrderStatusProjectReject:               "Refund",
-	OrderStatusRefund:                      "Refund",
-	OrderStatusChargeback:                  "Chargeback",
-	OrderStatusPaymentSystemDeclined:       "Declined",
-	OrderStatusPaymentSystemCanceled:       "Canceled",
 }
 
 var RevenuePeriods = map[string]bool{
@@ -275,56 +214,6 @@ type Order struct {
 	UrlFail string `bson:"url_fail" json:"url_fail"`
 }
 
-type OrderSimple struct {
-	// unique order identifier in Protocol One
-	Id bson.ObjectId `json:"id"`
-	// object which contains main information about project
-	Project *SimpleItem `json:"project"`
-	// user account in project
-	Account string `json:"account"`
-	// unique order identifier in project
-	ProjectOrderId string `json:"order_id"`
-	// data about payer, for example: country, city, ip and etc
-	PayerData *PayerData `json:"payer_data"`
-	// payer payment requisites
-	PaymentRequisites map[string]string `json:"payment_requisites"`
-	// object which contains main information about payment method
-	PaymentMethod *SimpleItem `json:"payment_method"`
-	// object which contains main information about accounting finances of project which received of project
-	ProjectAmountIncome *OrderSimpleAmountObject `json:"project_amount_income"`
-	// object which contains main information about accounting finances of project which will send to project
-	ProjectAmountOutcome *OrderSimpleAmountObject `json:"project_amount_outcome"`
-	// object which contains main information about finances of payment system which received of payment system
-	PaymentMethodAmountIncome *OrderSimpleAmountObject `json:"payment_method_amount_income"`
-	// object which contains main information about fixed package which was buy
-	FixedPackage *OrderFixedPackage `json:"fixed_package"`
-	// object which contains main information about payment status
-	Status *Status `json:"status"`
-	// date when payment created
-	CreatedAt int64 `json:"created_at"`
-	// date when payment was confirmed from payment system side
-	ConfirmedAt int64 `json:"confirmed_at"`
-	// date when project was notification about payment
-	ClosedAt int64 `json:"closed_at"`
-	// PSP (P1) fee amount in merchant accounting currency
-	PspFeeAmount *OrderFeePsp `json:"psp_fee"`
-	// payment system fee for payment operation in payment system accounting currency
-	PaymentSystemFeeAmount *OrderFeePaymentSystem `json:"ps_fee_amount"`
-	// fee is charged with the project for the operation in merchant accounting currency
-	ProjectFeeAmount *OrderFee `json:"project_fee_amount"`
-	// value of fee which added to payer amount in merchant accounting currency
-	ToPayerFeeAmount *OrderFee `json:"to_payer_fee_amount"`
-	// vat amount in payment system accounting currency
-	VatAmount float64 `json:"vat_amount"`
-}
-
-type OrderPaginate struct {
-	// total count of selected orders
-	Count int `json:"count"`
-	// array of selected orders
-	Items []*OrderSimple `json:"items"`
-}
-
 type OrderPaymentNotification struct {
 	Id         string
 	Request    interface{}
@@ -336,31 +225,6 @@ type RevenueDynamicRequest struct {
 	To      time.Time
 	Project []bson.ObjectId
 	Period  string
-}
-
-type RevenueDynamicResult struct {
-	Points  []*RevenueDynamicPoint  `json:"points"`
-	Revenue *RevenueDynamicMainData `json:"revenue"`
-	Refund  *RevenueDynamicMainData `json:"refund"`
-}
-
-type RevenueDynamicPoint struct {
-	Date   *RevenueDynamicPointDate `json:"date"`
-	Amount float64                  `json:"amount"`
-}
-
-type RevenueDynamicPointDate struct {
-	Year  int `json:"year"`
-	Month int `json:"month,omitempty"`
-	Week  int `json:"week,omitempty"`
-	Day   int `json:"day,omitempty"`
-	Hour  int `json:"hour,omitempty"`
-}
-
-type RevenueDynamicMainData struct {
-	Count int     `json:"count"`
-	Total float64 `json:"total"`
-	Avg   float64 `json:"avg"`
 }
 
 type OrderFee struct {
@@ -387,87 +251,4 @@ type OrderFeePaymentSystem struct {
 	AmountMerchantCurrency float64 `bson:"amount_merchant_currency" json:"amount_merchant_currency"`
 	// amount of fee of payment system in accounting currency of payment system
 	AmountPaymentSystemCurrency float64 `bson:"amount_payment_system_currency" json:"amount_payment_system_currency"`
-}
-
-// Contain information about accounting payment to merchant by accounting period
-type AccountingPayment struct {
-	// total amount to accounting payment to merchant include commissions
-	SuccessWithCommissions float64 `json:"success_with_commissions"`
-	// total amount to accounting payment to merchant exclude commissions
-	SuccessWithoutCommissions float64 `json:"success_without_commissions"`
-	// total amount refunded payments
-	TotalRefund float64 `json:"total_refund"`
-	// total amount charged payments
-	TotalChargeback float64 `json:"total_chargeback"`
-	// total amount of commissions
-	TotalCommission float64 `json:"total_commission"`
-}
-
-// Contain data to create payment on payment system side
-type OrderCreatePaymentRequest struct {
-	// unique identifier of order on PSP (P1) side
-	OrderId string `json:"order_id"`
-	// unique identifier of payment method by PSP (P1) classifier
-	PaymentMethodId string `json:"payment_method_id"`
-	// user bank card number. required only for bank card payment
-	Pan *string `json:"pan,omitempty"`
-	// month of expire date of user bank card. required only for bank card payment
-	Month *int `json:"month,omitempty"`
-	// year of expire date of user bank card. required only for bank card payment
-	Year *int `json:"year,omitempty"`
-	// bank card cvv code. required only for bank card payment
-	Cvv *int `json:"cvv,omitempty"`
-	// bank card card holder name. required only for bank card payment
-	CardHolder *string `json:"card_holder,omitempty"`
-	// user account in ewallet payment system. required only for ewallet payment
-	Ewallet *string `json:"ewallet,omitempty"`
-	// user wallet address in crypto payment system. required only for crypto payment
-	Address *string `json:"address,omitempty"`
-}
-
-// Aggregate all data to render payment form from client library
-type JsonOrderCreateResponse struct {
-	// order unique identifier
-	Id string `json:"id"`
-	// user account, may be null
-	Account *string `json:"account"`
-	// flag to show VAT commission amount in payment form
-	HasVat bool `json:"has_vat"`
-	// flag to show commission amount changed to user in payment form
-	HasUserCommission bool `json:"has_user_commission"`
-	// contain data about project
-	Project *ProjectJsonOrderResponse `json:"project"`
-	// contain data about payment methods
-	PaymentMethods []*PaymentMethodJsonOrderResponse `json:"payment_methods"`
-	// url to redirect user to inline form in PSP side
-	InlineFormRedirectUrl string `json:"inline_form_redirect_url"`
-	// access token to websocket private chanel
-	Token string `json:"token"`
-}
-
-func (order *Order) IsComplete() bool {
-	return order.Status == OrderStatusProjectComplete
-}
-
-func (order *Order) HasEndedStatus() bool {
-	return order.Status == OrderStatusPaymentSystemReject || order.Status == OrderStatusProjectComplete ||
-		order.Status == OrderStatusProjectReject || order.Status == OrderStatusRefund || order.Status == OrderStatusChargeback
-}
-
-func (rdr *RevenueDynamicRequest) SetProjectsFromMap(pMap map[bson.ObjectId]string) {
-	var p []bson.ObjectId
-
-	for k := range pMap {
-		p = append(p, k)
-	}
-
-	rdr.Project = p
-}
-
-func (pd *RevenueDynamicPointDate) String() string {
-	return fmt.Sprintf("%d%d%d%d%d", pd.Year, pd.Month, pd.Week, pd.Day, pd.Hour)
-}
-
-func (order *Order) CanProcessNotify() bool {
-	return order.Status == OrderStatusPaymentSystemCreate || order.Status == OrderStatusPaymentSystemReject
 }
