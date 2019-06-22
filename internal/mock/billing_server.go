@@ -1794,22 +1794,6 @@ func (s *BillingServerOkMock) DeleteMoneyBackCostMerchant(ctx context.Context, i
 	return &grpc.EmptyResponse{}, nil
 }
 
-func (s *BillingServerOkMock) CreateOrUpdatePaymentMethod(ctx context.Context, in *billing.PaymentMethod, opts ...client.CallOption) (*grpc.ChangePaymentMethodResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerOkMock) CreateOrUpdatePaymentMethodProductionSettings(ctx context.Context, in *grpc.ChangePaymentMethodParamsRequest, opts ...client.CallOption) (*grpc.ChangePaymentMethodParamsResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerOkMock) GetPaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodProductionSettingsRequest, opts ...client.CallOption) (*billing.PaymentMethodParams, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerOkMock) DeletePaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodProductionSettingsRequest, opts ...client.CallOption) (*grpc.ChangePaymentMethodParamsResponse, error) {
-	panic("implement me")
-}
-
 func (s *BillingServerErrorMock) IsOrderCanBePaying(
 	ctx context.Context,
 	in *grpc.IsOrderCanBePayingRequest,
@@ -1913,22 +1897,6 @@ func (s *BillingServerErrorMock) GetAllMoneyBackCostMerchant(ctx context.Context
 	return nil, errors.New("Some error")
 }
 
-func (s *BillingServerErrorMock) CreateOrUpdatePaymentMethod(ctx context.Context, in *billing.PaymentMethod, opts ...client.CallOption) (*grpc.ChangePaymentMethodResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerErrorMock) CreateOrUpdatePaymentMethodProductionSettings(ctx context.Context, in *grpc.ChangePaymentMethodParamsRequest, opts ...client.CallOption) (*grpc.ChangePaymentMethodParamsResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerErrorMock) GetPaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodProductionSettingsRequest, opts ...client.CallOption) (*billing.PaymentMethodParams, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerErrorMock) DeletePaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodProductionSettingsRequest, opts ...client.CallOption) (*grpc.ChangePaymentMethodParamsResponse, error) {
-	panic("implement me")
-}
-
 func (s *BillingServerSystemErrorMock) IsOrderCanBePaying(
 	ctx context.Context,
 	in *grpc.IsOrderCanBePayingRequest,
@@ -2027,22 +1995,6 @@ func (s *BillingServerSystemErrorMock) GetAllMoneyBackCostSystem(ctx context.Con
 
 func (s *BillingServerSystemErrorMock) GetAllMoneyBackCostMerchant(ctx context.Context, in *billing.MoneyBackCostMerchantListRequest, opts ...client.CallOption) (*billing.MoneyBackCostMerchantList, error) {
 	return nil, errors.New("Some error")
-}
-
-func (s *BillingServerSystemErrorMock) CreateOrUpdatePaymentMethod(ctx context.Context, in *billing.PaymentMethod, opts ...client.CallOption) (*grpc.ChangePaymentMethodResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerSystemErrorMock) CreateOrUpdatePaymentMethodProductionSettings(ctx context.Context, in *grpc.ChangePaymentMethodParamsRequest, opts ...client.CallOption) (*grpc.ChangePaymentMethodParamsResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerSystemErrorMock) GetPaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodProductionSettingsRequest, opts ...client.CallOption) (*billing.PaymentMethodParams, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerSystemErrorMock) DeletePaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodProductionSettingsRequest, opts ...client.CallOption) (*grpc.ChangePaymentMethodParamsResponse, error) {
-	panic("implement me")
 }
 
 func (s *BillingServerOkTemporaryMock) IsOrderCanBePaying(
@@ -2144,22 +2096,6 @@ func (s *BillingServerOkTemporaryMock) GetAllMoneyBackCostSystem(ctx context.Con
 
 func (s *BillingServerOkTemporaryMock) GetAllMoneyBackCostMerchant(ctx context.Context, in *billing.MoneyBackCostMerchantListRequest, opts ...client.CallOption) (*billing.MoneyBackCostMerchantList, error) {
 	return &billing.MoneyBackCostMerchantList{}, nil
-}
-
-func (s *BillingServerOkTemporaryMock) CreateOrUpdatePaymentMethod(ctx context.Context, in *billing.PaymentMethod, opts ...client.CallOption) (*grpc.ChangePaymentMethodResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerOkTemporaryMock) CreateOrUpdatePaymentMethodProductionSettings(ctx context.Context, in *grpc.ChangePaymentMethodParamsRequest, opts ...client.CallOption) (*grpc.ChangePaymentMethodParamsResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerOkTemporaryMock) GetPaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodProductionSettingsRequest, opts ...client.CallOption) (*billing.PaymentMethodParams, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerOkTemporaryMock) DeletePaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodProductionSettingsRequest, opts ...client.CallOption) (*grpc.ChangePaymentMethodParamsResponse, error) {
-	panic("implement me")
 }
 
 func (s *BillingServerOkMock) FindByZipCode(
