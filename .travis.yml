@@ -1,10 +1,13 @@
 os:
   - linux
-dist: trusty
 language: go
 sudo: required
 go:
 - 1.11.x
+dist: trusty
+addons:
+  sonarcloud:
+    organization: "paysuper"
 services:
 - mongodb
 stages:
@@ -29,6 +32,7 @@ jobs:
     install: true
     script:
     - go test ./... -coverprofile=coverage.out -covermode=atomic -p=1
+    - sonar-scanner
     after_success:
     - bash <(curl -s https://codecov.io/bash)
   - stage: deploy
