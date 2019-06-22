@@ -55,7 +55,7 @@ const (
 	requestParameterUrlRedirectSuccess       = "url_redirect_success"
 	requestParameterUrlChargebackPayment     = "url_chargeback_payment"
 	requestParameterUrlCancelPayment         = "url_cancel_payment"
-	requestParameterUrlFraudPayment          = "url_redirect_success"
+	requestParameterUrlFraudPayment          = "url_fraud_payment"
 	requestParameterUrlRefundPayment         = "url_refund_payment"
 	requestParameterStatus                   = "status"
 	requestAuthorizationTokenRegex           = "Bearer ([A-z0-9_.-]{10,})"
