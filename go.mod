@@ -21,7 +21,7 @@ require (
 	github.com/micro/kubernetes v0.7.0
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190621100754-4e2e9f8f32b9
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190622123118-07acba7978ab
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c
 	github.com/paysuper/paysuper-recurring-repository v1.0.107
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190308105725-016a09c27fbd

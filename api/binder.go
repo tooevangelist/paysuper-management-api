@@ -820,5 +820,37 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		}
 	}
 
+	if v, ok := req[requestParameterUrlChargebackPayment]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageUrlChargebackPayment)
+		} else {
+			structure.UrlChargebackPayment = tv
+		}
+	}
+
+	if v, ok := req[requestParameterUrlCancelPayment]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageUrlCancelPayment)
+		} else {
+			structure.UrlCancelPayment = tv
+		}
+	}
+
+	if v, ok := req[requestParameterUrlFraudPayment]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageUrlFraudPayment)
+		} else {
+			structure.UrlFraudPayment = tv
+		}
+	}
+
+	if v, ok := req[requestParameterUrlRefundPayment]; ok {
+		if tv, ok := v.(string); !ok {
+			return errors.New(errorMessageUrlRefundPayment)
+		} else {
+			structure.UrlRefundPayment = tv
+		}
+	}
+
 	return nil
 }
