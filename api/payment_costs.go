@@ -18,28 +18,28 @@ func (api *Api) InitPaymentCostRoutes() *Api {
 
 	api.authUserRouteGroup.GET("/payment_costs/channel/system/all", paymentCostApiV1.getAllPaymentChannelCostSystem)
 	api.authUserRouteGroup.GET("/payment_costs/channel/merchant/all", paymentCostApiV1.getAllPaymentChannelCostMerchant)
-	api.authUserRouteGroup.GET("/payment_costs/undo/system/all", paymentCostApiV1.getAllMoneyBackCostSystem)
-	api.authUserRouteGroup.GET("/payment_costs/undo/merchant/all", paymentCostApiV1.getAllMoneyBackCostMerchant)
+	api.authUserRouteGroup.GET("/payment_costs/money_back/system/all", paymentCostApiV1.getAllMoneyBackCostSystem)
+	api.authUserRouteGroup.GET("/payment_costs/money_back/merchant/all", paymentCostApiV1.getAllMoneyBackCostMerchant)
 
 	api.authUserRouteGroup.GET("/payment_costs/channel/system", paymentCostApiV1.getPaymentChannelCostSystem)
 	api.authUserRouteGroup.GET("/payment_costs/channel/merchant", paymentCostApiV1.getPaymentChannelCostMerchant)
-	api.authUserRouteGroup.GET("/payment_costs/undo/system", paymentCostApiV1.getMoneyBackCostSystem)
-	api.authUserRouteGroup.GET("/payment_costs/undo/merchant", paymentCostApiV1.getMoneyBackCostMerchant)
+	api.authUserRouteGroup.GET("/payment_costs/money_back/system", paymentCostApiV1.getMoneyBackCostSystem)
+	api.authUserRouteGroup.GET("/payment_costs/money_back/merchant", paymentCostApiV1.getMoneyBackCostMerchant)
 
 	api.authUserRouteGroup.DELETE("/payment_costs/channel/system/:id", paymentCostApiV1.deletePaymentChannelCostSystem)
 	api.authUserRouteGroup.DELETE("/payment_costs/channel/merchant/:id", paymentCostApiV1.deletePaymentChannelCostMerchant)
-	api.authUserRouteGroup.DELETE("/payment_costs/undo/system/:id", paymentCostApiV1.deleteMoneyBackCostSystem)
-	api.authUserRouteGroup.DELETE("/payment_costs/undo/merchant/:id", paymentCostApiV1.deleteMoneyBackCostMerchant)
+	api.authUserRouteGroup.DELETE("/payment_costs/money_back/system/:id", paymentCostApiV1.deleteMoneyBackCostSystem)
+	api.authUserRouteGroup.DELETE("/payment_costs/money_back/merchant/:id", paymentCostApiV1.deleteMoneyBackCostMerchant)
 
 	api.authUserRouteGroup.POST("/payment_costs/channel/system", paymentCostApiV1.setPaymentChannelCostSystem)
 	api.authUserRouteGroup.POST("/payment_costs/channel/merchant", paymentCostApiV1.setPaymentChannelCostMerchant)
-	api.authUserRouteGroup.POST("/payment_costs/undo/system", paymentCostApiV1.setMoneyBackCostSystem)
-	api.authUserRouteGroup.POST("/payment_costs/undo/merchant", paymentCostApiV1.setMoneyBackCostMerchant)
+	api.authUserRouteGroup.POST("/payment_costs/money_back/system", paymentCostApiV1.setMoneyBackCostSystem)
+	api.authUserRouteGroup.POST("/payment_costs/money_back/merchant", paymentCostApiV1.setMoneyBackCostMerchant)
 
 	api.authUserRouteGroup.PUT("/payment_costs/channel/system/:id", paymentCostApiV1.setPaymentChannelCostSystem)
 	api.authUserRouteGroup.PUT("/payment_costs/channel/merchant/:id", paymentCostApiV1.setPaymentChannelCostMerchant)
-	api.authUserRouteGroup.PUT("/payment_costs/undo/system/:id", paymentCostApiV1.setMoneyBackCostSystem)
-	api.authUserRouteGroup.PUT("/payment_costs/undo/merchant/:id", paymentCostApiV1.setMoneyBackCostMerchant)
+	api.authUserRouteGroup.PUT("/payment_costs/money_back/system/:id", paymentCostApiV1.setMoneyBackCostSystem)
+	api.authUserRouteGroup.PUT("/payment_costs/money_back/merchant/:id", paymentCostApiV1.setMoneyBackCostMerchant)
 
 	return api
 }
@@ -95,7 +95,7 @@ func (r *paymentCostRoute) getPaymentChannelCostMerchant(ctx echo.Context) error
 }
 
 // @Description Get MoneyBackCostSystem
-// @Example GET /admin/api/v1/payment_costs/undo/system?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&days=10&undoReason=chargeback&paymentStage=1
+// @Example GET /admin/api/v1/payment_costs/money_back/system?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&days=10&undoReason=chargeback&paymentStage=1
 func (r *paymentCostRoute) getMoneyBackCostSystem(ctx echo.Context) error {
 
 	req := &billing.MoneyBackCostSystemRequest{}
@@ -116,7 +116,7 @@ func (r *paymentCostRoute) getMoneyBackCostSystem(ctx echo.Context) error {
 }
 
 // @Description Get MoneyBackCostSystem
-// @Example GET /admin/api/v1/payment_costs/undo/merchant?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&days=10&undoReason=chargeback&paymentStage=1
+// @Example GET /admin/api/v1/payment_costs/money_back/merchant?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&days=10&undoReason=chargeback&paymentStage=1
 func (r *paymentCostRoute) getMoneyBackCostMerchant(ctx echo.Context) error {
 
 	req := &billing.MoneyBackCostMerchantRequest{}
@@ -186,7 +186,7 @@ func (r *paymentCostRoute) deletePaymentChannelCostMerchant(ctx echo.Context) er
 }
 
 // @Description Delete PaymentCostDeleteRequest
-// @Example DELETE /admin/api/v1/payment_costs/undo/system/5be2d0b4b0b30d0007383ce6
+// @Example DELETE /admin/api/v1/payment_costs/money_back/system/5be2d0b4b0b30d0007383ce6
 func (r *paymentCostRoute) deleteMoneyBackCostSystem(ctx echo.Context) error {
 	pcId := ctx.Param(requestParameterId)
 
@@ -207,7 +207,7 @@ func (r *paymentCostRoute) deleteMoneyBackCostSystem(ctx echo.Context) error {
 }
 
 // @Description Delete PaymentCostDeleteRequest
-// @Example DELETE /admin/api/v1/payment_costs/undo/merchant/5be2d0b4b0b30d0007383ce6
+// @Example DELETE /admin/api/v1/payment_costs/money_back/merchant/5be2d0b4b0b30d0007383ce6
 func (r *paymentCostRoute) deleteMoneyBackCostMerchant(ctx echo.Context) error {
 	pcId := ctx.Param(requestParameterId)
 
@@ -299,14 +299,14 @@ func (r *paymentCostRoute) setPaymentChannelCostMerchant(ctx echo.Context) error
 }
 
 // @Description create/update MoneyBackCostSystem
-// @Example POST /admin/api/v1/payment_costs/undo/system
-// @Example PUT /admin/api/v1/payment_costs/undo/system/5be2d0b4b0b30d0007383ce6
+// @Example POST /admin/api/v1/payment_costs/money_back/system
+// @Example PUT /admin/api/v1/payment_costs/money_back/system/5be2d0b4b0b30d0007383ce6
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
 //      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34, "payout_currency": "USD"
 //      "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1}' \
-//      https://api.paysuper.online/admin/api/v1/payment_costs/undo/system
+//      https://api.paysuper.online/admin/api/v1/payment_costs/money_back/system
 func (r *paymentCostRoute) setMoneyBackCostSystem(ctx echo.Context) error {
 	req := &billing.MoneyBackCostSystem{}
 	err := ctx.Bind(req)
@@ -332,14 +332,14 @@ func (r *paymentCostRoute) setMoneyBackCostSystem(ctx echo.Context) error {
 }
 
 // @Description create/update MoneyBackCostMerchant
-// @Example POST /admin/api/v1/payment_costs/undo/merchant
-// @Example PUT /admin/api/v1/payment_costs/undo/merchant/5be2d0b4b0b30d0007383ce6
+// @Example POST /admin/api/v1/payment_costs/money_back/merchant
+// @Example PUT /admin/api/v1/payment_costs/money_back/merchant/5be2d0b4b0b30d0007383ce6
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
 //      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34, "payout_currency": "USD",
 ////      "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1, "is_paid_by_merchant": true}' \
-//      https://api.paysuper.online/admin/api/v1/payment_costs/undo/merchant
+//      https://api.paysuper.online/admin/api/v1/payment_costs/money_back/merchant
 func (r *paymentCostRoute) setMoneyBackCostMerchant(ctx echo.Context) error {
 	req := &billing.MoneyBackCostMerchant{}
 	err := ctx.Bind(req)
@@ -405,7 +405,7 @@ func (r *paymentCostRoute) getAllPaymentChannelCostMerchant(ctx echo.Context) er
 }
 
 // @Description Get All PaymentChannelCostSystem
-// @Example GET /admin/api/v1/payment_costs/undo/system/all
+// @Example GET /admin/api/v1/payment_costs/money_back/system/all
 func (r *paymentCostRoute) getAllMoneyBackCostSystem(ctx echo.Context) error {
 	res, err := r.billingService.GetAllPaymentChannelCostSystem(ctx.Request().Context(), &grpc.EmptyRequest{})
 	if err != nil {
@@ -415,7 +415,7 @@ func (r *paymentCostRoute) getAllMoneyBackCostSystem(ctx echo.Context) error {
 }
 
 // @Description Get All PaymentChannelCostMerchant
-// @Example GET /admin/api/v1/payment_costs/undo/merchant/all
+// @Example GET /admin/api/v1/payment_costs/money_back/merchant/all
 func (r *paymentCostRoute) getAllMoneyBackCostMerchant(ctx echo.Context) error {
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
