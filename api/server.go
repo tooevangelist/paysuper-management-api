@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/ProtocolONE/authone-jwt-verifier-golang"
 	jwtMiddleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
@@ -336,20 +335,20 @@ func (api *Api) getUserDetailsMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 		auth := ctx.Request().Header.Get(echo.HeaderAuthorization)
 
 		if auth == "" {
-			return errors.New(errorMessageAuthorizationHeaderNotFound)
+			return errorMessageAuthorizationHeaderNotFound
 		}
 
 		r := regexp.MustCompile(requestAuthorizationTokenRegex)
 		match := r.FindStringSubmatch(auth)
 
 		if len(match) < 1 {
-			return errors.New(errorMessageAuthorizationTokenNotFound)
+			return errorMessageAuthorizationTokenNotFound
 		}
 
 		u, err := api.jwtVerifier.GetUserInfo(ctx.Request().Context(), match[1])
 
 		if err != nil {
-			return errors.New(errorMessageAuthorizedUserNotFound)
+			return errorMessageAuthorizedUserNotFound
 		}
 
 		api.authUser.Email = u.Email
@@ -368,13 +367,13 @@ func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.
 	err := ctx.Bind(st)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = api.validate.Struct(st)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, api.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(api.getValidationError(err)))
 	}
 
 	return nil

@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 	"github.com/globalsign/mgo/bson"
@@ -12,6 +11,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"go.uber.org/zap"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -101,7 +101,7 @@ func (r *onboardingRoute) getMerchant(ctx echo.Context) error {
 	rsp, err := r.billingService.GetMerchantBy(ctx.Request().Context(), req)
 
 	if err != nil {
-		r.logError("Call billing-server method GetMerchantBy failed", []interface{}{"error", err.Error(), "request", req})
+		zap.S().Errorf("Call billing-server method GetMerchantBy failed", "error", err.Error(), "request", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -135,13 +135,13 @@ func (r *onboardingRoute) listMerchants(ctx echo.Context) error {
 	err := (&OnboardingMerchantListingBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.ListMerchants(ctx.Request().Context(), req)
@@ -158,7 +158,7 @@ func (r *onboardingRoute) changeMerchant(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req.User = &billing.MerchantUser{
@@ -168,16 +168,20 @@ func (r *onboardingRoute) changeMerchant(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
-	return ctx.JSON(http.StatusOK, rsp)
+	if rsp.Status != http.StatusOK {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
 func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
@@ -185,23 +189,27 @@ func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 	err := (&OnboardingChangeMerchantStatusBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	req.UserId = r.authUser.Id
 	rsp, err := r.billingService.ChangeMerchantStatus(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
-	return ctx.JSON(http.StatusOK, rsp)
+	if rsp.Status != http.StatusOK {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
 func (r *onboardingRoute) createNotification(ctx echo.Context) error {
@@ -209,23 +217,27 @@ func (r *onboardingRoute) createNotification(ctx echo.Context) error {
 	err := (&OnboardingCreateNotificationBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	req.UserId = r.authUser.Id
 	rsp, err := r.billingService.CreateNotification(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
-	return ctx.JSON(http.StatusCreated, rsp)
+	if rsp.Status != http.StatusOK {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusCreated, rsp.Item)
 }
 
 func (r *onboardingRoute) getNotification(ctx echo.Context) error {
@@ -247,7 +259,7 @@ func (r *onboardingRoute) getNotification(ctx echo.Context) error {
 	rsp, err := r.billingService.GetNotification(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		return echo.NewHTTPError(http.StatusNotFound, errorNotificationNotFound)
 	}
 
 	return ctx.JSON(http.StatusOK, rsp)
@@ -258,19 +270,19 @@ func (r *onboardingRoute) listNotifications(ctx echo.Context) error {
 	err := (&OnboardingNotificationsListBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.ListNotifications(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
 	return ctx.JSON(http.StatusOK, rsp)
@@ -295,7 +307,7 @@ func (r *onboardingRoute) markAsReadNotification(ctx echo.Context) error {
 	rsp, err := r.billingService.MarkNotificationAsRead(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
 	return ctx.JSON(http.StatusOK, rsp)
@@ -306,7 +318,7 @@ func (r *onboardingRoute) getPaymentMethod(ctx echo.Context) error {
 	err := (&OnboardingGetPaymentMethodBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	rsp, err := r.billingService.GetMerchantPaymentMethod(ctx.Request().Context(), req)
@@ -327,14 +339,14 @@ func (r *onboardingRoute) listPaymentMethods(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req.MerchantId = ctx.Param(requestParameterMerchantId)
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.ListMerchantPaymentMethods(ctx.Request().Context(), req)
@@ -351,7 +363,7 @@ func (r *onboardingRoute) changePaymentMethod(ctx echo.Context) error {
 	err := (&OnboardingChangePaymentMethodBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req.UserId = r.authUser.Id
@@ -359,7 +371,7 @@ func (r *onboardingRoute) changePaymentMethod(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.ChangeMerchantPaymentMethod(ctx.Request().Context(), req)
@@ -381,22 +393,20 @@ func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
 	err := binder.Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.ChangeMerchantData(ctx.Request().Context(), req)
 
 	if err != nil {
-		r.logError(
-			`Call billing server method "ChangeMerchantData" failed`,
-			[]interface{}{"error", err.Error(), "request", req},
-		)
+		zap.S().Errorf(`Call billing server method "ChangeMerchantData" failed`,
+			"error", err.Error(), "request", req)
 
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
@@ -412,17 +422,15 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 	merchantId := ctx.Param(requestParameterId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
 	rsp, err := r.billingService.GetMerchantBy(context.Background(), req)
 
 	if err != nil {
-		r.logError(
-			`Call billing server method "GetMerchantBy" failed`,
-			[]interface{}{"error", err.Error(), "request", req},
-		)
+		zap.S().Errorf(`Call billing server method "GetMerchantBy" failed`,
+			"error", err.Error(), "request", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -435,13 +443,14 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 		err = r.mClt.FGetObject(r.config.S3.BucketName, rsp.Item.S3AgreementName, filePath, minio.GetObjectOptions{})
 
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 		}
 
 		fData, err := r.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
 
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+			zap.S().Errorf("internal error", "err", err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 		}
 
 		return ctx.JSON(http.StatusOK, fData)
@@ -457,20 +466,23 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 	err = ctx.Echo().Renderer.Render(buf, agreementPageTemplateName, data, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	pdf, err := wkhtmltopdf.NewPDFGenerator()
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	pdf.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buf.String())))
 	err = pdf.Create()
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	agrName := fmt.Sprintf(agreementFileMask, rsp.Item.Id)
@@ -479,30 +491,31 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 	err = pdf.WriteFile(filePath)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	_, err = r.mClt.FPutObject(r.config.S3.BucketName, agrName, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	req1 := &grpc.SetMerchantS3AgreementRequest{MerchantId: merchantId, S3AgreementName: agrName}
 	_, err = r.billingService.SetMerchantS3Agreement(context.Background(), req1)
 
 	if err != nil {
-		r.logError(
-			`Call billing server method "SetMerchantS3Agreement" failed`,
-			[]interface{}{"error", err.Error(), "request", req1},
-		)
+		zap.S().Errorf(`Call billing server method "SetMerchantS3Agreement" failed`,
+			"error", err.Error(), "request", req1)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
 	fData, err := r.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, fData)
@@ -512,17 +525,15 @@ func (r *onboardingRoute) getAgreementDocument(ctx echo.Context) error {
 	merchantId := ctx.Param(requestParameterId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
 	rsp, err := r.billingService.GetMerchantBy(context.Background(), req)
 
 	if err != nil {
-		r.logError(
-			`Call billing server method "GetMerchantBy" failed`,
-			[]interface{}{"error", err.Error(), "request", req},
-		)
+		zap.S().Errorf(`Call billing server method "GetMerchantBy" failed`,
+			"error", err.Error(), "request", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -538,7 +549,7 @@ func (r *onboardingRoute) getAgreementDocument(ctx echo.Context) error {
 	err = r.mClt.FGetObject(r.config.S3.BucketName, rsp.Item.S3AgreementName, filePath, minio.GetObjectOptions{})
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorAgreementFileNotExist)
 	}
 
 	return ctx.File(filePath)
@@ -548,17 +559,15 @@ func (r *onboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
 	merchantId := ctx.Param(requestParameterId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
 	rsp, err := r.billingService.GetMerchantBy(context.Background(), req)
 
 	if err != nil {
-		r.logError(
-			`Call billing server method "GetMerchantBy" failed`,
-			[]interface{}{"error", err.Error(), "request", req},
-		)
+		zap.S().Errorf(`Call billing server method "GetMerchantBy" failed`,
+			"error", err.Error(), "request", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -569,13 +578,13 @@ func (r *onboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
 	file, err := ctx.FormFile(requestParameterFile)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorNotMultipartForm)
 	}
 
 	src, err := r.validateUpload(file)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorMessageAgreementContentType)
 	}
 
 	defer func() {
@@ -589,7 +598,8 @@ func (r *onboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
 	dst, err := os.Create(filePath)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	defer func() {
@@ -601,30 +611,30 @@ func (r *onboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
 	_, err = io.Copy(dst, src)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	_, err = r.mClt.FPutObject(r.config.S3.BucketName, agrName, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUploadFailed)
 	}
 
 	req1 := &grpc.SetMerchantS3AgreementRequest{MerchantId: merchantId, S3AgreementName: agrName}
 	_, err = r.billingService.SetMerchantS3Agreement(context.Background(), req1)
 
 	if err != nil {
-		r.logError(
-			`Call billing server method "SetMerchantS3Agreement" failed`,
-			[]interface{}{"error", err.Error(), "request", req1},
-		)
+		zap.S().Errorf(`Call billing server method "SetMerchantS3Agreement" failed`,
+			"error", err.Error(), "request", req1)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
 	fData, err := r.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, fData)
@@ -637,7 +647,7 @@ func (r *onboardingRoute) getAgreementStructure(
 	file, err := os.Open(fPath)
 
 	if err != nil {
-		return nil, errors.New(errorMessageAgreementNotFound)
+		return nil, errorMessageAgreementNotFound
 	}
 
 	defer func() {
@@ -649,7 +659,7 @@ func (r *onboardingRoute) getAgreementStructure(
 	fi, err := file.Stat()
 
 	if err != nil {
-		return nil, errors.New(errorMessageAgreementNotFound)
+		return nil, errorMessageAgreementNotFound
 	}
 
 	data := &OnboardingFileData{
@@ -667,7 +677,7 @@ func (r *onboardingRoute) getAgreementStructure(
 
 func (r *onboardingRoute) validateUpload(file *multipart.FileHeader) (multipart.File, error) {
 	if file.Size > agreementUploadMaxSize {
-		return nil, fmt.Errorf(errorMessageAgreementUploadMaxSize, agreementUploadMaxSize)
+		return nil, errorMessageAgreementUploadMaxSize
 	}
 
 	src, err := file.Open()
@@ -692,7 +702,7 @@ func (r *onboardingRoute) validateUpload(file *multipart.FileHeader) (multipart.
 	ct := http.DetectContentType(buffer)
 
 	if ct != agreementContentType {
-		return nil, errors.New(errorMessageAgreementContentType)
+		return nil, errorMessageAgreementContentType
 	}
 
 	return src, nil

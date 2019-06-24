@@ -105,7 +105,7 @@ func (suite *ZipCodeTestSuite) TestOrder_CheckZip_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *ZipCodeTestSuite) TestOrder_CheckZip_ValidateError() {
@@ -126,7 +126,7 @@ func (suite *ZipCodeTestSuite) TestOrder_CheckZip_ValidateError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Country", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Country"), httpErr.Message)
 }
 
 func (suite *ZipCodeTestSuite) TestOrder_CheckZip_BillingServerError() {

@@ -16,6 +16,8 @@ import (
 	"syscall"
 )
 
+const LoggerName = "PAYONE_MANAGEMENT_API"
+
 // @title Protocol One payment solution swagger documentation
 // @version 1.0
 // @description This is a Protocol One payment solution service.
@@ -59,6 +61,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Application logger initialization failed with error: %s\n", err)
 	}
+	logger = logger.Named(LoggerName)
 	zap.ReplaceGlobals(logger)
 
 	defer func() {

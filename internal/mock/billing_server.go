@@ -9,16 +9,18 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"net/http"
 )
 
 const (
-	SomeError          = "some error"
 	SomeAgreementName  = "some_name.pdf"
 	SomeAgreementName1 = "some_name1.pdf"
 	SomeAgreementName2 = "some_name2.pdf"
 )
 
 var (
+	SomeError = &grpc.ResponseErrorMessage{Message: "some error"}
+
 	SomeMerchantId  = bson.NewObjectId().Hex()
 	SomeMerchantId1 = bson.NewObjectId().Hex()
 	SomeMerchantId2 = bson.NewObjectId().Hex()
@@ -143,8 +145,11 @@ func (s *BillingServerOkMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
 	opts ...client.CallOption,
-) (*billing.Order, error) {
-	return &billing.Order{}, nil
+) (*grpc.OrderCreateProcessResponse, error) {
+	return &grpc.OrderCreateProcessResponse{
+		Status: http.StatusOK,
+		Item:   &billing.Order{},
+	}, nil
 }
 
 func (s *BillingServerOkMock) PaymentFormJsonDataProcess(
@@ -232,7 +237,7 @@ func (s *BillingServerOkMock) GetMerchantBy(
 
 	rsp := &grpc.MerchantGetMerchantResponse{
 		Status:  pkg.ResponseStatusOk,
-		Message: "",
+		Message: &grpc.ResponseErrorMessage{},
 		Item:    OnboardingMerchantMock,
 	}
 
@@ -254,7 +259,7 @@ func (s *BillingServerOkMock) ChangeMerchant(
 	ctx context.Context,
 	in *grpc.OnboardingRequest,
 	opts ...client.CallOption,
-) (*billing.Merchant, error) {
+) (*grpc.ChangeMerchantResponse, error) {
 	m := &billing.Merchant{
 		User: &billing.MerchantUser{
 			Id:    bson.NewObjectId().Hex(),
@@ -294,23 +299,31 @@ func (s *BillingServerOkMock) ChangeMerchant(
 		m.Id = bson.NewObjectId().Hex()
 	}
 
-	return m, nil
+	return &grpc.ChangeMerchantResponse{
+		Status: http.StatusOK,
+		Item:   m,
+	}, nil
 }
 
 func (s *BillingServerOkMock) ChangeMerchantStatus(
 	ctx context.Context,
 	in *grpc.MerchantChangeStatusRequest,
 	opts ...client.CallOption,
-) (*billing.Merchant, error) {
-	return &billing.Merchant{Id: in.MerchantId, Status: in.Status}, nil
+) (*grpc.ChangeMerchantStatusResponse, error) {
+	return &grpc.ChangeMerchantStatusResponse{
+		Status: http.StatusOK,
+		Item:   &billing.Merchant{Id: in.MerchantId, Status: in.Status},
+	}, nil
 }
 
 func (s *BillingServerOkMock) CreateNotification(
 	ctx context.Context,
 	in *grpc.NotificationRequest,
 	opts ...client.CallOption,
-) (*billing.Notification, error) {
-	return &billing.Notification{}, nil
+) (*grpc.CreateNotificationResponse, error) {
+	return &grpc.CreateNotificationResponse{
+		Status: http.StatusOK,
+	}, nil
 }
 
 func (s *BillingServerOkMock) GetNotification(
@@ -387,7 +400,7 @@ func (s *BillingServerOkMock) CreateRefund(
 			ExternalId: "",
 			Amount:     10,
 			CreatorId:  "",
-			Reason:     SomeError,
+			Reason:     SomeError.Message,
 			Currency: &billing.Currency{
 				CodeInt:  643,
 				CodeA3:   "RUB",
@@ -413,7 +426,7 @@ func (s *BillingServerOkMock) ListRefunds(
 				ExternalId: "",
 				Amount:     10,
 				CreatorId:  "",
-				Reason:     SomeError,
+				Reason:     SomeError.Message,
 				Currency: &billing.Currency{
 					CodeInt:  643,
 					CodeA3:   "RUB",
@@ -428,7 +441,7 @@ func (s *BillingServerOkMock) ListRefunds(
 				ExternalId: "",
 				Amount:     10,
 				CreatorId:  "",
-				Reason:     SomeError,
+				Reason:     SomeError.Message,
 				Currency: &billing.Currency{
 					CodeInt:  643,
 					CodeA3:   "RUB",
@@ -454,7 +467,7 @@ func (s *BillingServerOkMock) GetRefund(
 			ExternalId: "",
 			Amount:     10,
 			CreatorId:  "",
-			Reason:     SomeError,
+			Reason:     SomeError.Message,
 			Currency: &billing.Currency{
 				CodeInt:  643,
 				CodeA3:   "RUB",
@@ -539,7 +552,7 @@ func (s *BillingServerOkMock) ChangeMerchantData(
 	}
 
 	if in.MerchantId == SomeMerchantId {
-		return nil, errors.New(SomeError)
+		return nil, SomeError
 	}
 
 	return rsp, nil
@@ -556,7 +569,7 @@ func (s *BillingServerOkMock) SetMerchantS3Agreement(
 	}
 
 	if in.MerchantId == SomeMerchantId {
-		return nil, errors.New(SomeError)
+		return nil, SomeError
 	}
 
 	return rsp, nil
@@ -630,8 +643,11 @@ func (s *BillingServerErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
 	opts ...client.CallOption,
-) (*billing.Order, error) {
-	return &billing.Order{}, nil
+) (*grpc.OrderCreateProcessResponse, error) {
+	return &grpc.OrderCreateProcessResponse{
+		Status: http.StatusOK,
+		Item:   &billing.Order{},
+	}, nil
 }
 
 func (s *BillingServerErrorMock) PaymentFormJsonDataProcess(
@@ -713,24 +729,33 @@ func (s *BillingServerErrorMock) ChangeMerchant(
 	ctx context.Context,
 	in *grpc.OnboardingRequest,
 	opts ...client.CallOption,
-) (*billing.Merchant, error) {
-	return nil, errors.New(SomeError)
+) (*grpc.ChangeMerchantResponse, error) {
+	return &grpc.ChangeMerchantResponse{
+		Status:  http.StatusBadRequest,
+		Message: SomeError,
+	}, nil
 }
 
 func (s *BillingServerErrorMock) ChangeMerchantStatus(
 	ctx context.Context,
 	in *grpc.MerchantChangeStatusRequest,
 	opts ...client.CallOption,
-) (*billing.Merchant, error) {
-	return nil, errors.New(SomeError)
+) (*grpc.ChangeMerchantStatusResponse, error) {
+	return &grpc.ChangeMerchantStatusResponse{
+		Status:  http.StatusBadRequest,
+		Message: SomeError,
+	}, nil
 }
 
 func (s *BillingServerErrorMock) CreateNotification(
 	ctx context.Context,
 	in *grpc.NotificationRequest,
 	opts ...client.CallOption,
-) (*billing.Notification, error) {
-	return nil, errors.New(SomeError)
+) (*grpc.CreateNotificationResponse, error) {
+	return &grpc.CreateNotificationResponse{
+		Status:  http.StatusBadRequest,
+		Message: SomeError,
+	}, nil
 }
 
 func (s *BillingServerErrorMock) GetNotification(
@@ -738,7 +763,7 @@ func (s *BillingServerErrorMock) GetNotification(
 	in *grpc.GetNotificationRequest,
 	opts ...client.CallOption,
 ) (*billing.Notification, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerErrorMock) ListNotifications(
@@ -746,7 +771,7 @@ func (s *BillingServerErrorMock) ListNotifications(
 	in *grpc.ListingNotificationRequest,
 	opts ...client.CallOption,
 ) (*grpc.Notifications, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerErrorMock) MarkNotificationAsRead(
@@ -754,7 +779,7 @@ func (s *BillingServerErrorMock) MarkNotificationAsRead(
 	in *grpc.GetNotificationRequest,
 	opts ...client.CallOption,
 ) (*billing.Notification, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerErrorMock) ListMerchantPaymentMethods(
@@ -762,7 +787,7 @@ func (s *BillingServerErrorMock) ListMerchantPaymentMethods(
 	in *grpc.ListMerchantPaymentMethodsRequest,
 	opts ...client.CallOption,
 ) (*grpc.ListingMerchantPaymentMethod, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerErrorMock) GetMerchantPaymentMethod(
@@ -824,7 +849,7 @@ func (s *BillingServerErrorMock) ProcessRefundCallback(
 ) (*grpc.PaymentNotifyResponse, error) {
 	return &grpc.PaymentNotifyResponse{
 		Status: pkg.ResponseStatusNotFound,
-		Error:  SomeError,
+		Error:  SomeError.Message,
 	}, nil
 }
 
@@ -966,8 +991,11 @@ func (s *BillingServerSystemErrorMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
 	opts ...client.CallOption,
-) (*billing.Order, error) {
-	return nil, errors.New(SomeError)
+) (*grpc.OrderCreateProcessResponse, error) {
+	return &grpc.OrderCreateProcessResponse{
+		Status:  http.StatusBadRequest,
+		Message: SomeError,
+	}, nil
 }
 
 func (s *BillingServerSystemErrorMock) PaymentFormJsonDataProcess(
@@ -975,7 +1003,7 @@ func (s *BillingServerSystemErrorMock) PaymentFormJsonDataProcess(
 	in *grpc.PaymentFormJsonDataRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormJsonDataResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) PaymentCreateProcess(
@@ -1039,31 +1067,40 @@ func (s *BillingServerSystemErrorMock) ListMerchants(
 	in *grpc.MerchantListingRequest,
 	opts ...client.CallOption,
 ) (*grpc.MerchantListingResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ChangeMerchant(
 	ctx context.Context,
 	in *grpc.OnboardingRequest,
 	opts ...client.CallOption,
-) (*billing.Merchant, error) {
-	return &billing.Merchant{}, nil
+) (*grpc.ChangeMerchantResponse, error) {
+	return &grpc.ChangeMerchantResponse{
+		Status: http.StatusOK,
+		Item:   &billing.Merchant{},
+	}, nil
 }
 
 func (s *BillingServerSystemErrorMock) ChangeMerchantStatus(
 	ctx context.Context,
 	in *grpc.MerchantChangeStatusRequest,
 	opts ...client.CallOption,
-) (*billing.Merchant, error) {
-	return &billing.Merchant{}, nil
+) (*grpc.ChangeMerchantStatusResponse, error) {
+	return &grpc.ChangeMerchantStatusResponse{
+		Status: http.StatusOK,
+		Item:   &billing.Merchant{},
+	}, nil
 }
 
 func (s *BillingServerSystemErrorMock) CreateNotification(
 	ctx context.Context,
 	in *grpc.NotificationRequest,
 	opts ...client.CallOption,
-) (*billing.Notification, error) {
-	return &billing.Notification{}, nil
+) (*grpc.CreateNotificationResponse, error) {
+	return &grpc.CreateNotificationResponse{
+		Status:  http.StatusBadRequest,
+		Message: SomeError,
+	}, nil
 }
 
 func (s *BillingServerSystemErrorMock) GetNotification(
@@ -1103,7 +1140,7 @@ func (s *BillingServerSystemErrorMock) GetMerchantPaymentMethod(
 	in *grpc.GetMerchantPaymentMethodRequest,
 	opts ...client.CallOption,
 ) (*grpc.GetMerchantPaymentMethodResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ChangeMerchantPaymentMethod(
@@ -1111,7 +1148,7 @@ func (s *BillingServerSystemErrorMock) ChangeMerchantPaymentMethod(
 	in *grpc.MerchantPaymentMethodRequest,
 	opts ...client.CallOption,
 ) (*grpc.MerchantPaymentMethodResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) CreateRefund(
@@ -1119,7 +1156,7 @@ func (s *BillingServerSystemErrorMock) CreateRefund(
 	in *grpc.CreateRefundRequest,
 	opts ...client.CallOption,
 ) (*grpc.CreateRefundResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ListRefunds(
@@ -1127,7 +1164,7 @@ func (s *BillingServerSystemErrorMock) ListRefunds(
 	in *grpc.ListRefundsRequest,
 	opts ...client.CallOption,
 ) (*grpc.ListRefundsResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) GetRefund(
@@ -1135,7 +1172,7 @@ func (s *BillingServerSystemErrorMock) GetRefund(
 	in *grpc.GetRefundRequest,
 	opts ...client.CallOption,
 ) (*grpc.CreateRefundResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ProcessRefundCallback(
@@ -1143,7 +1180,7 @@ func (s *BillingServerSystemErrorMock) ProcessRefundCallback(
 	in *grpc.CallbackRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentNotifyResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) PaymentFormLanguageChanged(
@@ -1151,7 +1188,7 @@ func (s *BillingServerSystemErrorMock) PaymentFormLanguageChanged(
 	in *grpc.PaymentFormUserChangeLangRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormDataChangeResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) PaymentFormPaymentAccountChanged(
@@ -1159,7 +1196,7 @@ func (s *BillingServerSystemErrorMock) PaymentFormPaymentAccountChanged(
 	in *grpc.PaymentFormUserChangePaymentAccountRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormDataChangeResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ProcessBillingAddress(
@@ -1167,7 +1204,7 @@ func (s *BillingServerSystemErrorMock) ProcessBillingAddress(
 	in *grpc.ProcessBillingAddressRequest,
 	opts ...client.CallOption,
 ) (*grpc.ProcessBillingAddressResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ChangeMerchantData(
@@ -1175,7 +1212,7 @@ func (s *BillingServerSystemErrorMock) ChangeMerchantData(
 	in *grpc.ChangeMerchantDataRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantDataResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) SetMerchantS3Agreement(
@@ -1183,7 +1220,7 @@ func (s *BillingServerSystemErrorMock) SetMerchantS3Agreement(
 	in *grpc.SetMerchantS3AgreementRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantDataResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ChangeProject(
@@ -1191,7 +1228,7 @@ func (s *BillingServerSystemErrorMock) ChangeProject(
 	in *billing.Project,
 	opts ...client.CallOption,
 ) (*grpc.ChangeProjectResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) GetProject(
@@ -1215,7 +1252,7 @@ func (s *BillingServerSystemErrorMock) GetProject(
 		}, nil
 	}
 
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) DeleteProject(
@@ -1223,7 +1260,7 @@ func (s *BillingServerSystemErrorMock) DeleteProject(
 	in *grpc.GetProjectRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeProjectResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) CreateToken(
@@ -1231,7 +1268,7 @@ func (s *BillingServerSystemErrorMock) CreateToken(
 	in *grpc.TokenRequest,
 	opts ...client.CallOption,
 ) (*grpc.TokenResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) CheckProjectRequestSignature(
@@ -1239,7 +1276,7 @@ func (s *BillingServerSystemErrorMock) CheckProjectRequestSignature(
 	in *grpc.CheckProjectRequestSignatureRequest,
 	opts ...client.CallOption,
 ) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) GetProductsForOrder(
@@ -1247,15 +1284,18 @@ func (s *BillingServerOkTemporaryMock) GetProductsForOrder(
 	in *grpc.GetProductsForOrderRequest,
 	opts ...client.CallOption,
 ) (*grpc.ListProductsResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) OrderCreateProcess(
 	ctx context.Context,
 	in *billing.OrderCreateRequest,
 	opts ...client.CallOption,
-) (*billing.Order, error) {
-	return &billing.Order{}, nil
+) (*grpc.OrderCreateProcessResponse, error) {
+	return &grpc.OrderCreateProcessResponse{
+		Status: http.StatusOK,
+		Item:   &billing.Order{},
+	}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) PaymentFormJsonDataProcess(
@@ -1321,7 +1361,7 @@ func (s *BillingServerOkTemporaryMock) GetMerchantBy(
 ) (*grpc.MerchantGetMerchantResponse, error) {
 	rsp := &grpc.MerchantGetMerchantResponse{
 		Status:  pkg.ResponseStatusOk,
-		Message: "",
+		Message: &grpc.ResponseErrorMessage{},
 		Item:    OnboardingMerchantMock,
 	}
 
@@ -1343,7 +1383,7 @@ func (s *BillingServerOkTemporaryMock) ChangeMerchant(
 	ctx context.Context,
 	in *grpc.OnboardingRequest,
 	opts ...client.CallOption,
-) (*billing.Merchant, error) {
+) (*grpc.ChangeMerchantResponse, error) {
 	m := &billing.Merchant{
 		Name:               in.Name,
 		AlternativeName:    in.AlternativeName,
@@ -1379,23 +1419,32 @@ func (s *BillingServerOkTemporaryMock) ChangeMerchant(
 		m.Id = bson.NewObjectId().Hex()
 	}
 
-	return m, nil
+	return &grpc.ChangeMerchantResponse{
+		Status: http.StatusOK,
+		Item:   m,
+	}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) ChangeMerchantStatus(
 	ctx context.Context,
 	in *grpc.MerchantChangeStatusRequest,
 	opts ...client.CallOption,
-) (*billing.Merchant, error) {
-	return &billing.Merchant{Id: in.MerchantId, Status: in.Status}, nil
+) (*grpc.ChangeMerchantStatusResponse, error) {
+	return &grpc.ChangeMerchantStatusResponse{
+		Status: http.StatusOK,
+		Item:   &billing.Merchant{Id: in.MerchantId, Status: in.Status},
+	}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) CreateNotification(
 	ctx context.Context,
 	in *grpc.NotificationRequest,
 	opts ...client.CallOption,
-) (*billing.Notification, error) {
-	return &billing.Notification{}, nil
+) (*grpc.CreateNotificationResponse, error) {
+	return &grpc.CreateNotificationResponse{
+		Status: http.StatusOK,
+		Item:   &billing.Notification{},
+	}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) GetNotification(
@@ -1494,7 +1543,7 @@ func (s *BillingServerOkTemporaryMock) ProcessRefundCallback(
 ) (*grpc.PaymentNotifyResponse, error) {
 	return &grpc.PaymentNotifyResponse{
 		Status: pkg.ResponseStatusOk,
-		Error:  SomeError,
+		Error:  SomeError.Message,
 	}, nil
 }
 
@@ -1503,7 +1552,7 @@ func (s *BillingServerOkTemporaryMock) ChangeProject(
 	in *billing.Project,
 	opts ...client.CallOption,
 ) (*grpc.ChangeProjectResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) GetProject(
@@ -1511,7 +1560,7 @@ func (s *BillingServerOkTemporaryMock) GetProject(
 	in *grpc.GetProjectRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeProjectResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) DeleteProject(
@@ -1530,7 +1579,7 @@ func (s *BillingServerOkTemporaryMock) CreateToken(
 	in *grpc.TokenRequest,
 	opts ...client.CallOption,
 ) (*grpc.TokenResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) CheckProjectRequestSignature(
@@ -1538,7 +1587,7 @@ func (s *BillingServerOkTemporaryMock) CheckProjectRequestSignature(
 	in *grpc.CheckProjectRequestSignatureRequest,
 	opts ...client.CallOption,
 ) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
@@ -1588,35 +1637,35 @@ func (s *BillingServerOkTemporaryMock) DeleteProduct(ctx context.Context, in *gr
 }
 
 func (s *BillingServerErrorMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerErrorMock) ListProducts(ctx context.Context, in *grpc.ListProductsRequest, opts ...client.CallOption) (*grpc.ListProductsResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerErrorMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) CreateOrUpdateProduct(ctx context.Context, in *grpc.Product, opts ...client.CallOption) (*grpc.Product, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ListProducts(ctx context.Context, in *grpc.ListProductsRequest, opts ...client.CallOption) (*grpc.ListProductsResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) PaymentFormLanguageChanged(
@@ -1624,7 +1673,7 @@ func (s *BillingServerOkTemporaryMock) PaymentFormLanguageChanged(
 	in *grpc.PaymentFormUserChangeLangRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormDataChangeResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) PaymentFormPaymentAccountChanged(
@@ -1632,7 +1681,7 @@ func (s *BillingServerOkTemporaryMock) PaymentFormPaymentAccountChanged(
 	in *grpc.PaymentFormUserChangePaymentAccountRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormDataChangeResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) ProcessBillingAddress(
@@ -1640,7 +1689,7 @@ func (s *BillingServerOkTemporaryMock) ProcessBillingAddress(
 	in *grpc.ProcessBillingAddressRequest,
 	opts ...client.CallOption,
 ) (*grpc.ProcessBillingAddressResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) ChangeMerchantData(
@@ -1664,11 +1713,11 @@ func (s *BillingServerOkMock) FindAllOrders(ctx context.Context, in *grpc.ListOr
 }
 
 func (s *BillingServerErrorMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
@@ -1680,11 +1729,11 @@ func (s *BillingServerOkMock) ListProjects(ctx context.Context, in *grpc.ListPro
 }
 
 func (s *BillingServerErrorMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
@@ -1696,11 +1745,11 @@ func (s *BillingServerOkMock) GetOrder(ctx context.Context, in *grpc.GetOrderReq
 }
 
 func (s *BillingServerErrorMock) GetOrder(ctx context.Context, in *grpc.GetOrderRequest, opts ...client.CallOption) (*billing.Order, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) GetOrder(ctx context.Context, in *grpc.GetOrderRequest, opts ...client.CallOption) (*billing.Order, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) GetOrder(ctx context.Context, in *grpc.GetOrderRequest, opts ...client.CallOption) (*billing.Order, error) {
@@ -1934,7 +1983,7 @@ func (s *BillingServerSystemErrorMock) IsOrderCanBePaying(
 	in *grpc.IsOrderCanBePayingRequest,
 	opts ...client.CallOption,
 ) (*grpc.IsOrderCanBePayingResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) GetCountry(ctx context.Context, in *billing.GetCountryRequest, opts ...client.CallOption) (*billing.Country, error) {
@@ -2199,7 +2248,7 @@ func (s *BillingServerOkTemporaryMock) FindByZipCode(
 	in *grpc.FindByZipCodeRequest,
 	opts ...client.CallOption,
 ) (*grpc.FindByZipCodeResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerErrorMock) FindByZipCode(
@@ -2207,7 +2256,7 @@ func (s *BillingServerErrorMock) FindByZipCode(
 	in *grpc.FindByZipCodeRequest,
 	opts ...client.CallOption,
 ) (*grpc.FindByZipCodeResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) FindByZipCode(
@@ -2215,7 +2264,7 @@ func (s *BillingServerSystemErrorMock) FindByZipCode(
 	in *grpc.FindByZipCodeRequest,
 	opts ...client.CallOption,
 ) (*grpc.FindByZipCodeResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkMock) CreateAccountingEntry(
@@ -2247,5 +2296,5 @@ func (s *BillingServerSystemErrorMock) CreateAccountingEntry(
 	in *grpc.CreateAccountingEntryRequest,
 	opts ...client.CallOption,
 ) (*grpc.CreateAccountingEntryRequest, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }

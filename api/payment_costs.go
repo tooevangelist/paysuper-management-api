@@ -51,7 +51,7 @@ func (r *paymentCostRoute) getPaymentChannelCostSystem(ctx echo.Context) error {
 	req := &billing.PaymentChannelCostSystemRequest{}
 	err := ctx.Bind(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	err = r.validate.Struct(req)
@@ -73,7 +73,7 @@ func (r *paymentCostRoute) getPaymentChannelCostMerchant(ctx echo.Context) error
 	req := &billing.PaymentChannelCostMerchantRequest{}
 	err := ctx.Bind(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -101,7 +101,7 @@ func (r *paymentCostRoute) getMoneyBackCostSystem(ctx echo.Context) error {
 	req := &billing.MoneyBackCostSystemRequest{}
 	err := ctx.Bind(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	err = r.validate.Struct(req)
@@ -122,7 +122,7 @@ func (r *paymentCostRoute) getMoneyBackCostMerchant(ctx echo.Context) error {
 	req := &billing.MoneyBackCostMerchantRequest{}
 	err := ctx.Bind(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -239,7 +239,7 @@ func (r *paymentCostRoute) setPaymentChannelCostSystem(ctx echo.Context) error {
 	req := &billing.PaymentChannelCostSystem{}
 	err := ctx.Bind(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	if pcId := ctx.Param(requestParameterId); pcId != "" {
@@ -272,7 +272,7 @@ func (r *paymentCostRoute) setPaymentChannelCostMerchant(ctx echo.Context) error
 	req := &billing.PaymentChannelCostMerchant{}
 	err := ctx.Bind(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	if pcId := ctx.Param(requestParameterId); pcId != "" {
@@ -311,7 +311,7 @@ func (r *paymentCostRoute) setMoneyBackCostSystem(ctx echo.Context) error {
 	req := &billing.MoneyBackCostSystem{}
 	err := ctx.Bind(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	if pcId := ctx.Param(requestParameterId); pcId != "" {
@@ -344,7 +344,7 @@ func (r *paymentCostRoute) setMoneyBackCostMerchant(ctx echo.Context) error {
 	req := &billing.MoneyBackCostMerchant{}
 	err := ctx.Bind(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	if pcId := ctx.Param(requestParameterId); pcId != "" {

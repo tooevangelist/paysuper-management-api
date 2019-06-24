@@ -58,13 +58,13 @@ func (cApiV1 *CurrencyApiV1) getById(ctx echo.Context) error {
 	codeInt, err := strconv.Atoi(ctx.Param("id"))
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Incorrect currency identifier")
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectCurrencyIdentifier)
 	}
 
 	c := cApiV1.currencyManager.FindByCodeInt(codeInt)
 
 	if c == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Currency not found")
+		return echo.NewHTTPError(http.StatusNotFound, errorCurrencyNotFound)
 	}
 
 	return ctx.JSON(http.StatusOK, c)
