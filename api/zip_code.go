@@ -21,7 +21,7 @@ func (r *zipCodeRoute) checkZip(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	if req.Limit <= 0 {
@@ -31,7 +31,7 @@ func (r *zipCodeRoute) checkZip(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	rsp, err := r.billingService.FindByZipCode(ctx.Request().Context(), req)

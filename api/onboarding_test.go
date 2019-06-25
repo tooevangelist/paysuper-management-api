@@ -249,7 +249,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_BindingError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_ValidationError() {
@@ -269,7 +269,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_ValidationError()
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Offset", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Offset"), httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_BillingServiceUnavailable_Error() {
@@ -391,7 +391,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateMerchant_ValidationError(
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Banking", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Banking"), httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_CreateMerchant_BillingServiceUnavailable_Error() {
@@ -687,7 +687,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_Validation
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Status", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Status"), httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_BillingServerUnavailable_Error() {
@@ -829,7 +829,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_ValidationEr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Title", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Title"), httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_BillingServerUnavailable_Error() {
@@ -918,7 +918,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_BillingServerUn
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+	assert.Equal(suite.T(), errorNotificationNotFound, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_Ok() {
@@ -964,7 +964,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_ValidationError() {
@@ -988,7 +988,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_ValidationErr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "UserId", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("UserId"), httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BillingServerError() {
@@ -1013,7 +1013,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BillingServer
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_Ok() {
@@ -1072,7 +1072,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_BillingS
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_Ok() {
@@ -1110,7 +1110,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_ValidationErro
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIncorrectPaymentMethodId, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_BillingServer_Error() {
@@ -1188,7 +1188,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_ValidationEr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "MerchantId", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("MerchantId"), httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_BillingServer_Error() {
@@ -1290,7 +1290,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BindingErro
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIncorrectMerchantId, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_ValidationError() {
@@ -1332,7 +1332,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_ValidationE
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Fee", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Fee"), httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BillingServer_Error() {
@@ -1444,7 +1444,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_BindError(
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIncorrectMerchantId, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_BindError() {
@@ -1470,7 +1470,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_BindError() 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorIncorrectMerchantId, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_IncorrectMerchant_Error() {
@@ -1549,7 +1549,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_ValidationError() {
@@ -1571,7 +1571,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_ValidationError
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "AgreementType", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("AgreementType"), httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerSystemError() {
@@ -1616,7 +1616,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerRe
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_Ok() {
@@ -1658,7 +1658,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_MerchantIdInv
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_BillingServerSystemError() {
@@ -1783,7 +1783,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExis
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), "The specified key does not exist.", httpErr.Message)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
@@ -1839,7 +1839,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_MerchantId
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_BillingServerSystemError() {
@@ -1917,7 +1917,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_AgreementF
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), "The specified key does not exist.", httpErr.Message)
+	assert.Equal(suite.T(), errorAgreementFileNotExist, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_Ok() {
@@ -1981,7 +1981,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_Merchan
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_BillingServerSystemError() {
@@ -2040,7 +2040,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_NotMult
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), "no multipart boundary param in Content-Type", httpErr.Message)
+	assert.Equal(suite.T(), errorNotMultipartForm, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_UploadFileValidationError() {
@@ -2162,7 +2162,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_S3Uploa
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), "unexpected EOF", httpErr.Message)
+	assert.Equal(suite.T(), errorUploadFailed, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) newFileUploadRequest(

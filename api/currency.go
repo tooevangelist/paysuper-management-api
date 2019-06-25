@@ -29,7 +29,7 @@ func (api *Api) InitCurrencyRoutes() *Api {
 func (cApiV1 *CurrencyApiV1) get(ctx echo.Context) error {
 	res, err := cApiV1.billingService.GetCurrencyList(ctx.Request().Context(), &grpc.EmptyRequest{})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Currency list error")
+		return echo.NewHTTPError(http.StatusInternalServerError, errorCurrencyNotFound)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -55,7 +55,7 @@ func (cApiV1 *CurrencyApiV1) getByName(ctx echo.Context) error {
 	res, err := cApiV1.billingService.GetCurrency(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Currency not found")
+		return echo.NewHTTPError(http.StatusNotFound, errorCurrencyNotFound)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -67,7 +67,7 @@ func (cApiV1 *CurrencyApiV1) getById(ctx echo.Context) error {
 	i, err := strconv.ParseInt(ctx.QueryParam("id"), 10, 32)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectCurrencyIdentifier)
 	}
 
 	req := &billing.GetCurrencyRequest{CurrencyInt: int32(i)}
@@ -78,7 +78,7 @@ func (cApiV1 *CurrencyApiV1) getById(ctx echo.Context) error {
 
 	res, err := cApiV1.billingService.GetCurrency(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Currency not found")
+		return echo.NewHTTPError(http.StatusNotFound, errorCurrencyNotFound)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

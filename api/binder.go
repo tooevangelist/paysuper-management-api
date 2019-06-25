@@ -12,6 +12,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-payment-link/proto"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"strconv"
 	"time"
@@ -236,7 +237,7 @@ func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context)
 			if v[0] == "1" || v[0] == "true" {
 				structure.IsSigned = 2
 			} else {
-				return errors.New(errorQueryParamsIncorrect)
+				return errorRequestParamsIncorrect
 			}
 		}
 	}
@@ -276,11 +277,11 @@ func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context
 	paymentMethodId := ctx.Param(requestParameterPaymentMethodId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return errors.New(errorIncorrectMerchantId)
+		return errorIncorrectMerchantId
 	}
 
 	if paymentMethodId == "" || bson.IsObjectIdHex(paymentMethodId) == false {
-		return errors.New(errorIncorrectPaymentMethodId)
+		return errorIncorrectPaymentMethodId
 	}
 
 	structure := i.(*grpc.GetMerchantPaymentMethodRequest)
@@ -303,12 +304,12 @@ func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Cont
 	methodId := ctx.Param(requestParameterPaymentMethodId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return errors.New(errorIncorrectMerchantId)
+		return errorIncorrectMerchantId
 	}
 
 	if methodId == "" || bson.IsObjectIdHex(methodId) == false ||
 		structure.PaymentMethod.Id != methodId {
-		return errors.New(errorIncorrectPaymentMethodId)
+		return errorIncorrectPaymentMethodId
 	}
 
 	structure.MerchantId = merchantId
@@ -327,7 +328,7 @@ func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Cont
 	merchantId := ctx.Param(requestParameterId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return errors.New(errorIncorrectMerchantId)
+		return errorIncorrectMerchantId
 	}
 
 	structure := i.(*grpc.MerchantChangeStatusRequest)
@@ -347,7 +348,7 @@ func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Contex
 	merchantId := ctx.Param(requestParameterMerchantId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return errors.New(errorIncorrectMerchantId)
+		return errorIncorrectMerchantId
 	}
 
 	structure := i.(*grpc.NotificationRequest)
@@ -422,7 +423,7 @@ func (b *PaylinksCreateBinder) Bind(i interface{}, ctx echo.Context) error {
 func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
 	id := ctx.Param(requestParameterId)
 	if id == "" {
-		return errors.New(errorIncorrectPaylinkId)
+		return errorIncorrectPaylinkId
 	}
 	db := new(echo.DefaultBinder)
 	err := db.Bind(i, ctx)
@@ -499,7 +500,7 @@ func (b *ProductsCreateProductBinder) Bind(i interface{}, ctx echo.Context) erro
 func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) error {
 	id := ctx.Param(requestParameterId)
 	if id == "" || bson.IsObjectIdHex(id) == false {
-		return errors.New(errorIncorrectProductId)
+		return errorIncorrectProductId
 	}
 	db := new(echo.DefaultBinder)
 	err := db.Bind(i, ctx)
@@ -520,25 +521,25 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 	err := db.Bind(&req, ctx)
 
 	if err != nil {
-		return errors.New(errorQueryParamsIncorrect)
+		return errorRequestParamsIncorrect
 	}
 
 	merchantId := ctx.Param(requestParameterId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return errors.New(errorIncorrectMerchantId)
+		return errorIncorrectMerchantId
 	}
 
 	mReq := &grpc.GetMerchantByRequest{MerchantId: merchantId}
 	mRsp, err := b.billingService.GetMerchantBy(context.Background(), mReq)
 
 	if err != nil {
-		b.logError(`Call billing server method "GetMerchantBy" failed`, []interface{}{"error", err.Error(), "request", mReq})
-		return errors.New(errorUnknown)
+		zap.S().Errorf(`Call billing server method "GetMerchantBy" failed`, "error", err.Error(), "request", mReq)
+		return errorUnknown
 	}
 
 	if mRsp.Status != pkg.ResponseStatusOk {
-		return errors.New(mRsp.Message)
+		return mRsp.Message
 	}
 
 	structure := i.(*grpc.ChangeMerchantDataRequest)
@@ -551,7 +552,7 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 
 	if v, ok := req[requestParameterAgreementType]; ok {
 		if tv, ok := v.(float64); !ok {
-			return errors.New(errorMessageAgreementTypeIncorrectType)
+			return errorMessageAgreementTypeIncorrectType
 		} else {
 			structure.AgreementType = int32(tv)
 		}
@@ -559,7 +560,7 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 
 	if v, ok := req[requestParameterHasMerchantSignature]; ok {
 		if tv, ok := v.(bool); !ok {
-			return errors.New(errorMessageHasMerchantSignatureIncorrectType)
+			return errorMessageHasMerchantSignatureIncorrectType
 		} else {
 			structure.HasMerchantSignature = tv
 		}
@@ -567,7 +568,7 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 
 	if v, ok := req[requestParameterHasPspSignature]; ok {
 		if tv, ok := v.(bool); !ok {
-			return errors.New(errorMessageHasPspSignatureIncorrectType)
+			return errorMessageHasPspSignatureIncorrectType
 		} else {
 			structure.HasPspSignature = tv
 		}
@@ -575,7 +576,7 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 
 	if v, ok := req[requestParameterAgreementSentViaMail]; ok {
 		if tv, ok := v.(bool); !ok {
-			return errors.New(errorMessageAgreementSentViaMailIncorrectType)
+			return errorMessageAgreementSentViaMailIncorrectType
 		} else {
 			structure.AgreementSentViaMail = tv
 		}
@@ -583,7 +584,7 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 
 	if v, ok := req[requestParameterMailTrackingLink]; ok {
 		if tv, ok := v.(string); !ok {
-			return errors.New(errorMessageMailTrackingLinkIncorrectType)
+			return errorMessageMailTrackingLinkIncorrectType
 		} else {
 			structure.MailTrackingLink = tv
 		}
@@ -599,25 +600,25 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	err := db.Bind(&req, ctx)
 
 	if err != nil {
-		return errors.New(errorQueryParamsIncorrect)
+		return errorRequestParamsIncorrect
 	}
 
 	projectId := ctx.Param(requestParameterId)
 
 	if projectId == "" || bson.IsObjectIdHex(projectId) == false {
-		return errors.New(errorIncorrectProjectId)
+		return errorIncorrectProjectId
 	}
 
 	pReq := &grpc.GetProjectRequest{ProjectId: projectId}
 	pRsp, err := b.billingService.GetProject(context.Background(), pReq)
 
 	if err != nil {
-		b.logError(`Call billing server method "GetProject" failed`, []interface{}{"error", err.Error(), "request", pReq})
-		return errors.New(errorUnknown)
+		zap.S().Errorf(`Call billing server method "GetProject" failed`, "error", err.Error(), "request", pReq)
+		return errorUnknown
 	}
 
 	if pRsp.Status != pkg.ResponseStatusOk {
-		return errors.New(pRsp.Message)
+		return pRsp.Message
 	}
 
 	structure := i.(*billing.Project)
@@ -648,7 +649,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		tv, ok := v.(map[string]interface{})
 
 		if !ok || len(tv) <= 0 {
-			return errors.New(errorMessageNameIncorrectType)
+			return errorMessageNameIncorrectType
 		}
 
 		for k, tvv := range tv {
@@ -658,7 +659,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterImage]; ok {
 		if tv, ok := v.(string); !ok {
-			return errors.New(errorMessageImageIncorrectType)
+			return errorMessageImageIncorrectType
 		} else {
 			structure.Image = tv
 		}
@@ -666,7 +667,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterCallbackCurrency]; ok {
 		if tv, ok := v.(string); !ok {
-			return errors.New(errorMessageCallbackCurrencyIncorrectType)
+			return errorMessageCallbackCurrencyIncorrectType
 		} else {
 			structure.CallbackCurrency = tv
 		}
@@ -674,7 +675,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterCallbackProtocol]; ok {
 		if tv, ok := v.(string); !ok {
-			return errors.New(errorMessageCallbackProtocolIncorrectType)
+			return errorMessageCallbackProtocolIncorrectType
 		} else {
 			structure.CallbackProtocol = tv
 		}
@@ -684,7 +685,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		tv, ok := v.([]interface{})
 
 		if !ok {
-			return errors.New(errorMessageCreateOrderAllowedUrlsIncorrectType)
+			return errorMessageCreateOrderAllowedUrlsIncorrectType
 		}
 
 		structure.CreateOrderAllowedUrls = []string{}
@@ -696,7 +697,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterAllowDynamicNotifyUrls]; ok {
 		if tv, ok := v.(bool); !ok {
-			return errors.New(errorMessageAllowDynamicNotifyUrlsIncorrectType)
+			return errorMessageAllowDynamicNotifyUrlsIncorrectType
 		} else {
 			structure.AllowDynamicNotifyUrls = tv
 		}
@@ -704,7 +705,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterAllowDynamicRedirectUrls]; ok {
 		if tv, ok := v.(bool); !ok {
-			return errors.New(errorMessageAllowDynamicRedirectUrlsIncorrectType)
+			return errorMessageAllowDynamicRedirectUrlsIncorrectType
 		} else {
 			structure.AllowDynamicRedirectUrls = tv
 		}
@@ -712,7 +713,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterLimitsCurrency]; ok {
 		if tv, ok := v.(string); !ok {
-			return errors.New(errorMessageLimitsCurrencyIncorrectType)
+			return errorMessageLimitsCurrencyIncorrectType
 		} else {
 			structure.LimitsCurrency = tv
 		}
@@ -720,7 +721,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterMinPaymentAmount]; ok {
 		if tv, ok := v.(float64); !ok {
-			return errors.New(errorMessageMinPaymentAmountIncorrectType)
+			return errorMessageMinPaymentAmountIncorrectType
 		} else {
 			structure.MinPaymentAmount = tv
 		}
@@ -728,7 +729,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterMaxPaymentAmount]; ok {
 		if tv, ok := v.(float64); !ok {
-			return errors.New(errorMessageMaxPaymentAmountIncorrectType)
+			return errorMessageMaxPaymentAmountIncorrectType
 		} else {
 			structure.MaxPaymentAmount = tv
 		}
@@ -738,7 +739,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		tv, ok := v.([]interface{})
 
 		if !ok {
-			return errors.New(errorMessageNotifyEmailsIncorrectType)
+			return errorMessageNotifyEmailsIncorrectType
 		}
 
 		structure.NotifyEmails = []string{}
@@ -750,7 +751,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterIsProductsCheckout]; ok {
 		if tv, ok := v.(bool); !ok {
-			return errors.New(errorMessageIsProductsCheckoutIncorrectType)
+			return errorMessageIsProductsCheckoutIncorrectType
 		} else {
 			structure.IsProductsCheckout = tv
 		}
@@ -758,7 +759,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterSecretKey]; ok {
 		if tv, ok := v.(string); !ok {
-			return errors.New(errorMessageSecretKeyIncorrectType)
+			return errorMessageSecretKeyIncorrectType
 		} else {
 			structure.SecretKey = tv
 		}
@@ -766,7 +767,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterSignatureRequired]; ok {
 		if tv, ok := v.(bool); !ok {
-			return errors.New(errorMessageSignatureRequiredIncorrectType)
+			return errorMessageSignatureRequiredIncorrectType
 		} else {
 			structure.SignatureRequired = tv
 		}
@@ -774,7 +775,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterSendNotifyEmail]; ok {
 		if tv, ok := v.(bool); !ok {
-			return errors.New(errorMessageSendNotifyEmailIncorrectType)
+			return errorMessageSendNotifyEmailIncorrectType
 		} else {
 			structure.SendNotifyEmail = tv
 		}
@@ -782,7 +783,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterUrlCheckAccount]; ok {
 		if tv, ok := v.(string); !ok {
-			return errors.New(errorMessageUrlCheckAccountIncorrectType)
+			return errorMessageUrlCheckAccountIncorrectType
 		} else {
 			structure.UrlCheckAccount = tv
 		}
@@ -790,7 +791,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterUrlProcessPayment]; ok {
 		if tv, ok := v.(string); !ok {
-			return errors.New(errorMessageUrlProcessPaymentIncorrectType)
+			return errorMessageUrlProcessPaymentIncorrectType
 		} else {
 			structure.UrlProcessPayment = tv
 		}
@@ -798,7 +799,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterUrlRedirectFail]; ok {
 		if tv, ok := v.(string); !ok {
-			return errors.New(errorMessageUrlRedirectFailIncorrectType)
+			return errorMessageUrlRedirectFailIncorrectType
 		} else {
 			structure.UrlRedirectFail = tv
 		}
@@ -806,7 +807,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterUrlRedirectSuccess]; ok {
 		if tv, ok := v.(string); !ok {
-			return errors.New(errorMessageUrlRedirectSuccessIncorrectType)
+			return errorMessageUrlRedirectSuccessIncorrectType
 		} else {
 			structure.UrlRedirectSuccess = tv
 		}
@@ -814,9 +815,41 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[requestParameterStatus]; ok {
 		if tv, ok := v.(float64); !ok {
-			return errors.New(errorMessageStatusIncorrectType)
+			return errorMessageStatusIncorrectType
 		} else {
 			structure.Status = int32(tv)
+		}
+	}
+
+	if v, ok := req[requestParameterUrlChargebackPayment]; ok {
+		if tv, ok := v.(string); !ok {
+			return errorMessageUrlChargebackPayment
+		} else {
+			structure.UrlChargebackPayment = tv
+		}
+	}
+
+	if v, ok := req[requestParameterUrlCancelPayment]; ok {
+		if tv, ok := v.(string); !ok {
+			return errorMessageUrlCancelPayment
+		} else {
+			structure.UrlCancelPayment = tv
+		}
+	}
+
+	if v, ok := req[requestParameterUrlFraudPayment]; ok {
+		if tv, ok := v.(string); !ok {
+			return errorMessageUrlFraudPayment
+		} else {
+			structure.UrlFraudPayment = tv
+		}
+	}
+
+	if v, ok := req[requestParameterUrlRefundPayment]; ok {
+		if tv, ok := v.(string); !ok {
+			return errorMessageUrlRefundPayment
+		} else {
+			structure.UrlRefundPayment = tv
 		}
 	}
 

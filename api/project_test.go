@@ -84,7 +84,7 @@ func (suite *ProjectTestSuite) TestProject_CreateProject_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	//assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	//assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *ProjectTestSuite) TestProject_CreateProject_ValidationError() {
@@ -113,7 +113,7 @@ func (suite *ProjectTestSuite) TestProject_CreateProject_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "MinPaymentAmount", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("MinPaymentAmount"), httpErr.Message)
 }
 
 func (suite *ProjectTestSuite) TestProject_CreateProject_BillingServerError() {
@@ -212,7 +212,7 @@ func (suite *ProjectTestSuite) TestProject_UpdateProject_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorMessageNameIncorrectType, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *ProjectTestSuite) TestProject_UpdateProject_ValidationError() {
@@ -233,7 +233,7 @@ func (suite *ProjectTestSuite) TestProject_UpdateProject_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "MinPaymentAmount", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("MinPaymentAmount"), httpErr.Message)
 }
 
 func (suite *ProjectTestSuite) TestProject_UpdateProject_BillingServerError() {
@@ -308,7 +308,7 @@ func (suite *ProjectTestSuite) TestProject_GetProject_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "ProjectId", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("ProjectId"), httpErr.Message)
 }
 
 func (suite *ProjectTestSuite) TestProject_GetProject_BillingServerError() {
@@ -381,7 +381,7 @@ func (suite *ProjectTestSuite) TestProject_ListProjects_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *ProjectTestSuite) TestProject_ListProjects_ValidationError() {
@@ -399,7 +399,7 @@ func (suite *ProjectTestSuite) TestProject_ListProjects_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Offset", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Offset"), httpErr.Message)
 }
 
 func (suite *ProjectTestSuite) TestProject_ListProjects_BillingServerError() {
@@ -449,7 +449,7 @@ func (suite *ProjectTestSuite) TestProject_DeleteProject_ValidateError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "ProjectId", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("ProjectId"), httpErr.Message)
 }
 
 func (suite *ProjectTestSuite) TestProject_DeleteProject_BillingServerError() {

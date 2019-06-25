@@ -31,11 +31,11 @@ func (h *CardPayWebHook) paymentCallback(ctx echo.Context) error {
 	st := &billing.CardPayPaymentCallback{}
 
 	if err := ctx.Bind(st); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	if err := h.validate.Struct(st); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, getFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
 	}
 
 	req := &grpc.PaymentNotifyRequest{
@@ -47,7 +47,7 @@ func (h *CardPayWebHook) paymentCallback(ctx echo.Context) error {
 	rsp, err := h.billingService.PaymentCallbackProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageUnknownError)
+		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
 	var httpStatus int
@@ -76,13 +76,13 @@ func (h *CardPayWebHook) refundCallback(ctx echo.Context) error {
 	err := ctx.Bind(st)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = h.validate.Struct(st)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, getFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
 	}
 
 	req := &grpc.CallbackRequest{

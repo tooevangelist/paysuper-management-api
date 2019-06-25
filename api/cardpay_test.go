@@ -113,7 +113,7 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *CardPayTestSuite) TestCardPay_RefundCallback_ValidationError() {
@@ -160,7 +160,7 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "PaymentData", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("PaymentData"), httpErr.Message)
 }
 
 func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BillingServerSystemError() {
@@ -264,7 +264,7 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BillingServer_Error() 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+	assert.Equal(suite.T(), mock.SomeError.Message, httpErr.Message)
 }
 
 func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BillingServerTemporary_Ok() {
@@ -320,5 +320,5 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BillingServerTemporary
 
 	v, ok := body["message"]
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), mock.SomeError, v)
+	assert.Equal(suite.T(), mock.SomeError.Message, v)
 }

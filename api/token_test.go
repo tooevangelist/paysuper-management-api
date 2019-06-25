@@ -136,7 +136,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_BindError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorQueryParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *TokenTestSuite) TestToken_CreateToken_ValidationError() {
@@ -187,7 +187,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_ValidationError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "Amount", httpErr.Message)
+	assert.Regexp(suite.T(), newValidationError("Amount"), httpErr.Message)
 }
 
 func (suite *TokenTestSuite) TestToken_CreateToken_CheckProjectRequestSignature_System_Error() {

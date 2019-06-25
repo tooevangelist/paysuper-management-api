@@ -71,7 +71,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Get
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Add() {
-	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34}`
+	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34, "fix_amount_currency": "USD"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/payment_costs/channel/system", strings.NewReader(bodyJson))
@@ -181,12 +181,12 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_D
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_GetAll() {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/payment_costs/undo/system/all", nil)
+	req := httptest.NewRequest(http.MethodGet, "/payment_costs/money_back/system/all", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/undo/system/all")
+	ctx.SetPath("/payment_costs/money_back/system/all")
 	err := suite.router.getAllMoneyBackCostSystem(ctx)
 
 	if assert.NoError(suite.T(), err) {
@@ -196,7 +196,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_GetAll()
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Get() {
-	path := "/payment_costs/undo/system?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&days=10&undoReason=chargeback&paymentStage=1"
+	path := "/payment_costs/money_back/system?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&days=10&undoReason=chargeback&paymentStage=1"
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, path, nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -217,12 +217,12 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Add() {
                   "payout_currency": "USD", "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1}`
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/payment_costs/undo/system", strings.NewReader(bodyJson))
+	req := httptest.NewRequest(http.MethodPost, "/payment_costs/money_back/system", strings.NewReader(bodyJson))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/undo/system")
+	ctx.SetPath("/payment_costs/money_back/system")
 	err := suite.router.setMoneyBackCostSystem(ctx)
 
 	if assert.NoError(suite.T(), err) {
@@ -233,12 +233,12 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Add() {
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Delete() {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/payment_costs/undo/system/5be2d0b4b0b30d0007383ce6", nil)
+	req := httptest.NewRequest(http.MethodGet, "/payment_costs/money_back/system/5be2d0b4b0b30d0007383ce6", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/undo/system/:" + requestParameterId)
+	ctx.SetPath("/payment_costs/money_back/system/:" + requestParameterId)
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("5be2d0b4b0b30d0007383ce6")
 
@@ -252,12 +252,12 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Delete()
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_GetAll() {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/payment_costs/undo/merchant/all", nil)
+	req := httptest.NewRequest(http.MethodGet, "/payment_costs/money_back/merchant/all", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/undo/merchant/all")
+	ctx.SetPath("/payment_costs/money_back/merchant/all")
 	err := suite.router.getAllMoneyBackCostMerchant(ctx)
 
 	if assert.NoError(suite.T(), err) {
@@ -267,7 +267,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_GetAll
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Get() {
-	path := "/payment_costs/undo/merchant?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&days=10&undoReason=chargeback&paymentStage=1"
+	path := "/payment_costs/money_back/merchant?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&days=10&undoReason=chargeback&paymentStage=1"
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, path, nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -289,12 +289,12 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Add() 
                   "is_paid_by_merchant": true}`
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/payment_costs/undo/merchant", strings.NewReader(bodyJson))
+	req := httptest.NewRequest(http.MethodPost, "/payment_costs/money_back/merchant", strings.NewReader(bodyJson))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/undo/merchant")
+	ctx.SetPath("/payment_costs/money_back/merchant")
 	err := suite.router.setMoneyBackCostMerchant(ctx)
 
 	if assert.NoError(suite.T(), err) {
@@ -305,12 +305,12 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Add() 
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Delete() {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/payment_costs/undo/merchant/5be2d0b4b0b30d0007383ce6", nil)
+	req := httptest.NewRequest(http.MethodGet, "/payment_costs/money_back/merchant/5be2d0b4b0b30d0007383ce6", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/undo/merchant/:" + requestParameterId)
+	ctx.SetPath("/payment_costs/money_back/merchant/:" + requestParameterId)
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("5be2d0b4b0b30d0007383ce6")
 

@@ -4,6 +4,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -32,7 +33,7 @@ func (r *productRoute) getProductsList(ctx echo.Context) error {
 	err := (&ProductsGetProductsListBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -44,12 +45,13 @@ func (r *productRoute) getProductsList(ctx echo.Context) error {
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	res, err := r.billingService.ListProducts(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -76,12 +78,13 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	res, err := r.billingService.GetProduct(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -107,12 +110,13 @@ func (r *productRoute) deleteProduct(ctx echo.Context) error {
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	_, err = r.billingService.DeleteProduct(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
@@ -145,7 +149,7 @@ func (r *productRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 	err := binder.Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -157,12 +161,13 @@ func (r *productRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	res, err := r.billingService.CreateOrUpdateProduct(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

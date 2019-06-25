@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-payment-link/proto"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -34,7 +35,7 @@ func (r *paylinkRoute) getPaylinksList(ctx echo.Context) error {
 	err := (&PaylinksListBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -46,12 +47,13 @@ func (r *paylinkRoute) getPaylinksList(ctx echo.Context) error {
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	res, err := r.paylinkService.GetPaylinks(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -67,12 +69,13 @@ func (r *paylinkRoute) getPaylink(ctx echo.Context) error {
 	}
 	err := r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	res, err := r.paylinkService.GetPaylink(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -88,12 +91,13 @@ func (r *paylinkRoute) getPaylinkStat(ctx echo.Context) error {
 	}
 	err := r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	res, err := r.paylinkService.GetPaylinkStat(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -106,17 +110,18 @@ func (r *paylinkRoute) getPaylinkUrl(ctx echo.Context) error {
 	err := (&PaylinksUrlBinder{}).Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorQueryParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	res, err := r.paylinkService.GetPaylinkURL(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -132,12 +137,13 @@ func (r *paylinkRoute) deletePaylink(ctx echo.Context) error {
 	}
 	err := r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	_, err = r.paylinkService.DeletePaylink(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
@@ -160,7 +166,7 @@ func (r *paylinkRoute) createOrUpdatePaylink(ctx echo.Context, binder echo.Binde
 	err := binder.Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -172,12 +178,13 @@ func (r *paylinkRoute) createOrUpdatePaylink(ctx echo.Context, binder echo.Binde
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
 	}
 
 	res, err := r.paylinkService.CreateOrUpdatePaylink(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

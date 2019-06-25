@@ -28,7 +28,7 @@ func (cApiV1 *CountryApiV1) get(ctx echo.Context) error {
 
 	res, err := cApiV1.billingService.GetCountriesList(ctx.Request().Context(), &grpc.EmptyRequest{})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Countries list error")
+		return echo.NewHTTPError(http.StatusInternalServerError, errorCountriesListError)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -40,7 +40,7 @@ func (cApiV1 *CountryApiV1) getById(ctx echo.Context) error {
 	code := ctx.Param("code")
 
 	if len(code) != 2 {
-		return echo.NewHTTPError(http.StatusBadRequest, "Incorrect country identifier")
+		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectCountryIdentifier)
 	}
 
 	req := &billing.GetCountryRequest{
@@ -48,12 +48,12 @@ func (cApiV1 *CountryApiV1) getById(ctx echo.Context) error {
 	}
 	err := cApiV1.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, getFirstValidationError(err))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
 	}
 
 	res, err := cApiV1.billingService.GetCountry(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Country not found")
+		return echo.NewHTTPError(http.StatusNotFound, errorCountryNotFound)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
