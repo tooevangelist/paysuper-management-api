@@ -75,7 +75,7 @@ func (suite *CurrencyTestSuite) TestCurrency_GetByName_BindingError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), "field validation for 'CurrencyCode' failed on the 'alpha' tag", httpErr.Message)
+	assert.Regexp(suite.T(), errorValidationFailed.Message, httpErr.Message)
 }
 
 func (suite *CurrencyTestSuite) TestCurrency_GetByName_NotFound() {
@@ -99,7 +99,7 @@ func (suite *CurrencyTestSuite) TestCurrency_GetByName_NotFound() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
-	assert.Equal(suite.T(), "Currency not found", httpErr.Message)
+	assert.Regexp(suite.T(), errorCurrencyNotFound.Message, httpErr.Message)
 }
 
 func (suite *CurrencyTestSuite) TestCurrency_GetByName_Ok() {
@@ -137,7 +137,7 @@ func (suite *CurrencyTestSuite) TestCurrency_GetById_BindingError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), newValidationError("incorrect currency identifier"), httpErr.Message)
+	assert.Regexp(suite.T(), errorIncorrectCurrencyIdentifier.Message, httpErr.Message)
 }
 
 func (suite *CurrencyTestSuite) TestCurrency_GetById_NotFound() {
@@ -160,7 +160,7 @@ func (suite *CurrencyTestSuite) TestCurrency_GetById_NotFound() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
-	assert.Equal(suite.T(), "Currency not found", httpErr.Message)
+	assert.Regexp(suite.T(), errorCurrencyNotFound.Message, httpErr.Message)
 }
 
 func (suite *CurrencyTestSuite) TestCurrency_GetById_Ok() {
