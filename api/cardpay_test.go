@@ -10,7 +10,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
-	"github.com/paysuper/paysuper-management-api/payment_system/entity"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
@@ -81,7 +80,7 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_Ok() {
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.Header.Set(entity.CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
+	req.Header.Set(CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
 
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
@@ -102,7 +101,7 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BindError() {
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(refundReq))
 
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.Header.Set(entity.CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
+	req.Header.Set(CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
 
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
@@ -149,7 +148,7 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_ValidationError() {
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.Header.Set(entity.CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
+	req.Header.Set(CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
 
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
@@ -200,7 +199,7 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BillingServerSystemErr
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.Header.Set(entity.CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
+	req.Header.Set(CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
 
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
@@ -252,7 +251,7 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BillingServer_Error() 
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.Header.Set(entity.CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
+	req.Header.Set(CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
 
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
@@ -304,7 +303,7 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BillingServerTemporary
 	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
 
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.Header.Set(entity.CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
+	req.Header.Set(CardPayPaymentResponseHeaderSignature, hex.EncodeToString(hash.Sum(nil)))
 
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)

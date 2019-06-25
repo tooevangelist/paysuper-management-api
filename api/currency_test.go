@@ -137,7 +137,7 @@ func (suite *CurrencyTestSuite) TestCurrency_GetById_BindingError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), "incorrect query parameters", httpErr.Message)
+	assert.Equal(suite.T(), newValidationError("incorrect currency identifier"), httpErr.Message)
 }
 
 func (suite *CurrencyTestSuite) TestCurrency_GetById_NotFound() {

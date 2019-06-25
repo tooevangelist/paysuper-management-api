@@ -3,19 +3,16 @@ package api
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-payment-link/proto"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"strconv"
-	"time"
 )
 
 const (
@@ -69,7 +66,7 @@ func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	o := i.(*billing.OrderCreateRequest)
 
 	for key, value := range params {
-		if _, ok := model.OrderReservedWords[key]; !ok {
+		if _, ok := OrderReservedWords[key]; !ok {
 			addParams[key] = value[0]
 		}
 
@@ -105,87 +102,6 @@ func (cb *OrderJsonBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	structure.RawBody = string(buf)
 
 	return
-}
-
-func (cb *OrderRevenueDynamicRequestBinder) Bind(i interface{}, ctx echo.Context) (err error) {
-	period := ctx.Param(model.OrderRevenueDynamicRequestFieldPeriod)
-
-	if period == "" {
-		return errors.New(binderErrorPeriodIsRequire)
-	}
-
-	if _, ok := model.RevenuePeriods[period]; !ok {
-		return errors.New(binderErrorUnknownRevenuePeriod)
-	}
-
-	params := ctx.QueryParams()
-
-	s := i.(*model.RevenueDynamicRequest)
-	s.Period = period
-	s.Project = []bson.ObjectId{}
-
-	if projects, ok := params[model.OrderRevenueDynamicRequestFieldProject]; ok {
-		for _, project := range projects {
-			if bson.IsObjectIdHex(project) == false {
-				return errors.New(model.ResponseMessageProjectIdIsInvalid)
-			}
-
-			s.Project = append(s.Project, bson.ObjectIdHex(project))
-		}
-	}
-
-	s, err = OrderPrepareAccountingPaymentRequest(s, ctx)
-
-	if err != nil {
-		return err
-	}
-
-	return
-}
-
-func (cb *OrderAccountingPaymentRequestBinder) Bind(i interface{}, ctx echo.Context) (err error) {
-	rdr := i.(*model.RevenueDynamicRequest)
-	rdr, err = OrderPrepareAccountingPaymentRequest(rdr, ctx)
-
-	if err != nil {
-		return err
-	}
-
-	return
-}
-
-func OrderPrepareAccountingPaymentRequest(rdr *model.RevenueDynamicRequest, ctx echo.Context) (*model.RevenueDynamicRequest, error) {
-	params := ctx.QueryParams()
-
-	if len(params) <= 0 {
-		return nil, errors.New(binderErrorQueryParamsIsEmpty)
-	}
-
-	if _, ok := params[model.OrderRevenueDynamicRequestFieldFrom]; !ok {
-		return nil, errors.New(binderErrorFromIsRequire)
-	}
-
-	if _, ok := params[model.OrderRevenueDynamicRequestFieldTo]; !ok {
-		return nil, errors.New(binderErrorToIsRequire)
-	}
-
-	t, err := strconv.ParseInt(params[model.OrderRevenueDynamicRequestFieldFrom][0], 10, 64)
-
-	if err != nil {
-		return nil, err
-	}
-
-	rdr.From = time.Unix(t, 0)
-
-	t, err = strconv.ParseInt(params[model.OrderRevenueDynamicRequestFieldTo][0], 10, 64)
-
-	if err != nil {
-		return nil, err
-	}
-
-	rdr.To = time.Unix(t, 0)
-
-	return rdr, nil
 }
 
 func (cb *PaymentCreateProcessBinder) Bind(i interface{}, ctx echo.Context) (err error) {

@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/paysuper/paysuper-management-api/database/model"
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"go.uber.org/zap"
 	"net/http"
@@ -95,12 +94,12 @@ func (r *taxesRoute) setTax(ctx echo.Context) error {
 func (r *taxesRoute) deleteTax(ctx echo.Context) error {
 	id := ctx.Param("id")
 	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	value, err := strconv.Atoi(id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, model.ResponseMessageInvalidRequestData)
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	res, err := r.taxService.DeleteRateById(ctx.Request().Context(), &tax_service.DeleteRateRequest{Id: uint32(value)})

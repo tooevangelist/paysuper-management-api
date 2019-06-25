@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"github.com/labstack/echo/v4"
-	"github.com/paysuper/paysuper-management-api/database/model"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -15,23 +14,23 @@ func (api *Api) LimitOffsetSortMiddleware(next echo.HandlerFunc) echo.HandlerFun
 			return next(ctx)
 		}
 
-		limit, err := strconv.Atoi(ctx.QueryParam(model.QueryParameterNameLimit))
+		limit, err := strconv.Atoi(ctx.QueryParam(QueryParameterNameLimit))
 
 		if err != nil {
-			limit = model.DefaultLimit
+			limit = LimitDefault
 		}
 
-		offset, err := strconv.Atoi(ctx.QueryParam(model.QueryParameterNameOffset))
+		offset, err := strconv.Atoi(ctx.QueryParam(QueryParameterNameOffset))
 
 		if err != nil {
-			offset = model.DefaultOffset
+			offset = OffsetDefault
 		}
 
 		qParams := ctx.QueryParams()
 
-		sort := model.DefaultSort
+		sort := DefaultSort
 
-		if s, ok := qParams[model.QueryParameterNameSort]; ok {
+		if s, ok := qParams[QueryParameterNameSort]; ok {
 			sort = s
 		}
 

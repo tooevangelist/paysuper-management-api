@@ -5,8 +5,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-management-api/database/model"
-	"github.com/paysuper/paysuper-management-api/payment_system/entity"
 	"net/http"
 )
 
@@ -35,13 +33,13 @@ func (h *CardPayWebHook) paymentCallback(ctx echo.Context) error {
 	}
 
 	if err := h.validate.Struct(st); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
 	}
 
 	req := &grpc.PaymentNotifyRequest{
 		OrderId:   st.MerchantOrder.Id,
 		Request:   []byte(h.rawBody),
-		Signature: ctx.Request().Header.Get(entity.CardPayPaymentResponseHeaderSignature),
+		Signature: ctx.Request().Header.Get(CardPayPaymentResponseHeaderSignature),
 	}
 
 	rsp, err := h.billingService.PaymentCallbackProcess(ctx.Request().Context(), req)
@@ -82,13 +80,13 @@ func (h *CardPayWebHook) refundCallback(ctx echo.Context) error {
 	err = h.validate.Struct(st)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
 	}
 
 	req := &grpc.CallbackRequest{
 		Handler:   pkg.PaymentSystemHandlerCardPay,
 		Body:      []byte(h.rawBody),
-		Signature: ctx.Request().Header.Get(entity.CardPayPaymentResponseHeaderSignature),
+		Signature: ctx.Request().Header.Get(CardPayPaymentResponseHeaderSignature),
 	}
 
 	rsp, err := h.billingService.ProcessRefundCallback(ctx.Request().Context(), req)
