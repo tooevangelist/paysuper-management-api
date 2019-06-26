@@ -233,7 +233,7 @@ func (r *paymentCostRoute) deleteMoneyBackCostMerchant(ctx echo.Context) error {
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34}' \
+//      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34, "fix_amount_currency": "USD"}' \
 //      https://api.paysuper.online/admin/api/v1/payment_costs/channel/system
 func (r *paymentCostRoute) setPaymentChannelCostSystem(ctx echo.Context) error {
 	req := &billing.PaymentChannelCostSystem{}

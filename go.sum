@@ -697,14 +697,8 @@ github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FI
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190625060336-a51f4f897ddb h1:esk86+pZQ2EFfn4V6j7YCZvymVijIc/IzIUmwVun8/Y=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190625060336-a51f4f897ddb/go.mod h1:k3pANOXWLSc26i1IRmDNm8WipsLJ3MZJRoJKEEuvgTU=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190626070007-086bbac14985 h1:xIb1rEIJTSadmMT0zFLgzoosiZE+BRDo4OwpFPzgrJU=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190626070007-086bbac14985/go.mod h1:k3pANOXWLSc26i1IRmDNm8WipsLJ3MZJRoJKEEuvgTU=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190626114857-405fb0f7030b h1:GqFkWhdUJpycFVLEzHzNWNZhsBX8aVYIxFYAf9Ue6Co=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190626114857-405fb0f7030b/go.mod h1:k3pANOXWLSc26i1IRmDNm8WipsLJ3MZJRoJKEEuvgTU=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190626130839-36fd9849ec1e h1:vISZSUXCjcjjsXAHdYafcoGvv8j4xY83SfegICIsSlo=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190626130839-36fd9849ec1e/go.mod h1:k3pANOXWLSc26i1IRmDNm8WipsLJ3MZJRoJKEEuvgTU=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190626164638-f2e462edcff0 h1:AJHeBGZA3jSW3WoqOQr3QO5DwY//b6gaxD+SwVvDE24=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190626164638-f2e462edcff0/go.mod h1:k3pANOXWLSc26i1IRmDNm8WipsLJ3MZJRoJKEEuvgTU=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190626163400-ec31f932a6c7 h1:oYRNvgq8yM/OPRmqrBg6WdPO4JMtZLepObEE0UCpqcg=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190626163400-ec31f932a6c7/go.mod h1:k3pANOXWLSc26i1IRmDNm8WipsLJ3MZJRoJKEEuvgTU=
 github.com/paysuper/paysuper-currencies v0.0.0-20190524103445-940bc8855c5c/go.mod h1:3iZFbAE0u2J24oKXhxTN+NgAHjJS2l3E/veHv7Oapz0=
 github.com/paysuper/paysuper-database-mongo v0.1.0 h1:RMSIYB8rpTAAHc0wmIQz8XQVa8KB6/xX8iA8ceiDic8=
 github.com/paysuper/paysuper-database-mongo v0.1.0/go.mod h1:IZu996j//Qoq+uzzCBL5GEYisfF4di/fwedWHlLz7sc=
