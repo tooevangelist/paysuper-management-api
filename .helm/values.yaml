@@ -24,10 +24,6 @@ backend:
     port: 8080
     protocol: TCP
   env:
-  - MONGO_DB
-  - MONGO_HOST
-  - MONGO_PASSWORD
-  - MONGO_USER
   - JWT_SIGNATURE_SECRET
   - AUTH1_ISSUER
   - AUTH1_CLIENTID

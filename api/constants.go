@@ -60,6 +60,26 @@ const (
 	requestParameterStatus                   = "status"
 	requestAuthorizationTokenRegex           = "Bearer ([A-z0-9_.-]{10,})"
 
+	orderFieldProjectId     = "PP_PROJECT_ID"
+	orderFieldSignature     = "PP_SIGNATURE"
+	orderFieldAmount        = "PP_AMOUNT"
+	orderFieldCurrency      = "PP_CURRENCY"
+	orderFieldAccount       = "PP_ACCOUNT"
+	orderFieldOrderId       = "PP_ORDER_ID"
+	orderFieldPaymentMethod = "PP_PAYMENT_METHOD"
+	orderFieldUrlVerify     = "PP_URL_VERIFY"
+	orderFieldUrlNotify     = "PP_URL_NOTIFY"
+	orderFieldUrlSuccess    = "PP_URL_SUCCESS"
+	orderFieldUrlFail       = "PP_URL_FAIL"
+	orderFieldPayerEmail    = "PP_PAYER_EMAIL"
+	orderFieldPayerPhone    = "PP_PAYER_PHONE"
+	orderFieldDescription   = "PP_DESCRIPTION"
+	orderFieldRegion        = "PP_REGION"
+
+	QueryParameterNameLimit  = "limit"
+	QueryParameterNameOffset = "offset"
+	QueryParameterNameSort   = "sort[]"
+
 	errorMessageMask = "field validation for '%s' failed on the '%s' tag"
 
 	HeaderAcceptLanguage      = "Accept-Language"
@@ -71,5 +91,27 @@ const (
 	CustomerTokenCookiesName     = "_ps_ctkn"
 	CustomerTokenCookiesLifetime = 2592000
 
+	CardPayPaymentResponseHeaderSignature = "Signature"
+
 	agreementPageTemplateName = "agreement.html"
 )
+
+var DefaultSort = []string{"_id"}
+
+var OrderReservedWords = map[string]bool{
+	orderFieldProjectId:     true,
+	orderFieldSignature:     true,
+	orderFieldAmount:        true,
+	orderFieldCurrency:      true,
+	orderFieldAccount:       true,
+	orderFieldOrderId:       true,
+	orderFieldDescription:   true,
+	orderFieldPaymentMethod: true,
+	orderFieldUrlVerify:     true,
+	orderFieldUrlNotify:     true,
+	orderFieldUrlSuccess:    true,
+	orderFieldUrlFail:       true,
+	orderFieldPayerEmail:    true,
+	orderFieldPayerPhone:    true,
+	orderFieldRegion:        true,
+}

@@ -2,70 +2,84 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/paysuper/paysuper-management-api/manager"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"net/http"
 	"strconv"
 )
 
 type CurrencyApiV1 struct {
 	*Api
-	currencyManager *manager.CurrencyManager
 }
 
 func (api *Api) InitCurrencyRoutes() *Api {
 	cApiV1 := CurrencyApiV1{
-		Api:             api,
-		currencyManager: manager.InitCurrencyManager(api.database, api.logger),
+		Api: api,
 	}
 
 	api.Http.GET("/api/v1/currency", cApiV1.get)
+	api.Http.GET("/api/v1/currency/name", cApiV1.getByName)
 	api.Http.GET("/api/v1/currency/:id", cApiV1.getById)
 
 	return api
 }
 
-// @Summary Get list of currencies
-// @Description Get full list of currencies or get list of currencies filtered by name
-// @Tags Currency
-// @Accept json
-// @Produce json
-// @Param name query string false "name or symbolic ISO 4217 code of currency"
-// @Success 200 {array} model.Currency "OK"
-// @Failure 500 {object} model.Error "Some unknown error"
-// @Router /api/v1/currency [get]
+// get list of currencies
+// GET /api/v1/currency
 func (cApiV1 *CurrencyApiV1) get(ctx echo.Context) error {
-	name := ctx.QueryParam("name")
-
-	if name != "" {
-		return ctx.JSON(http.StatusOK, cApiV1.currencyManager.FindByName(name))
+	res, err := cApiV1.billingService.GetCurrencyList(ctx.Request().Context(), &grpc.EmptyRequest{})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorCurrencyNotFound)
 	}
 
-	return ctx.JSON(http.StatusOK, cApiV1.currencyManager.FindAll(cApiV1.limit, cApiV1.offset))
+	return ctx.JSON(http.StatusOK, res)
 }
 
-// @Summary Get currency by numeric ISO 4217 code
-// @Description Get currency object by numeric ISO 4217 code
-// @Tags Currency
-// @Accept json
-// @Produce json
-// @Param id path int true "numeric ISO 4217 currency code"
-// @Success 200 {object} model.Currency "OK"
-// @Failure 400 {object} model.Error "Invalid request data"
-// @Failure 404 {object} model.Error "Not found"
-// @Failure 500 {object} model.Error "Some unknown error"
-// @Router /api/v1/currency/{id} [get]
+// getByName return currency by alpha code
+// GET /api/v1/currency/name
+func (cApiV1 *CurrencyApiV1) getByName(ctx echo.Context) error {
+	req := &billing.GetCurrencyRequest{
+		CurrencyCode: ctx.QueryParam("name"),
+	}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	err = cApiV1.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+	}
+
+	res, err := cApiV1.billingService.GetCurrency(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, errorCurrencyNotFound)
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+// getById return currency by numeric ISO 4217 code
+// GET /api/v1/currency/{id}
 func (cApiV1 *CurrencyApiV1) getById(ctx echo.Context) error {
-	codeInt, err := strconv.Atoi(ctx.Param("id"))
+	i, err := strconv.ParseInt(ctx.QueryParam("id"), 10, 32)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errorIncorrectCurrencyIdentifier)
 	}
 
-	c := cApiV1.currencyManager.FindByCodeInt(codeInt)
+	req := &billing.GetCurrencyRequest{CurrencyInt: int32(i)}
+	err = cApiV1.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+	}
 
-	if c == nil {
+	res, err := cApiV1.billingService.GetCurrency(ctx.Request().Context(), req)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, errorCurrencyNotFound)
 	}
 
-	return ctx.JSON(http.StatusOK, c)
+	return ctx.JSON(http.StatusOK, res)
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-management-api/manager"
 	"github.com/paysuper/paysuper-payment-link/proto"
 	"go.uber.org/zap"
 	"net/http"
@@ -23,8 +22,7 @@ const (
 
 type orderRoute struct {
 	*Api
-	projectManager *manager.ProjectManager
-	publisher      micro.Publisher
+	publisher micro.Publisher
 }
 
 type CreateOrderJsonProjectResponse struct {
@@ -81,8 +79,7 @@ func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
 // @Router /order/create [get]
 func (api *Api) InitOrderV1Routes() *Api {
 	route := &orderRoute{
-		Api:            api,
-		projectManager: manager.InitProjectManager(api.database, api.logger, api.billingService),
+		Api: api,
 	}
 
 	api.Http.GET("/order/:id", route.getOrderForm)
@@ -149,7 +146,7 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	req.IssuerUrl = ctx.Request().Header.Get(HeaderReferer)
 
 	if err := r.validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
 	}
 
 	orderResponse, err := r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
@@ -183,7 +180,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(manager.GetFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
 	}
 
 	// If request contain user object then paysuper must check request signature
@@ -666,7 +663,7 @@ func (r *orderRoute) notifySale(ctx echo.Context) error {
 	req.OrderUuid = orderId
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	_, err = r.billingService.SetUserNotifySales(ctx.Request().Context(), req)
@@ -700,7 +697,7 @@ func (r *orderRoute) notifyNewRegion(ctx echo.Context) error {
 	req.OrderUuid = orderUuid
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	_, err = r.billingService.SetUserNotifyNewRegion(ctx.Request().Context(), req)
