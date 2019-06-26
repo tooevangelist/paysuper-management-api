@@ -2328,7 +2328,7 @@ func (s *BillingServerSystemErrorMock) CreateOrUpdatePaymentMethodTestSettings(
 	in *grpc.ChangePaymentMethodParamsRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangePaymentMethodParamsResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkMock) GetPaymentMethodTestSettings(
@@ -2360,7 +2360,7 @@ func (s *BillingServerSystemErrorMock) GetPaymentMethodTestSettings(
 	in *grpc.GetPaymentMethodSettingsRequest,
 	opts ...client.CallOption,
 ) (*billing.PaymentMethodParams, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkMock) DeletePaymentMethodTestSettings(
@@ -2392,7 +2392,7 @@ func (s *BillingServerSystemErrorMock) DeletePaymentMethodTestSettings(
 	in *grpc.GetPaymentMethodSettingsRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangePaymentMethodParamsResponse, error) {
-	return nil, errors.New(SomeError)
+	return nil, SomeError
 }
 
 func (s *BillingServerOkMock) GetCurrency(

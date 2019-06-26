@@ -214,8 +214,8 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getProductionSettings_Err
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Regexp(suite.T(), "error", httpErr.Message)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Regexp(suite.T(), errorUnknown.Message, httpErr.Message)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_getProductionSettings_Ok() {
@@ -289,8 +289,8 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getTestSettings_Error_Bil
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Regexp(suite.T(), "error", httpErr.Message)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Regexp(suite.T(), errorUnknown.Message, httpErr.Message)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_getTestSettings_Ok() {
