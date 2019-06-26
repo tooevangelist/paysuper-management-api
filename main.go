@@ -2,13 +2,11 @@ package main
 
 import (
 	"flag"
-	"github.com/globalsign/mgo"
 	_ "github.com/micro/go-plugins/broker/rabbitmq"
 	_ "github.com/micro/go-plugins/registry/kubernetes"
 	_ "github.com/micro/go-plugins/transport/grpc"
 	"github.com/paysuper/paysuper-management-api/api"
 	"github.com/paysuper/paysuper-management-api/config"
-	"github.com/paysuper/paysuper-management-api/database"
 	"go.uber.org/zap"
 	"log"
 	"os"
@@ -29,31 +27,12 @@ const LoggerName = "PAYONE_MANAGEMENT_API"
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host p1payapi.tst.protocol.one
 func main() {
-	migration := flag.String("migration", "", "run database migrations with specified direction")
 	flag.Parse()
 
 	err, conf := config.NewConfig()
 
 	if err != nil {
 		log.Fatalln(err)
-	}
-
-	db, err := database.NewConnection(&conf.Database)
-
-	if err != nil {
-		log.Fatalf("database connection failed with error: %s\n", err)
-	}
-
-	defer db.Close()
-
-	if *migration != "" {
-		err := database.Migrate(db.Database().(*mgo.Database), *migration)
-
-		if err != nil {
-			log.Fatalf("database migration failed with error: %s\n", err)
-		}
-
-		return
 	}
 
 	logger, err := zap.NewProduction()
@@ -80,7 +59,6 @@ func main() {
 
 	sInit := &api.ServerInitParams{
 		Config:      conf,
-		Database:    db,
 		Logger:      sugar,
 		HttpScheme:  conf.HttpScheme,
 		K8sHost:     conf.KubernetesHost,

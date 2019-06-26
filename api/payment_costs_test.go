@@ -71,7 +71,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Get
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Add() {
-	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34}`
+	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34, "fix_amount_currency": "USD"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/payment_costs/channel/system", strings.NewReader(bodyJson))

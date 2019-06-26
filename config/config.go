@@ -8,13 +8,6 @@ const (
 	DefaultJwtSignAlgorithm = "RS256"
 )
 
-type Database struct {
-	Host     string `envconfig:"MONGO_HOST"`
-	Database string `envconfig:"MONGO_DB"`
-	User     string `envconfig:"MONGO_USER"`
-	Password string `envconfig:"MONGO_PASSWORD"`
-}
-
 type Auth1 struct {
 	Issuer       string `envconfig:"AUTH1_ISSUER" required:"true" default:"https://dev-auth1.tst.protocol.one"`
 	ClientId     string `envconfig:"AUTH1_CLIENTID" required:"true"`
@@ -32,7 +25,6 @@ type S3 struct {
 }
 
 type Config struct {
-	Database
 	Auth1
 	S3
 
