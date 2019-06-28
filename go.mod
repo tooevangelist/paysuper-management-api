@@ -18,7 +18,6 @@ require (
 	github.com/micro/go-grpc v0.11.0
 	github.com/micro/go-micro v1.0.0
 	github.com/micro/go-plugins v1.0.0
-	github.com/micro/kubernetes v0.7.0
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/oschwald/geoip2-golang v1.2.1
 	github.com/paysuper/paysuper-billing-server v0.0.0-20190626163400-ec31f932a6c7
