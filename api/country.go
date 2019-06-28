@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"log"
 	"net/http"
 )
 
@@ -28,6 +29,7 @@ func (cApiV1 *CountryApiV1) get(ctx echo.Context) error {
 
 	res, err := cApiV1.billingService.GetCountriesList(ctx.Request().Context(), &grpc.EmptyRequest{})
 	if err != nil {
+		log.Println(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorCountriesListError)
 	}
 
