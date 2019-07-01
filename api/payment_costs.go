@@ -66,7 +66,7 @@ func (r *paymentCostRoute) getPaymentChannelCostSystem(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get PaymentChannelCostMerchant
@@ -97,7 +97,7 @@ func (r *paymentCostRoute) getPaymentChannelCostMerchant(ctx echo.Context) error
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get MoneyBackCostSystem
@@ -121,7 +121,7 @@ func (r *paymentCostRoute) getMoneyBackCostSystem(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get MoneyBackCostSystem
@@ -152,7 +152,7 @@ func (r *paymentCostRoute) getMoneyBackCostMerchant(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Delete PaymentChannelCostSystem
@@ -278,7 +278,7 @@ func (r *paymentCostRoute) setPaymentChannelCostSystem(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description create/update PaymentChannelCostMerchant
@@ -319,7 +319,7 @@ func (r *paymentCostRoute) setPaymentChannelCostMerchant(ctx echo.Context) error
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description create/update MoneyBackCostSystem
@@ -354,7 +354,7 @@ func (r *paymentCostRoute) setMoneyBackCostSystem(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description create/update MoneyBackCostMerchant
@@ -395,7 +395,7 @@ func (r *paymentCostRoute) setMoneyBackCostMerchant(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get All PaymentChannelCostSystem
@@ -408,7 +408,7 @@ func (r *paymentCostRoute) getAllPaymentChannelCostSystem(ctx echo.Context) erro
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get All PaymentChannelCostMerchant
@@ -435,7 +435,7 @@ func (r *paymentCostRoute) getAllPaymentChannelCostMerchant(ctx echo.Context) er
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get All PaymentChannelCostSystem
@@ -448,7 +448,7 @@ func (r *paymentCostRoute) getAllMoneyBackCostSystem(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get All PaymentChannelCostMerchant
@@ -475,5 +475,5 @@ func (r *paymentCostRoute) getAllMoneyBackCostMerchant(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
