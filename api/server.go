@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/micro/go-micro"
+	"github.com/micro/go-plugins/selector/static"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
@@ -29,6 +30,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 )
@@ -271,6 +273,12 @@ func (api *Api) InitService() {
 	}
 
 	log.Println("Initialize micro service")
+
+	if os.Getenv("MICRO_SELECTOR") == "static" {
+		log.Println("Use micro selector `static`")
+		options = append(options, micro.Selector(static.NewSelector()))
+	}
+
 	api.service = micro.NewService(options...)
 	api.service.Init()
 
