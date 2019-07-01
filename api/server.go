@@ -223,7 +223,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}))
 
 	api.
-		InitCurrencyRoutes().
 		InitCountryRoutes().
 		InitProductRoutes().
 		InitProjectRoutes().
