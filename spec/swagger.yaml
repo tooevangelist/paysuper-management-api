@@ -917,6 +917,19 @@ definitions:
     required:
       - country
       - rate
+  payment_method.PaymentMethodParams:
+    properties:
+      currency:
+        type: string
+      terminal_id:
+        type: string
+      secret:
+        type: string
+      secret_callback:
+        type: string
+    type: object
+    required:
+      - currency
 
   onboarding.Contacts.Authorized:
     properties:
@@ -1183,6 +1196,28 @@ definitions:
         type: integer
       message:
         description: string description to new status
+        type: string
+    required:
+      - status
+
+  payment_method.ChangePaymentMethodResponse:
+    properties:
+      status:
+        description: status as result of operation
+        type: integer
+      message:
+        description: string description for error message
+        type: string
+    required:
+      - status
+
+  payment_method.ChangePaymentMethodParamsResponse:
+    properties:
+      status:
+        description: status as result of operation
+        type: integer
+      message:
+        description: string description for error message
         type: string
     required:
       - status
@@ -2479,6 +2514,443 @@ paths:
       summary: Create order with HTML form
       tags:
         - Payment Order
+  /payment_method:
+    post:
+      consumes:
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+      description: Create a payment method for payment system
+      parameters:
+        - description: Name of method
+          in: query
+          name: name
+          required: true
+          type: string
+        - description: Name of group for currency type
+          in: query
+          name: group_alias
+          required: false
+          type: string
+        - description: External id
+          in: query
+          name: external_id
+          required: true
+          type: string
+        - description: List of currency int codes
+          in: query
+          name: currencies
+          type: array
+          items:
+            type: integer
+        - description: Minimal payment amount
+          in: query
+          name: min_payment_amount
+          type: integer
+        - description: Maximum payment amount
+          in: query
+          name: max_payment_amount
+          type: integer
+        - description: Type of payment method
+          in: query
+          name: type
+          type: string
+        - description: Regular expression for validation
+          in: query
+          name: account_regexp
+          type: string
+        - description: Active or not
+          in: query
+          name: is_active
+          type: boolean
+        - description: Payment system identifier
+          in: query
+          name: payment_system_id
+          required: true
+          type: string
+        - description: List of test settings
+          in: query
+          name: test_settings
+          type: array
+          items:
+            type: object
+            $ref: '#/definitions/payment_method.PaymentMethodParams'
+        - description: List of production settings
+          in: query
+          name: production_settings
+          type: array
+          items:
+            type: object
+            $ref: '#/definitions/payment_method.PaymentMethodParams'
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment_method.ChangePaymentMethodResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Create a payment method for payment system
+      tags:
+        - Payment Method
+  /payment_method/{id}:
+    put:
+      consumes:
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+      description: Update a payment method for payment system
+      parameters:
+        - description: payment method identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: Name of method
+          in: query
+          name: name
+          required: true
+          type: string
+        - description: Name of group for currency type
+          in: query
+          name: group_alias
+          required: false
+          type: string
+        - description: External id
+          in: query
+          name: external_id
+          required: true
+          type: string
+        - description: List of currency int codes
+          in: query
+          name: currencies
+          type: array
+          items:
+            type: integer
+        - description: Minimal payment amount
+          in: query
+          name: min_payment_amount
+          type: integer
+        - description: Maximum payment amount
+          in: query
+          name: max_payment_amount
+          type: integer
+        - description: Type of payment method
+          in: query
+          name: type
+          type: string
+        - description: Regular expression for validation
+          in: query
+          name: account_regexp
+          type: string
+        - description: Active or not
+          in: query
+          name: is_active
+          type: boolean
+        - description: Payment system identifier
+          in: query
+          name: payment_system_id
+          required: true
+          type: string
+        - description: List of test settings
+          in: query
+          name: test_settings
+          type: array
+          items:
+            type: object
+            $ref: '#/definitions/payment_method.PaymentMethodParams'
+        - description: List of production settings
+          in: query
+          name: production_settings
+          type: array
+          items:
+            type: object
+            $ref: '#/definitions/payment_method.PaymentMethodParams'
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment_method.ChangePaymentMethodResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Update a payment method for payment system
+      tags:
+        - Payment Method
+  /payment_method/{id}/production:
+    post:
+      consumes:
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+      description: Add production settings to the payment method
+      parameters:
+        - description: payment method identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: payment method identifier
+          in: query
+          name: payment_method_id
+          required: true
+          type: string
+        - description: Params of settings
+          in: query
+          name: params
+          required: true
+          schema:
+            $ref: '#/definitions/payment_method.PaymentMethodParams'
+            type: object
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment_method.ChangePaymentMethodParamsResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Add production settings to the payment method
+      tags:
+        - Payment Method
+    put:
+      consumes:
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+      description: Update production settings to the payment method
+      parameters:
+        - description: payment method identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: payment method identifier
+          in: query
+          name: payment_method_id
+          required: true
+          type: string
+        - description: Params of settings
+          in: query
+          name: params
+          required: true
+          schema:
+            $ref: '#/definitions/payment_method.PaymentMethodParams'
+            type: object
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment_method.ChangePaymentMethodParamsResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Update production settings to the payment method
+      tags:
+        - Payment Method
+    get:
+      consumes:
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+      description: Get production settings to the payment method
+      parameters:
+        - description: payment method identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment_method.PaymentMethodParams'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Get production settings to the payment method
+      tags:
+        - Payment Method
+    delete:
+      consumes:
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+      description: Delete production settings to the payment method
+      parameters:
+        - description: payment method identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment_method.ChangePaymentMethodParamsResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Delete production settings to the payment method
+      tags:
+        - Payment Method
+  /payment_method/{id}/test:
+    post:
+      consumes:
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+      description: Add test settings to the payment method
+      parameters:
+        - description: payment method identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: payment method identifier
+          in: query
+          name: payment_method_id
+          required: true
+          type: string
+        - description: Params of settings
+          in: query
+          name: params
+          required: true
+          schema:
+            $ref: '#/definitions/payment_method.PaymentMethodParams'
+            type: object
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment_method.ChangePaymentMethodParamsResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Add test settings to the payment method
+      tags:
+        - Payment Method
+    put:
+      consumes:
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+      description: Update test settings to the payment method
+      parameters:
+        - description: payment method identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: payment method identifier
+          in: query
+          name: payment_method_id
+          required: true
+          type: string
+        - description: Params of settings
+          in: query
+          name: params
+          required: true
+          schema:
+            $ref: '#/definitions/payment_method.PaymentMethodParams'
+            type: object
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment_method.ChangePaymentMethodParamsResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Update test settings to the payment method
+      tags:
+        - Payment Method
+    get:
+      consumes:
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+      description: Get test settings to the payment method
+      parameters:
+        - description: payment method identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment_method.PaymentMethodParams'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Get test settings to the payment method
+      tags:
+        - Payment Method
+    delete:
+      consumes:
+        - multipart/form-data
+        - application/x-www-form-urlencoded
+      description: Delete test settings to the payment method
+      parameters:
+        - description: payment method identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      produces:
+        - text/html
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment_method.ChangePaymentMethodParamsResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Delete test settings to the payment method
+      tags:
+        - Payment Method
 
   "/admin/api/v1/merchants":
     get:
