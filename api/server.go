@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/micro/go-micro"
-	k8s "github.com/micro/kubernetes/go/micro"
+	"github.com/micro/go-plugins/selector/static"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
@@ -30,6 +30,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 )
@@ -49,7 +50,6 @@ type ServerInitParams struct {
 	Config      *config.Config
 	Logger      *zap.SugaredLogger
 	HttpScheme  string
-	K8sHost     string
 	AmqpAddress string
 	Auth1       *config.Auth1
 }
@@ -105,7 +105,6 @@ type Api struct {
 	AmqpAddress string
 	notifierPub *rabbitmq.Broker
 
-	k8sHost      string
 	rawBody      string
 	reqSignature string
 
@@ -120,7 +119,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		logger:      p.Logger,
 		validate:    validator.New(),
 		httpScheme:  p.HttpScheme,
-		k8sHost:     p.K8sHost,
 		AmqpAddress: p.AmqpAddress,
 		config:      p.Config,
 	}
@@ -274,14 +272,14 @@ func (api *Api) InitService() {
 		micro.Version(constant.PayOneMicroserviceVersion),
 	}
 
-	if api.k8sHost == "" {
-		api.service = micro.NewService(options...)
-		log.Println("Initialize micro service")
-	} else {
-		api.service = k8s.NewService(options...)
-		log.Println("Initialize k8s service")
+	log.Println("Initialize micro service")
+
+	if os.Getenv("MICRO_SELECTOR") == "static" {
+		log.Println("Use micro selector `static`")
+		options = append(options, micro.Selector(static.NewSelector()))
 	}
 
+	api.service = micro.NewService(options...)
 	api.service.Init()
 
 	api.repository = repository.NewRepositoryService(constant.PayOneRepositoryServiceName, api.service.Client())

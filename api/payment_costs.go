@@ -61,9 +61,12 @@ func (r *paymentCostRoute) getPaymentChannelCostSystem(ctx echo.Context) error {
 
 	res, err := r.billingService.GetPaymentChannelCostSystem(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get PaymentChannelCostMerchant
@@ -78,7 +81,7 @@ func (r *paymentCostRoute) getPaymentChannelCostMerchant(ctx echo.Context) error
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorIncorrectMerchantId)
 	}
 	req.MerchantId = merchant.Item.Id
 
@@ -89,9 +92,12 @@ func (r *paymentCostRoute) getPaymentChannelCostMerchant(ctx echo.Context) error
 
 	res, err := r.billingService.GetPaymentChannelCostMerchant(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get MoneyBackCostSystem
@@ -110,9 +116,12 @@ func (r *paymentCostRoute) getMoneyBackCostSystem(ctx echo.Context) error {
 	}
 	res, err := r.billingService.GetMoneyBackCostSystem(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get MoneyBackCostSystem
@@ -127,7 +136,7 @@ func (r *paymentCostRoute) getMoneyBackCostMerchant(ctx echo.Context) error {
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorIncorrectMerchantId)
 	}
 	req.MerchantId = merchant.Item.Id
 
@@ -138,9 +147,12 @@ func (r *paymentCostRoute) getMoneyBackCostMerchant(ctx echo.Context) error {
 
 	res, err := r.billingService.GetMoneyBackCostMerchant(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Delete PaymentChannelCostSystem
@@ -156,11 +168,13 @@ func (r *paymentCostRoute) deletePaymentChannelCostSystem(ctx echo.Context) erro
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	_, err = r.billingService.DeletePaymentChannelCostSystem(ctx.Request().Context(), req)
+	res, err := r.billingService.DeletePaymentChannelCostSystem(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
@@ -177,11 +191,13 @@ func (r *paymentCostRoute) deletePaymentChannelCostMerchant(ctx echo.Context) er
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	_, err = r.billingService.DeletePaymentChannelCostMerchant(ctx.Request().Context(), req)
+	res, err := r.billingService.DeletePaymentChannelCostMerchant(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
@@ -198,11 +214,13 @@ func (r *paymentCostRoute) deleteMoneyBackCostSystem(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	_, err = r.billingService.DeleteMoneyBackCostSystem(ctx.Request().Context(), req)
+	res, err := r.billingService.DeleteMoneyBackCostSystem(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
@@ -219,11 +237,13 @@ func (r *paymentCostRoute) deleteMoneyBackCostMerchant(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	_, err = r.billingService.DeleteMoneyBackCostMerchant(ctx.Request().Context(), req)
+	res, err := r.billingService.DeleteMoneyBackCostMerchant(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
@@ -253,10 +273,12 @@ func (r *paymentCostRoute) setPaymentChannelCostSystem(ctx echo.Context) error {
 
 	res, err := r.billingService.SetPaymentChannelCostSystem(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description create/update PaymentChannelCostMerchant
@@ -281,7 +303,7 @@ func (r *paymentCostRoute) setPaymentChannelCostMerchant(ctx echo.Context) error
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorIncorrectMerchantId)
 	}
 	req.MerchantId = merchant.Item.Id
 
@@ -292,10 +314,12 @@ func (r *paymentCostRoute) setPaymentChannelCostMerchant(ctx echo.Context) error
 
 	res, err := r.billingService.SetPaymentChannelCostMerchant(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description create/update MoneyBackCostSystem
@@ -325,10 +349,12 @@ func (r *paymentCostRoute) setMoneyBackCostSystem(ctx echo.Context) error {
 
 	res, err := r.billingService.SetMoneyBackCostSystem(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description create/update MoneyBackCostMerchant
@@ -353,7 +379,7 @@ func (r *paymentCostRoute) setMoneyBackCostMerchant(ctx echo.Context) error {
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorIncorrectMerchantId)
 	}
 	req.MerchantId = merchant.Item.Id
 
@@ -364,10 +390,12 @@ func (r *paymentCostRoute) setMoneyBackCostMerchant(ctx echo.Context) error {
 
 	res, err := r.billingService.SetMoneyBackCostMerchant(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get All PaymentChannelCostSystem
@@ -375,9 +403,12 @@ func (r *paymentCostRoute) setMoneyBackCostMerchant(ctx echo.Context) error {
 func (r *paymentCostRoute) getAllPaymentChannelCostSystem(ctx echo.Context) error {
 	res, err := r.billingService.GetAllPaymentChannelCostSystem(ctx.Request().Context(), &grpc.EmptyRequest{})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get All PaymentChannelCostMerchant
@@ -385,7 +416,7 @@ func (r *paymentCostRoute) getAllPaymentChannelCostSystem(ctx echo.Context) erro
 func (r *paymentCostRoute) getAllPaymentChannelCostMerchant(ctx echo.Context) error {
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorIncorrectMerchantId)
 	}
 
 	req := &billing.PaymentChannelCostMerchantListRequest{
@@ -399,19 +430,25 @@ func (r *paymentCostRoute) getAllPaymentChannelCostMerchant(ctx echo.Context) er
 
 	res, err := r.billingService.GetAllPaymentChannelCostMerchant(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get All PaymentChannelCostSystem
 // @Example GET /admin/api/v1/payment_costs/money_back/system/all
 func (r *paymentCostRoute) getAllMoneyBackCostSystem(ctx echo.Context) error {
-	res, err := r.billingService.GetAllPaymentChannelCostSystem(ctx.Request().Context(), &grpc.EmptyRequest{})
+	res, err := r.billingService.GetAllMoneyBackCostSystem(ctx.Request().Context(), &grpc.EmptyRequest{})
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // @Description Get All PaymentChannelCostMerchant
@@ -419,7 +456,7 @@ func (r *paymentCostRoute) getAllMoneyBackCostSystem(ctx echo.Context) error {
 func (r *paymentCostRoute) getAllMoneyBackCostMerchant(ctx echo.Context) error {
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorIncorrectMerchantId)
 	}
 
 	req := &billing.MoneyBackCostMerchantListRequest{
@@ -433,7 +470,10 @@ func (r *paymentCostRoute) getAllMoneyBackCostMerchant(ctx echo.Context) error {
 
 	res, err := r.billingService.GetAllMoneyBackCostMerchant(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-	return ctx.JSON(http.StatusOK, res)
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Item)
 }

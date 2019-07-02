@@ -61,7 +61,6 @@ func main() {
 		Config:      conf,
 		Logger:      sugar,
 		HttpScheme:  conf.HttpScheme,
-		K8sHost:     conf.KubernetesHost,
 		AmqpAddress: conf.AmqpAddress,
 		Auth1:       &conf.Auth1,
 	}
