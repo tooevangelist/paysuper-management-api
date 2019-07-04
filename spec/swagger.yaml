@@ -2514,7 +2514,7 @@ paths:
       summary: Create order with HTML form
       tags:
         - Payment Order
-  /payment_method:
+  /admin/api/v1/payment_method:
     post:
       consumes:
         - multipart/form-data
@@ -2597,7 +2597,7 @@ paths:
       summary: Create a payment method for payment system
       tags:
         - Payment Method
-  /payment_method/{id}:
+  /admin/api/v1/payment_method/{id}:
     put:
       consumes:
         - multipart/form-data
@@ -2685,7 +2685,7 @@ paths:
       summary: Update a payment method for payment system
       tags:
         - Payment Method
-  /payment_method/{id}/production:
+  /admin/api/v1/payment_method/{id}/production:
     post:
       consumes:
         - multipart/form-data
@@ -2818,7 +2818,7 @@ paths:
       summary: Delete production settings to the payment method
       tags:
         - Payment Method
-  /payment_method/{id}/test:
+  /admin/api/v1/payment_method/{id}/test:
     post:
       consumes:
         - multipart/form-data
