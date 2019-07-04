@@ -15,7 +15,7 @@ func (api *Api) initPriceGroupRoutes() *Api {
 		Api: api,
 	}
 
-	api.accessRouteGroup.GET("/price_group/country", InitPriceGroup.getCurrencyRegionByCountry)
+	api.accessRouteGroup.GET("/price_group/country", InitPriceGroup.getPriceGroupByCountry)
 	api.accessRouteGroup.GET("/price_group/currencies", InitPriceGroup.getCurrencyList)
 	api.accessRouteGroup.GET("/price_group/region", InitPriceGroup.getCurrencyByRegion)
 	api.accessRouteGroup.GET("/price_group/recommended", InitPriceGroup.getRecommendedPrice)
@@ -25,7 +25,7 @@ func (api *Api) initPriceGroupRoutes() *Api {
 
 // Get test settings for payment method
 // GET /api/v1/price_group/country
-func (api *PriceGroup) getCurrencyRegionByCountry(ctx echo.Context) error {
+func (api *PriceGroup) getPriceGroupByCountry(ctx echo.Context) error {
 	req := &currencies.CountryRequest{}
 	err := ctx.Bind(req)
 
@@ -39,7 +39,7 @@ func (api *PriceGroup) getCurrencyRegionByCountry(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, api.getValidationError(err))
 	}
 
-	res, err := api.currencyService.GetCurrencyRegionByCountry(ctx.Request().Context(), req)
+	res, err := api.currencyService.GetPriceGroupByCountry(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}

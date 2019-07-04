@@ -36,7 +36,7 @@ func (suite *PriceGroupTestSuite) SetupTest() {
 
 func (suite *PriceGroupTestSuite) TearDownTest() {}
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyRegionByCountry_BindError_RequiredCountry() {
+func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_BindError_RequiredCountry() {
 	data := `{"variable": "test"}`
 
 	e := echo.New()
@@ -45,7 +45,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyRegionByCountry_B
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	err := suite.router.getCurrencyRegionByCountry(ctx)
+	err := suite.router.getPriceGroupByCountry(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -54,7 +54,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyRegionByCountry_B
 	assert.Regexp(suite.T(), "field validation for 'Country' failed on the 'required' tag", httpErr.Message)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyRegionByCountry_Error_BillingServer() {
+func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Error_BillingServer() {
 	data := `{"country": "RU"}`
 
 	e := echo.New()
@@ -64,14 +64,14 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyRegionByCountry_E
 	ctx := e.NewContext(req, rsp)
 
 	currencyService := &mock.CurrencyratesService{}
-	currencyService.On("GetCurrencyRegionByCountry", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	currencyService.On("GetPriceGroupByCountry", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
 	suite.api.currencyService = currencyService
 
-	err := suite.router.getCurrencyRegionByCountry(ctx)
+	err := suite.router.getPriceGroupByCountry(ctx)
 	assert.Error(suite.T(), err)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyRegionByCountry_Ok() {
+func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Ok() {
 	data := `{"country": "RU"}`
 
 	e := echo.New()
@@ -81,10 +81,10 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyRegionByCountry_O
 	ctx := e.NewContext(req, rsp)
 
 	currencyService := &mock.CurrencyratesService{}
-	currencyService.On("GetCurrencyRegionByCountry", mock2.Anything, mock2.Anything).Return(&currencies.CurrencyRegion{}, nil)
+	currencyService.On("GetPriceGroupByCountry", mock2.Anything, mock2.Anything).Return(&currencies.CurrencyRegion{}, nil)
 	suite.api.currencyService = currencyService
 
-	err := suite.router.getCurrencyRegionByCountry(ctx)
+	err := suite.router.getPriceGroupByCountry(ctx)
 	assert.NoError(suite.T(), err)
 }
 

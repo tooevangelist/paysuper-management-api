@@ -312,36 +312,6 @@ func (_m *CurrencyratesService) GetCurrencyList(ctx context.Context, in *currenc
 	return r0, r1
 }
 
-// GetCurrencyRegionByCountry provides a mock function with given fields: ctx, in, opts
-func (_m *CurrencyratesService) GetCurrencyRegionByCountry(ctx context.Context, in *currencies.CountryRequest, opts ...client.CallOption) (*currencies.CurrencyRegion, error) {
-	_va := make([]interface{}, len(opts))
-	for _i := range opts {
-		_va[_i] = opts[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, in)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
-
-	var r0 *currencies.CurrencyRegion
-	if rf, ok := ret.Get(0).(func(context.Context, *currencies.CountryRequest, ...client.CallOption) *currencies.CurrencyRegion); ok {
-		r0 = rf(ctx, in, opts...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*currencies.CurrencyRegion)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *currencies.CountryRequest, ...client.CallOption) error); ok {
-		r1 = rf(ctx, in, opts...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // GetMerchantRateCorrectionRule provides a mock function with given fields: ctx, in, opts
 func (_m *CurrencyratesService) GetMerchantRateCorrectionRule(ctx context.Context, in *currencies.MerchantCorrectionRuleRequest, opts ...client.CallOption) (*currencies.CorrectionRule, error) {
 	_va := make([]interface{}, len(opts))
@@ -394,6 +364,36 @@ func (_m *CurrencyratesService) GetPriceCurrencies(ctx context.Context, in *curr
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *currencies.EmptyRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetPriceGroupByCountry provides a mock function with given fields: ctx, in, opts
+func (_m *CurrencyratesService) GetPriceGroupByCountry(ctx context.Context, in *currencies.CountryRequest, opts ...client.CallOption) (*currencies.CurrencyRegion, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *currencies.CurrencyRegion
+	if rf, ok := ret.Get(0).(func(context.Context, *currencies.CountryRequest, ...client.CallOption) *currencies.CurrencyRegion); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*currencies.CurrencyRegion)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *currencies.CountryRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
