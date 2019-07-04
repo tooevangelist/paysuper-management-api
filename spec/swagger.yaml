@@ -1267,9 +1267,6 @@ definitions:
       currency:
         description: name of currency
         type: string
-      country:
-        description: list of country
-        type: array
       amount:
         description: recommended amount
         type: double
