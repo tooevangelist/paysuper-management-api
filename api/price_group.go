@@ -48,7 +48,7 @@ func (api *PriceGroup) getPriceGroupByCountry(ctx echo.Context) error {
 }
 
 // Get test settings for payment method
-// GET /api/v1/payment_method/currencies
+// GET /api/v1/price_group/currencies
 func (api *PriceGroup) getCurrencyList(ctx echo.Context) error {
 	req := &currencies.EmptyRequest{}
 	err := ctx.Bind(req)
@@ -72,7 +72,7 @@ func (api *PriceGroup) getCurrencyList(ctx echo.Context) error {
 }
 
 // Get test settings for payment method
-// GET /api/v1/payment_method/region
+// GET /api/v1/price_group/region
 func (api *PriceGroup) getCurrencyByRegion(ctx echo.Context) error {
 	req := &currencies.RegionRequest{}
 	err := ctx.Bind(req)
@@ -96,7 +96,7 @@ func (api *PriceGroup) getCurrencyByRegion(ctx echo.Context) error {
 }
 
 // Get test settings for payment method
-// GET /api/v1/payment_method/recommended
+// GET /api/v1/price_group/recommended
 func (api *PriceGroup) getRecommendedPrice(ctx echo.Context) error {
 	req := &currencies.RecommendedPriceRequest{}
 	err := ctx.Bind(req)
