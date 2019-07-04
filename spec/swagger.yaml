@@ -1233,12 +1233,6 @@ definitions:
       currency:
         description: code of currency
         type: string
-      inflation_rate:
-        description: inflation rate
-        type: double
-      fraction:
-        description: fractional rounding mode
-        type: double
   price_group.CurrencyListResponse:
     properties:
       regions:
