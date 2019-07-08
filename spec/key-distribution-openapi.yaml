@@ -31,7 +31,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/KeyProductPrice'
+                  $ref: '#/components/schemas/KeyPlatform'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -44,7 +44,7 @@ paths:
           $ref: '#/components/responses/InternalError'
 
     put:
-      summary: Change prices for product
+      summary: Change prices for product and provided platforms
       parameters:
         - name: key_product_id
           in: path
@@ -58,10 +58,16 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/KeyProductPrice'
+                $ref: '#/components/schemas/KeyPlatformUpdate'
       responses:
         200:
           description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeyPlatform'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -335,6 +341,19 @@ components:
       required:
         - code
         - message
+
+    KeyPlatformUpdate:
+      type: object
+      properties:
+        platform:
+          type: string
+          description: Id of platform
+          example:
+            steam
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyProductPrice'
 
     KeyPlatform:
       type: object
