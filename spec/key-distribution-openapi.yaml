@@ -51,50 +51,6 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
-    put:
-      tags:
-        - product
-        - platform
-      summary: Change prices for specified platform and key product
-      parameters:
-        - name: key_product_id
-          in: path
-          description: "Key Product ID"
-          required: true
-          schema:
-            type: string
-        - name: platform_id
-          in: path
-          description: "Platform id"
-          required: true
-          example: steam
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/KeyProductPrice'
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/KeyPlatform'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalError'
-
   /admin/api/v1/key-products/:key_product_id/platforms:
     get:
       tags:
@@ -117,6 +73,44 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/KeyPlatform'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags:
+        - product
+        - platform
+      summary: Change prices for specified platform and key product
+      parameters:
+        - name: key_product_id
+          in: path
+          description: "Key Product ID"
+          required: true
+          schema:
+            type: string
+        - name: platform_id
+          in: path
+          description: "Platform id"
+          required: true
+          example: steam
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyPlatform'
+      responses:
+        200:
+          description: OK
         400:
           $ref: '#/components/responses/BadRequest'
         401:
