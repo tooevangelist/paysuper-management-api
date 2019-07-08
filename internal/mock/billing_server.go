@@ -2484,3 +2484,195 @@ func (s *BillingServerSystemErrorMock) GetCurrencyList(
 ) (*billing.CurrencyList, error) {
 	return nil, SomeError
 }
+
+func (s *BillingServerOkMock) GetPriceGroupByCountry(
+	ctx context.Context,
+	in *grpc.PriceGroupByCountryRequest,
+	opts ...client.CallOption,
+) (*billing.PriceGroup, error) {
+	return &billing.PriceGroup{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetPriceGroupByCountry(
+	ctx context.Context,
+	in *grpc.PriceGroupByCountryRequest,
+	opts ...client.CallOption,
+) (*billing.PriceGroup, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerErrorMock) GetPriceGroupByCountry(
+	ctx context.Context,
+	in *grpc.PriceGroupByCountryRequest,
+	opts ...client.CallOption,
+) (*billing.PriceGroup, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetPriceGroupByCountry(
+	ctx context.Context,
+	in *grpc.PriceGroupByCountryRequest,
+	opts ...client.CallOption,
+) (*billing.PriceGroup, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkMock) GetPriceGroupCurrencies(
+	ctx context.Context,
+	in *grpc.EmptyRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupCurrenciesResponse, error) {
+	return &grpc.PriceGroupCurrenciesResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetPriceGroupCurrencies(
+	ctx context.Context,
+	in *grpc.EmptyRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupCurrenciesResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerErrorMock) GetPriceGroupCurrencies(
+	ctx context.Context,
+	in *grpc.EmptyRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupCurrenciesResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetPriceGroupCurrencies(
+	ctx context.Context,
+	in *grpc.EmptyRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupCurrenciesResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkMock) GetPriceGroupCurrencyByRegion(
+	ctx context.Context,
+	in *grpc.PriceGroupByRegionRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupCurrenciesResponse, error) {
+	return &grpc.PriceGroupCurrenciesResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetPriceGroupCurrencyByRegion(
+	ctx context.Context,
+	in *grpc.PriceGroupByRegionRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupCurrenciesResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerErrorMock) GetPriceGroupCurrencyByRegion(
+	ctx context.Context,
+	in *grpc.PriceGroupByRegionRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupCurrenciesResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetPriceGroupCurrencyByRegion(
+	ctx context.Context,
+	in *grpc.PriceGroupByRegionRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupCurrenciesResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkMock) GetPriceGroupRecommendedPrice(
+	ctx context.Context,
+	in *grpc.PriceGroupRecommendedPriceRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupRecommendedPriceResponse, error) {
+	return &grpc.PriceGroupRecommendedPriceResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetPriceGroupRecommendedPrice(
+	ctx context.Context,
+	in *grpc.PriceGroupRecommendedPriceRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupRecommendedPriceResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerErrorMock) GetPriceGroupRecommendedPrice(
+	ctx context.Context,
+	in *grpc.PriceGroupRecommendedPriceRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupRecommendedPriceResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetPriceGroupRecommendedPrice(
+	ctx context.Context,
+	in *grpc.PriceGroupRecommendedPriceRequest,
+	opts ...client.CallOption,
+) (*grpc.PriceGroupRecommendedPriceResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkMock) GetProductPrices(
+	ctx context.Context,
+	in *grpc.RequestProduct,
+	opts ...client.CallOption,
+) (*grpc.ProductPricesResponse, error) {
+	return &grpc.ProductPricesResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetProductPrices(
+	ctx context.Context,
+	in *grpc.RequestProduct,
+	opts ...client.CallOption,
+) (*grpc.ProductPricesResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerErrorMock) GetProductPrices(
+	ctx context.Context,
+	in *grpc.RequestProduct,
+	opts ...client.CallOption,
+) (*grpc.ProductPricesResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetProductPrices(
+	ctx context.Context,
+	in *grpc.RequestProduct,
+	opts ...client.CallOption,
+) (*grpc.ProductPricesResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkMock) UpdateProductPrices(
+	ctx context.Context,
+	in *grpc.UpdateProductPricesRequest,
+	opts ...client.CallOption,
+) (*grpc.ResponseError, error) {
+	return &grpc.ResponseError{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) UpdateProductPrices(
+	ctx context.Context,
+	in *grpc.UpdateProductPricesRequest,
+	opts ...client.CallOption,
+) (*grpc.ResponseError, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerErrorMock) UpdateProductPrices(
+	ctx context.Context,
+	in *grpc.UpdateProductPricesRequest,
+	opts ...client.CallOption,
+) (*grpc.ResponseError, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) UpdateProductPrices(
+	ctx context.Context,
+	in *grpc.UpdateProductPricesRequest,
+	opts ...client.CallOption,
+) (*grpc.ResponseError, error) {
+	return nil, SomeError
+}

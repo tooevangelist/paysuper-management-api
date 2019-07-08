@@ -15,8 +15,6 @@ import (
 	"github.com/micro/go-plugins/selector/static"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	currenciesServiceConst "github.com/paysuper/paysuper-currencies/pkg"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/utils"
 	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
@@ -87,10 +85,10 @@ type Api struct {
 	accessRouteGroup    *echo.Group
 	webhookRouteGroup   *echo.Group
 	apiAuthProjectGroup *echo.Group
-	jwtVerifier         *jwtverifier.JwtVerifier
+	authUserRouteGroup  *echo.Group
 
-	authUserRouteGroup *echo.Group
-	authUser           *AuthUser
+	jwtVerifier *jwtverifier.JwtVerifier
+	authUser    *AuthUser
 
 	httpScheme string
 
@@ -98,12 +96,11 @@ type Api struct {
 	serviceContext context.Context
 	serviceCancel  context.CancelFunc
 
-	repository      repository.RepositoryService
-	geoService      proto.GeoIpService
-	billingService  grpc.BillingService
-	taxService      tax_service.TaxService
-	paylinkService  paylink.PaylinkService
-	currencyService currencies.CurrencyratesService
+	repository     repository.RepositoryService
+	geoService     proto.GeoIpService
+	billingService grpc.BillingService
+	taxService     tax_service.TaxService
+	paylinkService paylink.PaylinkService
 
 	AmqpAddress string
 	notifierPub *rabbitmq.Broker
@@ -291,7 +288,6 @@ func (api *Api) InitService() {
 	api.billingService = grpc.NewBillingService(pkg.ServiceName, api.service.Client())
 	api.taxService = tax_service.NewTaxService(taxServiceConst.ServiceName, api.service.Client())
 	api.paylinkService = paylink.NewPaylinkService(paylinkServiceConst.ServiceName, api.service.Client())
-	api.currencyService = currencies.NewCurrencyratesService(currenciesServiceConst.ServiceName, api.service.Client())
 }
 
 func (api *Api) Stop() {

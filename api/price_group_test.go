@@ -3,7 +3,8 @@ package api
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
 	mock2 "github.com/stretchr/testify/mock"
@@ -63,12 +64,15 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Error
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	currencyService := &mock.CurrencyratesService{}
-	currencyService.On("GetPriceGroupByCountry", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
-	suite.api.currencyService = currencyService
+	billingService := &mock.BillingService{}
+	billingService.On("GetPriceGroupByCountry", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	suite.api.billingService = billingService
 
 	err := suite.router.getPriceGroupByCountry(ctx)
-	assert.Error(suite.T(), err)
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Regexp(suite.T(), errorMessagePriceGroupByCountry.Message, httpErr.Message)
 }
 
 func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Ok() {
@@ -80,9 +84,9 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Ok() 
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	currencyService := &mock.CurrencyratesService{}
-	currencyService.On("GetPriceGroupByCountry", mock2.Anything, mock2.Anything).Return(&currencies.CurrencyRegion{}, nil)
-	suite.api.currencyService = currencyService
+	billingService := &mock.BillingService{}
+	billingService.On("GetPriceGroupByCountry", mock2.Anything, mock2.Anything).Return(&billing.PriceGroup{}, nil)
+	suite.api.billingService = billingService
 
 	err := suite.router.getPriceGroupByCountry(ctx)
 	assert.NoError(suite.T(), err)
@@ -95,12 +99,15 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyList_Error_Billin
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	currencyService := &mock.CurrencyratesService{}
-	currencyService.On("GetCurrencyList", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
-	suite.api.currencyService = currencyService
+	billingService := &mock.BillingService{}
+	billingService.On("GetPriceGroupCurrencies", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	suite.api.billingService = billingService
 
 	err := suite.router.getCurrencyList(ctx)
-	assert.Error(suite.T(), err)
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Regexp(suite.T(), errorMessagePriceGroupCurrencyList.Message, httpErr.Message)
 }
 
 func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyList_Ok() {
@@ -110,9 +117,9 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyList_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	currencyService := &mock.CurrencyratesService{}
-	currencyService.On("GetCurrencyList", mock2.Anything, mock2.Anything).Return(&currencies.CurrencyListResponse{}, nil)
-	suite.api.currencyService = currencyService
+	billingService := &mock.BillingService{}
+	billingService.On("GetPriceGroupCurrencies", mock2.Anything, mock2.Anything).Return(&grpc.PriceGroupCurrenciesResponse{}, nil)
+	suite.api.billingService = billingService
 
 	err := suite.router.getCurrencyList(ctx)
 	assert.NoError(suite.T(), err)
@@ -137,7 +144,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_BindErro
 }
 
 func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Error_BillingServer() {
-	data := `{"country": "RU"}`
+	data := `{"region": "RUB"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/price_group/region", strings.NewReader(data))
@@ -145,12 +152,15 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Error_Bi
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	currencyService := &mock.CurrencyratesService{}
-	currencyService.On("GetCurrencyByRegion", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
-	suite.api.currencyService = currencyService
+	billingService := &mock.BillingService{}
+	billingService.On("GetPriceGroupCurrencyByRegion", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	suite.api.billingService = billingService
 
 	err := suite.router.getCurrencyByRegion(ctx)
-	assert.Error(suite.T(), err)
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Regexp(suite.T(), errorMessagePriceGroupCurrencyByRegion.Message, httpErr.Message)
 }
 
 func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Ok() {
@@ -162,9 +172,9 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	currencyService := &mock.CurrencyratesService{}
-	currencyService.On("GetCurrencyByRegion", mock2.Anything, mock2.Anything).Return(&currencies.CurrencyListResponse{}, nil)
-	suite.api.currencyService = currencyService
+	billingService := &mock.BillingService{}
+	billingService.On("GetPriceGroupCurrencyByRegion", mock2.Anything, mock2.Anything).Return(&grpc.PriceGroupCurrenciesResponse{}, nil)
+	suite.api.billingService = billingService
 
 	err := suite.router.getCurrencyByRegion(ctx)
 	assert.NoError(suite.T(), err)
@@ -197,12 +207,15 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Error_Bi
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	currencyService := &mock.CurrencyratesService{}
-	currencyService.On("GetRecommendedPrice", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
-	suite.api.currencyService = currencyService
+	billingService := &mock.BillingService{}
+	billingService.On("GetPriceGroupRecommendedPrice", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	suite.api.billingService = billingService
 
 	err := suite.router.getRecommendedPrice(ctx)
-	assert.Error(suite.T(), err)
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Regexp(suite.T(), errorMessagePriceGroupRecommendedList.Message, httpErr.Message)
 }
 
 func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Ok() {
@@ -214,9 +227,9 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	currencyService := &mock.CurrencyratesService{}
-	currencyService.On("GetRecommendedPrice", mock2.Anything, mock2.Anything).Return(&currencies.RecommendedPriceResponse{}, nil)
-	suite.api.currencyService = currencyService
+	billingService := &mock.BillingService{}
+	billingService.On("GetPriceGroupRecommendedPrice", mock2.Anything, mock2.Anything).Return(&grpc.PriceGroupRecommendedPriceResponse{}, nil)
+	suite.api.billingService = billingService
 
 	err := suite.router.getRecommendedPrice(ctx)
 	assert.NoError(suite.T(), err)

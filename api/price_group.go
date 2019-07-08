@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/paysuper/paysuper-currencies/pkg/proto/currencies"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"net/http"
 )
 
@@ -26,7 +26,7 @@ func (api *Api) initPriceGroupRoutes() *Api {
 // Get test settings for payment method
 // GET /api/v1/price_group/country
 func (api *PriceGroup) getPriceGroupByCountry(ctx echo.Context) error {
-	req := &currencies.CountryRequest{}
+	req := &grpc.PriceGroupByCountryRequest{}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -39,9 +39,9 @@ func (api *PriceGroup) getPriceGroupByCountry(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, api.getValidationError(err))
 	}
 
-	res, err := api.currencyService.GetPriceGroupByCountry(ctx.Request().Context(), req)
+	res, err := api.billingService.GetPriceGroupByCountry(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorMessagePriceGroupByCountry)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -50,7 +50,7 @@ func (api *PriceGroup) getPriceGroupByCountry(ctx echo.Context) error {
 // Get test settings for payment method
 // GET /api/v1/price_group/currencies
 func (api *PriceGroup) getCurrencyList(ctx echo.Context) error {
-	req := &currencies.EmptyRequest{}
+	req := &grpc.EmptyRequest{}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -63,9 +63,9 @@ func (api *PriceGroup) getCurrencyList(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, api.getValidationError(err))
 	}
 
-	res, err := api.currencyService.GetCurrencyList(ctx.Request().Context(), req)
+	res, err := api.billingService.GetPriceGroupCurrencies(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorMessagePriceGroupCurrencyList)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -74,7 +74,7 @@ func (api *PriceGroup) getCurrencyList(ctx echo.Context) error {
 // Get test settings for payment method
 // GET /api/v1/price_group/region
 func (api *PriceGroup) getCurrencyByRegion(ctx echo.Context) error {
-	req := &currencies.RegionRequest{}
+	req := &grpc.PriceGroupByRegionRequest{}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -87,9 +87,9 @@ func (api *PriceGroup) getCurrencyByRegion(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, api.getValidationError(err))
 	}
 
-	res, err := api.currencyService.GetCurrencyByRegion(ctx.Request().Context(), req)
+	res, err := api.billingService.GetPriceGroupCurrencyByRegion(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorMessagePriceGroupCurrencyByRegion)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -98,7 +98,7 @@ func (api *PriceGroup) getCurrencyByRegion(ctx echo.Context) error {
 // Get test settings for payment method
 // GET /api/v1/price_group/recommended
 func (api *PriceGroup) getRecommendedPrice(ctx echo.Context) error {
-	req := &currencies.RecommendedPriceRequest{}
+	req := &grpc.PriceGroupRecommendedPriceRequest{}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -111,9 +111,9 @@ func (api *PriceGroup) getRecommendedPrice(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, api.getValidationError(err))
 	}
 
-	res, err := api.currencyService.GetRecommendedPrice(ctx.Request().Context(), req)
+	res, err := api.billingService.GetPriceGroupRecommendedPrice(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorMessagePriceGroupRecommendedList)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

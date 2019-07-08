@@ -1709,6 +1709,18 @@ definitions:
     required:
       - token
 
+  product.Price:
+    properties:
+      amount:
+        description: price
+        type: double
+      currency:
+        description: currency
+        type: string
+      region:
+        description: region
+        type: string
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -4254,6 +4266,78 @@ paths:
             $ref: '#/definitions/model.Error'
         "404":
           description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/products/:id/prices":
+    get:
+      security:
+        - XAPISignatureHeader: []
+      summary: Get product prices
+      tags:
+        - Product
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get product prices
+      parameters:
+        - description: id of product
+          in: query
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          type: array
+          schema:
+            type: object
+            $ref: '#/definitions/product.Price'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      security:
+        - XAPISignatureHeader: []
+      summary: Set product prices
+      tags:
+        - Product
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set product prices
+      parameters:
+        - description: id of product
+          in: query
+          name: id
+          type: string
+          required: true
+        - description: list of prices
+          in: query
+          name: prices
+          type: array
+          schema:
+            $ref: '#/definitions/product.Price'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
+        "400":
+          description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
         "500":
