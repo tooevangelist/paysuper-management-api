@@ -13,14 +13,21 @@ servers:
     url: https://p1payapi.tst.protocol.one
 
 paths:
-  /admin/api/v1/key-products/:key_product_id/prices:
-    get:
-      summary: Get prices for product
+  /admin/api/v1/key-products/:key_product_id/platforms/:platform_id:
+    delete:
+      summary: Remove platform from product
       parameters:
         - name: key_product_id
           in: path
           description: "Key Product ID"
           required: true
+          schema:
+            type: string
+        - name: platform_id
+          in: path
+          description: "Platform id"
+          required: true
+          example: steam
           schema:
             type: string
       responses:
@@ -29,9 +36,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/KeyPlatform'
+                $ref: '#/components/schemas/KeyProduct'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -44,12 +49,19 @@ paths:
           $ref: '#/components/responses/InternalError'
 
     put:
-      summary: Change prices for product and provided platforms
+      summary: Change prices for specified platform and key product
       parameters:
         - name: key_product_id
           in: path
           description: "Key Product ID"
           required: true
+          schema:
+            type: string
+        - name: platform_id
+          in: path
+          description: "Platform id"
+          required: true
+          example: steam
           schema:
             type: string
       requestBody:
@@ -58,7 +70,35 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/KeyPlatformUpdate'
+                $ref: '#/components/schemas/KeyProductPrice'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyPlatform'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /admin/api/v1/key-products/:key_product_id/platforms:
+    get:
+      summary: Get platforms with prices for specified key product
+      parameters:
+        - name: key_product_id
+          in: path
+          description: "Key Product ID"
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: OK
@@ -342,19 +382,6 @@ components:
         - code
         - message
 
-    KeyPlatformUpdate:
-      type: object
-      properties:
-        platform:
-          type: string
-          description: Id of platform
-          example:
-            steam
-        prices:
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyProductPrice'
-
     KeyPlatform:
       type: object
       properties:
@@ -434,10 +461,6 @@ components:
         default_currency:
           type: string
           example: USD
-        platforms:
-          type: array
-          items:
-            $ref: '#/components/schemas/KeyPlatform'
 
     KeyProduct:
       type: object
