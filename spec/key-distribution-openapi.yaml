@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  description: Qilin store api
+  description: Pay Super Key Products api
   version: 1.0.0
   title: Pay Super key distribution
   contact:
@@ -13,6 +13,66 @@ servers:
     url: https://p1payapi.tst.protocol.one
 
 paths:
+  /admin/api/v1/key-products/:key_product_id/prices:
+    get:
+      summary: Get prices for product
+      parameters:
+        - name: key_product_id
+          in: path
+          description: "Key Product ID"
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeyProductPrice'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      summary: Change prices for product
+      parameters:
+        - name: key_product_id
+          in: path
+          description: "Key Product ID"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/KeyProductPrice'
+      responses:
+        200:
+          description: OK
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
   /admin/api/v1/key-products/:key_product_id/publish:
     post:
       tags:
@@ -28,6 +88,10 @@ paths:
       responses:
         200:
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyProduct'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -38,7 +102,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
-
 
   /admin/api/v1/key-products:
     get:
@@ -76,9 +139,14 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/KeyProduct'
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/KeyProduct'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -91,12 +159,12 @@ paths:
     post:
       tags:
         - product
-      summary: "Get list of key products"
+      summary: "Create new key product"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KeyProduct'
+              $ref: '#/components/schemas/UpdateKeyProduct'
       responses:
         200:
           description: OK
@@ -125,6 +193,11 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKeyProduct'
       responses:
         200:
           description: OK
@@ -183,18 +256,20 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Platform'
+                type: object
+                properties:
+                  total_count:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Platform'
         401:
           $ref: '#/components/responses/Unauthorized'
         403:
           $ref: '#/components/responses/Forbidden'
         500:
           $ref: '#/components/responses/InternalError'
-
-
-
 
 components:
   securitySchemes:
@@ -278,6 +353,8 @@ components:
     KeyProductPrice:
       type: object
       properties:
+        region:
+          type: string
         amount:
           type: number
           format: float
@@ -301,6 +378,47 @@ components:
           type: string
           example:
             Steam
+
+    UpdateKeyProduct:
+      type: object
+      description: Model for updating or creating key product
+      properties:
+        name:
+          type: object
+          additionalProperties:
+            type: string
+          description: name of product
+        project_id:
+          type: string
+          description: Id of project
+        description:
+          type: object
+          additionalProperties:
+            type: string
+          description: description of description
+        long_description:
+          type: object
+          additionalProperties:
+            type: string
+          description: long description of description
+        sku:
+          type: string
+          description: sku of product
+        images:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
+        enabled:
+          type: boolean
+        default_currency:
+          type: string
+          example: USD
+        platforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyPlatform'
 
     KeyProduct:
       type: object
@@ -353,3 +471,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KeyPlatform'
+        published_at:
+          description: Date and time when product has been published. May be null
+          type: string
+          format: 'date-time'
