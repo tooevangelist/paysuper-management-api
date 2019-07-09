@@ -23,7 +23,7 @@ func (api *Api) initPriceGroupRoutes() *Api {
 	return api
 }
 
-// Get test settings for payment method
+// Get currency and region by country code
 // GET /api/v1/price_group/country
 func (api *PriceGroup) getPriceGroupByCountry(ctx echo.Context) error {
 	req := &grpc.PriceGroupByCountryRequest{}
@@ -47,7 +47,7 @@ func (api *PriceGroup) getPriceGroupByCountry(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Get test settings for payment method
+// Get a list of currencies with a list of countries and regions for them
 // GET /api/v1/price_group/currencies
 func (api *PriceGroup) getCurrencyList(ctx echo.Context) error {
 	req := &grpc.EmptyRequest{}
@@ -71,7 +71,7 @@ func (api *PriceGroup) getCurrencyList(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Get test settings for payment method
+// Get currency for a region and a list of countries in it
 // GET /api/v1/price_group/region
 func (api *PriceGroup) getCurrencyByRegion(ctx echo.Context) error {
 	req := &grpc.PriceGroupByRegionRequest{}
@@ -95,7 +95,7 @@ func (api *PriceGroup) getCurrencyByRegion(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Get test settings for payment method
+// Get a list of recommended prices for all regions
 // GET /api/v1/price_group/recommended
 func (api *PriceGroup) getRecommendedPrice(ctx echo.Context) error {
 	req := &grpc.PriceGroupRecommendedPriceRequest{}
