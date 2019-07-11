@@ -11,7 +11,7 @@ type PaymentMethodApiV1 struct {
 	*Api
 }
 
-func (api *Api) InitPaymentMethodRoutes() *Api {
+func (api *Api) initPaymentMethodRoutes() *Api {
 	pmApiV1 := PaymentMethodApiV1{
 		Api: api,
 	}
@@ -67,7 +67,9 @@ func (pmApiV1 *PaymentMethodApiV1) createOrUpdatePaymentMethod(ctx echo.Context)
 // Get production settings for payment method
 // GET /api/v1/payment_method/:id/production
 func (pmApiV1 *PaymentMethodApiV1) getProductionSettings(ctx echo.Context) error {
-	req := &grpc.GetPaymentMethodSettingsRequest{}
+	req := &grpc.GetPaymentMethodSettingsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -101,7 +103,9 @@ func (pmApiV1 *PaymentMethodApiV1) updateProductionSettings(ctx echo.Context) er
 }
 
 func (pmApiV1 *PaymentMethodApiV1) createOrUpdateProductionSettings(ctx echo.Context) error {
-	req := &grpc.ChangePaymentMethodParamsRequest{}
+	req := &grpc.ChangePaymentMethodParamsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -125,7 +129,9 @@ func (pmApiV1 *PaymentMethodApiV1) createOrUpdateProductionSettings(ctx echo.Con
 // Delete production settings for payment method
 // DELETE /api/v1/payment_method/:id/production
 func (pmApiV1 *PaymentMethodApiV1) deleteProductionSettings(ctx echo.Context) error {
-	req := &grpc.GetPaymentMethodSettingsRequest{}
+	req := &grpc.GetPaymentMethodSettingsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -149,7 +155,9 @@ func (pmApiV1 *PaymentMethodApiV1) deleteProductionSettings(ctx echo.Context) er
 // Get test settings for payment method
 // GET /api/v1/payment_method/:id/test
 func (pmApiV1 *PaymentMethodApiV1) getTestSettings(ctx echo.Context) error {
-	req := &grpc.GetPaymentMethodSettingsRequest{}
+	req := &grpc.GetPaymentMethodSettingsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -183,7 +191,9 @@ func (pmApiV1 *PaymentMethodApiV1) updateTestSettings(ctx echo.Context) error {
 }
 
 func (pmApiV1 *PaymentMethodApiV1) createOrUpdateTestSettings(ctx echo.Context) error {
-	req := &grpc.ChangePaymentMethodParamsRequest{}
+	req := &grpc.ChangePaymentMethodParamsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -207,7 +217,9 @@ func (pmApiV1 *PaymentMethodApiV1) createOrUpdateTestSettings(ctx echo.Context) 
 // Delete test settings for payment method
 // DELETE /api/v1/payment_method/:id/test
 func (pmApiV1 *PaymentMethodApiV1) deleteTestSettings(ctx echo.Context) error {
-	req := &grpc.GetPaymentMethodSettingsRequest{}
+	req := &grpc.GetPaymentMethodSettingsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
