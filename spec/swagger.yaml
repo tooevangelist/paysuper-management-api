@@ -3019,7 +3019,7 @@ paths:
       summary: Delete test settings to the payment method
       tags:
         - Payment Method
-  /price_group/country:
+  /api/v1/s/price_group/country:
     get:
       consumes:
         - application/json
@@ -3046,7 +3046,7 @@ paths:
       summary: Get region and currency by country
       tags:
         - Price group
-  /price_group/currencies:
+  /api/v1/s/price_group/currencies:
     get:
       description: Get a list of all currencies with regions and countries in them
       produces:
@@ -3065,7 +3065,7 @@ paths:
       summary: Get a list of all currencies with regions and countries in them
       tags:
         - Price group
-  /price_group/region:
+  /api/v1/s/price_group/region:
     get:
       consumes:
         - application/json
@@ -3092,7 +3092,7 @@ paths:
       summary: Get currency for a region and a list of countries in it
       tags:
         - Price group
-  /price_group/recommended:
+  /api/v1/s/price_group/recommended:
     get:
       consumes:
         - application/json
