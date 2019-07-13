@@ -85,10 +85,10 @@ type Api struct {
 	accessRouteGroup    *echo.Group
 	webhookRouteGroup   *echo.Group
 	apiAuthProjectGroup *echo.Group
-	authUserRouteGroup  *echo.Group
+	jwtVerifier         *jwtverifier.JwtVerifier
 
-	jwtVerifier *jwtverifier.JwtVerifier
-	authUser    *AuthUser
+	authUserRouteGroup *echo.Group
+	authUser           *AuthUser
 
 	httpScheme string
 
@@ -234,6 +234,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initTaxesRoutes().
 		initTokenRoutes().
 		initZipCodeRoutes().
+		initPaymentMethodRoutes().
 		initPriceGroupRoutes()
 
 	_, err = api.initOnboardingRoutes()

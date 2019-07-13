@@ -1244,7 +1244,7 @@ func (_m *BillingService) GetPaymentChannelCostSystem(ctx context.Context, in *b
 }
 
 // GetPaymentMethodProductionSettings provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) GetPaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodSettingsRequest, opts ...client.CallOption) (*billing.PaymentMethodParams, error) {
+func (_m *BillingService) GetPaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodSettingsRequest, opts ...client.CallOption) (*grpc.GetPaymentMethodSettingsResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -1254,12 +1254,12 @@ func (_m *BillingService) GetPaymentMethodProductionSettings(ctx context.Context
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *billing.PaymentMethodParams
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetPaymentMethodSettingsRequest, ...client.CallOption) *billing.PaymentMethodParams); ok {
+	var r0 *grpc.GetPaymentMethodSettingsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetPaymentMethodSettingsRequest, ...client.CallOption) *grpc.GetPaymentMethodSettingsResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*billing.PaymentMethodParams)
+			r0 = ret.Get(0).(*grpc.GetPaymentMethodSettingsResponse)
 		}
 	}
 
@@ -1274,7 +1274,7 @@ func (_m *BillingService) GetPaymentMethodProductionSettings(ctx context.Context
 }
 
 // GetPaymentMethodTestSettings provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) GetPaymentMethodTestSettings(ctx context.Context, in *grpc.GetPaymentMethodSettingsRequest, opts ...client.CallOption) (*billing.PaymentMethodParams, error) {
+func (_m *BillingService) GetPaymentMethodTestSettings(ctx context.Context, in *grpc.GetPaymentMethodSettingsRequest, opts ...client.CallOption) (*grpc.GetPaymentMethodSettingsResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -1284,12 +1284,12 @@ func (_m *BillingService) GetPaymentMethodTestSettings(ctx context.Context, in *
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *billing.PaymentMethodParams
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetPaymentMethodSettingsRequest, ...client.CallOption) *billing.PaymentMethodParams); ok {
+	var r0 *grpc.GetPaymentMethodSettingsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetPaymentMethodSettingsRequest, ...client.CallOption) *grpc.GetPaymentMethodSettingsResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*billing.PaymentMethodParams)
+			r0 = ret.Get(0).(*grpc.GetPaymentMethodSettingsResponse)
 		}
 	}
 
