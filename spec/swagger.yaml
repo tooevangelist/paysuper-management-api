@@ -2727,8 +2727,7 @@ paths:
   /api/v1/s/payment_method:
     post:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Create a payment method for payment system
       parameters:
         - description: product method properties
@@ -2756,8 +2755,7 @@ paths:
   /api/v1/s/payment_method/{id}:
     put:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Update a payment method for payment system
       parameters:
         - description: paymentmethod identifier
@@ -2790,8 +2788,7 @@ paths:
   /api/v1/s/payment_method/{id}/production:
     post:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Add production settings to the payment method
       parameters:
         - description: paymentmethod identifier
@@ -2823,8 +2820,7 @@ paths:
         - Payment Method
     put:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Update production settings to the payment method
       parameters:
         - description: payment method identifier
@@ -2856,8 +2852,7 @@ paths:
         - Payment Method
     get:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Get production settings to the payment method
       parameters:
         - description: payment method identifier
@@ -2883,8 +2878,7 @@ paths:
         - Payment Method
     delete:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Delete production settings to the payment method
       parameters:
         - description: payment method identifier
@@ -2911,8 +2905,7 @@ paths:
   /api/v1/s/payment_method/{id}/test:
     post:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Add test settings to the payment method
       parameters:
         - description: paymentmethod identifier
@@ -2944,8 +2937,7 @@ paths:
         - Payment Method
     put:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Update test settings to the payment method
       parameters:
         - description: paymentmethod identifier
@@ -2977,8 +2969,7 @@ paths:
         - Payment Method
     get:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Get test settings to the payment method
       parameters:
         - description: payment method identifier
@@ -3004,8 +2995,7 @@ paths:
         - Payment Method
     delete:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Delete test settings to the payment method
       parameters:
         - description: payment method identifier
@@ -3032,12 +3022,11 @@ paths:
   /price_group/country:
     get:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Get region and currency by country
       parameters:
         - description: two-letter code of country
-          in: path
+          in: query
           name: country
           type: string
           required: true
@@ -3059,9 +3048,6 @@ paths:
         - Price group
   /price_group/currencies:
     get:
-      consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
       description: Get a list of all currencies with regions and countries in them
       produces:
         - application/json
@@ -3082,12 +3068,11 @@ paths:
   /price_group/region:
     get:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Get currency for a region and a list of countries in it
       parameters:
         - description: name of region
-          in: path
+          in: query
           name: region
           type: string
           required: true
@@ -3110,12 +3095,11 @@ paths:
   /price_group/recommended:
     get:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Get recommended prices for regions
       parameters:
         - description: base price in USD
-          in: path
+          in: query
           name: amount
           type: string
           required: true
