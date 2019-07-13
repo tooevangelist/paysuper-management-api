@@ -692,12 +692,9 @@ github.com/oschwald/maxminddb-golang v1.3.0/go.mod h1:3jhIUymTJ5VREKyIhWm66LJiQt
 github.com/packethost/packngo v0.1.1-0.20180711074735-b9cb5096f54c/go.mod h1:otzZQXgoO96RTzDB/Hycg0qZcXZsWJGJRSXbmEIJ+4M=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190701160214-119c4e2eb031 h1:r3z/Rq89xnKP6Dz9bJMRfhnIKEQGQCcf6X2Fn9eGVkM=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190701160214-119c4e2eb031/go.mod h1:I1H3CadxvC4BDsGvIaj1tKX86pmUxAuyatoBxG/eO24=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190711062904-8c9e35e861fb h1:KRcJDiSEMzMi7wL3OGPg5WS9KH1+KGWwQ9nni7hFiPc=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190711062904-8c9e35e861fb/go.mod h1:I1H3CadxvC4BDsGvIaj1tKX86pmUxAuyatoBxG/eO24=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190711101638-70704ff9d380 h1:hbT75k8CRQ5LicvWvk3m6QIL58Jsi/cq3ox+7Cl0pKI=
-github.com/paysuper/paysuper-billing-server v0.0.0-20190711101638-70704ff9d380/go.mod h1:8RhUPbVy9t0P6hYG6wk80IKeqdEhpvXGmnyey40jX3Y=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190712101402-c035a9110122/go.mod h1:8RhUPbVy9t0P6hYG6wk80IKeqdEhpvXGmnyey40jX3Y=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190713110605-ed75e2c8209a h1:zGW5Eewpi8YiqeO0oozB/KpT/6AZcMelEjAp/v4NkrI=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190713110605-ed75e2c8209a/go.mod h1:8RhUPbVy9t0P6hYG6wk80IKeqdEhpvXGmnyey40jX3Y=
 github.com/paysuper/paysuper-currencies v0.0.0-20190524103445-940bc8855c5c/go.mod h1:3iZFbAE0u2J24oKXhxTN+NgAHjJS2l3E/veHv7Oapz0=
 github.com/paysuper/paysuper-database-mongo v0.1.0 h1:RMSIYB8rpTAAHc0wmIQz8XQVa8KB6/xX8iA8ceiDic8=
 github.com/paysuper/paysuper-database-mongo v0.1.0/go.mod h1:IZu996j//Qoq+uzzCBL5GEYisfF4di/fwedWHlLz7sc=
@@ -1106,7 +1103,6 @@ google.golang.org/genproto v0.0.0-20190201180003-4b09977fb922/go.mod h1:L3J43x8/
 google.golang.org/genproto v0.0.0-20190307195333-5fe7a883aa19/go.mod h1:VzzqZJRnGkLBvHegQrXjBqPurQTc5/KpmUdxsrq26oE=
 google.golang.org/genproto v0.0.0-20190327125643-d831d65fe17d/go.mod h1:VzzqZJRnGkLBvHegQrXjBqPurQTc5/KpmUdxsrq26oE=
 google.golang.org/genproto v0.0.0-20190404172233-64821d5d2107/go.mod h1:VzzqZJRnGkLBvHegQrXjBqPurQTc5/KpmUdxsrq26oE=
-google.golang.org/genproto v0.0.0-20190425155659-357c62f0e4bb h1:i1Ppqkc3WQXikh8bXiwHqAN5Rv3/qDCcRk0/Otx73BY=
 google.golang.org/genproto v0.0.0-20190425155659-357c62f0e4bb/go.mod h1:VzzqZJRnGkLBvHegQrXjBqPurQTc5/KpmUdxsrq26oE=
 google.golang.org/grpc v1.12.0/go.mod h1:yo6s7OP7yaDglbqo1J04qKzAhqBH6lvTonzMVmEdcZw=
 google.golang.org/grpc v1.14.0/go.mod h1:yo6s7OP7yaDglbqo1J04qKzAhqBH6lvTonzMVmEdcZw=
@@ -1117,7 +1113,6 @@ google.golang.org/grpc v1.18.0/go.mod h1:6QZJwpn2B+Zp71q/5VxRsJ6NXXVCE5NRUHRo+f3
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.19.1/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.20.1/go.mod h1:10oTOabMzJvdu6/UiuZezV6QK5dSlG84ov/aaiqXj38=
-google.golang.org/grpc v1.21.0 h1:G+97AoqBnmZIT91cLG/EkCoK9NSelj64P8bOHHNmGn0=
 google.golang.org/grpc v1.21.0/go.mod h1:oYelfM1adQP15Ek0mdvEgi9Df8B9CZIaU1084ijfRaM=
 gopkg.in/DataDog/dd-trace-go.v0 v0.6.1/go.mod h1:uxRvUTC61u1w+PTfyHNOzLPTCHYt6CJyGZvZSAzGvZA=
 gopkg.in/airbrake/gobrake.v2 v2.0.9/go.mod h1:/h5ZAUhDkGaJfjzjKLSjv6zCL6O0LLBxU4K+aSYdM/U=

@@ -1333,6 +1333,126 @@ func (_m *BillingService) GetPriceGroup(ctx context.Context, in *billing.GetPric
 	return r0, r1
 }
 
+// GetPriceGroupByCountry provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetPriceGroupByCountry(ctx context.Context, in *grpc.PriceGroupByCountryRequest, opts ...client.CallOption) (*billing.PriceGroup, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *billing.PriceGroup
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.PriceGroupByCountryRequest, ...client.CallOption) *billing.PriceGroup); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*billing.PriceGroup)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.PriceGroupByCountryRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetPriceGroupCurrencies provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetPriceGroupCurrencies(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.PriceGroupCurrenciesResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.PriceGroupCurrenciesResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) *grpc.PriceGroupCurrenciesResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.PriceGroupCurrenciesResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetPriceGroupCurrencyByRegion provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetPriceGroupCurrencyByRegion(ctx context.Context, in *grpc.PriceGroupByRegionRequest, opts ...client.CallOption) (*grpc.PriceGroupCurrenciesResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.PriceGroupCurrenciesResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.PriceGroupByRegionRequest, ...client.CallOption) *grpc.PriceGroupCurrenciesResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.PriceGroupCurrenciesResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.PriceGroupByRegionRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetPriceGroupRecommendedPrice provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetPriceGroupRecommendedPrice(ctx context.Context, in *grpc.PriceGroupRecommendedPriceRequest, opts ...client.CallOption) (*grpc.PriceGroupRecommendedPriceResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.PriceGroupRecommendedPriceResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.PriceGroupRecommendedPriceRequest, ...client.CallOption) *grpc.PriceGroupRecommendedPriceResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.PriceGroupRecommendedPriceResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.PriceGroupRecommendedPriceRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetProduct provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
 	_va := make([]interface{}, len(opts))
@@ -1350,6 +1470,36 @@ func (_m *BillingService) GetProduct(ctx context.Context, in *grpc.RequestProduc
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*grpc.Product)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.RequestProduct, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetProductPrices provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetProductPrices(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.ProductPricesResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ProductPricesResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.RequestProduct, ...client.CallOption) *grpc.ProductPricesResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ProductPricesResponse)
 		}
 	}
 
@@ -2255,6 +2405,36 @@ func (_m *BillingService) UpdatePriceGroup(ctx context.Context, in *billing.Pric
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *billing.PriceGroup, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateProductPrices provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) UpdateProductPrices(ctx context.Context, in *grpc.UpdateProductPricesRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ResponseError
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.UpdateProductPricesRequest, ...client.CallOption) *grpc.ResponseError); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ResponseError)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.UpdateProductPricesRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)

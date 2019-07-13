@@ -234,7 +234,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initTaxesRoutes().
 		initTokenRoutes().
 		initZipCodeRoutes().
-		initPaymentMethodRoutes()
+		initPaymentMethodRoutes().
+		initPriceGroupRoutes()
 
 	_, err = api.initOnboardingRoutes()
 
