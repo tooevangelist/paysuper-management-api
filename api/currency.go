@@ -49,7 +49,7 @@ func (cApiV1 *CurrencyApiV1) getByName(ctx echo.Context) error {
 
 	err = cApiV1.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, cApiV1.getValidationError(err))
 	}
 
 	res, err := cApiV1.billingService.GetCurrency(ctx.Request().Context(), req)
@@ -73,7 +73,7 @@ func (cApiV1 *CurrencyApiV1) getById(ctx echo.Context) error {
 	req := &billing.GetCurrencyRequest{CurrencyInt: int32(i)}
 	err = cApiV1.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, cApiV1.getValidationError(err))
 	}
 
 	res, err := cApiV1.billingService.GetCurrency(ctx.Request().Context(), req)

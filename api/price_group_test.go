@@ -52,7 +52,10 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_BindE
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'Country' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'Country' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Error_BillingServer() {
@@ -140,7 +143,10 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_BindErro
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'Region' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'Region' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Error_BillingServer() {
@@ -195,7 +201,10 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_BindErro
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'Amount' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'Amount' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Error_BillingServer() {

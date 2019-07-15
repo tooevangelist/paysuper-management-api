@@ -51,7 +51,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_Required
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.Regexp(suite.T(), "Name", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "Name", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_RequiredPaymentSystemId() {
@@ -69,7 +72,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_Required
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "PaymentSystemId", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "PaymentSystemId", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_Name() {
@@ -87,7 +93,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_Name() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'Name' failed on the 'alphanum' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'Name' failed on the 'alphanum' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_PaymentSystemId() {
@@ -105,7 +114,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_PaymentS
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'PaymentSystemId' failed on the 'len' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'PaymentSystemId' failed on the 'len' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_Error_BillingServer() {
@@ -174,7 +186,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getProductionSettings_Bin
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_getProductionSettings_Error_BillingServer() {
@@ -231,7 +246,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getTestSettings_BindError
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_getTestSettings_Error_BillingServer() {
@@ -288,7 +306,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_createProductionSettings_
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'Params' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'Params' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_createProductionSettings_BindError_RequiredPaymentMethodId() {
@@ -306,7 +327,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_createProductionSettings_
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateProductionSettings_BindError_RequiredParams() {
@@ -324,7 +348,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateProductionSettings_
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'Params' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'Params' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateProductionSettings_BindError_RequiredPaymentMethodId() {
@@ -342,7 +369,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateProductionSettings_
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_createTestSettings_BindError_RequiredParams() {
@@ -360,7 +390,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_createTestSettings_BindEr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'Params' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'Params' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_createTestSettings_BindError_RequiredPaymentMethodId() {
@@ -378,7 +411,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_createTestSettings_BindEr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateTestSettings_BindError_RequiredParams() {
@@ -396,7 +432,10 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateTestSettings_BindEr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'Params' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'Params' failed on the 'required' tag", msg.Details)
 }
 
 func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateTestSettings_BindError_RequiredPaymentMethodId() {
@@ -414,5 +453,8 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateTestSettings_BindEr
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", httpErr.Message)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "field validation for 'PaymentMethodId' failed on the 'required' tag", msg.Details)
 }
