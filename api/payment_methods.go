@@ -181,13 +181,13 @@ func (pmApiV1 *PaymentMethodApiV1) getTestSettings(ctx echo.Context) error {
 // Create new test settings for payment method
 // POST /payment_method/:id/test
 func (pmApiV1 *PaymentMethodApiV1) createTestSettings(ctx echo.Context) error {
-	return pmApiV1.createOrUpdateProductionSettings(ctx)
+	return pmApiV1.createOrUpdateTestSettings(ctx)
 }
 
 // Update exists test settings for payment method
 // PUT /api/v1/payment_method/:id/test
 func (pmApiV1 *PaymentMethodApiV1) updateTestSettings(ctx echo.Context) error {
-	return pmApiV1.createOrUpdateProductionSettings(ctx)
+	return pmApiV1.createOrUpdateTestSettings(ctx)
 }
 
 func (pmApiV1 *PaymentMethodApiV1) createOrUpdateTestSettings(ctx echo.Context) error {
