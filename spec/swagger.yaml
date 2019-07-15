@@ -3012,7 +3012,7 @@ paths:
           in: query
           name: currency_a3
           type: string
-        required: true
+          required: true
       produces:
         - text/html
       responses:
