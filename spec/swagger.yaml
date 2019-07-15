@@ -2886,6 +2886,11 @@ paths:
           name: id
           type: string
           required: true
+        - description: code of currency
+          in: query
+          name: currency_a3
+          type: string
+          required: true
       produces:
         - text/html
       responses:
@@ -3003,6 +3008,11 @@ paths:
           name: id
           type: string
           required: true
+        - description: code of currency
+          in: query
+          name: currency_a3
+          type: string
+        required: true
       produces:
         - text/html
       responses:
