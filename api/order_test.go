@@ -689,7 +689,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationError() {
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationZipError() {
-	body := `{"country": "US", "zip": "0"}`
+	body := `{"country": "US", "zip": "00"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
