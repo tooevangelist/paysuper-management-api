@@ -173,24 +173,20 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.accessRouteGroup.Use(middleware.Recover())
 
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
-	/*api.authUserRouteGroup.Use(
-	      jwtMiddleware.AuthOneJwtCallableWithConfig(
-	          api.jwtVerifier,
-	          func(ui *jwtverifier.UserInfo) {
-	              api.authUser = &AuthUser{
-	                  Id:        ui.UserID,
-	                  Name:      "System User",
-	                  Merchants: make(map[string]bool),
-	                  Roles:     make(map[string]bool),
-	              }
-	          },
-	      ),
-	  )
-	  api.authUserRouteGroup.Use(api.getUserDetailsMiddleware)*/
-	api.authUser = &AuthUser{
-		Id:    "ffffffffffffffffffffffff",
-		Email: "dmitriy.sinichkin@protocol.one",
-	}
+	api.authUserRouteGroup.Use(
+		jwtMiddleware.AuthOneJwtCallableWithConfig(
+			api.jwtVerifier,
+			func(ui *jwtverifier.UserInfo) {
+				api.authUser = &AuthUser{
+					Id:        ui.UserID,
+					Name:      "System User",
+					Merchants: make(map[string]bool),
+					Roles:     make(map[string]bool),
+				}
+			},
+		),
+	)
+	api.authUserRouteGroup.Use(api.getUserDetailsMiddleware)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
 	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
