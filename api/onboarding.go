@@ -120,12 +120,10 @@ func (r *onboardingRoute) getMerchantByUser(ctx echo.Context) error {
 	rsp, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 
 	if err != nil {
-		r.logError("500_debug", []interface{}{"error", err})
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
 	if rsp.Status != pkg.ResponseStatusOk {
-		r.logError("500_debug", []interface{}{"response", rsp})
 		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
 	}
 

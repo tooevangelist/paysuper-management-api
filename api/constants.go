@@ -1,5 +1,10 @@
 package api
 
+type Dictionary struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 const (
 	apiWebHookGroupPath     = "/webhook"
 	apiAuthProjectGroupPath = "/api/v1"
@@ -16,7 +21,6 @@ const (
 	requestParameterProject                  = "project[]"
 	requestParameterPaymentMethod            = "payment_method[]"
 	requestParameterCountry                  = "country[]"
-	requestParameterStatuses                 = "status[]"
 	requestParameterProjectId                = "project_id"
 	requestParameterPaymentMethodId          = "method_id"
 	requestParameterOrderId                  = "order_id"
@@ -96,22 +100,24 @@ const (
 	agreementPageTemplateName = "agreement.html"
 )
 
-var DefaultSort = []string{"_id"}
+var (
+	DefaultSort = []string{"_id"}
 
-var OrderReservedWords = map[string]bool{
-	orderFieldProjectId:     true,
-	orderFieldSignature:     true,
-	orderFieldAmount:        true,
-	orderFieldCurrency:      true,
-	orderFieldAccount:       true,
-	orderFieldOrderId:       true,
-	orderFieldDescription:   true,
-	orderFieldPaymentMethod: true,
-	orderFieldUrlVerify:     true,
-	orderFieldUrlNotify:     true,
-	orderFieldUrlSuccess:    true,
-	orderFieldUrlFail:       true,
-	orderFieldPayerEmail:    true,
-	orderFieldPayerPhone:    true,
-	orderFieldRegion:        true,
-}
+	OrderReservedWords = map[string]bool{
+		orderFieldProjectId:     true,
+		orderFieldSignature:     true,
+		orderFieldAmount:        true,
+		orderFieldCurrency:      true,
+		orderFieldAccount:       true,
+		orderFieldOrderId:       true,
+		orderFieldDescription:   true,
+		orderFieldPaymentMethod: true,
+		orderFieldUrlVerify:     true,
+		orderFieldUrlNotify:     true,
+		orderFieldUrlSuccess:    true,
+		orderFieldUrlFail:       true,
+		orderFieldPayerEmail:    true,
+		orderFieldPayerPhone:    true,
+		orderFieldRegion:        true,
+	}
+)
