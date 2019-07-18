@@ -336,10 +336,18 @@ func (api *Api) getUserDetailsMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 	}
 }
 
-func (api *Api) getValidationError(err error) string {
+func (api *Api) getValidationError(err error) (rspErr *grpc.ResponseErrorMessage) {
 	vErr := err.(validator.ValidationErrors)[0]
 
-	return fmt.Sprintf(errorMessageMask, vErr.Field(), vErr.Tag())
+	if vErr.Tag() == requestParameterZipUsa {
+		rspErr = errorMessageIncorrectZip
+	} else {
+		rspErr = errorValidationFailed
+	}
+
+	rspErr.Details = fmt.Sprintf(errorMessageMask, vErr.Field(), vErr.Tag())
+
+	return rspErr
 }
 
 func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.HTTPError {
@@ -352,7 +360,7 @@ func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.
 	err = api.validate.Struct(st)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(api.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, api.getValidationError(err))
 	}
 
 	return nil

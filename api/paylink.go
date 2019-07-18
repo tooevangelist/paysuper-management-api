@@ -47,7 +47,7 @@ func (r *paylinkRoute) getPaylinksList(ctx echo.Context) error {
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.paylinkService.GetPaylinks(ctx.Request().Context(), req)
@@ -69,7 +69,7 @@ func (r *paylinkRoute) getPaylink(ctx echo.Context) error {
 	}
 	err := r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.paylinkService.GetPaylink(ctx.Request().Context(), req)
@@ -91,7 +91,7 @@ func (r *paylinkRoute) getPaylinkStat(ctx echo.Context) error {
 	}
 	err := r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.paylinkService.GetPaylinkStat(ctx.Request().Context(), req)
@@ -115,7 +115,7 @@ func (r *paylinkRoute) getPaylinkUrl(ctx echo.Context) error {
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.paylinkService.GetPaylinkURL(ctx.Request().Context(), req)
@@ -137,7 +137,7 @@ func (r *paylinkRoute) deletePaylink(ctx echo.Context) error {
 	}
 	err := r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	_, err = r.paylinkService.DeletePaylink(ctx.Request().Context(), req)
@@ -178,7 +178,7 @@ func (r *paylinkRoute) createOrUpdatePaylink(ctx echo.Context, binder echo.Binde
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.paylinkService.CreateOrUpdatePaylink(ctx.Request().Context(), req)
