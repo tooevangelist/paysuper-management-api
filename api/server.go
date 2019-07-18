@@ -141,25 +141,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.Http.Static("/", "web/static")
 	api.Http.Static("/spec", "spec")
 
-	err := api.validate.RegisterValidation("phone", api.PhoneValidator)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = api.validate.RegisterValidation("uuid", api.UuidValidator)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = api.validate.RegisterValidation("zip_usa", api.ZipUsaValidator)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = api.validate.RegisterValidation("name", api.NameValidator)
+	err := api.registerValidators()
 
 	if err != nil {
 		return nil, err
@@ -420,6 +402,12 @@ func (api *Api) registerValidators() error {
 	}
 
 	if err := api.validate.RegisterValidation("position", api.PositionValidator); err != nil {
+		return err
+	}
+
+	api.validate.RegisterStructValidation(api.CompanyValidator, grpc.UserProfileCompany{})
+
+	if err := api.validate.RegisterValidation("company_name", api.CompanyNameValidator); err != nil {
 		return err
 	}
 

@@ -42,13 +42,9 @@ func (suite *UserProfileTestSuite) SetupTest() {
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
 	suite.router = &userProfileRoute{Api: suite.api}
 
-	err := suite.api.validate.RegisterValidation("name", suite.api.NameValidator)
+	err := suite.api.registerValidators()
 
 	if err != nil {
-		suite.FailNow("Validator registration failed", "%v", err)
-	}
-
-	if err := suite.api.validate.RegisterValidation("position", suite.api.PositionValidator); err != nil {
 		suite.FailNow("Validator registration failed", "%v", err)
 	}
 }
@@ -137,7 +133,16 @@ func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_BillingServerR
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_Ok() {
-	body := `{"personal": {"first_name": "unit test", "last_name": "test unit", "position": "test"}}`
+	body := `{
+		"personal": {"first_name": "unit test", "last_name": "test-unit", "position": "Software Developer"},
+		"company": {
+			"company_name": "Unit Test.-444", 
+			"website": "http://localhost",
+			"annual_income": {"from": 0, "to": 1000},
+			"number_of_employees": {"from": 1, "to": 10},
+			"kind_of_activity": "other"
+		}
+	}`
 
 	req := httptest.NewRequest(http.MethodPatch, "/admin/api/v1/user_profile", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -186,6 +191,132 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationErro
 	assert.True(suite.T(), ok)
 
 	assert.Regexp(suite.T(), "UserId", err1.Details)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationUserNameError() {
+	body := `{"personal": {"first_name": "unit test♂", "last_name": "test-unit", "position": "Software Developer"}}`
+
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/user_profile", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.setUserProfile(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+
+	assert.Regexp(suite.T(), "Name", err1.Details)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationUserPositionError() {
+	body := `{"personal": {"first_name": "unit test", "last_name": "test-unit", "position": "qwerty"}}`
+
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/user_profile", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.setUserProfile(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+
+	assert.Regexp(suite.T(), "Position", err1.Details)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationAnnualIncomeError() {
+	body := `{
+		"company": {
+			"company_name": "Unit Test", 
+			"website": "http://localhost", 
+			"annual_income": {"from": 78898, "to": 9998},
+			"number_of_employees": {"from": 1, "to": 10}
+		}
+	}`
+
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/user_profile", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.setUserProfile(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+
+	assert.Regexp(suite.T(), "AnnualIncome", err1.Details)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationNumberOfEmployeesError() {
+	body := `{
+		"company": {
+			"company_name": "Unit Test", 
+			"website": "http://localhost", 
+			"annual_income": {"from": 0, "to": 1000},
+			"number_of_employees": {"from": 23872, "to": 129}
+		}
+	}`
+
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/user_profile", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.setUserProfile(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+
+	assert.Regexp(suite.T(), "NumberOfEmployees", err1.Details)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationCompanyNameError() {
+	body := `{
+		"company": {
+			"company_name": "Unit Test♂", 
+			"website": "http://localhost", 
+			"annual_income": {"from": 0, "to": 1000},
+			"number_of_employees": {"from": 1, "to": 10}
+		}
+	}`
+
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/user_profile", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.setUserProfile(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+
+	assert.Regexp(suite.T(), "CompanyName", err1.Details)
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_BillingServerSystemError() {
