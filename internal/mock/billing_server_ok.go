@@ -830,3 +830,25 @@ func (s *BillingServerOkMock) ChangeRoyaltyReport(ctx context.Context, in *grpc.
 func (s *BillingServerOkMock) AutoAcceptRoyaltyReports(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkMock) GetUserProfile(
+	ctx context.Context,
+	in *grpc.GetUserProfileRequest,
+	opts ...client.CallOption,
+) (*grpc.GetUserProfileResponse, error) {
+	return &grpc.GetUserProfileResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   &grpc.UserProfile{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) CreateOrUpdateUserProfile(
+	ctx context.Context,
+	in *grpc.UserProfile,
+	opts ...client.CallOption,
+) (*grpc.GetUserProfileResponse, error) {
+	return &grpc.GetUserProfileResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   &grpc.UserProfile{},
+	}, nil
+}

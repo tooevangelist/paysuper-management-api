@@ -120,12 +120,10 @@ func (r *onboardingRoute) getMerchantByUser(ctx echo.Context) error {
 	rsp, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 
 	if err != nil {
-		r.logError("500_debug", []interface{}{"error", err})
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
 	if rsp.Status != pkg.ResponseStatusOk {
-		r.logError("500_debug", []interface{}{"response", rsp})
 		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
 	}
 
@@ -143,7 +141,7 @@ func (r *onboardingRoute) listMerchants(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListMerchants(ctx.Request().Context(), req)
@@ -170,7 +168,7 @@ func (r *onboardingRoute) changeMerchant(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
@@ -197,7 +195,7 @@ func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	req.UserId = r.authUser.Id
@@ -225,7 +223,7 @@ func (r *onboardingRoute) createNotification(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	req.UserId = r.authUser.Id
@@ -278,7 +276,7 @@ func (r *onboardingRoute) listNotifications(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListNotifications(ctx.Request().Context(), req)
@@ -348,7 +346,7 @@ func (r *onboardingRoute) listPaymentMethods(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListMerchantPaymentMethods(ctx.Request().Context(), req)
@@ -373,7 +371,7 @@ func (r *onboardingRoute) changePaymentMethod(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ChangeMerchantPaymentMethod(ctx.Request().Context(), req)
@@ -401,7 +399,7 @@ func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ChangeMerchantData(ctx.Request().Context(), req)

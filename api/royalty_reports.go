@@ -33,7 +33,7 @@ func (cApiV1 *royaltyReportsRoute) getRoyaltyReportsList(ctx echo.Context) error
 
 	err = cApiV1.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, cApiV1.getValidationError(err))
 	}
 
 	res, err := cApiV1.billingService.ListRoyaltyReports(ctx.Request().Context(), req)
@@ -60,7 +60,7 @@ func (cApiV1 *royaltyReportsRoute) listRoyaltyReportOrders(ctx echo.Context) err
 
 	err = cApiV1.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, cApiV1.getValidationError(err))
 	}
 
 	res, err := cApiV1.billingService.ListRoyaltyReportOrders(ctx.Request().Context(), req)

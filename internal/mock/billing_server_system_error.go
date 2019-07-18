@@ -583,3 +583,19 @@ func (s *BillingServerSystemErrorMock) ChangeRoyaltyReport(ctx context.Context, 
 func (s *BillingServerSystemErrorMock) AutoAcceptRoyaltyReports(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerSystemErrorMock) GetUserProfile(
+	ctx context.Context,
+	in *grpc.GetUserProfileRequest,
+	opts ...client.CallOption,
+) (*grpc.GetUserProfileResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) CreateOrUpdateUserProfile(
+	ctx context.Context,
+	in *grpc.UserProfile,
+	opts ...client.CallOption,
+) (*grpc.GetUserProfileResponse, error) {
+	return nil, SomeError
+}

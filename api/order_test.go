@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
@@ -684,6 +685,32 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationError() {
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Regexp(suite.T(), newValidationError("Country"), httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationZipError() {
+	body := `{"country": "US", "zip": "00"}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/api/v1/orders/:order_id/billing_address")
+	ctx.SetParamNames(requestParameterOrderId)
+	ctx.SetParamValues(uuid.New().String())
+
+	err := suite.router.processBillingAddress(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), errorMessageIncorrectZip, msg)
+	assert.Regexp(suite.T(), "Zip", msg.Details)
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerSystemError() {

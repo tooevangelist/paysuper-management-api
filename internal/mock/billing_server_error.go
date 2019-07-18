@@ -635,3 +635,25 @@ func (s *BillingServerErrorMock) ChangeRoyaltyReport(ctx context.Context, in *gr
 func (s *BillingServerErrorMock) AutoAcceptRoyaltyReports(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerErrorMock) GetUserProfile(
+	ctx context.Context,
+	in *grpc.GetUserProfileRequest,
+	opts ...client.CallOption,
+) (*grpc.GetUserProfileResponse, error) {
+	return &grpc.GetUserProfileResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) CreateOrUpdateUserProfile(
+	ctx context.Context,
+	in *grpc.UserProfile,
+	opts ...client.CallOption,
+) (*grpc.GetUserProfileResponse, error) {
+	return &grpc.GetUserProfileResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}

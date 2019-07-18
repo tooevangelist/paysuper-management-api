@@ -146,7 +146,7 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	req.IssuerUrl = ctx.Request().Header.Get(HeaderReferer)
 
 	if err := r.validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	orderResponse, err := r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
@@ -180,7 +180,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	// If request contain user object then paysuper must check request signature
@@ -372,7 +372,7 @@ func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 
 	if err != nil {
 
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.GetOrder(ctx.Request().Context(), req)
@@ -409,7 +409,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.FindAllOrders(ctx.Request().Context(), req)
@@ -464,7 +464,7 @@ func (r *orderRoute) getRefund(ctx echo.Context) error {
 	err := r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.GetRefund(ctx.Request().Context(), req)
@@ -491,7 +491,7 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListRefunds(ctx.Request().Context(), req)
@@ -515,7 +515,7 @@ func (r *orderRoute) createRefund(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	req.CreatorId = r.authUser.Id
@@ -553,7 +553,7 @@ func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.PaymentFormLanguageChanged(ctx.Request().Context(), req)
@@ -590,7 +590,7 @@ func (r *orderRoute) changeCustomer(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.PaymentFormPaymentAccountChanged(ctx.Request().Context(), req)
@@ -624,7 +624,7 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ProcessBillingAddress(ctx.Request().Context(), req)

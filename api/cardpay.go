@@ -33,7 +33,7 @@ func (h *CardPayWebHook) paymentCallback(ctx echo.Context) error {
 	}
 
 	if err := h.validate.Struct(st); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, h.getValidationError(err))
 	}
 
 	req := &grpc.PaymentNotifyRequest{
@@ -80,7 +80,7 @@ func (h *CardPayWebHook) refundCallback(ctx echo.Context) error {
 	err = h.validate.Struct(st)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, h.getValidationError(err))
 	}
 
 	req := &grpc.CallbackRequest{

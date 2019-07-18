@@ -51,7 +51,7 @@ func (cApiV1 *vatReportsRoute) getVatReportsForCountry(ctx echo.Context) error {
 
 	err = cApiV1.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, cApiV1.getValidationError(err))
 	}
 
 	res, err := cApiV1.billingService.GetVatReportsForCountry(ctx.Request().Context(), req)
@@ -78,7 +78,7 @@ func (cApiV1 *vatReportsRoute) getVatReportTransactions(ctx echo.Context) error 
 
 	err = cApiV1.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, cApiV1.getValidationError(err))
 	}
 
 	res, err := cApiV1.billingService.GetVatReportTransactions(ctx.Request().Context(), req)
@@ -112,7 +112,7 @@ func (cApiV1 *vatReportsRoute) updateVatReportStatus(ctx echo.Context) error {
 
 	err = cApiV1.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, cApiV1.getValidationError(err))
 	}
 
 	res, err := cApiV1.billingService.UpdateVatReportStatus(ctx.Request().Context(), req)
