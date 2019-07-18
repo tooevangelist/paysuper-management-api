@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/ttacon/libphonenumber"
 	"gopkg.in/go-playground/validator.v9"
@@ -50,10 +49,4 @@ func (api *Api) NameValidator(fl validator.FieldLevel) bool {
 func (api *Api) PositionValidator(fl validator.FieldLevel) bool {
 	_, ok := availablePositions[fl.Field().String()]
 	return ok
-}
-
-func getFirstValidationError(err error) string {
-	vErr := err.(validator.ValidationErrors)[0]
-
-	return fmt.Sprintf(errorMessageMask, vErr.Field(), vErr.Tag())
 }

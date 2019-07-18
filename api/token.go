@@ -29,7 +29,7 @@ func (r *tokenRoute) createToken(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	err = r.checkProjectAuthRequestSignature(ctx, req.Settings.ProjectId)

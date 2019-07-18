@@ -63,6 +63,7 @@ const (
 	requestParameterUrlRefundPayment         = "url_refund_payment"
 	requestParameterStatus                   = "status"
 	requestAuthorizationTokenRegex           = "Bearer ([A-z0-9_.-]{10,})"
+	requestParameterZipUsa                   = "zip_usa"
 
 	orderFieldProjectId     = "PP_PROJECT_ID"
 	orderFieldSignature     = "PP_SIGNATURE"

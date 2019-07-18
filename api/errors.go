@@ -86,4 +86,5 @@ var (
 	errorMessagePriceGroupRecommendedList             = newManagementApiResponseError("ma000072", "unable to get price group recommended prices")
 	errorMessageGetProductPrice                       = newManagementApiResponseError("ma000072", "unable to get price of product")
 	errorMessageUpdateProductPrice                    = newManagementApiResponseError("ma000072", "unable to update price of product")
+	errorMessageIncorrectZip                          = newManagementApiResponseError("ma000073", "incorrect zip code")
 )

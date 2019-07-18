@@ -48,7 +48,7 @@ func (cApiV1 *CountryApiV1) getById(ctx echo.Context) error {
 	}
 	err := cApiV1.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, cApiV1.getValidationError(err))
 	}
 
 	res, err := cApiV1.billingService.GetCountry(ctx.Request().Context(), req)
