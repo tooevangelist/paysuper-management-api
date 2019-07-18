@@ -210,7 +210,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationUser
 
 	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
 	assert.True(suite.T(), ok)
-
+	assert.Equal(suite.T(), errorMessageIncorrectFirstName, err1)
 	assert.Regexp(suite.T(), "Name", err1.Details)
 }
 
@@ -231,7 +231,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationUser
 
 	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
 	assert.True(suite.T(), ok)
-
+	assert.Equal(suite.T(), errorMessageIncorrectPosition, err1)
 	assert.Regexp(suite.T(), "Position", err1.Details)
 }
 
@@ -259,7 +259,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationAnnu
 
 	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
 	assert.True(suite.T(), ok)
-
+	assert.Equal(suite.T(), errorMessageIncorrectAnnualIncome, err1)
 	assert.Regexp(suite.T(), "AnnualIncome", err1.Details)
 }
 
@@ -287,7 +287,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationNumb
 
 	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
 	assert.True(suite.T(), ok)
-
+	assert.Equal(suite.T(), errorMessageIncorrectNumberOfEmployees, err1)
 	assert.Regexp(suite.T(), "NumberOfEmployees", err1.Details)
 }
 
@@ -315,7 +315,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationComp
 
 	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
 	assert.True(suite.T(), ok)
-
+	assert.Equal(suite.T(), errorMessageIncorrectCompanyName, err1)
 	assert.Regexp(suite.T(), "CompanyName", err1.Details)
 }
 

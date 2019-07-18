@@ -327,11 +327,16 @@ func (api *Api) getUserDetailsMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 
 func (api *Api) getValidationError(err error) (rspErr *grpc.ResponseErrorMessage) {
 	vErr := err.(validator.ValidationErrors)[0]
+	val, ok := validationErrors[vErr.Field()]
 
-	if vErr.Tag() == requestParameterZipUsa {
-		rspErr = errorMessageIncorrectZip
+	if ok {
+		rspErr = val
 	} else {
-		rspErr = errorValidationFailed
+		if vErr.Tag() == requestParameterZipUsa {
+			rspErr = errorMessageIncorrectZip
+		} else {
+			rspErr = errorValidationFailed
+		}
 	}
 
 	rspErr.Details = fmt.Sprintf(errorMessageMask, vErr.Field(), vErr.Tag())

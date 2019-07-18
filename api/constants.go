@@ -65,6 +65,15 @@ const (
 	requestAuthorizationTokenRegex           = "Bearer ([A-z0-9_.-]{10,})"
 	requestParameterZipUsa                   = "zip_usa"
 
+	userProfileFieldNumberOfEmployees = "NumberOfEmployees"
+	userProfileFieldAnnualIncome      = "AnnualIncome"
+	userProfileFieldCompanyName       = "CompanyName"
+	userProfileFieldPosition          = "Position"
+	userProfileFieldFirstName         = "FirstName"
+	userProfileFieldLastName          = "LastName"
+	userProfileFieldWebsite           = "Website"
+	userProfileFieldKindOfActivity    = "KindOfActivity"
+
 	orderFieldProjectId     = "PP_PROJECT_ID"
 	orderFieldSignature     = "PP_SIGNATURE"
 	orderFieldAmount        = "PP_AMOUNT"
