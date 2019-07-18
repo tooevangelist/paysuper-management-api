@@ -87,4 +87,23 @@ var (
 	errorMessageGetProductPrice                       = newManagementApiResponseError("ma000072", "unable to get price of product")
 	errorMessageUpdateProductPrice                    = newManagementApiResponseError("ma000072", "unable to update price of product")
 	errorMessageIncorrectZip                          = newManagementApiResponseError("ma000073", "incorrect zip code")
+	errorMessageIncorrectNumberOfEmployees            = newManagementApiResponseError("ma000074", "incorrect number of employees value")
+	errorMessageIncorrectAnnualIncome                 = newManagementApiResponseError("ma000075", "incorrect annual income value")
+	errorMessageIncorrectCompanyName                  = newManagementApiResponseError("ma000076", "incorrect company name")
+	errorMessageIncorrectPosition                     = newManagementApiResponseError("ma000077", "incorrect position")
+	errorMessageIncorrectFirstName                    = newManagementApiResponseError("ma000078", "incorrect first name")
+	errorMessageIncorrectLastName                     = newManagementApiResponseError("ma000079", "incorrect last name")
+	errorMessageIncorrectWebsite                      = newManagementApiResponseError("ma000080", "incorrect website")
+	errorMessageIncorrectKindOfActivity               = newManagementApiResponseError("ma000081", "incorrect kind of activity")
+
+	validationErrors = map[string]*grpc.ResponseErrorMessage{
+		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,
+		userProfileFieldAnnualIncome:      errorMessageIncorrectAnnualIncome,
+		userProfileFieldCompanyName:       errorMessageIncorrectCompanyName,
+		userProfileFieldPosition:          errorMessageIncorrectPosition,
+		userProfileFieldFirstName:         errorMessageIncorrectFirstName,
+		userProfileFieldLastName:          errorMessageIncorrectLastName,
+		userProfileFieldWebsite:           errorMessageIncorrectWebsite,
+		userProfileFieldKindOfActivity:    errorMessageIncorrectKindOfActivity,
+	}
 )

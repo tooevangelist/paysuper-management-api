@@ -141,19 +141,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.Http.Static("/", "web/static")
 	api.Http.Static("/spec", "spec")
 
-	err := api.validate.RegisterValidation("phone", api.PhoneValidator)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = api.validate.RegisterValidation("uuid", api.UuidValidator)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = api.validate.RegisterValidation("zip_usa", api.ZipUsaValidator)
+	err := api.registerValidators()
 
 	if err != nil {
 		return nil, err
@@ -235,7 +223,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initTokenRoutes().
 		initZipCodeRoutes().
 		initPaymentMethodRoutes().
-		initPriceGroupRoutes()
+		initPriceGroupRoutes().
+		initUserProfileRoutes()
 
 	_, err = api.initOnboardingRoutes()
 
@@ -338,11 +327,16 @@ func (api *Api) getUserDetailsMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 
 func (api *Api) getValidationError(err error) (rspErr *grpc.ResponseErrorMessage) {
 	vErr := err.(validator.ValidationErrors)[0]
+	val, ok := validationErrors[vErr.Field()]
 
-	if vErr.Tag() == requestParameterZipUsa {
-		rspErr = errorMessageIncorrectZip
+	if ok {
+		rspErr = val
 	} else {
-		rspErr = errorValidationFailed
+		if vErr.Tag() == requestParameterZipUsa {
+			rspErr = errorMessageIncorrectZip
+		} else {
+			rspErr = errorValidationFailed
+		}
 	}
 
 	rspErr.Details = fmt.Sprintf(errorMessageMask, vErr.Field(), vErr.Tag())
@@ -390,6 +384,36 @@ func (api *Api) checkProjectAuthRequestSignature(ctx echo.Context, projectId str
 
 	if rsp.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return nil
+}
+
+func (api *Api) registerValidators() error {
+	if err := api.validate.RegisterValidation("phone", api.PhoneValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("uuid", api.UuidValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("zip_usa", api.ZipUsaValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("name", api.NameValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("position", api.PositionValidator); err != nil {
+		return err
+	}
+
+	api.validate.RegisterStructValidation(api.CompanyValidator, grpc.UserProfileCompany{})
+
+	if err := api.validate.RegisterValidation("company_name", api.CompanyNameValidator); err != nil {
+		return err
 	}
 
 	return nil
