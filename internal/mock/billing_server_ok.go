@@ -695,27 +695,58 @@ func (s *BillingServerOkMock) CreateRoyaltyReport(ctx context.Context, in *grpc.
 }
 
 func (s *BillingServerOkMock) ListRoyaltyReports(ctx context.Context, in *grpc.ListRoyaltyReportsRequest, opts ...client.CallOption) (*grpc.ListRoyaltyReportsResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerOkMock) ChangeRoyaltyReportStatus(ctx context.Context, in *grpc.CreateRoyaltyReportRequest, opts ...client.CallOption) (*grpc.CreateRoyaltyReportRequest, error) {
-	panic("implement me")
+	return &grpc.ListRoyaltyReportsResponse{
+		Status:  pkg.ResponseStatusOk,
+		Message: nil,
+		Data: &grpc.RoyaltyReportsPaginate{
+			Count: 1,
+			Items: []*billing.RoyaltyReport{},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) ListRoyaltyReportOrders(ctx context.Context, in *grpc.ListRoyaltyReportOrdersRequest, opts ...client.CallOption) (*grpc.TransactionsResponse, error) {
-	panic("implement me")
+	return &grpc.TransactionsResponse{
+		Status:  pkg.ResponseStatusOk,
+		Message: nil,
+		Data: &grpc.TransactionsPaginate{
+			Count: 100,
+			Items: []*billing.OrderViewPublic{},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) GetVatReportsDashboard(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.VatReportsResponse, error) {
-	panic("implement me")
+	return &grpc.VatReportsResponse{
+		Status:  pkg.ResponseStatusOk,
+		Message: nil,
+		Data: &grpc.VatReportsPaginate{
+			Count: 1,
+			Items: []*billing.VatReport{},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) GetVatReportsForCountry(ctx context.Context, in *grpc.VatReportsRequest, opts ...client.CallOption) (*grpc.VatReportsResponse, error) {
-	panic("implement me")
+	return &grpc.VatReportsResponse{
+		Status:  pkg.ResponseStatusOk,
+		Message: nil,
+		Data: &grpc.VatReportsPaginate{
+			Count: 100,
+			Items: []*billing.VatReport{},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) GetVatReportTransactions(ctx context.Context, in *grpc.VatTransactionsRequest, opts ...client.CallOption) (*grpc.TransactionsResponse, error) {
-	panic("implement me")
+	return &grpc.TransactionsResponse{
+		Status:  pkg.ResponseStatusOk,
+		Message: nil,
+		Data: &grpc.TransactionsPaginate{
+			Count: 100,
+			Items: []*billing.OrderViewPublic{},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) CalcAnnualTurnovers(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
@@ -726,7 +757,10 @@ func (s *BillingServerOkMock) ProcessVatReports(ctx context.Context, in *grpc.Pr
 }
 
 func (s *BillingServerOkMock) UpdateVatReportStatus(ctx context.Context, in *grpc.UpdateVatReportStatusRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
-	panic("implement me")
+	return &grpc.ResponseError{
+		Status:  pkg.ResponseStatusOk,
+		Message: nil,
+	}, nil
 }
 
 func (s *BillingServerOkMock) GetPriceGroupByCountry(

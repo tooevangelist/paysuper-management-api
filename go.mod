@@ -20,7 +20,7 @@ require (
 	github.com/micro/go-plugins v1.0.0
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190717144309-a79d7ce08597
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190718214342-c8b2eb85e20c
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c
 	github.com/paysuper/paysuper-recurring-repository v1.0.110
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190709140206-bef6637696c0

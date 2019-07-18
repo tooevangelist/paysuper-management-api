@@ -1175,7 +1175,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_PaymentMethod() {
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Country() {
-	q := url.Values{requestParameterCountry: []string{"foo"}}
+	q := url.Values{requestParameterCountries: []string{"foo"}}
 	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "Country[0]", "len"))
 }
 
