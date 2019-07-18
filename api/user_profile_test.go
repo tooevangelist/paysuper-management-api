@@ -41,6 +41,16 @@ func (suite *UserProfileTestSuite) SetupTest() {
 
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
 	suite.router = &userProfileRoute{Api: suite.api}
+
+	err := suite.api.validate.RegisterValidation("name", suite.api.NameValidator)
+
+	if err != nil {
+		suite.FailNow("Validator registration failed", "%v", err)
+	}
+
+	if err := suite.api.validate.RegisterValidation("position", suite.api.PositionValidator); err != nil {
+		suite.FailNow("Validator registration failed", "%v", err)
+	}
 }
 
 func (suite *UserProfileTestSuite) TearDownTest() {}

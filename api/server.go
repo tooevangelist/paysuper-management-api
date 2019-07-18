@@ -159,6 +159,12 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		return nil, err
 	}
 
+	err = api.validate.RegisterValidation("name", api.NameValidator)
+
+	if err != nil {
+		return nil, err
+	}
+
 	api.accessRouteGroup = api.Http.Group("/api/v1/s")
 
 	api.accessRouteGroup.Use(
@@ -383,6 +389,30 @@ func (api *Api) checkProjectAuthRequestSignature(ctx echo.Context, projectId str
 
 	if rsp.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return nil
+}
+
+func (api *Api) registerValidators() error {
+	if err := api.validate.RegisterValidation("phone", api.PhoneValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("uuid", api.UuidValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("zip_usa", api.ZipUsaValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("name", api.NameValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("position", api.PositionValidator); err != nil {
+		return err
 	}
 
 	return nil

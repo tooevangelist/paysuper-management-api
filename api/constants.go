@@ -98,6 +98,16 @@ const (
 	CardPayPaymentResponseHeaderSignature = "Signature"
 
 	agreementPageTemplateName = "agreement.html"
+
+	UserProfilePositionCEO               = "CEO"
+	UserProfilePositionCTO               = "CTO"
+	UserProfilePositionCMO               = "CMO"
+	UserProfilePositionCFO               = "CFO"
+	UserProfilePositionProjectManagement = "Project Management"
+	UserProfilePositionGenericManagement = "Generic Management"
+	UserProfilePositionSoftwareDeveloper = "Software Developer"
+	UserProfilePositionMarketing         = "Marketing"
+	UserProfilePositionSupport           = "Support"
 )
 
 var (
