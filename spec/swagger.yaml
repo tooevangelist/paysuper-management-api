@@ -2002,6 +2002,9 @@ definitions:
       last_step:
         description: identifier of wizard last step which user ended
         type: string
+      centrifugo_token:
+        description: user authorisation token to connect to centrifigo channel
+        type: string
       created_at:
         description: time of create user profile
         $ref: '#/definitions/ProtobufTimestamp'
