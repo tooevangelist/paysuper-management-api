@@ -26,9 +26,9 @@ type orderRoute struct {
 }
 
 type CreateOrderJsonProjectResponse struct {
-	Id              string                            `json:"id"`
-	PaymentFormUrl  string                            `json:"payment_form_url"`
-	PaymentFormData *grpc.PaymentFormJsonDataResponse `json:"payment_form_data,omitempty"`
+	Id              string                    `json:"id"`
+	PaymentFormUrl  string                    `json:"payment_form_url"`
+	PaymentFormData *grpc.PaymentFormJsonData `json:"payment_form_data,omitempty"`
 }
 
 type OrderListRefundsBinder struct{}
@@ -245,10 +245,13 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		rsp2, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req2)
 
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if rsp2.Status != pkg.ResponseStatusOk {
+			return echo.NewHTTPError(int(rsp2.Status), rsp2.Message)
 		}
 
-		response.PaymentFormData = rsp2
+		response.PaymentFormData = rsp2.Item
 	}
 
 	return ctx.JSON(http.StatusOK, response)
@@ -281,10 +284,10 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
-	if rsp.Cookie != "" && rsp.Cookie != req.Cookie {
+	if rsp.Item.Cookie != "" && rsp.Item.Cookie != req.Cookie {
 		cookie := new(http.Cookie)
 		cookie.Name = CustomerTokenCookiesName
-		cookie.Value = rsp.Cookie
+		cookie.Value = rsp.Item.Cookie
 		cookie.Expires = time.Now().Add(time.Second * CustomerTokenCookiesLifetime)
 		cookie.HttpOnly = true
 		ctx.SetCookie(cookie)

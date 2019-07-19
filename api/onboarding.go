@@ -584,7 +584,7 @@ func (r *onboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
 	src, err := r.validateUpload(file)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorMessageAgreementContentType)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	defer func() {
@@ -683,20 +683,23 @@ func (r *onboardingRoute) validateUpload(file *multipart.FileHeader) (multipart.
 	src, err := file.Open()
 
 	if err != nil {
-		return nil, err
+		zap.S().Errorf("validate upload error", "err", err.Error())
+		return nil, errorUnknown
 	}
 
 	buffer := make([]byte, 512)
 	_, err = src.Read(buffer)
 
 	if err != nil {
-		return nil, err
+		zap.S().Errorf("validate upload error", "err", err.Error())
+		return nil, errorUnknown
 	}
 
 	_, err = src.Seek(0, 0)
 
 	if err != nil {
-		return nil, err
+		zap.S().Errorf("validate upload error", "err", err.Error())
+		return nil, errorUnknown
 	}
 
 	ct := http.DetectContentType(buffer)
