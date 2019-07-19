@@ -653,6 +653,25 @@ func (s *BillingServerOkMock) CreateOrUpdateUserProfile(
 	}, nil
 }
 
+func (s *BillingServerOkMock) SendConfirmEmailToUser(
+	ctx context.Context,
+	in *grpc.SendConfirmEmailToUserRequest,
+	opts ...client.CallOption,
+) (*grpc.GetUserProfileResponse, error) {
+	return &grpc.GetUserProfileResponse{
+		Status: pkg.ResponseStatusOk,
+		Item:   &grpc.UserProfile{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) ConfirmUserEmail(
+	ctx context.Context,
+	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
+}
+
 func (s *BillingServerErrorMock) GetProductsForOrder(
 	ctx context.Context,
 	in *grpc.GetProductsForOrderRequest,
@@ -1023,6 +1042,28 @@ func (s *BillingServerErrorMock) CreateOrUpdateUserProfile(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) SendConfirmEmailToUser(
+	ctx context.Context,
+	in *grpc.SendConfirmEmailToUserRequest,
+	opts ...client.CallOption,
+) (*grpc.GetUserProfileResponse, error) {
+	return &grpc.GetUserProfileResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) ConfirmUserEmail(
+	ctx context.Context,
+	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
 func (s *BillingServerSystemErrorMock) GetProductsForOrder(
 	ctx context.Context,
 	in *grpc.GetProductsForOrderRequest,
@@ -1336,6 +1377,22 @@ func (s *BillingServerSystemErrorMock) CreateOrUpdateUserProfile(
 	in *grpc.UserProfile,
 	opts ...client.CallOption,
 ) (*grpc.GetUserProfileResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) SendConfirmEmailToUser(
+	ctx context.Context,
+	in *grpc.SendConfirmEmailToUserRequest,
+	opts ...client.CallOption,
+) (*grpc.GetUserProfileResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) ConfirmUserEmail(
+	ctx context.Context,
+	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return nil, SomeError
 }
 
@@ -1663,6 +1720,22 @@ func (s *BillingServerOkTemporaryMock) CreateOrUpdateUserProfile(
 	in *grpc.UserProfile,
 	opts ...client.CallOption,
 ) (*grpc.GetUserProfileResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) SendConfirmEmailToUser(
+	ctx context.Context,
+	in *grpc.SendConfirmEmailToUserRequest,
+	opts ...client.CallOption,
+) (*grpc.GetUserProfileResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) ConfirmUserEmail(
+	ctx context.Context,
+	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return nil, SomeError
 }
 

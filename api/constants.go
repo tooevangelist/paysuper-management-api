@@ -64,6 +64,7 @@ const (
 	requestParameterStatus                   = "status"
 	requestAuthorizationTokenRegex           = "Bearer ([A-z0-9_.-]{10,})"
 	requestParameterZipUsa                   = "zip_usa"
+	requestParameterToken                    = "token"
 
 	userProfileFieldNumberOfEmployees = "NumberOfEmployees"
 	userProfileFieldAnnualIncome      = "AnnualIncome"

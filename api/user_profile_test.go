@@ -1,14 +1,17 @@
 package api
 
 import (
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -36,6 +39,9 @@ func (suite *UserProfileTestSuite) SetupTest() {
 		authUser: &AuthUser{
 			Id:    "ffffffffffffffffffffffff",
 			Email: "test@unit.test",
+		},
+		config: &config.Config{
+			HttpScheme: "http",
 		},
 	}
 
@@ -349,6 +355,156 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_BillingServerR
 	suite.api.billingService = mock.NewBillingServerErrorMock()
 
 	err := suite.router.setUserProfile(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_SendConfirmEmail_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile/send_confirm_email", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.sendConfirmEmail(ctx)
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_SendConfirmEmail_UserIdNotFound_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile/send_confirm_email", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.authUser.Id = ""
+
+	err := suite.router.sendConfirmEmail(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusUnauthorized, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageAccessDenied, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_SendConfirmEmail_UserIdIncorrect_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile/send_confirm_email", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.authUser.Id = "qwerty"
+
+	err := suite.router.sendConfirmEmail(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), errorValidationFailed, err1)
+	assert.Regexp(suite.T(), "UserId", err1.Details)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_SendConfirmEmail_BillingServerSystemError() {
+	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile/send_confirm_email", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.billingService = mock.NewBillingServerSystemErrorMock()
+
+	err := suite.router.sendConfirmEmail(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_SendConfirmEmail_BillingServerReturnError() {
+	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile/send_confirm_email", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.billingService = mock.NewBillingServerErrorMock()
+
+	err := suite.router.sendConfirmEmail(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_Ok() {
+	q := make(url.Values)
+	q.Set(requestParameterToken, bson.NewObjectId().Hex())
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/confirm_email?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.confirmEmail(ctx)
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_EmptyToken_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/confirm_email", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.confirmEmail(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerSystemError() {
+	q := make(url.Values)
+	q.Set(requestParameterToken, bson.NewObjectId().Hex())
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/confirm_email?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.billingService = mock.NewBillingServerSystemErrorMock()
+
+	err := suite.router.confirmEmail(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerReturnError() {
+	q := make(url.Values)
+	q.Set(requestParameterToken, bson.NewObjectId().Hex())
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/confirm_email?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.billingService = mock.NewBillingServerErrorMock()
+
+	err := suite.router.confirmEmail(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
