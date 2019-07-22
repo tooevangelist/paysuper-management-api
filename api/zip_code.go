@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -37,6 +38,7 @@ func (r *zipCodeRoute) checkZip(ctx echo.Context) error {
 	rsp, err := r.billingService.FindByZipCode(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 

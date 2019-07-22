@@ -5,6 +5,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -45,6 +46,7 @@ func (h *CardPayWebHook) paymentCallback(ctx echo.Context) error {
 	rsp, err := h.billingService.PaymentCallbackProcess(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -92,6 +94,7 @@ func (h *CardPayWebHook) refundCallback(ctx echo.Context) error {
 	rsp, err := h.billingService.ProcessRefundCallback(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 

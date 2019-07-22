@@ -40,6 +40,9 @@ func (r *paylinkRoute) getPaylinksList(ctx echo.Context) error {
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
+		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 

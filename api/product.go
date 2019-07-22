@@ -40,6 +40,9 @@ func (r *productRoute) getProductsList(ctx echo.Context) error {
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
+		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -70,6 +73,9 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
+		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -102,6 +108,9 @@ func (r *productRoute) deleteProduct(ctx echo.Context) error {
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
+		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -156,6 +165,9 @@ func (r *productRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
+		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
