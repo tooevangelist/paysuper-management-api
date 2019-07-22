@@ -4493,7 +4493,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user_profile":
+  "/admin/api/v1/user/profile":
     get:
       summary: Get user profile
       tags:
@@ -4571,7 +4571,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/api/v1/confirm_email":
+  "/api/v1/user/confirm_email":
     get:
       summary: Confirm user email
       tags:
