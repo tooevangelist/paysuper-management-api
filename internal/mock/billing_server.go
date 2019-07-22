@@ -653,17 +653,6 @@ func (s *BillingServerOkMock) CreateOrUpdateUserProfile(
 	}, nil
 }
 
-func (s *BillingServerOkMock) SendConfirmEmailToUser(
-	ctx context.Context,
-	in *grpc.SendConfirmEmailToUserRequest,
-	opts ...client.CallOption,
-) (*grpc.GetUserProfileResponse, error) {
-	return &grpc.GetUserProfileResponse{
-		Status: pkg.ResponseStatusOk,
-		Item:   &grpc.UserProfile{},
-	}, nil
-}
-
 func (s *BillingServerOkMock) ConfirmUserEmail(
 	ctx context.Context,
 	in *grpc.ConfirmUserEmailRequest,
@@ -1042,17 +1031,6 @@ func (s *BillingServerErrorMock) CreateOrUpdateUserProfile(
 	}, nil
 }
 
-func (s *BillingServerErrorMock) SendConfirmEmailToUser(
-	ctx context.Context,
-	in *grpc.SendConfirmEmailToUserRequest,
-	opts ...client.CallOption,
-) (*grpc.GetUserProfileResponse, error) {
-	return &grpc.GetUserProfileResponse{
-		Status:  pkg.ResponseStatusBadData,
-		Message: SomeError,
-	}, nil
-}
-
 func (s *BillingServerErrorMock) ConfirmUserEmail(
 	ctx context.Context,
 	in *grpc.ConfirmUserEmailRequest,
@@ -1375,14 +1353,6 @@ func (s *BillingServerSystemErrorMock) GetUserProfile(
 func (s *BillingServerSystemErrorMock) CreateOrUpdateUserProfile(
 	ctx context.Context,
 	in *grpc.UserProfile,
-	opts ...client.CallOption,
-) (*grpc.GetUserProfileResponse, error) {
-	return nil, SomeError
-}
-
-func (s *BillingServerSystemErrorMock) SendConfirmEmailToUser(
-	ctx context.Context,
-	in *grpc.SendConfirmEmailToUserRequest,
 	opts ...client.CallOption,
 ) (*grpc.GetUserProfileResponse, error) {
 	return nil, SomeError
@@ -1718,14 +1688,6 @@ func (s *BillingServerOkTemporaryMock) GetUserProfile(
 func (s *BillingServerOkTemporaryMock) CreateOrUpdateUserProfile(
 	ctx context.Context,
 	in *grpc.UserProfile,
-	opts ...client.CallOption,
-) (*grpc.GetUserProfileResponse, error) {
-	return nil, SomeError
-}
-
-func (s *BillingServerOkTemporaryMock) SendConfirmEmailToUser(
-	ctx context.Context,
-	in *grpc.SendConfirmEmailToUserRequest,
 	opts ...client.CallOption,
 ) (*grpc.GetUserProfileResponse, error) {
 	return nil, SomeError
