@@ -22,6 +22,7 @@ func (api *Api) initUserProfileRoutes() *Api {
 	api.authUserRouteGroup.GET("/user_profile", route.getUserProfile)
 	api.authUserRouteGroup.PATCH("/user_profile", route.setUserProfile)
 	api.authUserRouteGroup.GET("/user_profile/send_confirm_email", route.sendConfirmEmail)
+	api.authUserRouteGroup.POST("/page_reviews", route.createPageReview)
 	api.Http.GET("/api/v1/confirm_email", route.confirmEmail)
 
 	return api
@@ -115,6 +116,38 @@ func (r *userProfileRoute) confirmEmail(ctx echo.Context) error {
 
 	req := &grpc.ConfirmUserEmailRequest{Token: token}
 	rsp, err := r.billingService.ConfirmUserEmail(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != http.StatusOK {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}
+
+func (r *userProfileRoute) createPageReview(ctx echo.Context) error {
+	if r.authUser.Id == "" {
+		return echo.NewHTTPError(http.StatusUnauthorized, errorMessageAccessDenied)
+	}
+
+	req := &grpc.CreatePageReviewRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	req.UserId = r.authUser.Id
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp, err := r.billingService.CreatePageReview(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)

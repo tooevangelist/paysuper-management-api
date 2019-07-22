@@ -95,6 +95,7 @@ var (
 	errorMessageIncorrectLastName                     = newManagementApiResponseError("ma000079", "incorrect last name")
 	errorMessageIncorrectWebsite                      = newManagementApiResponseError("ma000080", "incorrect website")
 	errorMessageIncorrectKindOfActivity               = newManagementApiResponseError("ma000081", "incorrect kind of activity")
+	errorMessageIncorrectReview                       = newManagementApiResponseError("ma000082", "review must be text with length lower than or equal 500 characters")
 
 	validationErrors = map[string]*grpc.ResponseErrorMessage{
 		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,
@@ -105,5 +106,6 @@ var (
 		userProfileFieldLastName:          errorMessageIncorrectLastName,
 		userProfileFieldWebsite:           errorMessageIncorrectWebsite,
 		userProfileFieldKindOfActivity:    errorMessageIncorrectKindOfActivity,
+		userProfileFieldReview:            errorMessageIncorrectReview,
 	}
 )

@@ -278,13 +278,17 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
-	if rsp.Cookie != "" && rsp.Cookie != req.Cookie {
+	if rsp.Status != http.StatusOK {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	if rsp.Item.Cookie != "" && rsp.Item.Cookie != req.Cookie {
 		cookie := new(http.Cookie)
 		cookie.Name = CustomerTokenCookiesName
-		cookie.Value = rsp.Cookie
+		cookie.Value = rsp.Item.Cookie
 		cookie.Expires = time.Now().Add(time.Second * CustomerTokenCookiesLifetime)
 		cookie.HttpOnly = true
 		ctx.SetCookie(cookie)

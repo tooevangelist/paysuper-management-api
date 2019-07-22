@@ -512,3 +512,97 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerRet
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Ok() {
+	body := `{"review": "some review text"}`
+
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.createPageReview(ctx)
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Unauthorized_Error() {
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.authUser.Id = ""
+	err := suite.router.createPageReview(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusUnauthorized, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageAccessDenied, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() {
+	body := `{"review": "some review text"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationXML)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.createPageReview(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateError() {
+	body := `{"review": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.createPageReview(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageIncorrectReview, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServerSystemError() {
+	body := `{"review": "some review text"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.router.createPageReview(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServerResultError() {
+	body := `{"review": "some review text"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.billingService = mock.NewBillingServerErrorMock()
+	err := suite.router.createPageReview(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}

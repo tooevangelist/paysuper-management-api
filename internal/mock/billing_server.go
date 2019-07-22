@@ -158,7 +158,8 @@ func (s *BillingServerOkMock) PaymentFormJsonDataProcess(
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormJsonDataResponse, error) {
 	return &grpc.PaymentFormJsonDataResponse{
-		Cookie: bson.NewObjectId().Hex(),
+		Status: pkg.ResponseStatusOk,
+		Item:   &grpc.PaymentFormJsonData{Cookie: bson.NewObjectId().Hex()},
 	}, nil
 }
 
@@ -672,6 +673,14 @@ func (s *BillingServerOkMock) ConfirmUserEmail(
 	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
 }
 
+func (s *BillingServerOkMock) CreatePageReview(
+	ctx context.Context,
+	in *grpc.CreatePageReviewRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
+}
+
 func (s *BillingServerErrorMock) GetProductsForOrder(
 	ctx context.Context,
 	in *grpc.GetProductsForOrderRequest,
@@ -1064,6 +1073,17 @@ func (s *BillingServerErrorMock) ConfirmUserEmail(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) CreatePageReview(
+	ctx context.Context,
+	in *grpc.CreatePageReviewRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
 func (s *BillingServerSystemErrorMock) GetProductsForOrder(
 	ctx context.Context,
 	in *grpc.GetProductsForOrderRequest,
@@ -1391,6 +1411,14 @@ func (s *BillingServerSystemErrorMock) SendConfirmEmailToUser(
 func (s *BillingServerSystemErrorMock) ConfirmUserEmail(
 	ctx context.Context,
 	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) CreatePageReview(
+	ctx context.Context,
+	in *grpc.CreatePageReviewRequest,
 	opts ...client.CallOption,
 ) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return nil, SomeError
@@ -1734,6 +1762,14 @@ func (s *BillingServerOkTemporaryMock) SendConfirmEmailToUser(
 func (s *BillingServerOkTemporaryMock) ConfirmUserEmail(
 	ctx context.Context,
 	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) CreatePageReview(
+	ctx context.Context,
+	in *grpc.CreatePageReviewRequest,
 	opts ...client.CallOption,
 ) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return nil, SomeError
