@@ -17,8 +17,8 @@ import (
 )
 
 var userProfileRoutes = [][]string{
-	{"/admin/api/v1/user_profile", http.MethodGet},
-	{"/admin/api/v1/user_profile", http.MethodPatch},
+	{"/admin/api/v1/user/profile", http.MethodGet},
+	{"/admin/api/v1/user/profile", http.MethodPatch},
 }
 
 type UserProfileTestSuite struct {
@@ -363,88 +363,6 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_BillingServerR
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
-func (suite *UserProfileTestSuite) TestUserProfile_SendConfirmEmail_Ok() {
-	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile/send_confirm_email", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	err := suite.router.sendConfirmEmail(ctx)
-	assert.NoError(suite.T(), err)
-}
-
-func (suite *UserProfileTestSuite) TestUserProfile_SendConfirmEmail_UserIdNotFound_Error() {
-	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile/send_confirm_email", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	suite.api.authUser.Id = ""
-
-	err := suite.router.sendConfirmEmail(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusUnauthorized, httpErr.Code)
-	assert.Equal(suite.T(), errorMessageAccessDenied, httpErr.Message)
-}
-
-func (suite *UserProfileTestSuite) TestUserProfile_SendConfirmEmail_UserIdIncorrect_Error() {
-	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile/send_confirm_email", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	suite.api.authUser.Id = "qwerty"
-
-	err := suite.router.sendConfirmEmail(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-
-	err1, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), errorValidationFailed, err1)
-	assert.Regexp(suite.T(), "UserId", err1.Details)
-}
-
-func (suite *UserProfileTestSuite) TestUserProfile_SendConfirmEmail_BillingServerSystemError() {
-	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile/send_confirm_email", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	suite.api.billingService = mock.NewBillingServerSystemErrorMock()
-
-	err := suite.router.sendConfirmEmail(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
-}
-
-func (suite *UserProfileTestSuite) TestUserProfile_SendConfirmEmail_BillingServerReturnError() {
-	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile/send_confirm_email", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	suite.api.billingService = mock.NewBillingServerErrorMock()
-
-	err := suite.router.sendConfirmEmail(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
-}
-
 func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_Ok() {
 	q := make(url.Values)
 	q.Set(requestParameterToken, bson.NewObjectId().Hex())
@@ -520,7 +438,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	err := suite.router.createPageReview(ctx)
+	err := suite.router.createFeedback(ctx)
 	assert.NoError(suite.T(), err)
 }
 
@@ -531,7 +449,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Unauthorized
 	ctx := suite.api.Http.NewContext(req, rsp)
 
 	suite.api.authUser.Id = ""
-	err := suite.router.createPageReview(ctx)
+	err := suite.router.createFeedback(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -547,7 +465,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() 
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	err := suite.router.createPageReview(ctx)
+	err := suite.router.createFeedback(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -563,7 +481,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidatePage
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	err := suite.router.createPageReview(ctx)
+	err := suite.router.createFeedback(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -579,7 +497,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateRevi
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	err := suite.router.createPageReview(ctx)
+	err := suite.router.createFeedback(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -596,7 +514,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServe
 	ctx := suite.api.Http.NewContext(req, rsp)
 
 	suite.api.billingService = mock.NewBillingServerSystemErrorMock()
-	err := suite.router.createPageReview(ctx)
+	err := suite.router.createFeedback(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -613,7 +531,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServe
 	ctx := suite.api.Http.NewContext(req, rsp)
 
 	suite.api.billingService = mock.NewBillingServerErrorMock()
-	err := suite.router.createPageReview(ctx)
+	err := suite.router.createFeedback(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
