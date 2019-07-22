@@ -514,8 +514,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerRet
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Ok() {
-	body := `{"review": "some review text"}`
-
+	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
 	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
@@ -542,7 +541,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Unauthorized
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() {
-	body := `{"review": "some review text"}`
+	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
 	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationXML)
 	rsp := httptest.NewRecorder()
@@ -557,8 +556,24 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() 
 	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
-func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateError() {
-	body := `{"review": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}`
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidatePageIdError() {
+	body := `{"review": "some review text", "page_id": "unknown_page"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.createPageReview(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageIncorrectPageId, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateReviewError() {
+	body := `{"review": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "page_id": "primary_onboarding"}`
 	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
@@ -574,7 +589,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateErro
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServerSystemError() {
-	body := `{"review": "some review text"}`
+	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
 	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
@@ -591,7 +606,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServe
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServerResultError() {
-	body := `{"review": "some review text"}`
+	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
 	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()

@@ -96,6 +96,7 @@ var (
 	errorMessageIncorrectWebsite                      = newManagementApiResponseError("ma000080", "incorrect website")
 	errorMessageIncorrectKindOfActivity               = newManagementApiResponseError("ma000081", "incorrect kind of activity")
 	errorMessageIncorrectReview                       = newManagementApiResponseError("ma000082", "review must be text with length lower than or equal 500 characters")
+	errorMessageIncorrectPageId                       = newManagementApiResponseError("ma000083", "review page identifier must be one of next values: primary_onboarding, merchant_onboarding")
 
 	validationErrors = map[string]*grpc.ResponseErrorMessage{
 		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,
@@ -107,5 +108,6 @@ var (
 		userProfileFieldWebsite:           errorMessageIncorrectWebsite,
 		userProfileFieldKindOfActivity:    errorMessageIncorrectKindOfActivity,
 		userProfileFieldReview:            errorMessageIncorrectReview,
+		userProfileFieldPageId:            errorMessageIncorrectPageId,
 	}
 )

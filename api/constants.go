@@ -75,6 +75,7 @@ const (
 	userProfileFieldWebsite           = "Website"
 	userProfileFieldKindOfActivity    = "KindOfActivity"
 	userProfileFieldReview            = "Review"
+	userProfileFieldPageId            = "PageId"
 
 	orderFieldProjectId     = "PP_PROJECT_ID"
 	orderFieldSignature     = "PP_SIGNATURE"
