@@ -22,7 +22,7 @@ func (api *Api) initUserProfileRoutes() *Api {
 	api.authUserRouteGroup.GET("/user_profile", route.getUserProfile)
 	api.authUserRouteGroup.PATCH("/user_profile", route.setUserProfile)
 	api.authUserRouteGroup.GET("/user_profile/send_confirm_email", route.sendConfirmEmail)
-	api.authUserRouteGroup.POST("/page_reviews", route.createPageReview)
+	api.authUserRouteGroup.POST("/user/feedback", route.createPageReview)
 	api.Http.GET("/api/v1/confirm_email", route.confirmEmail)
 
 	return api

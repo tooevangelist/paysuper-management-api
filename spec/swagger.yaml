@@ -4649,7 +4649,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/page_reviews":
+  "/admin/api/v1/user/feedback":
     post:
       summary: Create page review
       tags:
