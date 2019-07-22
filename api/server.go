@@ -211,7 +211,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}))
 
 	api.
-		InitCurrencyRoutes().
 		InitCountryRoutes().
 		InitProductRoutes().
 		InitProjectRoutes().
@@ -224,7 +223,9 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initZipCodeRoutes().
 		initPaymentMethodRoutes().
 		initPriceGroupRoutes().
-		initUserProfileRoutes()
+		initUserProfileRoutes().
+		initVatReportsRoutes().
+		initRoyaltyReportsRoutes()
 
 	_, err = api.initOnboardingRoutes()
 

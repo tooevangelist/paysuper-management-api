@@ -71,7 +71,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Get
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Add() {
-	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34, "fix_amount_currency": "USD"}`
+	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.0101, "fix_amount": 2.34, "fix_amount_currency": "USD"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/payment_costs/channel/system", strings.NewReader(bodyJson))
@@ -141,9 +141,9 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_G
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_Add() {
-	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "min_amount": 0.75, "method_percent": 1.01, 
-                  "method_fix_amount": 2.34, "ps_percent": 3.5, "ps_fixed_fee": 2, "ps_fixed_fee_currency": "EUR", 
-                  "payout_currency": "USD"}`
+	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "min_amount": 0.75, "method_percent": 0.0101, 
+                  "method_fix_amount": 2.34, "ps_percent": 0.00035, "ps_fixed_fee": 2, "ps_fixed_fee_currency": "EUR", 
+                  "payout_currency": "USD", "method_fix_amount_currency": "EUR"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/payment_costs/channel/merchant", strings.NewReader(bodyJson))
@@ -213,7 +213,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Get() {
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Add() {
-	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34, 
+	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.0101, "fix_amount": 2.34, 
                   "payout_currency": "USD", "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1}`
 
 	e := echo.New()
@@ -284,7 +284,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Get() 
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Add() {
-	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34, "fix_amount_currency": "USD",
+	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.0101, "fix_amount": 2.34, "fix_amount_currency": "USD",
                   "payout_currency": "USD", "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1, 
                   "is_paid_by_merchant": true}`
 

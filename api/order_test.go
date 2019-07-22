@@ -86,7 +86,6 @@ func (suite *OrderTestSuite) TestOrder_GetRefund_Ok() {
 	err = json.Unmarshal(rsp.Body.Bytes(), refund)
 	assert.NoError(suite.T(), err)
 	assert.NotEmpty(suite.T(), refund.Id)
-	assert.NotEmpty(suite.T(), refund.OrderId)
 	assert.NotEmpty(suite.T(), refund.Currency)
 	assert.Len(suite.T(), refund.Currency, 3)
 }
@@ -1203,7 +1202,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_PaymentMethod() {
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Country() {
-	q := url.Values{requestParameterCountry: []string{"foo"}}
+	q := url.Values{requestParameterCountries: []string{"foo"}}
 	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "Country[0]", "len"))
 }
 
