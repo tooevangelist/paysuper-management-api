@@ -16,7 +16,7 @@ func (api *Api) initUserProfileRoutes() *Api {
 
 	api.authUserRouteGroup.GET("/user/profile", route.getUserProfile)
 	api.authUserRouteGroup.PATCH("/user/profile", route.setUserProfile)
-	api.Http.GET("/api/v1/user/confirm_email", route.confirmEmail)
+	api.Http.PUT("/api/v1/user/confirm_email", route.confirmEmail)
 	api.authUserRouteGroup.POST("/user/feedback", route.createFeedback)
 
 	return api
@@ -74,13 +74,13 @@ func (r *userProfileRoute) setUserProfile(ctx echo.Context) error {
 }
 
 func (r *userProfileRoute) confirmEmail(ctx echo.Context) error {
-	token := ctx.QueryParam(requestParameterToken)
+	req := &grpc.ConfirmUserEmailRequest{}
+	err := ctx.Bind(req)
 
-	if token == "" {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
-	req := &grpc.ConfirmUserEmailRequest{Token: token}
 	rsp, err := r.billingService.ConfirmUserEmail(ctx.Request().Context(), req)
 
 	if err != nil {
