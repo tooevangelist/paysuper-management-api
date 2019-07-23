@@ -13,6 +13,7 @@ require (
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/golang/protobuf v1.3.2 // indirects
 	github.com/google/uuid v1.1.1
+	github.com/jinzhu/now v1.0.1 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/labstack/echo v3.3.5+incompatible
 	github.com/labstack/echo/v4 v4.0.0
@@ -25,7 +26,7 @@ require (
 	github.com/paysuper/paysuper-billing-server v0.0.0-20190723141533-bcecc0ddf64b
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c
 	github.com/paysuper/paysuper-recurring-repository v1.0.111
-	github.com/paysuper/paysuper-tax-service v0.0.0-20190308105725-016a09c27fbd
+	github.com/paysuper/paysuper-tax-service v0.0.0-20190722140034-a37f835eaad7
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sidmal/slug v1.4.2
@@ -37,6 +38,7 @@ require (
 	go.uber.org/zap v1.10.0
 	google.golang.org/grpc v1.21.0 // indirect
 	gopkg.in/go-playground/validator.v9 v9.26.0
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 	gopkg.in/yaml.v2 v2.2.2
 )

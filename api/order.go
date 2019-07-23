@@ -26,9 +26,9 @@ type orderRoute struct {
 }
 
 type CreateOrderJsonProjectResponse struct {
-	Id              string                            `json:"id"`
-	PaymentFormUrl  string                            `json:"payment_form_url"`
-	PaymentFormData *grpc.PaymentFormJsonDataResponse `json:"payment_form_data,omitempty"`
+	Id              string                    `json:"id"`
+	PaymentFormUrl  string                    `json:"payment_form_url"`
+	PaymentFormData *grpc.PaymentFormJsonData `json:"payment_form_data,omitempty"`
 }
 
 type OrderListRefundsBinder struct{}
@@ -152,6 +152,7 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	orderResponse, err := r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -208,6 +209,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		rsp1, err := r.billingService.IsOrderCanBePaying(ctx.Request().Context(), req1)
 
 		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
 			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 		}
 
@@ -220,6 +222,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		orderResponse, err = r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
 
 		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
 			return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 		}
 
@@ -245,10 +248,13 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		rsp2, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req2)
 
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if rsp2.Status != pkg.ResponseStatusOk {
+			return echo.NewHTTPError(int(rsp2.Status), rsp2.Message)
 		}
 
-		response.PaymentFormData = rsp2
+		response.PaymentFormData = rsp2.Item
 	}
 
 	return ctx.JSON(http.StatusOK, response)
@@ -278,6 +284,7 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -444,6 +451,7 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -474,6 +482,7 @@ func (r *orderRoute) getRefund(ctx echo.Context) error {
 	rsp, err := r.billingService.GetRefund(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -501,6 +510,7 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 	rsp, err := r.billingService.ListRefunds(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -526,6 +536,7 @@ func (r *orderRoute) createRefund(ctx echo.Context) error {
 	rsp, err := r.billingService.CreateRefund(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -563,6 +574,7 @@ func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentFormLanguageChanged(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -600,6 +612,7 @@ func (r *orderRoute) changeCustomer(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentFormPaymentAccountChanged(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -634,6 +647,7 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 	rsp, err := r.billingService.ProcessBillingAddress(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -672,6 +686,7 @@ func (r *orderRoute) notifySale(ctx echo.Context) error {
 
 	_, err = r.billingService.SetUserNotifySales(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -706,6 +721,7 @@ func (r *orderRoute) notifyNewRegion(ctx echo.Context) error {
 
 	_, err = r.billingService.SetUserNotifyNewRegion(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 

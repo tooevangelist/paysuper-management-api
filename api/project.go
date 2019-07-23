@@ -5,6 +5,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -39,6 +40,7 @@ func (r *projectRoute) createProject(ctx echo.Context) error {
 	rsp, err := r.billingService.ChangeProject(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -67,6 +69,7 @@ func (r *projectRoute) updateProject(ctx echo.Context) error {
 	rsp, err := r.billingService.ChangeProject(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -91,6 +94,7 @@ func (r *projectRoute) getProject(ctx echo.Context) error {
 	rsp, err := r.billingService.GetProject(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -122,6 +126,7 @@ func (r *projectRoute) listProjects(ctx echo.Context) error {
 	rsp, err := r.billingService.ListProjects(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -142,6 +147,7 @@ func (r *projectRoute) deleteProject(ctx echo.Context) error {
 	rsp, err := r.billingService.DeleteProject(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
