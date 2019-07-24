@@ -160,7 +160,7 @@ func (r *keyProductRoute) getPlatformsList(ctx echo.Context) error {
 }
 
 // @Description Create new key product for authenticated merchant
-// @Example POST /admin/api/v1/key-products/:key_product_id
+// @Example PUT /admin/api/v1/key-products/:key_product_id
 func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
 	req := &grpc.CreateOrUpdateKeyProductRequest{}
 	err := ctx.Bind(req)
@@ -259,7 +259,7 @@ func (r *keyProductRoute) createKeyProduct(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, res.Product)
+	return ctx.JSON(http.StatusCreated, res.Product)
 }
 
 // @Description Get list of key products for authenticated merchant
