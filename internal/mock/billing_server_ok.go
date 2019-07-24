@@ -855,3 +855,19 @@ func (s *BillingServerOkMock) CreateOrUpdateUserProfile(
 		Item:   &grpc.UserProfile{},
 	}, nil
 }
+
+func (s *BillingServerOkMock) ConfirmUserEmail(
+	ctx context.Context,
+	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
+}
+
+func (s *BillingServerOkMock) CreatePageReview(
+	ctx context.Context,
+	in *grpc.CreatePageReviewRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
+}

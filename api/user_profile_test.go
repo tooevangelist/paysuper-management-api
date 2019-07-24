@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
@@ -11,7 +10,6 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 )
@@ -364,10 +362,8 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_BillingServerR
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_Ok() {
-	q := make(url.Values)
-	q.Set(requestParameterToken, bson.NewObjectId().Hex())
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/confirm_email?"+q.Encode(), nil)
+	body := `{"token": "123456789"}`
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/confirm_email", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -377,7 +373,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_Ok() {
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_EmptyToken_Error() {
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/confirm_email", nil)
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/confirm_email", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -392,10 +388,8 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_EmptyToken_Error
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerSystemError() {
-	q := make(url.Values)
-	q.Set(requestParameterToken, bson.NewObjectId().Hex())
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/confirm_email?"+q.Encode(), nil)
+	body := `{"token": "123456789"}`
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/confirm_email", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -412,10 +406,8 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerSys
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerReturnError() {
-	q := make(url.Values)
-	q.Set(requestParameterToken, bson.NewObjectId().Hex())
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/confirm_email?"+q.Encode(), nil)
+	body := `{"token": "123456789"}`
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/confirm_email", strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -423,6 +415,115 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerRet
 	suite.api.billingService = mock.NewBillingServerErrorMock()
 
 	err := suite.router.confirmEmail(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Ok() {
+	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.createFeedback(ctx)
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Unauthorized_Error() {
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.authUser.Id = ""
+	err := suite.router.createFeedback(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusUnauthorized, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageAccessDenied, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() {
+	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationXML)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.createFeedback(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidatePageIdError() {
+	body := `{"review": "some review text", "page_id": "unknown_page"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.createFeedback(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageIncorrectPageId, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateReviewError() {
+	body := `{"review": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "page_id": "primary_onboarding"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	err := suite.router.createFeedback(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageIncorrectReview, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServerSystemError() {
+	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.router.createFeedback(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServerResultError() {
+	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/page_reviews", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	suite.api.billingService = mock.NewBillingServerErrorMock()
+	err := suite.router.createFeedback(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)

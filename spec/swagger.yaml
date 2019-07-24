@@ -2012,6 +2012,26 @@ definitions:
         description: time of last update user profile
         $ref: '#/definitions/ProtobufTimestamp'
 
+  pageReview.request:
+    properties:
+      review:
+        description: user review about page
+        type: string
+      page_id:
+        description: "page identifier. now allowed values: primary_onboarding, merchant_onboarding"
+        type: string
+    required:
+      - review
+      - page_id
+
+  user.confirmEmail.request:
+    properties:
+      token:
+        description: email confirmation token
+        type: string
+    required:
+      - token
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -4572,7 +4592,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/api/v1/user/confirm_email":
-    get:
+    put:
       summary: Confirm user email
       tags:
         - User Profile
@@ -4582,15 +4602,60 @@ paths:
         - application/json
       description: Confirm user email by token
       parameters:
-        - description: email confirmation token
-          in: query
-          name: token
-          type: string
+        - description: object contained confirmation token
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/user.confirmEmail.request'
+            type: object
+          required: true
       responses:
         "200":
           description: OK
         "400":
           description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/user/feedback":
+    post:
+      summary: Create page review
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create page feedback
+      parameters:
+        - description: review body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/pageReview.request'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
         "404":
