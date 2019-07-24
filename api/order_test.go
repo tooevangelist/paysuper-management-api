@@ -1149,7 +1149,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
 	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 

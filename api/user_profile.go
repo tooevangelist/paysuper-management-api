@@ -15,8 +15,10 @@ type userProfileRoute struct {
 func (api *Api) initUserProfileRoutes() *Api {
 	route := &userProfileRoute{Api: api}
 
-	api.authUserRouteGroup.GET("/user_profile", route.getUserProfile)
-	api.authUserRouteGroup.PATCH("/user_profile", route.setUserProfile)
+	api.authUserRouteGroup.GET("/user/profile", route.getUserProfile)
+	api.authUserRouteGroup.PATCH("/user/profile", route.setUserProfile)
+	api.Http.PUT("/api/v1/user/confirm_email", route.confirmEmail)
+	api.authUserRouteGroup.POST("/user/feedback", route.createFeedback)
 
 	return api
 }
@@ -72,4 +74,57 @@ func (r *userProfileRoute) setUserProfile(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *userProfileRoute) confirmEmail(ctx echo.Context) error {
+	req := &grpc.ConfirmUserEmailRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	rsp, err := r.billingService.ConfirmUserEmail(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != http.StatusOK {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}
+
+func (r *userProfileRoute) createFeedback(ctx echo.Context) error {
+	if r.authUser.Id == "" {
+		return echo.NewHTTPError(http.StatusUnauthorized, errorMessageAccessDenied)
+	}
+
+	req := &grpc.CreatePageReviewRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	req.UserId = r.authUser.Id
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp, err := r.billingService.CreatePageReview(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != http.StatusOK {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }

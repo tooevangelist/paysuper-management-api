@@ -599,3 +599,19 @@ func (s *BillingServerSystemErrorMock) CreateOrUpdateUserProfile(
 ) (*grpc.GetUserProfileResponse, error) {
 	return nil, SomeError
 }
+
+func (s *BillingServerSystemErrorMock) ConfirmUserEmail(
+	ctx context.Context,
+	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) CreatePageReview(
+	ctx context.Context,
+	in *grpc.CreatePageReviewRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}

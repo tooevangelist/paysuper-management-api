@@ -659,3 +659,19 @@ func (s *BillingServerOkTemporaryMock) CreateOrUpdateUserProfile(
 ) (*grpc.GetUserProfileResponse, error) {
 	return nil, SomeError
 }
+
+func (s *BillingServerOkTemporaryMock) ConfirmUserEmail(
+	ctx context.Context,
+	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) CreatePageReview(
+	ctx context.Context,
+	in *grpc.CreatePageReviewRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}

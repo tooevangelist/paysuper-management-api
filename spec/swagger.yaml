@@ -2002,12 +2002,35 @@ definitions:
       last_step:
         description: identifier of wizard last step which user ended
         type: string
+      centrifugo_token:
+        description: user authorisation token to connect to centrifigo channel
+        type: string
       created_at:
         description: time of create user profile
         $ref: '#/definitions/ProtobufTimestamp'
       updated_at:
         description: time of last update user profile
         $ref: '#/definitions/ProtobufTimestamp'
+
+  pageReview.request:
+    properties:
+      review:
+        description: user review about page
+        type: string
+      page_id:
+        description: "page identifier. now allowed values: primary_onboarding, merchant_onboarding"
+        type: string
+    required:
+      - review
+      - page_id
+
+  user.confirmEmail.request:
+    properties:
+      token:
+        description: email confirmation token
+        type: string
+    required:
+      - token
 
 host: p1payapi.tst.protocol.one
 info:
@@ -4490,7 +4513,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user_profile":
+  "/admin/api/v1/user/profile":
     get:
       summary: Get user profile
       tags:
@@ -4547,6 +4570,82 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/userProfile.response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/confirm_email":
+    put:
+      summary: Confirm user email
+      tags:
+        - User Profile
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Confirm user email by token
+      parameters:
+        - description: object contained confirmation token
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/user.confirmEmail.request'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/user/feedback":
+    post:
+      summary: Create page review
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create page feedback
+      parameters:
+        - description: review body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/pageReview.request'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
         "400":
           description: Invalid request data
           schema:

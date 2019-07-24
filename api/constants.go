@@ -66,6 +66,7 @@ const (
 	requestParameterStatus                   = "status"
 	requestAuthorizationTokenRegex           = "Bearer ([A-z0-9_.-]{10,})"
 	requestParameterZipUsa                   = "zip_usa"
+	requestParameterToken                    = "token"
 
 	userProfileFieldNumberOfEmployees = "NumberOfEmployees"
 	userProfileFieldAnnualIncome      = "AnnualIncome"
@@ -75,6 +76,8 @@ const (
 	userProfileFieldLastName          = "LastName"
 	userProfileFieldWebsite           = "Website"
 	userProfileFieldKindOfActivity    = "KindOfActivity"
+	userProfileFieldReview            = "Review"
+	userProfileFieldPageId            = "PageId"
 
 	orderFieldProjectId     = "PP_PROJECT_ID"
 	orderFieldSignature     = "PP_SIGNATURE"
