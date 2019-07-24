@@ -211,7 +211,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}))
 
 	api.
-		InitCurrencyRoutes().
 		InitCountryRoutes().
 		InitProductRoutes().
 		InitProjectRoutes().
@@ -224,7 +223,9 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initZipCodeRoutes().
 		initPaymentMethodRoutes().
 		initPriceGroupRoutes().
-		initUserProfileRoutes()
+		initUserProfileRoutes().
+		initVatReportsRoutes().
+		initRoyaltyReportsRoutes()
 
 	_, err = api.initOnboardingRoutes()
 
@@ -379,6 +380,7 @@ func (api *Api) checkProjectAuthRequestSignature(ctx echo.Context, projectId str
 	rsp, err := api.billingService.CheckProjectRequestSignature(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
