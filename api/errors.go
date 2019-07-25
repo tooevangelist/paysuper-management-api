@@ -95,6 +95,8 @@ var (
 	errorMessageIncorrectLastName                     = newManagementApiResponseError("ma000079", "incorrect last name")
 	errorMessageIncorrectWebsite                      = newManagementApiResponseError("ma000080", "incorrect website")
 	errorMessageIncorrectKindOfActivity               = newManagementApiResponseError("ma000081", "incorrect kind of activity")
+	ErrorMessageKeyProductIdInvalid                   = newManagementApiResponseError("ma000082", "key product id is invalid")
+	ErrorMessagePlatformIdInvalid                     = newManagementApiResponseError("ma000083", "platform id is invalid")
 
 	validationErrors = map[string]*grpc.ResponseErrorMessage{
 		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,
