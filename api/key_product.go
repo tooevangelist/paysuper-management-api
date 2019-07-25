@@ -14,8 +14,8 @@ type keyProductRoute struct {
 const internalErrorTemplate = "internal error"
 
 var (
-	keyProductIdInvalid = newManagementApiResponseError("ka000001", "key product id is invalid")
-	platformIdInvalid   = newManagementApiResponseError("ka000002", "platform id is invalid")
+	KeyProductIdInvalid = newManagementApiResponseError("ka000001", "key product id is invalid")
+	PlatformIdInvalid   = newManagementApiResponseError("ka000002", "platform id is invalid")
 )
 
 func (api *Api) InitKeyProductRoutes() *Api {
@@ -41,12 +41,12 @@ func (r *keyProductRoute) removePlatformForKeyProduct(ctx echo.Context) error {
 	req := &grpc.RemovePlatformRequest{}
 	req.KeyProductId = ctx.Param("key_product_id")
 	if req.KeyProductId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, keyProductIdInvalid)
+		return echo.NewHTTPError(http.StatusBadRequest, KeyProductIdInvalid)
 	}
 
 	req.PlatformId = ctx.Param("platform_id")
 	if req.PlatformId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, platformIdInvalid)
+		return echo.NewHTTPError(http.StatusBadRequest, PlatformIdInvalid)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -79,7 +79,7 @@ func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) er
 	req := &grpc.AddOrUpdatePlatformPricesRequest{}
 	req.KeyProductId = ctx.Param("key_product_id")
 	if req.KeyProductId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, keyProductIdInvalid)
+		return echo.NewHTTPError(http.StatusBadRequest, KeyProductIdInvalid)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -112,7 +112,7 @@ func (r *keyProductRoute) publishKeyProduct(ctx echo.Context) error {
 	req := &grpc.PublishKeyProductRequest{}
 	req.KeyProductId = ctx.Param("key_product_id")
 	if req.KeyProductId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, keyProductIdInvalid)
+		return echo.NewHTTPError(http.StatusBadRequest, KeyProductIdInvalid)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -179,7 +179,7 @@ func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
 
 	req.Id = ctx.Param("key_product_id")
 	if req.Id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, keyProductIdInvalid)
+		return echo.NewHTTPError(http.StatusBadRequest, KeyProductIdInvalid)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
