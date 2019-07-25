@@ -54,7 +54,7 @@ func (r *keyProductRoute) removePlatformForKeyProduct(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
-	if merchant.Status != pkg.StatusOK {
+	if merchant.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
@@ -89,7 +89,7 @@ func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) er
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
-	if merchant.Status != pkg.StatusOK {
+	if merchant.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
@@ -125,7 +125,7 @@ func (r *keyProductRoute) publishKeyProduct(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
-	if merchant.Status != pkg.StatusOK {
+	if merchant.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
@@ -190,7 +190,7 @@ func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
-	if merchant.Status != pkg.StatusOK {
+	if merchant.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
@@ -222,7 +222,7 @@ func (r *keyProductRoute) getKeyProductById(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
-	if merchant.Status != pkg.StatusOK {
+	if merchant.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
@@ -256,7 +256,7 @@ func (r *keyProductRoute) createKeyProduct(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
-	if merchant.Status != pkg.StatusOK {
+	if merchant.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
@@ -298,7 +298,7 @@ func (r *keyProductRoute) getKeyProductList(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
-	if merchant.Status != pkg.StatusOK {
+	if merchant.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	
