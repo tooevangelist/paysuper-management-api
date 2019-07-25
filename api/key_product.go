@@ -35,6 +35,8 @@ func (api *Api) InitKeyProductRoutes() *Api {
 	return api
 }
 
+// @Description Remove platform from product
+// @Example DELETE /admin/api/v1/key-products/:key_product_id/platforms/:platform_id
 func (r *keyProductRoute) removePlatformForKeyProduct(ctx echo.Context) error {
 	req := &grpc.RemovePlatformRequest{}
 	req.KeyProductId = ctx.Param("key_product_id")
@@ -71,6 +73,8 @@ func (r *keyProductRoute) removePlatformForKeyProduct(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
+// @Description Change prices for specified platform and key product
+// @Example POST /admin/api/v1/key-products/:key_product_id/platforms
 func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) error {
 	req := &grpc.AddOrUpdatePlatformPricesRequest{}
 	req.KeyProductId = ctx.Param("key_product_id")
@@ -102,6 +106,8 @@ func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) er
 	return ctx.JSON(http.StatusOK, res)
 }
 
+// @Description Publishes product
+// @Example POST /admin/api/v1/key-products/:key_product_id/publish
 func (r *keyProductRoute) publishKeyProduct(ctx echo.Context) error {
 	req := &grpc.PublishKeyProductRequest{}
 	req.KeyProductId = ctx.Param("key_product_id")
@@ -133,6 +139,8 @@ func (r *keyProductRoute) publishKeyProduct(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Product)
 }
 
+// @Description Get available platform list
+// @Example GET /admin/api/v1/platforms
 func (r *keyProductRoute) getPlatformsList(ctx echo.Context) error {
 	req := &grpc.ListPlatformsRequest{}
 	err := ctx.Bind(req)
