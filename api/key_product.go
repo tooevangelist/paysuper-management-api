@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"go.uber.org/zap"
 	"net/http"
@@ -50,19 +51,21 @@ func (r *keyProductRoute) removePlatformForKeyProduct(ctx echo.Context) error {
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
-	if err != nil || merchant.Item == nil {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+	if merchant.Status != pkg.StatusOK {
+		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
 
-	err = r.validate.Struct(req)
-	if err != nil {
+	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.DeletePlatformFromProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorf(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -83,8 +86,11 @@ func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) er
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
-	if err != nil || merchant.Item == nil {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+	if merchant.Status != pkg.StatusOK {
+		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
 
@@ -95,7 +101,7 @@ func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) er
 
 	res, err := r.billingService.UpdatePlatformPrices(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorf(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -116,19 +122,21 @@ func (r *keyProductRoute) publishKeyProduct(ctx echo.Context) error {
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
-	if err != nil || merchant.Item == nil {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+	if merchant.Status != pkg.StatusOK {
+		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
 
-	err = r.validate.Struct(req)
-	if err != nil {
+	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.PublishKeyProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorf(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -143,20 +151,18 @@ func (r *keyProductRoute) publishKeyProduct(ctx echo.Context) error {
 // @Example GET /admin/api/v1/platforms
 func (r *keyProductRoute) getPlatformsList(ctx echo.Context) error {
 	req := &grpc.ListPlatformsRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
-	err = r.validate.Struct(req)
-	if err != nil {
+	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.GetPlatforms(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorf(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -171,9 +177,7 @@ func (r *keyProductRoute) getPlatformsList(ctx echo.Context) error {
 // @Example PUT /admin/api/v1/key-products/:key_product_id
 func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
 	req := &grpc.CreateOrUpdateKeyProductRequest{}
-	err := ctx.Bind(req)
-
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
@@ -183,19 +187,21 @@ func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
-	if err != nil || merchant.Item == nil {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+	if merchant.Status != pkg.StatusOK {
+		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
 
-	err = r.validate.Struct(req)
-	if err != nil {
+	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.CreateOrUpdateKeyProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorf(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -213,19 +219,21 @@ func (r *keyProductRoute) getKeyProductById(ctx echo.Context) error {
 	req.Id = ctx.Param("key_product_id")
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
-	if err != nil || merchant.Item == nil {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+	if merchant.Status != pkg.StatusOK {
+		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
 
-	err = r.validate.Struct(req)
-	if err != nil {
+	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.GetKeyProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorf(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -240,26 +248,26 @@ func (r *keyProductRoute) getKeyProductById(ctx echo.Context) error {
 // @Example POST /admin/api/v1/key-products
 func (r *keyProductRoute) createKeyProduct(ctx echo.Context) error {
 	req := &grpc.CreateOrUpdateKeyProductRequest{}
-	err := ctx.Bind(req)
-
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
-	if err != nil || merchant.Item == nil {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+	if merchant.Status != pkg.StatusOK {
+		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
 	req.MerchantId = merchant.Item.Id
 
-	err = r.validate.Struct(req)
-	if err != nil {
+	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.CreateOrUpdateKeyProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorf(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -274,10 +282,12 @@ func (r *keyProductRoute) createKeyProduct(ctx echo.Context) error {
 // @Example GET /admin/api/v1/key-products?name=car&project_id=5bdc39a95d1e1100019fb7df&offset=0&limit=10
 func (r *keyProductRoute) getKeyProductList(ctx echo.Context) error {
 	req := &grpc.ListKeyProductsRequest{}
-	err := ctx.Bind(req)
-
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	if req.Limit > LimitMax {
+		req.Limit = LimitMax
 	}
 
 	if req.Limit <= 0 {
@@ -285,19 +295,22 @@ func (r *keyProductRoute) getKeyProductList(ctx echo.Context) error {
 	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
-	if err != nil || merchant.Item == nil {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
+	if merchant.Status != pkg.StatusOK {
+		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
+	}
+	
 	req.MerchantId = merchant.Item.Id
 
-	err = r.validate.Struct(req)
-	if err != nil {
+	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.GetKeyProducts(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorf(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
