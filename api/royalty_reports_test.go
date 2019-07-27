@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 )
 
@@ -77,5 +78,62 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_listRoyaltyReportOrders
 	if assert.NoError(suite.T(), err) {
 		assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 		assert.NotEmpty(suite.T(), rsp.Body.String())
+	}
+}
+
+func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_merchantAcceptRoyaltyReport() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/accept", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/royalty_reports/:" + requestParameterId + "/accept")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues("5ced34d689fce60bf4440829")
+
+	err := suite.router.merchantAcceptRoyaltyReport(ctx)
+
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusNoContent, rsp.Code)
+	}
+}
+
+func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_merchantDeclineRoyaltyReport() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/decline", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/royalty_reports/:" + requestParameterId + "/decline")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues("5ced34d689fce60bf4440829")
+
+	err := suite.router.merchantDeclineRoyaltyReport(ctx)
+
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusNoContent, rsp.Code)
+	}
+}
+
+func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_changeRoyaltyReport() {
+
+	bodyJson := `{"status": "accepted", "correction": {"amount": 100500, "reason": "just for fun :)"}, "payout_id": "5bdc39a95d1e1100019fb7df"}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/change", strings.NewReader(bodyJson))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/royalty_reports/:" + requestParameterId + "/change")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues("5ced34d689fce60bf4440829")
+
+	err := suite.router.changeRoyaltyReport(ctx)
+
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusNoContent, rsp.Code)
 	}
 }
