@@ -872,6 +872,6 @@ func (s *BillingServerOkMock) CreatePageReview(
 	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
 }
 
-func (s *BillingServerOkMock) MerchantAcceptRoyaltyReport(ctx context.Context, in *grpc.MerchantAcceptRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+func (s *BillingServerOkMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	return &grpc.ResponseError{Status: pkg.ResponseStatusOk}, nil
 }

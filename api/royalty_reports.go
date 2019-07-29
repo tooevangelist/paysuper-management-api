@@ -17,7 +17,7 @@ func (api *Api) initRoyaltyReportsRoutes() *Api {
 
 	api.authUserRouteGroup.GET("/royalty_reports", cApiV1.getRoyaltyReportsList)
 	api.authUserRouteGroup.GET("/royalty_reports/details/:id", cApiV1.listRoyaltyReportOrders)
-	api.authUserRouteGroup.POST("/royalty_reports/:id/accept", cApiV1.merchantAcceptRoyaltyReport)
+	api.authUserRouteGroup.POST("/royalty_reports/:id/accept", cApiV1.MerchantReviewRoyaltyReport)
 	api.authUserRouteGroup.POST("/royalty_reports/:id/decline", cApiV1.merchantDeclineRoyaltyReport)
 	api.authUserRouteGroup.POST("/royalty_reports/:id/change", cApiV1.changeRoyaltyReport)
 
@@ -78,15 +78,15 @@ func (cApiV1 *royaltyReportsRoute) listRoyaltyReportOrders(ctx echo.Context) err
 
 // Accept royalty report by merchant
 // POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/accept
-func (cApiV1 *royaltyReportsRoute) merchantAcceptRoyaltyReport(ctx echo.Context) error {
+func (cApiV1 *royaltyReportsRoute) MerchantReviewRoyaltyReport(ctx echo.Context) error {
 
-	req := &grpc.MerchantAcceptRoyaltyReportRequest{
+	req := &grpc.MerchantReviewRoyaltyReportRequest{
 		IsAccepted: true,
 		Ip:         ctx.RealIP(),
 		ReportId:   ctx.Param(requestParameterId),
 	}
 
-	res, err := cApiV1.billingService.MerchantAcceptRoyaltyReport(ctx.Request().Context(), req)
+	res, err := cApiV1.billingService.MerchantReviewRoyaltyReport(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -100,13 +100,13 @@ func (cApiV1 *royaltyReportsRoute) merchantAcceptRoyaltyReport(ctx echo.Context)
 // POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/decline
 func (cApiV1 *royaltyReportsRoute) merchantDeclineRoyaltyReport(ctx echo.Context) error {
 
-	req := &grpc.MerchantAcceptRoyaltyReportRequest{
+	req := &grpc.MerchantReviewRoyaltyReportRequest{
 		IsAccepted: false,
 		Ip:         ctx.RealIP(),
 		ReportId:   ctx.Param(requestParameterId),
 	}
 
-	res, err := cApiV1.billingService.MerchantAcceptRoyaltyReport(ctx.Request().Context(), req)
+	res, err := cApiV1.billingService.MerchantReviewRoyaltyReport(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}

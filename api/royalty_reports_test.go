@@ -81,7 +81,7 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_listRoyaltyReportOrders
 	}
 }
 
-func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_merchantAcceptRoyaltyReport() {
+func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_MerchantReviewRoyaltyReport() {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/accept", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -92,7 +92,7 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_merchantAcceptRoyaltyRe
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("5ced34d689fce60bf4440829")
 
-	err := suite.router.merchantAcceptRoyaltyReport(ctx)
+	err := suite.router.MerchantReviewRoyaltyReport(ctx)
 
 	if assert.NoError(suite.T(), err) {
 		assert.Equal(suite.T(), http.StatusNoContent, rsp.Code)

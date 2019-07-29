@@ -2143,8 +2143,8 @@ func (_m *BillingService) MarkNotificationAsRead(ctx context.Context, in *grpc.G
 	return r0, r1
 }
 
-// MerchantAcceptRoyaltyReport provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) MerchantAcceptRoyaltyReport(ctx context.Context, in *grpc.MerchantAcceptRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+// MerchantReviewRoyaltyReport provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -2155,7 +2155,7 @@ func (_m *BillingService) MerchantAcceptRoyaltyReport(ctx context.Context, in *g
 	ret := _m.Called(_ca...)
 
 	var r0 *grpc.ResponseError
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.MerchantAcceptRoyaltyReportRequest, ...client.CallOption) *grpc.ResponseError); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.MerchantReviewRoyaltyReportRequest, ...client.CallOption) *grpc.ResponseError); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
@@ -2164,7 +2164,7 @@ func (_m *BillingService) MerchantAcceptRoyaltyReport(ctx context.Context, in *g
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *grpc.MerchantAcceptRoyaltyReportRequest, ...client.CallOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.MerchantReviewRoyaltyReportRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
