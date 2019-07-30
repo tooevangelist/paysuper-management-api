@@ -827,7 +827,7 @@ func (s *BillingServerOkMock) GetPaymentMethodTestSettings(ctx context.Context, 
 }
 
 func (s *BillingServerOkMock) ChangeRoyaltyReport(ctx context.Context, in *grpc.ChangeRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
-	panic("implement me")
+	return &grpc.ResponseError{Status: pkg.ResponseStatusOk}, nil
 }
 
 func (s *BillingServerOkMock) AutoAcceptRoyaltyReports(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
@@ -870,4 +870,8 @@ func (s *BillingServerOkMock) CreatePageReview(
 	opts ...client.CallOption,
 ) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
+}
+
+func (s *BillingServerOkMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	return &grpc.ResponseError{Status: pkg.ResponseStatusOk}, nil
 }

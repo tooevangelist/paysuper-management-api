@@ -17,6 +17,9 @@ func (api *Api) initRoyaltyReportsRoutes() *Api {
 
 	api.authUserRouteGroup.GET("/royalty_reports", cApiV1.getRoyaltyReportsList)
 	api.authUserRouteGroup.GET("/royalty_reports/details/:id", cApiV1.listRoyaltyReportOrders)
+	api.authUserRouteGroup.POST("/royalty_reports/:id/accept", cApiV1.MerchantReviewRoyaltyReport)
+	api.authUserRouteGroup.POST("/royalty_reports/:id/decline", cApiV1.merchantDeclineRoyaltyReport)
+	api.authUserRouteGroup.POST("/royalty_reports/:id/change", cApiV1.changeRoyaltyReport)
 
 	return api
 }
@@ -71,4 +74,77 @@ func (cApiV1 *royaltyReportsRoute) listRoyaltyReportOrders(ctx echo.Context) err
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 	return ctx.JSON(http.StatusOK, res.Data)
+}
+
+// Accept royalty report by merchant
+// POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/accept
+func (cApiV1 *royaltyReportsRoute) MerchantReviewRoyaltyReport(ctx echo.Context) error {
+
+	req := &grpc.MerchantReviewRoyaltyReportRequest{
+		IsAccepted: true,
+		Ip:         ctx.RealIP(),
+		ReportId:   ctx.Param(requestParameterId),
+	}
+
+	res, err := cApiV1.billingService.MerchantReviewRoyaltyReport(ctx.Request().Context(), req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.NoContent(http.StatusNoContent)
+}
+
+// Decline royalty report by merchant and start a dispute
+// POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/decline
+func (cApiV1 *royaltyReportsRoute) merchantDeclineRoyaltyReport(ctx echo.Context) error {
+
+	req := &grpc.MerchantReviewRoyaltyReportRequest{
+		IsAccepted: false,
+		Ip:         ctx.RealIP(),
+		ReportId:   ctx.Param(requestParameterId),
+	}
+
+	res, err := cApiV1.billingService.MerchantReviewRoyaltyReport(ctx.Request().Context(), req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.NoContent(http.StatusNoContent)
+}
+
+// Change royalty report by admin
+// POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/change
+//
+// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
+//      -H "Authorization: Bearer %access_token_here%" \
+//      -d '{"status": "Accepted", "correction": {"amount": 100500, "reason": "just for fun :)"}, payout_id: "5bdc39a95d1e1100019fb7df"}' \
+//      https://api.paysuper.online/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/change
+func (cApiV1 *royaltyReportsRoute) changeRoyaltyReport(ctx echo.Context) error {
+	req := &grpc.ChangeRoyaltyReportRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
+	}
+
+	req.ReportId = ctx.Param(requestParameterId)
+	req.Ip = ctx.RealIP()
+
+	err = cApiV1.validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, cApiV1.getValidationError(err))
+	}
+
+	res, err := cApiV1.billingService.ChangeRoyaltyReport(ctx.Request().Context(), req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.NoContent(http.StatusNoContent)
 }

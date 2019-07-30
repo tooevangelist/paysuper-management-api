@@ -679,3 +679,7 @@ func (s *BillingServerErrorMock) CreatePageReview(
 		Message: SomeError,
 	}, nil
 }
+
+func (s *BillingServerErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	panic("implement me")
+}
