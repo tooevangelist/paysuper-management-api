@@ -1,5 +1,10 @@
 package api
 
+type Dictionary struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 const (
 	apiWebHookGroupPath     = "/webhook"
 	apiAuthProjectGroupPath = "/api/v1"
@@ -15,7 +20,8 @@ const (
 	requestParameterMerchantId               = "merchant_id"
 	requestParameterProject                  = "project[]"
 	requestParameterPaymentMethod            = "payment_method[]"
-	requestParameterCountry                  = "country[]"
+	requestParameterCountry                  = "country"
+	requestParameterCountries                = "country[]"
 	requestParameterStatuses                 = "status[]"
 	requestParameterProjectId                = "project_id"
 	requestParameterPaymentMethodId          = "method_id"
@@ -59,6 +65,19 @@ const (
 	requestParameterUrlRefundPayment         = "url_refund_payment"
 	requestParameterStatus                   = "status"
 	requestAuthorizationTokenRegex           = "Bearer ([A-z0-9_.-]{10,})"
+	requestParameterZipUsa                   = "zip_usa"
+	requestParameterToken                    = "token"
+
+	userProfileFieldNumberOfEmployees = "NumberOfEmployees"
+	userProfileFieldAnnualIncome      = "AnnualIncome"
+	userProfileFieldCompanyName       = "CompanyName"
+	userProfileFieldPosition          = "Position"
+	userProfileFieldFirstName         = "FirstName"
+	userProfileFieldLastName          = "LastName"
+	userProfileFieldWebsite           = "Website"
+	userProfileFieldKindOfActivity    = "KindOfActivity"
+	userProfileFieldReview            = "Review"
+	userProfileFieldPageId            = "PageId"
 
 	orderFieldProjectId     = "PP_PROJECT_ID"
 	orderFieldSignature     = "PP_SIGNATURE"
@@ -94,24 +113,36 @@ const (
 	CardPayPaymentResponseHeaderSignature = "Signature"
 
 	agreementPageTemplateName = "agreement.html"
+
+	UserProfilePositionCEO               = "CEO"
+	UserProfilePositionCTO               = "CTO"
+	UserProfilePositionCMO               = "CMO"
+	UserProfilePositionCFO               = "CFO"
+	UserProfilePositionProjectManagement = "Project Management"
+	UserProfilePositionGenericManagement = "Generic Management"
+	UserProfilePositionSoftwareDeveloper = "Software Developer"
+	UserProfilePositionMarketing         = "Marketing"
+	UserProfilePositionSupport           = "Support"
 )
 
-var DefaultSort = []string{"_id"}
+var (
+	DefaultSort = []string{"_id"}
 
-var OrderReservedWords = map[string]bool{
-	orderFieldProjectId:     true,
-	orderFieldSignature:     true,
-	orderFieldAmount:        true,
-	orderFieldCurrency:      true,
-	orderFieldAccount:       true,
-	orderFieldOrderId:       true,
-	orderFieldDescription:   true,
-	orderFieldPaymentMethod: true,
-	orderFieldUrlVerify:     true,
-	orderFieldUrlNotify:     true,
-	orderFieldUrlSuccess:    true,
-	orderFieldUrlFail:       true,
-	orderFieldPayerEmail:    true,
-	orderFieldPayerPhone:    true,
-	orderFieldRegion:        true,
-}
+	OrderReservedWords = map[string]bool{
+		orderFieldProjectId:     true,
+		orderFieldSignature:     true,
+		orderFieldAmount:        true,
+		orderFieldCurrency:      true,
+		orderFieldAccount:       true,
+		orderFieldOrderId:       true,
+		orderFieldDescription:   true,
+		orderFieldPaymentMethod: true,
+		orderFieldUrlVerify:     true,
+		orderFieldUrlNotify:     true,
+		orderFieldUrlSuccess:    true,
+		orderFieldUrlFail:       true,
+		orderFieldPayerEmail:    true,
+		orderFieldPayerPhone:    true,
+		orderFieldRegion:        true,
+	}
+)

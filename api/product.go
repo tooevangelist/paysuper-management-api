@@ -40,6 +40,9 @@ func (r *productRoute) getProductsList(ctx echo.Context) error {
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
+		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -47,7 +50,7 @@ func (r *productRoute) getProductsList(ctx echo.Context) error {
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.ListProducts(ctx.Request().Context(), req)
@@ -70,6 +73,9 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
+		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -80,7 +86,7 @@ func (r *productRoute) getProduct(ctx echo.Context) error {
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.GetProduct(ctx.Request().Context(), req)
@@ -102,6 +108,9 @@ func (r *productRoute) deleteProduct(ctx echo.Context) error {
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
+		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -112,7 +121,7 @@ func (r *productRoute) deleteProduct(ctx echo.Context) error {
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	_, err = r.billingService.DeleteProduct(ctx.Request().Context(), req)
@@ -156,6 +165,9 @@ func (r *productRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil || merchant.Item == nil {
+		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -163,7 +175,7 @@ func (r *productRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 
 	err = r.validate.Struct(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.CreateOrUpdateProduct(ctx.Request().Context(), req)
@@ -186,7 +198,7 @@ func (r *productRoute) getProductPrices(ctx echo.Context) error {
 	}
 
 	if err := r.validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.GetProductPrices(ctx.Request().Context(), req)
@@ -207,7 +219,7 @@ func (r *productRoute) updateProductPrices(ctx echo.Context) error {
 	req := &grpc.UpdateProductPricesRequest{}
 
 	if err := r.validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	res, err := r.billingService.UpdateProductPrices(ctx.Request().Context(), req)

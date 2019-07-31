@@ -120,12 +120,11 @@ func (r *onboardingRoute) getMerchantByUser(ctx echo.Context) error {
 	rsp, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 
 	if err != nil {
-		r.logError("500_debug", []interface{}{"error", err})
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
 	if rsp.Status != pkg.ResponseStatusOk {
-		r.logError("500_debug", []interface{}{"response", rsp})
 		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
 	}
 
@@ -143,12 +142,13 @@ func (r *onboardingRoute) listMerchants(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListMerchants(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -170,12 +170,13 @@ func (r *onboardingRoute) changeMerchant(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -197,13 +198,14 @@ func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	req.UserId = r.authUser.Id
 	rsp, err := r.billingService.ChangeMerchantStatus(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -225,13 +227,14 @@ func (r *onboardingRoute) createNotification(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	req.UserId = r.authUser.Id
 	rsp, err := r.billingService.CreateNotification(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -278,12 +281,13 @@ func (r *onboardingRoute) listNotifications(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListNotifications(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -309,6 +313,7 @@ func (r *onboardingRoute) markAsReadNotification(ctx echo.Context) error {
 	rsp, err := r.billingService.MarkNotificationAsRead(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -326,6 +331,7 @@ func (r *onboardingRoute) getPaymentMethod(ctx echo.Context) error {
 	rsp, err := r.billingService.GetMerchantPaymentMethod(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -348,12 +354,13 @@ func (r *onboardingRoute) listPaymentMethods(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListMerchantPaymentMethods(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -373,12 +380,13 @@ func (r *onboardingRoute) changePaymentMethod(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ChangeMerchantPaymentMethod(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -401,7 +409,7 @@ func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ChangeMerchantData(ctx.Request().Context(), req)
@@ -445,6 +453,7 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 		err = r.mClt.FGetObject(r.config.S3.BucketName, rsp.Item.S3AgreementName, filePath, minio.GetObjectOptions{})
 
 		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
 			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 		}
 
@@ -586,7 +595,7 @@ func (r *onboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
 	src, err := r.validateUpload(file)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorMessageAgreementContentType)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	defer func() {
@@ -685,20 +694,23 @@ func (r *onboardingRoute) validateUpload(file *multipart.FileHeader) (multipart.
 	src, err := file.Open()
 
 	if err != nil {
-		return nil, err
+		zap.S().Errorf("validate upload error", "err", err.Error())
+		return nil, errorUnknown
 	}
 
 	buffer := make([]byte, 512)
 	_, err = src.Read(buffer)
 
 	if err != nil {
-		return nil, err
+		zap.S().Errorf("validate upload error", "err", err.Error())
+		return nil, errorUnknown
 	}
 
 	_, err = src.Seek(0, 0)
 
 	if err != nil {
-		return nil, err
+		zap.S().Errorf("validate upload error", "err", err.Error())
+		return nil, errorUnknown
 	}
 
 	ct := http.DetectContentType(buffer)

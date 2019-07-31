@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
@@ -85,7 +86,6 @@ func (suite *OrderTestSuite) TestOrder_GetRefund_Ok() {
 	err = json.Unmarshal(rsp.Body.Bytes(), refund)
 	assert.NoError(suite.T(), err)
 	assert.NotEmpty(suite.T(), refund.Id)
-	assert.NotEmpty(suite.T(), refund.OrderId)
 	assert.NotEmpty(suite.T(), refund.Currency)
 	assert.Len(suite.T(), refund.Currency, 3)
 }
@@ -687,6 +687,32 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationError() {
 	assert.Regexp(suite.T(), newValidationError("Country"), httpErr.Message)
 }
 
+func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationZipError() {
+	body := `{"country": "US", "zip": "00"}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/api/v1/orders/:order_id/billing_address")
+	ctx.SetParamNames(requestParameterOrderId)
+	ctx.SetParamValues(uuid.New().String())
+
+	err := suite.router.processBillingAddress(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), errorMessageIncorrectZip, msg)
+	assert.Regexp(suite.T(), "Zip", msg.Details)
+}
+
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerSystemError() {
 	body := `{"country": "US", "zip": "98001"}`
 
@@ -1123,7 +1149,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
 	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
@@ -1176,7 +1202,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_PaymentMethod() {
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Country() {
-	q := url.Values{requestParameterCountry: []string{"foo"}}
+	q := url.Values{requestParameterCountries: []string{"foo"}}
 	suite.testGetOrdersBindError(q, fmt.Sprintf(errorMessageMask, "Country[0]", "len"))
 }
 

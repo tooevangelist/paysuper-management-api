@@ -86,4 +86,28 @@ var (
 	errorMessagePriceGroupRecommendedList             = newManagementApiResponseError("ma000072", "unable to get price group recommended prices")
 	errorMessageGetProductPrice                       = newManagementApiResponseError("ma000072", "unable to get price of product")
 	errorMessageUpdateProductPrice                    = newManagementApiResponseError("ma000072", "unable to update price of product")
+	errorMessageIncorrectZip                          = newManagementApiResponseError("ma000073", "incorrect zip code")
+	errorMessageIncorrectNumberOfEmployees            = newManagementApiResponseError("ma000074", "incorrect number of employees value")
+	errorMessageIncorrectAnnualIncome                 = newManagementApiResponseError("ma000075", "incorrect annual income value")
+	errorMessageIncorrectCompanyName                  = newManagementApiResponseError("ma000076", "incorrect company name")
+	errorMessageIncorrectPosition                     = newManagementApiResponseError("ma000077", "incorrect position")
+	errorMessageIncorrectFirstName                    = newManagementApiResponseError("ma000078", "incorrect first name")
+	errorMessageIncorrectLastName                     = newManagementApiResponseError("ma000079", "incorrect last name")
+	errorMessageIncorrectWebsite                      = newManagementApiResponseError("ma000080", "incorrect website")
+	errorMessageIncorrectKindOfActivity               = newManagementApiResponseError("ma000081", "incorrect kind of activity")
+	errorMessageIncorrectReview                       = newManagementApiResponseError("ma000082", "review must be text with length lower than or equal 500 characters")
+	errorMessageIncorrectPageId                       = newManagementApiResponseError("ma000083", "review page identifier must be one of next values: primary_onboarding, merchant_onboarding")
+
+	validationErrors = map[string]*grpc.ResponseErrorMessage{
+		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,
+		userProfileFieldAnnualIncome:      errorMessageIncorrectAnnualIncome,
+		userProfileFieldCompanyName:       errorMessageIncorrectCompanyName,
+		userProfileFieldPosition:          errorMessageIncorrectPosition,
+		userProfileFieldFirstName:         errorMessageIncorrectFirstName,
+		userProfileFieldLastName:          errorMessageIncorrectLastName,
+		userProfileFieldWebsite:           errorMessageIncorrectWebsite,
+		userProfileFieldKindOfActivity:    errorMessageIncorrectKindOfActivity,
+		userProfileFieldReview:            errorMessageIncorrectReview,
+		userProfileFieldPageId:            errorMessageIncorrectPageId,
+	}
 )
