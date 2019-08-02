@@ -77,7 +77,7 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.GET("/merchants/:id/agreement", route.generateAgreement)
 	api.authUserRouteGroup.GET("/merchants/:id/agreement/document", route.getAgreementDocument)
 	api.authUserRouteGroup.POST("/merchants/:id/agreement/document", route.uploadAgreementDocument)
-	api.authUserRouteGroup.GET("/merchants/:id/agreement/signature", route.getAgreementSignature)
+	api.authUserRouteGroup.PUT("/merchants/:id/agreement/signature", route.getAgreementSignature)
 
 	api.authUserRouteGroup.POST("/merchants/:merchant_id/notifications", route.createNotification)
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/notifications/:notification_id", route.getNotification)
@@ -724,7 +724,7 @@ func (r *onboardingRoute) validateUpload(file *multipart.FileHeader) (multipart.
 }
 
 // @Description get hellosign (https://www.hellosign.com) signature to sign license agreement
-// @Example GET /admin/api/v1/merchants/ffffffffffffffffffffffff/agreement/signature
+// @Example PUT /admin/api/v1/merchants/ffffffffffffffffffffffff/agreement/signature
 func (r *onboardingRoute) getAgreementSignature(ctx echo.Context) error {
 	req := &grpc.SetMerchantS3AgreementRequest{
 		MerchantId: ctx.Param(requestParameterId),
