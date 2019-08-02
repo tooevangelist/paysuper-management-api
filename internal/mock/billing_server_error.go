@@ -683,3 +683,14 @@ func (s *BillingServerErrorMock) CreatePageReview(
 func (s *BillingServerErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerErrorMock) AgreementSign(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.AgreementSignResponse, error) {
+	return &grpc.AgreementSignResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}

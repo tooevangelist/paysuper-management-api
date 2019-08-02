@@ -875,3 +875,11 @@ func (s *BillingServerOkMock) CreatePageReview(
 func (s *BillingServerOkMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	return &grpc.ResponseError{Status: pkg.ResponseStatusOk}, nil
 }
+
+func (s *BillingServerOkMock) AgreementSign(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.AgreementSignResponse, error) {
+	return &grpc.AgreementSignResponse{Status: pkg.ResponseStatusOk}, nil
+}
