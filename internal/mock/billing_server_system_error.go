@@ -600,7 +600,6 @@ func (s *BillingServerSystemErrorMock) CreateOrUpdateUserProfile(
 	return nil, SomeError
 }
 
-
 func (s *BillingServerSystemErrorMock) CreateOrUpdateKeyProduct(ctx context.Context, in *grpc.CreateOrUpdateKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	return nil, SomeError
 }
@@ -658,5 +657,17 @@ func (s *BillingServerSystemErrorMock) FinishRedeemKeyForOrder(ctx context.Conte
 }
 
 func (s *BillingServerSystemErrorMock) CancelRedeemKeyForOrder(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) ConfirmUserEmail(ctx context.Context, in *grpc.ConfirmUserEmailRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) CreatePageReview(ctx context.Context, in *grpc.CreatePageReviewRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	return nil, SomeError
 }

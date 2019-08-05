@@ -288,6 +288,21 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
+  /api/v1/key-products/:key_product_id:
+    get:
+      tags:
+        - product
+      summary: "Get product with platforms list and their prices"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyProduct'
+        500:
+          $ref: '#/components/responses/InternalError'
+
 components:
   securitySchemes:
     bearerAuth:

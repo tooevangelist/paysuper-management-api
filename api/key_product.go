@@ -28,6 +28,8 @@ func (api *Api) InitKeyProductRoutes() *Api {
 	api.authUserRouteGroup.DELETE("/key-products/:key_product_id/platforms/:platform_id", keyProductApiV1.removePlatformForKeyProduct)
 	api.authUserRouteGroup.PUT("/platforms", keyProductApiV1.getPlatformsList)
 
+	api.Http.GET("/api/v1/key-products/:key_product_id", keyProductApiV1.getKeyProduct)
+
 	return api
 }
 
@@ -296,7 +298,7 @@ func (r *keyProductRoute) getKeyProductList(ctx echo.Context) error {
 	if merchant.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
-	
+
 	req.MerchantId = merchant.Item.Id
 
 	if err := r.validate.Struct(req); err != nil {
@@ -314,4 +316,27 @@ func (r *keyProductRoute) getKeyProductList(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res)
+}
+
+// @Description Get product with platforms list and their prices
+// @Example POST /api/v1/key-products/:key_product_id
+func (r *keyProductRoute) getKeyProduct(ctx echo.Context) error {
+	req := &grpc.RequestKeyProduct{}
+	req.Id = ctx.Param("key_product_id")
+
+	if err := r.validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	res, err := r.billingService.GetKeyProduct(ctx.Request().Context(), req)
+	if err != nil {
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
+	}
+
+	if res.Message != nil {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res.Product)
 }

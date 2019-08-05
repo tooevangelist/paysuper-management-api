@@ -8,6 +8,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
+	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
 	"net/http"
@@ -259,4 +260,44 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_ValidationError()
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), 400, e.Code)
 	assert.NotEmpty(suite.T(), e.Message)
+}
+
+func (suite *KeyProductTestSuite) TestProject_getKeyProduct_ValidationError() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/key-products/1", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	billingService := &mock.BillingService{}
+	billingService.On("GetKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.GetPaymentMethodSettingsResponse{}, nil)
+	suite.api.billingService = billingService
+
+	err := suite.router.getKeyProduct(ctx)
+	assert.Error(suite.T(), err)
+	err2, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), 400, err2.Code)
+	assert.NotEmpty(suite.T(), err2.Message)
+}
+
+func (suite *KeyProductTestSuite) TestProject_getKeyProduct_Ok() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/key-products/1", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/key-products/:key_product_id")
+	ctx.SetParamNames("key_product_id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	billingService := &mock.BillingService{}
+	billingService.On("GetKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.GetPaymentMethodSettingsResponse{}, nil)
+	suite.api.billingService = billingService
+
+	err := suite.router.getKeyProduct(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
