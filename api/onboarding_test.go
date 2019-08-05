@@ -2933,14 +2933,69 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantContacts_BillingServ
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_WithoutMerchantId_Ok() {
-	b := `{
-        "currency": "RUB", 
-        "name": "Bank Name-Spb.", 
-        "address": "St.Petersburg, Nevskiy st. 1", 
-        "account_number": "408000000001",
-        "swift": "TEST",
-        "correspondent_account": "408000000001"
-    }`
+	banking := &billing.MerchantBanking{
+		Currency:             "RUB",
+		Name:                 "Bank Name-Spb.",
+		Address:              "St.Petersburg, Nevskiy st. 1",
+		AccountNumber:        "408000000001",
+		Swift:                "ALFARUMM",
+		CorrespondentAccount: "408000000001",
+	}
+	b, err := json.Marshal(banking)
+	assert.NoError(suite.T(), err)
+
+	req := httptest.NewRequest(http.MethodPatch, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/banking")
+
+	err = suite.handler.setMerchantBanking(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	merchant := new(billing.Merchant)
+	err = json.Unmarshal(rsp.Body.Bytes(), merchant)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), merchant.Banking, banking)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_WithMerchantId_Ok() {
+	banking := &billing.MerchantBanking{
+		Currency:             "RUB",
+		Name:                 "Bank Name-Spb.",
+		Address:              "St.Petersburg, Nevskiy st. 1",
+		AccountNumber:        "408000000001",
+		Swift:                "ALFARUMM",
+		CorrespondentAccount: "408000000001",
+	}
+	b, err := json.Marshal(banking)
+	assert.NoError(suite.T(), err)
+
+	req := httptest.NewRequest(http.MethodPatch, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/banking")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId)
+
+	err = suite.handler.setMerchantBanking(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	merchant := new(billing.Merchant)
+	err = json.Unmarshal(rsp.Body.Bytes(), merchant)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), merchant.Banking, banking)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_BindError() {
+	b := `{"name": 123}`
 
 	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -2950,46 +3005,40 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_WithoutMerch
 	ctx.SetPath("/admin/api/v1/merchants/banking")
 
 	err := suite.handler.setMerchantBanking(ctx)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
+	assert.Error(suite.T(), err)
 
-	merchant := new(billing.Merchant)
-	err = json.Unmarshal(rsp.Body.Bytes(), merchant)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), merchant.Company, company)
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_WithMerchantId_Ok() {
-	company := &billing.MerchantCompanyInfo{
-		Name:            mock.OnboardingMerchantMock.Company.Name,
-		AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-		Website:         "http://localhost",
-		Country:         "RU",
-		State:           "St.Petersburg",
-		Zip:             "190000",
-		City:            "St.Petersburg",
-		Address:         "Nevskiy st. 1",
-	}
-	b, err := json.Marshal(company)
-	assert.NoError(suite.T(), err)
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationError_Currency() {
+	b := `{
+		"name": "Bank Name-Spb.",
+		"address": "St.Petersburg, Nevskiy st. 1",
+		"account_number": "408000000001",
+		"swift": "ALFARUMM",
+		"correspondent_account": "408000000001"
+	}`
 
-	req := httptest.NewRequest(http.MethodPatch, "/", bytes.NewReader(b))
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	ctx.SetPath("/admin/api/v1/merchants/:id/company")
-	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues(mock.SomeMerchantId)
+	ctx.SetPath("/admin/api/v1/merchants/banking")
 
-	err = suite.handler.setMerchantCompany(ctx)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
+	err := suite.handler.setMerchantBanking(ctx)
+	assert.Error(suite.T(), err)
 
-	merchant := new(billing.Merchant)
-	err = json.Unmarshal(rsp.Body.Bytes(), merchant)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), merchant.Company, company)
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), errorIncorrectCurrencyIdentifier.Code, msg.Code)
+	assert.Equal(suite.T(), errorIncorrectCurrencyIdentifier.Message, msg.Message)
+	assert.Regexp(suite.T(), "Currency", msg.Details)
 }
