@@ -3042,3 +3042,420 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationEr
 	assert.Equal(suite.T(), errorIncorrectCurrencyIdentifier.Message, msg.Message)
 	assert.Regexp(suite.T(), "Currency", msg.Details)
 }
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationError_Name() {
+	b := `{
+		"currency": "RUB",
+		"address": "St.Petersburg, Nevskiy st. 1",
+		"account_number": "408000000001",
+		"swift": "ALFARUMM",
+		"correspondent_account": "408000000001"
+	}`
+
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/banking")
+
+	err := suite.handler.setMerchantBanking(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), errorMessageIncorrectBankName.Code, msg.Code)
+	assert.Equal(suite.T(), errorMessageIncorrectBankName.Message, msg.Message)
+	assert.Regexp(suite.T(), "Name", msg.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationError_Address() {
+	b := `{
+		"currency": "RUB",
+		"name": "Bank Name-Spb.",
+		"account_number": "408000000001",
+		"swift": "ALFARUMM",
+		"correspondent_account": "408000000001"
+	}`
+
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/banking")
+
+	err := suite.handler.setMerchantBanking(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), errorMessageIncorrectBankAddress.Code, msg.Code)
+	assert.Equal(suite.T(), errorMessageIncorrectBankAddress.Message, msg.Message)
+	assert.Regexp(suite.T(), "Address", msg.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationError_AccountNumber() {
+	b := `{
+		"currency": "RUB",
+		"name": "Bank Name-Spb.",
+		"address": "St.Petersburg, Nevskiy st. 1",
+		"swift": "ALFARUMM",
+		"correspondent_account": "408000000001"
+	}`
+
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/banking")
+
+	err := suite.handler.setMerchantBanking(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), errorMessageIncorrectBankAccountNumber.Code, msg.Code)
+	assert.Equal(suite.T(), errorMessageIncorrectBankAccountNumber.Message, msg.Message)
+	assert.Regexp(suite.T(), "AccountNumber", msg.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationError_Swift() {
+	b := `{
+		"currency": "RUB",
+		"name": "Bank Name-Spb.",
+		"address": "St.Petersburg, Nevskiy st. 1",
+		"account_number": "408000000001",
+		"correspondent_account": "408000000001"
+	}`
+
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/banking")
+
+	err := suite.handler.setMerchantBanking(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), errorMessageIncorrectBankSwift.Code, msg.Code)
+	assert.Equal(suite.T(), errorMessageIncorrectBankSwift.Message, msg.Message)
+	assert.Regexp(suite.T(), "Swift", msg.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationError_CorrespondentAccount() {
+	b := `{
+		"currency": "RUB",
+		"name": "Bank Name-Spb.",
+		"address": "St.Petersburg, Nevskiy st. 1",
+		"account_number": "408000000001",
+		"swift": "ALFARUMM",
+		"correspondent_account": "408000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
+	}`
+
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/banking")
+
+	err := suite.handler.setMerchantBanking(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), errorMessageIncorrectBankCorrespondentAccount.Code, msg.Code)
+	assert.Equal(suite.T(), errorMessageIncorrectBankCorrespondentAccount.Message, msg.Message)
+	assert.Regexp(suite.T(), "CorrespondentAccount", msg.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_BillingServerSystemError() {
+	b := `{
+		"currency": "RUB",
+		"name": "Bank Name-Spb.",
+		"address": "St.Petersburg, Nevskiy st. 1",
+		"account_number": "408000000001",
+		"swift": "ALFARUMM",
+		"correspondent_account": "408000000001"
+	}`
+
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/banking")
+
+	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.setMerchantBanking(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_BillingServerResultError() {
+	b := `{
+		"currency": "RUB",
+		"name": "Bank Name-Spb.",
+		"address": "St.Petersburg, Nevskiy st. 1",
+		"account_number": "408000000001",
+		"swift": "ALFARUMM",
+		"correspondent_account": "408000000001"
+	}`
+
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/company")
+
+	suite.handler.billingService = mock.NewBillingServerErrorMock()
+	err := suite.handler.setMerchantBanking(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_WithoutMerchantId_Ok() {
+	tariff := &grpc.OnboardingRequest{Tariff: bson.NewObjectId().Hex()}
+	b, err := json.Marshal(tariff)
+	assert.NoError(suite.T(), err)
+
+	req := httptest.NewRequest(http.MethodPatch, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/tariff")
+
+	err = suite.handler.setMerchantTariff(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	merchant := new(billing.Merchant)
+	err = json.Unmarshal(rsp.Body.Bytes(), merchant)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), merchant.Tariff, tariff.Tariff)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_WithMerchantId_Ok() {
+	tariff := &grpc.OnboardingRequest{Tariff: bson.NewObjectId().Hex()}
+	b, err := json.Marshal(tariff)
+	assert.NoError(suite.T(), err)
+
+	req := httptest.NewRequest(http.MethodPatch, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/tariff")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId)
+
+	err = suite.handler.setMerchantTariff(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	merchant := new(billing.Merchant)
+	err = json.Unmarshal(rsp.Body.Bytes(), merchant)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), merchant.Tariff, tariff.Tariff)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_BindError() {
+	b := `some_not_json_string`
+
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/tariff")
+
+	err := suite.handler.setMerchantTariff(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_ValidateError() {
+	b := `{"tariff": "tariff_id"}`
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/tariff")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues("not_hex_string")
+
+	err := suite.handler.setMerchantTariff(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), errorValidationFailed.Code, msg.Code)
+	assert.Equal(suite.T(), errorValidationFailed.Message, msg.Message)
+	assert.Regexp(suite.T(), "Id", msg.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_BillingServerSystemError() {
+	b := `{"tariff": "tariff_id"}`
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/tariff")
+
+	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.setMerchantTariff(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_BillingServerResultError() {
+	b := `{"tariff": "tariff_id"}`
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/tariff")
+
+	suite.handler.billingService = mock.NewBillingServerErrorMock()
+	err := suite.handler.setMerchantTariff(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/status")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId)
+
+	err := suite.handler.getMerchantStatus(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_ValidateError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/status")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues("not_hex_string")
+
+	err := suite.handler.getMerchantStatus(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "MerchantId", msg.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServerSystemError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/status")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId)
+
+	suite.handler.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.getMerchantStatus(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServerResultError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/status")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId)
+
+	suite.handler.billingService = mock.NewBillingServerErrorMock()
+	err := suite.handler.getMerchantStatus(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), mock.SomeError.Message, msg.Message)
+	assert.Equal(suite.T(), mock.SomeError.Details, msg.Details)
+}

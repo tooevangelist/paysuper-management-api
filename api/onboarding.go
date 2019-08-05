@@ -849,18 +849,15 @@ func (r *onboardingRoute) setMerchantTariff(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
+	req.Id = ctx.Param(requestParameterId)
+	req.User = &billing.MerchantUser{
+		Id:    r.authUser.Id,
+		Email: r.authUser.Email,
+	}
 	err = r.validate.Struct(req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	merchantId := ctx.Param(requestParameterId)
-
-	if merchantId != "" {
-		req.Id = merchantId
-	} else {
-		req.User = &billing.MerchantUser{Id: r.authUser.Id}
 	}
 
 	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
@@ -880,13 +877,8 @@ func (r *onboardingRoute) getMerchantStatus(ctx echo.Context) error {
 	req := &grpc.SetMerchantS3AgreementRequest{
 		MerchantId: ctx.Param(requestParameterId),
 	}
-	err := ctx.Bind(req)
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
-	}
-
-	err = r.validate.Struct(req)
+	err := r.validate.Struct(req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))

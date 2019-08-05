@@ -146,6 +146,7 @@ func (s *BillingServerOkMock) ChangeMerchant(
 		Company:  in.Company,
 		Contacts: in.Contacts,
 		Banking:  in.Banking,
+		Tariff:   in.Tariff,
 		Status:   pkg.MerchantStatusDraft,
 	}
 
