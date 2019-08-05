@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/google/uuid"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/ttacon/libphonenumber"
 	"gopkg.in/go-playground/validator.v9"
@@ -12,6 +13,9 @@ const (
 	zipUsaRegexp      = "^[0-9]{5}(?:-[0-9]{4})?$"
 	nameRegexp        = "^[\\p{L}\\p{M} \\-\\']+$"
 	companyNameRegexp = "^[\\p{L}\\p{M} \\-\\.0-9]+$"
+	zipGeneralRegexp  = "^\\d{0,30}$"
+	swiftRegexp       = "^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$"
+	cityRegexp        = "^[\\p{L}\\p{M} \\-\\.]+$"
 )
 
 var (
@@ -95,5 +99,31 @@ func (api *Api) rangeIntValidator(in *grpc.RangeInt, rng []*grpc.RangeInt) bool 
 
 func (api *Api) CompanyNameValidator(fl validator.FieldLevel) bool {
 	match, err := regexp.MatchString(companyNameRegexp, fl.Field().String())
+	return match == true && err == nil
+}
+
+func (api *Api) MerchantCompanyValidator(sl validator.StructLevel) {
+	company := sl.Current().Interface().(billing.MerchantCompanyInfo)
+
+	reg := zipGeneralRegexp
+
+	if v, ok := zipRegexp[company.Country]; ok {
+		reg = v
+	}
+
+	match, err := regexp.MatchString(reg, company.Zip)
+
+	if !match || err != nil {
+		sl.ReportError(company.Zip, "Zip", "zip", "zip", "")
+	}
+}
+
+func (api *Api) SwiftValidator(fl validator.FieldLevel) bool {
+	match, err := regexp.MatchString(swiftRegexp, fl.Field().String())
+	return match == true && err == nil
+}
+
+func (api *Api) CityValidator(fl validator.FieldLevel) bool {
+	match, err := regexp.MatchString(cityRegexp, fl.Field().String())
 	return match == true && err == nil
 }

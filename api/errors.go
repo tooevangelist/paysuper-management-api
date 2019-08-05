@@ -16,6 +16,26 @@ func newValidationError(details string) *grpc.ResponseErrorMessage {
 	return newManagementApiResponseError(errorValidationFailed.Code, errorValidationFailed.Message, details)
 }
 
+const (
+	errorNamespaceMerchantCompanyInfoName            = "MerchantCompanyInfo.Name"
+	errorNamespaceMerchantCompanyInfoAlternativeName = "MerchantCompanyInfo.AlternativeName"
+	errorNamespaceMerchantCompanyInfoWebsite         = "MerchantCompanyInfo.Website"
+	errorNamespaceMerchantCompanyInfoCountry         = "MerchantCompanyInfo.Country"
+	errorNamespaceMerchantCompanyInfoState           = "MerchantCompanyInfo.State"
+	errorNamespaceMerchantCompanyInfoZip             = "MerchantCompanyInfo.Zip"
+	errorNamespaceMerchantCompanyInfoCity            = "MerchantCompanyInfo.City"
+	errorNamespaceMerchantCompanyInfoAddress         = "MerchantCompanyInfo.Address"
+	errorNamespaceMerchantContactAuthorized          = "MerchantContact.Authorized"
+	errorNamespaceMerchantContactTechnical           = "MerchantContact.Technical"
+	errorNamespaceMerchantContactAuthorizedName      = "MerchantContact.Authorized.Name"
+	errorNamespaceMerchantContactAuthorizedEmail     = "MerchantContact.Authorized.Email"
+	errorNamespaceMerchantContactAuthorizedPhone     = "MerchantContact.Authorized.Phone"
+	errorNamespaceMerchantContactAuthorizedPosition  = "MerchantContact.Authorized.Position"
+	errorNamespaceMerchantContactTechnicalName       = "MerchantContact.Technical.Name"
+	errorNamespaceMerchantContactTechnicalEmail      = "MerchantContact.Technical.Email"
+	errorNamespaceMerchantContactTechnicalPhone      = "MerchantContact.Technical.Phone"
+)
+
 var (
 	errorUnknown                                      = newManagementApiResponseError("ma000001", "unknown error. try request later")
 	errorValidationFailed                             = newManagementApiResponseError("ma000002", "validation failed")
@@ -36,7 +56,7 @@ var (
 	errorMessageAgreementNotGenerated                 = newManagementApiResponseError("ma000021", "agreement for merchant not generated early")
 	errorMessageSignatureHeaderIsEmpty                = newManagementApiResponseError("ma000022", "header with request signature can't be empty")
 	errorRequestParamsIncorrect                       = newManagementApiResponseError("ma000023", "incorrect request parameters")
-	errorEmailFieldIsRequired                         = newManagementApiResponseError("ma000024", "email field is required")
+	errorEmailFieldIncorrect                          = newManagementApiResponseError("ma000024", "incorrect email")
 	errorRequestDataInvalid                           = newManagementApiResponseError("ma000026", "request data invalid")
 	errorCountriesListError                           = newManagementApiResponseError("ma000027", "countries list error")
 	errorAgreementFileNotExist                        = newManagementApiResponseError("ma000028", "file for the specified key does not exist")
@@ -98,6 +118,15 @@ var (
 	errorMessageIncorrectReview                       = newManagementApiResponseError("ma000082", "review must be text with length lower than or equal 500 characters")
 	errorMessageIncorrectPageId                       = newManagementApiResponseError("ma000083", "review page identifier must be one of next values: primary_onboarding, merchant_onboarding")
 
+	errorMessageIncorrectAlternativeName  = newManagementApiResponseError("ma000084", "incorrect brand")
+	errorMessageIncorrectState            = newManagementApiResponseError("ma000085", "incorrect state")
+	errorMessageIncorrectCity             = newManagementApiResponseError("ma000086", "incorrect city")
+	errorMessageIncorrectAddress          = newManagementApiResponseError("ma000087", "incorrect address")
+	errorMessageRequiredContactAuthorized = newManagementApiResponseError("ma000088", "company authorized contact information is required")
+	errorMessageRequiredContactTechnical  = newManagementApiResponseError("ma000089", "company technical contact information is required")
+	errorMessageIncorrectName             = newManagementApiResponseError("ma000090", "incorrect name")
+	errorMessageIncorrectPhone            = newManagementApiResponseError("ma000091", "incorrect phone")
+
 	validationErrors = map[string]*grpc.ResponseErrorMessage{
 		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,
 		userProfileFieldAnnualIncome:      errorMessageIncorrectAnnualIncome,
@@ -109,5 +138,25 @@ var (
 		userProfileFieldKindOfActivity:    errorMessageIncorrectKindOfActivity,
 		userProfileFieldReview:            errorMessageIncorrectReview,
 		userProfileFieldPageId:            errorMessageIncorrectPageId,
+	}
+
+	validationNamespaceErrors = map[string]*grpc.ResponseErrorMessage{
+		errorNamespaceMerchantCompanyInfoName:            errorMessageIncorrectCompanyName,
+		errorNamespaceMerchantCompanyInfoAlternativeName: errorMessageIncorrectAlternativeName,
+		errorNamespaceMerchantCompanyInfoWebsite:         errorMessageIncorrectWebsite,
+		errorNamespaceMerchantCompanyInfoCountry:         errorIncorrectCountryIdentifier,
+		errorNamespaceMerchantCompanyInfoState:           errorMessageIncorrectState,
+		errorNamespaceMerchantCompanyInfoZip:             errorMessageIncorrectZip,
+		errorNamespaceMerchantCompanyInfoCity:            errorMessageIncorrectCity,
+		errorNamespaceMerchantCompanyInfoAddress:         errorMessageIncorrectAddress,
+		errorNamespaceMerchantContactAuthorized:          errorMessageRequiredContactAuthorized,
+		errorNamespaceMerchantContactTechnical:           errorMessageRequiredContactTechnical,
+		errorNamespaceMerchantContactAuthorizedName:      errorMessageIncorrectName,
+		errorNamespaceMerchantContactAuthorizedEmail:     errorEmailFieldIncorrect,
+		errorNamespaceMerchantContactAuthorizedPhone:     errorMessageIncorrectPhone,
+		errorNamespaceMerchantContactAuthorizedPosition:  errorMessageIncorrectPosition,
+		errorNamespaceMerchantContactTechnicalName:       errorMessageIncorrectName,
+		errorNamespaceMerchantContactTechnicalEmail:      errorEmailFieldIncorrect,
+		errorNamespaceMerchantContactTechnicalPhone:      errorMessageIncorrectPhone,
 	}
 )

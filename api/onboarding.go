@@ -71,6 +71,17 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.GET("/merchants/user", route.getMerchantByUser)
 	api.authUserRouteGroup.POST("/merchants", route.changeMerchant)
 	api.authUserRouteGroup.PUT("/merchants", route.changeMerchant)
+
+	api.authUserRouteGroup.PATCH("/merchants/company", route.setMerchantCompany)
+	api.authUserRouteGroup.PATCH("/merchants/contacts", route.setMerchantContacts)
+	api.authUserRouteGroup.PATCH("/merchants/banking", route.setMerchantBanking)
+	api.authUserRouteGroup.PATCH("/merchants/tariff", route.setMerchantTariff)
+	api.authUserRouteGroup.PATCH("/merchants/:id/company", route.setMerchantCompany)
+	api.authUserRouteGroup.PATCH("/merchants/:id/contacts", route.setMerchantContacts)
+	api.authUserRouteGroup.PATCH("/merchants/:id/banking", route.setMerchantBanking)
+	api.authUserRouteGroup.PATCH("/merchants/:id/tariff", route.setMerchantTariff)
+	api.authUserRouteGroup.GET("/merchants/:id/status", route.getMerchantStatus)
+
 	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
 	api.authUserRouteGroup.PATCH("/merchants/:id", route.changeAgreement)
 
@@ -720,4 +731,176 @@ func (r *onboardingRoute) validateUpload(file *multipart.FileHeader) (multipart.
 	}
 
 	return src, nil
+}
+
+func (r *onboardingRoute) setMerchantCompany(ctx echo.Context) error {
+	in := &billing.MerchantCompanyInfo{}
+	err := ctx.Bind(in)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	err = r.validate.Struct(in)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req := &grpc.OnboardingRequest{Company: in}
+	merchantId := ctx.Param(requestParameterId)
+
+	if merchantId != "" {
+		req.Id = merchantId
+	} else {
+		req.User = &billing.MerchantUser{Id: r.authUser.Id}
+	}
+
+	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *onboardingRoute) setMerchantContacts(ctx echo.Context) error {
+	in := &billing.MerchantContact{}
+	err := ctx.Bind(in)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	err = r.validate.Struct(in)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req := &grpc.OnboardingRequest{Contacts: in}
+	merchantId := ctx.Param(requestParameterId)
+
+	if merchantId != "" {
+		req.Id = merchantId
+	} else {
+		req.User = &billing.MerchantUser{Id: r.authUser.Id}
+	}
+
+	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *onboardingRoute) setMerchantBanking(ctx echo.Context) error {
+	in := &billing.MerchantBanking{}
+	err := ctx.Bind(in)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	err = r.validate.Struct(in)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req := &grpc.OnboardingRequest{Banking: in}
+	merchantId := ctx.Param(requestParameterId)
+
+	if merchantId != "" {
+		req.Id = merchantId
+	} else {
+		req.User = &billing.MerchantUser{Id: r.authUser.Id}
+	}
+
+	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *onboardingRoute) setMerchantTariff(ctx echo.Context) error {
+	req := &grpc.OnboardingRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	merchantId := ctx.Param(requestParameterId)
+
+	if merchantId != "" {
+		req.Id = merchantId
+	} else {
+		req.User = &billing.MerchantUser{Id: r.authUser.Id}
+	}
+
+	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *onboardingRoute) getMerchantStatus(ctx echo.Context) error {
+	req := &grpc.SetMerchantS3AgreementRequest{
+		MerchantId: ctx.Param(requestParameterId),
+	}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp, err := r.billingService.GetMerchantOnboardingCompleteData(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
 }
