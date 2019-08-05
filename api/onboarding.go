@@ -733,6 +733,16 @@ func (r *onboardingRoute) validateUpload(file *multipart.FileHeader) (multipart.
 	return src, nil
 }
 
+// @Description Set company information in merchant onboarding process
+// @Example curl -X PATCH -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  -d '{"name": "Roga and Copita LLC", "alternative_name": "Apple Inc", "website": "http://localhost", "country": "RU",
+//    	"state": "St.Petersburg", "zip": "190000", "city": "St.Petersburg", "address": "Nevskiy st. 1"}' \
+//  https://api.paysuper.online/admin/api/v1/merchants/company
+//
+// @Example curl -X PATCH -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  -d '{"name": "Roga and Copita LLC", "alternative_name": "Apple Inc", "website": "http://localhost", "country": "RU",
+//    	"state": "St.Petersburg", "zip": "190000", "city": "St.Petersburg", "address": "Nevskiy st. 2"}' \
+//  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/company
 func (r *onboardingRoute) setMerchantCompany(ctx echo.Context) error {
 	in := &billing.MerchantCompanyInfo{}
 	err := ctx.Bind(in)
@@ -769,6 +779,16 @@ func (r *onboardingRoute) setMerchantCompany(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
+// @Description Set company contact information in merchant onboarding process
+// @Example curl -X PATCH -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  -d '{"authorized": {"name": "Unit Test", "email": "test@unit.test", "phone": "1234567890", "position": "CEO"},
+//    	"technical": {"name": "Unit Test", "email": "test@unit.test", "phone": "1234567890"}}' \
+//  https://api.paysuper.online/admin/api/v1/merchants/contacts
+//
+// @Example curl -X PATCH -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  -d '{"authorized": {"name": "Unit Test", "email": "test@unit.test", "phone": "1234567891", "position": "CEO"},
+//    	"technical": {"name": "Unit Test", "email": "test@unit.test", "phone": "1234567890"}}' \
+//  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/contacts
 func (r *onboardingRoute) setMerchantContacts(ctx echo.Context) error {
 	in := &billing.MerchantContact{}
 	err := ctx.Bind(in)
@@ -805,6 +825,16 @@ func (r *onboardingRoute) setMerchantContacts(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
+// @Description Set company banking information in merchant onboarding process
+// @Example curl -X PATCH -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  -d '{"currency": "RUB", "name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
+//  	"account_number": "408000000001", "swift": "ALFARUMM", "correspondent_account": "408000000001"}' \
+//  https://api.paysuper.online/admin/api/v1/merchants/banking
+//
+// @Example curl -X PATCH -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  -d '{"currency": "RUB", "name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
+//  	"account_number": "408000000001", "swift": "ALFARUMM", "correspondent_account": "408000000002"}' \
+//  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/banking
 func (r *onboardingRoute) setMerchantBanking(ctx echo.Context) error {
 	in := &billing.MerchantBanking{}
 	err := ctx.Bind(in)
@@ -841,6 +871,14 @@ func (r *onboardingRoute) setMerchantBanking(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
+// Set company tariff in merchant onboarding process
+// @Example curl -X PATCH -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  -d '{"tariff": "ffffffffffffffffffffffff"}'
+//  https://api.paysuper.online/admin/api/v1/merchants/tariff
+//
+// @Example curl -X PATCH -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  -d '{"tariff": "000000000000000000000000"}'
+//  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/tariff
 func (r *onboardingRoute) setMerchantTariff(ctx echo.Context) error {
 	req := &grpc.OnboardingRequest{}
 	err := ctx.Bind(req)
@@ -873,6 +911,9 @@ func (r *onboardingRoute) setMerchantTariff(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
+// @Description Get merchant completion information
+// curl -X GET -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+// https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/status
 func (r *onboardingRoute) getMerchantStatus(ctx echo.Context) error {
 	req := &grpc.SetMerchantS3AgreementRequest{
 		MerchantId: ctx.Param(requestParameterId),

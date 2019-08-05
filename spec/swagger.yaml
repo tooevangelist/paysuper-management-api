@@ -1085,6 +1085,51 @@ definitions:
         description: person contact phone
         type: string
 
+  onboarding.Company:
+    properties:
+      name:
+        type: string
+        description: name
+      alternative_name:
+        type: string
+        description: brand
+      website:
+        type: string
+        description: website url
+      country:
+        type: string
+        description: destination country 2 letter code by ISO 3166-1
+      state:
+        type: string
+        description: destination state or region
+      zip:
+        type: string
+        description: destination zip code
+      city:
+        type: string
+        description: destination city
+      address:
+        type: string
+        description: destination address
+      address_additional:
+        type: string
+        description: additional company address
+      registration_number:
+        type: string
+        description: company registration number
+      tax_id:
+        type: string
+        description: company tax identifier
+    required:
+      - name
+      - alternative_name
+      - website
+      - country
+      - state
+      - zip
+      - city
+      - address
+
   onboarding.Contacts:
     properties:
       authorized:
@@ -1129,39 +1174,9 @@ definitions:
       id:
         description: merchant unique identifier in system
         type: string
-      name:
-        description: merchant company name
-        type: string
-      alternative_name:
-        description: merchant company alternative name
-        type: string
-      website:
-        description: merchant website url
-        type: string
-      country:
-        description: merchant company registration country
-        $ref: '#/definitions/model.Country'
-      state:
-        description: merchant company registration state
-        type: string
-      zip:
-        description: merchant company registration zip code
-        type: string
-      city:
-        description: merchant company registration city
-        type: string
-      address:
-        description: merchant company registration address
-        type: string
-      address_additional:
-        description: merchant company registration additional address
-        type: string
-      registration_number:
-        description: merchant company registration number
-        type: string
-      tax_id:
-        description: merchant company tax identifier
-        type: string
+      company:
+        description: merchant company info
+        $ref: '#/definitions/onboarding.Company'
       contacts:
         description: contain information about contacts of merchant
         $ref: '#/definitions/onboarding.Contacts'
@@ -4581,3 +4596,47 @@ paths:
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/company":
+    patch:
+      summary: Set company information
+        tags:
+          - Onboarding
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        description: Create page feedback
+        parameters:
+          - description: request body
+            in: body
+            name: data
+            schema:
+              $ref: '#/definitions/onboarding.Company'
+              type: object
+            required: true
+        responses:
+          "200":
+            description: OK
+            schema:
+              $ref: ''
+          "400":
+            description: Invalid request data
+            schema:
+              $ref: '#/definitions/model.Error'
+          "401":
+            description: Unauthorized
+            schema:
+              $ref: '#/definitions/model.Error'
+          "403":
+            description: Access denied
+            schema:
+              $ref: '#/definitions/model.Error'
+          "404":
+            description: Object not found
+            schema:
+              $ref: '#/definitions/model.Error'
+          "500":
+            description: Some unknown error on server side
+            schema:
+              $ref: '#/definitions/model.Error'
