@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -326,7 +325,6 @@ func (r *keyProductRoute) getKeyProduct(ctx echo.Context) error {
 	req.Id = ctx.Param("key_product_id")
 
 	if err := r.validate.Struct(req); err != nil {
-		fmt.Println(err)
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
