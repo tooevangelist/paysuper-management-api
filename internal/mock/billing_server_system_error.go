@@ -608,11 +608,11 @@ func (s *BillingServerSystemErrorMock) GetKeyProducts(ctx context.Context, in *g
 	return nil, SomeError
 }
 
-func (s *BillingServerSystemErrorMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+func (s *BillingServerSystemErrorMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	return nil, SomeError
 }
 
-func (s *BillingServerSystemErrorMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+func (s *BillingServerSystemErrorMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	return nil, SomeError
 }
 

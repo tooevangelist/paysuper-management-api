@@ -704,7 +704,7 @@ func (_m *BillingService) CreateToken(ctx context.Context, in *grpc.TokenRequest
 }
 
 // DeleteKeyProduct provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+func (_m *BillingService) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -715,7 +715,7 @@ func (_m *BillingService) DeleteKeyProduct(ctx context.Context, in *grpc.Request
 	ret := _m.Called(_ca...)
 
 	var r0 *grpc.EmptyResponseWithStatus
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.RequestKeyProduct, ...client.CallOption) *grpc.EmptyResponseWithStatus); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.RequestKeyProductMerchant, ...client.CallOption) *grpc.EmptyResponseWithStatus); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
@@ -724,7 +724,7 @@ func (_m *BillingService) DeleteKeyProduct(ctx context.Context, in *grpc.Request
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *grpc.RequestKeyProduct, ...client.CallOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.RequestKeyProductMerchant, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -1334,7 +1334,7 @@ func (_m *BillingService) GetKeyByID(ctx context.Context, in *grpc.KeyForOrderRe
 }
 
 // GetKeyProduct provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+func (_m *BillingService) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -1345,7 +1345,7 @@ func (_m *BillingService) GetKeyProduct(ctx context.Context, in *grpc.RequestKey
 	ret := _m.Called(_ca...)
 
 	var r0 *grpc.KeyProductResponse
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.RequestKeyProduct, ...client.CallOption) *grpc.KeyProductResponse); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.RequestKeyProductMerchant, ...client.CallOption) *grpc.KeyProductResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
@@ -1354,7 +1354,7 @@ func (_m *BillingService) GetKeyProduct(ctx context.Context, in *grpc.RequestKey
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *grpc.RequestKeyProduct, ...client.CallOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.RequestKeyProductMerchant, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)

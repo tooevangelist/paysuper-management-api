@@ -672,14 +672,14 @@ func (s *BillingServerErrorMock) GetKeyProducts(ctx context.Context, in *grpc.Li
 	}, nil
 }
 
-func (s *BillingServerErrorMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+func (s *BillingServerErrorMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	return &grpc.KeyProductResponse{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil
 }
 
-func (s *BillingServerErrorMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+func (s *BillingServerErrorMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	return &grpc.EmptyResponseWithStatus{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,

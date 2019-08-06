@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -212,7 +213,7 @@ func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
 // @Description Gets key product by id
 // @Example POST /admin/api/v1/key-products/:key_product_id
 func (r *keyProductRoute) getKeyProductById(ctx echo.Context) error {
-	req := &grpc.RequestKeyProduct{}
+	req := &grpc.RequestKeyProductMerchant{}
 	req.Id = ctx.Param("key_product_id")
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -325,10 +326,11 @@ func (r *keyProductRoute) getKeyProduct(ctx echo.Context) error {
 	req.Id = ctx.Param("key_product_id")
 
 	if err := r.validate.Struct(req); err != nil {
+		fmt.Println(err)
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	res, err := r.billingService.GetKeyProduct(ctx.Request().Context(), req)
+	res, err := r.billingService.GetKeyProduct(ctx.Request().Context(), &grpc.RequestKeyProductMerchant{Id: req.Id})
 	if err != nil {
 		zap.S().Error(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)

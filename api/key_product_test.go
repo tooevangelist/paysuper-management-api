@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -270,14 +271,37 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProduct_ValidationError() {
 	ctx := e.NewContext(req, rsp)
 
 	billingService := &mock.BillingService{}
-	billingService.On("GetKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.GetPaymentMethodSettingsResponse{}, nil)
+	billingService.On("GetKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{}, nil)
 	suite.api.billingService = billingService
 
 	err := suite.router.getKeyProduct(ctx)
 	assert.Error(suite.T(), err)
 	err2, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), 400, err2.Code)
+	assert.Equal(suite.T(), http.StatusBadRequest, err2.Code)
+	assert.NotEmpty(suite.T(), err2.Message)
+}
+
+func (suite *KeyProductTestSuite) TestProject_getKeyProduct_BillingServer() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/key-products/1", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/key-products/:key_product_id")
+	ctx.SetParamNames("key_product_id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	billingService := &mock.BillingService{}
+	billingService.On("GetKeyProduct", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	suite.api.billingService = billingService
+
+	err := suite.router.getKeyProduct(ctx)
+	assert.Error(suite.T(), err)
+	err2, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, err2.Code)
 	assert.NotEmpty(suite.T(), err2.Message)
 }
 
@@ -293,7 +317,7 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProduct_Ok() {
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	billingService := &mock.BillingService{}
-	billingService.On("GetKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.GetPaymentMethodSettingsResponse{}, nil)
+	billingService.On("GetKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{}, nil)
 	suite.api.billingService = billingService
 
 	err := suite.router.getKeyProduct(ctx)

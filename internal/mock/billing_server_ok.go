@@ -873,14 +873,14 @@ func (s *BillingServerOkMock) GetKeyProducts(ctx context.Context, in *grpc.ListK
 	}, nil
 }
 
-func (s *BillingServerOkMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+func (s *BillingServerOkMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	return &grpc.KeyProductResponse{
 		Status:  pkg.ResponseStatusOk,
 		Product: &grpc.KeyProduct{},
 	}, nil
 }
 
-func (s *BillingServerOkMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+func (s *BillingServerOkMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	return &grpc.EmptyResponseWithStatus{
 		Status: pkg.ResponseStatusOk,
 	}, nil
