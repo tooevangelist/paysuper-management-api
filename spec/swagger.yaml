@@ -1072,6 +1072,11 @@ definitions:
       position:
         description: person position in company
         type: string
+    required:
+      - name
+      - email
+      - phone
+      - position
 
   onboarding.Contacts.Technical:
     properties:
@@ -1084,6 +1089,10 @@ definitions:
       phone:
         description: person contact phone
         type: string
+    required:
+      - name
+      - email
+      - phone
 
   onboarding.Company:
     properties:
@@ -1138,6 +1147,9 @@ definitions:
       technical:
         description: object contain information about contacts of merchant tecnican
         $ref: '#/definitions/onboarding.Contacts.Technical'
+    required:
+      - authorized
+      - technical
 
   onboarding.Banking:
     properties:
@@ -1159,6 +1171,15 @@ definitions:
       details:
         description: any details abount merchant accounting bank
         type: string
+      correspondent_account:
+        description: bank correspondent account
+        type: string
+    required:
+      - currency
+      - name
+      - address
+      - account_number
+      - swift
 
   onboarding.Merchant.LastPayout:
     properties:
@@ -1168,6 +1189,14 @@ definitions:
       amount:
         description: last payout amount to merchant
         type: number
+
+  onboarding.Tariff:
+    properties:
+      tariff:
+        description: tariff identifier
+        type: string
+    required:
+      - tariff
 
   onboarding.Merchant:
     properties:
@@ -1212,6 +1241,12 @@ definitions:
         type: boolean
       mail_tracking_link:
         description: "link to tracking package with agreement in post"
+        type: string
+      signature_request:
+        description: object contained signatire request data
+        $ref: '#/definitions/onboarding.merchant.signatureRequest'
+      tariff:
+        description: tariff identifier
         type: string
 
   onboarding.Merchant.Onboarding.Request:
@@ -2046,6 +2081,154 @@ definitions:
         type: string
     required:
       - token
+
+  onboarding.merchant.signatureRequest.event.event_metadata:
+    properties:
+      related_signature_id:
+        type: string
+        description: Signature associated with this event
+      reported_for_account_id:
+        type: string
+        description: Id of the account this event is reported for
+      reported_for_app_id:
+        type: string
+        description: Client id of the app this event is reported for
+
+  onboarding.merchant.signatureRequest.event:
+    properties:
+      event_time:
+        type: string
+        description: When the event was created (UNIX timestamp)
+      event_type:
+        type: string
+        description: Type of event being reported
+      event_hash:
+        type: string
+        description: Unique hash of this event
+      event_metadata:
+        description: A map of values containing data related to this event
+        $ref: '#/definitions/onboarding.merchant.signatureRequest.event.event_metadata'
+
+  onboarding.merchant.signatureRequest.event.signature_request.signatures:
+    properties:
+      signature_id:
+        type: string
+        description: Signature identifier
+      last_reminded_at:
+        type: integer
+        description: The time the last reminder email was sent to the signer or 0
+      last_viewed_at:
+        type: integer
+        description: The time that the document was last viewed by this signer or 0
+      signed_at:
+        type: integer
+        description: Time that the document was signed or 0
+      signer_email_address:
+        type: string
+        description: The email address of the signer
+      signer_name:
+        type: string
+        description: The name of the signer
+      status_code:
+        type: string
+        description: The current status of the signature
+      has_pin:
+        type: boolean
+        description: Boolean to indicate whether this signature requires a PIN to access
+      signer_role:
+        type: string
+        description: The role of the signer
+
+  onboarding.merchant.signatureRequest.event.signatureRequest:
+    properties:
+      cc_email_addresses:
+        description: The email address of the CC filling the role of RoleName
+        type: string
+      details_url:
+        type: string
+        description: The URL where the requester and the signers can view the current status of the SignatureRequest
+      has_error:
+        type: boolean
+        description: Whether or not an error occurred
+      is_complete:
+        type: boolean
+        description: Whether or not the SignatureRequest has been fully executed by all signers
+      is_declined:
+        type: boolean
+        description: Whether or not the SignatureRequest has been declined by a signer
+      message:
+        type: string
+        description: The custom message in the email that was initially sent to the signers
+      requester_email_address:
+        type: string
+        description: The email address of the initiator of the SignatureRequest
+      response_data:
+        type: array
+        items:
+          type: string
+        description: An array of form field objects containing the name, value, and type of each textbox or checkmark field filled in by the signers
+      signature_request_id:
+        type: string
+        description: The id of the SignatureRequest
+      signatures:
+        description: An array of signature obects
+        type: array
+        items:
+          $ref: '#/definitions/onboarding.merchant.signatureRequest.event.signature_request.signatures'
+
+  onboarding.merchant.signatureRequest:
+    properties:
+      account_guid:
+        type: string
+        description: Id of the account this event is reported for
+      client_id:
+        type: string
+        description: Client id of the app this event is reported for
+      event:
+        description: A complete description of this event
+        $ref: '#/definitions/onboarding.merchant.signatureRequest.event'
+      signature_request:
+        description: Related signature request
+        $ref: '#/definitions/onboarding.merchant.signatureRequest.event.signatureRequest'
+      signing_url:
+        type: string
+        description: The URL where a signer, after authenticating, can sign the documents. This should only be used by users with existing HelloSign accounts as they will be required to log in before signing
+      signing_redirect_url:
+        type: string
+        description: The URL you want the signer redirected to after they successfully sign
+      subject:
+        type: string
+        description: The subject in the email that was initially sent to the signers
+      metadata:
+        type: object
+        description: The metadata attached to the signature request or template
+
+  onboarding.merchant.fillStatus.Steps:
+    properties:
+      company:
+        type: boolean
+        description: step company basic info complete
+      contacts:
+        type: boolean
+        description: step company contacts complete
+      banking:
+        type: boolean
+        description: step company banking complete
+      tariff:
+        type: boolean
+        description: step tariff complete
+
+  onboarding.merchant.fillStatus:
+    properties:
+      status:
+        type: string
+        description: "fill status. possible values: draft, life"
+      steps:
+        description: object contain information about fill status different steps
+        $ref: '#/definitions/onboarding.merchant.fillStatus.Steps'
+      complete_steps_count:
+        type: integer
+        description: count of complete steps
 
 host: p1payapi.tst.protocol.one
 info:
@@ -4597,46 +4780,458 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
+  "/admin/api/v1/merchants/{id}/agreement/signature":
+    put:
+      summary: Get data to sign agreement
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get data to sign license agreement with hellosign api
+      parameters:
+        - description: merchant identifier for which creating signature request
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.merchant.signatureRequest'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
   "/admin/api/v1/merchants/company":
     patch:
       summary: Set company information
-        tags:
-          - Onboarding
-        consumes:
-          - application/json
-        produces:
-          - application/json
-        description: Create page feedback
-        parameters:
-          - description: request body
-            in: body
-            name: data
-            schema:
-              $ref: '#/definitions/onboarding.Company'
-              type: object
-            required: true
-        responses:
-          "200":
-            description: OK
-            schema:
-              $ref: ''
-          "400":
-            description: Invalid request data
-            schema:
-              $ref: '#/definitions/model.Error'
-          "401":
-            description: Unauthorized
-            schema:
-              $ref: '#/definitions/model.Error'
-          "403":
-            description: Access denied
-            schema:
-              $ref: '#/definitions/model.Error'
-          "404":
-            description: Object not found
-            schema:
-              $ref: '#/definitions/model.Error'
-          "500":
-            description: Some unknown error on server side
-            schema:
-              $ref: '#/definitions/model.Error'
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set company information
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Company'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/company":
+    patch:
+      summary: Set company information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set company information
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Company'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/contacts":
+    patch:
+      summary: Set contacts information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set contacts information
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Contacts'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/contacts":
+    patch:
+      summary: Set contacts information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set contacts information
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Contacts'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/banking":
+    patch:
+      summary: Set banking information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set banking information
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Banking'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/banking":
+    patch:
+      summary: Set banking information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set banking information
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Banking'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/tariff":
+    patch:
+      summary: Set tariff
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set tariff
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Tariff'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/tariff":
+    patch:
+      summary: Set tariff
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set tariff
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Tariff'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/status":
+    get:
+      summary: Get data fill status
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get data fill status
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.merchant.fillStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'

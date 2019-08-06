@@ -3459,3 +3459,81 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServer
 	assert.Equal(suite.T(), mock.SomeError.Message, msg.Message)
 	assert.Equal(suite.T(), mock.SomeError.Details, msg.Details)
 }
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/signature")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId1)
+
+	err := suite.handler.getAgreementSignature(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_ValidateError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/signature")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues("incorrect_merchant_id")
+
+	err := suite.handler.getAgreementSignature(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	v, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "MerchantId", v.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingServerSystemError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/signature")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId1)
+
+	suite.api.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.handler.getAgreementSignature(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Regexp(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingServerResultError() {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/signature")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId1)
+
+	suite.api.billingService = mock.NewBillingServerErrorMock()
+	err := suite.handler.getAgreementSignature(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Regexp(suite.T(), mock.SomeError, httpErr.Message)
+}
