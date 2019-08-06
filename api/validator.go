@@ -9,15 +9,6 @@ import (
 	"regexp"
 )
 
-const (
-	zipUsaRegexp      = "^[0-9]{5}(?:-[0-9]{4})?$"
-	nameRegexp        = "^[\\p{L}\\p{M} \\-\\']+$"
-	companyNameRegexp = "^[\\p{L}\\p{M} \\-\\.0-9]+$"
-	zipGeneralRegexp  = "^\\d{0,30}$"
-	swiftRegexp       = "^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$"
-	cityRegexp        = "^[\\p{L}\\p{M} \\-\\.]+$"
-)
-
 var (
 	availablePositions = map[string]bool{
 		UserProfilePositionCEO:               true,
@@ -45,6 +36,13 @@ var (
 		{From: 51, To: 100},
 		{From: 100, To: 0},
 	}
+
+	zipUsaRegexp      = regexp.MustCompile("^[0-9]{5}(?:-[0-9]{4})?$")
+	nameRegexp        = regexp.MustCompile("^[\\p{L}\\p{M} \\-\\']+$")
+	companyNameRegexp = regexp.MustCompile("^[\\p{L}\\p{M} \\-\\.0-9]+$")
+	zipGeneralRegexp  = regexp.MustCompile("^\\d{0,30}$")
+	swiftRegexp       = regexp.MustCompile("^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$")
+	cityRegexp        = regexp.MustCompile("^[\\p{L}\\p{M} \\-\\.]+$")
 )
 
 func (api *Api) PhoneValidator(fl validator.FieldLevel) bool {
@@ -58,13 +56,11 @@ func (api *Api) UuidValidator(fl validator.FieldLevel) bool {
 }
 
 func (api *Api) ZipUsaValidator(fl validator.FieldLevel) bool {
-	match, err := regexp.MatchString(zipUsaRegexp, fl.Field().String())
-	return match == true && err == nil
+	return zipUsaRegexp.MatchString(fl.Field().String())
 }
 
 func (api *Api) NameValidator(fl validator.FieldLevel) bool {
-	match, err := regexp.MatchString(nameRegexp, fl.Field().String())
-	return match == true && err == nil
+	return nameRegexp.MatchString(fl.Field().String())
 }
 
 func (api *Api) PositionValidator(fl validator.FieldLevel) bool {
@@ -98,8 +94,7 @@ func (api *Api) rangeIntValidator(in *grpc.RangeInt, rng []*grpc.RangeInt) bool 
 }
 
 func (api *Api) CompanyNameValidator(fl validator.FieldLevel) bool {
-	match, err := regexp.MatchString(companyNameRegexp, fl.Field().String())
-	return match == true && err == nil
+	return companyNameRegexp.MatchString(fl.Field().String())
 }
 
 func (api *Api) MerchantCompanyValidator(sl validator.StructLevel) {
@@ -111,19 +106,17 @@ func (api *Api) MerchantCompanyValidator(sl validator.StructLevel) {
 		reg = v
 	}
 
-	match, err := regexp.MatchString(reg, company.Zip)
+	match := reg.MatchString(company.Zip)
 
-	if !match || err != nil {
+	if !match {
 		sl.ReportError(company.Zip, "Zip", "zip", "zip", "")
 	}
 }
 
 func (api *Api) SwiftValidator(fl validator.FieldLevel) bool {
-	match, err := regexp.MatchString(swiftRegexp, fl.Field().String())
-	return match == true && err == nil
+	return swiftRegexp.MatchString(fl.Field().String())
 }
 
 func (api *Api) CityValidator(fl validator.FieldLevel) bool {
-	match, err := regexp.MatchString(cityRegexp, fl.Field().String())
-	return match == true && err == nil
+	return cityRegexp.MatchString(fl.Field().String())
 }

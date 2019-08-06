@@ -72,14 +72,14 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.POST("/merchants", route.changeMerchant)
 	api.authUserRouteGroup.PUT("/merchants", route.changeMerchant)
 
-	api.authUserRouteGroup.PATCH("/merchants/company", route.setMerchantCompany)
-	api.authUserRouteGroup.PATCH("/merchants/contacts", route.setMerchantContacts)
-	api.authUserRouteGroup.PATCH("/merchants/banking", route.setMerchantBanking)
-	api.authUserRouteGroup.PATCH("/merchants/tariff", route.setMerchantTariff)
-	api.authUserRouteGroup.PATCH("/merchants/:id/company", route.setMerchantCompany)
-	api.authUserRouteGroup.PATCH("/merchants/:id/contacts", route.setMerchantContacts)
-	api.authUserRouteGroup.PATCH("/merchants/:id/banking", route.setMerchantBanking)
-	api.authUserRouteGroup.PATCH("/merchants/:id/tariff", route.setMerchantTariff)
+	api.authUserRouteGroup.PUT("/merchants/company", route.setMerchantCompany)
+	api.authUserRouteGroup.PUT("/merchants/contacts", route.setMerchantContacts)
+	api.authUserRouteGroup.PUT("/merchants/banking", route.setMerchantBanking)
+	api.authUserRouteGroup.PUT("/merchants/tariff", route.setMerchantTariff)
+	api.authUserRouteGroup.PUT("/merchants/:id/company", route.setMerchantCompany)
+	api.authUserRouteGroup.PUT("/merchants/:id/contacts", route.setMerchantContacts)
+	api.authUserRouteGroup.PUT("/merchants/:id/banking", route.setMerchantBanking)
+	api.authUserRouteGroup.PUT("/merchants/:id/tariff", route.setMerchantTariff)
 	api.authUserRouteGroup.GET("/merchants/:id/status", route.getMerchantStatus)
 
 	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
@@ -88,7 +88,7 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.GET("/merchants/:id/agreement", route.generateAgreement)
 	api.authUserRouteGroup.GET("/merchants/:id/agreement/document", route.getAgreementDocument)
 	api.authUserRouteGroup.POST("/merchants/:id/agreement/document", route.uploadAgreementDocument)
-	api.authUserRouteGroup.PUT("/merchants/:id/agreement/signature", route.getAgreementSignature)
+	api.authUserRouteGroup.PUT("/merchants/:id/agreement/signature", route.createAgreementSignature)
 
 	api.authUserRouteGroup.POST("/merchants/:merchant_id/notifications", route.createNotification)
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/notifications/:notification_id", route.getNotification)
@@ -941,7 +941,7 @@ func (r *onboardingRoute) getMerchantStatus(ctx echo.Context) error {
 
 // @Description get hellosign (https://www.hellosign.com) signature to sign license agreement
 // @Example PUT /admin/api/v1/merchants/ffffffffffffffffffffffff/agreement/signature
-func (r *onboardingRoute) getAgreementSignature(ctx echo.Context) error {
+func (r *onboardingRoute) createAgreementSignature(ctx echo.Context) error {
 	req := &grpc.SetMerchantS3AgreementRequest{
 		MerchantId: ctx.Param(requestParameterId),
 	}

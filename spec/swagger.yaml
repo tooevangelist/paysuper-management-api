@@ -4823,7 +4823,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/merchants/company":
-    patch:
+    put:
       summary: Set company information
       tags:
         - Onboarding
@@ -4867,7 +4867,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/merchants/{id}/company":
-    patch:
+    put:
       summary: Set company information
       tags:
         - Onboarding
@@ -4916,7 +4916,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/merchants/contacts":
-    patch:
+    put:
       summary: Set contacts information
       tags:
         - Onboarding
@@ -4960,7 +4960,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/merchants/{id}/contacts":
-    patch:
+    put:
       summary: Set contacts information
       tags:
         - Onboarding
@@ -5009,7 +5009,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/merchants/banking":
-    patch:
+    put:
       summary: Set banking information
       tags:
         - Onboarding
@@ -5053,7 +5053,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/merchants/{id}/banking":
-    patch:
+    put:
       summary: Set banking information
       tags:
         - Onboarding
@@ -5102,7 +5102,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/merchants/tariff":
-    patch:
+    put:
       summary: Set tariff
       tags:
         - Onboarding
@@ -5146,7 +5146,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/merchants/{id}/tariff":
-    patch:
+    put:
       summary: Set tariff
       tags:
         - Onboarding
