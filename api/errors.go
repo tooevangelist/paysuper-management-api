@@ -136,7 +136,7 @@ var (
 	errorMessageIncorrectBankAddress              = newManagementApiResponseError("ma000093", "incorrect bank address")
 	errorMessageIncorrectBankAccountNumber        = newManagementApiResponseError("ma000094", "incorrect bank accounting number")
 	errorMessageIncorrectBankSwift                = newManagementApiResponseError("ma000095", "incorrect bank swift code")
-	errorMessageIncorrectBankCorrespondentAccount = newManagementApiResponseError("ma000095", "incorrect bank correspondent account")
+	errorMessageIncorrectBankCorrespondentAccount = newManagementApiResponseError("ma000096", "incorrect bank correspondent account")
 
 	validationErrors = map[string]*grpc.ResponseErrorMessage{
 		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,
