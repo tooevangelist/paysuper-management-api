@@ -77,6 +77,7 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.GET("/merchants/:id/agreement", route.generateAgreement)
 	api.authUserRouteGroup.GET("/merchants/:id/agreement/document", route.getAgreementDocument)
 	api.authUserRouteGroup.POST("/merchants/:id/agreement/document", route.uploadAgreementDocument)
+	api.authUserRouteGroup.PUT("/merchants/:id/agreement/signature", route.getAgreementSignature)
 
 	api.authUserRouteGroup.POST("/merchants/:merchant_id/notifications", route.createNotification)
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/notifications/:notification_id", route.getNotification)
@@ -720,4 +721,29 @@ func (r *onboardingRoute) validateUpload(file *multipart.FileHeader) (multipart.
 	}
 
 	return src, nil
+}
+
+// @Description get hellosign (https://www.hellosign.com) signature to sign license agreement
+// @Example PUT /admin/api/v1/merchants/ffffffffffffffffffffffff/agreement/signature
+func (r *onboardingRoute) getAgreementSignature(ctx echo.Context) error {
+	req := &grpc.SetMerchantS3AgreementRequest{
+		MerchantId: ctx.Param(requestParameterId),
+	}
+	err := r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp, err := r.billingService.AgreementSign(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.SignatureRequest)
 }

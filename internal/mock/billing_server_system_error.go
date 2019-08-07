@@ -619,3 +619,11 @@ func (s *BillingServerSystemErrorMock) CreatePageReview(
 func (s *BillingServerSystemErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerSystemErrorMock) AgreementSign(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.AgreementSignResponse, error) {
+	return nil, SomeError
+}
