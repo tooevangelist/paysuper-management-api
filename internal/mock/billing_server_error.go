@@ -783,3 +783,10 @@ func (s *BillingServerErrorMock) MerchantReviewRoyaltyReport(ctx context.Context
 		Message: SomeError,
 	}, nil
 }
+
+func (s *BillingServerErrorMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
+	return &grpc.GetKeyProductInfoResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}

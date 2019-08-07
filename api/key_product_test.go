@@ -35,6 +35,7 @@ func (suite *KeyProductTestSuite) SetupTest() {
 		authUser: &AuthUser{
 			Id: "ffffffffffffffffffffffff",
 		},
+		geoService: mock.NewGeoIpServiceTestOk(),
 	}
 
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
@@ -294,7 +295,7 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProduct_BillingServer() {
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	billingService := &mock.BillingService{}
-	billingService.On("GetKeyProduct", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	billingService.On("GetKeyProductInfo", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
 	suite.api.billingService = billingService
 
 	err := suite.router.getKeyProduct(ctx)
@@ -303,6 +304,68 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProduct_BillingServer() {
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, err2.Code)
 	assert.NotEmpty(suite.T(), err2.Message)
+}
+
+
+func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCurrency_Ok() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/key-products/1?currency=USD", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/key-products/:key_product_id")
+	ctx.SetParamNames("key_product_id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	billingService := &mock.BillingService{}
+	billingService.On("GetKeyProductInfo", mock2.Anything, mock2.Anything).Return(&grpc.GetKeyProductInfoResponse{
+		Status: 200,
+		KeyProduct: &grpc.KeyProductInfo{
+			LongDescription: "Description",
+			Name: "Name",
+			Platforms: []*grpc.PlatformPriceInfo{
+				{Name: "Steam", Id: "steam", Price: &grpc.ProductPrice{Currency: "USD", Amount:10, Region:"USD"}},
+			},
+		},
+	}, nil)
+	suite.api.billingService = billingService
+
+	err := suite.router.getKeyProduct(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+
+func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCountry_Ok() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/key-products/1?country=RUS", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/key-products/:key_product_id")
+	ctx.SetParamNames("key_product_id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	billingService := &mock.BillingService{}
+	billingService.On("GetKeyProductInfo", mock2.Anything, mock2.Anything).Return(&grpc.GetKeyProductInfoResponse{
+		Status: 200,
+		KeyProduct: &grpc.KeyProductInfo{
+			LongDescription: "Description",
+			Name: "Name",
+			Platforms: []*grpc.PlatformPriceInfo{
+				{Name: "Steam", Id: "steam", Price: &grpc.ProductPrice{Currency: "USD", Amount:10, Region:"USD"}},
+			},
+		},
+	}, nil)
+	suite.api.billingService = billingService
+
+	err := suite.router.getKeyProduct(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
 func (suite *KeyProductTestSuite) TestProject_getKeyProduct_Ok() {
@@ -317,7 +380,16 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProduct_Ok() {
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	billingService := &mock.BillingService{}
-	billingService.On("GetKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{}, nil)
+	billingService.On("GetKeyProductInfo", mock2.Anything, mock2.Anything).Return(&grpc.GetKeyProductInfoResponse{
+		Status: 200,
+		KeyProduct: &grpc.KeyProductInfo{
+			LongDescription: "Description",
+			Name: "Name",
+			Platforms: []*grpc.PlatformPriceInfo{
+				{Name: "Steam", Id: "steam", Price: &grpc.ProductPrice{Currency: "USD", Amount:10, Region:"USD"}},
+			},
+		},
+	}, nil)
 	suite.api.billingService = billingService
 
 	err := suite.router.getKeyProduct(ctx)

@@ -990,3 +990,9 @@ func (s *BillingServerOkMock) MerchantReviewRoyaltyReport(ctx context.Context, i
 		Status: pkg.ResponseStatusOk,
 	}, nil
 }
+
+func (s *BillingServerOkMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
+	return &grpc.GetKeyProductInfoResponse{
+		Status: pkg.ResponseStatusOk,
+	}, nil
+}

@@ -731,3 +731,7 @@ func (s *BillingServerOkTemporaryMock) CreatePageReview(ctx context.Context, in 
 func (s *BillingServerOkTemporaryMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkTemporaryMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
+	panic("implement me")
+}

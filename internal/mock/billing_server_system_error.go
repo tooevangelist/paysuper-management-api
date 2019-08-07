@@ -13,6 +13,7 @@ import (
 
 type BillingServerSystemErrorMock struct{}
 
+
 func NewBillingServerSystemErrorMock() grpc.BillingService {
 	return &BillingServerSystemErrorMock{}
 }
@@ -670,4 +671,8 @@ func (s *BillingServerSystemErrorMock) CreatePageReview(ctx context.Context, in 
 
 func (s *BillingServerSystemErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
+	panic("implement me")
 }
