@@ -22,11 +22,13 @@ var (
 	SomeMerchantId3 = bson.NewObjectId().Hex()
 
 	OnboardingMerchantMock = &billing.Merchant{
-		Id:      bson.NewObjectId().Hex(),
-		Name:    "Unit test",
-		Country: "RU",
-		Zip:     "190000",
-		City:    "St.Petersburg",
+		Id: bson.NewObjectId().Hex(),
+		Company: &billing.MerchantCompanyInfo{
+			Name:    "merchant1",
+			Country: "RU",
+			Zip:     "190000",
+			City:    "St.Petersburg",
+		},
 		Contacts: &billing.MerchantContact{
 			Authorized: &billing.MerchantContactAuthorized{
 				Name:     "Unit Test",

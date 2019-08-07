@@ -143,27 +143,11 @@ func (s *BillingServerOkMock) ChangeMerchant(
 			Id:    bson.NewObjectId().Hex(),
 			Email: "test@unit.test",
 		},
-		Name:               in.Name,
-		AlternativeName:    in.AlternativeName,
-		Website:            in.Website,
-		Country:            "RU",
-		State:              in.State,
-		Zip:                in.Zip,
-		City:               in.City,
-		Address:            in.Address,
-		AddressAdditional:  in.AddressAdditional,
-		RegistrationNumber: in.RegistrationNumber,
-		TaxId:              in.TaxId,
-		Contacts:           in.Contacts,
-		Banking: &billing.MerchantBanking{
-			Currency:      "RUB",
-			Name:          in.Banking.Name,
-			Address:       in.Banking.Address,
-			AccountNumber: in.Banking.AccountNumber,
-			Swift:         in.Banking.Swift,
-			Details:       in.Banking.Details,
-		},
-		Status: pkg.MerchantStatusDraft,
+		Company:  in.Company,
+		Contacts: in.Contacts,
+		Banking:  in.Banking,
+		Tariff:   in.Tariff,
+		Status:   pkg.MerchantStatusDraft,
 	}
 
 	if in.Id != "" {
@@ -882,4 +866,12 @@ func (s *BillingServerOkMock) AgreementSign(
 	opts ...client.CallOption,
 ) (*grpc.AgreementSignResponse, error) {
 	return &grpc.AgreementSignResponse{Status: pkg.ResponseStatusOk}, nil
+}
+
+func (s *BillingServerOkMock) GetMerchantOnboardingCompleteData(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
+	return &grpc.GetMerchantOnboardingCompleteDataResponse{Status: pkg.ResponseStatusOk}, nil
 }
