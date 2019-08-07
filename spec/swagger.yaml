@@ -2175,6 +2175,9 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/onboarding.merchant.signatureRequest.event.signature_request.signatures'
+      files_url:
+        type: string
+        description: The URL where a copy of the request's documents can be downloaded.
 
   onboarding.merchant.signatureRequest:
     properties:
