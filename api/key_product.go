@@ -30,7 +30,7 @@ func (api *Api) InitKeyProductRoutes() *Api {
 	api.authUserRouteGroup.DELETE("/key-products/:key_product_id/platforms/:platform_id", keyProductApiV1.removePlatformForKeyProduct)
 	api.authUserRouteGroup.PUT("/platforms", keyProductApiV1.getPlatformsList)
 
-	api.Http.GET("/api/v1/key-products/:key_product_id", keyProductApiV1.getKeyProduct)
+	api.publicRouteGroup.GET("/key-products/:key_product_id", keyProductApiV1.getKeyProduct)
 
 	return api
 }

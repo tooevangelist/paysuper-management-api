@@ -39,6 +39,7 @@ func (suite *KeyProductTestSuite) SetupTest() {
 	}
 
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
+	suite.api.publicRouteGroup = suite.api.Http.Group(apiPublicGroupPath)
 	suite.router = &keyProductRoute{Api: suite.api}
 }
 
