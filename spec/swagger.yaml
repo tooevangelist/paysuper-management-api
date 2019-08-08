@@ -1097,8 +1097,8 @@ definitions:
   onboarding.Banking:
     properties:
       currency:
-        description: merchant accounting currency in bank
-        $ref: '#/definitions/model.Currency'
+        description: merchant accounting currency in bank. 3 letter by ISO 4217
+        type: string
       name:
         description: bank name
         type: string
