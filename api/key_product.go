@@ -1,11 +1,13 @@
 package api
 
 import (
+	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"go.uber.org/zap"
 	"net/http"
+	"strings"
 )
 
 type keyProductRoute struct {
@@ -27,6 +29,8 @@ func (api *Api) InitKeyProductRoutes() *Api {
 	api.authUserRouteGroup.POST("/key-products/:key_product_id/platforms", keyProductApiV1.changePlatformPricesForKeyProduct)
 	api.authUserRouteGroup.DELETE("/key-products/:key_product_id/platforms/:platform_id", keyProductApiV1.removePlatformForKeyProduct)
 	api.authUserRouteGroup.PUT("/platforms", keyProductApiV1.getPlatformsList)
+
+	api.publicRouteGroup.GET("/key-products/:key_product_id", keyProductApiV1.getKeyProduct)
 
 	return api
 }
@@ -210,7 +214,7 @@ func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
 // @Description Gets key product by id
 // @Example POST /admin/api/v1/key-products/:key_product_id
 func (r *keyProductRoute) getKeyProductById(ctx echo.Context) error {
-	req := &grpc.RequestKeyProduct{}
+	req := &grpc.RequestKeyProductMerchant{}
 	req.Id = ctx.Param("key_product_id")
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
@@ -296,7 +300,7 @@ func (r *keyProductRoute) getKeyProductList(ctx echo.Context) error {
 	if merchant.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
 	}
-	
+
 	req.MerchantId = merchant.Item.Id
 
 	if err := r.validate.Struct(req); err != nil {
@@ -314,4 +318,61 @@ func (r *keyProductRoute) getKeyProductList(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res)
+}
+
+// @Description Get product with platforms list and their prices
+// @Example GET /api/v1/key-products/:key_product_id?country=RUS&currency=EUR
+func (r *keyProductRoute) getKeyProduct(ctx echo.Context) error {
+	req := &grpc.GetKeyProductInfoRequest{}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	req.KeyProductId = ctx.Param("key_product_id")
+
+	if err := r.validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	if req.Currency == "" && req.Country == "" {
+		rsp, err := r.geoService.GetIpData(ctx.Request().Context(), &proto.GeoIpDataRequest{IP: ctx.RealIP()})
+		if err != nil {
+			zap.S().Error(internalErrorTemplate, "err", err.Error())
+		} else {
+			req.Country = rsp.Country.IsoCode
+		}
+	}
+
+	if req.Language == "" {
+		req.Language, _ = r.getCountryFromAcceptLanguage(ctx.Request().Header.Get("Accept-Language"))
+	}
+
+	res, err := r.billingService.GetKeyProductInfo(ctx.Request().Context(), req)
+	if err != nil {
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res.KeyProduct)
+}
+
+func (r *keyProductRoute) getCountryFromAcceptLanguage(acceptLanguage string) (string, string) {
+	it := strings.Split(acceptLanguage, ",")
+
+	if len(it) == 0 {
+		return "", ""
+	}
+
+	if strings.Index(it[0], "-") == -1 {
+		return "", ""
+	}
+
+	it = strings.Split(it[0], "-")
+
+	return strings.ToLower(it[0]), strings.ToUpper(it[1])
 }

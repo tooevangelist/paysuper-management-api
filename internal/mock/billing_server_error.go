@@ -672,14 +672,14 @@ func (s *BillingServerErrorMock) GetKeyProducts(ctx context.Context, in *grpc.Li
 	}, nil
 }
 
-func (s *BillingServerErrorMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+func (s *BillingServerErrorMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	return &grpc.KeyProductResponse{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil
 }
 
-func (s *BillingServerErrorMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+func (s *BillingServerErrorMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	return &grpc.EmptyResponseWithStatus{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
@@ -758,6 +758,34 @@ func (s *BillingServerErrorMock) FinishRedeemKeyForOrder(ctx context.Context, in
 
 func (s *BillingServerErrorMock) CancelRedeemKeyForOrder(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	return &grpc.EmptyResponseWithStatus{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) ConfirmUserEmail(ctx context.Context, in *grpc.ConfirmUserEmailRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) CreatePageReview(ctx context.Context, in *grpc.CreatePageReviewRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	return &grpc.ResponseError{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
+	return &grpc.GetKeyProductInfoResponse{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil

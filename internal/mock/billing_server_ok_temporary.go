@@ -660,7 +660,6 @@ func (s *BillingServerOkTemporaryMock) CreateOrUpdateUserProfile(
 	return nil, SomeError
 }
 
-
 func (s *BillingServerOkTemporaryMock) CreateOrUpdateKeyProduct(ctx context.Context, in *grpc.CreateOrUpdateKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	panic("implement me")
 }
@@ -669,11 +668,11 @@ func (s *BillingServerOkTemporaryMock) GetKeyProducts(ctx context.Context, in *g
 	panic("implement me")
 }
 
-func (s *BillingServerOkTemporaryMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+func (s *BillingServerOkTemporaryMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	panic("implement me")
 }
 
-func (s *BillingServerOkTemporaryMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProduct, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+func (s *BillingServerOkTemporaryMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
 
@@ -718,5 +717,21 @@ func (s *BillingServerOkTemporaryMock) FinishRedeemKeyForOrder(ctx context.Conte
 }
 
 func (s *BillingServerOkTemporaryMock) CancelRedeemKeyForOrder(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) ConfirmUserEmail(ctx context.Context, in *grpc.ConfirmUserEmailRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) CreatePageReview(ctx context.Context, in *grpc.CreatePageReviewRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
 	panic("implement me")
 }
