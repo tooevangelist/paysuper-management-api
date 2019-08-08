@@ -17,11 +17,11 @@
                 PaySuper company requisites
             </td>
             <td style="text-align: left; vertical-align: top;">
-                Name: {{ .Merchant.Name }}<br/>
-                Address: {{ .Merchant.Zip }}, {{ .Merchant.Country }}
-                    {{ if .Merchant.State }},{{ .Merchant.State }}{{ end }},{{ .Merchant.City }},{{ .Merchant.Address}}<br/>
-                Registration Number: {{ .Merchant.RegistrationNumber }}
-                Tax Id: {{ .Merchant.TaxId }}<br/><br/>
+                Name: {{ .Merchant.Company.Name }}<br/>
+                Address: {{ .Merchant.Company.Zip }}, {{ .Merchant.Company.Country }}
+                    {{ if .Merchant.Company.State }},{{ .Merchant.Company.State }}{{ end }},{{ .Merchant.Company.City }},{{ .Merchant.Company.Address}}<br/>
+                Registration Number: {{ .Merchant.Company.RegistrationNumber }}
+                Tax Id: {{ .Merchant.Company.TaxId }}<br/><br/>
                 Bank:<br />
                 Name: {{ .Merchant.Banking.Name }}<br/>
                 Address: {{ .Merchant.Banking.Address }}<br/>
