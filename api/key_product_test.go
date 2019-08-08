@@ -326,7 +326,7 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCurrency_Ok() {
 			LongDescription: "Description",
 			Name: "Name",
 			Platforms: []*grpc.PlatformPriceInfo{
-				{Name: "Steam", Id: "steam", Price: &grpc.ProductPrice{Currency: "USD", Amount:10, Region:"USD"}},
+				{Name: "Steam", Id: "steam", Price: &grpc.ProductPriceInfo{Currency: "USD", Amount:10, Region:"USD"}},
 			},
 		},
 	}, nil)
@@ -357,7 +357,7 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCountry_Ok() {
 			LongDescription: "Description",
 			Name: "Name",
 			Platforms: []*grpc.PlatformPriceInfo{
-				{Name: "Steam", Id: "steam", Price: &grpc.ProductPrice{Currency: "USD", Amount:10, Region:"USD"}},
+				{Name: "Steam", Id: "steam", Price: &grpc.ProductPriceInfo{Currency: "USD", Amount:10, Region:"USD"}},
 			},
 		},
 	}, nil)
@@ -387,7 +387,7 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProduct_Ok() {
 			LongDescription: "Description",
 			Name: "Name",
 			Platforms: []*grpc.PlatformPriceInfo{
-				{Name: "Steam", Id: "steam", Price: &grpc.ProductPrice{Currency: "USD", Amount:10, Region:"USD"}},
+				{Name: "Steam", Id: "steam", Price: &grpc.ProductPriceInfo{Currency: "USD", Amount:10, Region:"USD"}},
 			},
 		},
 	}, nil)

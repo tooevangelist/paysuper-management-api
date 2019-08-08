@@ -364,6 +364,10 @@ func (r *keyProductRoute) getKeyProduct(ctx echo.Context) error {
 func (r *keyProductRoute) getCountryFromAcceptLanguage(acceptLanguage string) (string, string) {
 	it := strings.Split(acceptLanguage, ",")
 
+	if len(it) == 0 {
+		return "", ""
+	}
+
 	if strings.Index(it[0], "-") == -1 {
 		return "", ""
 	}
