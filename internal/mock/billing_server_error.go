@@ -694,3 +694,14 @@ func (s *BillingServerErrorMock) AgreementSign(
 		Message: SomeError,
 	}, nil
 }
+
+func (s *BillingServerErrorMock) GetMerchantOnboardingCompleteData(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
+	return &grpc.GetMerchantOnboardingCompleteDataResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}

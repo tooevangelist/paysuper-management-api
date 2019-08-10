@@ -1072,6 +1072,11 @@ definitions:
       position:
         description: person position in company
         type: string
+    required:
+      - name
+      - email
+      - phone
+      - position
 
   onboarding.Contacts.Technical:
     properties:
@@ -1084,6 +1089,55 @@ definitions:
       phone:
         description: person contact phone
         type: string
+    required:
+      - name
+      - email
+      - phone
+
+  onboarding.Company:
+    properties:
+      name:
+        type: string
+        description: name
+      alternative_name:
+        type: string
+        description: brand
+      website:
+        type: string
+        description: website url
+      country:
+        type: string
+        description: destination country 2 letter code by ISO 3166-1
+      state:
+        type: string
+        description: destination state or region
+      zip:
+        type: string
+        description: destination zip code
+      city:
+        type: string
+        description: destination city
+      address:
+        type: string
+        description: destination address
+      address_additional:
+        type: string
+        description: additional company address
+      registration_number:
+        type: string
+        description: company registration number
+      tax_id:
+        type: string
+        description: company tax identifier
+    required:
+      - name
+      - alternative_name
+      - website
+      - country
+      - state
+      - zip
+      - city
+      - address
 
   onboarding.Contacts:
     properties:
@@ -1093,12 +1147,15 @@ definitions:
       technical:
         description: object contain information about contacts of merchant tecnican
         $ref: '#/definitions/onboarding.Contacts.Technical'
+    required:
+      - authorized
+      - technical
 
   onboarding.Banking:
     properties:
       currency:
-        description: merchant accounting currency in bank
-        $ref: '#/definitions/model.Currency'
+        description: merchant accounting currency in bank. 3 letter by ISO 4217
+        type: string
       name:
         description: bank name
         type: string
@@ -1114,6 +1171,15 @@ definitions:
       details:
         description: any details abount merchant accounting bank
         type: string
+      correspondent_account:
+        description: bank correspondent account
+        type: string
+    required:
+      - currency
+      - name
+      - address
+      - account_number
+      - swift
 
   onboarding.Merchant.LastPayout:
     properties:
@@ -1124,44 +1190,22 @@ definitions:
         description: last payout amount to merchant
         type: number
 
+  onboarding.Tariff:
+    properties:
+      tariff:
+        description: tariff identifier
+        type: string
+    required:
+      - tariff
+
   onboarding.Merchant:
     properties:
       id:
         description: merchant unique identifier in system
         type: string
-      name:
-        description: merchant company name
-        type: string
-      alternative_name:
-        description: merchant company alternative name
-        type: string
-      website:
-        description: merchant website url
-        type: string
-      country:
-        description: merchant company registration country
-        $ref: '#/definitions/model.Country'
-      state:
-        description: merchant company registration state
-        type: string
-      zip:
-        description: merchant company registration zip code
-        type: string
-      city:
-        description: merchant company registration city
-        type: string
-      address:
-        description: merchant company registration address
-        type: string
-      address_additional:
-        description: merchant company registration additional address
-        type: string
-      registration_number:
-        description: merchant company registration number
-        type: string
-      tax_id:
-        description: merchant company tax identifier
-        type: string
+      company:
+        description: merchant company info
+        $ref: '#/definitions/onboarding.Company'
       contacts:
         description: contain information about contacts of merchant
         $ref: '#/definitions/onboarding.Contacts'
@@ -1197,6 +1241,12 @@ definitions:
         type: boolean
       mail_tracking_link:
         description: "link to tracking package with agreement in post"
+        type: string
+      signature_request:
+        description: object contained signatire request data
+        $ref: '#/definitions/onboarding.merchant.signatureRequest'
+      tariff:
+        description: tariff identifier
         type: string
 
   onboarding.Merchant.Onboarding.Request:
@@ -2125,6 +2175,9 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/onboarding.merchant.signatureRequest.event.signature_request.signatures'
+      files_url:
+        type: string
+        description: The URL where a copy of the request's documents can be downloaded.
 
   onboarding.merchant.signatureRequest:
     properties:
@@ -2152,6 +2205,33 @@ definitions:
       metadata:
         type: object
         description: The metadata attached to the signature request or template
+
+  onboarding.merchant.fillStatus.Steps:
+    properties:
+      company:
+        type: boolean
+        description: step company basic info complete
+      contacts:
+        type: boolean
+        description: step company contacts complete
+      banking:
+        type: boolean
+        description: step company banking complete
+      tariff:
+        type: boolean
+        description: step tariff complete
+
+  onboarding.merchant.fillStatus:
+    properties:
+      status:
+        type: string
+        description: "fill status. possible values: draft, life"
+      steps:
+        description: object contain information about fill status different steps
+        $ref: '#/definitions/onboarding.merchant.fillStatus.Steps'
+      complete_steps_count:
+        type: integer
+        description: count of complete steps
 
 host: p1payapi.tst.protocol.one
 info:
@@ -4724,6 +4804,420 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.merchant.signatureRequest'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/company":
+    put:
+      summary: Set company information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set company information
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Company'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/company":
+    put:
+      summary: Set company information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set company information
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Company'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/contacts":
+    put:
+      summary: Set contacts information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set contacts information
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Contacts'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/contacts":
+    put:
+      summary: Set contacts information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set contacts information
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Contacts'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/banking":
+    put:
+      summary: Set banking information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set banking information
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Banking'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/banking":
+    put:
+      summary: Set banking information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set banking information
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Banking'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/tariff":
+    put:
+      summary: Set tariff
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set tariff
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Tariff'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/tariff":
+    put:
+      summary: Set tariff
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set tariff
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Tariff'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/status":
+    get:
+      summary: Get data fill status
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get data fill status
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.merchant.fillStatus'
         "400":
           description: Invalid request data
           schema:

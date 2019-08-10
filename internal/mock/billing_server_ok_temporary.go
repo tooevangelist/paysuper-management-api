@@ -113,18 +113,8 @@ func (s *BillingServerOkTemporaryMock) ChangeMerchant(
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantResponse, error) {
 	m := &billing.Merchant{
-		Name:               in.Name,
-		AlternativeName:    in.AlternativeName,
-		Website:            in.Website,
-		Country:            "RU",
-		State:              in.State,
-		Zip:                in.Zip,
-		City:               in.City,
-		Address:            in.Address,
-		AddressAdditional:  in.AddressAdditional,
-		RegistrationNumber: in.RegistrationNumber,
-		TaxId:              in.TaxId,
-		Contacts:           in.Contacts,
+		Company:  in.Company,
+		Contacts: in.Contacts,
 		Banking: &billing.MerchantBanking{
 			Currency:      "RUB",
 			Name:          in.Banking.Name,
@@ -685,5 +675,13 @@ func (s *BillingServerOkTemporaryMock) AgreementSign(
 	in *grpc.SetMerchantS3AgreementRequest,
 	opts ...client.CallOption,
 ) (*grpc.AgreementSignResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) GetMerchantOnboardingCompleteData(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
 	return nil, SomeError
 }
