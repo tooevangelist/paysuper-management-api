@@ -9,7 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/minio/minio-go"
 	"github.com/paysuper/paysuper-billing-server/pkg"
-	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"go.uber.org/zap"
 	"io"
@@ -69,8 +68,6 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.GET("/merchants", route.listMerchants)
 	api.authUserRouteGroup.GET("/merchants/:id", route.getMerchant)
 	api.authUserRouteGroup.GET("/merchants/user", route.getMerchantByUser)
-	api.authUserRouteGroup.POST("/merchants", route.changeMerchant)
-	api.authUserRouteGroup.PUT("/merchants", route.changeMerchant)
 	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
 	api.authUserRouteGroup.PATCH("/merchants/:id", route.changeAgreement)
 
@@ -154,38 +151,6 @@ func (r *onboardingRoute) listMerchants(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, rsp)
-}
-
-func (r *onboardingRoute) changeMerchant(ctx echo.Context) error {
-	req := &grpc.OnboardingRequest{}
-	err := ctx.Bind(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
-	}
-
-	req.User = &billing.MerchantUser{
-		Id:    r.authUser.Id,
-		Email: r.authUser.Email,
-	}
-	err = r.validate.Struct(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
-
-	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
-		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
-	}
-
-	if rsp.Status != http.StatusOK {
-		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
 func (r *onboardingRoute) changeMerchantStatus(ctx echo.Context) error {
