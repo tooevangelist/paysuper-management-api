@@ -13,36 +13,6 @@ type BillingService struct {
 	mock.Mock
 }
 
-// AgreementSign provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) AgreementSign(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.AgreementSignResponse, error) {
-	_va := make([]interface{}, len(opts))
-	for _i := range opts {
-		_va[_i] = opts[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, ctx, in)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
-
-	var r0 *grpc.AgreementSignResponse
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.SetMerchantS3AgreementRequest, ...client.CallOption) *grpc.AgreementSignResponse); ok {
-		r0 = rf(ctx, in, opts...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*grpc.AgreementSignResponse)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *grpc.SetMerchantS3AgreementRequest, ...client.CallOption) error); ok {
-		r1 = rf(ctx, in, opts...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // AutoAcceptRoyaltyReports provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) AutoAcceptRoyaltyReports(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -1145,6 +1115,36 @@ func (_m *BillingService) GetCountry(ctx context.Context, in *billing.GetCountry
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *billing.GetCountryRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetMerchantAgreementSignUrl provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetMerchantAgreementSignUrl(ctx context.Context, in *grpc.GetMerchantAgreementSignUrlRequest, opts ...client.CallOption) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.GetMerchantAgreementSignUrlResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetMerchantAgreementSignUrlRequest, ...client.CallOption) *grpc.GetMerchantAgreementSignUrlResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.GetMerchantAgreementSignUrlResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetMerchantAgreementSignUrlRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)

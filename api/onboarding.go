@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/minio/minio-go"
 	"github.com/paysuper/paysuper-billing-server/pkg"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"go.uber.org/zap"
 	"io"
@@ -68,8 +69,6 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.GET("/merchants", route.listMerchants)
 	api.authUserRouteGroup.GET("/merchants/:id", route.getMerchant)
 	api.authUserRouteGroup.GET("/merchants/user", route.getMerchantByUser)
-	api.authUserRouteGroup.POST("/merchants", route.changeMerchant)
-	api.authUserRouteGroup.PUT("/merchants", route.changeMerchant)
 
 	api.authUserRouteGroup.PUT("/merchants/company", route.setMerchantCompany)
 	api.authUserRouteGroup.PUT("/merchants/contacts", route.setMerchantContacts)
@@ -909,16 +908,21 @@ func (r *onboardingRoute) getMerchantStatus(ctx echo.Context) error {
 // @Description get hellosign (https://www.hellosign.com) signature to sign license agreement
 // @Example PUT /admin/api/v1/merchants/ffffffffffffffffffffffff/agreement/signature
 func (r *onboardingRoute) createAgreementSignature(ctx echo.Context) error {
-	req := &grpc.SetMerchantS3AgreementRequest{
-		MerchantId: ctx.Param(requestParameterId),
+	req := &grpc.GetMerchantAgreementSignUrlRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
-	err := r.validate.Struct(req)
+
+	req.MerchantId = ctx.Param(requestParameterId)
+	err = r.validate.Struct(req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.AgreementSign(ctx.Request().Context(), req)
+	rsp, err := r.billingService.GetMerchantAgreementSignUrl(ctx.Request().Context(), req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -928,5 +932,5 @@ func (r *onboardingRoute) createAgreementSignature(ctx echo.Context) error {
 		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, rsp.SignatureRequest)
+	return ctx.JSON(http.StatusOK, rsp.Item)
 }
