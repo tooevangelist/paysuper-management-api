@@ -684,12 +684,12 @@ func (s *BillingServerErrorMock) MerchantReviewRoyaltyReport(ctx context.Context
 	panic("implement me")
 }
 
-func (s *BillingServerErrorMock) AgreementSign(
+func (s *BillingServerErrorMock) GetMerchantAgreementSignUrl(
 	ctx context.Context,
-	in *grpc.SetMerchantS3AgreementRequest,
+	in *grpc.GetMerchantAgreementSignUrlRequest,
 	opts ...client.CallOption,
-) (*grpc.AgreementSignResponse, error) {
-	return &grpc.AgreementSignResponse{
+) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
+	return &grpc.GetMerchantAgreementSignUrlResponse{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil

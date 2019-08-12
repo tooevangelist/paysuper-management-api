@@ -36,8 +36,6 @@ import (
 var onboardingRoutes = [][]string{
 	{"/admin/api/v1/merchants", http.MethodGet},
 	{"/admin/api/v1/merchants/:id", http.MethodGet},
-	{"/admin/api/v1/merchants", http.MethodPost},
-	{"/admin/api/v1/merchants", http.MethodPut},
 	{"/admin/api/v1/merchants/:id/change-status", http.MethodPut},
 	{"/admin/api/v1/merchants/:merchant_id/notifications", http.MethodPost},
 	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id", http.MethodGet},
@@ -305,486 +303,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_BillingServiceUna
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_CreateMerchant_Ok() {
-	merchant := &grpc.OnboardingRequest{
-		Company: &billing.MerchantCompanyInfo{
-			Name:            mock.OnboardingMerchantMock.Company.Name,
-			AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-			Website:         "http://localhost",
-			Country:         "RU",
-			State:           "St.Petersburg",
-			Zip:             "190000",
-			City:            "St.Petersburg",
-			Address:         "Nevskiy st. 1",
-		},
-		Contacts: &billing.MerchantContact{
-			Authorized: &billing.MerchantContactAuthorized{
-				Name:     "Unit Test",
-				Email:    "test@unit.test",
-				Phone:    "1234567890",
-				Position: "Unit Test",
-			},
-			Technical: &billing.MerchantContactTechnical{
-				Name:  "Unit Test",
-				Email: "test@unit.test",
-				Phone: "1234567890",
-			},
-		},
-		Banking: &billing.MerchantBanking{
-			Currency:      "RUB",
-			Name:          "Bank name",
-			Address:       "Unknown",
-			AccountNumber: "1234567890",
-			Swift:         "ALFARUMM",
-			Details:       "",
-		},
-	}
-
-	b, err := json.Marshal(merchant)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	err = suite.handler.changeMerchant(ctx)
-
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-
-	var merchantRsp *billing.Merchant
-	err = json.Unmarshal(rsp.Body.Bytes(), &merchantRsp)
-	assert.NoError(suite.T(), err)
-
-	assert.True(suite.T(), len(merchantRsp.Id) > 0)
-	assert.Equal(suite.T(), merchant.Company.Name, merchantRsp.Company.Name)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_CreateMerchant_ValidationError() {
-	merchant := &grpc.OnboardingRequest{
-		Company: &billing.MerchantCompanyInfo{
-			Name:    mock.OnboardingMerchantMock.Company.Name,
-			Country: "RU",
-			Zip:     "190000",
-			City:    "St.Petersburg",
-		},
-		Contacts: &billing.MerchantContact{
-			Authorized: &billing.MerchantContactAuthorized{
-				Name:     "Unit Test",
-				Email:    "test@unit.test",
-				Phone:    "1234567890",
-				Position: "Unit Test",
-			},
-			Technical: &billing.MerchantContactTechnical{
-				Name:  "Unit Test",
-				Email: "test@unit.test",
-				Phone: "1234567890",
-			},
-		},
-	}
-
-	b, err := json.Marshal(merchant)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	err = suite.handler.changeMerchant(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), newValidationError("Banking"), httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_CreateMerchant_BillingServiceUnavailable_Error() {
-	merchant := &grpc.OnboardingRequest{
-		Company: &billing.MerchantCompanyInfo{
-			Name:            mock.OnboardingMerchantMock.Company.Name,
-			AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-			Website:         "http://localhost",
-			Country:         "RU",
-			State:           "St.Petersburg",
-			Zip:             "190000",
-			City:            "St.Petersburg",
-			Address:         "Nevskiy st. 1",
-		},
-		Contacts: &billing.MerchantContact{
-			Authorized: &billing.MerchantContactAuthorized{
-				Name:     "Unit Test",
-				Email:    "test@unit.test",
-				Phone:    "1234567890",
-				Position: "Unit Test",
-			},
-			Technical: &billing.MerchantContactTechnical{
-				Name:  "Unit Test",
-				Email: "test@unit.test",
-				Phone: "1234567890",
-			},
-		},
-		Banking: &billing.MerchantBanking{
-			Currency:      "RUB",
-			Name:          "Bank name",
-			Address:       "Unknown",
-			AccountNumber: "1234567890",
-			Swift:         "ALFARUMM",
-			Details:       "",
-		},
-	}
-
-	b, err := json.Marshal(merchant)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	billingService := &mock.BillingService{}
-	billingService.On("ChangeMerchant", mock2.Anything, mock2.Anything).
-		Return(&grpc.ChangeMerchantResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
-	suite.handler.billingService = billingService
-	err = suite.handler.changeMerchant(ctx)
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_UpdateMerchant_Ok() {
-	merchant := &grpc.OnboardingRequest{
-		Company: &billing.MerchantCompanyInfo{
-			Name:            mock.OnboardingMerchantMock.Company.Name,
-			AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-			Website:         "http://localhost",
-			Country:         "RU",
-			State:           "St.Petersburg",
-			Zip:             "190000",
-			City:            "St.Petersburg",
-			Address:         "Nevskiy st. 1",
-		},
-		Contacts: &billing.MerchantContact{
-			Authorized: &billing.MerchantContactAuthorized{
-				Name:     "Unit Test",
-				Email:    "test@unit.test",
-				Phone:    "1234567890",
-				Position: "Unit Test",
-			},
-			Technical: &billing.MerchantContactTechnical{
-				Name:  "Unit Test",
-				Email: "test@unit.test",
-				Phone: "1234567890",
-			},
-		},
-		Banking: &billing.MerchantBanking{
-			Currency:      "RUB",
-			Name:          "Bank name",
-			Address:       "Unknown",
-			AccountNumber: "1234567890",
-			Swift:         "ALFARUMM",
-			Details:       "",
-		},
-	}
-
-	b, err := json.Marshal(merchant)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	err = suite.handler.changeMerchant(ctx)
-
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-
-	var merchantRsp *billing.Merchant
-	err = json.Unmarshal(rsp.Body.Bytes(), &merchantRsp)
-	assert.NoError(suite.T(), err)
-
-	assert.True(suite.T(), len(merchantRsp.Id) > 0)
-
-	merchant.Id = merchantRsp.Id
-	merchant.Company.Name = "New merchant name"
-
-	b, err = json.Marshal(merchant)
-	assert.NoError(suite.T(), err)
-
-	req = httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp = httptest.NewRecorder()
-	ctx = e.NewContext(req, rsp)
-
-	err = suite.handler.changeMerchant(ctx)
-
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-
-	var merchantRsp1 *billing.Merchant
-	err = json.Unmarshal(rsp.Body.Bytes(), &merchantRsp1)
-	assert.NoError(suite.T(), err)
-
-	assert.Equal(suite.T(), merchantRsp.Id, merchantRsp1.Id)
-	assert.NotEqual(suite.T(), merchantRsp.Company.Name, merchantRsp1.Company.Name)
-	assert.Equal(suite.T(), merchant.Company.Name, merchantRsp1.Company.Name)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_Ok() {
-	merchant := &grpc.OnboardingRequest{
-		Company: &billing.MerchantCompanyInfo{
-			Name:            mock.OnboardingMerchantMock.Company.Name,
-			AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-			Website:         "http://localhost",
-			Country:         "RU",
-			State:           "St.Petersburg",
-			Zip:             "190000",
-			City:            "St.Petersburg",
-			Address:         "Nevskiy st. 1",
-		},
-		Contacts: &billing.MerchantContact{
-			Authorized: &billing.MerchantContactAuthorized{
-				Name:     "Unit Test",
-				Email:    "test@unit.test",
-				Phone:    "1234567890",
-				Position: "Unit Test",
-			},
-			Technical: &billing.MerchantContactTechnical{
-				Name:  "Unit Test",
-				Email: "test@unit.test",
-				Phone: "1234567890",
-			},
-		},
-		Banking: &billing.MerchantBanking{
-			Currency:      "RUB",
-			Name:          "Bank name",
-			Address:       "Unknown",
-			AccountNumber: "1234567890",
-			Swift:         "ALFARUMM",
-			Details:       "",
-		},
-	}
-
-	b, err := json.Marshal(merchant)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	err = suite.handler.changeMerchant(ctx)
-
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-
-	var mRsp *billing.Merchant
-	err = json.Unmarshal(rsp.Body.Bytes(), &mRsp)
-	assert.NoError(suite.T(), err)
-
-	assert.True(suite.T(), len(mRsp.Id) > 0)
-	assert.Equal(suite.T(), pkg.MerchantStatusDraft, mRsp.Status)
-
-	changeStatusReq := &grpc.MerchantChangeStatusRequest{
-		MerchantId: mRsp.Id,
-		Status:     pkg.MerchantStatusAgreementRequested,
-	}
-	b, err = json.Marshal(changeStatusReq)
-	assert.NoError(suite.T(), err)
-
-	req = httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp = httptest.NewRecorder()
-	ctx = e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:id/change-status")
-	ctx.SetParamNames("id")
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	err = suite.handler.changeMerchantStatus(ctx)
-
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_ValidationError() {
-	merchant := &grpc.OnboardingRequest{
-		Company: &billing.MerchantCompanyInfo{
-			Name:            mock.OnboardingMerchantMock.Company.Name,
-			AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-			Website:         "http://localhost",
-			Country:         "RU",
-			State:           "St.Petersburg",
-			Zip:             "190000",
-			City:            "St.Petersburg",
-			Address:         "Nevskiy st. 1",
-		},
-		Contacts: &billing.MerchantContact{
-			Authorized: &billing.MerchantContactAuthorized{
-				Name:     "Unit Test",
-				Email:    "test@unit.test",
-				Phone:    "1234567890",
-				Position: "Unit Test",
-			},
-			Technical: &billing.MerchantContactTechnical{
-				Name:  "Unit Test",
-				Email: "test@unit.test",
-				Phone: "1234567890",
-			},
-		},
-		Banking: &billing.MerchantBanking{
-			Currency:      "RUB",
-			Name:          "Bank name",
-			Address:       "Unknown",
-			AccountNumber: "1234567890",
-			Swift:         "ALFARUMM",
-			Details:       "",
-		},
-	}
-
-	b, err := json.Marshal(merchant)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	err = suite.handler.changeMerchant(ctx)
-
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-
-	var mRsp *billing.Merchant
-	err = json.Unmarshal(rsp.Body.Bytes(), &mRsp)
-	assert.NoError(suite.T(), err)
-
-	assert.True(suite.T(), len(mRsp.Id) > 0)
-	assert.Equal(suite.T(), pkg.MerchantStatusDraft, mRsp.Status)
-
-	req = httptest.NewRequest(http.MethodPut, "/", strings.NewReader(`{"status": 33}`))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp = httptest.NewRecorder()
-	ctx = e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:id/change-status")
-	ctx.SetParamNames("id")
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	err = suite.handler.changeMerchantStatus(ctx)
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), newValidationError("Status"), httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_BillingServerUnavailable_Error() {
-	merchant := &grpc.OnboardingRequest{
-		Company: &billing.MerchantCompanyInfo{
-			Name:            mock.OnboardingMerchantMock.Company.Name,
-			AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-			Website:         "http://localhost",
-			Country:         "RU",
-			State:           "St.Petersburg",
-			Zip:             "190000",
-			City:            "St.Petersburg",
-			Address:         "Nevskiy st. 1",
-		},
-		Contacts: &billing.MerchantContact{
-			Authorized: &billing.MerchantContactAuthorized{
-				Name:     "Unit Test",
-				Email:    "test@unit.test",
-				Phone:    "1234567890",
-				Position: "Unit Test",
-			},
-			Technical: &billing.MerchantContactTechnical{
-				Name:  "Unit Test",
-				Email: "test@unit.test",
-				Phone: "1234567890",
-			},
-		},
-		Banking: &billing.MerchantBanking{
-			Currency:      "RUB",
-			Name:          "Bank name",
-			Address:       "Unknown",
-			AccountNumber: "1234567890",
-			Swift:         "ALFARUMM",
-			Details:       "",
-		},
-	}
-
-	b, err := json.Marshal(merchant)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	err = suite.handler.changeMerchant(ctx)
-
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-
-	var mRsp *billing.Merchant
-	err = json.Unmarshal(rsp.Body.Bytes(), &mRsp)
-	assert.NoError(suite.T(), err)
-
-	assert.True(suite.T(), len(mRsp.Id) > 0)
-	assert.Equal(suite.T(), pkg.MerchantStatusDraft, mRsp.Status)
-
-	changeStatusReq := &grpc.MerchantChangeStatusRequest{
-		MerchantId: mRsp.Id,
-		Status:     pkg.MerchantStatusAgreementRequested,
-	}
-	b, err = json.Marshal(changeStatusReq)
-	assert.NoError(suite.T(), err)
-
-	req = httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp = httptest.NewRecorder()
-	ctx = e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:id/change-status")
-	ctx.SetParamNames("id")
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	billingService := &mock.BillingService{}
-	billingService.On("ChangeMerchantStatus", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
-	suite.handler.billingService = billingService
-	err = suite.handler.changeMerchantStatus(ctx)
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
@@ -3547,7 +3065,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServer
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_Ok() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	b := `{"signer_type": 1}`
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -3585,7 +3104,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_ValidateE
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingServerSystemError() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	b := `{"signer_type": 1}`
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -3595,7 +3115,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 	ctx.SetParamValues(mock.SomeMerchantId1)
 
 	billingService := &mock.BillingService{}
-	billingService.On("AgreementSign", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
+	billingService.On("GetMerchantAgreementSignUrl", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
 	err := suite.handler.createAgreementSignature(ctx)
 	assert.Error(suite.T(), err)
@@ -3607,7 +3127,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingServerResultError() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	b := `{"signer_type": 1}`
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -3617,8 +3138,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 	ctx.SetParamValues(mock.SomeMerchantId1)
 
 	billingService := &mock.BillingService{}
-	billingService.On("AgreementSign", mock2.Anything, mock2.Anything).
-		Return(&grpc.AgreementSignResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
+	billingService.On("GetMerchantAgreementSignUrl", mock2.Anything, mock2.Anything).
+		Return(&grpc.GetMerchantAgreementSignUrlResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
 	err := suite.handler.createAgreementSignature(ctx)
 	assert.Error(suite.T(), err)
