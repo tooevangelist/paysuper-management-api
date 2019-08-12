@@ -6,6 +6,7 @@ enableCertIssuer: true
 ingress:
   hostname: p1payapi.tst.protocol.one
   path: /
+  hostnamePrefix:
 
 certIssuer:
   email: admin@protocol.one
