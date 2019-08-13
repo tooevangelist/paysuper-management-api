@@ -28,7 +28,7 @@ func (api *Api) InitKeyProductRoutes() *Api {
 	api.authUserRouteGroup.POST("/key-products/:key_product_id/publish", keyProductApiV1.publishKeyProduct)
 	api.authUserRouteGroup.POST("/key-products/:key_product_id/platforms", keyProductApiV1.changePlatformPricesForKeyProduct)
 	api.authUserRouteGroup.DELETE("/key-products/:key_product_id/platforms/:platform_id", keyProductApiV1.removePlatformForKeyProduct)
-	api.authUserRouteGroup.PUT("/platforms", keyProductApiV1.getPlatformsList)
+	api.authUserRouteGroup.GET("/platforms", keyProductApiV1.getPlatformsList)
 
 	api.publicRouteGroup.GET("/key-products/:key_product_id", keyProductApiV1.getKeyProduct)
 
