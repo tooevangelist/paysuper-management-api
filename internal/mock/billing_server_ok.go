@@ -860,12 +860,12 @@ func (s *BillingServerOkMock) MerchantReviewRoyaltyReport(ctx context.Context, i
 	return &grpc.ResponseError{Status: pkg.ResponseStatusOk}, nil
 }
 
-func (s *BillingServerOkMock) AgreementSign(
+func (s *BillingServerOkMock) GetMerchantAgreementSignUrl(
 	ctx context.Context,
-	in *grpc.SetMerchantS3AgreementRequest,
+	in *grpc.GetMerchantAgreementSignUrlRequest,
 	opts ...client.CallOption,
-) (*grpc.AgreementSignResponse, error) {
-	return &grpc.AgreementSignResponse{Status: pkg.ResponseStatusOk}, nil
+) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
+	return &grpc.GetMerchantAgreementSignUrlResponse{Status: pkg.ResponseStatusOk}, nil
 }
 
 func (s *BillingServerOkMock) GetMerchantOnboardingCompleteData(

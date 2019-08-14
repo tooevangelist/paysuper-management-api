@@ -2179,33 +2179,6 @@ definitions:
         type: string
         description: The URL where a copy of the request's documents can be downloaded.
 
-  onboarding.merchant.signatureRequest:
-    properties:
-      account_guid:
-        type: string
-        description: Id of the account this event is reported for
-      client_id:
-        type: string
-        description: Client id of the app this event is reported for
-      event:
-        description: A complete description of this event
-        $ref: '#/definitions/onboarding.merchant.signatureRequest.event'
-      signature_request:
-        description: Related signature request
-        $ref: '#/definitions/onboarding.merchant.signatureRequest.event.signatureRequest'
-      signing_url:
-        type: string
-        description: The URL where a signer, after authenticating, can sign the documents. This should only be used by users with existing HelloSign accounts as they will be required to log in before signing
-      signing_redirect_url:
-        type: string
-        description: The URL you want the signer redirected to after they successfully sign
-      subject:
-        type: string
-        description: The subject in the email that was initially sent to the signers
-      metadata:
-        type: object
-        description: The metadata attached to the signature request or template
-
   onboarding.merchant.fillStatus.Steps:
     properties:
       company:
@@ -2232,6 +2205,23 @@ definitions:
       complete_steps_count:
         type: integer
         description: count of complete steps
+
+  onboarding.merchant.signatureRequest:
+    properties:
+      signer_type:
+        type: integer
+        description: "type of signer which request a signing license agreement. possible values: 0 - merchant owner; 1 - paysuper admin"
+    required:
+      - signer_type
+
+  onboarding.merchant.signatureResponse:
+    properties:
+      sign_url:
+        type: string
+        description: URL of the signature page to display in the embedded iFrame
+      expires_at:
+        description: time of create user profile
+        $ref: '#/definitions/ProtobufTimestamp'
 
 host: p1payapi.tst.protocol.one
 info:
@@ -3463,82 +3453,6 @@ paths:
           in: query
           name: sort[]
           type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/onboarding.Merchant'
-            type: array
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error on server side
-          schema:
-            $ref: '#/definitions/model.Error'
-    post:
-      summary: Create new merchant in system
-      tags:
-        - Onboarding
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - description: Merchant data
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/onboarding.Merchant.CreateRequest'
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/onboarding.Merchant'
-            type: array
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error on server side
-          schema:
-            $ref: '#/definitions/model.Error'
-    put:
-      summary: Update merchant data in system
-      tags:
-        - Onboarding
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - description: Merchant data
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/onboarding.Merchant.UpdateRequest'
       responses:
         "200":
           description: OK
@@ -4799,11 +4713,18 @@ paths:
           name: id
           required: true
           type: string
+        - description: body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.merchant.signatureRequest'
+            type: object
+          required: true
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/onboarding.merchant.signatureRequest'
+            $ref: '#/definitions/onboarding.merchant.signatureResponse'
         "400":
           description: Invalid request data
           schema:

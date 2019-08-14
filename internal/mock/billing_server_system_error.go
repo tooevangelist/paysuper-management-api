@@ -617,11 +617,11 @@ func (s *BillingServerSystemErrorMock) MerchantReviewRoyaltyReport(ctx context.C
 	panic("implement me")
 }
 
-func (s *BillingServerSystemErrorMock) AgreementSign(
+func (s *BillingServerSystemErrorMock) GetMerchantAgreementSignUrl(
 	ctx context.Context,
-	in *grpc.SetMerchantS3AgreementRequest,
+	in *grpc.GetMerchantAgreementSignUrlRequest,
 	opts ...client.CallOption,
-) (*grpc.AgreementSignResponse, error) {
+) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
 	return nil, SomeError
 }
 
