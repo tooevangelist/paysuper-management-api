@@ -99,6 +99,9 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods", route.listPaymentMethods)
 	api.authUserRouteGroup.PUT("/merchants/:merchant_id/methods/:method_id", route.changePaymentMethod)
 
+	api.authUserRouteGroup.GET("/merchants/tariffs", route.getTariffRates)
+	api.authUserRouteGroup.POST("/merchants/:id/tariffs", route.setTariffRates)
+
 	return api, nil
 }
 
