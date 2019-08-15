@@ -936,3 +936,60 @@ func (r *onboardingRoute) createAgreementSignature(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
+
+func (r *onboardingRoute) getTariffRates(ctx echo.Context) error {
+	req := &grpc.GetMerchantTariffRatesRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req.Region = tariffRegions[req.Region]
+	rsp, err := r.billingService.GetMerchantTariffRates(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *onboardingRoute) setTariffRates(ctx echo.Context) error {
+	req := &grpc.SetMerchantTariffRatesRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	req.MerchantId = ctx.Param(requestParameterId)
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req.Region = tariffRegions[req.Region]
+	rsp, err := r.billingService.SetMerchantTariffRates(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}

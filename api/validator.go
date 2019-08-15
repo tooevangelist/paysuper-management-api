@@ -22,7 +22,7 @@ var (
 		UserProfilePositionSupport:           true,
 	}
 
-	availableAnnualIncome = []*grpc.RangeInt{
+	availableAnnualIncome = []*billing.RangeInt{
 		{From: 0, To: 1000},
 		{From: 1000, To: 10000},
 		{From: 10000, To: 100000},
@@ -30,7 +30,7 @@ var (
 		{From: 1000000, To: 0},
 	}
 
-	availableNumberOfEmployees = []*grpc.RangeInt{
+	availableNumberOfEmployees = []*billing.RangeInt{
 		{From: 1, To: 10},
 		{From: 11, To: 50},
 		{From: 51, To: 100},
@@ -83,7 +83,7 @@ func (api *Api) CompanyValidator(sl validator.StructLevel) {
 	}
 }
 
-func (api *Api) rangeIntValidator(in *grpc.RangeInt, rng []*grpc.RangeInt) bool {
+func (api *Api) rangeIntValidator(in *billing.RangeInt, rng []*billing.RangeInt) bool {
 	for _, v := range rng {
 		if in.From == v.From && in.To == v.To {
 			return true
@@ -119,4 +119,9 @@ func (api *Api) SwiftValidator(fl validator.FieldLevel) bool {
 
 func (api *Api) CityValidator(fl validator.FieldLevel) bool {
 	return cityRegexp.MatchString(fl.Field().String())
+}
+
+func (api *Api) WorldRegionValidator(fl validator.FieldLevel) bool {
+	_, ok := tariffRegions[fl.Field().String()]
+	return ok
 }

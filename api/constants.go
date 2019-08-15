@@ -332,4 +332,17 @@ var (
 		"WF": regexp.MustCompile("^986\\d{2}$"),
 		"ZM": regexp.MustCompile("^\\d{5}$"),
 	}
+
+	tariffRegions = map[string]string{
+		"CIS":             "CIS",
+		"Russia":          "Russia",
+		"West Asia":       "West Asia",
+		"EU":              "EU",
+		"North America":   "North America",
+		"Central America": "Central America",
+		"South America":   "South America",
+		"United Kingdom":  "United Kingdom",
+		"Worldwide":       "Worldwide",
+		"South Pacific":   "South Pacific",
+	}
 )
