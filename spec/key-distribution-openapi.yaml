@@ -75,7 +75,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KeyPlatform'
+              type: object
+              properties:
+                platform:
+                  $ref: '#/components/schemas/KeyPlatform'
       responses:
         200:
           description: OK

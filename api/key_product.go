@@ -79,6 +79,10 @@ func (r *keyProductRoute) removePlatformForKeyProduct(ctx echo.Context) error {
 // @Example POST /admin/api/v1/key-products/:key_product_id/platforms
 func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) error {
 	req := &grpc.AddOrUpdatePlatformPricesRequest{}
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
 	req.KeyProductId = ctx.Param("key_product_id")
 	if req.KeyProductId == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, ErrorMessageKeyProductIdInvalid)
