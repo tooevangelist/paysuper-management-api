@@ -73,11 +73,9 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.PUT("/merchants/company", route.setMerchantCompany)
 	api.authUserRouteGroup.PUT("/merchants/contacts", route.setMerchantContacts)
 	api.authUserRouteGroup.PUT("/merchants/banking", route.setMerchantBanking)
-	api.authUserRouteGroup.PUT("/merchants/tariff", route.setMerchantTariff)
 	api.authUserRouteGroup.PUT("/merchants/:id/company", route.setMerchantCompany)
 	api.authUserRouteGroup.PUT("/merchants/:id/contacts", route.setMerchantContacts)
 	api.authUserRouteGroup.PUT("/merchants/:id/banking", route.setMerchantBanking)
-	api.authUserRouteGroup.PUT("/merchants/:id/tariff", route.setMerchantTariff)
 	api.authUserRouteGroup.GET("/merchants/:id/status", route.getMerchantStatus)
 
 	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
@@ -818,46 +816,6 @@ func (r *onboardingRoute) setMerchantBanking(ctx echo.Context) error {
 			Id:    r.authUser.Id,
 			Email: r.authUser.Email,
 		},
-	}
-	err = r.validate.Struct(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
-	}
-
-	if rsp.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, rsp.Item)
-}
-
-// Set company tariff in merchant onboarding process
-// @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"tariff": "ffffffffffffffffffffffff"}'
-//  https://api.paysuper.online/admin/api/v1/merchants/tariff
-//
-// @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"tariff": "000000000000000000000000"}'
-//  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/tariff
-func (r *onboardingRoute) setMerchantTariff(ctx echo.Context) error {
-	req := &grpc.OnboardingRequest{}
-	err := ctx.Bind(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
-	}
-
-	req.Id = ctx.Param(requestParameterId)
-	req.User = &billing.MerchantUser{
-		Id:    r.authUser.Id,
-		Email: r.authUser.Email,
 	}
 	err = r.validate.Struct(req)
 
