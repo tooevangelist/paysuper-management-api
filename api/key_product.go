@@ -159,6 +159,14 @@ func (r *keyProductRoute) getPlatformsList(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
+	if req.Limit == 0 {
+		req.Limit = LimitDefault
+	}
+
+	if req.Limit > LimitMax {
+		req.Limit = LimitMax
+	}
+
 	if err := r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
