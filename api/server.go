@@ -8,7 +8,6 @@ import (
 	jwtMiddleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
-	"github.com/ProtocolONE/rabbitmq/pkg"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/micro/go-micro"
@@ -16,6 +15,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
+	"github.com/paysuper/paysuper-management-api/internal"
 	"github.com/paysuper/paysuper-management-api/utils"
 	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
 	"github.com/paysuper/paysuper-payment-link/proto"
@@ -47,11 +47,10 @@ type Template struct {
 }
 
 type ServerInitParams struct {
-	Config      *config.Config
-	Logger      *zap.SugaredLogger
-	HttpScheme  string
-	AmqpAddress string
-	Auth1       *config.Auth1
+	Config     *config.Config
+	Logger     *zap.SugaredLogger
+	HttpScheme string
+	Auth1      *config.Auth1
 }
 
 type Merchant struct {
@@ -102,11 +101,11 @@ type Api struct {
 	taxService     tax_service.TaxService
 	paylinkService paylink.PaylinkService
 
-	AmqpAddress string
-	notifierPub *rabbitmq.Broker
-
 	rawBody      string
 	reqSignature string
+
+	s3Client       internal.S3ClientInterface
+	s3ReportClient internal.S3ClientInterface
 
 	Merchant
 	GetParams
@@ -115,12 +114,11 @@ type Api struct {
 
 func NewServer(p *ServerInitParams) (*Api, error) {
 	api := &Api{
-		Http:        echo.New(),
-		logger:      p.Logger,
-		validate:    validator.New(),
-		httpScheme:  p.HttpScheme,
-		AmqpAddress: p.AmqpAddress,
-		config:      p.Config,
+		Http:       echo.New(),
+		logger:     p.Logger,
+		validate:   validator.New(),
+		httpScheme: p.HttpScheme,
+		config:     p.Config,
 	}
 	api.InitService()
 
@@ -218,18 +216,29 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitPaylinkRoutes().
 		InitCardPayWebHookRoutes().
 		InitPaymentCostRoutes().
-		initTaxesRoutes().
 		initTokenRoutes().
 		initZipCodeRoutes().
 		initPaymentMethodRoutes().
 		initPriceGroupRoutes().
 		initUserProfileRoutes().
 		initVatReportsRoutes().
-		initRoyaltyReportsRoutes()
+		initRoyaltyReportsRoutes().
+		initOnboardingRoutes().
+		initTaxesRoutes()
 
-	_, err = api.initOnboardingRoutes()
+	if api.s3Client, err = internal.NewS3Client(&api.config.S3); err != nil {
+		return nil, err
+	}
 
-	if err != nil {
+	cfg := config.S3{
+		BucketName:  api.config.S3Report.BucketName,
+		AccessKeyId: api.config.S3Report.AccessKeyId,
+		Endpoint:    api.config.S3Report.Endpoint,
+		Region:      api.config.S3Report.Region,
+		SecretKey:   api.config.S3Report.SecretKey,
+		Secure:      api.config.S3Report.Secure,
+	}
+	if api.s3ReportClient, err = internal.NewS3Client(&cfg); err != nil {
 		return nil, err
 	}
 

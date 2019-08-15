@@ -1,4 +1,4 @@
-swagger: "2.0"
+CreateReportFileParamsswagger: "2.0"
 definitions:
   model.AccountingPayment:
     properties:
@@ -917,6 +917,28 @@ definitions:
     required:
       - country
       - rate
+  taxes.CreateReportFileParams:
+    properties:
+      period_from:
+        type: number
+      period_to:
+        type: number
+      file_type:
+        type: string
+    type: object
+    required:
+      - period_from
+      - period_to
+      - file_type
+  taxes.CreateReportFileResponse:
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      file_id:
+        type: string
+    type: object
 
   payment_method.PaymentMethodParams:
     properties:
@@ -4575,6 +4597,69 @@ paths:
             $ref: '#/definitions/model.Error'
         "404":
           description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/taxes/report/download":
+    post:
+      summary: Create tax report file
+      tags:
+        - Tax
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create tax report file
+      parameters:
+        - description: payment method params
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/taxes.CreateReportFileParams'
+            type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/taxes.CreateReportFileResponse'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/taxes/report/download/:id":
+    post:
+      summary: Create tax report file
+      tags:
+        - Tax
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create tax report file
+      parameters:
+        - description: id of report file
+          in: query
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
         "500":

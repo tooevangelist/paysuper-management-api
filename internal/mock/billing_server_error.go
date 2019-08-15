@@ -683,3 +683,15 @@ func (s *BillingServerErrorMock) CreatePageReview(
 func (s *BillingServerErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerErrorMock) CreateReportFile(ctx context.Context, in *grpc.CreateReportFileRequest, opts ...client.CallOption) (*grpc.CreateReportFileResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) GetReportFile(ctx context.Context, in *grpc.GetReportFileRequest, opts ...client.CallOption) (*grpc.GetReportFileResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) UpdateReportFile(ctx context.Context, in *grpc.UpdateReportFileRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	panic("implement me")
+}

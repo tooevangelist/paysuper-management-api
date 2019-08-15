@@ -11,6 +11,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
+	"github.com/paysuper/paysuper-management-api/internal"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -103,8 +104,7 @@ func (suite *OnboardingTestSuite) SetupTest() {
 func (suite *OnboardingTestSuite) TearDownTest() {}
 
 func (suite *OnboardingTestSuite) TestOnboarding_InitRoutes_Ok() {
-	api, err := suite.api.initOnboardingRoutes()
-	assert.NoError(suite.T(), err)
+	api := suite.api.initOnboardingRoutes()
 	assert.NotNil(suite.T(), api)
 
 	routes := api.Http.Routes()
@@ -1746,7 +1746,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExis
 	err = pdf.WriteFile(filePath)
 	assert.NoError(suite.T(), err)
 
-	_, err = suite.handler.mClt.FPutObject(suite.api.config.S3.BucketName, mock.SomeAgreementName, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
+	_, err = suite.handler.s3Client.Put(mock.SomeAgreementName, filePath, internal.PutObjectOptions{ContentType: agreementContentType})
 	assert.NoError(suite.T(), err)
 
 	err = suite.handler.generateAgreement(ctx)
@@ -1763,7 +1763,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExis
 	assert.NotEmpty(suite.T(), fData.Metadata.ContentType)
 	assert.True(suite.T(), fData.Metadata.Size > 0)
 
-	err = suite.handler.mClt.RemoveObject(suite.api.config.S3.BucketName, mock.SomeAgreementName)
+	err = suite.handler.s3Client.RemoveObject(mock.SomeAgreementName)
 	assert.NoError(suite.T(), err)
 }
 
@@ -1812,7 +1812,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
 	err = pdf.WriteFile(filePath)
 	assert.NoError(suite.T(), err)
 
-	_, err = suite.handler.mClt.FPutObject(suite.api.config.S3.BucketName, mock.SomeAgreementName1, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
+	_, err = suite.handler.s3Client.Put(mock.SomeAgreementName1, filePath, internal.PutObjectOptions{ContentType: agreementContentType})
 	assert.NoError(suite.T(), err)
 
 	err = suite.handler.getAgreementDocument(ctx)
@@ -1821,7 +1821,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 	assert.Equal(suite.T(), agreementContentType, rsp.Header().Get(echo.HeaderContentType))
 
-	err = suite.handler.mClt.RemoveObject(suite.api.config.S3.BucketName, mock.SomeAgreementName1)
+	err = suite.handler.s3Client.RemoveObject(mock.SomeAgreementName1)
 	assert.NoError(suite.T(), err)
 }
 

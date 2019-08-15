@@ -875,3 +875,15 @@ func (s *BillingServerOkMock) CreatePageReview(
 func (s *BillingServerOkMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	return &grpc.ResponseError{Status: pkg.ResponseStatusOk}, nil
 }
+
+func (s *BillingServerOkMock) CreateReportFile(ctx context.Context, in *grpc.CreateReportFileRequest, opts ...client.CallOption) (*grpc.CreateReportFileResponse, error) {
+	return &grpc.CreateReportFileResponse{Status: pkg.ResponseStatusOk}, nil
+}
+
+func (s *BillingServerOkMock) GetReportFile(ctx context.Context, in *grpc.GetReportFileRequest, opts ...client.CallOption) (*grpc.GetReportFileResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) UpdateReportFile(ctx context.Context, in *grpc.UpdateReportFileRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	panic("implement me")
+}

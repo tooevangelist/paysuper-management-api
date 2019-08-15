@@ -97,6 +97,11 @@ var (
 	errorMessageIncorrectKindOfActivity               = newManagementApiResponseError("ma000081", "incorrect kind of activity")
 	errorMessageIncorrectReview                       = newManagementApiResponseError("ma000082", "review must be text with length lower than or equal 500 characters")
 	errorMessageIncorrectPageId                       = newManagementApiResponseError("ma000083", "review page identifier must be one of next values: primary_onboarding, merchant_onboarding")
+	errorMessageMerchantNotFound                      = newManagementApiResponseError("ma000084", "merchant not found")
+	errorMessageCreateReportFile                      = newManagementApiResponseError("ma000085", "unable to create report file")
+	errorMessageDownloadReportFile                    = newManagementApiResponseError("ma000085", "unable to download report file")
+	errorMessageS3BucketNotFound                      = newManagementApiResponseError("ma000086", "s3 bucket not found")
+	errorMessageS3ClientError                         = newManagementApiResponseError("ma000087", "unable to initialize s3 client")
 
 	validationErrors = map[string]*grpc.ResponseErrorMessage{
 		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,

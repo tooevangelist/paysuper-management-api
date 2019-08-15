@@ -11,6 +11,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"github.com/paysuper/paysuper-management-api/internal"
 	"go.uber.org/zap"
 	"io"
 	"mime/multipart"
@@ -44,27 +45,8 @@ type OnboardingFileData struct {
 	Metadata *OnboardingFileMetadata `json:"metadata"`
 }
 
-func (api *Api) initOnboardingRoutes() (*Api, error) {
+func (api *Api) initOnboardingRoutes() *Api {
 	route := &onboardingRoute{Api: api}
-
-	mClt, err := minio.New(
-		api.config.S3.Endpoint,
-		api.config.S3.AccessKeyId,
-		api.config.S3.SecretKey,
-		api.config.S3.Secure,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = mClt.MakeBucket(api.config.S3.BucketName, api.config.S3.Region)
-
-	if err != nil {
-		return nil, err
-	}
-
-	route.mClt = mClt
 
 	api.authUserRouteGroup.GET("/merchants", route.listMerchants)
 	api.authUserRouteGroup.GET("/merchants/:id", route.getMerchant)
@@ -87,7 +69,7 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods", route.listPaymentMethods)
 	api.authUserRouteGroup.PUT("/merchants/:merchant_id/methods/:method_id", route.changePaymentMethod)
 
-	return api, nil
+	return api
 }
 
 func (r *onboardingRoute) getMerchant(ctx echo.Context) error {
@@ -450,7 +432,7 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 
 	if rsp.Item.S3AgreementName != "" {
 		filePath := os.TempDir() + string(os.PathSeparator) + rsp.Item.S3AgreementName
-		err = r.mClt.FGetObject(r.config.S3.BucketName, rsp.Item.S3AgreementName, filePath, minio.GetObjectOptions{})
+		err = r.s3Client.Get(rsp.Item.S3AgreementName, filePath, internal.GetObjectOptions{})
 
 		if err != nil {
 			zap.S().Errorf("internal error", "err", err.Error())
@@ -506,7 +488,7 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
-	_, err = r.mClt.FPutObject(r.config.S3.BucketName, agrName, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
+	_, err = r.s3Client.Put(agrName, filePath, internal.PutObjectOptions{ContentType: agreementContentType})
 
 	if err != nil {
 		zap.S().Errorf("internal error", "err", err.Error())
@@ -557,7 +539,7 @@ func (r *onboardingRoute) getAgreementDocument(ctx echo.Context) error {
 	}
 
 	filePath := os.TempDir() + string(os.PathSeparator) + rsp.Item.S3AgreementName
-	err = r.mClt.FGetObject(r.config.S3.BucketName, rsp.Item.S3AgreementName, filePath, minio.GetObjectOptions{})
+	err = r.s3Client.Get(rsp.Item.S3AgreementName, filePath, internal.GetObjectOptions{})
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorAgreementFileNotExist)
@@ -626,7 +608,7 @@ func (r *onboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
-	_, err = r.mClt.FPutObject(r.config.S3.BucketName, agrName, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
+	_, err = r.s3Client.Put(agrName, filePath, internal.PutObjectOptions{ContentType: agreementContentType})
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUploadFailed)
