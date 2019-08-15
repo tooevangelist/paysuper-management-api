@@ -105,10 +105,7 @@ func (s *BillingServerSystemErrorMock) ChangeMerchant(
 	in *grpc.OnboardingRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantResponse, error) {
-	return &grpc.ChangeMerchantResponse{
-		Status: pkg.ResponseStatusOk,
-		Item:   &billing.Merchant{},
-	}, nil
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ChangeMerchantStatus(
@@ -618,6 +615,22 @@ func (s *BillingServerSystemErrorMock) CreatePageReview(
 
 func (s *BillingServerSystemErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetMerchantAgreementSignUrl(
+	ctx context.Context,
+	in *grpc.GetMerchantAgreementSignUrlRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetMerchantOnboardingCompleteData(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) CreateReportFile(ctx context.Context, in *grpc.CreateReportFileRequest, opts ...client.CallOption) (*grpc.CreateReportFileResponse, error) {

@@ -113,18 +113,8 @@ func (s *BillingServerOkTemporaryMock) ChangeMerchant(
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantResponse, error) {
 	m := &billing.Merchant{
-		Name:               in.Name,
-		AlternativeName:    in.AlternativeName,
-		Website:            in.Website,
-		Country:            "RU",
-		State:              in.State,
-		Zip:                in.Zip,
-		City:               in.City,
-		Address:            in.Address,
-		AddressAdditional:  in.AddressAdditional,
-		RegistrationNumber: in.RegistrationNumber,
-		TaxId:              in.TaxId,
-		Contacts:           in.Contacts,
+		Company:  in.Company,
+		Contacts: in.Contacts,
 		Banking: &billing.MerchantBanking{
 			Currency:      "RUB",
 			Name:          in.Banking.Name,
@@ -678,6 +668,22 @@ func (s *BillingServerOkTemporaryMock) CreatePageReview(
 
 func (s *BillingServerOkTemporaryMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
 	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetMerchantAgreementSignUrl(
+	ctx context.Context,
+	in *grpc.GetMerchantAgreementSignUrlRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) GetMerchantOnboardingCompleteData(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
+	return nil, SomeError
 }
 
 func (s *BillingServerOkTemporaryMock) CreateReportFile(ctx context.Context, in *grpc.CreateReportFileRequest, opts ...client.CallOption) (*grpc.CreateReportFileResponse, error) {
