@@ -146,7 +146,6 @@ func (s *BillingServerOkMock) ChangeMerchant(
 		Company:  in.Company,
 		Contacts: in.Contacts,
 		Banking:  in.Banking,
-		Tariff:   in.Tariff,
 		Status:   pkg.MerchantStatusDraft,
 	}
 
@@ -874,4 +873,20 @@ func (s *BillingServerOkMock) GetMerchantOnboardingCompleteData(
 	opts ...client.CallOption,
 ) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
 	return &grpc.GetMerchantOnboardingCompleteDataResponse{Status: pkg.ResponseStatusOk}, nil
+}
+
+func (s *BillingServerOkMock) GetMerchantTariffRates(
+	ctx context.Context,
+	in *grpc.GetMerchantTariffRatesRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantTariffRatesResponse, error) {
+	return &grpc.GetMerchantTariffRatesResponse{}, nil
+}
+
+func (s *BillingServerOkMock) SetMerchantTariffRates(
+	ctx context.Context,
+	in *grpc.SetMerchantTariffRatesRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{}, nil
 }

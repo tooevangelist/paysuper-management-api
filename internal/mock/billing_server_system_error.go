@@ -632,3 +632,19 @@ func (s *BillingServerSystemErrorMock) GetMerchantOnboardingCompleteData(
 ) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
 	return nil, SomeError
 }
+
+func (s *BillingServerSystemErrorMock) GetMerchantTariffRates(
+	ctx context.Context,
+	in *grpc.GetMerchantTariffRatesRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantTariffRatesResponse, error) {
+	return &grpc.GetMerchantTariffRatesResponse{}, nil
+}
+
+func (s *BillingServerSystemErrorMock) SetMerchantTariffRates(
+	ctx context.Context,
+	in *grpc.SetMerchantTariffRatesRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{}, nil
+}

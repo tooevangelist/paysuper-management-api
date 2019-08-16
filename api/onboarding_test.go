@@ -2842,141 +2842,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_BillingServe
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_WithoutMerchantId_Ok() {
-	tariff := &grpc.OnboardingRequest{Tariff: bson.NewObjectId().Hex()}
-	b, err := json.Marshal(tariff)
-	assert.NoError(suite.T(), err)
-
-	req := httptest.NewRequest(http.MethodPatch, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/admin/api/v1/merchants/tariff")
-
-	err = suite.handler.setMerchantTariff(ctx)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-
-	merchant := new(billing.Merchant)
-	err = json.Unmarshal(rsp.Body.Bytes(), merchant)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), merchant.Tariff, tariff.Tariff)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_WithMerchantId_Ok() {
-	tariff := &grpc.OnboardingRequest{Tariff: bson.NewObjectId().Hex()}
-	b, err := json.Marshal(tariff)
-	assert.NoError(suite.T(), err)
-
-	req := httptest.NewRequest(http.MethodPatch, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/admin/api/v1/merchants/:id/tariff")
-	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues(mock.SomeMerchantId)
-
-	err = suite.handler.setMerchantTariff(ctx)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-
-	merchant := new(billing.Merchant)
-	err = json.Unmarshal(rsp.Body.Bytes(), merchant)
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), merchant.Tariff, tariff.Tariff)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_BindError() {
-	b := `some_not_json_string`
-
-	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/admin/api/v1/merchants/tariff")
-
-	err := suite.handler.setMerchantTariff(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_ValidateError() {
-	b := `{"tariff": "tariff_id"}`
-	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/admin/api/v1/merchants/:id/tariff")
-	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues("not_hex_string")
-
-	err := suite.handler.setMerchantTariff(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-
-	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), errorValidationFailed.Code, msg.Code)
-	assert.Equal(suite.T(), errorValidationFailed.Message, msg.Message)
-	assert.Regexp(suite.T(), "Id", msg.Details)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_BillingServerSystemError() {
-	b := `{"tariff": "tariff_id"}`
-	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/admin/api/v1/merchants/tariff")
-
-	billingService := &mock.BillingService{}
-	billingService.On("ChangeMerchant", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
-	suite.handler.billingService = billingService
-	err := suite.handler.setMerchantTariff(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantTariff_BillingServerResultError() {
-	b := `{"tariff": "tariff_id"}`
-	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/admin/api/v1/merchants/tariff")
-
-	billingService := &mock.BillingService{}
-	billingService.On("ChangeMerchant", mock2.Anything, mock2.Anything).
-		Return(&grpc.ChangeMerchantResponse{Status: http.StatusBadRequest, Message: mock.SomeError}, nil)
-	suite.handler.billingService = billingService
-	err := suite.handler.setMerchantTariff(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
-}
-
 func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_Ok() {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -3148,4 +3013,251 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Regexp(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_Ok() {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set("region", "North America")
+	q.Set("payout_currency", "USD")
+	q.Set("amount_from", "10")
+	q.Set("amount_to", "1000")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	billingService := &mock.BillingService{}
+	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).
+		Return(&grpc.GetMerchantTariffRatesResponse{Status: pkg.ResponseStatusOk, Item: &billing.MerchantTariffRates{}}, nil)
+	suite.handler.billingService = billingService
+
+	err := suite.handler.getTariffRates(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BindError() {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set("region", "North America")
+	q.Set("payout_currency", "USD")
+	q.Set("amount_from", "qwerty")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err := suite.handler.getTariffRates(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_ValidateError() {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set("region", "777")
+	q.Set("payout_currency", "USD")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err := suite.handler.getTariffRates(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "Region", msg.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerError() {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set("region", "North America")
+	q.Set("payout_currency", "USD")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	billingService := &mock.BillingService{}
+	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
+	suite.handler.billingService = billingService
+
+	err := suite.handler.getTariffRates(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerResultError() {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set("region", "North America")
+	q.Set("payout_currency", "USD")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	billingService := &mock.BillingService{}
+	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).
+		Return(&grpc.GetMerchantTariffRatesResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
+	suite.handler.billingService = billingService
+
+	err := suite.handler.getTariffRates(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_Ok() {
+	body := `{"region": "North America", "payout_currency": "USD", "amount_from": 10, "amount_to": 1000}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	billingService := &mock.BillingService{}
+	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything).
+		Return(&grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil)
+	suite.handler.billingService = billingService
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/tariffs")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId1)
+
+	err := suite.handler.setTariffRates(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.Empty(suite.T(), rsp.Body.String())
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BindError() {
+	body := `{"region": "North America", "payout_currency": "USD", "amount_from": "qwerty"}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/tariffs")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId1)
+
+	err := suite.handler.setTariffRates(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_ValidationError() {
+	body := `{"region": "North America", "payout_currency": "USD", "amount_from": -100}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/tariffs")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId1)
+
+	err := suite.handler.setTariffRates(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "AmountFrom", msg.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerError() {
+	body := `{"region": "North America", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	billingService := &mock.BillingService{}
+	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything).
+		Return(nil, errors.New("some error"))
+	suite.handler.billingService = billingService
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/tariffs")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId1)
+
+	err := suite.handler.setTariffRates(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerResultError() {
+	body := `{"region": "North America", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	billingService := &mock.BillingService{}
+	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything).
+		Return(&grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
+	suite.handler.billingService = billingService
+
+	ctx.SetPath("/admin/api/v1/merchants/:id/tariffs")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(mock.SomeMerchantId1)
+
+	err := suite.handler.setTariffRates(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }

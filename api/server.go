@@ -434,5 +434,9 @@ func (api *Api) registerValidators() error {
 		return err
 	}
 
+	if err := api.validate.RegisterValidation("world_region", api.WorldRegionValidator); err != nil {
+		return err
+	}
+
 	return nil
 }

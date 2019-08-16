@@ -73,11 +73,9 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.PUT("/merchants/company", route.setMerchantCompany)
 	api.authUserRouteGroup.PUT("/merchants/contacts", route.setMerchantContacts)
 	api.authUserRouteGroup.PUT("/merchants/banking", route.setMerchantBanking)
-	api.authUserRouteGroup.PUT("/merchants/tariff", route.setMerchantTariff)
 	api.authUserRouteGroup.PUT("/merchants/:id/company", route.setMerchantCompany)
 	api.authUserRouteGroup.PUT("/merchants/:id/contacts", route.setMerchantContacts)
 	api.authUserRouteGroup.PUT("/merchants/:id/banking", route.setMerchantBanking)
-	api.authUserRouteGroup.PUT("/merchants/:id/tariff", route.setMerchantTariff)
 	api.authUserRouteGroup.GET("/merchants/:id/status", route.getMerchantStatus)
 
 	api.authUserRouteGroup.PUT("/merchants/:id/change-status", route.changeMerchantStatus)
@@ -96,6 +94,9 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods/:method_id", route.getPaymentMethod)
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods", route.listPaymentMethods)
 	api.authUserRouteGroup.PUT("/merchants/:merchant_id/methods/:method_id", route.changePaymentMethod)
+
+	api.authUserRouteGroup.GET("/merchants/tariffs", route.getTariffRates)
+	api.authUserRouteGroup.POST("/merchants/:id/tariffs", route.setTariffRates)
 
 	return api, nil
 }
@@ -835,46 +836,6 @@ func (r *onboardingRoute) setMerchantBanking(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
-// Set company tariff in merchant onboarding process
-// @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"tariff": "ffffffffffffffffffffffff"}'
-//  https://api.paysuper.online/admin/api/v1/merchants/tariff
-//
-// @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"tariff": "000000000000000000000000"}'
-//  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/tariff
-func (r *onboardingRoute) setMerchantTariff(ctx echo.Context) error {
-	req := &grpc.OnboardingRequest{}
-	err := ctx.Bind(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
-	}
-
-	req.Id = ctx.Param(requestParameterId)
-	req.User = &billing.MerchantUser{
-		Id:    r.authUser.Id,
-		Email: r.authUser.Email,
-	}
-	err = r.validate.Struct(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	rsp, err := r.billingService.ChangeMerchant(ctx.Request().Context(), req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
-	}
-
-	if rsp.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, rsp.Item)
-}
-
 // @Description Get merchant completion information
 // @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
 //	-d '{"signer_type": 0}'
@@ -932,4 +893,61 @@ func (r *onboardingRoute) createAgreementSignature(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *onboardingRoute) getTariffRates(ctx echo.Context) error {
+	req := &grpc.GetMerchantTariffRatesRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req.Region = tariffRegions[req.Region]
+	rsp, err := r.billingService.GetMerchantTariffRates(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
+}
+
+func (r *onboardingRoute) setTariffRates(ctx echo.Context) error {
+	req := &grpc.SetMerchantTariffRatesRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	req.MerchantId = ctx.Param(requestParameterId)
+	err = r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	req.Region = tariffRegions[req.Region]
+	rsp, err := r.billingService.SetMerchantTariffRates(ctx.Request().Context(), req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }
