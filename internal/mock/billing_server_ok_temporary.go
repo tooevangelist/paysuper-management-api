@@ -720,6 +720,7 @@ func (s *BillingServerOkTemporaryMock) CancelRedeemKeyForOrder(ctx context.Conte
 	panic("implement me")
 }
 
+
 func (s *BillingServerOkTemporaryMock) ConfirmUserEmail(ctx context.Context, in *grpc.ConfirmUserEmailRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	panic("implement me")
 }
@@ -733,5 +734,9 @@ func (s *BillingServerOkTemporaryMock) MerchantReviewRoyaltyReport(ctx context.C
 }
 
 func (s *BillingServerOkTemporaryMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) ChangeCodeInOrder(ctx context.Context, in *grpc.ChangeCodeInOrderRequest, opts ...client.CallOption) (*grpc.ChangeCodeInOrderResponse, error) {
 	panic("implement me")
 }
