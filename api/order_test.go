@@ -1433,5 +1433,4 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ValidationError() {
 	httpErr, ok = err.(*echo.HTTPError)
 	shouldBe.True(ok)
 	shouldBe.EqualValues(http.StatusBadRequest, httpErr.Code)
-
 }
