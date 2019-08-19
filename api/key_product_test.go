@@ -45,22 +45,6 @@ func (suite *KeyProductTestSuite) SetupTest() {
 
 func (suite *KeyProductTestSuite) TearDownTest() {}
 
-func (suite *KeyProductTestSuite) TestProject_GetPlatformList_ValidationError() {
-	req := httptest.NewRequest(http.MethodGet, "/platforms", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/platforms")
-
-	err := suite.router.getPlatformsList(ctx)
-	assert.Error(suite.T(), err)
-	e, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), 400, e.Code)
-	assert.NotEmpty(suite.T(), e.Message)
-}
-
 func (suite *KeyProductTestSuite) TestProject_RemovePlatform_Ok() {
 	req := httptest.NewRequest(http.MethodDelete, "/", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
