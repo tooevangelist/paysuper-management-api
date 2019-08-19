@@ -676,3 +676,7 @@ func (s *BillingServerSystemErrorMock) MerchantReviewRoyaltyReport(ctx context.C
 func (s *BillingServerSystemErrorMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerSystemErrorMock) ChangeCodeInOrder(ctx context.Context, in *grpc.ChangeCodeInOrderRequest, opts ...client.CallOption) (*grpc.ChangeCodeInOrderResponse, error) {
+	panic("implement me")
+}

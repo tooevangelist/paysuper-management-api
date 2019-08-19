@@ -790,3 +790,7 @@ func (s *BillingServerErrorMock) GetKeyProductInfo(ctx context.Context, in *grpc
 		Message: SomeError,
 	}, nil
 }
+
+func (s *BillingServerErrorMock) ChangeCodeInOrder(ctx context.Context, in *grpc.ChangeCodeInOrderRequest, opts ...client.CallOption) (*grpc.ChangeCodeInOrderResponse, error) {
+	panic("implement me")
+}

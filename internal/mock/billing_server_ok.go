@@ -996,3 +996,11 @@ func (s *BillingServerOkMock) GetKeyProductInfo(ctx context.Context, in *grpc.Ge
 		Status: pkg.ResponseStatusOk,
 	}, nil
 }
+
+func (s *BillingServerOkMock) ChangeCodeInOrder(ctx context.Context, in *grpc.ChangeCodeInOrderRequest, opts ...client.CallOption) (*grpc.ChangeCodeInOrderResponse, error) {
+	return &grpc.ChangeCodeInOrderResponse{
+		Status: pkg.ResponseStatusOk,
+		Order: &billing.Order{
+		},
+	}, nil
+}
