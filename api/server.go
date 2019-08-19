@@ -421,6 +421,7 @@ func (api *Api) registerValidators() error {
 
 	api.validate.RegisterStructValidation(api.CompanyValidator, grpc.UserProfileCompany{})
 	api.validate.RegisterStructValidation(api.MerchantCompanyValidator, billing.MerchantCompanyInfo{})
+	api.validate.RegisterStructValidation(api.MerchantTariffRatesValidator, grpc.GetMerchantTariffRatesRequest{})
 
 	if err := api.validate.RegisterValidation("company_name", api.CompanyNameValidator); err != nil {
 		return err

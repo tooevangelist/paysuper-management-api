@@ -3021,8 +3021,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_Ok() {
 	q := make(url.Values)
 	q.Set("region", "North America")
 	q.Set("payout_currency", "USD")
-	q.Set("amount_from", "10")
-	q.Set("amount_to", "1000")
+	q.Set("amount_from", "0.75")
+	q.Set("amount_to", "5")
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -3084,6 +3084,31 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_ValidateError() 
 	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
 	assert.True(suite.T(), ok)
 	assert.Regexp(suite.T(), "Region", msg.Details)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_ValidateAmountRangeError() {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set("region", "CIS")
+	q.Set("payout_currency", "USD")
+	q.Set("amount_to", "2")
+
+	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	err := suite.handler.getTariffRates(ctx)
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "AmountFrom", msg.Details)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerError() {
