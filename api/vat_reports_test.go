@@ -103,7 +103,7 @@ func (suite *VatReportsTestSuite) TestVatReports_updateVatReportStatus() {
 	bodyJson := `{"status": "paid"}`
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/vat_reports/status/5ced34d689fce60bf4440829?", strings.NewReader(bodyJson))
+	req := httptest.NewRequest(http.MethodPost, "/vat_reports/status/5ced34d689fce60bf4440829", strings.NewReader(bodyJson))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)

@@ -658,6 +658,70 @@ func (s *BillingServerErrorMock) CreateOrUpdateUserProfile(
 	}, nil
 }
 
+func (s *BillingServerErrorMock) ConfirmUserEmail(
+	ctx context.Context,
+	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) CreatePageReview(
+	ctx context.Context,
+	in *grpc.CreatePageReviewRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) GetMerchantAgreementSignUrl(
+	ctx context.Context,
+	in *grpc.GetMerchantAgreementSignUrlRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
+	return &grpc.GetMerchantAgreementSignUrlResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) GetMerchantOnboardingCompleteData(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
+	return &grpc.GetMerchantOnboardingCompleteDataResponse{
+		Status:  pkg.ResponseStatusBadData,
+		Message: SomeError,
+	}, nil
+}
+
+func (s *BillingServerErrorMock) GetMerchantTariffRates(
+	ctx context.Context,
+	in *grpc.GetMerchantTariffRatesRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantTariffRatesResponse, error) {
+	return &grpc.GetMerchantTariffRatesResponse{}, nil
+}
+
+func (s *BillingServerErrorMock) SetMerchantTariffRates(
+	ctx context.Context,
+	in *grpc.SetMerchantTariffRatesRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{}, nil
+}
+
 func (s *BillingServerErrorMock) CreateOrUpdateKeyProduct(ctx context.Context, in *grpc.CreateOrUpdateKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	return &grpc.KeyProductResponse{
 		Status:  pkg.ResponseStatusBadData,

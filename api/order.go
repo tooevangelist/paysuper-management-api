@@ -286,7 +286,11 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 
 	if err != nil {
 		zap.S().Errorf("internal error", "err", err.Error())
-		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != http.StatusOK {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
 	}
 
 	if rsp.Item.Cookie != "" && rsp.Item.Cookie != req.Cookie {

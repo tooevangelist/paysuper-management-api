@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"net/http"
+	"strings"
 )
 
 type vatReportsRoute struct {
@@ -47,7 +48,7 @@ func (cApiV1 *vatReportsRoute) getVatReportsForCountry(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
 	}
 
-	req.Country = ctx.Param(requestParameterCountry)
+	req.Country = strings.ToUpper(ctx.Param(requestParameterCountry))
 
 	err = cApiV1.validate.Struct(req)
 	if err != nil {

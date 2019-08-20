@@ -36,6 +36,7 @@ backend:
   - S3_BUCKET_NAME
   - S3_REGION
   - ENVIRONMENT
+  - PAYMENT_FORM_URL
   
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

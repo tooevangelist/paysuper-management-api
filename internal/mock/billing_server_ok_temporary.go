@@ -113,18 +113,8 @@ func (s *BillingServerOkTemporaryMock) ChangeMerchant(
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantResponse, error) {
 	m := &billing.Merchant{
-		Name:               in.Name,
-		AlternativeName:    in.AlternativeName,
-		Website:            in.Website,
-		Country:            "RU",
-		State:              in.State,
-		Zip:                in.Zip,
-		City:               in.City,
-		Address:            in.Address,
-		AddressAdditional:  in.AddressAdditional,
-		RegistrationNumber: in.RegistrationNumber,
-		TaxId:              in.TaxId,
-		Contacts:           in.Contacts,
+		Company:  in.Company,
+		Contacts: in.Contacts,
 		Banking: &billing.MerchantBanking{
 			Currency:      "RUB",
 			Name:          in.Banking.Name,
@@ -658,6 +648,58 @@ func (s *BillingServerOkTemporaryMock) CreateOrUpdateUserProfile(
 	opts ...client.CallOption,
 ) (*grpc.GetUserProfileResponse, error) {
 	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) ConfirmUserEmail(
+	ctx context.Context,
+	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) CreatePageReview(
+	ctx context.Context,
+	in *grpc.CreatePageReviewRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetMerchantAgreementSignUrl(
+	ctx context.Context,
+	in *grpc.GetMerchantAgreementSignUrlRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) GetMerchantOnboardingCompleteData(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerOkTemporaryMock) GetMerchantTariffRates(
+	ctx context.Context,
+	in *grpc.GetMerchantTariffRatesRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantTariffRatesResponse, error) {
+	return &grpc.GetMerchantTariffRatesResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) SetMerchantTariffRates(
+	ctx context.Context,
+	in *grpc.SetMerchantTariffRatesRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) CreateOrUpdateKeyProduct(ctx context.Context, in *grpc.CreateOrUpdateKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {

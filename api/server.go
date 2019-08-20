@@ -14,6 +14,7 @@ import (
 	"github.com/micro/go-micro"
 	"github.com/micro/go-plugins/selector/static"
 	"github.com/paysuper/paysuper-billing-server/pkg"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/utils"
@@ -339,10 +340,16 @@ func (api *Api) getValidationError(err error) (rspErr *grpc.ResponseErrorMessage
 	if ok {
 		rspErr = val
 	} else {
-		if vErr.Tag() == requestParameterZipUsa {
-			rspErr = errorMessageIncorrectZip
+		val, ok := validationNamespaceErrors[vErr.StructNamespace()]
+
+		if ok {
+			rspErr = val
 		} else {
-			rspErr = errorValidationFailed
+			if vErr.Tag() == requestParameterZipUsa {
+				rspErr = errorMessageIncorrectZip
+			} else {
+				rspErr = errorValidationFailed
+			}
 		}
 	}
 
@@ -419,8 +426,22 @@ func (api *Api) registerValidators() error {
 	}
 
 	api.validate.RegisterStructValidation(api.CompanyValidator, grpc.UserProfileCompany{})
+	api.validate.RegisterStructValidation(api.MerchantCompanyValidator, billing.MerchantCompanyInfo{})
+	api.validate.RegisterStructValidation(api.MerchantTariffRatesValidator, grpc.GetMerchantTariffRatesRequest{})
 
 	if err := api.validate.RegisterValidation("company_name", api.CompanyNameValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("swift", api.SwiftValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("city", api.CityValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("world_region", api.WorldRegionValidator); err != nil {
 		return err
 	}
 

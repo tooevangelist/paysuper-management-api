@@ -106,10 +106,7 @@ func (s *BillingServerSystemErrorMock) ChangeMerchant(
 	in *grpc.OnboardingRequest,
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantResponse, error) {
-	return &grpc.ChangeMerchantResponse{
-		Status: pkg.ResponseStatusOk,
-		Item:   &billing.Merchant{},
-	}, nil
+	return nil, SomeError
 }
 
 func (s *BillingServerSystemErrorMock) ChangeMerchantStatus(
@@ -599,6 +596,58 @@ func (s *BillingServerSystemErrorMock) CreateOrUpdateUserProfile(
 	opts ...client.CallOption,
 ) (*grpc.GetUserProfileResponse, error) {
 	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) ConfirmUserEmail(
+	ctx context.Context,
+	in *grpc.ConfirmUserEmailRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) CreatePageReview(
+	ctx context.Context,
+	in *grpc.CreatePageReviewRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetMerchantAgreementSignUrl(
+	ctx context.Context,
+	in *grpc.GetMerchantAgreementSignUrlRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetMerchantOnboardingCompleteData(
+	ctx context.Context,
+	in *grpc.SetMerchantS3AgreementRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetMerchantTariffRates(
+	ctx context.Context,
+	in *grpc.GetMerchantTariffRatesRequest,
+	opts ...client.CallOption,
+) (*grpc.GetMerchantTariffRatesResponse, error) {
+	return &grpc.GetMerchantTariffRatesResponse{}, nil
+}
+
+func (s *BillingServerSystemErrorMock) SetMerchantTariffRates(
+	ctx context.Context,
+	in *grpc.SetMerchantTariffRatesRequest,
+	opts ...client.CallOption,
+) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	return &grpc.CheckProjectRequestSignatureResponse{}, nil
 }
 
 func (s *BillingServerSystemErrorMock) CreateOrUpdateKeyProduct(ctx context.Context, in *grpc.CreateOrUpdateKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
