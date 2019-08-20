@@ -13,11 +13,11 @@ require (
 	github.com/hashicorp/vault v1.1.3 // indirect
 	github.com/karlseguin/expect v1.0.1 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/labstack/echo/v4 v4.0.0
+	github.com/labstack/echo/v4 v4.1.6
 	github.com/micro/go-micro v1.0.0
 	github.com/micro/go-plugins v1.0.0
 	github.com/minio/minio-go v6.0.14+incompatible
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190819115114-2552f1aacd72
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190819141749-d5483dc8565f
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c
 	github.com/paysuper/paysuper-recurring-repository v1.0.114
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190722140034-a37f835eaad7
@@ -26,7 +26,7 @@ require (
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
 	go.uber.org/zap v1.10.0
 	google.golang.org/grpc v1.21.0 // indirect
-	gopkg.in/go-playground/validator.v9 v9.26.0
+	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 	k8s.io/api v0.0.0-20190722141453-b90922c02518 // indirect

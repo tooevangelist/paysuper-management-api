@@ -710,18 +710,6 @@ func (s *BillingServerSystemErrorMock) CancelRedeemKeyForOrder(ctx context.Conte
 	return nil, SomeError
 }
 
-func (s *BillingServerSystemErrorMock) ConfirmUserEmail(ctx context.Context, in *grpc.ConfirmUserEmailRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return nil, SomeError
-}
-
-func (s *BillingServerSystemErrorMock) CreatePageReview(ctx context.Context, in *grpc.CreatePageReviewRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return nil, SomeError
-}
-
-func (s *BillingServerSystemErrorMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
-	return nil, SomeError
-}
-
 func (s *BillingServerSystemErrorMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
 	panic("implement me")
 }

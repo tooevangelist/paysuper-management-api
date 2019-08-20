@@ -762,19 +762,6 @@ func (s *BillingServerOkTemporaryMock) CancelRedeemKeyForOrder(ctx context.Conte
 	panic("implement me")
 }
 
-
-func (s *BillingServerOkTemporaryMock) ConfirmUserEmail(ctx context.Context, in *grpc.ConfirmUserEmailRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerOkTemporaryMock) CreatePageReview(ctx context.Context, in *grpc.CreatePageReviewRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerOkTemporaryMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
-	panic("implement me")
-}
-
 func (s *BillingServerOkTemporaryMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
 	panic("implement me")
 }

@@ -1008,24 +1008,6 @@ func (s *BillingServerOkMock) CancelRedeemKeyForOrder(ctx context.Context, in *g
 	}, nil
 }
 
-func (s *BillingServerOkMock) ConfirmUserEmail(ctx context.Context, in *grpc.ConfirmUserEmailRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return &grpc.CheckProjectRequestSignatureResponse{
-		Status: pkg.ResponseStatusOk,
-	}, nil
-}
-
-func (s *BillingServerOkMock) CreatePageReview(ctx context.Context, in *grpc.CreatePageReviewRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return &grpc.CheckProjectRequestSignatureResponse{
-		Status: pkg.ResponseStatusOk,
-	}, nil
-}
-
-func (s *BillingServerOkMock) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
-	return &grpc.ResponseError{
-		Status: pkg.ResponseStatusOk,
-	}, nil
-}
-
 func (s *BillingServerOkMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
 	return &grpc.GetKeyProductInfoResponse{
 		Status: pkg.ResponseStatusOk,
