@@ -771,3 +771,23 @@ func (s *BillingServerSystemErrorMock) FindAllOrdersPrivate(
 ) (*grpc.ListOrdersPrivateResponse, error) {
 	return &grpc.ListOrdersPrivateResponse{}, nil
 }
+
+func (s *BillingServerSystemErrorMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) UpdatePayoutDocument(ctx context.Context, in *grpc.UpdatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetPayoutDocuments(ctx context.Context, in *grpc.GetPayoutDocumentsRequest, opts ...client.CallOption) (*grpc.GetPayoutDocumentsResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetPayoutDocumentSignUrl(ctx context.Context, in *grpc.GetPayoutDocumentSignUrlRequest, opts ...client.CallOption) (*grpc.GetPayoutDocumentSignUrlResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) UpdatePayoutDocumentSignatures(ctx context.Context, in *grpc.UpdatePayoutDocumentSignaturesRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
