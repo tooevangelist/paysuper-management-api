@@ -17,7 +17,7 @@ require (
 	github.com/micro/go-micro v1.0.0
 	github.com/micro/go-plugins v1.0.0
 	github.com/minio/minio-go v6.0.14+incompatible
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190820130240-68eb9e61950e
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190820134730-3560e58c3a2a
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c
 	github.com/paysuper/paysuper-recurring-repository v1.0.114
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190722140034-a37f835eaad7
