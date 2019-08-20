@@ -233,9 +233,15 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		order = orderResponse.Item
 	}
 
+	paymentFormUrl := fmt.Sprintf(pkg.OrderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Uuid)
+
+	if r.config.PaymentFormUrl != "" {
+		paymentFormUrl = r.config.PaymentFormUrl + "/order/" + order.Uuid
+	}
+
 	response := &CreateOrderJsonProjectResponse{
 		Id:             order.Uuid,
-		PaymentFormUrl: fmt.Sprintf(pkg.OrderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Uuid),
+		PaymentFormUrl: paymentFormUrl,
 	}
 
 	// If not production environment then return data to payment form

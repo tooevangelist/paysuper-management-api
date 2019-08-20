@@ -28,9 +28,10 @@ type Config struct {
 	Auth1
 	S3
 
-	HttpScheme  string `envconfig:"HTTP_SCHEME" default:"https"`
-	AmqpAddress string `envconfig:"AMQP_ADDRESS" required:"true" default:"amqp://127.0.0.1:5672"`
-	Environment string `envconfig:"ENVIRONMENT" default:"test"`
+	HttpScheme     string `envconfig:"HTTP_SCHEME" default:"https"`
+	AmqpAddress    string `envconfig:"AMQP_ADDRESS" required:"true" default:"amqp://127.0.0.1:5672"`
+	Environment    string `envconfig:"ENVIRONMENT" default:"test"`
+	PaymentFormUrl string `envconfig:"PAYMENT_FORM_URL" default:""`
 }
 
 func NewConfig() (error, *Config) {
