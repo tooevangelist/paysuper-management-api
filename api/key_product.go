@@ -6,6 +6,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"go.uber.org/zap"
+	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -29,6 +30,9 @@ func (api *Api) InitKeyProductRoutes() *Api {
 	api.authUserRouteGroup.POST("/key-products/:key_product_id/platforms", keyProductApiV1.changePlatformPricesForKeyProduct)
 	api.authUserRouteGroup.DELETE("/key-products/:key_product_id/platforms/:platform_id", keyProductApiV1.removePlatformForKeyProduct)
 	api.authUserRouteGroup.GET("/platforms", keyProductApiV1.getPlatformsList)
+
+	api.authUserRouteGroup.POST("/key-products/:key_product_id/platforms/:platform_id/file", keyProductApiV1.uploadKeys)
+	api.authUserRouteGroup.GET("/key-products/:key_product_id/platforms/:platform_id/keys/count", keyProductApiV1.getCountOfKeys)
 
 	api.publicRouteGroup.GET("/key-products/:key_product_id", keyProductApiV1.getKeyProduct)
 
@@ -371,6 +375,90 @@ func (r *keyProductRoute) getKeyProduct(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res.KeyProduct)
+}
+
+func (r *keyProductRoute) uploadKeys(ctx echo.Context) error {
+	req := &grpc.PlatformKeysFileRequest{}
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		zap.S().Error(errorMessageFileNotFound, "err", err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorMessageFileNotFound)
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		zap.S().Error(errorMessageCantReadFile, "err", err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorMessageCantReadFile)
+	}
+	defer src.Close()
+
+	req.File, err = ioutil.ReadAll(src)
+
+	if err != nil {
+		zap.S().Error(errorMessageCantReadFile, "err", err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, errorMessageCantReadFile)
+	}
+
+	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+	if merchant.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
+	}
+
+	req.KeyProductId = ctx.Param("key_product_id")
+	req.PlatformId = ctx.Param("platform_id")
+	req.MerchantId = merchant.Item.Id
+
+	if err := r.validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp, err := r.billingService.UploadKeysFile(ctx.Request().Context(), req)
+	if err != nil {
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp)
+}
+
+func (r *keyProductRoute) getCountOfKeys(ctx echo.Context) error {
+	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+	if merchant.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
+	}
+
+	req := &grpc.GetPlatformKeyCountRequest{}
+	req.KeyProductId = ctx.Param("key_product_id")
+	req.PlatformId = ctx.Param("platform_id")
+	req.MerchantId = merchant.Item.Id
+
+	if err := r.validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp, err := r.billingService.GetAvailableKeysCount(ctx.Request().Context(), req)
+
+	if err != nil {
+		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp)
 }
 
 func (r *keyProductRoute) getCountryFromAcceptLanguage(acceptLanguage string) (string, string) {
