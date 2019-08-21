@@ -7,6 +7,7 @@ require (
 	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.4.1
 	github.com/amalfra/etag v0.0.0-20180217025506-c1ee3b8b3121
 	github.com/apex/log v1.1.0
+	github.com/aws/aws-sdk-go v1.23.5
 	github.com/centrifugal/gocent v2.0.2+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8

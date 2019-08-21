@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/labstack/echo/v4"
-	"github.com/minio/minio-go"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -23,6 +26,7 @@ import (
 	"image/color"
 	"image/png"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -59,7 +63,10 @@ func Test_Onboarding(t *testing.T) {
 func (suite *OnboardingTestSuite) SetupTest() {
 	s3Cfg := config.S3{}
 	err := envconfig.Process("", &s3Cfg)
-	assert.NoError(suite.T(), err)
+
+	if err != nil {
+		suite.FailNow("Configuration init failed", "%v", err)
+	}
 
 	suite.api = &Api{
 		Http:           echo.New(),
@@ -83,20 +90,22 @@ func (suite *OnboardingTestSuite) SetupTest() {
 	err = suite.api.validate.RegisterValidation("phone", suite.api.PhoneValidator)
 	assert.NoError(suite.T(), err)
 
-	mClt, err := minio.New(
-		suite.api.config.S3.Endpoint,
-		suite.api.config.S3.AccessKeyId,
-		suite.api.config.S3.SecretKey,
-		suite.api.config.S3.Secure,
+	awsSession, err := session.NewSession(
+		&aws.Config{
+			Region: aws.String(suite.api.config.AwsRegion),
+			Credentials: credentials.NewStaticCredentials(
+				suite.api.config.AwsAccessKeyId,
+				suite.api.config.AwsSecretAccessKey,
+				"",
+			),
+		},
 	)
 	assert.NoError(suite.T(), err)
 
-	err = mClt.MakeBucket(suite.api.config.S3.BucketName, suite.api.config.S3.Region)
-	assert.NoError(suite.T(), err)
-
 	suite.handler = &onboardingRoute{
-		Api:  suite.api,
-		mClt: mClt,
+		Api:           suite.api,
+		awsUploader:   s3manager.NewUploader(awsSession),
+		awsDownloader: s3manager.NewDownloader(awsSession),
 	}
 
 	err = suite.api.registerValidators()
@@ -1193,6 +1202,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_Ok() {
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 
+	log.Println(err)
+	log.Println(rsp.Body.String())
+
 	data := &OnboardingFileData{}
 	err = json.Unmarshal(rsp.Body.Bytes(), data)
 	assert.NoError(suite.T(), err)
@@ -1310,11 +1322,18 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExis
 	err = pdf.WriteFile(filePath)
 	assert.NoError(suite.T(), err)
 
-	_, err = suite.handler.mClt.FPutObject(suite.api.config.S3.BucketName, mock.SomeAgreementName, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
+	out := &s3manager.UploadInput{
+		Bucket: aws.String(suite.api.config.AwsBucket),
+		Body:   bytes.NewReader(pdf.Bytes()),
+		Key:    aws.String(mock.SomeAgreementName),
+	}
+	_, err = suite.handler.awsUploader.UploadWithContext(ctx.Request().Context(), out)
 	assert.NoError(suite.T(), err)
 
 	err = suite.handler.generateAgreement(ctx)
 	assert.NoError(suite.T(), err)
+
+	log.Println(err)
 
 	fData := &OnboardingFileData{}
 	err = json.Unmarshal(rsp.Body.Bytes(), fData)
@@ -1326,9 +1345,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExis
 	assert.NotEmpty(suite.T(), fData.Metadata.Extension)
 	assert.NotEmpty(suite.T(), fData.Metadata.ContentType)
 	assert.True(suite.T(), fData.Metadata.Size > 0)
-
-	err = suite.handler.mClt.RemoveObject(suite.api.config.S3.BucketName, mock.SomeAgreementName)
-	assert.NoError(suite.T(), err)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExist_Error() {
@@ -1376,7 +1392,12 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
 	err = pdf.WriteFile(filePath)
 	assert.NoError(suite.T(), err)
 
-	_, err = suite.handler.mClt.FPutObject(suite.api.config.S3.BucketName, mock.SomeAgreementName1, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
+	out := &s3manager.UploadInput{
+		Bucket: aws.String(suite.api.config.AwsBucket),
+		Body:   bytes.NewReader(pdf.Bytes()),
+		Key:    aws.String(mock.SomeAgreementName1),
+	}
+	_, err = suite.handler.awsUploader.UploadWithContext(ctx.Request().Context(), out)
 	assert.NoError(suite.T(), err)
 
 	err = suite.handler.getAgreementDocument(ctx)
@@ -1384,9 +1405,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 	assert.Equal(suite.T(), agreementContentType, rsp.Header().Get(echo.HeaderContentType))
-
-	err = suite.handler.mClt.RemoveObject(suite.api.config.S3.BucketName, mock.SomeAgreementName1)
-	assert.NoError(suite.T(), err)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_MerchantIdIncorrect_Error() {
@@ -1730,7 +1748,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_S3Uploa
 	ctx1.SetParamNames(requestParameterId)
 	ctx1.SetParamValues(bson.NewObjectId().Hex())
 
-	suite.api.config.S3.BucketName = "fake_bucket"
+	suite.api.config.S3.AwsBucket = "fake_bucket"
 	err = suite.handler.uploadAgreementDocument(ctx1)
 	assert.Error(suite.T(), err)
 

@@ -2,12 +2,15 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
-	"github.com/minio/minio-go"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -29,7 +32,8 @@ const (
 
 type onboardingRoute struct {
 	*Api
-	mClt *minio.Client
+	awsUploader   *s3manager.Uploader
+	awsDownloader *s3manager.Downloader
 }
 
 type OnboardingFileMetadata struct {
@@ -45,26 +49,22 @@ type OnboardingFileData struct {
 }
 
 func (api *Api) initOnboardingRoutes() (*Api, error) {
-	route := &onboardingRoute{Api: api}
-
-	mClt, err := minio.New(
-		api.config.S3.Endpoint,
-		api.config.S3.AccessKeyId,
-		api.config.S3.SecretKey,
-		api.config.S3.Secure,
+	awsSession, err := session.NewSession(
+		&aws.Config{
+			Region:      aws.String(api.config.AwsRegion),
+			Credentials: credentials.NewStaticCredentials(api.config.AwsAccessKeyId, api.config.AwsSecretAccessKey, ""),
+		},
 	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = mClt.MakeBucket(api.config.S3.BucketName, api.config.S3.Region)
-
-	if err != nil {
-		return nil, err
+	route := &onboardingRoute{
+		Api:           api,
+		awsUploader:   s3manager.NewUploader(awsSession),
+		awsDownloader: s3manager.NewDownloader(awsSession),
 	}
-
-	route.mClt = mClt
 
 	api.authUserRouteGroup.GET("/merchants", route.listMerchants)
 	api.authUserRouteGroup.GET("/merchants/:id", route.getMerchant)
@@ -415,11 +415,9 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 	}
 
 	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
-	rsp, err := r.billingService.GetMerchantBy(context.Background(), req)
+	rsp, err := r.billingService.GetMerchantBy(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf(`Call billing server method "GetMerchantBy" failed`,
-			"error", err.Error(), "request", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -429,17 +427,29 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 
 	if rsp.Item.S3AgreementName != "" {
 		filePath := os.TempDir() + string(os.PathSeparator) + rsp.Item.S3AgreementName
-		err = r.mClt.FGetObject(r.config.S3.BucketName, rsp.Item.S3AgreementName, filePath, minio.GetObjectOptions{})
+		file, err := os.Create(filePath)
 
 		if err != nil {
-			zap.S().Errorf("internal error", "err", err.Error())
+			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		}
+		defer file.Close()
+
+		_, err = r.awsDownloader.DownloadWithContext(
+			ctx.Request().Context(),
+			file,
+			&s3.GetObjectInput{
+				Bucket: aws.String(r.config.AwsBucket),
+				Key:    aws.String(rsp.Item.S3AgreementName),
+			},
+		)
+
+		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 		}
 
 		fData, err := r.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
 
 		if err != nil {
-			zap.S().Errorf("internal error", "err", err.Error())
 			return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 		}
 
@@ -452,18 +462,15 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 
 	buf := new(bytes.Buffer)
 	data := map[string]interface{}{"Merchant": rsp.Item}
-
 	err = ctx.Echo().Renderer.Render(buf, agreementPageTemplateName, data, ctx)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
 	pdf, err := wkhtmltopdf.NewPDFGenerator()
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -471,40 +478,38 @@ func (r *onboardingRoute) generateAgreement(ctx echo.Context) error {
 	err = pdf.Create()
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
-	agrName := fmt.Sprintf(agreementFileMask, rsp.Item.Id)
-	filePath := os.TempDir() + string(os.PathSeparator) + agrName
-
+	fileName := fmt.Sprintf(agreementFileMask, rsp.Item.Id)
+	filePath := os.TempDir() + string(os.PathSeparator) + fileName
 	err = pdf.WriteFile(filePath)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
-	_, err = r.mClt.FPutObject(r.config.S3.BucketName, agrName, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
+	out := &s3manager.UploadInput{
+		Bucket: aws.String(r.config.AwsBucket),
+		Body:   bytes.NewReader(pdf.Bytes()),
+		Key:    aws.String(fileName),
+	}
+	_, err = r.awsUploader.UploadWithContext(ctx.Request().Context(), out)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
-	req1 := &grpc.SetMerchantS3AgreementRequest{MerchantId: merchantId, S3AgreementName: agrName}
-	_, err = r.billingService.SetMerchantS3Agreement(context.Background(), req1)
+	req1 := &grpc.SetMerchantS3AgreementRequest{MerchantId: merchantId, S3AgreementName: fileName}
+	_, err = r.billingService.SetMerchantS3Agreement(ctx.Request().Context(), req1)
 
 	if err != nil {
-		zap.S().Errorf(`Call billing server method "SetMerchantS3Agreement" failed`,
-			"error", err.Error(), "request", req1)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
 	fData, err := r.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -519,11 +524,9 @@ func (r *onboardingRoute) getAgreementDocument(ctx echo.Context) error {
 	}
 
 	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
-	rsp, err := r.billingService.GetMerchantBy(context.Background(), req)
+	rsp, err := r.billingService.GetMerchantBy(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf(`Call billing server method "GetMerchantBy" failed`,
-			"error", err.Error(), "request", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -536,7 +539,21 @@ func (r *onboardingRoute) getAgreementDocument(ctx echo.Context) error {
 	}
 
 	filePath := os.TempDir() + string(os.PathSeparator) + rsp.Item.S3AgreementName
-	err = r.mClt.FGetObject(r.config.S3.BucketName, rsp.Item.S3AgreementName, filePath, minio.GetObjectOptions{})
+	file, err := os.Create(filePath)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+	defer file.Close()
+
+	_, err = r.awsDownloader.DownloadWithContext(
+		ctx.Request().Context(),
+		file,
+		&s3.GetObjectInput{
+			Bucket: aws.String(r.config.AwsBucket),
+			Key:    aws.String(rsp.Item.S3AgreementName),
+		},
+	)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorAgreementFileNotExist)
@@ -553,11 +570,9 @@ func (r *onboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
 	}
 
 	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
-	rsp, err := r.billingService.GetMerchantBy(context.Background(), req)
+	rsp, err := r.billingService.GetMerchantBy(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf(`Call billing server method "GetMerchantBy" failed`,
-			"error", err.Error(), "request", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -576,54 +591,44 @@ func (r *onboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
+	defer src.Close()
 
-	defer func() {
-		if err := src.Close(); err != nil {
-			return
-		}
-	}()
-
-	agrName := fmt.Sprintf(agreementFileMask, rsp.Item.Id)
-	filePath := os.TempDir() + string(os.PathSeparator) + agrName
+	fileName := fmt.Sprintf(agreementFileMask, rsp.Item.Id)
+	filePath := os.TempDir() + string(os.PathSeparator) + fileName
 	dst, err := os.Create(filePath)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
-
-	defer func() {
-		if err := dst.Close(); err != nil {
-			return
-		}
-	}()
+	defer dst.Close()
 
 	_, err = io.Copy(dst, src)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
-	_, err = r.mClt.FPutObject(r.config.S3.BucketName, agrName, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
+	out := &s3manager.UploadInput{
+		Bucket: aws.String(r.config.AwsBucket),
+		Body:   dst,
+		Key:    aws.String(fileName),
+	}
+	_, err = r.awsUploader.UploadWithContext(ctx.Request().Context(), out)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUploadFailed)
 	}
 
-	req1 := &grpc.SetMerchantS3AgreementRequest{MerchantId: merchantId, S3AgreementName: agrName}
-	_, err = r.billingService.SetMerchantS3Agreement(context.Background(), req1)
+	req1 := &grpc.SetMerchantS3AgreementRequest{MerchantId: merchantId, S3AgreementName: fileName}
+	_, err = r.billingService.SetMerchantS3Agreement(ctx.Request().Context(), req1)
 
 	if err != nil {
-		zap.S().Errorf(`Call billing server method "SetMerchantS3Agreement" failed`,
-			"error", err.Error(), "request", req1)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
 	fData, err := r.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 

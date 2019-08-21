@@ -16,12 +16,10 @@ type Auth1 struct {
 }
 
 type S3 struct {
-	AccessKeyId string `envconfig:"S3_ACCESS_KEY" required:"true"`
-	SecretKey   string `envconfig:"S3_SECRET_KEY" required:"true"`
-	Endpoint    string `envconfig:"S3_ENDPOINT" required:"true"`
-	BucketName  string `envconfig:"S3_BUCKET_NAME" required:"true"`
-	Region      string `envconfig:"S3_REGION" default:"us-west-2"`
-	Secure      bool   `envconfig:"S3_SECURE" default:"false"`
+	AwsAccessKeyId     string `envconfig:"AWS_ACCESS_KEY_ID" required:"true"`
+	AwsSecretAccessKey string `envconfig:"AWS_SECRET_ACCESS_KEY" required:"true"`
+	AwsRegion          string `envconfig:"AWS_REGION" default:"eu-west-1"`
+	AwsBucket          string `envconfig:"AWS_BUCKET" required:"true"`
 }
 
 type Config struct {
