@@ -1273,6 +1273,36 @@ func (_m *BillingService) GetMerchantPaymentMethod(ctx context.Context, in *grpc
 	return r0, r1
 }
 
+// GetMerchantTariffRates provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetMerchantTariffRates(ctx context.Context, in *grpc.GetMerchantTariffRatesRequest, opts ...client.CallOption) (*grpc.GetMerchantTariffRatesResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.GetMerchantTariffRatesResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetMerchantTariffRatesRequest, ...client.CallOption) *grpc.GetMerchantTariffRatesResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.GetMerchantTariffRatesResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetMerchantTariffRatesRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetMoneyBackCostMerchant provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) GetMoneyBackCostMerchant(ctx context.Context, in *billing.MoneyBackCostMerchantRequest, opts ...client.CallOption) (*grpc.MoneyBackCostMerchantResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -2585,6 +2615,36 @@ func (_m *BillingService) SetMerchantS3Agreement(ctx context.Context, in *grpc.S
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *grpc.SetMerchantS3AgreementRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SetMerchantTariffRates provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) SetMerchantTariffRates(ctx context.Context, in *grpc.SetMerchantTariffRatesRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.CheckProjectRequestSignatureResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.SetMerchantTariffRatesRequest, ...client.CallOption) *grpc.CheckProjectRequestSignatureResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.CheckProjectRequestSignatureResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.SetMerchantTariffRatesRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)

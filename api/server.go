@@ -430,6 +430,7 @@ func (api *Api) registerValidators() error {
 
 	api.validate.RegisterStructValidation(api.CompanyValidator, grpc.UserProfileCompany{})
 	api.validate.RegisterStructValidation(api.MerchantCompanyValidator, billing.MerchantCompanyInfo{})
+	api.validate.RegisterStructValidation(api.MerchantTariffRatesValidator, grpc.GetMerchantTariffRatesRequest{})
 
 	if err := api.validate.RegisterValidation("company_name", api.CompanyNameValidator); err != nil {
 		return err
@@ -440,6 +441,10 @@ func (api *Api) registerValidators() error {
 	}
 
 	if err := api.validate.RegisterValidation("city", api.CityValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("world_region", api.WorldRegionValidator); err != nil {
 		return err
 	}
 

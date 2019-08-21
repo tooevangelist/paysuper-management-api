@@ -181,39 +181,7 @@ definitions:
           merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
         type: integer
     type: object
-  model.MerchantScalar:
-    properties:
-      accounting_period:
-        description: |
-          period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year
-        type: string
-      country:
-        description: |
-          numeric ISO 3166-1 country code
-        type: integer
-      currency:
-        description: |
-          numeric ISO 4217 currency code describes merchant's accounting currency
-        type: integer
-      email:
-        description: |
-          merchant email
-        type: string
-      id:
-        description: |
-          unique merchant identifier in auth system
-        type: string
-      name:
-        description: |
-          merchant company legal name
-        type: string
-      status:
-        description: |
-          merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
-        type: integer
-    required:
-      - id
-    type: object
+
   model.Name:
     properties:
       en:
@@ -850,48 +818,7 @@ definitions:
         $ref: '#/definitions/model.RevenueDynamicMainData'
         type: object
     type: object
-  model.SimpleCurrency:
-    properties:
-      code_a3:
-        description: |
-          3 chars ISO 4217 currency code
-        type: string
-      code_int:
-        description: |
-          numeric ISO 4217 currency code
-        type: integer
-      name:
-        $ref: '#/definitions/model.Name'
-        description: |
-          list of currency names
-        type: object
-    type: object
-  model.SimpleItem:
-    properties:
-      id:
-        description: |
-          unique identifier of item
-        type: string
-      name:
-        description: |
-          item name
-        type: string
-    type: object
-  model.Status:
-    properties:
-      description:
-        description: |
-          text description
-        type: string
-      name:
-        description: |
-          status name
-        type: string
-      status:
-        description: |
-          numeric status code
-        type: integer
-    type: object
+
   payment_system.PaymentResponse:
     properties:
       error:
@@ -1212,13 +1139,126 @@ definitions:
         description: last payout amount to merchant
         type: number
 
+  onboarding.Tariff.Payment.NumberRange:
+    properties:
+      from:
+        type: number
+        description: start value
+      to:
+        type: number
+        description: end value
+
+  onboarding.Tariff.Payment:
+    properties:
+      method:
+        type: string
+        description: payment method name
+      payout_currency:
+        type: string
+        description: payout cyrrency. 3 letters code by ISO 4217
+      amount_range:
+        description: merchan turnover range
+        $ref: '#/definitions/onboarding.Tariff.Payment.NumberRange'
+      country:
+        type: string
+        description: tariff country. 2 letters code by ISO 3166-1
+      method_percent_fee:
+        description: payment method fee in percents
+        type: number
+      method_fixed_fee:
+        description: payment method fixed fee in particular currency
+        type: number
+      method_fixed_fee_currency:
+        type: string
+        description: currency of payment method fixed fee.  letters code by ISO 4217
+      ps_percent_fee:
+        type: number
+        description: paysuper fee in percents
+      ps_fixed_fee:
+        type: number
+        description: paysuper fixed fee in particular currency
+      ps_fixed_fee_currency:
+        type: string
+        description: currency of paysuper fixed fee.  letters code by ISO 4217
+
+  onboarding.Tariff.MoneyBack:
+    properties:
+      method:
+        type: string
+        description: payment method name
+      payout_currency:
+        type: string
+        description: payout cyrrency. 3 letters code by ISO 4217
+      country:
+        type: string
+        description: tariff country. 2 letters code by ISO 3166-1
+      days_range:
+        description: days range after payment
+        $ref: '#/definitions/RangeInt'
+      payment_stage:
+        type: integer
+        description: payment stage
+      percent_fee:
+        type: number
+        description: payment method fee in percents
+      fixed_fee:
+        type: number
+        description: payment method fixed fee in particular currency
+      fixed_fee_currency:
+        type: string
+        description: currency of payment method fixed fee. letters code by ISO 4217
+      is_paid_by_merchant:
+        type: boolean
+        description: fee will be withdrawn from the merchant account
+
+  onboarding.Tariff.TariffRatesItem:
+    properties:
+      fixed_fee:
+        type: number
+        description: fixed fee in particular currency
+      fixed_fee_currency:
+        type: string
+        description: currency of fixed fee. letters code by ISO 4217
+      is_paid_by_merchant:
+        type: boolean
+        description: fee will be withdrawn from the merchant account
+
   onboarding.Tariff:
     properties:
-      tariff:
-        description: tariff identifier
+      payment:
+        type: array
+        description: list of payment tarrifs by other payment methods
+        items:
+          $ref: '#/definitions/onboarding.Tariff.Payment'
+      money_back:
+        type: array
+        description: list of refund tarrifs by other payment methods
+        items:
+          $ref: '#/definitions/onboarding.Tariff.MoneyBack'
+      payout:
+        description: payout fee
+        $ref: '#/definitions/onboarding.Tariff.TariffRatesItem'
+      chargeback:
+        description: chargeback fee
+        $ref: '#/definitions/onboarding.Tariff.TariffRatesItem'
+      region:
         type: string
-    required:
-      - tariff
+        description: fee region
+
+  onboarding.Tariff.Set.Request:
+    properties:
+      region:
+        type: string
+        description: name of region
+      payout_currency:
+        type: string
+        description: merchant payout currency. letters code by ISO 4217
+      amount_from:
+        type: number
+        description: start amount of merchant turnover
+      amount_to:
+        type: number
+        description: end amount of merchant turnover
 
   onboarding.Merchant:
     properties:
@@ -1270,123 +1310,6 @@ definitions:
       tariff:
         description: tariff identifier
         type: string
-
-  onboarding.Merchant.Onboarding.Request:
-    properties:
-      currency:
-        description: 3 chars code by ISO 4217 of accounting currency in bank
-        type: string
-      name:
-        description: bank name
-        type: string
-      address:
-        description: bank address
-        type: string
-      account_number:
-        description: merchant accounting number in bank
-        type: string
-      swift:
-        description: bank SWIFT code
-        type: string
-      details:
-        description: any details abount merchant accounting bank
-        type: string
-
-  onboarding.Merchant.CreateRequest:
-    properties:
-      name:
-        description: merchant company name
-        type: string
-      alternative_name:
-        description: merchant company alternative name
-        type: string
-      website:
-        description: merchant website url
-        type: string
-      country:
-        description: 2 char code of merchant company registration country by ISO 3166-1
-        type: string
-      state:
-        description: merchant company registration state
-        type: string
-      zip:
-        description: merchant company registration zip code
-        type: string
-      city:
-        description: merchant company registration city
-        type: string
-      address:
-        description: merchant company registration address
-        type: string
-      address_additional:
-        description: merchant company registration additional address
-        type: string
-      registration_number:
-        description: merchant company registration number
-        type: string
-      tax_id:
-        description: merchant company tax identifier
-        type: string
-      contacts:
-        description: contain information about contacts of merchant
-        $ref: '#/definitions/onboarding.Contacts'
-      banking:
-        description: contain information about merchan bank
-        $ref: "#/definitions/onboarding.Merchant.Onboarding.Request"
-    required:
-      - name
-      - contacts
-      - banking
-
-  onboarding.Merchant.UpdateRequest:
-    properties:
-      id:
-        description: merchant unique identifier in system
-        type: string
-      name:
-        description: merchant company name
-        type: string
-      alternative_name:
-        description: merchant company alternative name
-        type: string
-      website:
-        description: merchant website url
-        type: string
-      country:
-        description: 2 char code of merchant company registration country by ISO 3166-1
-        type: string
-      state:
-        description: merchant company registration state
-        type: string
-      zip:
-        description: merchant company registration zip code
-        type: string
-      city:
-        description: merchant company registration city
-        type: string
-      address:
-        description: merchant company registration address
-        type: string
-      address_additional:
-        description: merchant company registration additional address
-        type: string
-      registration_number:
-        description: merchant company registration number
-        type: string
-      tax_id:
-        description: merchant company tax identifier
-        type: string
-      contacts:
-        description: contain information about contacts of merchant
-        $ref: '#/definitions/onboarding.Contacts'
-      banking:
-        description: contain information about merchan bank
-        $ref: "#/definitions/onboarding.Merchant.Onboarding.Request"
-    required:
-      - id
-      - name
-      - contacts
-      - banking
 
   onboarding.Merchant.ChangeStatus:
     properties:
@@ -2103,103 +2026,6 @@ definitions:
         type: string
     required:
       - token
-
-  onboarding.merchant.signatureRequest.event.event_metadata:
-    properties:
-      related_signature_id:
-        type: string
-        description: Signature associated with this event
-      reported_for_account_id:
-        type: string
-        description: Id of the account this event is reported for
-      reported_for_app_id:
-        type: string
-        description: Client id of the app this event is reported for
-
-  onboarding.merchant.signatureRequest.event:
-    properties:
-      event_time:
-        type: string
-        description: When the event was created (UNIX timestamp)
-      event_type:
-        type: string
-        description: Type of event being reported
-      event_hash:
-        type: string
-        description: Unique hash of this event
-      event_metadata:
-        description: A map of values containing data related to this event
-        $ref: '#/definitions/onboarding.merchant.signatureRequest.event.event_metadata'
-
-  onboarding.merchant.signatureRequest.event.signature_request.signatures:
-    properties:
-      signature_id:
-        type: string
-        description: Signature identifier
-      last_reminded_at:
-        type: integer
-        description: The time the last reminder email was sent to the signer or 0
-      last_viewed_at:
-        type: integer
-        description: The time that the document was last viewed by this signer or 0
-      signed_at:
-        type: integer
-        description: Time that the document was signed or 0
-      signer_email_address:
-        type: string
-        description: The email address of the signer
-      signer_name:
-        type: string
-        description: The name of the signer
-      status_code:
-        type: string
-        description: The current status of the signature
-      has_pin:
-        type: boolean
-        description: Boolean to indicate whether this signature requires a PIN to access
-      signer_role:
-        type: string
-        description: The role of the signer
-
-  onboarding.merchant.signatureRequest.event.signatureRequest:
-    properties:
-      cc_email_addresses:
-        description: The email address of the CC filling the role of RoleName
-        type: string
-      details_url:
-        type: string
-        description: The URL where the requester and the signers can view the current status of the SignatureRequest
-      has_error:
-        type: boolean
-        description: Whether or not an error occurred
-      is_complete:
-        type: boolean
-        description: Whether or not the SignatureRequest has been fully executed by all signers
-      is_declined:
-        type: boolean
-        description: Whether or not the SignatureRequest has been declined by a signer
-      message:
-        type: string
-        description: The custom message in the email that was initially sent to the signers
-      requester_email_address:
-        type: string
-        description: The email address of the initiator of the SignatureRequest
-      response_data:
-        type: array
-        items:
-          type: string
-        description: An array of form field objects containing the name, value, and type of each textbox or checkmark field filled in by the signers
-      signature_request_id:
-        type: string
-        description: The id of the SignatureRequest
-      signatures:
-        description: An array of signature obects
-        type: array
-        items:
-          $ref: '#/definitions/onboarding.merchant.signatureRequest.event.signature_request.signatures'
-      files_url:
-        type: string
-        description: The URL where a copy of the request's documents can be downloaded.
 
   onboarding.merchant.fillStatus.Steps:
     properties:
@@ -5047,29 +4873,42 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/tariff":
-    put:
-      summary: Set tariff
+  "/admin/api/v1/merchants/tariffs":
+    get:
+      summary: Get tariff rates
       tags:
         - Onboarding
       consumes:
-        - application/json
+        - application/x-www-form-urlencoded
       produces:
         - application/json
-      description: Set tariff
+      description: Get tariff rates
       parameters:
-        - description: request body
-          in: body
-          name: data
-          schema:
-            $ref: '#/definitions/onboarding.Tariff'
-            type: object
+        - description: "region name. possible regions: CIS, Russia, West Asia, EU, North America, Central America, South America, United Kingdom, Worldwide, South Pacific"
+          in: query
+          name: region
+          type: string
           required: true
+        - description: "merchant payout currency. 3 letters code by ISO 4217"
+          in: query
+          name: payout_currency
+          type: string
+          required: true
+        - description: "merchant start amount of turnover"
+          in: query
+          name: amount_from
+          type: number
+          required: false
+        - description: "merchant end amount of turnover"
+          in: query
+          name: amount_to
+          type: number
+          required: false
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/onboarding.Merchant'
+            $ref: '#/definitions/onboarding.Tariff'
         "400":
           description: Invalid request data
           schema:
@@ -5091,34 +4930,32 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/tariff":
-    put:
-      summary: Set tariff
+  "/admin/api/v1/merchants/{id}/tariffs":
+    post:
+      summary: Set tariff rates to merchant
       tags:
         - Onboarding
       consumes:
         - application/json
       produces:
         - application/json
-      description: Set tariff
+      description: Set tariff rates to merchant
       parameters:
         - description: merchant identifier
           in: path
           name: id
-          required: true
           type: string
+          required: true
         - description: request body
           in: body
-          name: data
           schema:
-            $ref: '#/definitions/onboarding.Tariff'
+            $ref: '#/definitions/onboarding.Tariff.Set.Request'
             type: object
+          name: data
           required: true
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/onboarding.Merchant'
         "400":
           description: Invalid request data
           schema:
