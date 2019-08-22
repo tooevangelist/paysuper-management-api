@@ -3,12 +3,14 @@ package api
 import (
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/labstack/echo/v4"
+	"github.com/micro/go-micro/client"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type keyProductRoute struct {
@@ -418,7 +420,7 @@ func (r *keyProductRoute) uploadKeys(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.UploadKeysFile(ctx.Request().Context(), req)
+	rsp, err := r.billingService.UploadKeysFile(ctx.Request().Context(), req, client.WithRequestTimeout(time.Minute * 10))
 	if err != nil {
 		zap.S().Error(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
