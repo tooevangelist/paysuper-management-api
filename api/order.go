@@ -305,9 +305,9 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 		http.StatusOK,
 		orderFormTemplateName,
 		map[string]interface{}{
-			"Order":             rsp,
-			"WebSocketUrl":      r.config.WebsocketUrl,
-			"PaymentFormSdkUrl": r.config.PaymentFormSdkUrl,
+			"Order":                   rsp,
+			"WebSocketUrl":            r.config.WebsocketUrl,
+			"PaymentFormJsLibraryUrl": r.config.PaymentFormJsLibraryUrl,
 		},
 	)
 }
