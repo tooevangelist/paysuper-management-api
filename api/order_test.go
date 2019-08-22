@@ -1053,7 +1053,6 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_ProductionEnvironment_Ok() {
 	ctx := e.NewContext(req, rsp)
 
 	suite.router.config.Environment = EnvironmentProduction
-	suite.router.config.PaymentFormUrl = "https://paysuper.com"
 	err = suite.router.createJson(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
@@ -1063,7 +1062,6 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_ProductionEnvironment_Ok() {
 	err = json.Unmarshal(rsp.Body.Bytes(), &response)
 	assert.NoError(suite.T(), err)
 	assert.Nil(suite.T(), response.PaymentFormData)
-	assert.Regexp(suite.T(), suite.router.config.PaymentFormUrl+"/order/", response.PaymentFormUrl)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrderForm_Ok() {
