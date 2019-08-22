@@ -22,6 +22,8 @@ import (
 	"github.com/paysuper/paysuper-payment-link/proto"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
+	reporterPkg "github.com/paysuper/paysuper-reporter/pkg"
+	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
 	taxServiceConst "github.com/paysuper/paysuper-tax-service/pkg"
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"github.com/ttacon/libphonenumber"
@@ -96,11 +98,12 @@ type Api struct {
 	serviceContext context.Context
 	serviceCancel  context.CancelFunc
 
-	repository     repository.RepositoryService
-	geoService     proto.GeoIpService
-	billingService grpc.BillingService
-	taxService     tax_service.TaxService
-	paylinkService paylink.PaylinkService
+	repository      repository.RepositoryService
+	geoService      proto.GeoIpService
+	billingService  grpc.BillingService
+	taxService      tax_service.TaxService
+	paylinkService  paylink.PaylinkService
+	reporterService reporterProto.ReporterService
 
 	rawBody      string
 	reqSignature string
@@ -289,6 +292,7 @@ func (api *Api) InitService() {
 	api.billingService = grpc.NewBillingService(pkg.ServiceName, api.service.Client())
 	api.taxService = tax_service.NewTaxService(taxServiceConst.ServiceName, api.service.Client())
 	api.paylinkService = paylink.NewPaylinkService(paylinkServiceConst.ServiceName, api.service.Client())
+	api.reporterService = reporterProto.NewReporterService(reporterPkg.ServiceName, api.service.Client())
 }
 
 func (api *Api) Stop() {

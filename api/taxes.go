@@ -3,13 +3,12 @@ package api
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/minio/minio-go"
-	billingPkg "github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-management-api/internal"
+	reporterPkg "github.com/paysuper/paysuper-reporter/pkg"
+	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"go.uber.org/zap"
 	"net/http"
-	"os"
 	"strconv"
 )
 
@@ -129,17 +128,16 @@ func (r *taxesRoute) createTaxReportFile(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageMerchantNotFound)
 	}
 
-	req := &grpc.CreateReportFileRequest{
-		ReportType: billingPkg.ReportTypeTax,
+	req := &reporterProto.CreateFileRequest{
+		ReportType: reporterPkg.ReportTypeTax,
 		MerchantId: merchant.Item.Id,
 	}
-	err = ctx.Bind(req)
 
-	if err != nil {
+	if err = ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
 	}
 
-	res, err := r.billingService.CreateReportFile(ctx.Request().Context(), req)
+	res, err := r.reporterService.CreateFile(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageCreateReportFile)
 	}
@@ -162,27 +160,20 @@ func (r *taxesRoute) downloadTaxReportFile(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageMerchantNotFound)
 	}
 
-	req := &grpc.GetReportFileRequest{
+	req := &reporterProto.GetFileRequest{
 		Id:         id,
 		MerchantId: merchant.Item.Id,
 	}
-	err = r.validate.Struct(req)
-	if err != nil {
+
+	if err = r.validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	res, err := r.billingService.GetReportFile(ctx.Request().Context(), req)
+	res, err := r.reporterService.LoadFile(ctx.Request().Context(), req)
 	if err != nil {
 		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageDownloadReportFile)
 	}
 
-	filePath := os.TempDir() + string(os.PathSeparator) + res.File.FilePath
-	err = r.s3ReportClient.Get(res.File.FilePath, filePath, internal.GetObjectOptions{})
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageDownloadReportFile)
-	}
-
-	return ctx.File(filePath)
+	return ctx.Blob(http.StatusOK, res.ContentType, res.File.File)
 }
