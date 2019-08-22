@@ -131,6 +131,11 @@ definitions:
         description: |
           access token to websocket private chanel
         type: string
+      platform_id:
+        description: |
+          id of platform for key product (steam, gog, xbox, etc.)
+        type: string
+        example: steam
       type:
         description: |
           type of products in order (simple, product, key)
