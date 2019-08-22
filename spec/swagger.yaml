@@ -131,6 +131,15 @@ definitions:
         description: |
           access token to websocket private chanel
         type: string
+      type:
+        description: |
+          type of products in order (simple, product, key)
+        type: string
+        example: simple
+        enum:
+          - simple
+          - product
+          - key
     type: object
   model.Merchant:
     properties:
