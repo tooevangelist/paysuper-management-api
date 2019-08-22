@@ -280,9 +280,11 @@ func (r *keyProductRoute) createKeyProduct(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
+	zap.S().Infow("createKeyProduct", "req", req)
+
 	res, err := r.billingService.CreateOrUpdateKeyProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Errorw(internalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
