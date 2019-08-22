@@ -10,7 +10,7 @@
     window.PAYSUPER_FORM_DATA = {{ Marshal .Order }};
     window.PAYSUPER_WEBSOCKET_URL = {{ .WebSocketUrl }};
 </script>
-<script src="https://static.protocol.one/paysuper/form/dev/paysuper-form.js"></script>
+<script src="{{ .PaymentFormSdkUrl }}"></script>
 </body>
 
 </html>

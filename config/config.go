@@ -28,11 +28,11 @@ type Config struct {
 	Auth1
 	S3
 
-	HttpScheme     string `envconfig:"HTTP_SCHEME" default:"https"`
-	AmqpAddress    string `envconfig:"AMQP_ADDRESS" required:"true" default:"amqp://127.0.0.1:5672"`
-	Environment    string `envconfig:"ENVIRONMENT" default:"test"`
-	PaymentFormUrl string `envconfig:"PAYMENT_FORM_URL" default:""`
-	WebsocketUrl   string `envconfig:"WEBSOCKET_URL" default:"wss://cf.tst.protocol.one/connection/websocket"`
+	HttpScheme        string `envconfig:"HTTP_SCHEME" default:"https"`
+	AmqpAddress       string `envconfig:"AMQP_ADDRESS" required:"true" default:"amqp://127.0.0.1:5672"`
+	Environment       string `envconfig:"ENVIRONMENT" default:"test"`
+	PaymentFormSdkUrl string `envconfig:"PAYMENT_FORM_SDK_URL" required:"true"`
+	WebsocketUrl      string `envconfig:"WEBSOCKET_URL" default:"wss://cf.tst.protocol.one/connection/websocket"`
 }
 
 func NewConfig() (error, *Config) {

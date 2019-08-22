@@ -233,15 +233,9 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		order = orderResponse.Item
 	}
 
-	paymentFormUrl := fmt.Sprintf(pkg.OrderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Uuid)
-
-	if r.config.PaymentFormUrl != "" {
-		paymentFormUrl = r.config.PaymentFormUrl + "/order/" + order.Uuid
-	}
-
 	response := &CreateOrderJsonProjectResponse{
 		Id:             order.Uuid,
-		PaymentFormUrl: paymentFormUrl,
+		PaymentFormUrl: fmt.Sprintf(pkg.OrderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, order.Uuid),
 	}
 
 	// If not production environment then return data to payment form
@@ -310,7 +304,11 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 	return ctx.Render(
 		http.StatusOK,
 		orderFormTemplateName,
-		map[string]interface{}{"Order": rsp, "WebSocketUrl": r.config.WebsocketUrl},
+		map[string]interface{}{
+			"Order":             rsp,
+			"WebSocketUrl":      r.config.WebsocketUrl,
+			"PaymentFormSdkUrl": r.config.PaymentFormSdkUrl,
+		},
 	)
 }
 
