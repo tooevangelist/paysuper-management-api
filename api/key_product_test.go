@@ -39,7 +39,7 @@ func (suite *KeyProductTestSuite) SetupTest() {
 	}
 
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
-	suite.api.publicRouteGroup = suite.api.Http.Group(apiPublicGroupPath)
+	suite.api.apiAuthProjectGroup = suite.api.Http.Group(apiAuthProjectGroupPath)
 	suite.router = &keyProductRoute{Api: suite.api}
 }
 
@@ -145,7 +145,6 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_Ok() {
 		DefaultCurrency: "RUB",
 		ProjectId:       bson.NewObjectId().Hex(),
 		Sku:             "some_sku",
-		Enabled:         false,
 	}
 
 	b, err := json.Marshal(&body)
@@ -169,7 +168,6 @@ func (suite *KeyProductTestSuite) TestProject_ChangeKeyProduct_ValidationError()
 		DefaultCurrency: "RUB",
 		ProjectId:       bson.NewObjectId().Hex(),
 		Sku:             "some_sku",
-		Enabled:         false,
 	}
 
 	b, err := json.Marshal(&body)
@@ -201,7 +199,6 @@ func (suite *KeyProductTestSuite) TestProject_ChangeKeyProduct_Ok() {
 		DefaultCurrency: "RUB",
 		ProjectId:       bson.NewObjectId().Hex(),
 		Sku:             "some_sku",
-		Enabled:         false,
 	}
 
 	b, err := json.Marshal(&body)
@@ -229,7 +226,6 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_ValidationError()
 		DefaultCurrency: "RUB",
 		ProjectId:       bson.NewObjectId().Hex(),
 		Sku:             "some_sku",
-		Enabled:         false,
 	}
 
 	b, err := json.Marshal(&body)

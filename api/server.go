@@ -89,7 +89,6 @@ type Api struct {
 	jwtVerifier         *jwtverifier.JwtVerifier
 
 	authUserRouteGroup *echo.Group
-	publicRouteGroup   *echo.Group
 	authUser           *AuthUser
 
 	httpScheme string
@@ -162,10 +161,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.accessRouteGroup.Use(middleware.Logger())
 	api.accessRouteGroup.Use(middleware.Recover())
 
-	api.publicRouteGroup = api.Http.Group(apiPublicGroupPath)
-	api.publicRouteGroup.Use(middleware.Logger())
-	api.publicRouteGroup.Use(middleware.Recover())
-
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
 	api.authUserRouteGroup.Use(
 		jwtMiddleware.AuthOneJwtCallableWithConfig(
@@ -232,7 +227,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initUserProfileRoutes().
 		initVatReportsRoutes().
 		initRoyaltyReportsRoutes().
-		InitKeyProductRoutes()
+		initKeyProductRoutes()
 
 	_, err = api.initOnboardingRoutes()
 

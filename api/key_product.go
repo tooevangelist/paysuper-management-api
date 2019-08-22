@@ -17,7 +17,7 @@ type keyProductRoute struct {
 
 const internalErrorTemplate = "internal error"
 
-func (api *Api) InitKeyProductRoutes() *Api {
+func (api *Api) initKeyProductRoutes() *Api {
 	keyProductApiV1 := keyProductRoute{
 		Api: api,
 	}
@@ -34,7 +34,7 @@ func (api *Api) InitKeyProductRoutes() *Api {
 	api.authUserRouteGroup.POST("/key-products/:key_product_id/platforms/:platform_id/file", keyProductApiV1.uploadKeys)
 	api.authUserRouteGroup.GET("/key-products/:key_product_id/platforms/:platform_id/keys/count", keyProductApiV1.getCountOfKeys)
 
-	api.publicRouteGroup.GET("/key-products/:key_product_id", keyProductApiV1.getKeyProduct)
+	api.apiAuthProjectGroup.GET("/key-products/:key_product_id", keyProductApiV1.getKeyProduct)
 
 	return api
 }
@@ -72,7 +72,7 @@ func (r *keyProductRoute) removePlatformForKeyProduct(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
-	if res.Message != nil {
+	if res.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
@@ -112,7 +112,7 @@ func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) er
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
-	if res.Message != nil {
+	if res.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
@@ -363,7 +363,7 @@ func (r *keyProductRoute) getKeyProduct(ctx echo.Context) error {
 	}
 
 	if req.Language == "" {
-		req.Language, _ = r.getCountryFromAcceptLanguage(ctx.Request().Header.Get("Accept-Language"))
+		req.Language, _ = r.getCountryFromAcceptLanguage(ctx.Request().Header.Get(HeaderAcceptLanguage))
 	}
 
 	res, err := r.billingService.GetKeyProductInfo(ctx.Request().Context(), req)

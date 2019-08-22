@@ -11,7 +11,6 @@ const (
 	apiWebHookGroupPath     = "/webhook"
 	apiAuthProjectGroupPath = "/api/v1"
 	apiAuthUserGroupPath    = "/admin/api/v1"
-	apiPublicGroupPath      = "/api/v1"
 
 	LimitDefault  = 100
 	LimitMax      = 1000
