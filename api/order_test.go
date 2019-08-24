@@ -1419,18 +1419,4 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ValidationError() {
 	}
 	b, err = json.Marshal(changeOrderRequest)
 	assert.NoError(suite.T(), err)
-
-	e = echo.New()
-	req = httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp = httptest.NewRecorder()
-	ctx = e.NewContext(req, rsp)
-	ctx.SetParamNames("order_id")
-	ctx.SetParamValues("some_wrong")
-
-	err = suite.router.replaceCode(ctx)
-	shouldBe.NotNil(err)
-	httpErr, ok = err.(*echo.HTTPError)
-	shouldBe.True(ok)
-	shouldBe.EqualValues(http.StatusBadRequest, httpErr.Code)
 }

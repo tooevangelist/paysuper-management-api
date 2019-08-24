@@ -126,6 +126,7 @@ const (
 	UserProfilePositionSoftwareDeveloper = "Software Developer"
 	UserProfilePositionMarketing         = "Marketing"
 	UserProfilePositionSupport           = "Support"
+	InternalErrorTemplate = "internal error"
 )
 
 var (

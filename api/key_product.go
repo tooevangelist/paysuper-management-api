@@ -17,8 +17,6 @@ type keyProductRoute struct {
 	*Api
 }
 
-const internalErrorTemplate = "internal error"
-
 func (api *Api) initKeyProductRoutes() *Api {
 	keyProductApiV1 := keyProductRoute{
 		Api: api,
@@ -51,10 +49,6 @@ func (r *keyProductRoute) removePlatformForKeyProduct(ctx echo.Context) error {
 	}
 
 	req.PlatformId = ctx.Param("platform_id")
-	if req.PlatformId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, ErrorMessagePlatformIdInvalid)
-	}
-
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -70,7 +64,7 @@ func (r *keyProductRoute) removePlatformForKeyProduct(ctx echo.Context) error {
 
 	res, err := r.billingService.DeletePlatformFromProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -90,9 +84,6 @@ func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) er
 	}
 
 	req.KeyProductId = ctx.Param("key_product_id")
-	if req.KeyProductId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, ErrorMessageKeyProductIdInvalid)
-	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil {
@@ -110,7 +101,7 @@ func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) er
 
 	res, err := r.billingService.UpdatePlatformPrices(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -126,9 +117,6 @@ func (r *keyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) er
 func (r *keyProductRoute) publishKeyProduct(ctx echo.Context) error {
 	req := &grpc.PublishKeyProductRequest{}
 	req.KeyProductId = ctx.Param("key_product_id")
-	if req.KeyProductId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, ErrorMessageKeyProductIdInvalid)
-	}
 
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil {
@@ -145,7 +133,7 @@ func (r *keyProductRoute) publishKeyProduct(ctx echo.Context) error {
 
 	res, err := r.billingService.PublishKeyProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -179,7 +167,7 @@ func (r *keyProductRoute) getPlatformsList(ctx echo.Context) error {
 
 	res, err := r.billingService.GetPlatforms(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -199,10 +187,6 @@ func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
 	}
 
 	req.Id = ctx.Param("key_product_id")
-	if req.Id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, ErrorMessageKeyProductIdInvalid)
-	}
-
 	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
@@ -218,7 +202,7 @@ func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
 
 	res, err := r.billingService.CreateOrUpdateKeyProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -250,7 +234,7 @@ func (r *keyProductRoute) getKeyProductById(ctx echo.Context) error {
 
 	res, err := r.billingService.GetKeyProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -286,7 +270,7 @@ func (r *keyProductRoute) createKeyProduct(ctx echo.Context) error {
 
 	res, err := r.billingService.CreateOrUpdateKeyProduct(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorw(internalErrorTemplate, "err", err.Error())
+		zap.S().Errorw(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -329,7 +313,7 @@ func (r *keyProductRoute) getKeyProductList(ctx echo.Context) error {
 
 	res, err := r.billingService.GetKeyProducts(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -358,7 +342,7 @@ func (r *keyProductRoute) getKeyProduct(ctx echo.Context) error {
 	if req.Currency == "" && req.Country == "" {
 		rsp, err := r.geoService.GetIpData(ctx.Request().Context(), &proto.GeoIpDataRequest{IP: ctx.RealIP()})
 		if err != nil {
-			zap.S().Error(internalErrorTemplate, "err", err.Error())
+			zap.S().Error(InternalErrorTemplate, "err", err.Error())
 		} else {
 			req.Country = rsp.Country.IsoCode
 		}
@@ -370,7 +354,7 @@ func (r *keyProductRoute) getKeyProduct(ctx echo.Context) error {
 
 	res, err := r.billingService.GetKeyProductInfo(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Error(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -422,7 +406,7 @@ func (r *keyProductRoute) uploadKeys(ctx echo.Context) error {
 
 	rsp, err := r.billingService.UploadKeysFile(ctx.Request().Context(), req, client.WithRequestTimeout(time.Minute * 10))
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Errorw(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
@@ -454,7 +438,7 @@ func (r *keyProductRoute) getCountOfKeys(ctx echo.Context) error {
 	rsp, err := r.billingService.GetAvailableKeysCount(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Error(internalErrorTemplate, "err", err.Error())
+		zap.S().Errorw(InternalErrorTemplate, "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
