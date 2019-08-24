@@ -77,6 +77,19 @@ func (suite *KeyProductTestSuite) TestProject_PublishKeyProduct_Ok() {
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
+
+func (suite *KeyProductTestSuite) TestProject_GetPlatformList_Error() {
+	req := httptest.NewRequest(http.MethodGet, "/platforms?limit=qwe", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/platforms?limit=qwe")
+
+	err := suite.router.getPlatformsList(ctx)
+	assert.Error(suite.T(), err)
+}
+
 func (suite *KeyProductTestSuite) TestProject_GetPlatformList_Ok() {
 	req := httptest.NewRequest(http.MethodGet, "/platforms?limit=10", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -86,6 +99,30 @@ func (suite *KeyProductTestSuite) TestProject_GetPlatformList_Ok() {
 	ctx.SetPath("/platforms?limit=10")
 
 	err := suite.router.getPlatformsList(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	req = httptest.NewRequest(http.MethodGet, "/platforms", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp = httptest.NewRecorder()
+	ctx = suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/platforms?limit")
+
+	err = suite.router.getPlatformsList(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	req = httptest.NewRequest(http.MethodGet, "/platforms?limit=300000", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp = httptest.NewRecorder()
+	ctx = suite.api.Http.NewContext(req, rsp)
+
+	ctx.SetPath("/platforms?limit=300000")
+
+	err = suite.router.getPlatformsList(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
@@ -287,7 +324,6 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProduct_BillingServer() {
 	assert.NotEmpty(suite.T(), err2.Message)
 }
 
-
 func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCurrency_Ok() {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/key-products/1?currency=USD", nil)
@@ -318,7 +354,6 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCurrency_Ok() {
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
-
 func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCountry_Ok() {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/key-products/1?country=RUS", nil)
@@ -347,6 +382,10 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCountry_Ok() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *KeyProductTestSuite) Test_Init_Ok()  {
+	assert.NotNil(suite.T(), suite.api.initKeyProductRoutes())
 }
 
 func (suite *KeyProductTestSuite) TestProject_getKeyProduct_Ok() {

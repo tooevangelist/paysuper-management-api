@@ -278,9 +278,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  total_count:
+                  count:
                     type: integer
-                  items:
+                  platforms:
                     type: array
                     items:
                       $ref: '#/components/schemas/Platform'
