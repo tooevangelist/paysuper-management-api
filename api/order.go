@@ -301,7 +301,15 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 		ctx.SetCookie(cookie)
 	}
 
-	return ctx.Render(http.StatusOK, orderFormTemplateName, map[string]interface{}{"Order": rsp})
+	return ctx.Render(
+		http.StatusOK,
+		orderFormTemplateName,
+		map[string]interface{}{
+			"Order":                   rsp,
+			"WebSocketUrl":            r.config.WebsocketUrl,
+			"PaymentFormJsLibraryUrl": r.config.PaymentFormJsLibraryUrl,
+		},
+	)
 }
 
 // Create order from payment link and redirect to order payment form
