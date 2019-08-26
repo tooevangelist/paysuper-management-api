@@ -24,19 +24,9 @@ type S3 struct {
 	Secure      bool   `envconfig:"S3_SECURE" default:"false"`
 }
 
-type S3Report struct {
-	AccessKeyId string `envconfig:"S3REPORT_ACCESS_KEY" required:"true"`
-	SecretKey   string `envconfig:"S3REPORT_SECRET_KEY" required:"true"`
-	Endpoint    string `envconfig:"S3REPORT_ENDPOINT" required:"true"`
-	BucketName  string `envconfig:"S3REPORT_BUCKET_NAME" required:"true"`
-	Region      string `envconfig:"S3REPORT_REGION" default:"us-west-1"`
-	Secure      bool   `envconfig:"S3REPORT_SECURE" default:"false"`
-}
-
 type Config struct {
 	Auth1
 	S3
-	S3Report
 
 	HttpScheme  string `envconfig:"HTTP_SCHEME" default:"https"`
 	Environment string `envconfig:"ENVIRONMENT" default:"test"`

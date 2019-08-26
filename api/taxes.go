@@ -3,9 +3,6 @@ package api
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/minio/minio-go"
-	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	reporterPkg "github.com/paysuper/paysuper-reporter/pkg"
-	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"go.uber.org/zap"
 	"net/http"
@@ -23,9 +20,6 @@ func (api *Api) initTaxesRoutes() *Api {
 	api.authUserRouteGroup.GET("/taxes", route.getTaxes)
 	api.authUserRouteGroup.POST("/taxes", route.setTax)
 	api.authUserRouteGroup.DELETE("/taxes/:id", route.deleteTax)
-
-	api.authUserRouteGroup.POST("/taxes/report/download", route.createTaxReportFile)
-	api.authUserRouteGroup.GET("/taxes/report/download/:id", route.downloadTaxReportFile)
 
 	return api
 }
@@ -117,63 +111,4 @@ func (r *taxesRoute) deleteTax(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res)
-}
-
-func (r *taxesRoute) createTaxReportFile(ctx echo.Context) error {
-	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
-	if err != nil || merchant.Item == nil {
-		if err != nil {
-			zap.S().Errorf("unable to find merchant by user", "err", err.Error())
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageMerchantNotFound)
-	}
-
-	req := &reporterProto.CreateFileRequest{
-		ReportType: reporterPkg.ReportTypeTax,
-		MerchantId: merchant.Item.Id,
-	}
-
-	if err = ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
-	}
-
-	res, err := r.reporterService.CreateFile(ctx.Request().Context(), req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageCreateReportFile)
-	}
-
-	return ctx.JSON(http.StatusOK, res)
-}
-
-func (r *taxesRoute) downloadTaxReportFile(ctx echo.Context) error {
-	id := ctx.Param("id")
-	if id == "" {
-		zap.S().Error("unable to find the file id")
-		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
-	}
-
-	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
-	if err != nil || merchant.Item == nil {
-		if err != nil {
-			zap.S().Errorf("unable to find merchant by user", "err", err.Error())
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageMerchantNotFound)
-	}
-
-	req := &reporterProto.GetFileRequest{
-		Id:         id,
-		MerchantId: merchant.Item.Id,
-	}
-
-	if err = r.validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	res, err := r.reporterService.LoadFile(ctx.Request().Context(), req)
-	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
-		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageDownloadReportFile)
-	}
-
-	return ctx.Blob(http.StatusOK, res.ContentType, res.File.File)
 }

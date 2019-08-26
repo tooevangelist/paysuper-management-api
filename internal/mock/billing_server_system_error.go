@@ -648,15 +648,3 @@ func (s *BillingServerSystemErrorMock) SetMerchantTariffRates(
 ) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return &grpc.CheckProjectRequestSignatureResponse{}, nil
 }
-
-func (s *BillingServerSystemErrorMock) CreateReportFile(ctx context.Context, in *grpc.CreateReportFileRequest, opts ...client.CallOption) (*grpc.CreateReportFileResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerSystemErrorMock) GetReportFile(ctx context.Context, in *grpc.GetReportFileRequest, opts ...client.CallOption) (*grpc.GetReportFileResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerSystemErrorMock) UpdateReportFile(ctx context.Context, in *grpc.UpdateReportFileRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
-	panic("implement me")
-}
