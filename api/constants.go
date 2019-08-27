@@ -125,6 +125,10 @@ const (
 	UserProfilePositionSoftwareDeveloper = "Software Developer"
 	UserProfilePositionMarketing         = "Marketing"
 	UserProfilePositionSupport           = "Support"
+
+	ErrorFieldService = "service"
+	ErrorFieldMethod  = "method"
+	ErrorFieldRequest = "request"
 )
 
 var (
