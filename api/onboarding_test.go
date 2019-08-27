@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/labstack/echo/v4"
 	awsWrapper "github.com/paysuper/paysuper-aws-manager"
+	awsWrapperMocks "github.com/paysuper/paysuper-aws-manager/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -114,7 +115,7 @@ func (suite *OnboardingTestSuite) SetupTest() {
 		return nBytes
 	}
 
-	awsManagerMock := &mock.AwsManagerInterface{}
+	awsManagerMock := &awsWrapperMocks.AwsManagerInterface{}
 	awsManagerMock.On("Upload", mock2.Anything, mock2.Anything, mock2.Anything).Return(&s3manager.UploadOutput{}, nil)
 	awsManagerMock.On("Download", mock2.Anything, mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(downloadMockResultFn, nil)
@@ -1344,7 +1345,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExis
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(mock.SomeMerchantId2)
 
-	awsManagerMock := &mock.AwsManagerInterface{}
+	awsManagerMock := &awsWrapperMocks.AwsManagerInterface{}
 	awsManagerMock.On("Upload", mock2.Anything, mock2.Anything, mock2.Anything).Return(&s3manager.UploadOutput{}, nil)
 	awsManagerMock.On("Download", mock2.Anything, mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(int64(0), errors.New("some error"))
@@ -1467,7 +1468,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_AgreementF
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(mock.SomeMerchantId2)
 
-	awsManagerMock := &mock.AwsManagerInterface{}
+	awsManagerMock := &awsWrapperMocks.AwsManagerInterface{}
 	awsManagerMock.On("Upload", mock2.Anything, mock2.Anything, mock2.Anything).Return(&s3manager.UploadOutput{}, nil)
 	awsManagerMock.On("Download", mock2.Anything, mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(int64(0), errors.New("some error"))
@@ -1723,7 +1724,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_S3Uploa
 	ctx1.SetParamNames(requestParameterId)
 	ctx1.SetParamValues(bson.NewObjectId().Hex())
 
-	awsManagerMock := &mock.AwsManagerInterface{}
+	awsManagerMock := &awsWrapperMocks.AwsManagerInterface{}
 	awsManagerMock.On("Upload", mock2.Anything, mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
 	suite.handler.awsManager = awsManagerMock
 
