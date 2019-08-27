@@ -701,3 +701,34 @@ func (s *BillingServerOkTemporaryMock) SetMerchantTariffRates(
 ) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return &grpc.CheckProjectRequestSignatureResponse{}, nil
 }
+
+func (s *BillingServerOkTemporaryMock) GetOrderPublic(
+	ctx context.Context,
+	in *grpc.GetOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.GetOrderPublicResponse, error) {
+	return &grpc.GetOrderPublicResponse{}, nil
+}
+func (s *BillingServerOkTemporaryMock) GetOrderPrivate(
+	ctx context.Context,
+	in *grpc.GetOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.GetOrderPrivateResponse, error) {
+	return &grpc.GetOrderPrivateResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) FindAllOrdersPublic(
+	ctx context.Context,
+	in *grpc.ListOrdersRequest,
+	opts ...client.CallOption,
+) (*grpc.ListOrdersPublicResponse, error) {
+	return &grpc.ListOrdersPublicResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) FindAllOrdersPrivate(
+	ctx context.Context,
+	in *grpc.ListOrdersRequest,
+	opts ...client.CallOption,
+) (*grpc.ListOrdersPrivateResponse, error) {
+	return &grpc.ListOrdersPrivateResponse{}, nil
+}

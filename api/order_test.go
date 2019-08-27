@@ -3,15 +3,18 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
+	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
 	"html/template"
@@ -1153,7 +1156,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
-func (suite *OrderTestSuite) TestOrder_GetOrders_Ok() {
+func (suite *OrderTestSuite) TestOrder_listOrdersPublic_Ok() {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
@@ -1161,7 +1164,18 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_Ok() {
 
 	ctx.SetPath("/order")
 
-	err := suite.router.getOrders(ctx)
+	bs := &mock.BillingService{}
+	bs.On("FindAllOrdersPublic", mock2.Anything, mock2.Anything, mock2.Anything).
+		Return(
+			&grpc.ListOrdersPublicResponse{
+				Status: pkg.ResponseStatusOk,
+				Item:   &grpc.ListOrdersPublicResponseItem{},
+			},
+			nil,
+		)
+	suite.router.billingService = bs
+
+	err := suite.router.listOrdersPublic(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
@@ -1175,14 +1189,18 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_BillingServerError() {
 
 	ctx.SetPath("/order")
 
-	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
-	err := suite.router.getOrders(ctx)
+	bs := &mock.BillingService{}
+	bs.On("FindAllOrdersPublic", mock2.Anything, mock2.Anything, mock2.Anything).
+		Return(nil, errors.New("some error"))
+	suite.router.billingService = bs
+
+	err := suite.router.listOrdersPublic(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
-	assert.Equal(suite.T(), errorMessageOrdersNotFound, httpErr.Message)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Id() {
@@ -1215,7 +1233,7 @@ func (suite *OrderTestSuite) testGetOrdersBindError(q url.Values, error string) 
 
 	ctx.SetPath("/order")
 
-	err := suite.router.getOrders(ctx)
+	err := suite.router.listOrdersPublic(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
