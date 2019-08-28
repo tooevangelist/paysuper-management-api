@@ -413,8 +413,9 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)
 }
 
-// Get full object with order data
-// Route GET /api/v1/s/order/{id}
+// @Description Get order by id
+// @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  https://api.paysuper.online/admin/api/v1/order/%order_id_here%
 func (r *orderRoute) getOrderPublic(ctx echo.Context) error {
 	req := &grpc.GetOrderRequest{
 		Id: ctx.Param(requestParameterId),
@@ -444,11 +445,12 @@ func (r *orderRoute) getOrderPublic(ctx echo.Context) error {
 		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, rsp)
+	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
-// Get orders list
-// Route GET /api/v1/s/order
+// @Description Get orders list
+// @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  https://api.paysuper.online/admin/api/v1/order?project[]=%project_identifier_here%
 func (r *orderRoute) listOrdersPublic(ctx echo.Context) error {
 	req := &grpc.ListOrdersRequest{}
 	err := ctx.Bind(req)
