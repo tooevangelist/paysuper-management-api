@@ -178,7 +178,7 @@ func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Ok() {
 	reporterService := &reporterMocks.ReporterService{}
 	reporterService.
 		On("CreateFile", mock2.Anything, mock2.Anything).
-		Return(&reporterProto.CreateFileResponse{FileId: bson.NewObjectId().Hex()}, nil)
+		Return(&reporterProto.ReportFile{Id: bson.NewObjectId().Hex()}, nil)
 	suite.api.reporterService = reporterService
 
 	err := suite.handler.create(ctx)

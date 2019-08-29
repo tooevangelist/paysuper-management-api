@@ -1,6 +1,8 @@
 package api
 
 import (
+	"encoding/json"
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
@@ -10,6 +12,14 @@ import (
 
 type reportFileRoute struct {
 	*Api
+}
+
+type reportFileRequest struct {
+	Id         bson.ObjectId          `bson:"_id"`
+	FileType   string                 `bson:"file_type"`
+	ReportType string                 `bson:"report_type"`
+	Template   string                 `bson:"template"`
+	Params     map[string]interface{} `bson:"params"`
 }
 
 func (api *Api) initReportFileRoute() *Api {
@@ -40,12 +50,23 @@ func (r *reportFileRoute) create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageMerchantNotFound)
 	}
 
-	req := &reporterProto.CreateFileRequest{MerchantId: merchant.Item.Id}
-
-	if err = ctx.Bind(req); err != nil {
+	data := &reportFileRequest{}
+	if err := ctx.Bind(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
 	}
 
+	params, err := json.Marshal(data.Params)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorRequestDataInvalid)
+	}
+
+	req := &reporterProto.ReportFile{
+		Id:         data.Id.Hex(),
+		ReportType: data.ReportType,
+		FileType:   data.FileType,
+		Template:   data.Template,
+		Params:     params,
+	}
 	res, err := r.reporterService.CreateFile(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageCreateReportFile)

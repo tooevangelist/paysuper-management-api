@@ -227,7 +227,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initVatReportsRoutes().
 		initRoyaltyReportsRoutes().
 		initOnboardingRoutes().
-		initTaxesRoutes()
+		initTaxesRoutes().
+		initReportFileRoute()
 
 	if api.s3Client, err = internal.NewS3Client(&api.config.S3); err != nil {
 		return nil, err
