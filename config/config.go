@@ -16,6 +16,8 @@ type Config struct {
 
 	HttpScheme  string `envconfig:"HTTP_SCHEME" default:"https"`
 	Environment string `envconfig:"ENVIRONMENT" default:"test"`
+	PaymentFormJsLibraryUrl string `envconfig:"PAYMENT_FORM_JS_LIBRARY_URL" required:"true"`
+	WebsocketUrl            string `envconfig:"WEBSOCKET_URL" default:"wss://cf.tst.protocol.one/connection/websocket"`
 }
 
 func NewConfig() (error, *Config) {
