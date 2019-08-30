@@ -15,7 +15,6 @@ type Config struct {
 	Auth1
 
 	HttpScheme  string `envconfig:"HTTP_SCHEME" default:"https"`
-	AmqpAddress string `envconfig:"AMQP_ADDRESS" required:"true" default:"amqp://127.0.0.1:5672"`
 	Environment string `envconfig:"ENVIRONMENT" default:"test"`
 }
 
