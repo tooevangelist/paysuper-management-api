@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/minio/minio-go"
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"go.uber.org/zap"
 	"net/http"
@@ -11,7 +10,6 @@ import (
 
 type taxesRoute struct {
 	*Api
-	mClt *minio.Client
 }
 
 func (api *Api) initTaxesRoutes() *Api {

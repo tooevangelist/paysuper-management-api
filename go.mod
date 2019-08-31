@@ -19,7 +19,6 @@ require (
 	github.com/micro/go-grpc v0.11.0
 	github.com/micro/go-micro v1.0.0
 	github.com/micro/go-plugins v1.0.0
-	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/oschwald/geoip2-golang v1.2.1
 	github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82
 	github.com/paysuper/paysuper-billing-server v0.0.0-20190830084245-a51ee2260a9c
