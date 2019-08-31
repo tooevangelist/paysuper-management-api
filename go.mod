@@ -7,6 +7,7 @@ require (
 	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.4.1
 	github.com/amalfra/etag v0.0.0-20180217025506-c1ee3b8b3121
 	github.com/apex/log v1.1.0
+	github.com/aws/aws-sdk-go v1.23.8
 	github.com/centrifugal/gocent v2.0.2+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
@@ -20,7 +21,8 @@ require (
 	github.com/micro/go-plugins v1.0.0
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/oschwald/geoip2-golang v1.2.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190826080453-5c3b4dafd15e
+	github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190830084245-a51ee2260a9c
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c
 	github.com/paysuper/paysuper-recurring-repository v1.0.114
 	github.com/paysuper/paysuper-reporter v0.0.0-20190826044216-c7926ddc75e1
@@ -29,7 +31,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/sidmal/slug v1.4.2
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
-	github.com/stretchr/testify v1.3.0
+	github.com/stretchr/testify v1.4.0
 	github.com/swaggo/swag v1.4.1 // indirect
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/xakep666/mongo-migrate v0.1.0

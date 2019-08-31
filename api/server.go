@@ -16,7 +16,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
-	"github.com/paysuper/paysuper-management-api/internal"
 	"github.com/paysuper/paysuper-management-api/utils"
 	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
 	"github.com/paysuper/paysuper-payment-link/proto"
@@ -50,10 +49,11 @@ type Template struct {
 }
 
 type ServerInitParams struct {
-	Config     *config.Config
-	Logger     *zap.SugaredLogger
-	HttpScheme string
-	Auth1      *config.Auth1
+	Config      *config.Config
+	Logger      *zap.SugaredLogger
+	HttpScheme  string
+	AmqpAddress string
+	Auth1       *config.Auth1
 }
 
 type Merchant struct {
@@ -108,8 +108,6 @@ type Api struct {
 	rawBody      string
 	reqSignature string
 
-	s3Client internal.S3ClientInterface
-
 	Merchant
 	GetParams
 	Order
@@ -117,11 +115,12 @@ type Api struct {
 
 func NewServer(p *ServerInitParams) (*Api, error) {
 	api := &Api{
-		Http:       echo.New(),
-		logger:     p.Logger,
-		validate:   validator.New(),
-		httpScheme: p.HttpScheme,
-		config:     p.Config,
+		Http:        echo.New(),
+		logger:      p.Logger,
+		validate:    validator.New(),
+		httpScheme:  p.HttpScheme,
+		AmqpAddress: p.AmqpAddress,
+		config:      p.Config,
 	}
 	api.InitService()
 
@@ -219,6 +218,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitPaylinkRoutes().
 		InitCardPayWebHookRoutes().
 		InitPaymentCostRoutes().
+		initTaxesRoutes().
 		initTokenRoutes().
 		initZipCodeRoutes().
 		initPaymentMethodRoutes().
@@ -226,11 +226,11 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initUserProfileRoutes().
 		initVatReportsRoutes().
 		initRoyaltyReportsRoutes().
-		initOnboardingRoutes().
-		initTaxesRoutes().
 		initReportFileRoute()
 
-	if api.s3Client, err = internal.NewS3Client(&api.config.S3); err != nil {
+	_, err = api.initOnboardingRoutes()
+
+	if err != nil {
 		return nil, err
 	}
 
