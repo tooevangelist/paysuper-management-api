@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
 	"go.uber.org/zap"
@@ -15,7 +15,7 @@ type reportFileRoute struct {
 }
 
 type reportFileRequest struct {
-	Id         bson.ObjectId          `bson:"_id"`
+	Id         string                 `bson:"_id"`
 	FileType   string                 `bson:"file_type"`
 	ReportType string                 `bson:"report_type"`
 	Template   string                 `bson:"template"`
@@ -42,17 +42,24 @@ func (api *Api) initReportFileRoute() *Api {
 //      https://api.paysuper.online/admin/api/v1/report_file
 //
 func (r *reportFileRoute) create(ctx echo.Context) error {
-	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	req1 := &grpc.GetMerchantByRequest{UserId: r.authUser.Id}
+	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), req1)
 	if err != nil || merchant.Item == nil {
 		if err != nil {
-			zap.S().Errorf("unable to find merchant by user", "err", err.Error())
+			zap.L().Error(
+				pkg.ErrorGrpcServiceCallFailed,
+				zap.Error(err),
+				zap.String(ErrorFieldService, pkg.ServiceName),
+				zap.String(ErrorFieldMethod, "GetMerchantBy"),
+				zap.Any(ErrorFieldRequest, req1),
+			)
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageMerchantNotFound)
 	}
 
 	data := &reportFileRequest{}
 	if err := ctx.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
 	params, err := json.Marshal(data.Params)
@@ -60,14 +67,14 @@ func (r *reportFileRoute) create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorRequestDataInvalid)
 	}
 
-	req := &reporterProto.ReportFile{
-		Id:         data.Id.Hex(),
+	req2 := &reporterProto.ReportFile{
+		Id:         data.Id,
 		ReportType: data.ReportType,
 		FileType:   data.FileType,
 		Template:   data.Template,
 		Params:     params,
 	}
-	res, err := r.reporterService.CreateFile(ctx.Request().Context(), req)
+	res, err := r.reporterService.CreateFile(ctx.Request().Context(), req2)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageCreateReportFile)
 	}
@@ -89,24 +96,31 @@ func (r *reportFileRoute) download(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
-	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	req1 := &grpc.GetMerchantByRequest{UserId: r.authUser.Id}
+	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), req1)
 	if err != nil || merchant.Item == nil {
 		if err != nil {
-			zap.S().Errorf("unable to find merchant by user", "err", err.Error())
+			zap.L().Error(
+				pkg.ErrorGrpcServiceCallFailed,
+				zap.Error(err),
+				zap.String(ErrorFieldService, pkg.ServiceName),
+				zap.String(ErrorFieldMethod, "GetMerchantBy"),
+				zap.Any(ErrorFieldRequest, req1),
+			)
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageMerchantNotFound)
 	}
 
-	req := &reporterProto.LoadFileRequest{
+	req2 := &reporterProto.LoadFileRequest{
 		Id:         id,
 		MerchantId: merchant.Item.Id,
 	}
 
-	if err = r.validate.Struct(req); err != nil {
+	if err = r.validate.Struct(req2); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	res, err := r.reporterService.LoadFile(ctx.Request().Context(), req)
+	res, err := r.reporterService.LoadFile(ctx.Request().Context(), req2)
 	if err != nil {
 		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageDownloadReportFile)

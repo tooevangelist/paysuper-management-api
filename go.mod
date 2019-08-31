@@ -21,7 +21,7 @@ require (
 	github.com/micro/go-plugins v1.0.0
 	github.com/oschwald/geoip2-golang v1.2.1
 	github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190830084245-a51ee2260a9c
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190826080453-5c3b4dafd15e
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c
 	github.com/paysuper/paysuper-recurring-repository v1.0.114
 	github.com/paysuper/paysuper-reporter v0.0.0-20190826044216-c7926ddc75e1
