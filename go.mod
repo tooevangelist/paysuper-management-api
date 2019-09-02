@@ -45,3 +45,5 @@ require (
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 	gopkg.in/yaml.v2 v2.2.2
 )
+
+replace git.apache.org/thrift.git v0.0.0-20181218151757-9b75e4fe745a => github.com/apache/thrift v0.0.0-20181218151757-9b75e4fe745a
