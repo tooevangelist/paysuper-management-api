@@ -21,9 +21,6 @@ dmitri.shuralyov.com/html/belt v0.0.0-20180602232347-f7d459c86be0/go.mod h1:JLBr
 dmitri.shuralyov.com/service/change v0.0.0-20181023043359-a85b471d5412/go.mod h1:a1inKt/atXimZ4Mv927x+r7UpyzRUf4emIoiiSC2TN4=
 dmitri.shuralyov.com/service/change v0.0.0-20190203025214-430bf650e55a/go.mod h1:a1inKt/atXimZ4Mv927x+r7UpyzRUf4emIoiiSC2TN4=
 dmitri.shuralyov.com/state v0.0.0-20180228185332-28bcc343414c/go.mod h1:0PRwlb0D6DFvNNtx+9ybjezNCa8XF0xaYcETyp6rHWU=
-github.com/apache/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
-github.com/apache/thrift.git v0.0.0-20181218151757-9b75e4fe745a/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
-github.com/apache/thrift.git v0.12.0/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
 github.com/99designs/gqlgen v0.7.1/go.mod h1:KSQDfLlTTGmzlRgLGm6HeKKKo598l5E2svEM6Nz2Jnw=
 github.com/99designs/gqlgen v0.7.2/go.mod h1:KSQDfLlTTGmzlRgLGm6HeKKKo598l5E2svEM6Nz2Jnw=
 github.com/Azure/azure-amqp-common-go v1.1.3/go.mod h1:FhZtXirFANw40UXI2ntweO+VOkfaw8s6vZxUiRhLYW8=
@@ -110,6 +107,9 @@ github.com/apache/arrow/go/arrow v0.0.0-20181217213538-e9ed591db9cb/go.mod h1:Gj
 github.com/apache/thrift v0.0.0-20181218151757-9b75e4fe745a/go.mod h1:cp2SuWMxlEZw2r+iP2GNCdIi4C1qmUzdZFSVb+bacwQ=
 github.com/apache/thrift v0.12.0 h1:pODnxUFNcjP9UTLZGTdeh+j16A8lJbRvD3rOtrk/7bs=
 github.com/apache/thrift v0.12.0/go.mod h1:cp2SuWMxlEZw2r+iP2GNCdIi4C1qmUzdZFSVb+bacwQ=
+github.com/apache/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
+github.com/apache/thrift.git v0.0.0-20181218151757-9b75e4fe745a/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
+github.com/apache/thrift.git v0.12.0/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
 github.com/apex/log v1.1.0/go.mod h1:yA770aXIDQrhVOIGurT/pVdfCpSq1GQV/auzMN5fzvY=
 github.com/araddon/gou v0.0.0-20190110011759-c797efecbb61/go.mod h1:ikc1XA58M+Rx7SEbf0bLJCfBkwayZ8T5jBo5FXK8Uz8=
 github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hCbHZ8TKRvWD2dDTCfh9M9ya+I9JpbB7O8o=
@@ -773,6 +773,8 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20190829194634-4384f9f128e0 h
 github.com/paysuper/paysuper-billing-server v0.0.0-20190829194634-4384f9f128e0/go.mod h1:hZ2vx3guY7x9iinvBB1YUXmg70a97RNs7ci+DR8WCh0=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190830084245-a51ee2260a9c h1:9BFz4KG/6vvple1mixX/rLdmbs9eVchLK3/pCRgQgqE=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190830084245-a51ee2260a9c/go.mod h1:hZ2vx3guY7x9iinvBB1YUXmg70a97RNs7ci+DR8WCh0=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190902165035-a112254a42fc h1:7/Hqmqid234tJm7NsKtfkUKMwaF8HvErtArG/IixuGQ=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190902165035-a112254a42fc/go.mod h1:YRKRUzEGAIrlNE7Yc1mCI1a1c6MnQx5JKBrTQEmwde8=
 github.com/paysuper/paysuper-currencies v0.0.0-20190723132218-9628e1b3ba42 h1:eSunQs9D/gzZ0XT5fsg4zAvUTTlhNO079kOyK6DoiEk=
 github.com/paysuper/paysuper-currencies v0.0.0-20190723132218-9628e1b3ba42/go.mod h1:151KLmte00rDeSTyON3HAnV3TuB73eCjqK/ydRWrD8k=
 github.com/paysuper/paysuper-database-mongo v0.1.0 h1:RMSIYB8rpTAAHc0wmIQz8XQVa8KB6/xX8iA8ceiDic8=
@@ -784,6 +786,8 @@ github.com/paysuper/paysuper-recurring-repository v1.0.111 h1:YSg8Rvp7p1Nd0baEaG
 github.com/paysuper/paysuper-recurring-repository v1.0.111/go.mod h1:4XX2FeDCMGxAHBO/Pn9mE8JJiPaYaNxXhQnZL91ec0Y=
 github.com/paysuper/paysuper-recurring-repository v1.0.113 h1:jumiog+1NakjhyldLwFB2px/gm8DjiQLNwXLopJ73wk=
 github.com/paysuper/paysuper-recurring-repository v1.0.113/go.mod h1:4XX2FeDCMGxAHBO/Pn9mE8JJiPaYaNxXhQnZL91ec0Y=
+github.com/paysuper/paysuper-recurring-repository v1.0.115 h1:pJoK/H0ffH4p7T0etsQH92iLp8Kg0WwK8xQQzZK/xbs=
+github.com/paysuper/paysuper-recurring-repository v1.0.115/go.mod h1:olJGzJ1378cOXuk9Nrg1lJysp+2g/px3c8G1FBEnrHs=
 github.com/paysuper/paysuper-tax-service v0.0.0-20190722140034-a37f835eaad7 h1:bGPbVtlyrkJ8W1kaZnxiUmGs5lsjuBVJzT9AE7SlS78=
 github.com/paysuper/paysuper-tax-service v0.0.0-20190722140034-a37f835eaad7/go.mod h1:sG79373f9raEBE9m1ZF9lmPSOfiLRTWhvvdcMR4h9/4=
 github.com/paysuper/postmark-sender v0.0.0-20190724195234-709a636c4f39 h1:VgocRLQ8zaXPA4fMm2H/PMBjmVgr1lNfLVyU3p2PzY4=

@@ -1,7 +1,6 @@
 module github.com/paysuper/paysuper-management-api
 
 require (
-	git.apache.org/thrift.git v0.12.0
 	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681
 	github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742
 	github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c
@@ -24,9 +23,9 @@ require (
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/oschwald/geoip2-golang v1.2.1
 	github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190830084245-a51ee2260a9c
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190902165035-a112254a42fc
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190410180823-800306b3fd7c
-	github.com/paysuper/paysuper-recurring-repository v1.0.113
+	github.com/paysuper/paysuper-recurring-repository v1.0.115
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190722140034-a37f835eaad7
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/satori/go.uuid v1.2.0
@@ -46,5 +45,3 @@ require (
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 	gopkg.in/yaml.v2 v2.2.2
 )
-
-replace git.apache.org/thrift.git v0.12.0 => github.com/apache/thrift v0.12.0
