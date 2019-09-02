@@ -1,6 +1,7 @@
 module github.com/paysuper/paysuper-management-api
 
 require (
+	git.apache.org/thrift.git v0.12.0
 	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681
 	github.com/ProtocolONE/geoip-service v0.0.0-20190130072841-bf3b3b79a742
 	github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c
@@ -46,4 +47,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-replace git.apache.org/thrift.git v0.0.0-20181218151757-9b75e4fe745a => github.com/apache/thrift v0.0.0-20181218151757-9b75e4fe745a
+replace git.apache.org/thrift.git v0.12.0 => github.com/apache/thrift v0.12.0
