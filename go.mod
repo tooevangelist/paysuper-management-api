@@ -34,7 +34,7 @@ require (
 	github.com/paysuper/paysuper-billing-server v0.0.0-20190903140338-4525ab5052f9
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
-	github.com/paysuper/paysuper-reporter v0.0.0-20190904051107-e889f74e5e0b // indirect
+	github.com/paysuper/paysuper-reporter v0.0.0-20190904051107-e889f74e5e0b
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/shirou/gopsutil v2.18.12+incompatible // indirect
