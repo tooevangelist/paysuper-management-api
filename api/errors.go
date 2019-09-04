@@ -16,6 +16,32 @@ func newValidationError(details string) *grpc.ResponseErrorMessage {
 	return newManagementApiResponseError(errorValidationFailed.Code, errorValidationFailed.Message, details)
 }
 
+const (
+	errorNamespaceMerchantCompanyInfoName             = "OnboardingRequest.Company.Name"
+	errorNamespaceMerchantCompanyInfoAlternativeName  = "OnboardingRequest.Company.AlternativeName"
+	errorNamespaceMerchantCompanyInfoWebsite          = "OnboardingRequest.Company.Website"
+	errorNamespaceMerchantCompanyInfoCountry          = "OnboardingRequest.Company.Country"
+	errorNamespaceMerchantCompanyInfoState            = "OnboardingRequest.Company.State"
+	errorNamespaceMerchantCompanyInfoZip              = "OnboardingRequest.Company.Zip"
+	errorNamespaceMerchantCompanyInfoCity             = "OnboardingRequest.Company.City"
+	errorNamespaceMerchantCompanyInfoAddress          = "OnboardingRequest.Company.Address"
+	errorNamespaceMerchantContactAuthorized           = "OnboardingRequest.Contacts.Authorized"
+	errorNamespaceMerchantContactTechnical            = "OnboardingRequest.Contacts.Technical"
+	errorNamespaceMerchantContactAuthorizedName       = "OnboardingRequest.Contacts.Authorized.Name"
+	errorNamespaceMerchantContactAuthorizedEmail      = "OnboardingRequest.Contacts.Authorized.Email"
+	errorNamespaceMerchantContactAuthorizedPhone      = "OnboardingRequest.Contacts.Authorized.Phone"
+	errorNamespaceMerchantContactAuthorizedPosition   = "OnboardingRequest.Contacts.Authorized.Position"
+	errorNamespaceMerchantContactTechnicalName        = "OnboardingRequest.Contacts.Technical.Name"
+	errorNamespaceMerchantContactTechnicalEmail       = "OnboardingRequest.Contacts.Technical.Email"
+	errorNamespaceMerchantContactTechnicalPhone       = "OnboardingRequest.Contacts.Technical.Phone"
+	errorNamespaceMerchantBankingCurrency             = "OnboardingRequest.Banking.Currency"
+	errorNamespaceMerchantBankingName                 = "OnboardingRequest.Banking.Name"
+	errorNamespaceMerchantBankingAddress              = "OnboardingRequest.Banking.Address"
+	errorNamespaceMerchantBankingAccountNumber        = "OnboardingRequest.Banking.AccountNumber"
+	errorNamespaceMerchantBankingSwift                = "OnboardingRequest.Banking.Swift"
+	errorNamespaceMerchantBankingCorrespondentAccount = "OnboardingRequest.Banking.CorrespondentAccount"
+)
+
 var (
 	errorUnknown                                      = newManagementApiResponseError("ma000001", "unknown error. try request later")
 	errorValidationFailed                             = newManagementApiResponseError("ma000002", "validation failed")
@@ -36,7 +62,7 @@ var (
 	errorMessageAgreementNotGenerated                 = newManagementApiResponseError("ma000021", "agreement for merchant not generated early")
 	errorMessageSignatureHeaderIsEmpty                = newManagementApiResponseError("ma000022", "header with request signature can't be empty")
 	errorRequestParamsIncorrect                       = newManagementApiResponseError("ma000023", "incorrect request parameters")
-	errorEmailFieldIsRequired                         = newManagementApiResponseError("ma000024", "email field is required")
+	errorEmailFieldIncorrect                          = newManagementApiResponseError("ma000024", "incorrect email")
 	errorRequestDataInvalid                           = newManagementApiResponseError("ma000026", "request data invalid")
 	errorCountriesListError                           = newManagementApiResponseError("ma000027", "countries list error")
 	errorAgreementFileNotExist                        = newManagementApiResponseError("ma000028", "file for the specified key does not exist")
@@ -80,4 +106,78 @@ var (
 	errorMessageUrlCancelPayment                      = newManagementApiResponseError("ma000066", "url cancel payment parameter has incorrect type")
 	errorMessageUrlFraudPayment                       = newManagementApiResponseError("ma000067", "url fraud payment parameter has incorrect type")
 	errorMessageUrlRefundPayment                      = newManagementApiResponseError("ma000068", "url refund payment parameter has incorrect type")
+	errorMessagePriceGroupByCountry                   = newManagementApiResponseError("ma000069", "unable to get price group by country")
+	errorMessagePriceGroupCurrencyList                = newManagementApiResponseError("ma000070", "unable to get price group currencies")
+	errorMessagePriceGroupCurrencyByRegion            = newManagementApiResponseError("ma000071", "unable to get price group currency by region")
+	errorMessagePriceGroupRecommendedList             = newManagementApiResponseError("ma000072", "unable to get price group recommended prices")
+	errorMessageGetProductPrice                       = newManagementApiResponseError("ma000072", "unable to get price of product")
+	errorMessageUpdateProductPrice                    = newManagementApiResponseError("ma000072", "unable to update price of product")
+	errorMessageIncorrectZip                          = newManagementApiResponseError("ma000073", "incorrect zip code")
+	errorMessageIncorrectNumberOfEmployees            = newManagementApiResponseError("ma000074", "incorrect number of employees value")
+	errorMessageIncorrectAnnualIncome                 = newManagementApiResponseError("ma000075", "incorrect annual income value")
+	errorMessageIncorrectCompanyName                  = newManagementApiResponseError("ma000076", "incorrect company name")
+	errorMessageIncorrectPosition                     = newManagementApiResponseError("ma000077", "incorrect position")
+	errorMessageIncorrectFirstName                    = newManagementApiResponseError("ma000078", "incorrect first name")
+	errorMessageIncorrectLastName                     = newManagementApiResponseError("ma000079", "incorrect last name")
+	errorMessageIncorrectWebsite                      = newManagementApiResponseError("ma000080", "incorrect website")
+	errorMessageIncorrectKindOfActivity               = newManagementApiResponseError("ma000081", "incorrect kind of activity")
+	errorMessageIncorrectReview                       = newManagementApiResponseError("ma000082", "review must be text with length lower than or equal 500 characters")
+	errorMessageIncorrectPageId                       = newManagementApiResponseError("ma000083", "review page identifier must be one of next values: primary_onboarding, merchant_onboarding")
+	ErrorMessageKeyProductIdInvalid                   = newManagementApiResponseError("ma000082", "key product id is invalid")
+	ErrorMessagePlatformIdInvalid                     = newManagementApiResponseError("ma000083", "platform id is invalid")
+
+	errorMessageIncorrectAlternativeName          = newManagementApiResponseError("ma000084", "incorrect brand")
+	errorMessageIncorrectState                    = newManagementApiResponseError("ma000085", "incorrect state")
+	errorMessageIncorrectCity                     = newManagementApiResponseError("ma000086", "incorrect city")
+	errorMessageIncorrectAddress                  = newManagementApiResponseError("ma000087", "incorrect address")
+	errorMessageRequiredContactAuthorized         = newManagementApiResponseError("ma000088", "company authorized contact information is required")
+	errorMessageRequiredContactTechnical          = newManagementApiResponseError("ma000089", "company technical contact information is required")
+	errorMessageIncorrectName                     = newManagementApiResponseError("ma000090", "incorrect name")
+	errorMessageIncorrectPhone                    = newManagementApiResponseError("ma000091", "incorrect phone")
+	errorMessageIncorrectBankName                 = newManagementApiResponseError("ma000092", "incorrect bank name")
+	errorMessageIncorrectBankAddress              = newManagementApiResponseError("ma000093", "incorrect bank address")
+	errorMessageIncorrectBankAccountNumber        = newManagementApiResponseError("ma000094", "incorrect bank accounting number")
+	errorMessageIncorrectBankSwift                = newManagementApiResponseError("ma000095", "incorrect bank swift code")
+	errorMessageIncorrectBankCorrespondentAccount = newManagementApiResponseError("ma000096", "incorrect bank correspondent account")
+	errorMessageFileNotFound                      = newManagementApiResponseError("ma000097", "file with key was not specified")
+	errorMessageCantReadFile                      = newManagementApiResponseError("ma000098", "file can not be read")
+
+	validationErrors = map[string]*grpc.ResponseErrorMessage{
+		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,
+		userProfileFieldAnnualIncome:      errorMessageIncorrectAnnualIncome,
+		userProfileFieldCompanyName:       errorMessageIncorrectCompanyName,
+		userProfileFieldPosition:          errorMessageIncorrectPosition,
+		userProfileFieldFirstName:         errorMessageIncorrectFirstName,
+		userProfileFieldLastName:          errorMessageIncorrectLastName,
+		userProfileFieldWebsite:           errorMessageIncorrectWebsite,
+		userProfileFieldKindOfActivity:    errorMessageIncorrectKindOfActivity,
+		userProfileFieldReview:            errorMessageIncorrectReview,
+		userProfileFieldPageId:            errorMessageIncorrectPageId,
+	}
+
+	validationNamespaceErrors = map[string]*grpc.ResponseErrorMessage{
+		errorNamespaceMerchantCompanyInfoName:             errorMessageIncorrectCompanyName,
+		errorNamespaceMerchantCompanyInfoAlternativeName:  errorMessageIncorrectAlternativeName,
+		errorNamespaceMerchantCompanyInfoWebsite:          errorMessageIncorrectWebsite,
+		errorNamespaceMerchantCompanyInfoCountry:          errorIncorrectCountryIdentifier,
+		errorNamespaceMerchantCompanyInfoState:            errorMessageIncorrectState,
+		errorNamespaceMerchantCompanyInfoZip:              errorMessageIncorrectZip,
+		errorNamespaceMerchantCompanyInfoCity:             errorMessageIncorrectCity,
+		errorNamespaceMerchantCompanyInfoAddress:          errorMessageIncorrectAddress,
+		errorNamespaceMerchantContactAuthorized:           errorMessageRequiredContactAuthorized,
+		errorNamespaceMerchantContactTechnical:            errorMessageRequiredContactTechnical,
+		errorNamespaceMerchantContactAuthorizedName:       errorMessageIncorrectName,
+		errorNamespaceMerchantContactAuthorizedEmail:      errorEmailFieldIncorrect,
+		errorNamespaceMerchantContactAuthorizedPhone:      errorMessageIncorrectPhone,
+		errorNamespaceMerchantContactAuthorizedPosition:   errorMessageIncorrectPosition,
+		errorNamespaceMerchantContactTechnicalName:        errorMessageIncorrectName,
+		errorNamespaceMerchantContactTechnicalEmail:       errorEmailFieldIncorrect,
+		errorNamespaceMerchantContactTechnicalPhone:       errorMessageIncorrectPhone,
+		errorNamespaceMerchantBankingCurrency:             errorIncorrectCurrencyIdentifier,
+		errorNamespaceMerchantBankingName:                 errorMessageIncorrectBankName,
+		errorNamespaceMerchantBankingAddress:              errorMessageIncorrectBankAddress,
+		errorNamespaceMerchantBankingAccountNumber:        errorMessageIncorrectBankAccountNumber,
+		errorNamespaceMerchantBankingSwift:                errorMessageIncorrectBankSwift,
+		errorNamespaceMerchantBankingCorrespondentAccount: errorMessageIncorrectBankCorrespondentAccount,
+	}
 )

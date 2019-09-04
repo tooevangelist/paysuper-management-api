@@ -131,6 +131,20 @@ definitions:
         description: |
           access token to websocket private chanel
         type: string
+      platform_id:
+        description: |
+          id of platform for key product (steam, gog, xbox, etc.)
+        type: string
+        example: steam
+      type:
+        description: |
+          type of products in order (simple, product, key)
+        type: string
+        example: simple
+        enum:
+          - simple
+          - product
+          - key
     type: object
   model.Merchant:
     properties:
@@ -181,39 +195,7 @@ definitions:
           merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
         type: integer
     type: object
-  model.MerchantScalar:
-    properties:
-      accounting_period:
-        description: |
-          period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year
-        type: string
-      country:
-        description: |
-          numeric ISO 3166-1 country code
-        type: integer
-      currency:
-        description: |
-          numeric ISO 4217 currency code describes merchant's accounting currency
-        type: integer
-      email:
-        description: |
-          merchant email
-        type: string
-      id:
-        description: |
-          unique merchant identifier in auth system
-        type: string
-      name:
-        description: |
-          merchant company legal name
-        type: string
-      status:
-        description: |
-          merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
-        type: integer
-    required:
-      - id
-    type: object
+
   model.Name:
     properties:
       en:
@@ -850,48 +832,7 @@ definitions:
         $ref: '#/definitions/model.RevenueDynamicMainData'
         type: object
     type: object
-  model.SimpleCurrency:
-    properties:
-      code_a3:
-        description: |
-          3 chars ISO 4217 currency code
-        type: string
-      code_int:
-        description: |
-          numeric ISO 4217 currency code
-        type: integer
-      name:
-        $ref: '#/definitions/model.Name'
-        description: |
-          list of currency names
-        type: object
-    type: object
-  model.SimpleItem:
-    properties:
-      id:
-        description: |
-          unique identifier of item
-        type: string
-      name:
-        description: |
-          item name
-        type: string
-    type: object
-  model.Status:
-    properties:
-      description:
-        description: |
-          text description
-        type: string
-      name:
-        description: |
-          status name
-        type: string
-      status:
-        description: |
-          numeric status code
-        type: integer
-    type: object
+
   payment_system.PaymentResponse:
     properties:
       error:
@@ -917,6 +858,7 @@ definitions:
     required:
       - country
       - rate
+
   payment_method.PaymentMethodParams:
     properties:
       currency:
@@ -930,6 +872,132 @@ definitions:
     type: object
     required:
       - currency
+
+  payment_method.PostProductMethod:
+    properties:
+      name:
+        description: Name of method
+        type: string
+      group_alias:
+        description: Name of group for currency type
+        type: string
+      external_id:
+        description: External id
+        type: string
+      currencies:
+        description: List of currency int codes
+        type: array
+        items:
+          type: integer
+      min_payment_amount:
+        description: Minimal payment amount
+        type: integer
+      max_payment_amount:
+        description: Maximum payment amount
+        type: integer
+      type:
+        description: Type of payment method
+        type: string
+      account_regexp:
+        description: Regular expression for validation
+        type: string
+      is_active:
+        description: Active or not
+        type: boolean
+      payment_system_id:
+        description: Payment system identifier
+        type: string
+      test_settings:
+        description: List of test settings
+        type: array
+        items:
+          type: object
+          $ref: '#/definitions/payment_method.PaymentMethodParams'
+      production_settings:
+        description: List of production settings
+        type: array
+        items:
+          type: object
+          $ref: '#/definitions/payment_method.PaymentMethodParams'
+    type: object
+    required:
+      - name
+      - external_id
+      - payment_system_id
+
+  payment_method.PutProductMethod:
+    properties:
+      id:
+        description: Payment method identifier
+        type: string
+      name:
+        description: Name of method
+        type: string
+      group_alias:
+        description: Name of group for currency type
+        type: string
+      external_id:
+        description: External id
+        type: string
+      currencies:
+        description: List of currency int codes
+        type: array
+        items:
+          type: integer
+      min_payment_amount:
+        description: Minimal payment amount
+        type: integer
+      max_payment_amount:
+        description: Maximum payment amount
+        type: integer
+      type:
+        description: Type of payment method
+        type: string
+      account_regexp:
+        description: Regular expression for validation
+        type: string
+      is_active:
+        description: Active or not
+        type: boolean
+      payment_system_id:
+        description: Payment system identifier
+        type: string
+      test_settings:
+        description: List of test settings
+        type: array
+        items:
+          type: object
+          $ref: '#/definitions/payment_method.PaymentMethodParams'
+      production_settings:
+        description: List of production settings
+        type: array
+        items:
+          type: object
+          $ref: '#/definitions/payment_method.PaymentMethodParams'
+    type: object
+    required:
+      - id
+      - name
+      - external_id
+      - payment_system_id
+
+  payment_method.UpdatePaymentMethodParams:
+    properties:
+      id:
+        description: Payment method identifier
+        type: string
+      payment_system_id:
+        description: Payment system identifier
+        type: string
+      params:
+        description: List of settings
+        type: object
+        $ref: '#/definitions/payment_method.PaymentMethodParams'
+    type: object
+    required:
+      - id
+      - payment_system_id
+      - params
 
   onboarding.Contacts.Authorized:
     properties:
@@ -945,6 +1013,11 @@ definitions:
       position:
         description: person position in company
         type: string
+    required:
+      - name
+      - email
+      - phone
+      - position
 
   onboarding.Contacts.Technical:
     properties:
@@ -957,6 +1030,55 @@ definitions:
       phone:
         description: person contact phone
         type: string
+    required:
+      - name
+      - email
+      - phone
+
+  onboarding.Company:
+    properties:
+      name:
+        type: string
+        description: name
+      alternative_name:
+        type: string
+        description: brand
+      website:
+        type: string
+        description: website url
+      country:
+        type: string
+        description: destination country 2 letter code by ISO 3166-1
+      state:
+        type: string
+        description: destination state or region
+      zip:
+        type: string
+        description: destination zip code
+      city:
+        type: string
+        description: destination city
+      address:
+        type: string
+        description: destination address
+      address_additional:
+        type: string
+        description: additional company address
+      registration_number:
+        type: string
+        description: company registration number
+      tax_id:
+        type: string
+        description: company tax identifier
+    required:
+      - name
+      - alternative_name
+      - website
+      - country
+      - state
+      - zip
+      - city
+      - address
 
   onboarding.Contacts:
     properties:
@@ -966,12 +1088,15 @@ definitions:
       technical:
         description: object contain information about contacts of merchant tecnican
         $ref: '#/definitions/onboarding.Contacts.Technical'
+    required:
+      - authorized
+      - technical
 
   onboarding.Banking:
     properties:
       currency:
-        description: merchant accounting currency in bank
-        $ref: '#/definitions/model.Currency'
+        description: merchant accounting currency in bank. 3 letter by ISO 4217
+        type: string
       name:
         description: bank name
         type: string
@@ -987,6 +1112,15 @@ definitions:
       details:
         description: any details abount merchant accounting bank
         type: string
+      correspondent_account:
+        description: bank correspondent account
+        type: string
+    required:
+      - currency
+      - name
+      - address
+      - account_number
+      - swift
 
   onboarding.Merchant.LastPayout:
     properties:
@@ -997,44 +1131,135 @@ definitions:
         description: last payout amount to merchant
         type: number
 
+  onboarding.Tariff.Payment.NumberRange:
+    properties:
+      from:
+        type: number
+        description: start value
+      to:
+        type: number
+        description: end value
+
+  onboarding.Tariff.Payment:
+    properties:
+      method:
+        type: string
+        description: payment method name
+      payout_currency:
+        type: string
+        description: payout cyrrency. 3 letters code by ISO 4217
+      amount_range:
+        description: merchan turnover range
+        $ref: '#/definitions/onboarding.Tariff.Payment.NumberRange'
+      country:
+        type: string
+        description: tariff country. 2 letters code by ISO 3166-1
+      method_percent_fee:
+        description: payment method fee in percents
+        type: number
+      method_fixed_fee:
+        description: payment method fixed fee in particular currency
+        type: number
+      method_fixed_fee_currency:
+        type: string
+        description: currency of payment method fixed fee.  letters code by ISO 4217
+      ps_percent_fee:
+        type: number
+        description: paysuper fee in percents
+      ps_fixed_fee:
+        type: number
+        description: paysuper fixed fee in particular currency
+      ps_fixed_fee_currency:
+        type: string
+        description: currency of paysuper fixed fee.  letters code by ISO 4217
+
+  onboarding.Tariff.MoneyBack:
+    properties:
+      method:
+        type: string
+        description: payment method name
+      payout_currency:
+        type: string
+        description: payout cyrrency. 3 letters code by ISO 4217
+      country:
+        type: string
+        description: tariff country. 2 letters code by ISO 3166-1
+      days_range:
+        description: days range after payment
+        $ref: '#/definitions/RangeInt'
+      payment_stage:
+        type: integer
+        description: payment stage
+      percent_fee:
+        type: number
+        description: payment method fee in percents
+      fixed_fee:
+        type: number
+        description: payment method fixed fee in particular currency
+      fixed_fee_currency:
+        type: string
+        description: currency of payment method fixed fee. letters code by ISO 4217
+      is_paid_by_merchant:
+        type: boolean
+        description: fee will be withdrawn from the merchant account
+
+  onboarding.Tariff.TariffRatesItem:
+    properties:
+      fixed_fee:
+        type: number
+        description: fixed fee in particular currency
+      fixed_fee_currency:
+        type: string
+        description: currency of fixed fee. letters code by ISO 4217
+      is_paid_by_merchant:
+        type: boolean
+        description: fee will be withdrawn from the merchant account
+
+  onboarding.Tariff:
+    properties:
+      payment:
+        type: array
+        description: list of payment tarrifs by other payment methods
+        items:
+          $ref: '#/definitions/onboarding.Tariff.Payment'
+      money_back:
+        type: array
+        description: list of refund tarrifs by other payment methods
+        items:
+          $ref: '#/definitions/onboarding.Tariff.MoneyBack'
+      payout:
+        description: payout fee
+        $ref: '#/definitions/onboarding.Tariff.TariffRatesItem'
+      chargeback:
+        description: chargeback fee
+        $ref: '#/definitions/onboarding.Tariff.TariffRatesItem'
+      region:
+        type: string
+        description: fee region
+
+  onboarding.Tariff.Set.Request:
+    properties:
+      region:
+        type: string
+        description: name of region
+      payout_currency:
+        type: string
+        description: merchant payout currency. letters code by ISO 4217
+      amount_from:
+        type: number
+        description: start amount of merchant turnover
+      amount_to:
+        type: number
+        description: end amount of merchant turnover
+
   onboarding.Merchant:
     properties:
       id:
         description: merchant unique identifier in system
         type: string
-      name:
-        description: merchant company name
-        type: string
-      alternative_name:
-        description: merchant company alternative name
-        type: string
-      website:
-        description: merchant website url
-        type: string
-      country:
-        description: merchant company registration country
-        $ref: '#/definitions/model.Country'
-      state:
-        description: merchant company registration state
-        type: string
-      zip:
-        description: merchant company registration zip code
-        type: string
-      city:
-        description: merchant company registration city
-        type: string
-      address:
-        description: merchant company registration address
-        type: string
-      address_additional:
-        description: merchant company registration additional address
-        type: string
-      registration_number:
-        description: merchant company registration number
-        type: string
-      tax_id:
-        description: merchant company tax identifier
-        type: string
+      company:
+        description: merchant company info
+        $ref: '#/definitions/onboarding.Company'
       contacts:
         description: contain information about contacts of merchant
         $ref: '#/definitions/onboarding.Contacts'
@@ -1071,123 +1296,12 @@ definitions:
       mail_tracking_link:
         description: "link to tracking package with agreement in post"
         type: string
-
-  onboarding.Merchant.Onboarding.Request:
-    properties:
-      currency:
-        description: 3 chars code by ISO 4217 of accounting currency in bank
+      signature_request:
+        description: object contained signatire request data
+        $ref: '#/definitions/onboarding.merchant.signatureRequest'
+      tariff:
+        description: tariff identifier
         type: string
-      name:
-        description: bank name
-        type: string
-      address:
-        description: bank address
-        type: string
-      account_number:
-        description: merchant accounting number in bank
-        type: string
-      swift:
-        description: bank SWIFT code
-        type: string
-      details:
-        description: any details abount merchant accounting bank
-        type: string
-
-  onboarding.Merchant.CreateRequest:
-    properties:
-      name:
-        description: merchant company name
-        type: string
-      alternative_name:
-        description: merchant company alternative name
-        type: string
-      website:
-        description: merchant website url
-        type: string
-      country:
-        description: 2 char code of merchant company registration country by ISO 3166-1
-        type: string
-      state:
-        description: merchant company registration state
-        type: string
-      zip:
-        description: merchant company registration zip code
-        type: string
-      city:
-        description: merchant company registration city
-        type: string
-      address:
-        description: merchant company registration address
-        type: string
-      address_additional:
-        description: merchant company registration additional address
-        type: string
-      registration_number:
-        description: merchant company registration number
-        type: string
-      tax_id:
-        description: merchant company tax identifier
-        type: string
-      contacts:
-        description: contain information about contacts of merchant
-        $ref: '#/definitions/onboarding.Contacts'
-      banking:
-        description: contain information about merchan bank
-        $ref: "#/definitions/onboarding.Merchant.Onboarding.Request"
-    required:
-      - name
-      - contacts
-      - banking
-
-  onboarding.Merchant.UpdateRequest:
-    properties:
-      id:
-        description: merchant unique identifier in system
-        type: string
-      name:
-        description: merchant company name
-        type: string
-      alternative_name:
-        description: merchant company alternative name
-        type: string
-      website:
-        description: merchant website url
-        type: string
-      country:
-        description: 2 char code of merchant company registration country by ISO 3166-1
-        type: string
-      state:
-        description: merchant company registration state
-        type: string
-      zip:
-        description: merchant company registration zip code
-        type: string
-      city:
-        description: merchant company registration city
-        type: string
-      address:
-        description: merchant company registration address
-        type: string
-      address_additional:
-        description: merchant company registration additional address
-        type: string
-      registration_number:
-        description: merchant company registration number
-        type: string
-      tax_id:
-        description: merchant company tax identifier
-        type: string
-      contacts:
-        description: contain information about contacts of merchant
-        $ref: '#/definitions/onboarding.Contacts'
-      banking:
-        description: contain information about merchan bank
-        $ref: "#/definitions/onboarding.Merchant.Onboarding.Request"
-    required:
-      - id
-      - name
-      - contacts
-      - banking
 
   onboarding.Merchant.ChangeStatus:
     properties:
@@ -1221,6 +1335,60 @@ definitions:
         type: string
     required:
       - status
+
+  price_group.CurrencyRegion:
+    properties:
+      id:
+        description: price group identifier
+        type: string
+      region:
+        description: name of region
+        type: string
+      currency:
+        description: code of currency
+        type: string
+
+  price_group.CurrencyListResponse:
+    properties:
+      regions:
+        description: list of currency
+        $ref: '#/definitions/price_group.Regions'
+
+  price_group.Regions:
+    properties:
+      currency:
+        description: name of currency
+        type: string
+      region:
+        description: list of regions
+        $ref: '#/definitions/price_group.Region'
+
+  price_group.Region:
+    properties:
+      region:
+        description: name of region
+        type: string
+      country:
+        description: list of countries
+        type: array
+
+  price_group.RecommendedPriceResponse:
+    properties:
+      recommended_price:
+        description: list of price
+        $ref: '#/definitions/price_group.RecommendedPrice'
+
+  price_group.RecommendedPrice:
+    properties:
+      region:
+        description: name of region
+        type: string
+      currency:
+        description: name of currency
+        type: string
+      amount:
+        description: recommended amount
+        type: number
 
   onboarding.Merchant.Notification.Statuses:
     properties:
@@ -1660,6 +1828,241 @@ definitions:
     required:
       - token
 
+  product.Price:
+    properties:
+      amount:
+        description: price
+        type: number
+      currency:
+        description: currency
+        type: string
+      region:
+        description: region
+        type: string
+
+  product.PutPrice:
+    properties:
+      id:
+        description: id of product
+        type: string
+      prices:
+        description: list of prices
+        type: array
+        items:
+          $ref: '#/definitions/product.Price'
+          type: object
+    required:
+      - id
+      - prices
+
+  userProfile.personal:
+    properties:
+      first_name:
+        description: user first name
+        type: string
+      last_name:
+        description: user last name
+        type: string
+      position:
+        description: user position in company
+        type: string
+
+  userProfile.help:
+    properties:
+      product_promotion_and_development:
+        description: User need help with product promotion and development
+        type: boolean
+      released_game_promotion:
+        description: User need help with games promotion that have already been released
+        type: boolean
+      international_sales:
+        description: User need help with international sales
+        type: boolean
+      other:
+        description: User need help with other problems
+        type: boolean
+
+  RangeInt:
+    properties:
+      from:
+        description: range start value
+        type: integer
+      to:
+        description: range end value
+        type: integer
+
+  userProfile.company.monetization:
+    properties:
+      paid_subscription:
+        description: company monetisation from buy paid subscription by company users
+        type: boolean
+      in_game_advertising:
+        description: company monetisation from buy in game advertising
+        type: boolean
+      in_game_purchases:
+        description: company monetisation from buy in game purchases by company users
+        type: boolean
+      premium_access:
+        description: company monetisation from buy premium access by company users
+        type: boolean
+      other:
+        description: company monetisation from other activities
+        type: boolean
+
+  userProfile.company.platforms:
+    properties:
+      pc_mac:
+        description: PC/MacOs
+        type: boolean
+      game_console:
+        description: game console
+        type: boolean
+      mobile_device:
+        description: mobile device
+        type: boolean
+      web_browser:
+        description: web browsers
+        type: boolean
+      other:
+        description: other platforms
+        type: boolean
+
+  userProfile.company:
+    properties:
+      company_name:
+        description: company name
+        type: string
+      website:
+        description: company website url
+        type: string
+      annual_income:
+        description: company annual income
+        $ref: '#/definitions/RangeInt'
+      number_of_employees:
+        description: company number of employees
+        $ref: '#/definitions/RangeInt'
+      kind_of_activity:
+        description: "company kind of activity. available values: develop_and_publish_your_games, publish_games_of_other_companies, publish_your_games_through_other_publishers, other"
+        type: string
+      monetization:
+        description: company monetization activities
+        $ref: '#/definitions/userProfile.company.monetization'
+      platforms:
+        description: platforms
+        $ref: '#/definitions/userProfile.company.platforms'
+
+  ProtobufTimestamp:
+    properties:
+      seconds:
+        description: time in unix timestamp
+        type: integer
+      nanos:
+        description: time nano seconds
+        type: integer
+
+  userProfile.request:
+    properties:
+        personal:
+          description: object contain personal information about user
+          $ref: '#/definitions/userProfile.personal'
+        help:
+          description: object contain information about user problem which need help
+          $ref: '#/definitions/userProfile.help'
+        company:
+          description: object contain information about user company
+          $ref: '#/definitions/userProfile.company'
+        last_step:
+          description: identifier of wizard last step which user ended
+          type: string
+
+  userProfile.response:
+    properties:
+      personal:
+        description: object contain personal information about user
+        $ref: '#/definitions/userProfile.personal'
+      help:
+        description: object contain information about user problem which need help
+        $ref: '#/definitions/userProfile.help'
+      company:
+        description: object contain information about user company
+        $ref: '#/definitions/userProfile.company'
+      last_step:
+        description: identifier of wizard last step which user ended
+        type: string
+      centrifugo_token:
+        description: user authorisation token to connect to centrifigo channel
+        type: string
+      created_at:
+        description: time of create user profile
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: time of last update user profile
+        $ref: '#/definitions/ProtobufTimestamp'
+
+  pageReview.request:
+    properties:
+      review:
+        description: user review about page
+        type: string
+      page_id:
+        description: "page identifier. now allowed values: primary_onboarding, merchant_onboarding"
+        type: string
+    required:
+      - review
+      - page_id
+
+  user.confirmEmail.request:
+    properties:
+      token:
+        description: email confirmation token
+        type: string
+    required:
+      - token
+
+  onboarding.merchant.fillStatus.Steps:
+    properties:
+      company:
+        type: boolean
+        description: step company basic info complete
+      contacts:
+        type: boolean
+        description: step company contacts complete
+      banking:
+        type: boolean
+        description: step company banking complete
+      tariff:
+        type: boolean
+        description: step tariff complete
+
+  onboarding.merchant.fillStatus:
+    properties:
+      status:
+        type: string
+        description: "fill status. possible values: draft, life"
+      steps:
+        description: object contain information about fill status different steps
+        $ref: '#/definitions/onboarding.merchant.fillStatus.Steps'
+      complete_steps_count:
+        type: integer
+        description: count of complete steps
+
+  onboarding.merchant.signatureRequest:
+    properties:
+      signer_type:
+        type: integer
+        description: "type of signer which request a signing license agreement. possible values: 0 - merchant owner; 1 - paysuper admin"
+    required:
+      - signer_type
+
+  onboarding.merchant.signatureResponse:
+    properties:
+      sign_url:
+        type: string
+        description: URL of the signature page to display in the embedded iFrame
+      expires_at:
+        description: time of create user profile
+        $ref: '#/definitions/ProtobufTimestamp'
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -1742,91 +2145,6 @@ paths:
       summary: Get country by numeric ISO 3166-1 code
       tags:
         - Country
-  /api/v1/currency:
-    get:
-      consumes:
-        - application/json
-      description: Get full list of currencies or get list of currencies filtered
-        by name
-      parameters:
-        - description: name or symbolic ISO 4217 code of currency
-          in: query
-          name: name
-          type: string
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Currency'
-            type: array
-        "500":
-          description: Some unknown error
-          schema:
-            $ref: '#/definitions/model.Error'
-      summary: Get list of currencies
-      tags:
-        - Currency
-  /api/v1/currency/{id}:
-    get:
-      consumes:
-        - application/json
-      description: Get currency object by numeric ISO 4217 code
-      parameters:
-        - description: numeric ISO 4217 currency code
-          in: path
-          name: id
-          required: true
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Currency'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-      summary: Get currency by numeric ISO 4217 code
-      tags:
-        - Currency
-  /api/v1/currency/name:
-    get:
-      consumes:
-        - application/json
-      description: Get currency object by alpha code
-      parameters:
-        - description: numeric ISO 4217 currency code
-          in: path
-          name: name
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Currency'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-      summary: Get currency by numeric ISO 4217 code
-      tags:
-        - Currency
   /api/v1/order:
     post:
       consumes:
@@ -1963,7 +2281,9 @@ paths:
         - description: query array of merchant identifier list
           in: query
           name: merchant
-          type: string[]
+          type: array
+          items:
+            type: string
       produces:
         - application/json
       responses:
@@ -2514,73 +2834,18 @@ paths:
       summary: Create order with HTML form
       tags:
         - Payment Order
-  /admin/api/v1/payment_method:
+  /api/v1/s/payment_method:
     post:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Create a payment method for payment system
       parameters:
-        - description: Name of method
-          in: query
-          name: name
-          required: true
-          type: string
-        - description: Name of group for currency type
-          in: query
-          name: group_alias
-          required: false
-          type: string
-        - description: External id
-          in: query
-          name: external_id
-          required: true
-          type: string
-        - description: List of currency int codes
-          in: query
-          name: currencies
-          type: array
-          items:
-            type: integer
-        - description: Minimal payment amount
-          in: query
-          name: min_payment_amount
-          type: integer
-        - description: Maximum payment amount
-          in: query
-          name: max_payment_amount
-          type: integer
-        - description: Type of payment method
-          in: query
-          name: type
-          type: string
-        - description: Regular expression for validation
-          in: query
-          name: account_regexp
-          type: string
-        - description: Active or not
-          in: query
-          name: is_active
-          type: boolean
-        - description: Payment system identifier
-          in: query
-          name: payment_system_id
-          required: true
-          type: string
-        - description: List of test settings
-          in: query
-          name: test_settings
-          type: array
-          items:
+        - description: product method properties
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/payment_method.PostProductMethod'
             type: object
-            $ref: '#/definitions/payment_method.PaymentMethodParams'
-        - description: List of production settings
-          in: query
-          name: production_settings
-          type: array
-          items:
-            type: object
-            $ref: '#/definitions/payment_method.PaymentMethodParams'
       produces:
         - text/html
       responses:
@@ -2597,78 +2862,23 @@ paths:
       summary: Create a payment method for payment system
       tags:
         - Payment Method
-  /admin/api/v1/payment_method/{id}:
+  /api/v1/s/payment_method/{id}:
     put:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Update a payment method for payment system
       parameters:
-        - description: payment method identifier
+        - description: paymentmethod identifier
           in: path
           name: id
-          type: string
-          required: true
-        - description: Name of method
-          in: query
-          name: name
           required: true
           type: string
-        - description: Name of group for currency type
-          in: query
-          name: group_alias
-          required: false
-          type: string
-        - description: External id
-          in: query
-          name: external_id
-          required: true
-          type: string
-        - description: List of currency int codes
-          in: query
-          name: currencies
-          type: array
-          items:
-            type: integer
-        - description: Minimal payment amount
-          in: query
-          name: min_payment_amount
-          type: integer
-        - description: Maximum payment amount
-          in: query
-          name: max_payment_amount
-          type: integer
-        - description: Type of payment method
-          in: query
-          name: type
-          type: string
-        - description: Regular expression for validation
-          in: query
-          name: account_regexp
-          type: string
-        - description: Active or not
-          in: query
-          name: is_active
-          type: boolean
-        - description: Payment system identifier
-          in: query
-          name: payment_system_id
-          required: true
-          type: string
-        - description: List of test settings
-          in: query
-          name: test_settings
-          type: array
-          items:
+        - description: product method properties
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/payment_method.PutProductMethod'
             type: object
-            $ref: '#/definitions/payment_method.PaymentMethodParams'
-        - description: List of production settings
-          in: query
-          name: production_settings
-          type: array
-          items:
-            type: object
-            $ref: '#/definitions/payment_method.PaymentMethodParams'
       produces:
         - text/html
       responses:
@@ -2685,29 +2895,22 @@ paths:
       summary: Update a payment method for payment system
       tags:
         - Payment Method
-  /admin/api/v1/payment_method/{id}/production:
+  /api/v1/s/payment_method/{id}/production:
     post:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Add production settings to the payment method
       parameters:
-        - description: payment method identifier
+        - description: paymentmethod identifier
           in: path
           name: id
-          type: string
-          required: true
-        - description: payment method identifier
-          in: query
-          name: payment_method_id
           required: true
           type: string
-        - description: Params of settings
-          in: query
-          name: params
-          required: true
+        - description: payment method params
+          in: body
+          name: body
           schema:
-            $ref: '#/definitions/payment_method.PaymentMethodParams'
+            $ref: '#/definitions/payment_method.UpdatePaymentMethodParams'
             type: object
       produces:
         - text/html
@@ -2727,26 +2930,19 @@ paths:
         - Payment Method
     put:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Update production settings to the payment method
       parameters:
         - description: payment method identifier
           in: path
           name: id
-          type: string
-          required: true
-        - description: payment method identifier
-          in: query
-          name: payment_method_id
           required: true
           type: string
-        - description: Params of settings
-          in: query
-          name: params
-          required: true
+        - description: payment method params
+          in: body
+          name: body
           schema:
-            $ref: '#/definitions/payment_method.PaymentMethodParams'
+            $ref: '#/definitions/payment_method.UpdatePaymentMethodParams'
             type: object
       produces:
         - text/html
@@ -2766,8 +2962,7 @@ paths:
         - Payment Method
     get:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Get production settings to the payment method
       parameters:
         - description: payment method identifier
@@ -2793,13 +2988,17 @@ paths:
         - Payment Method
     delete:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Delete production settings to the payment method
       parameters:
         - description: payment method identifier
           in: path
           name: id
+          type: string
+          required: true
+        - description: code of currency
+          in: query
+          name: currency_a3
           type: string
           required: true
       produces:
@@ -2818,29 +3017,22 @@ paths:
       summary: Delete production settings to the payment method
       tags:
         - Payment Method
-  /admin/api/v1/payment_method/{id}/test:
+  /api/v1/s/payment_method/{id}/test:
     post:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Add test settings to the payment method
       parameters:
-        - description: payment method identifier
+        - description: paymentmethod identifier
           in: path
           name: id
-          type: string
-          required: true
-        - description: payment method identifier
-          in: query
-          name: payment_method_id
           required: true
           type: string
-        - description: Params of settings
-          in: query
-          name: params
-          required: true
+        - description: payment method params
+          in: body
+          name: body
           schema:
-            $ref: '#/definitions/payment_method.PaymentMethodParams'
+            $ref: '#/definitions/payment_method.UpdatePaymentMethodParams'
             type: object
       produces:
         - text/html
@@ -2860,26 +3052,19 @@ paths:
         - Payment Method
     put:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Update test settings to the payment method
       parameters:
-        - description: payment method identifier
+        - description: paymentmethod identifier
           in: path
           name: id
-          type: string
-          required: true
-        - description: payment method identifier
-          in: query
-          name: payment_method_id
           required: true
           type: string
-        - description: Params of settings
-          in: query
-          name: params
-          required: true
+        - description: payment method params
+          in: body
+          name: body
           schema:
-            $ref: '#/definitions/payment_method.PaymentMethodParams'
+            $ref: '#/definitions/payment_method.UpdatePaymentMethodParams'
             type: object
       produces:
         - text/html
@@ -2899,8 +3084,7 @@ paths:
         - Payment Method
     get:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Get test settings to the payment method
       parameters:
         - description: payment method identifier
@@ -2926,13 +3110,17 @@ paths:
         - Payment Method
     delete:
       consumes:
-        - multipart/form-data
-        - application/x-www-form-urlencoded
+        - application/json
       description: Delete test settings to the payment method
       parameters:
         - description: payment method identifier
           in: path
           name: id
+          type: string
+          required: true
+        - description: code of currency
+          in: query
+          name: currency_a3
           type: string
           required: true
       produces:
@@ -2951,6 +3139,106 @@ paths:
       summary: Delete test settings to the payment method
       tags:
         - Payment Method
+  /api/v1/s/price_group/country:
+    get:
+      consumes:
+        - application/json
+      description: Get region and currency by country
+      parameters:
+        - description: two-letter code of country
+          in: query
+          name: country
+          type: string
+          required: true
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/price_group.CurrencyRegion'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Get region and currency by country
+      tags:
+        - Price group
+  /api/v1/s/price_group/currencies:
+    get:
+      description: Get a list of all currencies with regions and countries in them
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/price_group.CurrencyListResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Get a list of all currencies with regions and countries in them
+      tags:
+        - Price group
+  /api/v1/s/price_group/region:
+    get:
+      consumes:
+        - application/json
+      description: Get currency for a region and a list of countries in it
+      parameters:
+        - description: name of region
+          in: query
+          name: region
+          type: string
+          required: true
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/price_group.CurrencyListResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Get currency for a region and a list of countries in it
+      tags:
+        - Price group
+  /api/v1/s/price_group/recommended:
+    get:
+      consumes:
+        - application/json
+      description: Get recommended prices for regions
+      parameters:
+        - description: base price in USD
+          in: query
+          name: amount
+          type: string
+          required: true
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/price_group.RecommendedPriceResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Get recommended prices for regions
+      tags:
+        - Price group
 
   "/admin/api/v1/merchants":
     get:
@@ -3005,82 +3293,6 @@ paths:
           in: query
           name: sort[]
           type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/onboarding.Merchant'
-            type: array
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error on server side
-          schema:
-            $ref: '#/definitions/model.Error'
-    post:
-      summary: Create new merchant in system
-      tags:
-        - Onboarding
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - description: Merchant data
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/onboarding.Merchant.CreateRequest'
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/onboarding.Merchant'
-            type: array
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error on server side
-          schema:
-            $ref: '#/definitions/model.Error'
-    put:
-      summary: Update merchant data in system
-      tags:
-        - Onboarding
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - description: Merchant data
-          in: body
-          name: data
-          required: true
-          schema:
-            $ref: '#/definitions/onboarding.Merchant.UpdateRequest'
       responses:
         "200":
           description: OK
@@ -4095,6 +4307,744 @@ paths:
             $ref: '#/definitions/token.TokenResponse'
         "400":
           description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/products/:id/prices":
+    get:
+      security:
+        - XAPISignatureHeader: []
+      summary: Get product prices
+      tags:
+        - Product
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get product prices
+      parameters:
+        - description: id of product
+          in: query
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/product.Price'
+            type: array
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      security:
+        - XAPISignatureHeader: []
+      summary: Set product prices
+      tags:
+        - Product
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set product prices
+      parameters:
+        - description: price properties
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/product.PutPrice'
+            type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/user/profile":
+    get:
+      summary: Get user profile
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get user profile
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userProfile.response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    patch:
+      summary: Create or update user profile
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create or update user profile
+      parameters:
+        - description: User profile information
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/userProfile.request'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userProfile.response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/confirm_email":
+    put:
+      summary: Confirm user email
+      tags:
+        - User Profile
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Confirm user email by token
+      parameters:
+        - description: object contained confirmation token
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/user.confirmEmail.request'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/user/feedback":
+    post:
+      summary: Create page review
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create page feedback
+      parameters:
+        - description: review body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/pageReview.request'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/agreement/signature":
+    put:
+      summary: Get data to sign agreement
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get data to sign license agreement with hellosign api
+      parameters:
+        - description: merchant identifier for which creating signature request
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.merchant.signatureRequest'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.merchant.signatureResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/company":
+    put:
+      summary: Set company information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set company information
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Company'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/company":
+    put:
+      summary: Set company information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set company information
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Company'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/contacts":
+    put:
+      summary: Set contacts information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set contacts information
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Contacts'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/contacts":
+    put:
+      summary: Set contacts information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set contacts information
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Contacts'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/banking":
+    put:
+      summary: Set banking information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set banking information
+      parameters:
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Banking'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/banking":
+    put:
+      summary: Set banking information
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set banking information
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: request body
+          in: body
+          name: data
+          schema:
+            $ref: '#/definitions/onboarding.Banking'
+            type: object
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/tariffs":
+    get:
+      summary: Get tariff rates
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get tariff rates
+      parameters:
+        - description: "region name. possible regions: CIS, Russia, West Asia, EU, North America, Central America, South America, United Kingdom, Worldwide, South Pacific"
+          in: query
+          name: region
+          type: string
+          required: true
+        - description: "merchant payout currency. 3 letters code by ISO 4217"
+          in: query
+          name: payout_currency
+          type: string
+          required: true
+        - description: "merchant start amount of turnover"
+          in: query
+          name: amount_from
+          type: number
+          required: false
+        - description: "merchant end amount of turnover"
+          in: query
+          name: amount_to
+          type: number
+          required: false
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Tariff'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/tariffs":
+    post:
+      summary: Set tariff rates to merchant
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set tariff rates to merchant
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: request body
+          in: body
+          schema:
+            $ref: '#/definitions/onboarding.Tariff.Set.Request'
+            type: object
+          name: data
+          required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/status":
+    get:
+      summary: Get data fill status
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get data fill status
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.merchant.fillStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+  "/admin/api/v1/order/{order_id}/replace_code":
+    put:
+      summary: Replaces activation code in order
+      tags:
+        - Order
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - description: Order change request
+          in: body
+          name: data
+          schema:
+            type: object
+            properties:
+              key_product_id:
+                type: string
+          required: true
+      description: Replaces activation code in order
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Order'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
         "404":

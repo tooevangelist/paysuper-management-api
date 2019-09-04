@@ -14,6 +14,7 @@ import (
 	"github.com/micro/go-micro"
 	"github.com/micro/go-plugins/selector/static"
 	"github.com/paysuper/paysuper-billing-server/pkg"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/utils"
@@ -141,19 +142,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.Http.Static("/", "web/static")
 	api.Http.Static("/spec", "spec")
 
-	err := api.validate.RegisterValidation("phone", api.PhoneValidator)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = api.validate.RegisterValidation("uuid", api.UuidValidator)
-
-	if err != nil {
-		return nil, err
-	}
-
-	err = api.validate.RegisterValidation("zip_usa", api.ZipUsaValidator)
+	err := api.registerValidators()
 
 	if err != nil {
 		return nil, err
@@ -223,7 +212,6 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	}))
 
 	api.
-		InitCurrencyRoutes().
 		InitCountryRoutes().
 		InitProductRoutes().
 		InitProjectRoutes().
@@ -233,7 +221,13 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		InitPaymentCostRoutes().
 		initTaxesRoutes().
 		initTokenRoutes().
-		initZipCodeRoutes()
+		initZipCodeRoutes().
+		initPaymentMethodRoutes().
+		initPriceGroupRoutes().
+		initUserProfileRoutes().
+		initVatReportsRoutes().
+		initRoyaltyReportsRoutes().
+		initKeyProductRoutes()
 
 	_, err = api.initOnboardingRoutes()
 
@@ -334,10 +328,29 @@ func (api *Api) getUserDetailsMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 	}
 }
 
-func (api *Api) getValidationError(err error) string {
+func (api *Api) getValidationError(err error) (rspErr *grpc.ResponseErrorMessage) {
 	vErr := err.(validator.ValidationErrors)[0]
+	val, ok := validationErrors[vErr.Field()]
 
-	return fmt.Sprintf(errorMessageMask, vErr.Field(), vErr.Tag())
+	if ok {
+		rspErr = val
+	} else {
+		val, ok := validationNamespaceErrors[vErr.StructNamespace()]
+
+		if ok {
+			rspErr = val
+		} else {
+			if vErr.Tag() == requestParameterZipUsa {
+				rspErr = errorMessageIncorrectZip
+			} else {
+				rspErr = errorValidationFailed
+			}
+		}
+	}
+
+	rspErr.Details = fmt.Sprintf(errorMessageMask, vErr.Field(), vErr.Tag())
+
+	return rspErr
 }
 
 func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.HTTPError {
@@ -350,7 +363,7 @@ func (api *Api) onboardingBeforeHandler(st interface{}, ctx echo.Context) *echo.
 	err = api.validate.Struct(st)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(api.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, api.getValidationError(err))
 	}
 
 	return nil
@@ -375,11 +388,56 @@ func (api *Api) checkProjectAuthRequestSignature(ctx echo.Context, projectId str
 	rsp, err := api.billingService.CheckProjectRequestSignature(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
 	if rsp.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return nil
+}
+
+func (api *Api) registerValidators() error {
+	if err := api.validate.RegisterValidation("phone", api.PhoneValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("uuid", api.UuidValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("zip_usa", api.ZipUsaValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("name", api.NameValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("position", api.PositionValidator); err != nil {
+		return err
+	}
+
+	api.validate.RegisterStructValidation(api.CompanyValidator, grpc.UserProfileCompany{})
+	api.validate.RegisterStructValidation(api.MerchantCompanyValidator, billing.MerchantCompanyInfo{})
+	api.validate.RegisterStructValidation(api.MerchantTariffRatesValidator, grpc.GetMerchantTariffRatesRequest{})
+
+	if err := api.validate.RegisterValidation("company_name", api.CompanyNameValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("swift", api.SwiftValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("city", api.CityValidator); err != nil {
+		return err
+	}
+
+	if err := api.validate.RegisterValidation("world_region", api.WorldRegionValidator); err != nil {
+		return err
 	}
 
 	return nil

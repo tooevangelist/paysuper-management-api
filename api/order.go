@@ -26,9 +26,9 @@ type orderRoute struct {
 }
 
 type CreateOrderJsonProjectResponse struct {
-	Id              string                            `json:"id"`
-	PaymentFormUrl  string                            `json:"payment_form_url"`
-	PaymentFormData *grpc.PaymentFormJsonDataResponse `json:"payment_form_data,omitempty"`
+	Id              string                    `json:"id"`
+	PaymentFormUrl  string                    `json:"payment_form_url"`
+	PaymentFormData *grpc.PaymentFormJsonData `json:"payment_form_data,omitempty"`
 }
 
 type OrderListRefundsBinder struct{}
@@ -97,6 +97,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.authUserRouteGroup.GET("/order/:order_id/refunds", route.listRefunds)
 	api.authUserRouteGroup.GET("/order/:order_id/refunds/:refund_id", route.getRefund)
 	api.authUserRouteGroup.POST("/order/:order_id/refunds", route.createRefund)
+	api.authUserRouteGroup.PUT("/order/:order_id/replace_code", route.replaceCode)
 
 	api.Http.PATCH("/api/v1/orders/:order_id/language", route.changeLanguage)
 	api.Http.PATCH("/api/v1/orders/:order_id/customer", route.changeCustomer)
@@ -146,12 +147,13 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	req.IssuerUrl = ctx.Request().Header.Get(HeaderReferer)
 
 	if err := r.validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	orderResponse, err := r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -180,7 +182,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(getFirstValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	// If request contain user object then paysuper must check request signature
@@ -208,6 +210,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		rsp1, err := r.billingService.IsOrderCanBePaying(ctx.Request().Context(), req1)
 
 		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
 			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 		}
 
@@ -220,6 +223,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		orderResponse, err = r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
 
 		if err != nil {
+			zap.S().Errorf("internal error", "err", err.Error())
 			return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 		}
 
@@ -245,10 +249,13 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		rsp2, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req2)
 
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if rsp2.Status != pkg.ResponseStatusOk {
+			return echo.NewHTTPError(int(rsp2.Status), rsp2.Message)
 		}
 
-		response.PaymentFormData = rsp2
+		response.PaymentFormData = rsp2.Item
 	}
 
 	return ctx.JSON(http.StatusOK, response)
@@ -278,13 +285,18 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
-	if rsp.Cookie != "" && rsp.Cookie != req.Cookie {
+	if rsp.Status != http.StatusOK {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	if rsp.Item.Cookie != "" && rsp.Item.Cookie != req.Cookie {
 		cookie := new(http.Cookie)
 		cookie.Name = CustomerTokenCookiesName
-		cookie.Value = rsp.Cookie
+		cookie.Value = rsp.Item.Cookie
 		cookie.Expires = time.Now().Add(time.Second * CustomerTokenCookiesLifetime)
 		cookie.HttpOnly = true
 		ctx.SetCookie(cookie)
@@ -372,7 +384,7 @@ func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 
 	if err != nil {
 
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.GetOrder(ctx.Request().Context(), req)
@@ -409,7 +421,7 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.FindAllOrders(ctx.Request().Context(), req)
@@ -440,6 +452,7 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -464,12 +477,13 @@ func (r *orderRoute) getRefund(ctx echo.Context) error {
 	err := r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.GetRefund(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -491,16 +505,43 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListRefunds(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
 	return ctx.JSON(http.StatusOK, rsp)
+}
+
+func (r *orderRoute) replaceCode(ctx echo.Context) error {
+	req := &grpc.ChangeCodeInOrderRequest{}
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	req.OrderId = ctx.Param("order_id")
+	if err := r.validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp := &grpc.ChangeCodeInOrderResponse{}
+
+	rsp, err := r.billingService.ChangeCodeInOrder(ctx.Request().Context(), req)
+	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Order)
 }
 
 func (r *orderRoute) createRefund(ctx echo.Context) error {
@@ -515,13 +556,14 @@ func (r *orderRoute) createRefund(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	req.CreatorId = r.authUser.Id
 	rsp, err := r.billingService.CreateRefund(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -553,12 +595,13 @@ func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.PaymentFormLanguageChanged(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -590,12 +633,13 @@ func (r *orderRoute) changeCustomer(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.PaymentFormPaymentAccountChanged(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -624,12 +668,13 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ProcessBillingAddress(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -668,6 +713,7 @@ func (r *orderRoute) notifySale(ctx echo.Context) error {
 
 	_, err = r.billingService.SetUserNotifySales(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -702,6 +748,7 @@ func (r *orderRoute) notifyNewRegion(ctx echo.Context) error {
 
 	_, err = r.billingService.SetUserNotifyNewRegion(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 

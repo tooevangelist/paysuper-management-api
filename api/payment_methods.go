@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -11,7 +12,7 @@ type PaymentMethodApiV1 struct {
 	*Api
 }
 
-func (api *Api) InitPaymentMethodRoutes() *Api {
+func (api *Api) initPaymentMethodRoutes() *Api {
 	pmApiV1 := PaymentMethodApiV1{
 		Api: api,
 	}
@@ -58,6 +59,7 @@ func (pmApiV1 *PaymentMethodApiV1) createOrUpdatePaymentMethod(ctx echo.Context)
 
 	res, err := pmApiV1.billingService.CreateOrUpdatePaymentMethod(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -67,7 +69,9 @@ func (pmApiV1 *PaymentMethodApiV1) createOrUpdatePaymentMethod(ctx echo.Context)
 // Get production settings for payment method
 // GET /api/v1/payment_method/:id/production
 func (pmApiV1 *PaymentMethodApiV1) getProductionSettings(ctx echo.Context) error {
-	req := &grpc.GetPaymentMethodSettingsRequest{}
+	req := &grpc.GetPaymentMethodSettingsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -82,6 +86,7 @@ func (pmApiV1 *PaymentMethodApiV1) getProductionSettings(ctx echo.Context) error
 
 	res, err := pmApiV1.billingService.GetPaymentMethodProductionSettings(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -101,7 +106,9 @@ func (pmApiV1 *PaymentMethodApiV1) updateProductionSettings(ctx echo.Context) er
 }
 
 func (pmApiV1 *PaymentMethodApiV1) createOrUpdateProductionSettings(ctx echo.Context) error {
-	req := &grpc.ChangePaymentMethodParamsRequest{}
+	req := &grpc.ChangePaymentMethodParamsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -116,6 +123,7 @@ func (pmApiV1 *PaymentMethodApiV1) createOrUpdateProductionSettings(ctx echo.Con
 
 	res, err := pmApiV1.billingService.CreateOrUpdatePaymentMethodProductionSettings(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -125,7 +133,9 @@ func (pmApiV1 *PaymentMethodApiV1) createOrUpdateProductionSettings(ctx echo.Con
 // Delete production settings for payment method
 // DELETE /api/v1/payment_method/:id/production
 func (pmApiV1 *PaymentMethodApiV1) deleteProductionSettings(ctx echo.Context) error {
-	req := &grpc.GetPaymentMethodSettingsRequest{}
+	req := &grpc.GetPaymentMethodSettingsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -140,6 +150,7 @@ func (pmApiV1 *PaymentMethodApiV1) deleteProductionSettings(ctx echo.Context) er
 
 	res, err := pmApiV1.billingService.DeletePaymentMethodProductionSettings(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -149,7 +160,9 @@ func (pmApiV1 *PaymentMethodApiV1) deleteProductionSettings(ctx echo.Context) er
 // Get test settings for payment method
 // GET /api/v1/payment_method/:id/test
 func (pmApiV1 *PaymentMethodApiV1) getTestSettings(ctx echo.Context) error {
-	req := &grpc.GetPaymentMethodSettingsRequest{}
+	req := &grpc.GetPaymentMethodSettingsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -164,6 +177,7 @@ func (pmApiV1 *PaymentMethodApiV1) getTestSettings(ctx echo.Context) error {
 
 	res, err := pmApiV1.billingService.GetPaymentMethodTestSettings(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -173,17 +187,19 @@ func (pmApiV1 *PaymentMethodApiV1) getTestSettings(ctx echo.Context) error {
 // Create new test settings for payment method
 // POST /payment_method/:id/test
 func (pmApiV1 *PaymentMethodApiV1) createTestSettings(ctx echo.Context) error {
-	return pmApiV1.createOrUpdateProductionSettings(ctx)
+	return pmApiV1.createOrUpdateTestSettings(ctx)
 }
 
 // Update exists test settings for payment method
 // PUT /api/v1/payment_method/:id/test
 func (pmApiV1 *PaymentMethodApiV1) updateTestSettings(ctx echo.Context) error {
-	return pmApiV1.createOrUpdateProductionSettings(ctx)
+	return pmApiV1.createOrUpdateTestSettings(ctx)
 }
 
 func (pmApiV1 *PaymentMethodApiV1) createOrUpdateTestSettings(ctx echo.Context) error {
-	req := &grpc.ChangePaymentMethodParamsRequest{}
+	req := &grpc.ChangePaymentMethodParamsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -198,6 +214,7 @@ func (pmApiV1 *PaymentMethodApiV1) createOrUpdateTestSettings(ctx echo.Context) 
 
 	res, err := pmApiV1.billingService.CreateOrUpdatePaymentMethodTestSettings(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -207,7 +224,9 @@ func (pmApiV1 *PaymentMethodApiV1) createOrUpdateTestSettings(ctx echo.Context) 
 // Delete test settings for payment method
 // DELETE /api/v1/payment_method/:id/test
 func (pmApiV1 *PaymentMethodApiV1) deleteTestSettings(ctx echo.Context) error {
-	req := &grpc.GetPaymentMethodSettingsRequest{}
+	req := &grpc.GetPaymentMethodSettingsRequest{
+		PaymentMethodId: ctx.Param("id"),
+	}
 	err := ctx.Bind(req)
 
 	if err != nil {
@@ -222,6 +241,7 @@ func (pmApiV1 *PaymentMethodApiV1) deleteTestSettings(ctx echo.Context) error {
 
 	res, err := pmApiV1.billingService.DeletePaymentMethodTestSettings(ctx.Request().Context(), req)
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 

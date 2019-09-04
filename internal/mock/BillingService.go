@@ -13,6 +13,126 @@ type BillingService struct {
 	mock.Mock
 }
 
+// AutoAcceptRoyaltyReports provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) AutoAcceptRoyaltyReports(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.EmptyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) *grpc.EmptyResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.EmptyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CalcAnnualTurnovers provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) CalcAnnualTurnovers(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.EmptyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) *grpc.EmptyResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.EmptyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CancelRedeemKeyForOrder provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) CancelRedeemKeyForOrder(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.EmptyResponseWithStatus
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.KeyForOrderRequest, ...client.CallOption) *grpc.EmptyResponseWithStatus); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.EmptyResponseWithStatus)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.KeyForOrderRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ChangeCodeInOrder provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) ChangeCodeInOrder(ctx context.Context, in *grpc.ChangeCodeInOrderRequest, opts ...client.CallOption) (*grpc.ChangeCodeInOrderResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ChangeCodeInOrderResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.ChangeCodeInOrderRequest, ...client.CallOption) *grpc.ChangeCodeInOrderResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ChangeCodeInOrderResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.ChangeCodeInOrderRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ChangeMerchant provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) ChangeMerchant(ctx context.Context, in *grpc.OnboardingRequest, opts ...client.CallOption) (*grpc.ChangeMerchantResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -163,6 +283,36 @@ func (_m *BillingService) ChangeProject(ctx context.Context, in *billing.Project
 	return r0, r1
 }
 
+// ChangeRoyaltyReport provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) ChangeRoyaltyReport(ctx context.Context, in *grpc.ChangeRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ResponseError
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.ChangeRoyaltyReportRequest, ...client.CallOption) *grpc.ResponseError); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ResponseError)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.ChangeRoyaltyReportRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CheckProjectRequestSignature provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) CheckProjectRequestSignature(ctx context.Context, in *grpc.CheckProjectRequestSignatureRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -193,8 +343,8 @@ func (_m *BillingService) CheckProjectRequestSignature(ctx context.Context, in *
 	return r0, r1
 }
 
-// CreateAccountingEntry provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) CreateAccountingEntry(ctx context.Context, in *grpc.CreateAccountingEntryRequest, opts ...client.CallOption) (*grpc.CreateAccountingEntryRequest, error) {
+// ConfirmUserEmail provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) ConfirmUserEmail(ctx context.Context, in *grpc.ConfirmUserEmailRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -204,12 +354,42 @@ func (_m *BillingService) CreateAccountingEntry(ctx context.Context, in *grpc.Cr
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *grpc.CreateAccountingEntryRequest
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.CreateAccountingEntryRequest, ...client.CallOption) *grpc.CreateAccountingEntryRequest); ok {
+	var r0 *grpc.CheckProjectRequestSignatureResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.ConfirmUserEmailRequest, ...client.CallOption) *grpc.CheckProjectRequestSignatureResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*grpc.CreateAccountingEntryRequest)
+			r0 = ret.Get(0).(*grpc.CheckProjectRequestSignatureResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.ConfirmUserEmailRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateAccountingEntry provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) CreateAccountingEntry(ctx context.Context, in *grpc.CreateAccountingEntryRequest, opts ...client.CallOption) (*grpc.CreateAccountingEntryResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.CreateAccountingEntryResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.CreateAccountingEntryRequest, ...client.CallOption) *grpc.CreateAccountingEntryResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.CreateAccountingEntryResponse)
 		}
 	}
 
@@ -245,6 +425,36 @@ func (_m *BillingService) CreateNotification(ctx context.Context, in *grpc.Notif
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *grpc.NotificationRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateOrUpdateKeyProduct provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) CreateOrUpdateKeyProduct(ctx context.Context, in *grpc.CreateOrUpdateKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.KeyProductResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.CreateOrUpdateKeyProductRequest, ...client.CallOption) *grpc.KeyProductResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.KeyProductResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.CreateOrUpdateKeyProductRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -373,6 +583,66 @@ func (_m *BillingService) CreateOrUpdateProduct(ctx context.Context, in *grpc.Pr
 	return r0, r1
 }
 
+// CreateOrUpdateUserProfile provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) CreateOrUpdateUserProfile(ctx context.Context, in *grpc.UserProfile, opts ...client.CallOption) (*grpc.GetUserProfileResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.GetUserProfileResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.UserProfile, ...client.CallOption) *grpc.GetUserProfileResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.GetUserProfileResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.UserProfile, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreatePageReview provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) CreatePageReview(ctx context.Context, in *grpc.CreatePageReviewRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.CheckProjectRequestSignatureResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.CreatePageReviewRequest, ...client.CallOption) *grpc.CheckProjectRequestSignatureResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.CheckProjectRequestSignatureResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.CreatePageReviewRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateRefund provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) CreateRefund(ctx context.Context, in *grpc.CreateRefundRequest, opts ...client.CallOption) (*grpc.CreateRefundResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -403,6 +673,36 @@ func (_m *BillingService) CreateRefund(ctx context.Context, in *grpc.CreateRefun
 	return r0, r1
 }
 
+// CreateRoyaltyReport provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) CreateRoyaltyReport(ctx context.Context, in *grpc.CreateRoyaltyReportRequest, opts ...client.CallOption) (*grpc.CreateRoyaltyReportRequest, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.CreateRoyaltyReportRequest
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.CreateRoyaltyReportRequest, ...client.CallOption) *grpc.CreateRoyaltyReportRequest); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.CreateRoyaltyReportRequest)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.CreateRoyaltyReportRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateToken provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) CreateToken(ctx context.Context, in *grpc.TokenRequest, opts ...client.CallOption) (*grpc.TokenResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -425,6 +725,36 @@ func (_m *BillingService) CreateToken(ctx context.Context, in *grpc.TokenRequest
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *grpc.TokenRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteKeyProduct provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.EmptyResponseWithStatus
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.RequestKeyProductMerchant, ...client.CallOption) *grpc.EmptyResponseWithStatus); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.EmptyResponseWithStatus)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.RequestKeyProductMerchant, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -613,6 +943,36 @@ func (_m *BillingService) DeletePaymentMethodTestSettings(ctx context.Context, i
 	return r0, r1
 }
 
+// DeletePlatformFromProduct provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) DeletePlatformFromProduct(ctx context.Context, in *grpc.RemovePlatformRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.EmptyResponseWithStatus
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.RemovePlatformRequest, ...client.CallOption) *grpc.EmptyResponseWithStatus); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.EmptyResponseWithStatus)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.RemovePlatformRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteProduct provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -725,6 +1085,36 @@ func (_m *BillingService) FindByZipCode(ctx context.Context, in *grpc.FindByZipC
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *grpc.FindByZipCodeRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// FinishRedeemKeyForOrder provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) FinishRedeemKeyForOrder(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.GetKeyForOrderRequestResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.GetKeyForOrderRequestResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.KeyForOrderRequest, ...client.CallOption) *grpc.GetKeyForOrderRequestResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.GetKeyForOrderRequestResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.KeyForOrderRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -853,8 +1243,8 @@ func (_m *BillingService) GetAllPaymentChannelCostSystem(ctx context.Context, in
 	return r0, r1
 }
 
-// GetConvertRate provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) GetConvertRate(ctx context.Context, in *grpc.ConvertRateRequest, opts ...client.CallOption) (*grpc.ConvertRateResponse, error) {
+// GetAvailableKeysCount provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetAvailableKeysCount(ctx context.Context, in *grpc.GetPlatformKeyCountRequest, opts ...client.CallOption) (*grpc.GetPlatformKeyCountResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -864,17 +1254,17 @@ func (_m *BillingService) GetConvertRate(ctx context.Context, in *grpc.ConvertRa
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *grpc.ConvertRateResponse
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.ConvertRateRequest, ...client.CallOption) *grpc.ConvertRateResponse); ok {
+	var r0 *grpc.GetPlatformKeyCountResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetPlatformKeyCountRequest, ...client.CallOption) *grpc.GetPlatformKeyCountResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*grpc.ConvertRateResponse)
+			r0 = ret.Get(0).(*grpc.GetPlatformKeyCountResponse)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *grpc.ConvertRateRequest, ...client.CallOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetPlatformKeyCountRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -943,8 +1333,8 @@ func (_m *BillingService) GetCountry(ctx context.Context, in *billing.GetCountry
 	return r0, r1
 }
 
-// GetCurrency provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) GetCurrency(ctx context.Context, in *billing.GetCurrencyRequest, opts ...client.CallOption) (*billing.Currency, error) {
+// GetKeyByID provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetKeyByID(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.GetKeyForOrderRequestResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -954,17 +1344,17 @@ func (_m *BillingService) GetCurrency(ctx context.Context, in *billing.GetCurren
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *billing.Currency
-	if rf, ok := ret.Get(0).(func(context.Context, *billing.GetCurrencyRequest, ...client.CallOption) *billing.Currency); ok {
+	var r0 *grpc.GetKeyForOrderRequestResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.KeyForOrderRequest, ...client.CallOption) *grpc.GetKeyForOrderRequestResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*billing.Currency)
+			r0 = ret.Get(0).(*grpc.GetKeyForOrderRequestResponse)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *billing.GetCurrencyRequest, ...client.CallOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.KeyForOrderRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -973,8 +1363,8 @@ func (_m *BillingService) GetCurrency(ctx context.Context, in *billing.GetCurren
 	return r0, r1
 }
 
-// GetCurrencyList provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) GetCurrencyList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*billing.CurrencyList, error) {
+// GetKeyProduct provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -984,17 +1374,137 @@ func (_m *BillingService) GetCurrencyList(ctx context.Context, in *grpc.EmptyReq
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *billing.CurrencyList
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) *billing.CurrencyList); ok {
+	var r0 *grpc.KeyProductResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.RequestKeyProductMerchant, ...client.CallOption) *grpc.KeyProductResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*billing.CurrencyList)
+			r0 = ret.Get(0).(*grpc.KeyProductResponse)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.RequestKeyProductMerchant, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetKeyProductInfo provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.GetKeyProductInfoResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetKeyProductInfoRequest, ...client.CallOption) *grpc.GetKeyProductInfoResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.GetKeyProductInfoResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetKeyProductInfoRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetKeyProducts provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetKeyProducts(ctx context.Context, in *grpc.ListKeyProductsRequest, opts ...client.CallOption) (*grpc.ListKeyProductsResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ListKeyProductsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.ListKeyProductsRequest, ...client.CallOption) *grpc.ListKeyProductsResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ListKeyProductsResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.ListKeyProductsRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetKeyProductsForOrder provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetKeyProductsForOrder(ctx context.Context, in *grpc.GetKeyProductsForOrderRequest, opts ...client.CallOption) (*grpc.ListKeyProductsResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ListKeyProductsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetKeyProductsForOrderRequest, ...client.CallOption) *grpc.ListKeyProductsResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ListKeyProductsResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetKeyProductsForOrderRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetMerchantAgreementSignUrl provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetMerchantAgreementSignUrl(ctx context.Context, in *grpc.GetMerchantAgreementSignUrlRequest, opts ...client.CallOption) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.GetMerchantAgreementSignUrlResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetMerchantAgreementSignUrlRequest, ...client.CallOption) *grpc.GetMerchantAgreementSignUrlResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.GetMerchantAgreementSignUrlResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetMerchantAgreementSignUrlRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -1033,6 +1543,36 @@ func (_m *BillingService) GetMerchantBy(ctx context.Context, in *grpc.GetMerchan
 	return r0, r1
 }
 
+// GetMerchantOnboardingCompleteData provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetMerchantOnboardingCompleteData(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.GetMerchantOnboardingCompleteDataResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.GetMerchantOnboardingCompleteDataResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.SetMerchantS3AgreementRequest, ...client.CallOption) *grpc.GetMerchantOnboardingCompleteDataResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.GetMerchantOnboardingCompleteDataResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.SetMerchantS3AgreementRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetMerchantPaymentMethod provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) GetMerchantPaymentMethod(ctx context.Context, in *grpc.GetMerchantPaymentMethodRequest, opts ...client.CallOption) (*grpc.GetMerchantPaymentMethodResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -1055,6 +1595,36 @@ func (_m *BillingService) GetMerchantPaymentMethod(ctx context.Context, in *grpc
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetMerchantPaymentMethodRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetMerchantTariffRates provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetMerchantTariffRates(ctx context.Context, in *grpc.GetMerchantTariffRatesRequest, opts ...client.CallOption) (*grpc.GetMerchantTariffRatesResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.GetMerchantTariffRatesResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetMerchantTariffRatesRequest, ...client.CallOption) *grpc.GetMerchantTariffRatesResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.GetMerchantTariffRatesResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetMerchantTariffRatesRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -1244,7 +1814,7 @@ func (_m *BillingService) GetPaymentChannelCostSystem(ctx context.Context, in *b
 }
 
 // GetPaymentMethodProductionSettings provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) GetPaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodSettingsRequest, opts ...client.CallOption) (*billing.PaymentMethodParams, error) {
+func (_m *BillingService) GetPaymentMethodProductionSettings(ctx context.Context, in *grpc.GetPaymentMethodSettingsRequest, opts ...client.CallOption) (*grpc.GetPaymentMethodSettingsResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -1254,12 +1824,12 @@ func (_m *BillingService) GetPaymentMethodProductionSettings(ctx context.Context
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *billing.PaymentMethodParams
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetPaymentMethodSettingsRequest, ...client.CallOption) *billing.PaymentMethodParams); ok {
+	var r0 *grpc.GetPaymentMethodSettingsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetPaymentMethodSettingsRequest, ...client.CallOption) *grpc.GetPaymentMethodSettingsResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*billing.PaymentMethodParams)
+			r0 = ret.Get(0).(*grpc.GetPaymentMethodSettingsResponse)
 		}
 	}
 
@@ -1274,7 +1844,7 @@ func (_m *BillingService) GetPaymentMethodProductionSettings(ctx context.Context
 }
 
 // GetPaymentMethodTestSettings provides a mock function with given fields: ctx, in, opts
-func (_m *BillingService) GetPaymentMethodTestSettings(ctx context.Context, in *grpc.GetPaymentMethodSettingsRequest, opts ...client.CallOption) (*billing.PaymentMethodParams, error) {
+func (_m *BillingService) GetPaymentMethodTestSettings(ctx context.Context, in *grpc.GetPaymentMethodSettingsRequest, opts ...client.CallOption) (*grpc.GetPaymentMethodSettingsResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -1284,17 +1854,47 @@ func (_m *BillingService) GetPaymentMethodTestSettings(ctx context.Context, in *
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *billing.PaymentMethodParams
-	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetPaymentMethodSettingsRequest, ...client.CallOption) *billing.PaymentMethodParams); ok {
+	var r0 *grpc.GetPaymentMethodSettingsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetPaymentMethodSettingsRequest, ...client.CallOption) *grpc.GetPaymentMethodSettingsResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*billing.PaymentMethodParams)
+			r0 = ret.Get(0).(*grpc.GetPaymentMethodSettingsResponse)
 		}
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetPaymentMethodSettingsRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetPlatforms provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetPlatforms(ctx context.Context, in *grpc.ListPlatformsRequest, opts ...client.CallOption) (*grpc.ListPlatformsResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ListPlatformsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.ListPlatformsRequest, ...client.CallOption) *grpc.ListPlatformsResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ListPlatformsResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.ListPlatformsRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -1333,6 +1933,126 @@ func (_m *BillingService) GetPriceGroup(ctx context.Context, in *billing.GetPric
 	return r0, r1
 }
 
+// GetPriceGroupByCountry provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetPriceGroupByCountry(ctx context.Context, in *grpc.PriceGroupByCountryRequest, opts ...client.CallOption) (*billing.PriceGroup, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *billing.PriceGroup
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.PriceGroupByCountryRequest, ...client.CallOption) *billing.PriceGroup); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*billing.PriceGroup)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.PriceGroupByCountryRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetPriceGroupCurrencies provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetPriceGroupCurrencies(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.PriceGroupCurrenciesResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.PriceGroupCurrenciesResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) *grpc.PriceGroupCurrenciesResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.PriceGroupCurrenciesResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetPriceGroupCurrencyByRegion provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetPriceGroupCurrencyByRegion(ctx context.Context, in *grpc.PriceGroupByRegionRequest, opts ...client.CallOption) (*grpc.PriceGroupCurrenciesResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.PriceGroupCurrenciesResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.PriceGroupByRegionRequest, ...client.CallOption) *grpc.PriceGroupCurrenciesResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.PriceGroupCurrenciesResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.PriceGroupByRegionRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetPriceGroupRecommendedPrice provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetPriceGroupRecommendedPrice(ctx context.Context, in *grpc.PriceGroupRecommendedPriceRequest, opts ...client.CallOption) (*grpc.PriceGroupRecommendedPriceResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.PriceGroupRecommendedPriceResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.PriceGroupRecommendedPriceRequest, ...client.CallOption) *grpc.PriceGroupRecommendedPriceResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.PriceGroupRecommendedPriceResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.PriceGroupRecommendedPriceRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetProduct provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
 	_va := make([]interface{}, len(opts))
@@ -1350,6 +2070,36 @@ func (_m *BillingService) GetProduct(ctx context.Context, in *grpc.RequestProduc
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*grpc.Product)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.RequestProduct, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetProductPrices provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetProductPrices(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.ProductPricesResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ProductPricesResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.RequestProduct, ...client.CallOption) *grpc.ProductPricesResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ProductPricesResponse)
 		}
 	}
 
@@ -1445,6 +2195,126 @@ func (_m *BillingService) GetRefund(ctx context.Context, in *grpc.GetRefundReque
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetRefundRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetUserProfile provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetUserProfile(ctx context.Context, in *grpc.GetUserProfileRequest, opts ...client.CallOption) (*grpc.GetUserProfileResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.GetUserProfileResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.GetUserProfileRequest, ...client.CallOption) *grpc.GetUserProfileResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.GetUserProfileResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetUserProfileRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetVatReportTransactions provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetVatReportTransactions(ctx context.Context, in *grpc.VatTransactionsRequest, opts ...client.CallOption) (*grpc.TransactionsResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.TransactionsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.VatTransactionsRequest, ...client.CallOption) *grpc.TransactionsResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.TransactionsResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.VatTransactionsRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetVatReportsDashboard provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetVatReportsDashboard(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.VatReportsResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.VatReportsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) *grpc.VatReportsResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.VatReportsResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.EmptyRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetVatReportsForCountry provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) GetVatReportsForCountry(ctx context.Context, in *grpc.VatReportsRequest, opts ...client.CallOption) (*grpc.VatReportsResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.VatReportsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.VatReportsRequest, ...client.CallOption) *grpc.VatReportsResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.VatReportsResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.VatReportsRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -1663,6 +2533,66 @@ func (_m *BillingService) ListRefunds(ctx context.Context, in *grpc.ListRefundsR
 	return r0, r1
 }
 
+// ListRoyaltyReportOrders provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) ListRoyaltyReportOrders(ctx context.Context, in *grpc.ListRoyaltyReportOrdersRequest, opts ...client.CallOption) (*grpc.TransactionsResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.TransactionsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.ListRoyaltyReportOrdersRequest, ...client.CallOption) *grpc.TransactionsResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.TransactionsResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.ListRoyaltyReportOrdersRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListRoyaltyReports provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) ListRoyaltyReports(ctx context.Context, in *grpc.ListRoyaltyReportsRequest, opts ...client.CallOption) (*grpc.ListRoyaltyReportsResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ListRoyaltyReportsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.ListRoyaltyReportsRequest, ...client.CallOption) *grpc.ListRoyaltyReportsResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ListRoyaltyReportsResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.ListRoyaltyReportsRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // MarkNotificationAsRead provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) MarkNotificationAsRead(ctx context.Context, in *grpc.GetNotificationRequest, opts ...client.CallOption) (*billing.Notification, error) {
 	_va := make([]interface{}, len(opts))
@@ -1685,6 +2615,36 @@ func (_m *BillingService) MarkNotificationAsRead(ctx context.Context, in *grpc.G
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *grpc.GetNotificationRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MerchantReviewRoyaltyReport provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) MerchantReviewRoyaltyReport(ctx context.Context, in *grpc.MerchantReviewRoyaltyReportRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ResponseError
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.MerchantReviewRoyaltyReportRequest, ...client.CallOption) *grpc.ResponseError); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ResponseError)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.MerchantReviewRoyaltyReportRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -1933,6 +2893,96 @@ func (_m *BillingService) ProcessRefundCallback(ctx context.Context, in *grpc.Ca
 	return r0, r1
 }
 
+// ProcessVatReports provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) ProcessVatReports(ctx context.Context, in *grpc.ProcessVatReportsRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.EmptyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.ProcessVatReportsRequest, ...client.CallOption) *grpc.EmptyResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.EmptyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.ProcessVatReportsRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PublishKeyProduct provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) PublishKeyProduct(ctx context.Context, in *grpc.PublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.KeyProductResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.PublishKeyProductRequest, ...client.CallOption) *grpc.KeyProductResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.KeyProductResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.PublishKeyProductRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ReserveKeyForOrder provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) ReserveKeyForOrder(ctx context.Context, in *grpc.PlatformKeyReserveRequest, opts ...client.CallOption) (*grpc.PlatformKeyReserveResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.PlatformKeyReserveResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.PlatformKeyReserveRequest, ...client.CallOption) *grpc.PlatformKeyReserveResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.PlatformKeyReserveResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.PlatformKeyReserveRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // SetMerchantS3Agreement provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) SetMerchantS3Agreement(ctx context.Context, in *grpc.SetMerchantS3AgreementRequest, opts ...client.CallOption) (*grpc.ChangeMerchantDataResponse, error) {
 	_va := make([]interface{}, len(opts))
@@ -1955,6 +3005,36 @@ func (_m *BillingService) SetMerchantS3Agreement(ctx context.Context, in *grpc.S
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *grpc.SetMerchantS3AgreementRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SetMerchantTariffRates provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) SetMerchantTariffRates(ctx context.Context, in *grpc.SetMerchantTariffRatesRequest, opts ...client.CallOption) (*grpc.CheckProjectRequestSignatureResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.CheckProjectRequestSignatureResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.SetMerchantTariffRatesRequest, ...client.CallOption) *grpc.CheckProjectRequestSignatureResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.CheckProjectRequestSignatureResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.SetMerchantTariffRatesRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)
@@ -2233,6 +3313,36 @@ func (_m *BillingService) UpdateOrder(ctx context.Context, in *billing.Order, op
 	return r0, r1
 }
 
+// UpdatePlatformPrices provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) UpdatePlatformPrices(ctx context.Context, in *grpc.AddOrUpdatePlatformPricesRequest, opts ...client.CallOption) (*grpc.UpdatePlatformPricesResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.UpdatePlatformPricesResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.AddOrUpdatePlatformPricesRequest, ...client.CallOption) *grpc.UpdatePlatformPricesResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.UpdatePlatformPricesResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.AddOrUpdatePlatformPricesRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpdatePriceGroup provides a mock function with given fields: ctx, in, opts
 func (_m *BillingService) UpdatePriceGroup(ctx context.Context, in *billing.PriceGroup, opts ...client.CallOption) (*billing.PriceGroup, error) {
 	_va := make([]interface{}, len(opts))
@@ -2255,6 +3365,96 @@ func (_m *BillingService) UpdatePriceGroup(ctx context.Context, in *billing.Pric
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *billing.PriceGroup, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateProductPrices provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) UpdateProductPrices(ctx context.Context, in *grpc.UpdateProductPricesRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ResponseError
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.UpdateProductPricesRequest, ...client.CallOption) *grpc.ResponseError); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ResponseError)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.UpdateProductPricesRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateVatReportStatus provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) UpdateVatReportStatus(ctx context.Context, in *grpc.UpdateVatReportStatusRequest, opts ...client.CallOption) (*grpc.ResponseError, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.ResponseError
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.UpdateVatReportStatusRequest, ...client.CallOption) *grpc.ResponseError); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.ResponseError)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.UpdateVatReportStatusRequest, ...client.CallOption) error); ok {
+		r1 = rf(ctx, in, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UploadKeysFile provides a mock function with given fields: ctx, in, opts
+func (_m *BillingService) UploadKeysFile(ctx context.Context, in *grpc.PlatformKeysFileRequest, opts ...client.CallOption) (*grpc.PlatformKeysFileResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, in)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *grpc.PlatformKeysFileResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *grpc.PlatformKeysFileRequest, ...client.CallOption) *grpc.PlatformKeysFileResponse); ok {
+		r0 = rf(ctx, in, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*grpc.PlatformKeysFileResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *grpc.PlatformKeysFileRequest, ...client.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)

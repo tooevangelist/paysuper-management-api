@@ -5,6 +5,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -27,18 +28,19 @@ func (r *projectRoute) createProject(ctx echo.Context) error {
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest /*errorRequestParamsIncorrect*/, err)
 	}
 
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ChangeProject(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -55,18 +57,19 @@ func (r *projectRoute) updateProject(ctx echo.Context) error {
 	err := binder.Bind(req, ctx)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+		return echo.NewHTTPError(http.StatusBadRequest /*errorRequestParamsIncorrect*/, err)
 	}
 
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ChangeProject(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -85,12 +88,13 @@ func (r *projectRoute) getProject(ctx echo.Context) error {
 	err := r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.GetProject(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -116,12 +120,13 @@ func (r *projectRoute) listProjects(ctx echo.Context) error {
 	err = r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.ListProjects(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -136,12 +141,13 @@ func (r *projectRoute) deleteProject(ctx echo.Context) error {
 	err := r.validate.Struct(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(r.getValidationError(err)))
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
 	rsp, err := r.billingService.DeleteProject(ctx.Request().Context(), req)
 
 	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
