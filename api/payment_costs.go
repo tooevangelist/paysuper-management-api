@@ -34,9 +34,9 @@ func (api *Api) InitPaymentCostRoutes() *Api {
 	api.authUserRouteGroup.DELETE("/payment_costs/money_back/merchant/:id", paymentCostApiV1.deleteMoneyBackCostMerchant)
 
 	api.authUserRouteGroup.POST("/payment_costs/channel/system", paymentCostApiV1.setPaymentChannelCostSystem)
-	api.authUserRouteGroup.POST("/payment_costs/channel/merchant/:merchant_id", paymentCostApiV1.setPaymentChannelCostMerchant)
+	api.authUserRouteGroup.POST("/payment_costs/channel/merchant/:id", paymentCostApiV1.setPaymentChannelCostMerchant)
 	api.authUserRouteGroup.POST("/payment_costs/money_back/system", paymentCostApiV1.setMoneyBackCostSystem)
-	api.authUserRouteGroup.POST("/payment_costs/money_back/merchant/:merchant_id", paymentCostApiV1.setMoneyBackCostMerchant)
+	api.authUserRouteGroup.POST("/payment_costs/money_back/merchant/:id", paymentCostApiV1.setMoneyBackCostMerchant)
 
 	api.authUserRouteGroup.PUT("/payment_costs/channel/system/:id", paymentCostApiV1.setPaymentChannelCostSystem)
 	api.authUserRouteGroup.PUT("/payment_costs/channel/merchant/:merchant_id/:rate_id", paymentCostApiV1.setPaymentChannelCostMerchant)
@@ -397,7 +397,7 @@ func (r *paymentCostRoute) setPaymentChannelCostMerchant(ctx echo.Context) error
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
-	req.MerchantId = ctx.Param(requestParameterMerchantId)
+	req.MerchantId = ctx.Param(requestParameterId)
 
 	if ctx.Request().Method == http.MethodPut {
 		req.Id = ctx.Param(requestParameterRateId)
@@ -499,7 +499,7 @@ func (r *paymentCostRoute) setMoneyBackCostMerchant(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
 	}
 
-	req.MerchantId = ctx.Param(requestParameterMerchantId)
+	req.MerchantId = ctx.Param(requestParameterId)
 
 	if ctx.Request().Method == http.MethodPut {
 		req.Id = ctx.Param(requestParameterRateId)
