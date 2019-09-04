@@ -97,6 +97,7 @@ func (api *Api) InitOrderV1Routes() *Api {
 	api.authUserRouteGroup.GET("/order/:order_id/refunds", route.listRefunds)
 	api.authUserRouteGroup.GET("/order/:order_id/refunds/:refund_id", route.getRefund)
 	api.authUserRouteGroup.POST("/order/:order_id/refunds", route.createRefund)
+	api.authUserRouteGroup.PUT("/order/:order_id/replace_code", route.replaceCode)
 
 	api.Http.PATCH("/api/v1/orders/:order_id/language", route.changeLanguage)
 	api.Http.PATCH("/api/v1/orders/:order_id/customer", route.changeCustomer)
@@ -523,6 +524,32 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, rsp)
+}
+
+func (r *orderRoute) replaceCode(ctx echo.Context) error {
+	req := &grpc.ChangeCodeInOrderRequest{}
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
+	}
+
+	req.OrderId = ctx.Param("order_id")
+	if err := r.validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	rsp := &grpc.ChangeCodeInOrderResponse{}
+
+	rsp, err := r.billingService.ChangeCodeInOrder(ctx.Request().Context(), req)
+	if err != nil {
+		zap.S().Errorf("internal error", "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Order)
 }
 
 func (r *orderRoute) createRefund(ctx echo.Context) error {

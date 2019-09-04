@@ -21,7 +21,7 @@ require (
 	github.com/micro/kubernetes v0.2.0 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190903140338-4525ab5052f9
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190904133438-ca187438857e
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
