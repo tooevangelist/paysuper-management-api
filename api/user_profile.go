@@ -27,6 +27,7 @@ func (r *userProfileRoute) getUserProfile(ctx echo.Context) error {
 	if r.authUser.Id == "" {
 		return echo.NewHTTPError(http.StatusUnauthorized, errorMessageAccessDenied)
 	}
+
 	req := &grpc.GetUserProfileRequest{UserId: r.authUser.Id}
 	rsp, err := r.billingService.GetUserProfile(ctx.Request().Context(), req)
 

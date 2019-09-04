@@ -25,7 +25,6 @@ const (
 	requestParameterPaymentMethod            = "payment_method[]"
 	requestParameterCountry                  = "country"
 	requestParameterCountries                = "country[]"
-	requestParameterStatuses                 = "status[]"
 	requestParameterProjectId                = "project_id"
 	requestParameterPaymentMethodId          = "method_id"
 	requestParameterOrderId                  = "order_id"
@@ -70,6 +69,7 @@ const (
 	requestAuthorizationTokenRegex           = "Bearer ([A-z0-9_.-]{10,})"
 	requestParameterZipUsa                   = "zip_usa"
 	requestParameterToken                    = "token"
+    requestParameterRateId                   = "rate_id"
 
 	userProfileFieldNumberOfEmployees = "NumberOfEmployees"
 	userProfileFieldAnnualIncome      = "AnnualIncome"
@@ -126,6 +126,7 @@ const (
 	UserProfilePositionSoftwareDeveloper = "Software Developer"
 	UserProfilePositionMarketing         = "Marketing"
 	UserProfilePositionSupport           = "Support"
+
 	InternalErrorTemplate = "internal error"
 )
 

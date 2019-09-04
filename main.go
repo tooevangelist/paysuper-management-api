@@ -58,11 +58,10 @@ func main() {
 	}()
 
 	sInit := &api.ServerInitParams{
-		Config:      conf,
-		Logger:      sugar,
-		HttpScheme:  conf.HttpScheme,
-		AmqpAddress: conf.AmqpAddress,
-		Auth1:       &conf.Auth1,
+		Config:     conf,
+		Logger:     sugar,
+		HttpScheme: conf.HttpScheme,
+		Auth1:      &conf.Auth1,
 	}
 
 	server, err := api.NewServer(sInit)
