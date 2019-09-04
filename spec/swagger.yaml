@@ -2063,6 +2063,364 @@ definitions:
         description: time of create user profile
         $ref: '#/definitions/ProtobufTimestamp'
 
+  onboarding.cost.payment.system:
+    properties:
+      id:
+        description: unique identifier
+        type: string
+      name:
+        description: payment method name
+        type: string
+      region:
+        description: region name
+        type: string
+      country:
+        description: two-letter country code by ISO 3166-1
+        type: string
+      percent:
+        description: percent fee
+        type: number
+      fix_amount:
+        description: fixed fee in particular currency
+        type: number
+      fix_amount_currency:
+        description: currency of fixed fee.  letters code by ISO 4217
+        type: string
+      created_at:
+        $ref: '#/definitions/ProtobufTimestamp'
+        description: date of create cost record
+      updated_at:
+        $ref: '#/definitions/ProtobufTimestamp'
+        description: date of create cost record
+      is_active:
+        description: true is cost record is active
+        type: boolean
+
+  onboarding.cost.payment.system.create:
+    properties:
+      name:
+        description: payment method name
+        type: string
+      region:
+        description: region name
+        type: string
+      country:
+        description: two-letter country code by ISO 3166-1
+        type: string
+      percent:
+        description: percent fee
+        type: number
+      fix_amount:
+        description: fixed fee in particular currency
+        type: number
+      fix_amount_currency:
+        description: currency of fixed fee.  letters code by ISO 4217
+        type: string
+    required:
+      - name
+      - region
+      - percent
+      - fix_amount_currency
+
+  onboarding.cost.payment.system.all:
+    properties:
+      items:
+        description: array of system payment costs
+        type: array
+        items:
+          $ref: '#/definitions/onboarding.cost.payment.system'
+
+  onboarding.cost.money_back.system.all:
+    properties:
+      items:
+        description: array of system money back costs
+        type: array
+        items:
+          $ref: '#/definitions/onboarding.cost.money_back.system'
+
+  onboarding.cost.payment.merchant:
+    properties:
+      id:
+        description: unique identifier
+        type: string
+      merchant_id:
+        description: merchant identifier
+        type: string
+      name:
+        description: payment method name
+        type: string
+      payout_currency:
+        description: payout currency. 3 lettre code by ISO 4217
+        type: string
+      min_amount:
+        description: payment min amount in payout currency
+        type: number
+      region:
+        description: region name
+        type: string
+      country:
+        description: two-letter country code by ISO 3166-1
+        type: string
+      method_percent:
+        description: payment method fee in percents
+        type: number
+      method_fix_amount:
+        description: payment method fixed fee in particular currency
+        type: number
+      method_fix_amount_currency:
+        description: currency of payment method fixed fee. 3-letters code by ISO 4217
+        type: string
+      ps_percent:
+        description: paysuper fixed fee in particular currency
+        type: number
+      ps_fixed_fee:
+        description: paysuper fixed fee in particular currency
+        type: number
+      ps_fixed_fee_currency:
+        description: currency of paysuper fixed fee. 3-letters code by ISO 4217
+        type: string
+      created_at:
+        description: time when retes record was created for merchant
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: time when retes record was updated at last time for merchant
+        $ref: '#/definitions/ProtobufTimestamp'
+      is_active:
+        description: true is rates record active for merchant
+        type: boolean
+
+  onboarding.cost.payment.merchant.create:
+    properties:
+      name:
+        description: payment method name
+        type: string
+      payout_currency:
+        description: payout currency. 3 lettre code by ISO 4217
+        type: string
+      min_amount:
+        description: payment min amount in payout currency
+        type: number
+      region:
+        description: region name
+        type: string
+      country:
+        description: two-letter country code by ISO 3166-1
+        type: string
+      method_percent:
+        description: payment method fee in percents
+        type: number
+      method_fix_amount:
+        description: payment method fixed fee in particular currency
+        type: number
+      method_fix_amount_currency:
+        description: currency of payment method fixed fee. 3-letters code by ISO 4217
+        type: string
+      ps_percent:
+        description: paysuper fixed fee in particular currency
+        type: number
+      ps_fixed_fee:
+        description: paysuper fixed fee in particular currency
+        type: number
+      ps_fixed_fee_currency:
+        description: currency of paysuper fixed fee. 3-letters code by ISO 4217
+        type: string
+    required:
+      - name
+      - payout_currency
+      - min_amount
+      - region
+      - method_percent
+      - method_fix_amount_currency
+      - ps_percent
+      - ps_fixed_fee_currency
+
+  onboarding.cost.money_back.system:
+    properties:
+      id:
+        description: unique identifier
+        type: string
+      name:
+        description: payment method name
+        type: string
+      payout_currency:
+        description: payout currency. 3 lettre code by ISO 4217
+        type: string
+      undo_reason:
+        description: "money back type. available values: refund, reversal, chargeback"
+        type: string
+      region:
+        description: region name
+        type: string
+      country:
+        description: two-letter country code by ISO 3166-1
+        type: string
+      days_from:
+        description: number of days after payment operation
+        type: number
+      payment_stage:
+        description: payment stage
+        type: number
+      percent:
+        description: payment method fee in percents
+        type: number
+      fix_amount:
+        description: payment method fixed fee
+        type: number
+      created_at:
+        description: time when retes record was created
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: time when retes record was updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+      is_active:
+        description: true is rates record is active
+        type: boolean
+
+  onboarding.cost.money_back.system.create:
+    properties:
+      name:
+        description: payment method name
+        type: string
+      payout_currency:
+        description: payout currency. 3 lettre code by ISO 4217
+        type: string
+      undo_reason:
+        description: "money back type. available values: refund, reversal, chargeback"
+        type: string
+      region:
+        description: region name
+        type: string
+      country:
+        description: two-letter country code by ISO 3166-1
+        type: string
+      days_from:
+        description: number of days after payment operation
+        type: number
+      payment_stage:
+        description: payment stage
+        type: number
+      percent:
+        description: payment method fee in percents
+        type: number
+      fix_amount:
+        description: payment method fixed fee
+        type: number
+    required:
+      - name
+      - payout_currency
+      - undo_reason
+      - region
+
+  onboarding.cost.money_back.merchant:
+    properties:
+      id:
+        description: unique identifier
+        type: string
+      merchant_id:
+        description: merchant identifier
+        type: string
+      name:
+        description: payment method name
+        type: string
+      payout_currency:
+        description: payout currency. 3 lettre code by ISO 4217
+        type: string
+      undo_reason:
+        description: "money back type. available values: refund, reversal, chargeback"
+        type: string
+      region:
+        description: region name
+        type: string
+      country:
+        description: two-letter country code by ISO 3166-1
+        type: string
+      days_from:
+        description: number of days after payment operation
+        type: number
+      payment_stage:
+        description: payment stage
+        type: number
+      percent:
+        description: payment method fee in percents
+        type: number
+      fix_amount:
+        description: payment method fixed fee in particular currency
+        type: number
+      fix_amount_currency:
+        description: currency of payment method fixed fee.  letters code by ISO 4217
+        type: string
+      is_paid_by_merchant:
+        description: if true than commission will to take from merchant when money back operation will be processing
+        type: boolean
+      created_at:
+        description: time when retes record was created
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: time when retes record was updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+      is_active:
+        description: true is rates record is active
+        type: boolean
+
+  onboarding.cost.money_back.merchant.create:
+    properties:
+      name:
+        description: payment method name
+        type: string
+      payout_currency:
+        description: payout currency. 3 lettre code by ISO 4217
+        type: string
+      undo_reason:
+        description: "money back type. available values: refund, reversal, chargeback"
+        type: string
+      region:
+        description: region name
+        type: string
+      country:
+        description: two-letter country code by ISO 3166-1
+        type: string
+      days_from:
+        description: number of days after payment operation
+        type: number
+      payment_stage:
+        description: payment stage
+        type: number
+      percent:
+        description: payment method fee in percents
+        type: number
+      fix_amount:
+        description: payment method fixed fee in particular currency
+        type: number
+      fix_amount_currency:
+        description: currency of payment method fixed fee.  letters code by ISO 4217
+        type: string
+      is_paid_by_merchant:
+        description: if true than commission will to take from merchant when money back operation will be processing
+        type: boolean
+    required:
+      - name
+      - payout_currency
+      - undo_reason
+      - region
+      - percent
+      - fix_amount_currency
+
+  onboarding.cost.payment.merchant.all:
+    properties:
+      items:
+        description: array of merchant payment costs
+        type: array
+        items:
+          $ref: '#/definitions/onboarding.cost.payment.merchant'
+
+  onboarding.cost.money_back.merchant.all:
+    properties:
+      items:
+        description: array of merchant payment costs
+        type: array
+        items:
+          $ref: '#/definitions/onboarding.cost.money_back.merchant'
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -2994,11 +3352,6 @@ paths:
         - description: payment method identifier
           in: path
           name: id
-          type: string
-          required: true
-        - description: code of currency
-          in: query
-          name: currency_a3
           type: string
           required: true
         - description: code of currency
@@ -5015,6 +5368,7 @@ paths:
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
+
   "/admin/api/v1/order/{order_id}/replace_code":
     put:
       summary: Replaces activation code in order
@@ -5025,6 +5379,11 @@ paths:
       produces:
         - application/json
       parameters:
+        - description: order identifier
+          in: path
+          name: order_id
+          type: string
+          required: true
         - description: Order change request
           in: body
           name: data
@@ -5040,6 +5399,957 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Order'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/channel/system/all":
+    get:
+      summary: Get all system costs for payments
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get all system costs for payments
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.system.all'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/channel/merchant/{id}/all":
+    get:
+      summary: Get all merchant costs for payments operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.merchant.all'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/money_back/system/all":
+    get:
+      summary: Get all system costs for money back operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get all system costs for money back operations
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.system.all'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/money_back/merchant/{id}/all":
+    get:
+      summary: Get all merchant costs for money back operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get all merchant costs for money back operations
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.merchant.all'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/channel/system":
+    get:
+      summary: Get system costs for payment operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get system costs for payment operations
+      parameters:
+        - description: "payment method name"
+          in: query
+          name: name
+          type: string
+          required: true
+        - description: "region name. possible regions: CIS, Russia, West Asia, EU, North America, Central America, South America, United Kingdom, Worldwide, South Pacific"
+          in: query
+          name: region
+          type: string
+          required: true
+        - description: "two-letter country code by ISO 3166-1"
+          in: query
+          name: country
+          type: string
+          required: false
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.system'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    post:
+      summary: Create system costs for payments operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create system costs for payments operations
+      parameters:
+        - description: data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.system.create'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.system'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/channel/merchant/{id}":
+    get:
+      summary: Get merchant costs for payment operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get merchant costs for payment operations
+      parameters:
+        - description: merchant unique identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: "payment method name"
+          in: query
+          name: name
+          type: string
+          required: true
+        - description: "region name. possible regions: CIS, Russia, West Asia, EU, North America, Central America, South America, United Kingdom, Worldwide, South Pacific"
+          in: query
+          name: region
+          type: string
+          required: true
+        - description: "two-letter country code by ISO 3166-1"
+          in: query
+          name: country
+          type: string
+          required: false
+        - description: payout currency. 3 lettre code by ISO 4217
+          in: query
+          type: string
+          name: payout_currency
+          required: true
+        - description: min payment amount
+          in: query
+          type: number
+          name: amount
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    post:
+      summary: Create merchant costs for payments operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create merchant costs for payments operations
+      parameters:
+        - description: merchant unique identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.merchant.create'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    delete:
+      summary: Delete merchant costs for payment operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete merchant costs for payment operations
+      parameters:
+        - description: merchant cost identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/money_back/system":
+    get:
+      summary: Get system costs for money back operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get system costs for money back operations
+      parameters:
+        - description: payment method name
+          in: query
+          name: name
+          type: string
+          required: true
+        - description: payout currency. 3 lettre code by ISO 4217
+          in: query
+          name: payout_currency
+          type: string
+          required: true
+        - description: "money back type. available values: refund, reversal, chargeback"
+          in: query
+          name: undo_reason
+          type: string
+          required: true
+        - description: region name
+          in: query
+          name: region
+          type: string
+          required: true
+        - description: two-letter country code by ISO 3166-1
+          in: query
+          name: country
+          type: string
+          required: false
+        - description: number of days after payment operation
+          in: query
+          name: days
+          type: number
+          required: true
+        - description: payment stage
+          in: query
+          name: payment_stage
+          type: number
+          required: false
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.system'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    post:
+      summary: Create system costs for money back operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create system costs for money back operations
+      parameters:
+        - description: data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.system.create'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.system'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/money_back/merchant/{id}":
+    get:
+      summary: Get merchant costs for money back operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get merchant costs for money back operations
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: payment method name
+          in: query
+          name: name
+          type: string
+          required: true
+        - description: payout currency. 3 lettre code by ISO 4217
+          in: query
+          name: payout_currency
+          type: string
+          required: true
+        - description: "money back type. available values: refund, reversal, chargeback"
+          in: query
+          name: undo_reason
+          type: string
+          required: true
+        - description: region name
+          in: query
+          name: region
+          type: string
+          required: true
+        - description: two-letter country code by ISO 3166-1
+          in: query
+          name: country
+          type: string
+          required: false
+        - description: number of days after payment operation
+          in: query
+          name: days
+          type: number
+          required: true
+        - description: payment stage
+          in: query
+          name: payment_stage
+          type: number
+          required: false
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    post:
+      summary: Create merchant costs for money back operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create merchant costs for money back operations
+      parameters:
+        - description: merchant unique identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.merchant.create'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    delete:
+      summary: Delete merchant costs for money back operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete merchant costs for money back operations
+      parameters:
+        - description: merchant cost identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/channel/system/{id}":
+    put:
+      summary: Update system costs for payment operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Update system costs for payment operations
+      parameters:
+        - description: cost record identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.system.create'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.system'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    delete:
+      summary: Delete system costs for payment operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete system costs for payment operations
+      parameters:
+        - description: system cost identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/money_back/system/{id}":
+    put:
+      summary: Update system costs for money back operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Update system costs for money back operations
+      parameters:
+        - description: system cost identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.system.create'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.system'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    delete:
+      summary: Delete system costs for money back operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete system costs for money back operations
+      parameters:
+        - description: system cost identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/channel/merchant/{merchant_id}/{cost_id}":
+    put:
+      summary: Update merchant costs for payments operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create merchant costs for payments operations
+      parameters:
+        - description: merchant unique identifier
+          in: path
+          name: merchant_id
+          type: string
+          required: true
+        - description: cost record unique identifier
+          in: path
+          name: cost_id
+          type: string
+          required: true
+        - description: data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.merchant.create'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.payment.merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_costs/money_back/merchant/{merchant_id}/{cost_id}":
+    put:
+      summary: Update merchant costs for money back operations
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Update merchant costs for money back operations
+      parameters:
+        - description: merchant unique identifier
+          in: path
+          name: merchant_id
+          type: string
+          required: true
+        - description: cost record unique identifier
+          in: path
+          name: cost_id
+          type: string
+          required: true
+        - description: data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.merchant.create'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.cost.money_back.merchant'
         "400":
           description: Invalid request data
           schema:
