@@ -52,6 +52,7 @@ paths:
           $ref: '#/components/responses/InternalError'
 
   /admin/api/v1/key-products/:key_product_id/platforms:
+<<<<<<< .merge_file_a05312
     get:
       tags:
         - product
@@ -84,6 +85,8 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
+=======
+>>>>>>> .merge_file_a14080
     post:
       tags:
         - product
@@ -107,7 +110,14 @@ paths:
         content:
           application/json:
             schema:
+<<<<<<< .merge_file_a05312
               $ref: '#/components/schemas/KeyPlatform'
+=======
+              type: object
+              properties:
+                platform:
+                  $ref: '#/components/schemas/KeyPlatform'
+>>>>>>> .merge_file_a14080
       responses:
         200:
           description: OK
@@ -307,9 +317,15 @@ paths:
               schema:
                 type: object
                 properties:
+<<<<<<< .merge_file_a05312
                   total_count:
                     type: integer
                   items:
+=======
+                  count:
+                    type: integer
+                  platforms:
+>>>>>>> .merge_file_a14080
                     type: array
                     items:
                       $ref: '#/components/schemas/Platform'
@@ -320,6 +336,47 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
+<<<<<<< .merge_file_a05312
+=======
+  /api/v1/key-products/:key_product_id:
+    get:
+      tags:
+        - product
+      summary: "Get product with platforms list and their prices"
+      parameters:
+        - name: key_product_id
+          in: path
+          description: "Key Product ID"
+          required: true
+          schema:
+            type: string
+        - name: country
+          in: query
+          description: ISO code of country for that price shoul be calculated
+          required: false
+          example: RUS
+          schema:
+            type: string
+        - name: currency
+          in: query
+          description: Currency of price that should be calculated
+          example: RUB
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyProductInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+>>>>>>> .merge_file_a14080
 components:
   securitySchemes:
     bearerAuth:
@@ -465,6 +522,58 @@ components:
           type: string
           example: USD
 
+<<<<<<< .merge_file_a05312
+=======
+    KeyProductInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: id of product
+        project_id:
+          type: string
+          description: Id of project
+        name:
+          type: string
+          description: Localized name of product
+        description:
+          type: string
+          description: Localized description of description
+        long_description:
+          type: string
+          description: Localized long description of description
+        images:
+          type: array
+          items:
+            type: string
+        platforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyPlatformInfo'
+
+    KeyPlatformInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: object
+          properties:
+            amount:
+              type: number
+            currency:
+              type: string
+              example: USD
+            region:
+              type: string
+              example: USD
+            is_fallback:
+              type: boolean
+              description: Flag indicates that price was calculated in default currency instead of specified
+
+>>>>>>> .merge_file_a14080
     KeyProduct:
       type: object
       properties:
