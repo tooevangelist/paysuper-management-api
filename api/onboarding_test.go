@@ -68,7 +68,11 @@ func (suite *OnboardingTestSuite) SetupTest() {
 			Email: "test@unit.test",
 		},
 		config: &config.Config{
-			HttpScheme: "http",
+			HttpScheme:                  "http",
+			AwsAccessKeyIdAgreement:     "key_id",
+			AwsSecretAccessKeyAgreement: "secret_key",
+			AwsRegionAgreement:          "eu-west-1",
+			AwsBucketAgreement:          "bucket",
 		},
 	}
 

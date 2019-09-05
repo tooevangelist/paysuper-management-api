@@ -14,10 +14,15 @@ type Auth1 struct {
 type Config struct {
 	Auth1
 
-	HttpScheme  string `envconfig:"HTTP_SCHEME" default:"https"`
-	Environment string `envconfig:"ENVIRONMENT" default:"test"`
+	HttpScheme              string `envconfig:"HTTP_SCHEME" default:"https"`
+	Environment             string `envconfig:"ENVIRONMENT" default:"test"`
 	PaymentFormJsLibraryUrl string `envconfig:"PAYMENT_FORM_JS_LIBRARY_URL" required:"true"`
 	WebsocketUrl            string `envconfig:"WEBSOCKET_URL" default:"wss://cf.tst.protocol.one/connection/websocket"`
+
+	AwsAccessKeyIdAgreement     string `envconfig:"AWS_ACCESS_KEY_ID_AGREEMENT" required:"true"`
+	AwsSecretAccessKeyAgreement string `envconfig:"AWS_SECRET_ACCESS_KEY_AGREEMENT" required:"true"`
+	AwsRegionAgreement          string `envconfig:"AWS_REGION_AGREEMENT" default:"eu-west-1"`
+	AwsBucketAgreement          string `envconfig:"AWS_BUCKET_AGREEMENT" required:"true"`
 }
 
 func NewConfig() (error, *Config) {
