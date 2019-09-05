@@ -1241,7 +1241,7 @@ definitions:
     properties:
       region:
         type: string
-        description: name of region
+        description: "region identifier. possible values: cis, russia, west_asia, eu, north_america, central_america, south_america, uk, worldwide, south_pacific"
       payout_currency:
         type: string
         description: merchant payout currency. letters code by ISO 4217
@@ -5234,7 +5234,7 @@ paths:
         - application/json
       description: Get tariff rates
       parameters:
-        - description: "region name. possible regions: CIS, Russia, West Asia, EU, North America, Central America, South America, United Kingdom, Worldwide, South Pacific"
+        - description: "region name. possible values: cis, russia, west_asia, eu, north_america, central_america, south_america, uk, worldwide, south_pacific"
           in: query
           name: region
           type: string
@@ -5591,7 +5591,7 @@ paths:
           name: name
           type: string
           required: true
-        - description: "region name. possible regions: CIS, Russia, West Asia, EU, North America, Central America, South America, United Kingdom, Worldwide, South Pacific"
+        - description: "region name. possible values: CIS, Russia, West Asia, EU, North America, Central America, South America, United Kingdom, Worldwide, South Pacific"
           in: query
           name: region
           type: string
