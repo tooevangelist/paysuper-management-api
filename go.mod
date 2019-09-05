@@ -19,7 +19,6 @@ require (
 	github.com/micro/go-plugins v1.2.0
 	github.com/micro/grpc-go v0.0.0-20180913204047-2c703400301b // indirect
 	github.com/micro/kubernetes v0.2.0 // indirect
-	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82
 	github.com/paysuper/paysuper-billing-server v0.0.0-20190903140338-4525ab5052f9
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
@@ -28,7 +27,6 @@ require (
 	github.com/spf13/viper v1.3.1 // indirect
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
 	github.com/stretchr/testify v1.4.0
-	github.com/ttacon/builder v0.0.0-20170518171403-c099f663e1c2 // indirect
 	github.com/ttacon/libphonenumber v1.0.1
 	go.uber.org/zap v1.10.0
 	gopkg.in/go-playground/validator.v9 v9.29.1
@@ -36,3 +34,5 @@ require (
 )
 
 replace github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
+
+go 1.13
