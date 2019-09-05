@@ -15,11 +15,12 @@ type reportFileRoute struct {
 }
 
 type reportFileRequest struct {
-	Id         string                 `bson:"_id"`
-	FileType   string                 `bson:"file_type"`
-	ReportType string                 `bson:"report_type"`
-	Template   string                 `bson:"template"`
-	Params     map[string]interface{} `bson:"params"`
+	Id         string                 `json:"id" form:"id" bson:"_id"`
+	MerchantId string                 `json:"merchant_id" form:"merchant_id" bson:"merchant_id"`
+	FileType   string                 `json:"file_type" form:"file_type" bson:"file_type"`
+	ReportType string                 `json:"report_type" form:"report_type" bson:"report_type"`
+	Template   string                 `json:"template" form:"template" bson:"template"`
+	Params     map[string]interface{} `json:"params" form:"params" bson:"params"`
 }
 
 func (api *Api) initReportFileRoute() *Api {
@@ -67,15 +68,29 @@ func (r *reportFileRoute) create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorRequestDataInvalid)
 	}
 
+	err = r.validate.Struct(data)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
 	req2 := &reporterProto.ReportFile{
-		Id:         data.Id,
+		MerchantId: merchant.Item.Id,
 		ReportType: data.ReportType,
 		FileType:   data.FileType,
 		Template:   data.Template,
 		Params:     params,
 	}
+
 	res, err := r.reporterService.CreateFile(ctx.Request().Context(), req2)
 	if err != nil {
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "CreateFile"),
+			zap.Any(ErrorFieldRequest, req1),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageCreateReportFile)
 	}
 
