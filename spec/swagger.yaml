@@ -131,6 +131,20 @@ definitions:
         description: |
           access token to websocket private chanel
         type: string
+      platform_id:
+        description: |
+          id of platform for key product (steam, gog, xbox, etc.)
+        type: string
+        example: steam
+      type:
+        description: |
+          type of products in order (simple, product, key)
+        type: string
+        example: simple
+        enum:
+          - simple
+          - product
+          - key
     type: object
   model.Merchant:
     properties:
@@ -1948,18 +1962,18 @@ definitions:
 
   userProfile.request:
     properties:
-      personal:
-        description: object contain personal information about user
-        $ref: '#/definitions/userProfile.personal'
-      help:
-        description: object contain information about user problem which need help
-        $ref: '#/definitions/userProfile.help'
-      company:
-        description: object contain information about user company
-        $ref: '#/definitions/userProfile.company'
-      last_step:
-        description: identifier of wizard last step which user ended
-        type: string
+        personal:
+          description: object contain personal information about user
+          $ref: '#/definitions/userProfile.personal'
+        help:
+          description: object contain information about user problem which need help
+          $ref: '#/definitions/userProfile.help'
+        company:
+          description: object contain information about user company
+          $ref: '#/definitions/userProfile.company'
+        last_step:
+          description: identifier of wizard last step which user ended
+          type: string
 
   userProfile.response:
     properties:
@@ -5334,6 +5348,57 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.merchant.fillStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/order/{order_id}/replace_code":
+    put:
+      summary: Replaces activation code in order
+      tags:
+        - Order
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - description: order identifier
+          in: path
+          name: order_id
+          type: string
+          required: true
+        - description: Order change request
+          in: body
+          name: data
+          schema:
+            type: object
+            properties:
+              key_product_id:
+                type: string
+          required: true
+      description: Replaces activation code in order
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Order'
         "400":
           description: Invalid request data
           schema:

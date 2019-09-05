@@ -13,6 +13,7 @@ import (
 
 type BillingServerSystemErrorMock struct{}
 
+
 func NewBillingServerSystemErrorMock() grpc.BillingService {
 	return &BillingServerSystemErrorMock{}
 }
@@ -647,4 +648,72 @@ func (s *BillingServerSystemErrorMock) SetMerchantTariffRates(
 	opts ...client.CallOption,
 ) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return &grpc.CheckProjectRequestSignatureResponse{}, nil
+}
+
+func (s *BillingServerSystemErrorMock) CreateOrUpdateKeyProduct(ctx context.Context, in *grpc.CreateOrUpdateKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetKeyProducts(ctx context.Context, in *grpc.ListKeyProductsRequest, opts ...client.CallOption) (*grpc.ListKeyProductsResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) PublishKeyProduct(ctx context.Context, in *grpc.PublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetKeyProductsForOrder(ctx context.Context, in *grpc.GetKeyProductsForOrderRequest, opts ...client.CallOption) (*grpc.ListKeyProductsResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetPlatforms(ctx context.Context, in *grpc.ListPlatformsRequest, opts ...client.CallOption) (*grpc.ListPlatformsResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) UpdatePlatformPrices(ctx context.Context, in *grpc.AddOrUpdatePlatformPricesRequest, opts ...client.CallOption) (*grpc.UpdatePlatformPricesResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) DeletePlatformFromProduct(ctx context.Context, in *grpc.RemovePlatformRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetAvailableKeysCount(ctx context.Context, in *grpc.GetPlatformKeyCountRequest, opts ...client.CallOption) (*grpc.GetPlatformKeyCountResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) UploadKeysFile(ctx context.Context, in *grpc.PlatformKeysFileRequest, opts ...client.CallOption) (*grpc.PlatformKeysFileResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetKeyByID(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.GetKeyForOrderRequestResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) ReserveKeyForOrder(ctx context.Context, in *grpc.PlatformKeyReserveRequest, opts ...client.CallOption) (*grpc.PlatformKeyReserveResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) FinishRedeemKeyForOrder(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.GetKeyForOrderRequestResponse, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) CancelRedeemKeyForOrder(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	return nil, SomeError
+}
+
+func (s *BillingServerSystemErrorMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) ChangeCodeInOrder(ctx context.Context, in *grpc.ChangeCodeInOrderRequest, opts ...client.CallOption) (*grpc.ChangeCodeInOrderResponse, error) {
+	panic("implement me")
 }

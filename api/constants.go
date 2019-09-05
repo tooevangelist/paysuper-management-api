@@ -13,6 +13,7 @@ const (
 	apiAuthUserGroupPath    = "/admin/api/v1"
 
 	LimitDefault  = 100
+	LimitMax      = 1000
 	OffsetDefault = 0
 
 	requestParameterId                       = "id"
@@ -128,6 +129,8 @@ const (
 	ErrorFieldService = "service"
 	ErrorFieldMethod  = "method"
 	ErrorFieldRequest = "request"
+
+	InternalErrorTemplate = "internal error"
 )
 
 var (
