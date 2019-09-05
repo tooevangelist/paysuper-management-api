@@ -1005,6 +1005,8 @@ github.com/paysuper/paysuper-aws-manager v0.0.0-20190826105402-bb303dc4dd78 h1:g
 github.com/paysuper/paysuper-aws-manager v0.0.0-20190826105402-bb303dc4dd78/go.mod h1:TjXLdcbFp4VeSvZK3+sKv61uRS1tH0mtrEEqziaJ/+E=
 github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82 h1:/p8k5EsVivYfSVFeWV9Pb7/EZj6PJt+f3v/OPmH2dr0=
 github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82/go.mod h1:TjXLdcbFp4VeSvZK3+sKv61uRS1tH0mtrEEqziaJ/+E=
+github.com/paysuper/paysuper-aws-manager v0.0.0-20190905152900-bd5c04c08c1f h1:CF3mAmM2gXas4rvUiGsBCfbZSXWnd5Z24WNrbWtlKKA=
+github.com/paysuper/paysuper-aws-manager v0.0.0-20190905152900-bd5c04c08c1f/go.mod h1:TjXLdcbFp4VeSvZK3+sKv61uRS1tH0mtrEEqziaJ/+E=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190730110641-01c53a635757/go.mod h1:lpU2waViaUZDqje93EGGl82YuumvKsSCnhLa9e4ZH8Q=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190801190642-0f5394def881/go.mod h1:VANzUeZc2mcnHfnuI1E5HB1wczpZ0AUIiDozUj2vn/A=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190801201139-8888c6f60f27/go.mod h1:I4q1nk/hBpNI3NNSpP1ZRMkA3mMOkSJhtrrg0JVXDyw=
