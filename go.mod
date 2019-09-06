@@ -55,6 +55,7 @@ require (
 	github.com/spf13/viper v1.3.1 // indirect
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
 	github.com/stretchr/testify v1.4.0
+	github.com/ttacon/builder v0.0.0-20170518171403-c099f663e1c2 // indirect
 	github.com/ttacon/libphonenumber v1.0.1
 	go.uber.org/zap v1.10.0
 	go4.org v0.0.0-20181109185143-00e24f1b2599 // indirect
