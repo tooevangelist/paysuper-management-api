@@ -11,7 +11,7 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20181212234831-e0a55b97c705 // indirect
 	github.com/amalfra/etag v0.0.0-20180217025506-c1ee3b8b3121
 	github.com/apex/log v1.1.0
-	github.com/aws/aws-sdk-go v1.23.8
+	github.com/aws/aws-sdk-go v1.23.16
 	github.com/coredns/coredns v1.5.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/envoyproxy/go-control-plane v0.7.1 // indirect
@@ -30,8 +30,8 @@ require (
 	github.com/micro/grpc-go v0.0.0-20180913204047-2c703400301b // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
-	github.com/paysuper/paysuper-aws-manager v0.0.0-20190905152900-bd5c04c08c1f
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190903140338-4525ab5052f9
+	github.com/paysuper/paysuper-aws-manager v0.0.1
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190904133438-ca187438857e
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-reporter v0.0.0-20190906093306-4f1d7faef1fd
@@ -55,7 +55,6 @@ require (
 	github.com/spf13/viper v1.3.1 // indirect
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
 	github.com/stretchr/testify v1.4.0
-	github.com/ttacon/builder v0.0.0-20170518171403-c099f663e1c2 // indirect
 	github.com/ttacon/libphonenumber v1.0.1
 	go.uber.org/zap v1.10.0
 	go4.org v0.0.0-20181109185143-00e24f1b2599 // indirect
@@ -65,3 +64,5 @@ require (
 )
 
 replace github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
+
+go 1.13

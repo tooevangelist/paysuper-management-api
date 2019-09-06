@@ -44,7 +44,13 @@ type OnboardingFileData struct {
 }
 
 func (api *Api) initOnboardingRoutes() (*Api, error) {
-	awsManager, err := awsWrapper.New()
+	awsOptions := []awsWrapper.Option{
+		awsWrapper.AccessKeyId(api.config.AwsAccessKeyIdAgreement),
+		awsWrapper.SecretAccessKey(api.config.AwsSecretAccessKeyAgreement),
+		awsWrapper.Region(api.config.AwsRegionAgreement),
+		awsWrapper.Bucket(api.config.AwsBucketAgreement),
+	}
+	awsManager, err := awsWrapper.New(awsOptions...)
 
 	if err != nil {
 		return nil, err

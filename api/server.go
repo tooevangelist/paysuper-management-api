@@ -224,6 +224,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initUserProfileRoutes().
 		initVatReportsRoutes().
 		initRoyaltyReportsRoutes().
+        initKeyProductRoutes().
 		initReportFileRoute()
 
 	_, err = api.initOnboardingRoutes()

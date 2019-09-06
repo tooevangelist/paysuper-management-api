@@ -6,6 +6,7 @@ enableCertIssuer: true
 ingress:
   hostname: p1payapi.tst.protocol.one
   path: /
+  hostnamePrefix:
 
 certIssuer:
   email: admin@protocol.one
@@ -29,10 +30,10 @@ backend:
   - AUTH1_CLIENTID
   - AUTH1_CLIENTSECRET
   - AUTH1_REDIRECTURL
-  - AWS_ACCESS_KEY_ID
-  - AWS_SECRET_ACCESS_KEY
-  - AWS_REGION
-  - AWS_BUCKET
+  - AWS_ACCESS_KEY_ID_AGREEMENT
+  - AWS_SECRET_ACCESS_KEY_AGREEMENT
+  - AWS_REGION_AGREEMENT
+  - AWS_BUCKET_AGREEMENT
   - ENVIRONMENT
   - PAYMENT_FORM_JS_LIBRARY_URL
   - WEBSOCKET_URL
