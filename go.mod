@@ -19,6 +19,7 @@ require (
 	github.com/micro/go-plugins v1.2.0
 	github.com/micro/grpc-go v0.0.0-20180913204047-2c703400301b // indirect
 	github.com/micro/kubernetes v0.2.0 // indirect
+	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/paysuper/paysuper-aws-manager v0.0.1
 	github.com/paysuper/paysuper-billing-server v0.0.0-20190904133438-ca187438857e
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
