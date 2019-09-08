@@ -64,7 +64,7 @@ func (suite *ReportFileTestSuite) Test_Routes() {
 	assert.Equal(suite.T(), len(shouldHaveRoutes), routeCount)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Error_GetMerchantBy() {
+func (suite *ReportFileTestSuite) TestReportFile_create_Error_GetMerchantBy() {
 	req := httptest.NewRequest(http.MethodPost, "/report_file", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
@@ -81,8 +81,8 @@ func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Error_GetMe
 	assert.Regexp(suite.T(), errorMessageMerchantNotFound.Message, httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Error_GetMerchantByReturnNilItem() {
-	req := httptest.NewRequest(http.MethodPost, "/taxes/report/download", nil)
+func (suite *ReportFileTestSuite) TestReportFile_create_Error_GetMerchantByReturnNilItem() {
+	req := httptest.NewRequest(http.MethodPost, "/report_file", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -98,47 +98,9 @@ func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Error_GetMe
 	assert.Regexp(suite.T(), errorMessageMerchantNotFound.Message, httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Error_BindPeriodFrom() {
-	data := `{"period_from": "a", "period_to": 2}`
-	req := httptest.NewRequest(http.MethodPost, "/taxes/report/download", strings.NewReader(data))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	billingService := &billingMocks.BillingService{}
-	billingService.
-		On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{Item: &billing.Merchant{Id: bson.NewObjectId().Hex()}}, nil)
-	suite.api.billingService = billingService
-
-	err := suite.handler.create(ctx)
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-}
-
-func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Error_BindPeriodTo() {
-	data := `{"period_from": 1, "period_to": "a"}`
-	req := httptest.NewRequest(http.MethodPost, "/taxes/report/download", strings.NewReader(data))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	billingService := &billingMocks.BillingService{}
-	billingService.
-		On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{Item: &billing.Merchant{Id: bson.NewObjectId().Hex()}}, nil)
-	suite.api.billingService = billingService
-
-	err := suite.handler.create(ctx)
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-}
-
-func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Error_CreateReportFile() {
+func (suite *ReportFileTestSuite) TestReportFile_create_Error_CreateFile() {
 	data := `{"period_from": 1, "period_to": 2}`
-	req := httptest.NewRequest(http.MethodPost, "/taxes/report/download", strings.NewReader(data))
+	req := httptest.NewRequest(http.MethodPost, "/report_file", strings.NewReader(data))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -162,9 +124,9 @@ func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Error_Creat
 	assert.Regexp(suite.T(), errorMessageCreateReportFile.Message, httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Ok() {
+func (suite *ReportFileTestSuite) TestReportFile_create_Ok() {
 	data := `{"period_from": 1, "period_to": 2}`
-	req := httptest.NewRequest(http.MethodPost, "/taxes/report/download", strings.NewReader(data))
+	req := httptest.NewRequest(http.MethodPost, "/report_file", strings.NewReader(data))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -178,15 +140,15 @@ func (suite *ReportFileTestSuite) TestReportFile_createTaxReportFile_Ok() {
 	reporterService := &reporterMocks.ReporterService{}
 	reporterService.
 		On("CreateFile", mock2.Anything, mock2.Anything).
-		Return(&reporterProto.ReportFile{Id: bson.NewObjectId().Hex()}, nil)
+		Return(&reporterProto.CreateFileResponse{FileId: bson.NewObjectId().Hex()}, nil)
 	suite.api.reporterService = reporterService
 
 	err := suite.handler.create(ctx)
 	assert.NoError(suite.T(), err)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_EmptyId() {
-	req := httptest.NewRequest(http.MethodGet, "/taxes/report/download/:id", nil)
+func (suite *ReportFileTestSuite) TestReportFile_download_Error_EmptyId() {
+	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -198,13 +160,13 @@ func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_Emp
 	assert.Regexp(suite.T(), errorRequestParamsIncorrect.Message, httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_GetMerchantBy() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+func (suite *ReportFileTestSuite) TestReportFile_download_Error_GetMerchantBy() {
+	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	ctx.SetPath("/taxes/report/download/:id")
+	ctx.SetPath("/report_file/:id")
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
@@ -219,13 +181,13 @@ func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_Get
 	assert.Regexp(suite.T(), errorMessageMerchantNotFound.Message, httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_GetMerchantByReturnNilItem() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+func (suite *ReportFileTestSuite) TestReportFile_download_Error_GetMerchantByReturnNilItem() {
+	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	ctx.SetPath("/taxes/report/download/:id")
+	ctx.SetPath("/report_file/:id")
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
@@ -242,8 +204,8 @@ func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_Get
 	assert.Regexp(suite.T(), errorMessageMerchantNotFound.Message, httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_ValidationId() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationId() {
+	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -265,13 +227,13 @@ func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_Val
 	assert.Regexp(suite.T(), "validation failed", httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_ValidationMerchantId() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationMerchantId() {
+	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	ctx.SetPath("/taxes/report/download/:id")
+	ctx.SetPath("/report_file/:id")
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
@@ -288,13 +250,13 @@ func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_Val
 	assert.Regexp(suite.T(), "validation failed", httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_DownloadReportFile() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+func (suite *ReportFileTestSuite) TestReportFile_download_Error_DownloadReportFile() {
+	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	ctx.SetPath("/taxes/report/download/:id")
+	ctx.SetPath("/report_file/:id")
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
@@ -317,8 +279,8 @@ func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Error_Dow
 	assert.Regexp(suite.T(), errorMessageDownloadReportFile.Message, httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_downloadTaxReportFile_Ok() {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+func (suite *ReportFileTestSuite) TestReportFile_download_Ok() {
+	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
