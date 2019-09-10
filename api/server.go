@@ -221,9 +221,12 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initPriceGroupRoutes().
 		initUserProfileRoutes().
 		initVatReportsRoutes().
+		initPayoutDocumentsRoutes().
+		initBalanceRoutes().
 		initRoyaltyReportsRoutes().
 		initKeyProductRoutes().
 		initDashboardRoutes()
+		initKeyProductRoutes()
 
 	_, err = api.initOnboardingRoutes()
 

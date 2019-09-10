@@ -3,6 +3,7 @@ package mock
 import (
 	"context"
 	"github.com/globalsign/mgo/bson"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	"github.com/micro/go-micro/client"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -1094,4 +1095,20 @@ func (s *BillingServerOkMock) GetPayoutDocumentSignUrl(ctx context.Context, in *
 
 func (s *BillingServerOkMock) UpdatePayoutDocumentSignatures(ctx context.Context, in *grpc.UpdatePayoutDocumentSignaturesRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
 	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetMerchantBalance(ctx context.Context, in *grpc.GetMerchantBalanceRequest, opts ...client.CallOption) (*grpc.GetMerchantBalanceResponse, error) {
+	return &grpc.GetMerchantBalanceResponse{
+		Status: pkg.ResponseStatusOk,
+		Item: &billing.MerchantBalance{
+			Id:             bson.NewObjectId().Hex(),
+			MerchantId:     bson.NewObjectId().Hex(),
+			Currency:       "RUB",
+			Debit:          0,
+			Credit:         0,
+			RollingReserve: 0,
+			Total:          0,
+			CreatedAt:      ptypes.TimestampNow(),
+		},
+	}, nil
 }
