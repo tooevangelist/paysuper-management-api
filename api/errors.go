@@ -123,6 +123,8 @@ var (
 	errorMessageIncorrectKindOfActivity               = newManagementApiResponseError("ma000081", "incorrect kind of activity")
 	errorMessageIncorrectReview                       = newManagementApiResponseError("ma000082", "review must be text with length lower than or equal 500 characters")
 	errorMessageIncorrectPageId                       = newManagementApiResponseError("ma000083", "review page identifier must be one of next values: primary_onboarding, merchant_onboarding")
+	ErrorMessageKeyProductIdInvalid                   = newManagementApiResponseError("ma000082", "key product id is invalid")
+	ErrorMessagePlatformIdInvalid                     = newManagementApiResponseError("ma000083", "platform id is invalid")
 
 	errorMessageIncorrectAlternativeName          = newManagementApiResponseError("ma000084", "incorrect brand")
 	errorMessageIncorrectState                    = newManagementApiResponseError("ma000085", "incorrect state")
@@ -137,6 +139,8 @@ var (
 	errorMessageIncorrectBankAccountNumber        = newManagementApiResponseError("ma000094", "incorrect bank accounting number")
 	errorMessageIncorrectBankSwift                = newManagementApiResponseError("ma000095", "incorrect bank swift code")
 	errorMessageIncorrectBankCorrespondentAccount = newManagementApiResponseError("ma000096", "incorrect bank correspondent account")
+	errorMessageFileNotFound                      = newManagementApiResponseError("ma000097", "file with key was not specified")
+	errorMessageCantReadFile                      = newManagementApiResponseError("ma000098", "file can not be read")
 
 	validationErrors = map[string]*grpc.ResponseErrorMessage{
 		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,

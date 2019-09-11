@@ -2,12 +2,14 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
-	"github.com/kelseyhightower/envconfig"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/labstack/echo/v4"
-	"github.com/minio/minio-go"
+	awsWrapper "github.com/paysuper/paysuper-aws-manager"
+	awsWrapperMocks "github.com/paysuper/paysuper-aws-manager/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -57,10 +59,6 @@ func Test_Onboarding(t *testing.T) {
 }
 
 func (suite *OnboardingTestSuite) SetupTest() {
-	s3Cfg := config.S3{}
-	err := envconfig.Process("", &s3Cfg)
-	assert.NoError(suite.T(), err)
-
 	suite.api = &Api{
 		Http:           echo.New(),
 		validate:       validator.New(),
@@ -70,7 +68,11 @@ func (suite *OnboardingTestSuite) SetupTest() {
 			Email: "test@unit.test",
 		},
 		config: &config.Config{
-			S3: s3Cfg,
+			HttpScheme:                  "http",
+			AwsAccessKeyIdAgreement:     "key_id",
+			AwsSecretAccessKeyAgreement: "secret_key",
+			AwsRegionAgreement:          "eu-west-1",
+			AwsBucketAgreement:          "bucket",
 		},
 	}
 
@@ -78,28 +80,56 @@ func (suite *OnboardingTestSuite) SetupTest() {
 		templates: template.Must(template.New("").Funcs(funcMap).ParseGlob("../web/template/*.html")),
 	}
 	suite.api.Http.Renderer = renderer
-
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
-	err = suite.api.validate.RegisterValidation("phone", suite.api.PhoneValidator)
-	assert.NoError(suite.T(), err)
 
-	mClt, err := minio.New(
-		suite.api.config.S3.Endpoint,
-		suite.api.config.S3.AccessKeyId,
-		suite.api.config.S3.SecretKey,
-		suite.api.config.S3.Secure,
-	)
-	assert.NoError(suite.T(), err)
+	downloadMockResultFn := func(
+		ctx context.Context,
+		filePath string,
+		in *awsWrapper.DownloadInput,
+		opts ...func(*s3manager.Downloader),
+	) int64 {
+		_, err := os.Stat(filePath)
 
-	err = mClt.MakeBucket(suite.api.config.S3.BucketName, suite.api.config.S3.Region)
-	assert.NoError(suite.T(), err)
+		if err == nil {
+			return 0
+		}
 
-	suite.handler = &onboardingRoute{
-		Api:  suite.api,
-		mClt: mClt,
+		if !os.IsNotExist(err) {
+			return 0
+		}
+
+		src, err := os.Open("./../test/test_pdf.pdf")
+		if err != nil {
+			return 0
+		}
+		defer src.Close()
+
+		dst, err := os.Create(filePath)
+		if err != nil {
+			return 0
+		}
+		defer dst.Close()
+
+		nBytes, err := io.Copy(dst, src)
+
+		if err != nil {
+			return 0
+		}
+
+		return nBytes
 	}
 
-	err = suite.api.registerValidators()
+	awsManagerMock := &awsWrapperMocks.AwsManagerInterface{}
+	awsManagerMock.On("Upload", mock2.Anything, mock2.Anything, mock2.Anything).Return(&s3manager.UploadOutput{}, nil)
+	awsManagerMock.On("Download", mock2.Anything, mock2.Anything, mock2.Anything, mock2.Anything).
+		Return(downloadMockResultFn, nil)
+
+	suite.handler = &onboardingRoute{
+		Api:        suite.api,
+		awsManager: awsManagerMock,
+	}
+
+	err := suite.api.registerValidators()
 
 	if err != nil {
 		suite.FailNow("Validator registration failed", "%v", err)
@@ -1294,26 +1324,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExis
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(mock.OnboardingMerchantMock.Id)
 
-	buf := new(bytes.Buffer)
-	data := map[string]interface{}{"Merchant": mock.OnboardingMerchantMock}
-	err := ctx.Echo().Renderer.Render(buf, agreementPageTemplateName, data, ctx)
-	assert.NoError(suite.T(), err)
-
-	pdf, err := wkhtmltopdf.NewPDFGenerator()
-	assert.NoError(suite.T(), err)
-
-	pdf.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buf.String())))
-	err = pdf.Create()
-	assert.NoError(suite.T(), err)
-
-	filePath := os.TempDir() + string(os.PathSeparator) + mock.SomeAgreementName
-	err = pdf.WriteFile(filePath)
-	assert.NoError(suite.T(), err)
-
-	_, err = suite.handler.mClt.FPutObject(suite.api.config.S3.BucketName, mock.SomeAgreementName, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
-	assert.NoError(suite.T(), err)
-
-	err = suite.handler.generateAgreement(ctx)
+	err := suite.handler.generateAgreement(ctx)
 	assert.NoError(suite.T(), err)
 
 	fData := &OnboardingFileData{}
@@ -1326,9 +1337,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExis
 	assert.NotEmpty(suite.T(), fData.Metadata.Extension)
 	assert.NotEmpty(suite.T(), fData.Metadata.ContentType)
 	assert.True(suite.T(), fData.Metadata.Size > 0)
-
-	err = suite.handler.mClt.RemoveObject(suite.api.config.S3.BucketName, mock.SomeAgreementName)
-	assert.NoError(suite.T(), err)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExist_Error() {
@@ -1340,6 +1348,12 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExis
 	ctx.SetPath("/admin/api/v1/merchants/:id/agreement")
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(mock.SomeMerchantId2)
+
+	awsManagerMock := &awsWrapperMocks.AwsManagerInterface{}
+	awsManagerMock.On("Upload", mock2.Anything, mock2.Anything, mock2.Anything).Return(&s3manager.UploadOutput{}, nil)
+	awsManagerMock.On("Download", mock2.Anything, mock2.Anything, mock2.Anything, mock2.Anything).
+		Return(int64(0), errors.New("some error"))
+	suite.handler.awsManager = awsManagerMock
 
 	err := suite.handler.generateAgreement(ctx)
 	assert.Error(suite.T(), err)
@@ -1360,33 +1374,11 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(mock.SomeMerchantId1)
 
-	buf := new(bytes.Buffer)
-	data := map[string]interface{}{"Merchant": mock.OnboardingMerchantMock}
-	err := ctx.Echo().Renderer.Render(buf, agreementPageTemplateName, data, ctx)
-	assert.NoError(suite.T(), err)
-
-	pdf, err := wkhtmltopdf.NewPDFGenerator()
-	assert.NoError(suite.T(), err)
-
-	pdf.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buf.String())))
-	err = pdf.Create()
-	assert.NoError(suite.T(), err)
-
-	filePath := os.TempDir() + string(os.PathSeparator) + mock.SomeAgreementName1
-	err = pdf.WriteFile(filePath)
-	assert.NoError(suite.T(), err)
-
-	_, err = suite.handler.mClt.FPutObject(suite.api.config.S3.BucketName, mock.SomeAgreementName1, filePath, minio.PutObjectOptions{ContentType: agreementContentType})
-	assert.NoError(suite.T(), err)
-
-	err = suite.handler.getAgreementDocument(ctx)
+	err := suite.handler.getAgreementDocument(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 	assert.Equal(suite.T(), agreementContentType, rsp.Header().Get(echo.HeaderContentType))
-
-	err = suite.handler.mClt.RemoveObject(suite.api.config.S3.BucketName, mock.SomeAgreementName1)
-	assert.NoError(suite.T(), err)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_MerchantIdIncorrect_Error() {
@@ -1479,6 +1471,12 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_AgreementF
 	ctx.SetPath("/admin/api/v1/merchants/:id/agreement/document")
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(mock.SomeMerchantId2)
+
+	awsManagerMock := &awsWrapperMocks.AwsManagerInterface{}
+	awsManagerMock.On("Upload", mock2.Anything, mock2.Anything, mock2.Anything).Return(&s3manager.UploadOutput{}, nil)
+	awsManagerMock.On("Download", mock2.Anything, mock2.Anything, mock2.Anything, mock2.Anything).
+		Return(int64(0), errors.New("some error"))
+	suite.handler.awsManager = awsManagerMock
 
 	err := suite.handler.getAgreementDocument(ctx)
 	assert.Error(suite.T(), err)
@@ -1730,7 +1728,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_S3Uploa
 	ctx1.SetParamNames(requestParameterId)
 	ctx1.SetParamValues(bson.NewObjectId().Hex())
 
-	suite.api.config.S3.BucketName = "fake_bucket"
+	awsManagerMock := &awsWrapperMocks.AwsManagerInterface{}
+	awsManagerMock.On("Upload", mock2.Anything, mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
+	suite.handler.awsManager = awsManagerMock
+
 	err = suite.handler.uploadAgreementDocument(ctx1)
 	assert.Error(suite.T(), err)
 
@@ -3019,7 +3020,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_Ok() {
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set("region", "North America")
+	q.Set("region", "north_america")
 	q.Set("payout_currency", "USD")
 	q.Set("amount_from", "0.75")
 	q.Set("amount_to", "5")
@@ -3090,7 +3091,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_ValidateAmountRa
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set("region", "CIS")
+	q.Set("region", "cis")
 	q.Set("payout_currency", "USD")
 	q.Set("amount_to", "2")
 
@@ -3115,7 +3116,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerErr
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set("region", "North America")
+	q.Set("region", "north_america")
 	q.Set("payout_currency", "USD")
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
@@ -3140,7 +3141,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerRes
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set("region", "North America")
+	q.Set("region", "north_america")
 	q.Set("payout_currency", "USD")
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
@@ -3163,7 +3164,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerRes
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_Ok() {
-	body := `{"region": "North America", "payout_currency": "USD", "amount_from": 10, "amount_to": 1000}`
+	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": 10, "amount_to": 1000}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
@@ -3187,7 +3188,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_Ok() {
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BindError() {
-	body := `{"region": "North America", "payout_currency": "USD", "amount_from": "qwerty"}`
+	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": "qwerty"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
@@ -3209,7 +3210,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BindError() {
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_ValidationError() {
-	body := `{"region": "North America", "payout_currency": "USD", "amount_from": -100}`
+	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": -100}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
@@ -3234,7 +3235,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_ValidationError(
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerError() {
-	body := `{"region": "North America", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
+	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
@@ -3261,7 +3262,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerErr
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerResultError() {
-	body := `{"region": "North America", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
+	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))

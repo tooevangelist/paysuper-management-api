@@ -36,17 +36,9 @@ spec:
         role: {{ $deployment.role }}
     spec:
       serviceAccountName: {{ .Release.Name }}
-      volumes:
-      - name: {{ .Chart.Name }}-cardpay
-        secret:
-          secretName: {{ .Chart.Name }}-cardpay
       containers:
       - name: {{ $deployment.name }}
         image: {{ $deployment.image }}:{{ $deployment.imageTag }}
-        volumeMounts:
-        - name: {{ .Chart.Name }}-cardpay
-          mountPath: /application/config/parameters
-          readOnly: true
         env:
         - name: MICRO_SERVER_ADDRESS
           value: "0.0.0.0:{{ $deployment.port }}"

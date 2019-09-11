@@ -15,6 +15,7 @@ import (
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
 	mock2 "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
 	"html/template"
@@ -1156,7 +1157,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
-func (suite *OrderTestSuite) TestOrder_listOrdersPublic_Ok() {
+func (suite *OrderTestSuite) TestOrder_GetOrders_Ok() {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
@@ -1164,18 +1165,7 @@ func (suite *OrderTestSuite) TestOrder_listOrdersPublic_Ok() {
 
 	ctx.SetPath("/order")
 
-	bs := &mock.BillingService{}
-	bs.On("FindAllOrdersPublic", mock2.Anything, mock2.Anything, mock2.Anything).
-		Return(
-			&grpc.ListOrdersPublicResponse{
-				Status: pkg.ResponseStatusOk,
-				Item:   &grpc.ListOrdersPublicResponseItem{},
-			},
-			nil,
-		)
-	suite.router.billingService = bs
-
-	err := suite.router.listOrdersPublic(ctx)
+	err := suite.router.getOrders(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
@@ -1189,18 +1179,14 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_BillingServerError() {
 
 	ctx.SetPath("/order")
 
-	bs := &mock.BillingService{}
-	bs.On("FindAllOrdersPublic", mock2.Anything, mock2.Anything, mock2.Anything).
-		Return(nil, errors.New("some error"))
-	suite.router.billingService = bs
-
-	err := suite.router.listOrdersPublic(ctx)
+	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
+	err := suite.router.getOrders(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
+	assert.Equal(suite.T(), errorMessageOrdersNotFound, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Id() {
@@ -1233,7 +1219,7 @@ func (suite *OrderTestSuite) testGetOrdersBindError(q url.Values, error string) 
 
 	ctx.SetPath("/order")
 
-	err := suite.router.listOrdersPublic(ctx)
+	err := suite.router.getOrders(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -1311,4 +1297,126 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithPreparedOrderId_BillingSer
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_Ok() {
+	shouldBe := require.New(suite.T())
+
+	changeOrderRequest := &grpc.ChangeCodeInOrderRequest{
+		KeyProductId: bson.NewObjectId().Hex(),
+	}
+	b, err := json.Marshal(changeOrderRequest)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+	ctx.SetParamNames("order_id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	billingService := &mock.BillingService{}
+	billingService.On("ChangeCodeInOrder", mock2.Anything, mock2.Anything).Return(&grpc.ChangeCodeInOrderResponse{
+		Status: pkg.ResponseStatusOk,
+		Order: &billing.Order{
+		},
+	}, nil)
+
+	suite.router.billingService = billingService
+	err = suite.router.replaceCode(ctx)
+	shouldBe.NoError(err)
+	shouldBe.Nil(err)
+	shouldBe.EqualValues(http.StatusOK, rsp.Code)
+	shouldBe.NotEmpty(rsp.Body.String())
+}
+
+func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ServiceError() {
+	shouldBe := require.New(suite.T())
+
+	changeOrderRequest := &grpc.ChangeCodeInOrderRequest{
+		KeyProductId: bson.NewObjectId().Hex(),
+	}
+	b, err := json.Marshal(changeOrderRequest)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+	ctx.SetParamNames("order_id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	billingService := &mock.BillingService{}
+	billingService.On("ChangeCodeInOrder", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
+
+	suite.router.billingService = billingService
+	err = suite.router.replaceCode(ctx)
+	shouldBe.NotNil(err)
+	httpErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.EqualValues(http.StatusInternalServerError, httpErr.Code)
+}
+
+func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ErrorInService() {
+	shouldBe := require.New(suite.T())
+
+	changeOrderRequest := &grpc.ChangeCodeInOrderRequest{
+		KeyProductId: bson.NewObjectId().Hex(),
+	}
+	b, err := json.Marshal(changeOrderRequest)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+	ctx.SetParamNames("order_id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	billingService := &mock.BillingService{}
+	billingService.On("ChangeCodeInOrder", mock2.Anything, mock2.Anything).Return(&grpc.ChangeCodeInOrderResponse{
+		Status: 400,
+	}, nil)
+
+	suite.router.billingService = billingService
+	err = suite.router.replaceCode(ctx)
+	shouldBe.NotNil(err)
+	httpErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.EqualValues(http.StatusBadRequest, httpErr.Code)
+}
+
+func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ValidationError() {
+	shouldBe := require.New(suite.T())
+
+	// Missing key product id
+	changeOrderRequest := &grpc.ChangeCodeInOrderRequest{
+		KeyProductId: "",
+	}
+	b, err := json.Marshal(changeOrderRequest)
+	assert.NoError(suite.T(), err)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+	ctx.SetParamNames("order_id")
+	ctx.SetParamValues(bson.NewObjectId().Hex())
+
+	err = suite.router.replaceCode(ctx)
+	shouldBe.NotNil(err)
+	httpErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.EqualValues(http.StatusBadRequest, httpErr.Code)
+
+	// Wrong order id
+	changeOrderRequest = &grpc.ChangeCodeInOrderRequest{
+		KeyProductId: bson.NewObjectId().Hex(),
+	}
+	b, err = json.Marshal(changeOrderRequest)
+	assert.NoError(suite.T(), err)
 }

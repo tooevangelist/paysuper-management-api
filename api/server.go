@@ -8,11 +8,10 @@ import (
 	jwtMiddleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
 	"github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
-	"github.com/ProtocolONE/rabbitmq/pkg"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/micro/go-micro"
-	"github.com/micro/go-plugins/selector/static"
+	"github.com/micro/go-plugins/client/selector/static"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -103,9 +102,6 @@ type Api struct {
 	taxService     tax_service.TaxService
 	paylinkService paylink.PaylinkService
 
-	AmqpAddress string
-	notifierPub *rabbitmq.Broker
-
 	rawBody      string
 	reqSignature string
 
@@ -116,12 +112,11 @@ type Api struct {
 
 func NewServer(p *ServerInitParams) (*Api, error) {
 	api := &Api{
-		Http:        echo.New(),
-		logger:      p.Logger,
-		validate:    validator.New(),
-		httpScheme:  p.HttpScheme,
-		AmqpAddress: p.AmqpAddress,
-		config:      p.Config,
+		Http:       echo.New(),
+		logger:     p.Logger,
+		validate:   validator.New(),
+		httpScheme: p.HttpScheme,
+		config:     p.Config,
 	}
 	api.InitService()
 
@@ -226,7 +221,8 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initPriceGroupRoutes().
 		initUserProfileRoutes().
 		initVatReportsRoutes().
-		initRoyaltyReportsRoutes()
+		initRoyaltyReportsRoutes().
+        initKeyProductRoutes()
 
 	_, err = api.initOnboardingRoutes()
 

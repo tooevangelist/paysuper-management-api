@@ -13,6 +13,7 @@ const (
 	apiAuthUserGroupPath    = "/admin/api/v1"
 
 	LimitDefault  = 100
+	LimitMax      = 1000
 	OffsetDefault = 0
 
 	requestParameterId                       = "id"
@@ -24,7 +25,6 @@ const (
 	requestParameterPaymentMethod            = "payment_method[]"
 	requestParameterCountry                  = "country"
 	requestParameterCountries                = "country[]"
-	requestParameterStatuses                 = "status[]"
 	requestParameterProjectId                = "project_id"
 	requestParameterPaymentMethodId          = "method_id"
 	requestParameterOrderId                  = "order_id"
@@ -68,7 +68,7 @@ const (
 	requestParameterStatus                   = "status"
 	requestAuthorizationTokenRegex           = "Bearer ([A-z0-9_.-]{10,})"
 	requestParameterZipUsa                   = "zip_usa"
-	requestParameterToken                    = "token"
+	requestParameterRateId                   = "rate_id"
 
 	userProfileFieldNumberOfEmployees = "NumberOfEmployees"
 	userProfileFieldAnnualIncome      = "AnnualIncome"
@@ -129,6 +129,8 @@ const (
 	ErrorFieldService = "service"
 	ErrorFieldMethod  = "method"
 	ErrorFieldRequest = "request"
+
+	InternalErrorTemplate = "internal error"
 )
 
 var (
@@ -338,15 +340,15 @@ var (
 	}
 
 	tariffRegions = map[string]string{
-		"CIS":             "CIS",
-		"Russia":          "Russia",
-		"West Asia":       "West Asia",
-		"EU":              "EU",
-		"North America":   "North America",
-		"Central America": "Central America",
-		"South America":   "South America",
-		"United Kingdom":  "United Kingdom",
-		"Worldwide":       "Worldwide",
-		"South Pacific":   "South Pacific",
+		"cis":             "CIS",
+		"russia":          "Russia",
+		"west_asia":       "West Asia",
+		"eu":              "EU",
+		"north_america":   "North America",
+		"central_america": "Central America",
+		"south_america":   "South America",
+		"uk":              "United Kingdom",
+		"worldwide":       "Worldwide",
+		"south_pacific":   "South Pacific",
 	}
 )

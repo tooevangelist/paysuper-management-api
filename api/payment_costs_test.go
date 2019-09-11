@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
@@ -71,7 +72,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Get
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Add() {
-	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.0101, "fix_amount": 2.34, "fix_amount_currency": "USD"}`
+	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.1, "fix_amount": 2.34, "fix_amount_currency": "USD"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/payment_costs/channel/system", strings.NewReader(bodyJson))
@@ -114,17 +115,17 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_G
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/channel/merchant/all")
+	ctx.SetPath("/payment_costs/channel/merchant/:id/all")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 	err := suite.router.getAllPaymentChannelCostMerchant(ctx)
-
-	if assert.NoError(suite.T(), err) {
-		assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-		assert.NotEmpty(suite.T(), rsp.Body.String())
-	}
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_Get() {
-	path := "/payment_costs/channel/merchant?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&amount=100"
+	path := "/payment_costs/channel/merchant/:id?name=VISA&region=CIS&country=AZ&payout_currency=USD&amount=100"
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, path, nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -132,12 +133,12 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_G
 	ctx := e.NewContext(req, rsp)
 
 	ctx.SetPath(path)
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 	err := suite.router.getPaymentChannelCostMerchant(ctx)
-
-	if assert.NoError(suite.T(), err) {
-		assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-		assert.NotEmpty(suite.T(), rsp.Body.String())
-	}
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_Add() {
@@ -151,13 +152,13 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_A
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/channel/merchant")
+	ctx.SetPath("/payment_costs/channel/merchant/:id")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 	err := suite.router.setPaymentChannelCostMerchant(ctx)
-
-	if assert.NoError(suite.T(), err) {
-		assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-		assert.NotEmpty(suite.T(), rsp.Body.String())
-	}
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_Delete() {
@@ -196,7 +197,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_GetAll()
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Get() {
-	path := "/payment_costs/money_back/system?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&days=10&undoReason=chargeback&paymentStage=1"
+	path := "/payment_costs/money_back/system?name=VISA&region=CIS&country=AZ&payout_currency=USD&days=10&undo_reason=chargeback&payment_stage=1"
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, path, nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -257,17 +258,17 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_GetAll
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/money_back/merchant/all")
+	ctx.SetPath("/payment_costs/money_back/merchant/:id/all")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 	err := suite.router.getAllMoneyBackCostMerchant(ctx)
-
-	if assert.NoError(suite.T(), err) {
-		assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-		assert.NotEmpty(suite.T(), rsp.Body.String())
-	}
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Get() {
-	path := "/payment_costs/money_back/merchant?name=VISA&region=CIS&country=AZ&payoutCurrency=USD&days=10&undoReason=chargeback&paymentStage=1"
+	path := "/payment_costs/money_back/merchant/:id/?name=VISA&region=CIS&country=AZ&payout_currency=USD&days=10&undo_reason=chargeback&payment_stage=1"
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, path, nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -275,12 +276,12 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Get() 
 	ctx := e.NewContext(req, rsp)
 
 	ctx.SetPath(path)
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 	err := suite.router.getMoneyBackCostMerchant(ctx)
-
-	if assert.NoError(suite.T(), err) {
-		assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-		assert.NotEmpty(suite.T(), rsp.Body.String())
-	}
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Add() {
@@ -294,13 +295,14 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Add() 
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/money_back/merchant")
-	err := suite.router.setMoneyBackCostMerchant(ctx)
+	ctx.SetPath("/payment_costs/money_back/merchant/:id")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	if assert.NoError(suite.T(), err) {
-		assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-		assert.NotEmpty(suite.T(), rsp.Body.String())
-	}
+	err := suite.router.setMoneyBackCostMerchant(ctx)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Delete() {
