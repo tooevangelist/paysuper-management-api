@@ -1017,7 +1017,29 @@ func (s *BillingServerOkMock) GetKeyProductInfo(ctx context.Context, in *grpc.Ge
 func (s *BillingServerOkMock) ChangeCodeInOrder(ctx context.Context, in *grpc.ChangeCodeInOrderRequest, opts ...client.CallOption) (*grpc.ChangeCodeInOrderResponse, error) {
 	return &grpc.ChangeCodeInOrderResponse{
 		Status: pkg.ResponseStatusOk,
-		Order: &billing.Order{
-		},
+		Order:  &billing.Order{},
 	}, nil
+}
+
+func (s *BillingServerOkMock) GetDashboardMainReport(
+	ctx context.Context,
+	in *grpc.GetDashboardMainRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardMainResponse, error) {
+	return &grpc.GetDashboardMainResponse{}, nil
+}
+func (s *BillingServerOkMock) GetDashboardRevenueDynamicsReport(
+	ctx context.Context,
+	in *grpc.GetDashboardMainRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardRevenueDynamicsReportResponse, error) {
+	return &grpc.GetDashboardRevenueDynamicsReportResponse{}, nil
+}
+
+func (s *BillingServerOkMock) GetDashboardBaseReport(
+	ctx context.Context,
+	in *grpc.GetDashboardBaseReportRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardBaseReportResponse, error) {
+	return &grpc.GetDashboardBaseReportResponse{}, nil
 }
