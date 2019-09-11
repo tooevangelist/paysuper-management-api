@@ -22,6 +22,9 @@ func (api *Api) initDashboardRoutes() *Api {
 	return api
 }
 
+// @Description get main reports data for dashboard
+// @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' \
+//  https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/dashboard/main?period=previous_month
 func (r *dashboardRoute) getMainReports(ctx echo.Context) error {
 	req := &grpc.GetDashboardMainRequest{}
 	err := ctx.Bind(req)
@@ -58,6 +61,9 @@ func (r *dashboardRoute) getMainReports(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
+// @Description get revenue dynamics report data for dashboard
+// @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' \
+//  'http://127.0.0.1:3001/admin/api/v1/merchants/ffffffffffffffffffffffff/dashboard/revenue_dynamics?period=previous_month'
 func (r *dashboardRoute) getRevenueDynamicsReport(ctx echo.Context) error {
 	req := &grpc.GetDashboardMainRequest{}
 	err := ctx.Bind(req)
@@ -94,6 +100,9 @@ func (r *dashboardRoute) getRevenueDynamicsReport(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
+// @Description get base reports data for dashboard
+// @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' \
+//  https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/dashboard/base?period=previous_month
 func (r *dashboardRoute) getBaseReports(ctx echo.Context) error {
 	req := &grpc.GetDashboardBaseReportRequest{}
 	err := ctx.Bind(req)

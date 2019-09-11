@@ -64,7 +64,7 @@ func (suite *DashboardTestSuite) SetupTest() {
 		Return(
 			&grpc.GetDashboardRevenueDynamicsReportResponse{
 				Status: pkg.ResponseStatusOk,
-				Item:   []*grpc.DashboardRevenueDynamicReport{},
+				Item:   []*grpc.DashboardRevenueDynamicReportItem{},
 			},
 			nil,
 		)

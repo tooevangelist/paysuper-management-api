@@ -32,7 +32,7 @@ require (
 	github.com/oschwald/maxminddb-golang v1.5.0 // indirect
 	github.com/paysuper/document-signer v0.0.0-20190906075749-af06b306ee92 // indirect
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190911155055-5dcbc1ea399b
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190911195415-8045adc9d823
 	github.com/paysuper/paysuper-database-mongo v0.1.1 // indirect
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
