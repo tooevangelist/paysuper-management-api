@@ -5316,7 +5316,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Order'
+            $ref: '#/definitions/order.public'
         "400":
           description: Invalid request data
           schema:
