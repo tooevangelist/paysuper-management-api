@@ -661,7 +661,7 @@ func (r *onboardingRoute) getAgreementDocument(ctx echo.Context) error {
 	}
 
 	if rsp.Item.S3AgreementName == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, errorMessageAgreementNotGenerated)
+		return echo.NewHTTPError(http.StatusNotFound, errorMessageAgreementNotGenerated)
 	}
 
 	filePath := os.TempDir() + string(os.PathSeparator) + rsp.Item.S3AgreementName
