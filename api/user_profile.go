@@ -24,6 +24,12 @@ func (api *Api) initUserProfileRoutes() *Api {
 	return api
 }
 
+// @Description Get user profile
+// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
+//  https://api.paysuper.online/admin/api/v1/user/profile
+//
+// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
+//  https://api.paysuper.online/admin/api/v1/user/profile/ffffffffffffffffffffffff
 func (r *userProfileRoute) getUserProfile(ctx echo.Context) error {
 	req := &grpc.GetUserProfileRequest{
 		UserId:    r.authUser.Id,

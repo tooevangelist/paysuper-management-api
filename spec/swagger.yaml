@@ -1252,6 +1252,27 @@ definitions:
         type: number
         description: end amount of merchant turnover
 
+  onboarding.Merchant.user:
+    properties:
+      id:
+        description: user identifier
+        type: string
+      email:
+        description: user email
+        type: string
+      first_name:
+        description: user first name
+        type: string
+      last_name:
+        description: user last name
+        type: string
+      profile_id:
+        description: user primary onboarding profile identifier
+        type: string
+      registration_date:
+        description: time when user email was confirm
+        $ref: '#/definitions/ProtobufTimestamp'
+
   onboarding.Merchant:
     properties:
       id:
@@ -1302,6 +1323,21 @@ definitions:
       tariff:
         description: tariff identifier
         type: string
+      agreement_template:
+        description: license agreement template identifier in hellosign
+        type: string
+      received_date:
+        description: time when merchant owner sign license agreement
+        $ref: '#/definitions/ProtobufTimestamp'
+      status_last_updated_at:
+        description: time when merchant status was updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+      has_projects:
+        description: true is merchant has created projects
+        type: boolean
+      user:
+        description: object contain main information about merchant owner from primary onboarding profile
+        $ref: '#/definitions/onboarding.Merchant.user'
 
   onboarding.Merchant.ChangeStatus:
     properties:
@@ -3651,6 +3687,22 @@ paths:
           in: query
           name: sort[]
           type: string
+        - description: start date to filter merchants by owner regiatration date. unix timestamp value in seconds
+          in: query
+          name: registration_date_from
+          type: integer
+        - description: end date to filter merchants by owner regiatration date. unix timestamp value in seconds
+          in: query
+          name: registration_date_to
+          type: integer
+        - description: start date to filter merchants by date when licanse agreement was signed by merchant owner. unix timestamp value in seconds
+          in: query
+          name: received_date_from
+          type: integer
+        - description: end date to filter merchants by date when licanse agreement was signed by merchant owner. unix timestamp value in seconds
+          in: query
+          name: received_date_to
+          type: integer
       responses:
         "200":
           description: OK
