@@ -9,6 +9,7 @@ require (
 	github.com/apex/log v1.1.0
 	github.com/aws/aws-sdk-go v1.23.16
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/golang/protobuf v1.3.2
 	github.com/google/uuid v1.1.1
 	github.com/hashicorp/consul v1.4.2 // indirect
@@ -20,7 +21,7 @@ require (
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/openzipkin/zipkin-go v0.1.6 // indirect
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190911214746-285df920e1db
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190913111153-d53404c81873
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
@@ -30,6 +31,7 @@ require (
 	github.com/ttacon/libphonenumber v1.0.1
 	go.uber.org/zap v1.10.0
 	gopkg.in/go-playground/validator.v9 v9.29.1
+	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 )
 
 replace github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
