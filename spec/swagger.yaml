@@ -51,36 +51,16 @@ definitions:
           list of country names
         type: object
     type: object
-  model.Currency:
-    properties:
-      code_a3:
-        description: |
-          3 chars ISO 4217 currency code
-        type: string
-      code_int:
-        description: |
-          numeric ISO 4217 currency code
-        type: integer
-      created_at:
-        description: |
-          date of create currency in system8
-        type: string
-      is_active:
-        description: |
-          is currency active
-        type: boolean
-      name:
-        $ref: '#/definitions/model.Name'
-        description: |
-          list of currency names
-        type: object
-    type: object
+
   model.Error:
     properties:
       message:
         description: |
           text error description
         type: string
+      code:
+        type: string
+        description: error code
     type: object
 
   model.JsonOrderCreateResponse:
@@ -146,55 +126,6 @@ definitions:
           - product
           - key
     type: object
-  model.Merchant:
-    properties:
-      accounting_period:
-        description: |
-          period payout of money to merchant bank account. Now available next values: day - every day, week - every week, 2week - every two week, month - every month, quarter - every quarter, half-year - every half-year, year - every year
-        type: string
-      country:
-        $ref: '#/definitions/model.Country'
-        description: |
-          full object of country where merchant company registered
-        type: object
-      created_at:
-        description: |
-          date of create merchant in system
-        type: string
-      currency:
-        $ref: '#/definitions/model.Currency'
-        description: |
-          full object describes merchant's accounting currency
-        type: object
-      email:
-        description: |
-          merchant email
-        type: string
-      external_id:
-        description: |
-          unique merchant identifier in auth system
-        type: string
-      id:
-        description: |
-          unique merchant identifier
-        type: string
-      is_commission_to_user_enabled:
-        description: |
-          enable to add commission payment method and commission PSP (P1) to payment amount
-        type: boolean
-      is_vat_enabled:
-        description: |
-          vat calculation enabled
-        type: boolean
-      name:
-        description: |
-          merchant company legal name
-        type: string
-      status:
-        description: |
-          merchant status in system. Now available next statuses: 0 - created, 1 - verified, 2 - active, 3 - deleted
-        type: integer
-    type: object
 
   model.Name:
     properties:
@@ -207,161 +138,7 @@ definitions:
           russian name
         type: string
     type: object
-  model.Order:
-    properties:
-      amount_in_merchant_accounting_currency:
-        description: |
-          received from project operation amount in project owner (merchant) accounting currency
-        type: number
-      amount_out_merchant_accounting_currency:
-        description: |
-          received from payment system operation amount in project owner (merchant) accounting currency
-        type: number
-      amount_ps_accounting_currency:
-        description: |
-          operation amount in payment system accounting currency
-        type: number
-      amount_psp_accounting_currency:
-        description: |
-          operation amount in accounting currency of PSP
-        type: number
-      created_at:
-        description: |
-          date of last update order data
-        type: string
-      created_by_json:
-        description: |
-          is order create by json request
-        type: boolean
-      description:
-        description: |
-          order description
-        type: string
-      fixed_package:
-        $ref: '#/definitions/model.OrderFixedPackage'
-        description: |
-          fixed package which buy payer
-        type: object
-      id:
-        description: |
-          unique order identifier in Protocol One
-        type: string
-      payer_data:
-        $ref: '#/definitions/model.PayerData'
-        description: |
-          information about payer, for example: ip, email,phone and etc
-        type: object
-      payment_method:
-        $ref: '#/definitions/model.OrderPaymentMethod'
-        description: |
-          payment method unique identifier
-        type: object
-      pm_account:
-        description: |
-          account of payer in payment system
-        type: string
-      pm_income_amount:
-        description: |
-          order amount received from payment system in notification request
-        type: number
-      pm_income_currency:
-        $ref: '#/definitions/model.Currency'
-        description: |
-          order currency received from payment system in notification request
-        type: object
-      pm_order_close_date:
-        description: |
-          date of ended payment operation in payment system
-        type: string
-      pm_order_id:
-        description: |
-          unique order id in payment system
-        type: string
-      pm_outcome_amount:
-        description: |
-          order amount send to payment system
-        type: number
-      pm_outcome_currency:
-        $ref: '#/definitions/model.Currency'
-        description: |
-          order currency send to payment system
-        type: object
-      pm_terminal_id:
-        description: |
-          identifier of terminal for process payment in payment system side
-        type: string
-      pm_txn_params:
-        description: |
-          any params received in request of payment system about payment
-        type: object
-      project:
-        $ref: '#/definitions/model.ProjectOrder'
-        description: |
-          object described main entities of project in Protocol One payment solution
-        type: object
-      project_account:
-        description: |
-          user unique account in project
-        type: string
-      project_fee_amount:
-        $ref: '#/definitions/model.OrderFee'
-        description: |
-          fee is charged with the project for the operation
-        type: object
-      project_income_amount:
-        description: |
-          order amount received from project
-        type: number
-      project_income_currency:
-        $ref: '#/definitions/model.Currency'
-        description: |
-          order currency received from project
-        type: object
-      project_last_requested_at:
-        description: |
-          date of last notification request to project
-        type: string
-      project_order_id:
-        description: |
-          unique order identifier in project. if was send in create order process
-        type: string
-      project_outcome_amount:
-        description: |
-          order amount send to project in notification request
-        type: number
-      project_outcome_currency:
-        $ref: '#/definitions/model.Currency'
-        description: |
-          order currency send to project in notification request
-        type: object
-      project_params:
-        description: |
-          any project params which received from project in request of create of order
-        type: object
-      ps_fee_amount:
-        $ref: '#/definitions/model.OrderFeePaymentSystem'
-        description: |
-          payment system fee for payment operation
-        type: object
-      psp_amount_fee_amount:
-        $ref: '#/definitions/model.OrderFeePsp'
-        description: |
-          PSP (P1) fee amount
-        type: object
-      status:
-        description: |
-          order status
-        type: integer
-      to_payer_fee_amount:
-        $ref: '#/definitions/model.OrderFee'
-        description: |
-          value of fee which added to payer amount
-        type: object
-      vat_amount:
-        description: |
-          vat amount
-        type: number
-    type: object
+
   model.OrderCreatePaymentRequest:
     properties:
       address:
@@ -401,88 +178,302 @@ definitions:
           year of expire date of user bank card. required only for bank card payment
         type: integer
     type: object
-  model.OrderFee:
+
+  order.project:
     properties:
-      amount_merchant_currency:
-        description: |
-          amount of fee of payment system in accounting currency of merchant
-        type: number
-      amount_payment_method_currency:
-        description: |
-          amount of fee of payment system in payment currency
-        type: number
-    type: object
-  model.OrderFeePaymentSystem:
-    properties:
-      amount_merchant_currency:
-        description: |
-          amount of fee of payment system in accounting currency of merchant
-        type: number
-      amount_payment_method_currency:
-        description: |
-          amount of fee of payment system in payment currency
-        type: number
-      amount_payment_system_currency:
-        description: |
-          amount of fee of payment system in accounting currency of payment system
-        type: number
-    type: object
-  model.OrderFeePsp:
-    properties:
-      amount_merchant_currency:
-        description: |
-          amount of fee of payment system in accounting currency of merchant
-        type: number
-      amount_payment_method_currency:
-        description: |
-          amount of fee of payment system in payment currency
-        type: number
-      amount_psp_currency:
-        description: |
-          amount of fee of PSP (P1) in PSP (P1) accounting currencies
-        type: number
-    type: object
-  model.OrderFixedPackage:
-    properties:
-      currency_int:
-        type: integer
       id:
         type: string
+        description: project unique identifier
+      merchant_id:
+        type: string
+        description: project merchant unique identifier
+      url_success:
+        type: string
+        description: url for redirect user after successfully completed payment
+      url_fail:
+        type: string
+        description: url for redirect user after failed payment
+      send_notify_email:
+        type: boolean
+        description: flag to send notification emails by "notify_emails" list after successfully completed payment
+      notify_emails:
+        type: array
+        description: emails list to send notification email after successfully completed payment
+        items:
+          type: string
+      secret_key:
+        type: string
+        description: project secret key
+      url_check_account:
+        type: string
+        description: callback url to check payment requisites
+      url_process_payment:
+        type: string
+        description: callback url to send payment complete request
+      callback_protocol:
+        type: string
+        description: "type of callback notification protocol. now available next values: empty - notification request not send, order just mark as successfully complete; default - notification request send by PaySuper notification protocol;"
+
+  order.payment_method.card:
+    properties:
+      first6:
+        type: string
+        description: string representing the first 6 digits of the card. Available only for a card method
+      last4:
+        type: string
+        description: string representing the last 4 digits of the card. Available only for a card method
+      masked:
+        type: string
+        description: masked pan of bank card
+      expiry_month:
+        type: string
+        description: month of expiration bank card
+      expiry_year:
+        type: string
+        description: year of expiration bank card
+      brand:
+        type: string
+        description: bank card brand
+      fingerprint:
+        type: string
+        description: string representing the internal fingerprint for given card
+      secure3d:
+        type: boolean
+        description: true is 3DS secure was used during payment
+
+  order.payment_method.wallet:
+    properties:
+      brand:
+        type: string
+        description: name of payment system
+      account:
+        type: string
+        description: payer wallet number in payment system
+
+  order.payment_method.crypto_currency:
+    properties:
+      brand:
+        type: string
+        description: name of crypto currency system
+      address:
+        type: string
+        description: payer address in crypto cyrrency system
+
+  order.payment_method:
+    properties:
+      title:
+        type: string
+        description: payment method name
+      external_id:
+        type: string
+        description: payment method identifier in payment system
+      payment_system_id:
+        type: string
+        description: payment system identifier
+      saved:
+        type: boolean
+        description: true is payment method was saved by user for future usage
+      card:
+        $ref: '#/definitions/order.payment_method.card'
+        description: object contain main information about requisites if payment was by bank card. may be null
+      wallet:
+        $ref: '#/definitions/order.payment_method.wallet'
+        description: object contain main information about requisites if payment was by e-wallets. may be null
+      crypto_currency:
+        $ref: '#/definitions/order.payment_method.crypto_currency'
+        description: object contain main information about requisites if payment was by crypto currency. may be null
+
+  order.user.address:
+    properties:
+      country:
+        type: string
+        description: string representing the the user's country. two-letter uppercase country code in ISO 3166-1 alpha-2 format
+      city:
+        type: string
+        description: user's city
+      postal_code:
+        type: string
+        description: postal code
+      state:
+        type: string
+        description: state name
+
+  order.user:
+    properties:
+      id:
+        type: string
+        description: customer identity identifier
+      object:
+        type: string
+        description: constant with object name
+      external_id:
+        type: string
+        description: user identifier in project
       name:
         type: string
-      price:
-        type: number
-      region:
+        description: user name
+      email:
         type: string
-    type: object
-  model.OrderPaginate:
+        description: user email
+      email_verified:
+        type: boolean
+        description: true is email was verified
+      phone:
+        type: string
+        description: user phone
+      phone_verified:
+        type: boolean
+        description: true is phone was verified
+      ip:
+        type: string
+        description: user ip address
+      locale:
+        type: string
+        description: user's locale. two-letter code in lowercase
+      address:
+        $ref: '#/definitions/order.user.address'
+      metadata:
+        type: object
+        description: set of key-value pairs that attached to an object on create order state
+      notify_new_region:
+        type: boolean
+        description: true is user wanting to receiving notification when paysuper will work in user's region
+      notify_new_region_email:
+        type: string
+        description: user's email to send notification email when paysuper starting work in user's region
+
+  order.money:
+    properties:
+      amount:
+        type: number
+        description: entry amount
+      currency:
+        type: string
+        description: entry currency. three-letter ISO 4217 currency code, in uppercase.
+
+  order.public:
+    properties:
+      uuid:
+        type: string
+        description: order unique identifier
+      total_payment_amount:
+        type: number
+        description: payment amount
+      currency:
+        type: string
+        description: payment currency. three-letter ISO 4217 currency code, in uppercase.
+      project:
+        description: object contain main iformation about project
+        $ref: '#/definitions/order.project'
+      created_at:
+        description: object contain information about time when payment created
+        $ref: '#/definitions/ProtobufTimestamp'
+      transaction:
+        type: string
+        description: unique identifier for the transaction in payment system
+      transaction_date:
+        $ref: '#/definitions/ProtobufTimestamp'
+        description: object contain information about time when payment processed in payment system
+      payment_method:
+        $ref: '#/definitions/order.payment_method'
+        description: object contain information about payment method
+      country_code:
+        type: string
+        description: string representing the the user's country. two-letter uppercase country code in ISO 3166-1 alpha-2 format
+      merchant_id:
+        type: string
+        description: project merchant unique identifier
+      locale:
+        type: string
+        description: user's locale. two-letter code in lowercase
+      status:
+        type: string
+        description: "string representing the order current status. possible statuses: created - the order created but not processed yet; canceled - the order was canceled and money refunded to user; rejected - the order was rejected by payment system with any reasons; processed - the order was processed in payment system;"
+      user:
+        $ref: '#/definitions/order.user'
+        description: object contain information about user
+      billing_address:
+        $ref: '#/definitions/order.user.address'
+        description: object contain information about user address by payment form
+      type:
+        type: string
+        description: constant with object type
+      is_vat_deduction:
+        type: boolean
+        description: true is vat deduction
+      gross_revenue:
+        $ref: '#/definitions/order.money'
+        description: object contain information about gross revenue
+      tax_fee:
+        $ref: '#/definitions/order.money'
+        description: object contain information about tax fee
+      tax_fee_currency_exchange_fee:
+        $ref: '#/definitions/order.money'
+        description: object contain information about tax fee currency exchange fee
+      tax_fee_total:
+        $ref: '#/definitions/order.money'
+        description: object contain information about tax fee total
+      method_fee_total:
+        $ref: '#/definitions/order.money'
+        description: object contain information about method fee total
+      method_fee_tariff:
+        $ref: '#/definitions/order.money'
+        description: object contain information about method fee tariff
+      method_fixed_fee_tariff:
+        $ref: '#/definitions/order.money'
+        description: object contain information about method fixed fee tariff
+      paysuper_fixed_fee:
+        $ref: '#/definitions/order.money'
+        description: object contain information about paysuper fixed fee
+      fees_total:
+        $ref: '#/definitions/order.money'
+        description: object contain information about fees total
+      fees_total_local:
+        $ref: '#/definitions/order.money'
+        description: object contain information about fees total local
+      net_revenue:
+        $ref: '#/definitions/order.money'
+        description: object contain information about net revenue
+      refund_gross_revenue:
+        $ref: '#/definitions/order.money'
+        description: object contain information about refund gross revenue
+      method_refund_fee_tariff:
+        $ref: '#/definitions/order.money'
+        description: object contain information about method refund fee tariff
+      merchant_refund_fixed_fee_tariff:
+        $ref: '#/definitions/order.money'
+        description: object contain information about merchant refund fixed fee tariff
+      refund_tax_fee:
+        $ref: '#/definitions/order.money'
+        description: object contain information about refund tax fee
+      refund_tax_fee_currency_exchange_fee:
+        $ref: '#/definitions/order.money'
+        description: object contain information about refund tax fee currency exchange fee
+      paysuper_refund_tax_fee_currency_exchange_fee:
+        $ref: '#/definitions/order.money'
+        description: object contain information about paysuper refund tax fee currency exchange fee
+      refund_reverse_revenue:
+        $ref: '#/definitions/order.money'
+        description: object contain information about refund reverse revenue
+      refund_fees_total:
+        $ref: '#/definitions/order.money'
+        description: object contain information about refund fees total
+      refund_fees_total_local:
+        $ref: '#/definitions/order.money'
+        description: object contain information about refund fees total local
+
+  order.list.public:
     properties:
       count:
-        description: |
-          total count of selected orders
+        description: total count of selected orders
         type: integer
       items:
-        description: |
-          array of selected orders
+        description: array of selected orders
         items:
-          $ref: '#/definitions/model.Order'
+          $ref: '#/definitions/order.public'
         type: array
     type: object
-  model.OrderPaymentMethod:
-    properties:
-      group_alias:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-      params:
-        $ref: '#/definitions/model.PaymentMethodParams'
-        type: object
-      payment_system:
-        $ref: '#/definitions/model.PaymentSystem'
-        type: object
-    type: object
+
   model.OrderScalar:
     properties:
       account:
@@ -557,43 +548,7 @@ definitions:
       - project
       - amount
     type: object
-  model.PayerData:
-    properties:
-      city:
-        $ref: '#/definitions/model.Name'
-        description: |
-          payer city names, get from ip geo location
-        type: object
-      country_code_a2:
-        description: |
-          payer country code by ISO 3166-1 from create order request
-        type: string
-      country_name:
-        $ref: '#/definitions/model.Name'
-        description: |
-          payer country names
-        type: object
-      email:
-        description: |
-          payer email from create order request
-        type: string
-      ip:
-        description: |
-          payer ip from create order request
-        type: string
-      phone:
-        description: |
-          payer phone from create order request
-        type: string
-      subdivision:
-        description: |
-          payer subdivision code by ISO-3166-2
-        type: string
-      timezone:
-        description: |
-          payer timezone name, get from ip geo location
-        type: string
-    type: object
+
   model.PaymentMethodJsonOrderResponse:
     properties:
       account_regexp:
@@ -621,36 +576,7 @@ definitions:
           payment method type. allowed: bank_card, ewallet, crypto
         type: string
     type: object
-  model.PaymentMethodParams:
-    properties:
-      external_id:
-        type: string
-      handler:
-        type: string
-      other:
-        type: object
-      terminal:
-        type: string
-    type: object
-  model.PaymentSystem:
-    properties:
-      accounting_currency:
-        $ref: '#/definitions/model.Currency'
-        type: object
-      accounting_period:
-        type: string
-      country:
-        $ref: '#/definitions/model.Country'
-        type: object
-      created_at:
-        type: string
-      id:
-        type: string
-      is_active:
-        type: boolean
-      name:
-        type: string
-    type: object
+
   model.Project:
     properties:
       id:
@@ -758,34 +684,6 @@ definitions:
       url_success:
         description: |
           url to redirect user after successfully completed payment. may be NULL if not set in project settings
-        type: string
-    type: object
-  model.ProjectOrder:
-    properties:
-      callback_protocol:
-        type: string
-      id:
-        type: string
-      merchant:
-        $ref: '#/definitions/model.Merchant'
-        type: object
-      name:
-        type: string
-      notify_emails:
-        items:
-          type: string
-        type: array
-      secret_key:
-        type: string
-      send_notify_email:
-        type: boolean
-      url_check_account:
-        type: string
-      url_fail:
-        type: string
-      url_process_payment:
-        type: string
-      url_success:
         type: string
     type: object
 
@@ -2457,6 +2355,197 @@ definitions:
         items:
           $ref: '#/definitions/onboarding.cost.money_back.merchant'
 
+  dashboard.main_reports.chart.float:
+    properties:
+      label:
+        description: "point label. for example: if period to get report equal month then point label will be equal one day"
+        type: string
+      value:
+        description: point value
+        type: number
+
+  dashboard.main_reports.chart.integer:
+    properties:
+      label:
+        description: "point label. for example: if period to get report equal month then point label will be equal one day"
+        type: string
+      value:
+        description: point value
+        type: integer
+
+  dashboard.main_reports.amount_with_chart:
+    properties:
+      amount:
+        description: total amount calculated for report
+        type: number
+      currency:
+        description: report amount currency.  three-letter ISO 4217 currency code, in uppercase.
+        type: string
+      chart:
+        description: array contain objects for chart drawing
+        type: array
+        items:
+          $ref: '#/definitions/dashboard.main_reports.chart.float'
+
+  dashboard.main_reports.total_transactions:
+    properties:
+      count:
+        description: total count of transactions by period
+        type: integer
+      chart:
+        description: array contain objects for chart drawing
+        type: array
+        items:
+          $ref: '#/definitions/dashboard.main_reports.chart.integer'
+
+  dashboard.main_reports:
+    properties:
+      gross_revenue:
+        description: object contain information for block gross revenue
+        $ref: '#/definitions/dashboard.main_reports.amount_with_chart'
+      vat:
+        description: object contain information for block VAT
+        $ref: '#/definitions/dashboard.main_reports.amount_with_chart'
+      total_transactions:
+        description: object contain information for block total transactions
+        $ref: '#/definitions/dashboard.main_reports.total_transactions'
+      arpu:
+        description: object contain information for block ARPU
+        $ref: '#/definitions/dashboard.main_reports.amount_with_chart'
+
+  dashboard.revenue_dynamics.item:
+    properties:
+      label:
+        description: "point label. for example: if period to get report equal month then point label will be equal one day"
+        type: string
+      amount:
+        description: revenue amount for label
+        type: number
+      currency:
+        description: amount currency. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+      count:
+        description: transactions count for label
+        type: integer
+
+  dashboard.base.revenue_by_country.top:
+    properties:
+      country:
+        description: country, two-letter uppercase country code in ISO 3166-1 alpha-2 format
+        type: string
+      amount:
+        description: amount by country
+        type: number
+      currency:
+        description: amount currency. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+
+  dashboard.base.total:
+    properties:
+      amount:
+        description: total revenue amount by chosen period
+        type: number
+      currency:
+        description: amount currency. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+
+  dashboard.base.chart:
+    properties:
+      label:
+        description: "point label. for example: if period to get report equal month then point label will be equal one day"
+        type: string
+      amount:
+        description: amount for label
+        type: number
+      currency:
+        description: amount currency. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+
+  dashboard.base.revenue_by_country:
+    properties:
+      top:
+        description: array of objects with information about top 5 countries by revenue by period
+        type: array
+        items:
+          $ref: '#/definitions/dashboard.base.revenue_by_country.top'
+      total_current:
+        description: object contain information about total revenue by chosen period
+        $ref: '#/definitions/dashboard.base.total'
+      total_previous:
+        description: object contain information about total revenue by previous period to chosen period
+        $ref: '#/definitions/dashboard.base.total'
+      chart:
+        description: array contain objects for chart drawing
+        $ref: '#/definitions/dashboard.base.chart'
+
+  dashboard.base.sales_today.top.item:
+    properties:
+      name:
+        description: sold item name
+        type: string
+      count:
+        description: item total count which were sold in period
+        type: integer
+
+  dashboard.base.sales_today:
+    properties:
+      top:
+        description: array of objects with information about top 5 merchant products (projects) which were sold in period
+        type: array
+        items:
+          $ref: '#/definitions/dashboard.base.sales_today.top.item'
+      total_current:
+        description: items total count which were sold by chosen period
+        type: integer
+      total_previous:
+        description: items total count which were sold by previous period to chosen period
+        type: integer
+      chart:
+        description: array contain objects for chart drawing
+        type: array
+        items:
+          $ref: '#/definitions/dashboard.main_reports.chart.integer'
+
+  dashboard.base.sources.top.item:
+    properties:
+      name:
+        description: url of issuer
+        type: string
+      count:
+        description: total count
+        type: integer
+
+  dashboard.base.sources:
+    properties:
+      top:
+        description: array of objects with information about top 5 issuers url
+        type: array
+        items:
+          $ref: '#/definitions/dashboard.base.sources.top.item'
+      total_current:
+        description: transactions total count by chosen period
+        type: integer
+      total_previous:
+        description: transactions total count by previous period to chosen period
+        type: integer
+      chart:
+        description: array contain objects for chart drawing
+        type: array
+        items:
+          $ref: '#/definitions/dashboard.main_reports.chart.integer'
+
+  dashboard.base:
+    properties:
+      revenue_by_country:
+        description: object contain information for block revenue by country
+        $ref: '#/definitions/dashboard.base.revenue_by_country'
+      sales_today:
+        description: object contain information for block sales today
+        $ref: '#/definitions/dashboard.base.sales_today'
+      sources:
+        description: object contain information for block sources
+        $ref: '#/definitions/dashboard.base.sources'
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -2607,6 +2696,8 @@ paths:
     get:
       consumes:
         - application/json
+      produces:
+        - application/json
       description: Get orders list
       parameters:
         - description: order unique identifier
@@ -2678,19 +2769,25 @@ paths:
           type: array
           items:
             type: string
-      produces:
-        - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.OrderPaginate'
+            $ref: '#/definitions/order.list.public'
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
-        "404":
-          description: Invalid request data
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
       summary: Get orders
@@ -2713,13 +2810,25 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Order'
+            $ref: '#/definitions/order.public'
         "400":
           description: Invalid request data
           schema:
             $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
         "404":
           description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
       summary: Get order data
@@ -5492,7 +5601,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Order'
+            $ref: '#/definitions/order.public'
         "400":
           description: Invalid request data
           schema:
@@ -6444,6 +6553,150 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/onboarding.cost.money_back.merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/dashboard/main":
+    get:
+      summary: Get main reports data for dashboard
+      tags:
+        - Dashboard
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: "Get main reports dashboard block data, ie. next reports: gross revenue, total transactions, VAT, ARPU"
+      parameters:
+        - description: merchant unique identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: "period name. now possible next values: current_month, previous_month, current_quarter, previous_quarter, current_year, previous_year"
+          in: query
+          name: period
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dashboard.main_reports'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+
+  "/admin/api/v1/merchants/{id}/dashboard/revenue_dynamics":
+    get:
+      summary: Get revenue dynamic report for dashboard
+      tags:
+        - Dashboard
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get revenue dynamic report for dashboard
+      parameters:
+        - description: merchant unique identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: "period name. now possible next values: current_month, previous_month, current_quarter, previous_quarter, current_year, previous_year"
+          in: query
+          name: period
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/dashboard.revenue_dynamics.item'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/dashboard/base":
+    get:
+      summary: Get base reports data for dashboard
+      tags:
+        - Dashboard
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: "Get base reports dashboard block data, ie. next reports: revenue by country, sales today, sources"
+      parameters:
+        - description: merchant unique identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: "period name. now possible next values: current_day, previous_day, current_week, previous_week, current_month, previous_month, current_quarter, previous_quarter, current_year, previous_year"
+          in: query
+          name: period
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dashboard.base'
         "400":
           description: Invalid request data
           schema:
