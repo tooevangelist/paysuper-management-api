@@ -15,11 +15,8 @@ require (
 	github.com/hashicorp/consul v1.4.2 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/labstack/echo/v4 v4.1.6
-	github.com/micro/go-api v0.6.0 // indirect
-	github.com/micro/go-grpc v0.6.0 // indirect
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
-	github.com/micro/grpc-go v0.0.0-20180913204047-2c703400301b // indirect
 	github.com/micro/kubernetes v0.2.0 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/openzipkin/zipkin-go v0.1.6 // indirect
