@@ -1150,6 +1150,27 @@ definitions:
         type: number
         description: end amount of merchant turnover
 
+  onboarding.Merchant.user:
+    properties:
+      id:
+        description: user identifier
+        type: string
+      email:
+        description: user email
+        type: string
+      first_name:
+        description: user first name
+        type: string
+      last_name:
+        description: user last name
+        type: string
+      profile_id:
+        description: user primary onboarding profile identifier
+        type: string
+      registration_date:
+        description: time when user email was confirm
+        $ref: '#/definitions/ProtobufTimestamp'
+
   onboarding.Merchant:
     properties:
       id:
@@ -1200,6 +1221,21 @@ definitions:
       tariff:
         description: tariff identifier
         type: string
+      agreement_template:
+        description: license agreement template identifier in hellosign
+        type: string
+      received_date:
+        description: time when merchant owner sign license agreement
+        $ref: '#/definitions/ProtobufTimestamp'
+      status_last_updated_at:
+        description: time when merchant status was updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+      has_projects:
+        description: true is merchant has created projects
+        type: boolean
+      user:
+        description: object contain main information about merchant owner from primary onboarding profile
+        $ref: '#/definitions/onboarding.Merchant.user'
 
   onboarding.Merchant.ChangeStatus:
     properties:
@@ -3760,6 +3796,22 @@ paths:
           in: query
           name: sort[]
           type: string
+        - description: start date to filter merchants by owner regiatration date. unix timestamp value in seconds
+          in: query
+          name: registration_date_from
+          type: integer
+        - description: end date to filter merchants by owner regiatration date. unix timestamp value in seconds
+          in: query
+          name: registration_date_to
+          type: integer
+        - description: start date to filter merchants by date when licanse agreement was signed by merchant owner. unix timestamp value in seconds
+          in: query
+          name: received_date_from
+          type: integer
+        - description: end date to filter merchants by date when licanse agreement was signed by merchant owner. unix timestamp value in seconds
+          in: query
+          name: received_date_to
+          type: integer
       responses:
         "200":
           description: OK
@@ -4951,6 +5003,48 @@ paths:
           description: OK
         "400":
           description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/user/profile/{id}":
+    get:
+      summary: Get user profile by proifile identifier
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get user profile by profile identifier
+      parameters:
+        - description: profile identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userProfile.response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
         "404":

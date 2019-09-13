@@ -85,21 +85,25 @@ func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_Ok() {
 	assert.NoError(suite.T(), err)
 }
 
-func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_UserIdNotFound_Error() {
+func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_ValidationError() {
 	req := httptest.NewRequest(http.MethodGet, "/admin/api/v1/user_profile", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	suite.api.authUser.Id = ""
+	ctx.SetPath("/admin/api/v1/user/profile/:id")
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues("qwerty")
 
 	err := suite.router.getUserProfile(ctx)
 	assert.Error(suite.T(), err)
-
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusUnauthorized, httpErr.Code)
-	assert.Equal(suite.T(), errorMessageAccessDenied, httpErr.Message)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+
+	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
+	assert.True(suite.T(), ok)
+	assert.Regexp(suite.T(), "ProfileId", msg.Details)
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_BillingServerSystemError() {
