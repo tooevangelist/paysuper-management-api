@@ -1165,7 +1165,21 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_Ok() {
 
 	ctx.SetPath("/order")
 
-	err := suite.router.getOrders(ctx)
+	bs := &mock.BillingService{}
+	bs.On("FindAllOrdersPublic", mock2.Anything, mock2.Anything, mock2.Anything).
+		Return(
+			&grpc.ListOrdersPublicResponse{
+				Status: pkg.ResponseStatusOk,
+				Item: &grpc.ListOrdersPublicResponseItem{
+					Count: 1,
+					Items: []*billing.OrderViewPublic{},
+				},
+			},
+			nil,
+		)
+	suite.router.billingService = bs
+
+	err := suite.router.listOrdersPublic(ctx)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
@@ -1179,14 +1193,18 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_BillingServerError() {
 
 	ctx.SetPath("/order")
 
-	suite.router.billingService = mock.NewBillingServerSystemErrorMock()
-	err := suite.router.getOrders(ctx)
+	bs := &mock.BillingService{}
+	bs.On("FindAllOrdersPublic", mock2.Anything, mock2.Anything, mock2.Anything).
+		Return(nil, errors.New("some error"))
+	suite.router.billingService = bs
+
+	err := suite.router.listOrdersPublic(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
-	assert.Equal(suite.T(), errorMessageOrdersNotFound, httpErr.Message)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Id() {
@@ -1219,7 +1237,7 @@ func (suite *OrderTestSuite) testGetOrdersBindError(q url.Values, error string) 
 
 	ctx.SetPath("/order")
 
-	err := suite.router.getOrders(ctx)
+	err := suite.router.listOrdersPublic(ctx)
 	assert.Error(suite.T(), err)
 
 	httpErr, ok := err.(*echo.HTTPError)
@@ -1319,8 +1337,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_Ok() {
 	billingService := &mock.BillingService{}
 	billingService.On("ChangeCodeInOrder", mock2.Anything, mock2.Anything).Return(&grpc.ChangeCodeInOrderResponse{
 		Status: pkg.ResponseStatusOk,
-		Order: &billing.Order{
-		},
+		Order:  &billing.Order{},
 	}, nil)
 
 	suite.router.billingService = billingService

@@ -1458,7 +1458,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_AgreementN
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
 	assert.Equal(suite.T(), errorMessageAgreementNotGenerated, httpErr.Message)
 }
 
