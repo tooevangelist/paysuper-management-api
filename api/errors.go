@@ -141,9 +141,9 @@ var (
 	errorMessageIncorrectBankCorrespondentAccount = newManagementApiResponseError("ma000096", "incorrect bank correspondent account")
 	errorMessageFileNotFound                      = newManagementApiResponseError("ma000097", "file with key was not specified")
 	errorMessageCantReadFile                      = newManagementApiResponseError("ma000098", "file can not be read")
-	errorMessageMerchantNotFound                      = newManagementApiResponseError("ma000099", "merchant not found")
-	errorMessageCreateReportFile                      = newManagementApiResponseError("ma000100", "unable to create report file")
-	errorMessageDownloadReportFile                    = newManagementApiResponseError("ma000101", "unable to download report file")
+	errorMessageMerchantNotFound                  = newManagementApiResponseError("ma000099", "merchant not found")
+	errorMessageCreateReportFile                  = newManagementApiResponseError("ma000100", "unable to create report file")
+	errorMessageDownloadReportFile                = newManagementApiResponseError("ma000101", "unable to download report file")
 
 	validationErrors = map[string]*grpc.ResponseErrorMessage{
 		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,

@@ -6394,7 +6394,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/report_file":
+  "/admin/api/v1/s/report_file":
     post:
       summary: Create report file
       tags:
@@ -6435,7 +6435,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/report_file/{id}":
+  "/admin/api/v1/s/report_file/{id}.{type}":
     get:
       summary: Download report file
       tags:
@@ -6451,6 +6451,11 @@ paths:
         - description: id of report file
           in: query
           name: id
+          type: string
+          required: true
+        - description: type of report file
+          in: query
+          name: type
           type: string
           required: true
       responses:

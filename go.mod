@@ -65,7 +65,7 @@ require (
 	github.com/paysuper/paysuper-billing-server v0.0.0-20190908041134-0ea9ad82aa7b
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
-	github.com/paysuper/paysuper-reporter v0.0.0-20190906154830-2b4adbdb3fef
+	github.com/paysuper/paysuper-reporter v0.0.0-20190916131828-703c52ed6855
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/pquerna/otp v1.1.0 // indirect

@@ -64,40 +64,6 @@ func (suite *ReportFileTestSuite) Test_Routes() {
 	assert.Equal(suite.T(), len(shouldHaveRoutes), routeCount)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_create_Error_GetMerchantBy() {
-	req := httptest.NewRequest(http.MethodPost, "/report_file", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	billingService := &billingMocks.BillingService{}
-	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(nil, errors.New("not found"))
-	suite.api.billingService = billingService
-
-	err := suite.handler.create(ctx)
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Regexp(suite.T(), errorMessageMerchantNotFound.Message, httpErr.Message)
-}
-
-func (suite *ReportFileTestSuite) TestReportFile_create_Error_GetMerchantByReturnNilItem() {
-	req := httptest.NewRequest(http.MethodPost, "/report_file", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	billingService := &billingMocks.BillingService{}
-	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{}, nil)
-	suite.api.billingService = billingService
-
-	err := suite.handler.create(ctx)
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Regexp(suite.T(), errorMessageMerchantNotFound.Message, httpErr.Message)
-}
-
 func (suite *ReportFileTestSuite) TestReportFile_create_Error_CreateFile() {
 	data := `{"period_from": 1, "period_to": 2}`
 	req := httptest.NewRequest(http.MethodPost, "/report_file", strings.NewReader(data))
@@ -158,50 +124,6 @@ func (suite *ReportFileTestSuite) TestReportFile_download_Error_EmptyId() {
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Regexp(suite.T(), errorRequestParamsIncorrect.Message, httpErr.Message)
-}
-
-func (suite *ReportFileTestSuite) TestReportFile_download_Error_GetMerchantBy() {
-	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/report_file/:id")
-	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	billingService := &billingMocks.BillingService{}
-	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(nil, errors.New("not found"))
-	suite.api.billingService = billingService
-
-	err := suite.handler.download(ctx)
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Regexp(suite.T(), errorMessageMerchantNotFound.Message, httpErr.Message)
-}
-
-func (suite *ReportFileTestSuite) TestReportFile_download_Error_GetMerchantByReturnNilItem() {
-	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/report_file/:id")
-	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	billingService := &billingMocks.BillingService{}
-	billingService.
-		On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{}, nil)
-	suite.api.billingService = billingService
-
-	err := suite.handler.download(ctx)
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Regexp(suite.T(), errorMessageMerchantNotFound.Message, httpErr.Message)
 }
 
 func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationId() {

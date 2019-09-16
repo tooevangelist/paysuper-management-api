@@ -2,12 +2,15 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
+	awsWrapper "github.com/paysuper/paysuper-aws-manager"
 	"github.com/paysuper/paysuper-billing-server/pkg"
-	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	reporterPkg "github.com/paysuper/paysuper-reporter/pkg"
 	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
 	"go.uber.org/zap"
 	"net/http"
+	"os"
 )
 
 type reportFileRoute struct {
@@ -28,36 +31,21 @@ func (api *Api) initReportFileRoute() *Api {
 		Api: api,
 	}
 
-	api.authUserRouteGroup.POST("/report_file", route.create)
-	api.authUserRouteGroup.GET("/report_file/:id", route.download)
+	api.accessRouteGroup.POST("/report_file", route.create)
+	api.accessRouteGroup.GET("/report_file/:id.:type", route.download)
 
 	return api
 }
 
 // Send a request to create a report for download.
-// POST /admin/api/v1/report_file
+// POST /admin/api/v1/s/report_file
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
 //      -d '{"file_type": "pdf", "period_from": 1566727410, "period_to": "1566736763"}' \
-//      https://api.paysuper.online/admin/api/v1/report_file
+//      https://api.paysuper.online/admin/api/v1/s/report_file
 //
 func (r *reportFileRoute) create(ctx echo.Context) error {
-	req1 := &grpc.GetMerchantByRequest{UserId: r.authUser.Id}
-	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), req1)
-	if err != nil || merchant.Item == nil {
-		if err != nil {
-			zap.L().Error(
-				pkg.ErrorGrpcServiceCallFailed,
-				zap.Error(err),
-				zap.String(ErrorFieldService, pkg.ServiceName),
-				zap.String(ErrorFieldMethod, "GetMerchantBy"),
-				zap.Any(ErrorFieldRequest, req1),
-			)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageMerchantNotFound)
-	}
-
 	data := &reportFileRequest{}
 	if err := ctx.Bind(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestDataInvalid)
@@ -73,24 +61,24 @@ func (r *reportFileRoute) create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	req2 := &reporterProto.ReportFile{
-		MerchantId: merchant.Item.Id,
+	req := &reporterProto.ReportFile{
+		UserId:     r.authUser.Id,
+		MerchantId: data.MerchantId,
 		ReportType: data.ReportType,
 		FileType:   data.FileType,
 		Template:   data.Template,
 		Params:     params,
 	}
 
-	res, err := r.reporterService.CreateFile(ctx.Request().Context(), req2)
+	res, err := r.reporterService.CreateFile(ctx.Request().Context(), req)
 	if err != nil {
 		zap.L().Error(
 			pkg.ErrorGrpcServiceCallFailed,
 			zap.Error(err),
-			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldService, reporterPkg.ServiceName),
 			zap.String(ErrorFieldMethod, "CreateFile"),
-			zap.Any(ErrorFieldRequest, req1),
+			zap.Any(ErrorFieldRequest, req),
 		)
-
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageCreateReportFile)
 	}
 
@@ -98,11 +86,11 @@ func (r *reportFileRoute) create(ctx echo.Context) error {
 }
 
 // Send a request to create a report for download.
-// GET /admin/api/v1/vat_reports/report/download/5ced34d689fce60bf4440829
+// GET /admin/api/v1/s/report_file/5ced34d689fce60bf4440829.csv
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
-//      https://api.paysuper.online/admin/api/v1/report_file/5ced34d689fce60bf4440829
+//      https://api.paysuper.online/admin/api/v1/s/report_file/5ced34d689fce60bf4440829.csv
 //
 func (r *reportFileRoute) download(ctx echo.Context) error {
 	id := ctx.Param("id")
@@ -111,35 +99,30 @@ func (r *reportFileRoute) download(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
-	req1 := &grpc.GetMerchantByRequest{UserId: r.authUser.Id}
-	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), req1)
-	if err != nil || merchant.Item == nil {
-		if err != nil {
-			zap.L().Error(
-				pkg.ErrorGrpcServiceCallFailed,
-				zap.Error(err),
-				zap.String(ErrorFieldService, pkg.ServiceName),
-				zap.String(ErrorFieldMethod, "GetMerchantBy"),
-				zap.Any(ErrorFieldRequest, req1),
-			)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageMerchantNotFound)
+	reportType := ctx.Param("type")
+	if reportType == "" {
+		zap.S().Error("unable to find the file id")
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
-	req2 := &reporterProto.LoadFileRequest{
-		Id:         id,
-		MerchantId: merchant.Item.Id,
+	awsOptions := []awsWrapper.Option{
+		awsWrapper.AccessKeyId(r.config.AwsAccessKeyIdReporter),
+		awsWrapper.SecretAccessKey(r.config.AwsSecretAccessKeyReporter),
+		awsWrapper.Region(r.config.AwsRegionReporter),
+		awsWrapper.Bucket(r.config.AwsBucketReporter),
 	}
+	awsManager, err := awsWrapper.New(awsOptions...)
 
-	if err = r.validate.Struct(req2); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	res, err := r.reporterService.LoadFile(ctx.Request().Context(), req2)
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.S().Error("unable to find the file id")
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageDownloadReportFile)
 	}
 
-	return ctx.Blob(http.StatusOK, res.ContentType, res.File.File)
+	fileName := fmt.Sprintf(reporterPkg.FileMask, r.authUser.Id, id, reportType)
+	filePath := os.TempDir() + string(os.PathSeparator) + fileName
+	_, err = awsManager.Download(ctx.Request().Context(), filePath, &awsWrapper.DownloadInput{FileName: fileName})
+
+	defer os.Remove(filePath)
+
+	return ctx.File(filePath)
 }
