@@ -238,7 +238,7 @@ func (r *keyProductRoute) getKeyProductById(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
-	if res.Message != nil {
+	if res.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
