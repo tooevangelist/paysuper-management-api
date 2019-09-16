@@ -322,10 +322,6 @@ func (s *BillingServerSystemErrorMock) DeleteProduct(ctx context.Context, in *gr
 	return nil, SomeError
 }
 
-func (s *BillingServerSystemErrorMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
-	return nil, SomeError
-}
-
 func (s *BillingServerSystemErrorMock) IsOrderCanBePaying(
 	ctx context.Context,
 	in *grpc.IsOrderCanBePayingRequest,
@@ -506,9 +502,6 @@ func (s *BillingServerSystemErrorMock) ListProjects(ctx context.Context, in *grp
 	return nil, SomeError
 }
 
-func (s *BillingServerSystemErrorMock) GetOrder(ctx context.Context, in *grpc.GetOrderRequest, opts ...client.CallOption) (*billing.Order, error) {
-	return nil, SomeError
-}
 func (s *BillingServerSystemErrorMock) ProcessVatReports(ctx context.Context, in *grpc.ProcessVatReportsRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	panic("implement me")
 }

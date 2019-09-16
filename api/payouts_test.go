@@ -139,8 +139,7 @@ func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_getPayoutDocument() {
 }
 
 func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_createPayoutDocument() {
-	bodyJson := `{"source_id": ["5bdc39a95d1e1100019fb7df", "5be2d0b4b0b30d0007383ce6"], 
-				"description": "royalty for june-july 2019", "merchant_id": "5bdc39a95d1e1100019fb7df"}`
+	bodyJson := `{"description": "royalty for june-july 2019", "merchant_id": "5bdc39a95d1e1100019fb7df"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/payout_documents", strings.NewReader(bodyJson))

@@ -80,7 +80,7 @@ func (cApiV1 *payoutDocumentsRoute) getPayoutDocument(ctx echo.Context) error {
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{ "source_id": ["5bdc39a95d1e1100019fb7df", "5be2d0b4b0b30d0007383ce6"], "description": "royalty for june-july 2019", "merchant_id": "5bdc39a95d1e1100019fb7df" }' \
+//      -d '{ "description": "royalty for june-july 2019", "merchant_id": "5bdc39a95d1e1100019fb7df" }' \
 //      https://api.paysuper.online/admin/api/v1/payout_documents
 func (cApiV1 *payoutDocumentsRoute) createPayoutDocument(ctx echo.Context) error {
 	req := &grpc.CreatePayoutDocumentRequest{}
