@@ -17,29 +17,33 @@ func newValidationError(details string) *grpc.ResponseErrorMessage {
 }
 
 const (
-	errorNamespaceMerchantCompanyInfoName             = "OnboardingRequest.Company.Name"
-	errorNamespaceMerchantCompanyInfoAlternativeName  = "OnboardingRequest.Company.AlternativeName"
-	errorNamespaceMerchantCompanyInfoWebsite          = "OnboardingRequest.Company.Website"
-	errorNamespaceMerchantCompanyInfoCountry          = "OnboardingRequest.Company.Country"
-	errorNamespaceMerchantCompanyInfoState            = "OnboardingRequest.Company.State"
-	errorNamespaceMerchantCompanyInfoZip              = "OnboardingRequest.Company.Zip"
-	errorNamespaceMerchantCompanyInfoCity             = "OnboardingRequest.Company.City"
-	errorNamespaceMerchantCompanyInfoAddress          = "OnboardingRequest.Company.Address"
-	errorNamespaceMerchantContactAuthorized           = "OnboardingRequest.Contacts.Authorized"
-	errorNamespaceMerchantContactTechnical            = "OnboardingRequest.Contacts.Technical"
-	errorNamespaceMerchantContactAuthorizedName       = "OnboardingRequest.Contacts.Authorized.Name"
-	errorNamespaceMerchantContactAuthorizedEmail      = "OnboardingRequest.Contacts.Authorized.Email"
-	errorNamespaceMerchantContactAuthorizedPhone      = "OnboardingRequest.Contacts.Authorized.Phone"
-	errorNamespaceMerchantContactAuthorizedPosition   = "OnboardingRequest.Contacts.Authorized.Position"
-	errorNamespaceMerchantContactTechnicalName        = "OnboardingRequest.Contacts.Technical.Name"
-	errorNamespaceMerchantContactTechnicalEmail       = "OnboardingRequest.Contacts.Technical.Email"
-	errorNamespaceMerchantContactTechnicalPhone       = "OnboardingRequest.Contacts.Technical.Phone"
-	errorNamespaceMerchantBankingCurrency             = "OnboardingRequest.Banking.Currency"
-	errorNamespaceMerchantBankingName                 = "OnboardingRequest.Banking.Name"
-	errorNamespaceMerchantBankingAddress              = "OnboardingRequest.Banking.Address"
-	errorNamespaceMerchantBankingAccountNumber        = "OnboardingRequest.Banking.AccountNumber"
-	errorNamespaceMerchantBankingSwift                = "OnboardingRequest.Banking.Swift"
-	errorNamespaceMerchantBankingCorrespondentAccount = "OnboardingRequest.Banking.CorrespondentAccount"
+	errorNamespaceMerchantCompanyInfoName                 = "OnboardingRequest.Company.Name"
+	errorNamespaceMerchantCompanyInfoAlternativeName      = "OnboardingRequest.Company.AlternativeName"
+	errorNamespaceMerchantCompanyInfoWebsite              = "OnboardingRequest.Company.Website"
+	errorNamespaceMerchantCompanyInfoCountry              = "OnboardingRequest.Company.Country"
+	errorNamespaceMerchantCompanyInfoState                = "OnboardingRequest.Company.State"
+	errorNamespaceMerchantCompanyInfoZip                  = "OnboardingRequest.Company.Zip"
+	errorNamespaceMerchantCompanyInfoCity                 = "OnboardingRequest.Company.City"
+	errorNamespaceMerchantCompanyInfoAddress              = "OnboardingRequest.Company.Address"
+	errorNamespaceMerchantContactAuthorized               = "OnboardingRequest.Contacts.Authorized"
+	errorNamespaceMerchantContactTechnical                = "OnboardingRequest.Contacts.Technical"
+	errorNamespaceMerchantContactAuthorizedName           = "OnboardingRequest.Contacts.Authorized.Name"
+	errorNamespaceMerchantContactAuthorizedEmail          = "OnboardingRequest.Contacts.Authorized.Email"
+	errorNamespaceMerchantContactAuthorizedPhone          = "OnboardingRequest.Contacts.Authorized.Phone"
+	errorNamespaceMerchantContactAuthorizedPosition       = "OnboardingRequest.Contacts.Authorized.Position"
+	errorNamespaceMerchantContactTechnicalName            = "OnboardingRequest.Contacts.Technical.Name"
+	errorNamespaceMerchantContactTechnicalEmail           = "OnboardingRequest.Contacts.Technical.Email"
+	errorNamespaceMerchantContactTechnicalPhone           = "OnboardingRequest.Contacts.Technical.Phone"
+	errorNamespaceMerchantBankingCurrency                 = "OnboardingRequest.Banking.Currency"
+	errorNamespaceMerchantBankingName                     = "OnboardingRequest.Banking.Name"
+	errorNamespaceMerchantBankingAddress                  = "OnboardingRequest.Banking.Address"
+	errorNamespaceMerchantBankingAccountNumber            = "OnboardingRequest.Banking.AccountNumber"
+	errorNamespaceMerchantBankingSwift                    = "OnboardingRequest.Banking.Swift"
+	errorNamespaceMerchantBankingCorrespondentAccount     = "OnboardingRequest.Banking.CorrespondentAccount"
+	errorNamespaceGetDashboardMainRequestPeriod           = "GetDashboardMainRequest.Period"
+	errorNamespaceGetDashboardMainRequestMerchantId       = "GetDashboardMainRequest.MerchantId"
+	errorNamespaceGetDashboardBaseReportRequestPeriod     = "GetDashboardBaseReportRequest.Period"
+	errorNamespaceGetDashboardBaseReportRequestMerchantId = "GetDashboardBaseReportRequest.MerchantId"
 )
 
 var (
@@ -141,9 +145,10 @@ var (
 	errorMessageIncorrectBankCorrespondentAccount = newManagementApiResponseError("ma000096", "incorrect bank correspondent account")
 	errorMessageFileNotFound                      = newManagementApiResponseError("ma000097", "file with key was not specified")
 	errorMessageCantReadFile                      = newManagementApiResponseError("ma000098", "file can not be read")
-	errorMessageMerchantNotFound                  = newManagementApiResponseError("ma000099", "merchant not found")
-	errorMessageCreateReportFile                  = newManagementApiResponseError("ma000100", "unable to create report file")
-	errorMessageDownloadReportFile                = newManagementApiResponseError("ma000101", "unable to download report file")
+	errorIncorrectPeriod                          = newManagementApiResponseError("ma000099", "incorrect period")
+	errorMessageMerchantNotFound                  = newManagementApiResponseError("ma000100", "merchant not found")
+	errorMessageCreateReportFile                  = newManagementApiResponseError("ma000101", "unable to create report file")
+	errorMessageDownloadReportFile                = newManagementApiResponseError("ma000102", "unable to download report file")
 
 	validationErrors = map[string]*grpc.ResponseErrorMessage{
 		userProfileFieldNumberOfEmployees: errorMessageIncorrectNumberOfEmployees,
@@ -159,28 +164,32 @@ var (
 	}
 
 	validationNamespaceErrors = map[string]*grpc.ResponseErrorMessage{
-		errorNamespaceMerchantCompanyInfoName:             errorMessageIncorrectCompanyName,
-		errorNamespaceMerchantCompanyInfoAlternativeName:  errorMessageIncorrectAlternativeName,
-		errorNamespaceMerchantCompanyInfoWebsite:          errorMessageIncorrectWebsite,
-		errorNamespaceMerchantCompanyInfoCountry:          errorIncorrectCountryIdentifier,
-		errorNamespaceMerchantCompanyInfoState:            errorMessageIncorrectState,
-		errorNamespaceMerchantCompanyInfoZip:              errorMessageIncorrectZip,
-		errorNamespaceMerchantCompanyInfoCity:             errorMessageIncorrectCity,
-		errorNamespaceMerchantCompanyInfoAddress:          errorMessageIncorrectAddress,
-		errorNamespaceMerchantContactAuthorized:           errorMessageRequiredContactAuthorized,
-		errorNamespaceMerchantContactTechnical:            errorMessageRequiredContactTechnical,
-		errorNamespaceMerchantContactAuthorizedName:       errorMessageIncorrectName,
-		errorNamespaceMerchantContactAuthorizedEmail:      errorEmailFieldIncorrect,
-		errorNamespaceMerchantContactAuthorizedPhone:      errorMessageIncorrectPhone,
-		errorNamespaceMerchantContactAuthorizedPosition:   errorMessageIncorrectPosition,
-		errorNamespaceMerchantContactTechnicalName:        errorMessageIncorrectName,
-		errorNamespaceMerchantContactTechnicalEmail:       errorEmailFieldIncorrect,
-		errorNamespaceMerchantContactTechnicalPhone:       errorMessageIncorrectPhone,
-		errorNamespaceMerchantBankingCurrency:             errorIncorrectCurrencyIdentifier,
-		errorNamespaceMerchantBankingName:                 errorMessageIncorrectBankName,
-		errorNamespaceMerchantBankingAddress:              errorMessageIncorrectBankAddress,
-		errorNamespaceMerchantBankingAccountNumber:        errorMessageIncorrectBankAccountNumber,
-		errorNamespaceMerchantBankingSwift:                errorMessageIncorrectBankSwift,
-		errorNamespaceMerchantBankingCorrespondentAccount: errorMessageIncorrectBankCorrespondentAccount,
+		errorNamespaceMerchantCompanyInfoName:                 errorMessageIncorrectCompanyName,
+		errorNamespaceMerchantCompanyInfoAlternativeName:      errorMessageIncorrectAlternativeName,
+		errorNamespaceMerchantCompanyInfoWebsite:              errorMessageIncorrectWebsite,
+		errorNamespaceMerchantCompanyInfoCountry:              errorIncorrectCountryIdentifier,
+		errorNamespaceMerchantCompanyInfoState:                errorMessageIncorrectState,
+		errorNamespaceMerchantCompanyInfoZip:                  errorMessageIncorrectZip,
+		errorNamespaceMerchantCompanyInfoCity:                 errorMessageIncorrectCity,
+		errorNamespaceMerchantCompanyInfoAddress:              errorMessageIncorrectAddress,
+		errorNamespaceMerchantContactAuthorized:               errorMessageRequiredContactAuthorized,
+		errorNamespaceMerchantContactTechnical:                errorMessageRequiredContactTechnical,
+		errorNamespaceMerchantContactAuthorizedName:           errorMessageIncorrectName,
+		errorNamespaceMerchantContactAuthorizedEmail:          errorEmailFieldIncorrect,
+		errorNamespaceMerchantContactAuthorizedPhone:          errorMessageIncorrectPhone,
+		errorNamespaceMerchantContactAuthorizedPosition:       errorMessageIncorrectPosition,
+		errorNamespaceMerchantContactTechnicalName:            errorMessageIncorrectName,
+		errorNamespaceMerchantContactTechnicalEmail:           errorEmailFieldIncorrect,
+		errorNamespaceMerchantContactTechnicalPhone:           errorMessageIncorrectPhone,
+		errorNamespaceMerchantBankingCurrency:                 errorIncorrectCurrencyIdentifier,
+		errorNamespaceMerchantBankingName:                     errorMessageIncorrectBankName,
+		errorNamespaceMerchantBankingAddress:                  errorMessageIncorrectBankAddress,
+		errorNamespaceMerchantBankingAccountNumber:            errorMessageIncorrectBankAccountNumber,
+		errorNamespaceMerchantBankingSwift:                    errorMessageIncorrectBankSwift,
+		errorNamespaceMerchantBankingCorrespondentAccount:     errorMessageIncorrectBankCorrespondentAccount,
+		errorNamespaceGetDashboardMainRequestMerchantId:       errorIncorrectMerchantId,
+		errorNamespaceGetDashboardMainRequestPeriod:           errorIncorrectPeriod,
+		errorNamespaceGetDashboardBaseReportRequestPeriod:     errorIncorrectPeriod,
+		errorNamespaceGetDashboardBaseReportRequestMerchantId: errorIncorrectMerchantId,
 	}
 )

@@ -41,6 +41,10 @@ backend:
   - ENVIRONMENT
   - PAYMENT_FORM_JS_LIBRARY_URL
   - WEBSOCKET_URL
+  - AWS_ACCESS_KEY_ID_REPORTER
+  - AWS_SECRET_ACCESS_KEY_REPORTER
+  - AWS_REGION_REPORTER
+  - AWS_BUCKET_REPORTER  
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
