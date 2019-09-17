@@ -18,15 +18,15 @@ require (
 	github.com/micro/go-plugins v1.2.0
 	github.com/micro/kubernetes v0.2.0 // indirect
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190917115812-06d2c2ec2646
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190917131248-b22922882d02
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
+	github.com/paysuper/paysuper-reporter v0.0.0-20190917132448-d75152f33094
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
 	github.com/spf13/viper v1.3.1 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/ttacon/libphonenumber v1.0.1
 	go.uber.org/zap v1.10.0
-	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 )
