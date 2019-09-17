@@ -1003,6 +1003,8 @@ github.com/paysuper/document-signer v0.0.0-20190812065749-d26175441785/go.mod h1
 github.com/paysuper/document-signer v0.0.0-20190903102235-df82efbb7d26/go.mod h1:39VQOEQm+WdUrGOAHDGnE8ks86mAPEKpgBwxP9mQfSA=
 github.com/paysuper/document-signer v0.0.0-20190903140137-c4c12bf31be5 h1:wEad5VJYpCwj64xMJIh1yALAMDTJnoxlId5fBWZr6G0=
 github.com/paysuper/document-signer v0.0.0-20190903140137-c4c12bf31be5/go.mod h1:HH+6SQ8iJQsXe5gFAzAqRvX8lkowVKMLOy2eDJi1wgA=
+github.com/paysuper/document-signer v0.0.0-20190906075749-af06b306ee92 h1:OzcTm69qCoqQ2YqYjgf8zAmkjAVaEV0VmzRNMyePPUI=
+github.com/paysuper/document-signer v0.0.0-20190906075749-af06b306ee92/go.mod h1:gqEKigUzMNjJ9P+OYeKCu+wOA17/Q2EElpJnd6O3Zr4=
 github.com/paysuper/paysuper-aws-manager v0.0.0-20190826105402-bb303dc4dd78 h1:gxHsn4NBFQxI5HnxK4AHkPashz1bDri7CcEAtcXgf+c=
 github.com/paysuper/paysuper-aws-manager v0.0.0-20190826105402-bb303dc4dd78/go.mod h1:TjXLdcbFp4VeSvZK3+sKv61uRS1tH0mtrEEqziaJ/+E=
 github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82 h1:/p8k5EsVivYfSVFeWV9Pb7/EZj6PJt+f3v/OPmH2dr0=
@@ -1061,6 +1063,8 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20190904122432-236ccc80e9b5 h
 github.com/paysuper/paysuper-billing-server v0.0.0-20190904122432-236ccc80e9b5/go.mod h1:C8HWINzXWZJEgnMcnrhYDgx5n9bCHCglLhFRLYr3gcI=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190904133438-ca187438857e h1:VUmhC4ufb/nlBZFkAwOdKrbEl82V3uj3IZKmHMAcV1k=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190904133438-ca187438857e/go.mod h1:C8HWINzXWZJEgnMcnrhYDgx5n9bCHCglLhFRLYr3gcI=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190917092047-aa3fabc21962 h1:+R2NgVQ/FPmzeqsVSz9AbnfBZAvQ0z/yjWf516X8H1Q=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190917092047-aa3fabc21962/go.mod h1:oxwtTZFhIv6pO74HtAzrjZ8wJ/qNX/dN4bfpLtBA1q4=
 github.com/paysuper/paysuper-currencies v0.0.0-20190723132218-9628e1b3ba42 h1:eSunQs9D/gzZ0XT5fsg4zAvUTTlhNO079kOyK6DoiEk=
 github.com/paysuper/paysuper-currencies v0.0.0-20190723132218-9628e1b3ba42/go.mod h1:151KLmte00rDeSTyON3HAnV3TuB73eCjqK/ydRWrD8k=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d h1:hoMkfdq4qEGOONvxajsZO0Mf6np++pGnrKVxegvplaw=
