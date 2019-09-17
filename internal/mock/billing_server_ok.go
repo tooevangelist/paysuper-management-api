@@ -890,3 +890,188 @@ func (s *BillingServerOkMock) SetMerchantTariffRates(
 ) (*grpc.CheckProjectRequestSignatureResponse, error) {
 	return &grpc.CheckProjectRequestSignatureResponse{}, nil
 }
+
+func (s *BillingServerOkMock) CreateOrUpdateKeyProduct(ctx context.Context, in *grpc.CreateOrUpdateKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	return &grpc.KeyProductResponse{
+		Status:  pkg.ResponseStatusOk,
+		Product: &grpc.KeyProduct{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) GetKeyProducts(ctx context.Context, in *grpc.ListKeyProductsRequest, opts ...client.CallOption) (*grpc.ListKeyProductsResponse, error) {
+	return &grpc.ListKeyProductsResponse{
+		Status: pkg.ResponseStatusOk,
+		Count:  1,
+		Products: []*grpc.KeyProduct{
+			{},
+		},
+	}, nil
+}
+
+func (s *BillingServerOkMock) GetKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	return &grpc.KeyProductResponse{
+		Status:  pkg.ResponseStatusOk,
+		Product: &grpc.KeyProduct{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) DeleteKeyProduct(ctx context.Context, in *grpc.RequestKeyProductMerchant, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	return &grpc.EmptyResponseWithStatus{
+		Status: pkg.ResponseStatusOk,
+	}, nil
+}
+
+func (s *BillingServerOkMock) PublishKeyProduct(ctx context.Context, in *grpc.PublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	return &grpc.KeyProductResponse{
+		Status:  pkg.ResponseStatusOk,
+		Product: &grpc.KeyProduct{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) GetKeyProductsForOrder(ctx context.Context, in *grpc.GetKeyProductsForOrderRequest, opts ...client.CallOption) (*grpc.ListKeyProductsResponse, error) {
+	return &grpc.ListKeyProductsResponse{
+		Status: pkg.ResponseStatusOk,
+		Count:  1,
+		Products: []*grpc.KeyProduct{
+			{},
+		},
+	}, nil
+}
+
+func (s *BillingServerOkMock) GetPlatforms(ctx context.Context, in *grpc.ListPlatformsRequest, opts ...client.CallOption) (*grpc.ListPlatformsResponse, error) {
+	return &grpc.ListPlatformsResponse{
+		Status: pkg.ResponseStatusOk,
+		Count:  1,
+		Platforms: []*grpc.Platform{
+			{},
+		},
+	}, nil
+}
+
+func (s *BillingServerOkMock) UpdatePlatformPrices(ctx context.Context, in *grpc.AddOrUpdatePlatformPricesRequest, opts ...client.CallOption) (*grpc.UpdatePlatformPricesResponse, error) {
+	return &grpc.UpdatePlatformPricesResponse{
+		Status: pkg.ResponseStatusOk,
+		Price: &grpc.PlatformPrice{
+			Id: "steam",
+			Prices: []*grpc.ProductPrice{
+				{},
+			},
+		},
+	}, nil
+}
+
+func (s *BillingServerOkMock) DeletePlatformFromProduct(ctx context.Context, in *grpc.RemovePlatformRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	return &grpc.EmptyResponseWithStatus{
+		Status: pkg.ResponseStatusOk,
+	}, nil
+}
+
+func (s *BillingServerOkMock) GetAvailableKeysCount(ctx context.Context, in *grpc.GetPlatformKeyCountRequest, opts ...client.CallOption) (*grpc.GetPlatformKeyCountResponse, error) {
+	return &grpc.GetPlatformKeyCountResponse{
+		Status: pkg.ResponseStatusOk,
+		Count:  1000,
+	}, nil
+}
+
+func (s *BillingServerOkMock) UploadKeysFile(ctx context.Context, in *grpc.PlatformKeysFileRequest, opts ...client.CallOption) (*grpc.PlatformKeysFileResponse, error) {
+	return &grpc.PlatformKeysFileResponse{
+		Status:        pkg.ResponseStatusOk,
+		KeysProcessed: 1000,
+		TotalCount:    2000,
+	}, nil
+}
+
+func (s *BillingServerOkMock) GetKeyByID(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.GetKeyForOrderRequestResponse, error) {
+	return &grpc.GetKeyForOrderRequestResponse{
+		Status: pkg.ResponseStatusOk,
+		Key:    &billing.Key{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) ReserveKeyForOrder(ctx context.Context, in *grpc.PlatformKeyReserveRequest, opts ...client.CallOption) (*grpc.PlatformKeyReserveResponse, error) {
+	return &grpc.PlatformKeyReserveResponse{
+		KeyId:  SomeMerchantId,
+		Status: pkg.ResponseStatusOk,
+	}, nil
+}
+
+func (s *BillingServerOkMock) FinishRedeemKeyForOrder(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.GetKeyForOrderRequestResponse, error) {
+	return &grpc.GetKeyForOrderRequestResponse{
+		Status: pkg.ResponseStatusOk,
+		Key:    &billing.Key{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) CancelRedeemKeyForOrder(ctx context.Context, in *grpc.KeyForOrderRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	return &grpc.EmptyResponseWithStatus{
+		Status: pkg.ResponseStatusOk,
+	}, nil
+}
+
+func (s *BillingServerOkMock) GetKeyProductInfo(ctx context.Context, in *grpc.GetKeyProductInfoRequest, opts ...client.CallOption) (*grpc.GetKeyProductInfoResponse, error) {
+	return &grpc.GetKeyProductInfoResponse{
+		Status: pkg.ResponseStatusOk,
+	}, nil
+}
+
+func (s *BillingServerOkMock) ChangeCodeInOrder(ctx context.Context, in *grpc.ChangeCodeInOrderRequest, opts ...client.CallOption) (*grpc.ChangeCodeInOrderResponse, error) {
+	return &grpc.ChangeCodeInOrderResponse{
+		Status: pkg.ResponseStatusOk,
+		Order:  &billing.Order{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) GetOrderPublic(
+	ctx context.Context,
+	in *grpc.GetOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.GetOrderPublicResponse, error) {
+	return &grpc.GetOrderPublicResponse{}, nil
+}
+
+func (s *BillingServerOkMock) GetOrderPrivate(
+	ctx context.Context,
+	in *grpc.GetOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.GetOrderPrivateResponse, error) {
+	return &grpc.GetOrderPrivateResponse{}, nil
+}
+
+func (s *BillingServerOkMock) FindAllOrdersPublic(
+	ctx context.Context,
+	in *grpc.ListOrdersRequest,
+	opts ...client.CallOption,
+) (*grpc.ListOrdersPublicResponse, error) {
+	return &grpc.ListOrdersPublicResponse{}, nil
+}
+
+func (s *BillingServerOkMock) FindAllOrdersPrivate(
+	ctx context.Context,
+	in *grpc.ListOrdersRequest,
+	opts ...client.CallOption,
+) (*grpc.ListOrdersPrivateResponse, error) {
+	return &grpc.ListOrdersPrivateResponse{}, nil
+}
+
+func (s *BillingServerOkMock) GetDashboardMainReport(
+	ctx context.Context,
+	in *grpc.GetDashboardMainRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardMainResponse, error) {
+	return &grpc.GetDashboardMainResponse{}, nil
+}
+func (s *BillingServerOkMock) GetDashboardRevenueDynamicsReport(
+	ctx context.Context,
+	in *grpc.GetDashboardMainRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardRevenueDynamicsReportResponse, error) {
+	return &grpc.GetDashboardRevenueDynamicsReportResponse{}, nil
+}
+
+func (s *BillingServerOkMock) GetDashboardBaseReport(
+	ctx context.Context,
+	in *grpc.GetDashboardBaseReportRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardBaseReportResponse, error) {
+	return &grpc.GetDashboardBaseReportResponse{}, nil
+}

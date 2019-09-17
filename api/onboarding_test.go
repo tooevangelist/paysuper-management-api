@@ -68,7 +68,11 @@ func (suite *OnboardingTestSuite) SetupTest() {
 			Email: "test@unit.test",
 		},
 		config: &config.Config{
-			HttpScheme: "http",
+			HttpScheme:                  "http",
+			AwsAccessKeyIdAgreement:     "key_id",
+			AwsSecretAccessKeyAgreement: "secret_key",
+			AwsRegionAgreement:          "eu-west-1",
+			AwsBucketAgreement:          "bucket",
 		},
 	}
 
@@ -1454,7 +1458,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_AgreementN
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
 	assert.Equal(suite.T(), errorMessageAgreementNotGenerated, httpErr.Message)
 }
 
@@ -3016,7 +3020,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_Ok() {
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set("region", "North America")
+	q.Set("region", "north_america")
 	q.Set("payout_currency", "USD")
 	q.Set("amount_from", "0.75")
 	q.Set("amount_to", "5")
@@ -3087,7 +3091,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_ValidateAmountRa
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set("region", "CIS")
+	q.Set("region", "cis")
 	q.Set("payout_currency", "USD")
 	q.Set("amount_to", "2")
 
@@ -3112,7 +3116,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerErr
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set("region", "North America")
+	q.Set("region", "north_america")
 	q.Set("payout_currency", "USD")
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
@@ -3137,7 +3141,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerRes
 	e := echo.New()
 
 	q := make(url.Values)
-	q.Set("region", "North America")
+	q.Set("region", "north_america")
 	q.Set("payout_currency", "USD")
 
 	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
@@ -3160,7 +3164,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerRes
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_Ok() {
-	body := `{"region": "North America", "payout_currency": "USD", "amount_from": 10, "amount_to": 1000}`
+	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": 10, "amount_to": 1000}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
@@ -3184,7 +3188,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_Ok() {
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BindError() {
-	body := `{"region": "North America", "payout_currency": "USD", "amount_from": "qwerty"}`
+	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": "qwerty"}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
@@ -3206,7 +3210,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BindError() {
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_ValidationError() {
-	body := `{"region": "North America", "payout_currency": "USD", "amount_from": -100}`
+	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": -100}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
@@ -3231,7 +3235,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_ValidationError(
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerError() {
-	body := `{"region": "North America", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
+	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))
@@ -3258,7 +3262,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerErr
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerResultError() {
-	body := `{"region": "North America", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
+	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(body))

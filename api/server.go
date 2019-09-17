@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/micro/go-micro"
-	"github.com/micro/go-plugins/selector/static"
+	"github.com/micro/go-plugins/client/selector/static"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -157,7 +157,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 	api.accessRouteGroup.Use(middleware.Recover())
 
 	api.authUserRouteGroup = api.Http.Group(apiAuthUserGroupPath)
-	/*api.authUserRouteGroup.Use(
+	api.authUserRouteGroup.Use(
 		jwtMiddleware.AuthOneJwtCallableWithConfig(
 			api.jwtVerifier,
 			func(ui *jwtverifier.UserInfo) {
@@ -170,11 +170,7 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 			},
 		),
 	)
-	api.authUserRouteGroup.Use(api.getUserDetailsMiddleware)*/
-	api.authUser = &AuthUser{
-		Id:    "ffffffffffffffffffffffff",
-		Email: "dmitriy.sinichkin@protocol.one",
-	}
+	api.authUserRouteGroup.Use(api.getUserDetailsMiddleware)
 
 	api.webhookRouteGroup = api.Http.Group(apiWebHookGroupPath)
 	api.webhookRouteGroup.Use(middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
@@ -225,7 +221,9 @@ func NewServer(p *ServerInitParams) (*Api, error) {
 		initPriceGroupRoutes().
 		initUserProfileRoutes().
 		initVatReportsRoutes().
-		initRoyaltyReportsRoutes()
+		initRoyaltyReportsRoutes().
+		initKeyProductRoutes().
+		initDashboardRoutes()
 
 	_, err = api.initOnboardingRoutes()
 

@@ -152,8 +152,8 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_A
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/channel/merchant/:merchant_id")
-	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetPath("/payment_costs/channel/merchant/:id")
+	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 	err := suite.router.setPaymentChannelCostMerchant(ctx)
 	assert.NoError(suite.T(), err)
@@ -295,8 +295,8 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Add() 
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/payment_costs/money_back/merchant/:merchant_id")
-	ctx.SetParamNames(requestParameterMerchantId)
+	ctx.SetPath("/payment_costs/money_back/merchant/:id")
+	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
 	err := suite.router.setMoneyBackCostMerchant(ctx)

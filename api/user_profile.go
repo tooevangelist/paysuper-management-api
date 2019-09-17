@@ -16,6 +16,7 @@ func (api *Api) initUserProfileRoutes() *Api {
 	route := &userProfileRoute{Api: api}
 
 	api.authUserRouteGroup.GET("/user/profile", route.getUserProfile)
+	api.authUserRouteGroup.GET("/user/profile/:id", route.getUserProfile)
 	api.authUserRouteGroup.PATCH("/user/profile", route.setUserProfile)
 	api.Http.PUT("/api/v1/user/confirm_email", route.confirmEmail)
 	api.authUserRouteGroup.POST("/user/feedback", route.createFeedback)
@@ -23,16 +24,34 @@ func (api *Api) initUserProfileRoutes() *Api {
 	return api
 }
 
+// @Description Get user profile
+// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
+//  https://api.paysuper.online/admin/api/v1/user/profile
+//
+// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
+//  https://api.paysuper.online/admin/api/v1/user/profile/ffffffffffffffffffffffff
 func (r *userProfileRoute) getUserProfile(ctx echo.Context) error {
-	if r.authUser.Id == "" {
-		return echo.NewHTTPError(http.StatusUnauthorized, errorMessageAccessDenied)
+	req := &grpc.GetUserProfileRequest{
+		UserId:    r.authUser.Id,
+		ProfileId: ctx.Param(requestParameterId),
+	}
+	err := r.validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	req := &grpc.GetUserProfileRequest{UserId: r.authUser.Id}
 	rsp, err := r.billingService.GetUserProfile(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "GetUserProfile"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
