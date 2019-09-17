@@ -1,13 +1,13 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
 	"github.com/paysuper/paysuper-payment-link/proto"
 	"go.uber.org/zap"
 	"net/http"
@@ -51,32 +51,6 @@ func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
 	return nil
 }
 
-// @Summary Create order with HTML form
-// @Description Create a payment order use GET or POST HTML form
-// @Tags Payment Order
-// @Accept multipart/form-data
-// @Accept application/x-www-form-urlencoded
-// @Produce html
-// @Param PP_PROJECT_ID query string true "Project unique identifier in Protocol One payment solution"
-// @Param PP_AMOUNT query float64 true "Order amount"
-// @Param PP_ACCOUNT query string true "User unique account in project"
-// @Param PP_ORDER_ID query string false "Unique order identifier in project. This field not required, BUT we're recommend send this field always"
-// @Param PP_PAYMENT_METHOD query string false "Payment method identifier in Protocol One payment solution"
-// @Param PP_DESCRIPTION query string false "Order description. If this field not send in request, then we're create standard order description"
-// @Param PP_CURRENCY query string false "Order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency"
-// @Param PP_REGION query string false "User (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip"
-// @Param PP_PAYER_EMAIL query string false "User (payer) email"
-// @Param PP_PAYER_PHONE query string false "User (payer) phone"
-// @Param PP_URL_VERIFY query string false "URL for payment data verification request to project. This field can be send if it allowed in project admin panel"
-// @Param PP_URL_NOTIFY query string false "URL for payment notification request to project. This field can be send if it allowed in project admin panel"
-// @Param PP_URL_SUCCESS query string false "URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel"
-// @Param PP_URL_FAIL query string false "URL for redirect user after failed payment. This field can be send if it allowed in project admin panel"
-// @Param PP_SIGNATURE query string false "Signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always"
-// @Param Other query string false "Any fields on the project side that do not match the names of the reserved fields"
-// @Success 302 {string} html "Redirect user to form entering payment requisites"
-// @Failure 400 {string} html "Redirect user to page with error description"
-// @Failure 500 {string} html "Redirect user to page with error description"
-// @Router /order/create [get]
 func (api *Api) InitOrderV1Routes() *Api {
 	route := &orderRoute{
 		Api: api,
@@ -91,8 +65,8 @@ func (api *Api) InitOrderV1Routes() *Api {
 
 	api.Http.POST("/api/v1/payment", route.processCreatePayment)
 
-	api.authUserRouteGroup.GET("/order", route.getOrders)
-	api.authUserRouteGroup.GET("/order/:id", route.getOrderJson)
+	api.authUserRouteGroup.GET("/order", route.listOrdersPublic)
+	api.authUserRouteGroup.GET("/order/:id", route.getOrderPublic)
 
 	api.authUserRouteGroup.GET("/order/:order_id/refunds", route.listRefunds)
 	api.authUserRouteGroup.GET("/order/:order_id/refunds/:refund_id", route.getRefund)
@@ -153,7 +127,14 @@ func (r *orderRoute) createFromFormData(ctx echo.Context) error {
 	orderResponse, err := r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "OrderCreateProcess"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -194,6 +175,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 		}
 	}
 
+	ctxReq := ctx.Request().Context()
 	req.IssuerUrl = ctx.Request().Header.Get(HeaderReferer)
 
 	var (
@@ -207,10 +189,17 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 			OrderId:   req.PspOrderUuid,
 			ProjectId: req.ProjectId,
 		}
-		rsp1, err := r.billingService.IsOrderCanBePaying(ctx.Request().Context(), req1)
+		rsp1, err := r.billingService.IsOrderCanBePaying(ctxReq, req1)
 
 		if err != nil {
-			zap.S().Errorf("internal error", "err", err.Error())
+			zap.L().Error(
+				pkg.ErrorGrpcServiceCallFailed,
+				zap.Error(err),
+				zap.String(ErrorFieldService, pkg.ServiceName),
+				zap.String(ErrorFieldMethod, "IsOrderCanBePaying"),
+				zap.Any(ErrorFieldRequest, req),
+			)
+
 			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 		}
 
@@ -220,10 +209,17 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 
 		order = rsp1.Item
 	} else {
-		orderResponse, err = r.billingService.OrderCreateProcess(ctx.Request().Context(), req)
+		orderResponse, err = r.billingService.OrderCreateProcess(ctxReq, req)
 
 		if err != nil {
-			zap.S().Errorf("internal error", "err", err.Error())
+			zap.L().Error(
+				pkg.ErrorGrpcServiceCallFailed,
+				zap.Error(err),
+				zap.String(ErrorFieldService, pkg.ServiceName),
+				zap.String(ErrorFieldMethod, "OrderCreateProcess"),
+				zap.Any(ErrorFieldRequest, req),
+			)
+
 			return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 		}
 
@@ -246,9 +242,17 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 			Scheme:  r.httpScheme,
 			Host:    ctx.Request().Host,
 		}
-		rsp2, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req2)
+		rsp2, err := r.billingService.PaymentFormJsonDataProcess(ctxReq, req2)
 
 		if err != nil {
+			zap.L().Error(
+				pkg.ErrorGrpcServiceCallFailed,
+				zap.Error(err),
+				zap.String(ErrorFieldService, pkg.ServiceName),
+				zap.String(ErrorFieldMethod, "PaymentFormJsonDataProcess"),
+				zap.Any(ErrorFieldRequest, req),
+			)
+
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		if rsp2.Status != pkg.ResponseStatusOk {
@@ -285,7 +289,14 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentFormJsonDataProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "PaymentFormJsonDataProcess"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -315,7 +326,6 @@ func (r *orderRoute) getOrderForm(ctx echo.Context) error {
 
 // Create order from payment link and redirect to order payment form
 func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
-
 	paylinkId := ctx.Param(requestParameterId)
 
 	req := &paylink.PaylinkRequest{
@@ -323,12 +333,20 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 	}
 
 	err := r.validate.Struct(req)
+
 	if err != nil {
-		zap.S().Errorf("Cannot validate request", "error", err.Error(), "request", req)
+		zap.L().Error(
+			"Cannot validate request",
+			zap.Error(err),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
-	pl, err := r.paylinkService.GetPaylink(context.Background(), req)
+	ctxReq := ctx.Request().Context()
+	pl, err := r.paylinkService.GetPaylink(ctxReq, req)
+
 	if err != nil {
 		return ctx.Render(http.StatusNotFound, errorTemplateName, map[string]interface{}{})
 	}
@@ -354,9 +372,17 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 		oReq.PrivateMetadata[requestParameterUtmCampaign] = v[0]
 	}
 
-	orderResponse, err := r.billingService.OrderCreateProcess(context.Background(), oReq)
+	orderResponse, err := r.billingService.OrderCreateProcess(ctxReq, oReq)
+
 	if err != nil {
-		zap.S().Errorf("Cannot create order for paylink", "error", err.Error(), "request", req)
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "OrderCreateProcess"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
@@ -366,24 +392,32 @@ func (r *orderRoute) getOrderForPaylink(ctx echo.Context) error {
 
 	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, r.httpScheme, ctx.Request().Host, orderResponse.Item.Uuid)
 	qs := ctx.QueryString()
+
 	if qs != "" {
 		inlineFormRedirectUrl += "?" + qs
 	}
 
 	go func() {
-		_, err := r.paylinkService.IncrPaylinkVisits(context.Background(), &paylink.PaylinkRequest{
-			Id: paylinkId,
-		})
+		_, err := r.paylinkService.IncrPaylinkVisits(ctxReq, &paylink.PaylinkRequest{Id: paylinkId})
+
 		if err != nil {
-			zap.S().Errorf("Cannot update paylink stat", "error", err.Error(), "request", req)
+			zap.L().Error(
+				pkg.ErrorGrpcServiceCallFailed,
+				zap.Error(err),
+				zap.String(ErrorFieldService, paylinkServiceConst.ServiceName),
+				zap.String(ErrorFieldMethod, "IncrPaylinkVisits"),
+				zap.Any(ErrorFieldRequest, req),
+			)
 		}
 	}()
+
 	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)
 }
 
-// Get full object with order data
-// Route GET /api/v1/s/order/{id}
-func (r *orderRoute) getOrderJson(ctx echo.Context) error {
+// @Description Get order by id
+// @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  https://api.paysuper.online/admin/api/v1/order/%order_id_here%
+func (r *orderRoute) getOrderPublic(ctx echo.Context) error {
 	req := &grpc.GetOrderRequest{
 		Id: ctx.Param(requestParameterId),
 	}
@@ -391,26 +425,34 @@ func (r *orderRoute) getOrderJson(ctx echo.Context) error {
 	err := r.validate.Struct(req)
 
 	if err != nil {
-
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.GetOrder(ctx.Request().Context(), req)
+	rsp, err := r.billingService.GetOrderPublic(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "GetOrderPublic"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
-	if rsp == nil {
-		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, rsp)
+	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
-// Get orders list
-// Route GET /api/v1/s/order
-func (r *orderRoute) getOrders(ctx echo.Context) error {
+// @Description Get orders list
+// @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+//  https://api.paysuper.online/admin/api/v1/order?project[]=%project_identifier_here%
+func (r *orderRoute) listOrdersPublic(ctx echo.Context) error {
 	req := &grpc.ListOrdersRequest{}
 	err := ctx.Bind(req)
 
@@ -432,13 +474,25 @@ func (r *orderRoute) getOrders(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	rsp, err := r.billingService.FindAllOrders(ctx.Request().Context(), req)
+	rsp, err := r.billingService.FindAllOrdersPublic(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, errorMessageOrdersNotFound)
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "FindAllOrdersPublic"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
-	return ctx.JSON(http.StatusOK, rsp)
+	if rsp.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
 // Create payment by order
@@ -460,7 +514,14 @@ func (r *orderRoute) processCreatePayment(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "PaymentCreateProcess"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusBadRequest, errorUnknown)
 	}
 
@@ -491,7 +552,14 @@ func (r *orderRoute) getRefund(ctx echo.Context) error {
 	rsp, err := r.billingService.GetRefund(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "GetRefund"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -519,7 +587,14 @@ func (r *orderRoute) listRefunds(ctx echo.Context) error {
 	rsp, err := r.billingService.ListRefunds(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "ListRefunds"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -571,7 +646,14 @@ func (r *orderRoute) createRefund(ctx echo.Context) error {
 	rsp, err := r.billingService.CreateRefund(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "CreateRefund"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -609,7 +691,14 @@ func (r *orderRoute) changeLanguage(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentFormLanguageChanged(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "PaymentFormLanguageChanged"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -647,7 +736,14 @@ func (r *orderRoute) changeCustomer(ctx echo.Context) error {
 	rsp, err := r.billingService.PaymentFormPaymentAccountChanged(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "PaymentFormPaymentAccountChanged"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -682,7 +778,14 @@ func (r *orderRoute) processBillingAddress(ctx echo.Context) error {
 	rsp, err := r.billingService.ProcessBillingAddress(ctx.Request().Context(), req)
 
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "ProcessBillingAddress"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -721,7 +824,14 @@ func (r *orderRoute) notifySale(ctx echo.Context) error {
 
 	_, err = r.billingService.SetUserNotifySales(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "SetUserNotifySales"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 
@@ -756,7 +866,14 @@ func (r *orderRoute) notifyNewRegion(ctx echo.Context) error {
 
 	_, err = r.billingService.SetUserNotifyNewRegion(ctx.Request().Context(), req)
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "SetUserNotifyNewRegion"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+
 		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 

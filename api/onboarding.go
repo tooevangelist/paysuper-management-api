@@ -152,6 +152,9 @@ func (r *onboardingRoute) getMerchantByUser(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
+// @Description List merchants by conditions
+// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
+//  'https://api.paysuper.online/admin/api/v1/merchants?received_date_from=1568332800'
 func (r *onboardingRoute) listMerchants(ctx echo.Context) error {
 	req := &grpc.MerchantListingRequest{}
 	err := (&OnboardingMerchantListingBinder{}).Bind(req, ctx)
@@ -661,7 +664,7 @@ func (r *onboardingRoute) getAgreementDocument(ctx echo.Context) error {
 	}
 
 	if rsp.Item.S3AgreementName == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, errorMessageAgreementNotGenerated)
+		return echo.NewHTTPError(http.StatusNotFound, errorMessageAgreementNotGenerated)
 	}
 
 	filePath := os.TempDir() + string(os.PathSeparator) + rsp.Item.S3AgreementName
