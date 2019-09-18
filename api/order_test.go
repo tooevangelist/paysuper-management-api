@@ -1166,7 +1166,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_Ok() {
 
 	ctx.SetPath("/order")
 
-	bs := &mock.BillingService{}
+	bs := &billMock.BillingService{}
 	bs.On("FindAllOrdersPublic", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(
 			&grpc.ListOrdersPublicResponse{
@@ -1194,7 +1194,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_BillingServerError() {
 
 	ctx.SetPath("/order")
 
-	bs := &mock.BillingService{}
+	bs := &billMock.BillingService{}
 	bs.On("FindAllOrdersPublic", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(nil, errors.New("some error"))
 	suite.router.billingService = bs

@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type reportFileRoute struct {
@@ -32,18 +33,18 @@ func (api *Api) initReportFileRoute() *Api {
 	}
 
 	api.accessRouteGroup.POST("/report_file", route.create)
-	api.accessRouteGroup.GET("/report_file/:id.:type", route.download)
+	api.accessRouteGroup.GET("/report_file/download/:file", route.download)
 
 	return api
 }
 
 // Send a request to create a report for download.
-// POST /admin/api/v1/s/report_file
+// POST /api/v1/s/report_file
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
 //      -d '{"file_type": "pdf", "period_from": 1566727410, "period_to": "1566736763"}' \
-//      https://api.paysuper.online/admin/api/v1/s/report_file
+//      https://api.paysuper.online/api/v1/s/report_file
 //
 func (r *reportFileRoute) create(ctx echo.Context) error {
 	data := &reportFileRequest{}
@@ -86,22 +87,23 @@ func (r *reportFileRoute) create(ctx echo.Context) error {
 }
 
 // Send a request to create a report for download.
-// GET /admin/api/v1/s/report_file/5ced34d689fce60bf4440829.csv
+// GET /api/v1/s/report_file/download/5ced34d689fce60bf4440829.csv
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
-//      https://api.paysuper.online/admin/api/v1/s/report_file/5ced34d689fce60bf4440829.csv
+//      https://api.paysuper.online/api/v1/s/report_file/download/5ced34d689fce60bf4440829.csv
 //
 func (r *reportFileRoute) download(ctx echo.Context) error {
-	id := ctx.Param("id")
-	if id == "" {
-		zap.S().Error("unable to find the file id")
+	file := ctx.Param("file")
+	if file == "" {
+		zap.S().Error("unable to find the file")
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
-	reportType := ctx.Param("type")
-	if reportType == "" {
-		zap.S().Error("unable to find the file id")
+	params := strings.Split(file, ".")
+
+	if len(params) != 2 {
+		zap.S().Error("incorrect of file string")
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
@@ -118,7 +120,7 @@ func (r *reportFileRoute) download(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorMessageDownloadReportFile)
 	}
 
-	fileName := fmt.Sprintf(reporterPkg.FileMask, r.authUser.Id, id, reportType)
+	fileName := fmt.Sprintf(reporterPkg.FileMask, r.authUser.Id, params[0], params[1])
 	filePath := os.TempDir() + string(os.PathSeparator) + fileName
 	_, err = awsManager.Download(ctx.Request().Context(), filePath, &awsWrapper.DownloadInput{FileName: fileName})
 

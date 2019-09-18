@@ -18,10 +18,10 @@ require (
 	github.com/micro/go-plugins v1.2.0
 	github.com/micro/kubernetes v0.2.0 // indirect
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190917131248-b22922882d02
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190918083056-4fbf54925f32
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
-	github.com/paysuper/paysuper-reporter v0.0.0-20190917132448-d75152f33094
+	github.com/paysuper/paysuper-reporter v0.0.0-20190917180039-6701d139ca7f
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
 	github.com/spf13/viper v1.3.1 // indirect
 	github.com/stretchr/testify v1.4.0
@@ -31,6 +31,9 @@ require (
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 )
 
-replace github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
+replace (
+	github.com/gogo/protobuf v0.0.0-20190410021324-65acae22fc9 => github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
+	github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
+)
 
 go 1.13

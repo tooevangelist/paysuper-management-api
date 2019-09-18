@@ -4,9 +4,7 @@ import (
 	"errors"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
-	billingMocks "github.com/paysuper/paysuper-billing-server/pkg/mocks"
-	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
-	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"github.com/paysuper/paysuper-management-api/config"
 	reporterMocks "github.com/paysuper/paysuper-reporter/pkg/mocks"
 	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
 	"github.com/stretchr/testify/assert"
@@ -34,16 +32,22 @@ func (suite *ReportFileTestSuite) SetupTest() {
 		Http:     echo.New(),
 		validate: validator.New(),
 		authUser: &AuthUser{Id: "ffffffffffffffffffffffff"},
+		config: &config.Config{
+			AwsBucketReporter:          "test",
+			AwsRegionReporter:          "test",
+			AwsSecretAccessKeyReporter: "test",
+			AwsAccessKeyIdReporter:     "test",
+		},
 	}
 
-	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
+	suite.api.accessRouteGroup = suite.api.Http.Group("/api/v1/s")
 	suite.handler = &reportFileRoute{Api: suite.api}
 }
 
 func (suite *ReportFileTestSuite) Test_Routes() {
 	shouldHaveRoutes := [][]string{
-		{"/admin/api/v1/report_file", http.MethodPost},
-		{"/admin/api/v1/report_file/:id", http.MethodGet},
+		{"/api/v1/s/report_file", http.MethodPost},
+		{"/api/v1/s/report_file/download/:file", http.MethodGet},
 	}
 
 	api := suite.api.initReportFileRoute()
@@ -71,12 +75,6 @@ func (suite *ReportFileTestSuite) TestReportFile_create_Error_CreateFile() {
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	billingService := &billingMocks.BillingService{}
-	billingService.
-		On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{Item: &billing.Merchant{Id: bson.NewObjectId().Hex()}}, nil)
-	suite.api.billingService = billingService
-
 	reporterService := &reporterMocks.ReporterService{}
 	reporterService.
 		On("CreateFile", mock2.Anything, mock2.Anything).
@@ -97,12 +95,6 @@ func (suite *ReportFileTestSuite) TestReportFile_create_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	billingService := &billingMocks.BillingService{}
-	billingService.
-		On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{Item: &billing.Merchant{Id: bson.NewObjectId().Hex()}}, nil)
-	suite.api.billingService = billingService
-
 	reporterService := &reporterMocks.ReporterService{}
 	reporterService.
 		On("CreateFile", mock2.Anything, mock2.Anything).
@@ -114,7 +106,7 @@ func (suite *ReportFileTestSuite) TestReportFile_create_Ok() {
 }
 
 func (suite *ReportFileTestSuite) TestReportFile_download_Error_EmptyId() {
-	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
+	req := httptest.NewRequest(http.MethodGet, "/report_file/download/:file", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
@@ -126,102 +118,49 @@ func (suite *ReportFileTestSuite) TestReportFile_download_Error_EmptyId() {
 	assert.Regexp(suite.T(), errorRequestParamsIncorrect.Message, httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationId() {
-	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
+func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationFileEmpty() {
+	req := httptest.NewRequest(http.MethodGet, "/report_file/download/:file", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	ctx.SetPath("/taxes/report/download/:id")
-	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues("string")
-
-	billingService := &billingMocks.BillingService{}
-	billingService.
-		On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{Item: &billing.Merchant{Id: bson.NewObjectId().Hex()}}, nil)
-	suite.api.billingService = billingService
+	ctx.SetPath("/report_file/download/:file")
+	ctx.SetParamNames(requestParameterFile)
+	ctx.SetParamValues("")
 
 	err := suite.handler.download(ctx)
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "validation failed", httpErr.Message)
+	assert.Regexp(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
-func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationMerchantId() {
-	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
+func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationFileIncorrect() {
+	req := httptest.NewRequest(http.MethodGet, "/report_file/download/:file", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	ctx.SetPath("/report_file/:id")
-	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	billingService := &billingMocks.BillingService{}
-	billingService.
-		On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{Item: &billing.Merchant{Id: "string"}}, nil)
-	suite.api.billingService = billingService
+	ctx.SetPath("/report_file/download/:file")
+	ctx.SetParamNames(requestParameterFile)
+	ctx.SetParamValues("test")
 
 	err := suite.handler.download(ctx)
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), "validation failed", httpErr.Message)
-}
-
-func (suite *ReportFileTestSuite) TestReportFile_download_Error_DownloadReportFile() {
-	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/report_file/:id")
-	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	billingService := &billingMocks.BillingService{}
-	billingService.
-		On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{Item: &billing.Merchant{Id: bson.NewObjectId().Hex()}}, nil)
-	suite.api.billingService = billingService
-
-	reporterService := &reporterMocks.ReporterService{}
-	reporterService.
-		On("LoadFile", mock2.Anything, mock2.Anything).
-		Return(nil, errors.New("error"))
-	suite.api.reporterService = reporterService
-
-	err := suite.handler.download(ctx)
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Regexp(suite.T(), errorMessageDownloadReportFile.Message, httpErr.Message)
+	assert.Regexp(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
 func (suite *ReportFileTestSuite) TestReportFile_download_Ok() {
-	req := httptest.NewRequest(http.MethodGet, "/report_file/:id", nil)
+	req := httptest.NewRequest(http.MethodGet, "/report_file/download/:file", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := suite.api.Http.NewContext(req, rsp)
 
-	ctx.SetPath("/taxes/report/download/:id")
-	ctx.SetParamNames(requestParameterId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	billingService := &billingMocks.BillingService{}
-	billingService.
-		On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{Item: &billing.Merchant{Id: bson.NewObjectId().Hex()}}, nil)
-	suite.api.billingService = billingService
-
-	reporterService := &reporterMocks.ReporterService{}
-	reporterService.
-		On("LoadFile", mock2.Anything, mock2.Anything).
-		Return(&reporterProto.LoadFileResponse{File: &reporterProto.File{}}, nil)
-	suite.api.reporterService = reporterService
+	ctx.SetPath("/report_file/download/:file")
+	ctx.SetParamNames(requestParameterFile)
+	ctx.SetParamValues("string.csv")
 
 	err := suite.handler.download(ctx)
 	assert.NoError(suite.T(), err)
