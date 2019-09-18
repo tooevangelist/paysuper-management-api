@@ -29,6 +29,7 @@ func (api *Api) initKeyProductRoutes() *Api {
 	api.authUserRouteGroup.POST("/key-products/:key_product_id/publish", keyProductApiV1.publishKeyProduct)
 	api.authUserRouteGroup.POST("/key-products/:key_product_id/platforms", keyProductApiV1.changePlatformPricesForKeyProduct)
 	api.authUserRouteGroup.DELETE("/key-products/:key_product_id/platforms/:platform_id", keyProductApiV1.removePlatformForKeyProduct)
+	api.authUserRouteGroup.DELETE("/key-products/:key_product_id", keyProductApiV1.deleteKeyProductById)
 	api.authUserRouteGroup.GET("/platforms", keyProductApiV1.getPlatformsList)
 
 	api.authUserRouteGroup.POST("/key-products/:key_product_id/platforms/:platform_id/file", keyProductApiV1.uploadKeys)
@@ -178,6 +179,36 @@ func (r *keyProductRoute) getPlatformsList(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
+func (r *keyProductRoute) deleteKeyProductById(ctx echo.Context) error {
+	req := &grpc.RequestKeyProductMerchant{}
+	req.Id = ctx.Param("key_product_id")
+
+	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+	}
+	if merchant.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
+	}
+	req.MerchantId = merchant.Item.Id
+
+	if err := r.validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
+	}
+
+	res, err := r.billingService.DeleteKeyProduct(ctx.Request().Context(), req)
+	if err != nil {
+		zap.S().Error(InternalErrorTemplate, "err", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}
+
 // @Description Create new key product for authenticated merchant
 // @Example PUT /admin/api/v1/key-products/:key_product_id
 func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
@@ -206,7 +237,7 @@ func (r *keyProductRoute) changeKeyProduct(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 
-	if res.Message != nil {
+	if res.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
