@@ -330,12 +330,12 @@ func (r *paymentCostRoute) deleteMoneyBackCostMerchant(ctx echo.Context) error {
 
 // @Description Create and update system costs for payments operations
 // @Example curl -X POST -H "Authorization: Bearer %access_token_here%" -H "Content-Type: application/json" \
-//      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34,
+//      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.01, "fix_amount": 2.34,
 //      "fix_amount_currency": "USD"}' \
 //      https://api.paysuper.online/admin/api/v1/payment_costs/channel/system
 //
 // @Example curl -X PUT -H "Authorization: Bearer %access_token_here%" -H "Content-Type: application/json" \
-//      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34,
+//      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.01, "fix_amount": 2.34,
 //      "fix_amount_currency": "USD"}' \
 //      https://api.paysuper.online/admin/api/v1/payment_costs/channel/system/ffffffffffffffffffffffff
 func (r *paymentCostRoute) setPaymentChannelCostSystem(ctx echo.Context) error {
@@ -379,14 +379,14 @@ func (r *paymentCostRoute) setPaymentChannelCostSystem(ctx echo.Context) error {
 
 // @Description Create and update merchant costs for payments operations
 //  @Example curl -X POST -H "Authorization: Bearer %access_token_here%" -H "Content-Type: application/json" \
-//      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "min_amount": 0.75, "method_percent": 1.01,
-// 			"method_fix_amount": 2.34, "ps_percent": 3.5, "ps_fixed_fee": 2, "ps_fixed_fee_currency": "EUR",
+//      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "min_amount": 0.75, "method_percent": 0.01,
+// 			"method_fix_amount": 2.34, "ps_percent": 0.05, "ps_fixed_fee": 2, "ps_fixed_fee_currency": "EUR",
 // 			"payout_currency": "USD"}' \
 //      https://api.paysuper.online/admin/api/v1/payment_costs/channel/merchant/ffffffffffffffffffffffff
 //
 // @Example curl -X PUT -H "Authorization: Bearer %access_token_here%" -H "Content-Type: application/json" \
-//      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "min_amount": 0.75, "method_percent": 1.01,
-//      "method_fix_amount": 2.34, "ps_percent": 3.5, "ps_fixed_fee": 2, "ps_fixed_fee_currency": "EUR",
+//      -d '{"name": "VISA", "region": "CIS", "country": "AZ", "min_amount": 0.75, "method_percent": 0.01,
+//      "method_fix_amount": 2.34, "ps_percent": 0.05, "ps_fixed_fee": 2, "ps_fixed_fee_currency": "EUR",
 //      "payout_currency": "USD"}' \
 //      https://api.paysuper.online/admin/api/v1/payment_costs/channel/merchant/ffffffffffffffffffffffff/aaaaaaaaaaaaaaaaaaaaaaaa
 func (r *paymentCostRoute) setPaymentChannelCostMerchant(ctx echo.Context) error {
@@ -432,12 +432,12 @@ func (r *paymentCostRoute) setPaymentChannelCostMerchant(ctx echo.Context) error
 
 // @Description Create and update system costs for money back operations
 // @Example curl -X POST -H 'Authorization: Bearer %access_token_here%' -H "Content-Type: application/json" \
-//		-d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34,
+//		-d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.01, "fix_amount": 2.34,
 //		"payout_currency": "USD", "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1}' \
 // 		https://api.paysuper.online/admin/api/v1/payment_costs/money_back/system
 //
 // @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H "Content-Type: application/json" \
-//		-d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34,
+//		-d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.01, "fix_amount": 2.34,
 //		"payout_currency": "USD", "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1}' \
 // 		https://api.paysuper.online/admin/api/v1/payment_costs/money_back/system/ffffffffffffffffffffffff
 func (r *paymentCostRoute) setMoneyBackCostSystem(ctx echo.Context) error {
@@ -481,13 +481,13 @@ func (r *paymentCostRoute) setMoneyBackCostSystem(ctx echo.Context) error {
 
 // @Description Create and update merchant costs for money back operations
 // @Example curl -X POST -H 'Authorization: Bearer %access_token_here%' -H "Content-Type: application/json" \
-//		-d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34,
+//		-d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.01, "fix_amount": 2.34,
 //		"payout_currency": "USD", "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1,
 //		"is_paid_by_merchant": true}' \
 // 		https://api.paysuper.online/admin/api/v1/payment_costs/money_back/merchant/ffffffffffffffffffffffff
 //
 // @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H "Content-Type: application/json" \
-//		-d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 1.01, "fix_amount": 2.34,
+//		-d '{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.01, "fix_amount": 2.34,
 //		"payout_currency": "USD", "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1,
 //		"is_paid_by_merchant": true}' \
 // 		https://api.paysuper.online/admin/api/v1/payment_costs/money_back/merchant/ffffffffffffffffffffffff/aaaaaaaaaaaaaaaaaaaaaaaa

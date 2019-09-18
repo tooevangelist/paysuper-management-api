@@ -23,6 +23,11 @@ type Config struct {
 	AwsSecretAccessKeyAgreement string `envconfig:"AWS_SECRET_ACCESS_KEY_AGREEMENT" required:"true"`
 	AwsRegionAgreement          string `envconfig:"AWS_REGION_AGREEMENT" default:"eu-west-1"`
 	AwsBucketAgreement          string `envconfig:"AWS_BUCKET_AGREEMENT" required:"true"`
+
+	AwsAccessKeyIdReporter     string `envconfig:"AWS_ACCESS_KEY_ID_REPORTER" required:"true"`
+	AwsSecretAccessKeyReporter string `envconfig:"AWS_SECRET_ACCESS_KEY_REPORTER" required:"true"`
+	AwsRegionReporter          string `envconfig:"AWS_REGION_REPORTER" default:"eu-west-1"`
+	AwsBucketReporter          string `envconfig:"AWS_BUCKET_REPORTER" required:"true"`
 }
 
 func NewConfig() (error, *Config) {
