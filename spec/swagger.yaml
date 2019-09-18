@@ -2968,7 +2968,7 @@ paths:
     delete:
       consumes:
         - application/x-www-form-urlencoded
-      description: Delete project for authenticated merchant
+      description: Deactivation project for authenticated merchant
       parameters:
         - description: Project identifier
           in: path
