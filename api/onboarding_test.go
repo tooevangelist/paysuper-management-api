@@ -44,9 +44,6 @@ var onboardingRoutes = [][]string{
 	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id", http.MethodGet},
 	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id", http.MethodGet},
 	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id/mark-as-read", http.MethodPut},
-	{"/admin/api/v1/merchants/:merchant_id/methods/:method_id", http.MethodGet},
-	{"/admin/api/v1/merchants/:merchant_id/methods", http.MethodGet},
-	{"/admin/api/v1/merchants/:merchant_id/methods/:method_id", http.MethodPut},
 }
 
 type OnboardingTestSuite struct {
