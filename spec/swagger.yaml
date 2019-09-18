@@ -757,6 +757,29 @@ definitions:
       - country
       - rate
 
+  report_file.CreateReportFileParams:
+    properties:
+      period_from:
+        type: number
+      period_to:
+        type: number
+      file_type:
+        type: string
+    type: object
+    required:
+      - period_from
+      - period_to
+      - file_type
+  report_file.CreateReportFileResponse:
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      file_id:
+        type: string
+    type: object
+
   payment_method.PaymentMethodParams:
     properties:
       currency:
@@ -6711,6 +6734,87 @@ paths:
             $ref: '#/definitions/model.Error'
         "404":
           description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/s/report_file":
+    post:
+      summary: Create report file
+      tags:
+        - ReportFile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Create report file
+      parameters:
+        - description: report file params
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/report_file.CreateReportFileParams'
+            type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/report_file.CreateReportFileResponse'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/s/report_file/download/{file}":
+    get:
+      summary: Download report file
+      tags:
+        - ReportFile
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/pdf
+        - text/csv
+        - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      description: Download report file
+      parameters:
+        - description: identity of file and file type
+          in: query
+          name: file
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
         "500":

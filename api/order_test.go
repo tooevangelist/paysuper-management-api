@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
+	billMock "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
@@ -1165,7 +1166,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_Ok() {
 
 	ctx.SetPath("/order")
 
-	bs := &mock.BillingService{}
+	bs := &billMock.BillingService{}
 	bs.On("FindAllOrdersPublic", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(
 			&grpc.ListOrdersPublicResponse{
@@ -1193,7 +1194,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_BillingServerError() {
 
 	ctx.SetPath("/order")
 
-	bs := &mock.BillingService{}
+	bs := &billMock.BillingService{}
 	bs.On("FindAllOrdersPublic", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(nil, errors.New("some error"))
 	suite.router.billingService = bs
@@ -1334,7 +1335,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_Ok() {
 	ctx.SetParamNames("order_id")
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ChangeCodeInOrder", mock2.Anything, mock2.Anything).Return(&grpc.ChangeCodeInOrderResponse{
 		Status: pkg.ResponseStatusOk,
 		Order:  &billing.Order{},
@@ -1365,7 +1366,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ServiceError() {
 	ctx.SetParamNames("order_id")
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ChangeCodeInOrder", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
 
 	suite.router.billingService = billingService
@@ -1393,7 +1394,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ErrorInService() {
 	ctx.SetParamNames("order_id")
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ChangeCodeInOrder", mock2.Anything, mock2.Anything).Return(&grpc.ChangeCodeInOrderResponse{
 		Status: 400,
 	}, nil)
