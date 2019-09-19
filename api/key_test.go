@@ -7,6 +7,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
+	billMock "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/stretchr/testify/assert"
 	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -54,7 +55,7 @@ func (suite *KeyTestSuite) Test_GetKeyById_Ok() {
 	ctx.SetParamNames("key_id")
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetKeyByID", mock2.Anything, mock2.Anything).Return(&grpc.GetKeyForOrderRequestResponse{
 		Status: 200,
 		Key: &billing.Key{
@@ -81,7 +82,7 @@ func (suite *KeyTestSuite) Test_GetKeyById_InternalError() {
 	ctx.SetParamNames("key_id")
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetKeyByID", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
 
 	suite.api.billingService = billingService
@@ -102,7 +103,7 @@ func (suite *KeyTestSuite) Test_GetKeyById_ServiceError() {
 	ctx.SetParamNames("key_id")
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetKeyByID", mock2.Anything, mock2.Anything).Return(&grpc.GetKeyForOrderRequestResponse{
 		Status: 404,
 	}, nil)
@@ -125,7 +126,7 @@ func (suite *KeyTestSuite) Test_GetKeyById_ValidationError() {
 	ctx.SetParamNames("key_id")
 	ctx.SetParamValues("")
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetKeyByID", mock2.Anything, mock2.Anything).Return(&grpc.GetKeyForOrderRequestResponse{
 		Status: 200,
 		Key: &billing.Key{
