@@ -86,10 +86,6 @@ func (api *Api) initOnboardingRoutes() (*Api, error) {
 	api.authUserRouteGroup.GET("/merchants/:merchant_id/notifications", route.listNotifications)
 	api.authUserRouteGroup.PUT("/merchants/:merchant_id/notifications/:notification_id/mark-as-read", route.markAsReadNotification)
 
-	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods/:method_id", route.getPaymentMethod)
-	api.authUserRouteGroup.GET("/merchants/:merchant_id/methods", route.listPaymentMethods)
-	api.authUserRouteGroup.PUT("/merchants/:merchant_id/methods/:method_id", route.changePaymentMethod)
-
 	api.authUserRouteGroup.GET("/merchants/tariffs", route.getTariffRates)
 	api.authUserRouteGroup.POST("/merchants/:id/tariffs", route.setTariffRates)
 
@@ -353,104 +349,6 @@ func (r *onboardingRoute) markAsReadNotification(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, rsp)
-}
-
-func (r *onboardingRoute) getPaymentMethod(ctx echo.Context) error {
-	req := &grpc.GetMerchantPaymentMethodRequest{}
-	err := (&OnboardingGetPaymentMethodBinder{}).Bind(req, ctx)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
-	}
-
-	rsp, err := r.billingService.GetMerchantPaymentMethod(ctx.Request().Context(), req)
-
-	if err != nil {
-		zap.L().Error(
-			pkg.ErrorGrpcServiceCallFailed,
-			zap.Error(err),
-			zap.String(ErrorFieldService, pkg.ServiceName),
-			zap.String(ErrorFieldMethod, "GetMerchantPaymentMethod"),
-			zap.Any(ErrorFieldRequest, req),
-		)
-
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
-	}
-
-	if rsp.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, rsp.Item)
-}
-
-func (r *onboardingRoute) listPaymentMethods(ctx echo.Context) error {
-	req := &grpc.ListMerchantPaymentMethodsRequest{}
-	err := ctx.Bind(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
-	}
-
-	req.MerchantId = ctx.Param(requestParameterMerchantId)
-	err = r.validate.Struct(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	rsp, err := r.billingService.ListMerchantPaymentMethods(ctx.Request().Context(), req)
-
-	if err != nil {
-		zap.L().Error(
-			pkg.ErrorGrpcServiceCallFailed,
-			zap.Error(err),
-			zap.String(ErrorFieldService, pkg.ServiceName),
-			zap.String(ErrorFieldMethod, "ListMerchantPaymentMethods"),
-			zap.Any(ErrorFieldRequest, req),
-		)
-
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
-	}
-
-	return ctx.JSON(http.StatusOK, rsp.PaymentMethods)
-}
-
-func (r *onboardingRoute) changePaymentMethod(ctx echo.Context) error {
-	req := &grpc.MerchantPaymentMethodRequest{}
-	err := (&OnboardingChangePaymentMethodBinder{}).Bind(req, ctx)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
-	}
-
-	req.UserId = r.authUser.Id
-
-	err = r.validate.Struct(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
-	}
-
-	rsp, err := r.billingService.ChangeMerchantPaymentMethod(ctx.Request().Context(), req)
-
-	if err != nil {
-		zap.L().Error(
-			pkg.ErrorGrpcServiceCallFailed,
-			zap.Error(err),
-			zap.String(ErrorFieldService, pkg.ServiceName),
-			zap.String(ErrorFieldMethod, "ChangeMerchantPaymentMethod"),
-			zap.Any(ErrorFieldRequest, req),
-		)
-
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
-	}
-
-	if rsp.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(rsp.Status), rsp.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, rsp.Item)
 }
 
 func (r *onboardingRoute) changeAgreement(ctx echo.Context) error {
@@ -971,12 +869,12 @@ func (r *onboardingRoute) setMerchantContacts(ctx echo.Context) error {
 
 // @Description Set company banking information in merchant onboarding process
 // @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"currency": "RUB", "name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
+//  -d '{"name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
 //  	"account_number": "408000000001", "swift": "ALFARUMM", "correspondent_account": "408000000001"}' \
 //  https://api.paysuper.online/admin/api/v1/merchants/banking
 //
 // @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"currency": "RUB", "name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
+//  -d '{"name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
 //  	"account_number": "408000000001", "swift": "ALFARUMM", "correspondent_account": "408000000002"}' \
 //  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/banking
 func (r *onboardingRoute) setMerchantBanking(ctx echo.Context) error {

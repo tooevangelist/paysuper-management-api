@@ -3,8 +3,8 @@ package api
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
+	billingMocks "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
 	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -129,7 +129,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_Error_BillingServer() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billingMocks.BillingService{}
 	billingService.On("CreateOrUpdatePaymentMethod", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
 	suite.api.billingService = billingService
 
@@ -146,7 +146,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billingMocks.BillingService{}
 	billingService.On("CreateOrUpdatePaymentMethod", mock2.Anything, mock2.Anything).Return(&grpc.ChangePaymentMethodResponse{}, nil)
 	suite.api.billingService = billingService
 
@@ -163,7 +163,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_update_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billingMocks.BillingService{}
 	billingService.On("CreateOrUpdatePaymentMethod", mock2.Anything, mock2.Anything).Return(&grpc.ChangePaymentMethodResponse{}, nil)
 	suite.api.billingService = billingService
 
@@ -201,7 +201,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getProductionSettings_Err
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billingMocks.BillingService{}
 	billingService.On("GetPaymentMethodProductionSettings", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
 	suite.api.billingService = billingService
 
@@ -223,7 +223,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getProductionSettings_Ok(
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billingMocks.BillingService{}
 	billingService.On("GetPaymentMethodProductionSettings", mock2.Anything, mock2.Anything).Return(&grpc.GetPaymentMethodSettingsResponse{}, nil)
 	suite.api.billingService = billingService
 
@@ -261,7 +261,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getTestSettings_Error_Bil
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billingMocks.BillingService{}
 	billingService.On("GetPaymentMethodTestSettings", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
 	suite.api.billingService = billingService
 
@@ -283,7 +283,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getTestSettings_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billingMocks.BillingService{}
 	billingService.On("GetPaymentMethodTestSettings", mock2.Anything, mock2.Anything).Return(&grpc.GetPaymentMethodSettingsResponse{}, nil)
 	suite.api.billingService = billingService
 

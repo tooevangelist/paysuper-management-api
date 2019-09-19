@@ -5,6 +5,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
+	billingMocks "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
@@ -57,7 +58,7 @@ func (suite *DashboardTestSuite) SetupTest() {
 		suite.FailNow("Validator registration failed", "%v", err)
 	}
 
-	bs := &mock.BillingService{}
+	bs := &billingMocks.BillingService{}
 	bs.On("GetDashboardMainReport", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(&grpc.GetDashboardMainResponse{Status: pkg.ResponseStatusOk, Item: &grpc.DashboardMainReport{}}, nil)
 	bs.On("GetDashboardRevenueDynamicsReport", mock2.Anything, mock2.Anything, mock2.Anything).
@@ -147,7 +148,7 @@ func (suite *DashboardTestSuite) TestDashboard_GetMainReports_BillingServerSyste
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	bs := &mock.BillingService{}
+	bs := &billingMocks.BillingService{}
 	bs.On("GetDashboardMainReport", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(nil, errors.New("some error"))
 	suite.api.billingService = bs
@@ -171,7 +172,7 @@ func (suite *DashboardTestSuite) TestDashboard_GetMainReports_BillingServerRetur
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	bs := &mock.BillingService{}
+	bs := &billingMocks.BillingService{}
 	bs.On("GetDashboardMainReport", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(
 			&grpc.GetDashboardMainResponse{
@@ -240,7 +241,7 @@ func (suite *DashboardTestSuite) TestDashboard_GetRevenueDynamicsReport_BillingS
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	bs := &mock.BillingService{}
+	bs := &billingMocks.BillingService{}
 	bs.On("GetDashboardRevenueDynamicsReport", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(nil, errors.New("some error"))
 	suite.api.billingService = bs
@@ -264,7 +265,7 @@ func (suite *DashboardTestSuite) TestDashboard_GetRevenueDynamicsReport_BillingS
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	bs := &mock.BillingService{}
+	bs := &billingMocks.BillingService{}
 	bs.On("GetDashboardRevenueDynamicsReport", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(
 			&grpc.GetDashboardRevenueDynamicsReportResponse{
@@ -333,7 +334,7 @@ func (suite *DashboardTestSuite) TestDashboard_GetBaseReports_BillingServerSyste
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	bs := &mock.BillingService{}
+	bs := &billingMocks.BillingService{}
 	bs.On("GetDashboardBaseReport", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(nil, errors.New("some error"))
 	suite.api.billingService = bs
@@ -357,7 +358,7 @@ func (suite *DashboardTestSuite) TestDashboard_GetBaseReports_BillingServerRetur
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	bs := &mock.BillingService{}
+	bs := &billingMocks.BillingService{}
 	bs.On("GetDashboardBaseReport", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(
 			&grpc.GetDashboardBaseReportResponse{

@@ -9,7 +9,7 @@ import (
 	"github.com/micro/go-micro/client"
 	"github.com/paysuper/paysuper-tax-service/proto"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
 	"net/http"
@@ -20,7 +20,7 @@ import (
 )
 
 type TaxServiceMock struct {
-	mock.Mock
+	mock2.Mock
 }
 
 type TaxesTestSuite struct {
