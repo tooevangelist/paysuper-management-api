@@ -2242,36 +2242,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_BindError() 
 	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationError_Currency() {
-	b := `{
-		"name": "Bank Name-Spb.",
-		"address": "St.Petersburg, Nevskiy st. 1",
-		"account_number": "408000000001",
-		"swift": "ALFARUMM",
-		"correspondent_account": "408000000001"
-	}`
-
-	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/admin/api/v1/merchants/banking")
-
-	err := suite.handler.setMerchantBanking(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-
-	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), errorIncorrectCurrencyIdentifier.Code, msg.Code)
-	assert.Equal(suite.T(), errorIncorrectCurrencyIdentifier.Message, msg.Message)
-	assert.Regexp(suite.T(), "Currency", msg.Details)
-}
-
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationError_Name() {
 	b := `{
 		"currency": "RUB",
