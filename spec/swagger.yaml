@@ -1015,9 +1015,6 @@ definitions:
 
   onboarding.Banking:
     properties:
-      currency:
-        description: merchant accounting currency in bank. 3 letter by ISO 4217
-        type: string
       name:
         description: bank name
         type: string
@@ -1037,7 +1034,6 @@ definitions:
         description: bank correspondent account
         type: string
     required:
-      - currency
       - name
       - address
       - account_number

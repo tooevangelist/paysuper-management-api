@@ -971,12 +971,12 @@ func (r *onboardingRoute) setMerchantContacts(ctx echo.Context) error {
 
 // @Description Set company banking information in merchant onboarding process
 // @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"currency": "RUB", "name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
+//  -d '{"name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
 //  	"account_number": "408000000001", "swift": "ALFARUMM", "correspondent_account": "408000000001"}' \
 //  https://api.paysuper.online/admin/api/v1/merchants/banking
 //
 // @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"currency": "RUB", "name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
+//  -d '{"name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
 //  	"account_number": "408000000001", "swift": "ALFARUMM", "correspondent_account": "408000000002"}' \
 //  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/banking
 func (r *onboardingRoute) setMerchantBanking(ctx echo.Context) error {
