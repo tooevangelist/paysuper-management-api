@@ -774,7 +774,6 @@ definitions:
       - merchant_id
       - file_type
       - report_type
-      - template
       - params
   report_file.CreateReportFileResponse:
     properties:
