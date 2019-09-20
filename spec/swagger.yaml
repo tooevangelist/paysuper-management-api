@@ -2319,8 +2319,11 @@ definitions:
 
   dashboard.main_reports.amount_with_chart:
     properties:
-      amount:
-        description: total amount calculated for report
+      amount_current:
+        description: total amount calculated for current report
+        type: number
+      amount_previous:
+        description: total amount calculated for previous report
         type: number
       currency:
         description: report amount currency.  three-letter ISO 4217 currency code, in uppercase.
@@ -2333,8 +2336,11 @@ definitions:
 
   dashboard.main_reports.total_transactions:
     properties:
-      count:
-        description: total count of transactions by period
+      count_current:
+        description: total count of transactions by current period
+        type: integer
+      count_previous:
+        description: total count of transactions by previous period
         type: integer
       chart:
         description: array contain objects for chart drawing
@@ -2365,12 +2371,20 @@ definitions:
       amount:
         description: revenue amount for label
         type: number
-      currency:
-        description: amount currency. three-letter ISO 4217 currency code, in uppercase.
-        type: string
       count:
         description: transactions count for label
         type: integer
+
+  dashboard.revenue_dynamics:
+    properties:
+      currency:
+        description: amount currency. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+      items:
+        description: array of points
+        type: array
+        items:
+          $ref: '#/definitions/dashboard.revenue_dynamics.item'
 
   dashboard.base.revenue_by_country.top:
     properties:
@@ -2380,18 +2394,6 @@ definitions:
       amount:
         description: amount by country
         type: number
-      currency:
-        description: amount currency. three-letter ISO 4217 currency code, in uppercase.
-        type: string
-
-  dashboard.base.total:
-    properties:
-      amount:
-        description: total revenue amount by chosen period
-        type: number
-      currency:
-        description: amount currency. three-letter ISO 4217 currency code, in uppercase.
-        type: string
 
   dashboard.base.chart:
     properties:
@@ -2401,9 +2403,6 @@ definitions:
       amount:
         description: amount for label
         type: number
-      currency:
-        description: amount currency. three-letter ISO 4217 currency code, in uppercase.
-        type: string
 
   dashboard.base.revenue_by_country:
     properties:
@@ -2413,11 +2412,14 @@ definitions:
         items:
           $ref: '#/definitions/dashboard.base.revenue_by_country.top'
       total_current:
-        description: object contain information about total revenue by chosen period
-        $ref: '#/definitions/dashboard.base.total'
+        description: total revenue amount by current period
+        type: number
       total_previous:
-        description: object contain information about total revenue by previous period to chosen period
-        $ref: '#/definitions/dashboard.base.total'
+        description: total revenue amount by previous period
+        type: number
+      currency:
+        description: amount currency. three-letter ISO 4217 currency code, in uppercase.
+        type: string
       chart:
         description: array contain objects for chart drawing
         $ref: '#/definitions/dashboard.base.chart'
@@ -6447,9 +6449,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/dashboard.revenue_dynamics.item'
+            $ref: '#/definitions/dashboard.revenue_dynamics'
         "400":
           description: Invalid request data
           schema:
