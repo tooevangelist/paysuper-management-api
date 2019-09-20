@@ -1844,18 +1844,18 @@ definitions:
 
   userProfile.request:
     properties:
-        personal:
-          description: object contain personal information about user
-          $ref: '#/definitions/userProfile.personal'
-        help:
-          description: object contain information about user problem which need help
-          $ref: '#/definitions/userProfile.help'
-        company:
-          description: object contain information about user company
-          $ref: '#/definitions/userProfile.company'
-        last_step:
-          description: identifier of wizard last step which user ended
-          type: string
+      personal:
+        description: object contain personal information about user
+        $ref: '#/definitions/userProfile.personal'
+      help:
+        description: object contain information about user problem which need help
+        $ref: '#/definitions/userProfile.help'
+      company:
+        description: object contain information about user company
+        $ref: '#/definitions/userProfile.company'
+      last_step:
+        description: identifier of wizard last step which user ended
+        type: string
 
   userProfile.response:
     properties:
@@ -2495,6 +2495,174 @@ definitions:
       sources:
         description: object contain information for block sources
         $ref: '#/definitions/dashboard.base.sources'
+
+
+  merchant_balance:
+    properties:
+      merchant_id:
+        type: string
+        description: merchant identificator
+      currency:
+        type: string
+        description: currency
+      debit:
+        type: number
+        description: balance debit
+      credit:
+        type: string
+        description: balance credit
+      rolling_reserve:
+        type: number
+        description: current rooling reserve balance
+      total:
+        type: number
+        description: total amount
+      created_at:
+        type: string
+        description: last update date
+
+  billingPayoutDocument:
+    type: object
+    properties:
+      id:
+        type: string
+        description: document id
+      source_id:
+        type: array
+        items:
+          type: string
+        description: royalty reports id
+      transaction:
+        type: string
+        description: transaction id
+      amount:
+        type: number
+        format: double
+        description: amount
+      currency:
+        type: string
+        description: currency
+      status:
+        type: string
+        description: status, one of skip pending in_progress paid canceled failed
+      description:
+        type: string
+        description: description
+      destination:
+        $ref: '#/definitions/onboarding.Banking'
+        description: merchant banking details
+      created_at:
+        type: string
+        format: date-time
+        description: creation date
+      updated_at:
+        type: string
+        format: date-time
+        description: update date
+      arrival_date:
+        type: string
+        format: date-time
+        description: arrival date
+      failure_code:
+        type: string
+        description: failure code, one of account_closed account_frozen account_restricted destination_bank_invalid could_not_process declined insufficient_funds invalid_account_number incorrect_account_holder_name invalid_currency
+      failure_message:
+        type: string
+        description: failure message
+      failure_transaction:
+        type: string
+        description: failure transaction
+      merchant_id:
+        type: string
+        description: merchant identificator
+      signature_data:
+        $ref: '#/definitions/billingPayoutDocumentSignatureData'
+        description: hellosign signature data
+      has_merchant_signature:
+        type: boolean
+        format: boolean
+        description: is document signed by merchant
+      has_psp_signature:
+        type: boolean
+        format: boolean
+        description: is document signed by paysuper
+      signed_document_file_url:
+        type: string
+        description: url to signed file
+      period_from:
+        type: string
+        format: date-time
+        description: payout period start
+      period_to:
+        type: string
+        format: date-time
+        description: payout period end
+
+  billingPayoutDocumentSignatureData:
+    type: object
+    properties:
+      details_url:
+        type: string
+      files_url:
+        type: string
+      signature_request_id:
+        type: string
+      merchant_signature_id:
+        type: string
+      ps_signature_id:
+        type: string
+      merchant_sign_url:
+        $ref: '#/definitions/billingPayoutDocumentSignatureDataSignUrl'
+      ps_sign_url:
+        $ref: '#/definitions/billingPayoutDocumentSignatureDataSignUrl'
+
+  billingPayoutDocumentSignatureDataSignUrl:
+    type: object
+    properties:
+      sign_url:
+        type: string
+      expires_at:
+        type: string
+        format: date-time
+
+  payout_documents_list:
+    properties:
+      count:
+        type: number
+        description: number of found documents
+      items:
+        description: array with documents
+        items:
+          $ref: '#/definitions/billingPayoutDocument'
+        type: array
+
+  payout_documents_create:
+    properties:
+      merchant_id:
+        type: string
+        description: merchant identificator to create payout document for
+      description:
+        type: string
+        description: document description
+
+  payout_documents_update:
+    properties:
+      transaction:
+        type: string
+        description: transaction id
+      status:
+        type: string
+        description: status, one of skip pending in_progress paid canceled failed
+      failure_code:
+        type: string
+        description: failure code, one of account_closed account_frozen account_restricted destination_bank_invalid could_not_process declined insufficient_funds invalid_account_number incorrect_account_holder_name invalid_currency
+      failure_message:
+        type: string
+        description: failure message
+      failure_transaction:
+        type: string
+        description: failure transaction
+
 
 host: p1payapi.tst.protocol.one
 info:
@@ -6576,6 +6744,11 @@ paths:
         - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
       description: Download report file
       parameters:
+        - description: filename
+          in: path
+          name: file
+          type: string
+          required: true
         - description: identity of file and file type
           in: query
           name: file
@@ -6600,5 +6773,232 @@ paths:
             $ref: '#/definitions/model.Error'
         "500":
           description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/balance":
+    get:
+      summary: Get balance for current user's merchant
+      tags:
+        - Balance
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get balance for current user's merchant
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/merchant_balance'
+            type: array
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/balance/{merchant_id}":
+    get:
+      summary: Get balance for merchant with id passed in url
+      tags:
+        - Balance
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get balance for merchant with id passed in url
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: merchant_id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/merchant_balance'
+            type: array
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payout_documents":
+    get:
+      summary: Get list of payout documents, matched to filters (if any)
+      tags:
+        - Payouts
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get list of payout documents, matched to filters (if any)
+      parameters:
+        - description: payout document unique identifier
+          in: query
+          name: payout_document_id
+          type: string
+        - description: filter by document's status
+          in: query
+          name: status
+          type: string
+        - description: filter by document's merchant
+          in: query
+          name: merchant_id
+          type: string
+        - description: filter only signed documents, if true
+          in: query
+          name: signed
+          type: boolean
+        - description: limit documents per page
+          in: query
+          name: limit
+          type: number
+        - description: offset documents per page
+          in: query
+          name: offset
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/payout_documents_list'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    post:
+      summary: Create a payout document POST JSON request
+      tags:
+        - Payout
+      consumes:
+        - application/json
+      description: Create a payout document POST JSON request
+      parameters:
+        - description: merchant identificator to create payout document for
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/payout_documents_create'
+            type: object
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/billingPayoutDocument'
+        "400":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payout_documents/{id}":
+    get:
+      summary: Get payout document by id
+      tags:
+        - Payouts
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get payout document by id
+      parameters:
+        - description: payout document unique identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/billingPayoutDocument'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    post:
+      summary: Update a payout document POST JSON request
+      tags:
+        - Payout
+      consumes:
+        - application/json
+      description: Update a payout document POST JSON request
+      parameters:
+        - description: update params
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/payout_documents_update'
+            type: object
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/billingPayoutDocument'
+        "400":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
