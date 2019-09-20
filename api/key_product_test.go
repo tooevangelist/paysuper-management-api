@@ -182,6 +182,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_Ok() {
 		DefaultCurrency: "RUB",
 		ProjectId:       bson.NewObjectId().Hex(),
 		Sku:             "some_sku",
+		Object:          "key_product",
 	}
 
 	b, err := json.Marshal(&body)
@@ -236,6 +237,7 @@ func (suite *KeyProductTestSuite) TestProject_ChangeKeyProduct_Ok() {
 		DefaultCurrency: "RUB",
 		ProjectId:       bson.NewObjectId().Hex(),
 		Sku:             "some_sku",
+		Object:          "key_product",
 	}
 
 	b, err := json.Marshal(&body)
