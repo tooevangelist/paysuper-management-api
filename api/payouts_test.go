@@ -98,12 +98,13 @@ func (suite *PayoutDocumentsTestSuite) SetupTest() {
 
 func (suite *PayoutDocumentsTestSuite) TearDownTest() {}
 
-func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_getPayoutDocumentsList() {
+func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Ok_getPayoutDocumentsList() {
 	e := echo.New()
 	q := make(url.Values)
 	q.Set("status", "pending")
 	q.Set("merchant_id", "5bdc39a95d1e1100019fb7df")
 	q.Set("limit", "10")
+	q.Set("signed", "true")
 	q.Set("offset", "10")
 	req := httptest.NewRequest(http.MethodGet, "/payout_documents?"+q.Encode(), nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -120,7 +121,35 @@ func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_getPayoutDocumentsLis
 	}
 }
 
-func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_getPayoutDocument() {
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocumentsList_MerchantNotFound() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocumentsList_MerchantIdInvalid() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocumentsList_StatusInvalid() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocumentsList_LimitInvalid() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocumentsList_OffsetInvalid() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocumentsList_GrpcError() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocumentsList_ResponseStatusNotOk() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Ok_getPayoutDocument() {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/payout_documents/5ced34d689fce60bf4440829", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -139,7 +168,23 @@ func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_getPayoutDocument() {
 	}
 }
 
-func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_createPayoutDocument() {
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocument_NotFound() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocument_InvalidId() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocument_GrpcError() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocument_ResponseStatusNotOk() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Ok_createPayoutDocument() {
 	bodyJson := `{"description": "royalty for june-july 2019", "merchant_id": "5bdc39a95d1e1100019fb7df"}`
 
 	e := echo.New()
@@ -156,7 +201,27 @@ func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_createPayoutDocument(
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
-func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_updatePayoutDocument() {
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_createPayoutDocument_MerchantNotFound() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_createPayoutDocument_MerchantIdInvalid() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_createPayoutDocument_ValidationError() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_createPayoutDocument_GrpcError() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_createPayoutDocument_ResponseStatusNotOk() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Ok_updatePayoutDocument() {
 	bodyJson := `{"status": "failed", "failure_code": "account_closed"}`
 
 	e := echo.New()
@@ -173,4 +238,20 @@ func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_updatePayoutDocument(
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
+}
+
+func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Ok_updatePayoutDocument_NotModified() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_updatePayoutDocument_InvalidId() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_updatePayoutDocument_GrpcError() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_updatePayoutDocument_ResponseStatusNotOk() {
+	assert.Equal(suite.T(), testStubImplementMe, "implement me!")
 }

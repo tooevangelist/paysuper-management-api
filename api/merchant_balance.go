@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"go.uber.org/zap"
 	"net/http"
@@ -17,38 +18,55 @@ func (api *Api) initBalanceRoutes() *Api {
 	}
 
 	api.authUserRouteGroup.GET("/balance", cApiV1.getMerchantBalance)
+	api.authUserRouteGroup.GET("/balance/:merchant_id", cApiV1.getMerchantBalance)
 
 	return api
 }
 
-// Get current merchant balance
-// GET /admin/api/v1/balance
+// Get merchant balance
+// GET /admin/api/v1/balance - for current merchant
+// GET /admin/api/v1/balance/:merchant_id - for any merchant by it's id
 func (cApiV1 *balanceRoute) getMerchantBalance(ctx echo.Context) error {
 	req := &grpc.GetMerchantBalanceRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
-	}
+	merchantId := ctx.Param(requestParameterMerchantId)
 
-	merchant, err := cApiV1.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: cApiV1.authUser.Id})
-	if err != nil || merchant.Item == nil {
+	if merchantId == "" {
+		mReq := &grpc.GetMerchantByRequest{UserId: cApiV1.authUser.Id}
+		merchant, err := cApiV1.billingService.GetMerchantBy(ctx.Request().Context(), mReq)
 		if err != nil {
-			zap.S().Errorf("internal error", "err", err.Error())
+			zap.L().Error(
+				pkg.ErrorGrpcServiceCallFailed,
+				zap.Error(err),
+				zap.String(ErrorFieldService, pkg.ServiceName),
+				zap.String(ErrorFieldMethod, "GetMerchantBy"),
+				zap.Any(ErrorFieldRequest, mReq),
+			)
+			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+		if merchant.Status != http.StatusOK {
+			return echo.NewHTTPError(int(merchant.Status), merchant.Message)
+		}
+		merchantId = merchant.Item.Id
 	}
 
-	req.MerchantId = merchant.Item.Id
+	req.MerchantId = merchantId
 
-	err = cApiV1.validate.Struct(req)
+	err := cApiV1.validate.Struct(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, cApiV1.getValidationError(err))
 	}
 
 	res, err := cApiV1.billingService.GetMerchantBalance(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "GetMerchantBalance"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)

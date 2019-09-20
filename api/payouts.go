@@ -2,7 +2,9 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -32,7 +34,7 @@ func (cApiV1 *payoutDocumentsRoute) getPayoutDocumentsList(ctx echo.Context) err
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	err = cApiV1.validate.Struct(req)
@@ -42,7 +44,14 @@ func (cApiV1 *payoutDocumentsRoute) getPayoutDocumentsList(ctx echo.Context) err
 
 	res, err := cApiV1.billingService.GetPayoutDocuments(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "GetPayoutDocuments"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
@@ -63,7 +72,14 @@ func (cApiV1 *payoutDocumentsRoute) getPayoutDocument(ctx echo.Context) error {
 
 	res, err := cApiV1.billingService.GetPayoutDocuments(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "GetPayoutDocuments"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
@@ -87,7 +103,7 @@ func (cApiV1 *payoutDocumentsRoute) createPayoutDocument(ctx echo.Context) error
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
 	req.Ip = ctx.RealIP()
@@ -99,7 +115,14 @@ func (cApiV1 *payoutDocumentsRoute) createPayoutDocument(ctx echo.Context) error
 
 	res, err := cApiV1.billingService.CreatePayoutDocument(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "CreatePayoutDocument"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
@@ -120,7 +143,7 @@ func (cApiV1 *payoutDocumentsRoute) updatePayoutDocument(ctx echo.Context) error
 	err := ctx.Bind(req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, newValidationError(err.Error()))
+		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 	req.PayoutDocumentId = ctx.Param(requestParameterId)
 	req.Ip = ctx.RealIP()
@@ -132,7 +155,14 @@ func (cApiV1 *payoutDocumentsRoute) updatePayoutDocument(ctx echo.Context) error
 
 	res, err := cApiV1.billingService.UpdatePayoutDocument(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "UpdatePayoutDocument"),
+			zap.Any(ErrorFieldRequest, req),
+		)
+		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 	}
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
