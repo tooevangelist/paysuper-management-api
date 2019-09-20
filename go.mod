@@ -14,13 +14,14 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190920113157-0d8ac537eca7
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190920205124-c369396d0f24
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-reporter v0.0.0-20190917180039-6701d139ca7f
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
 	github.com/stretchr/testify v1.4.0
 	github.com/ttacon/libphonenumber v1.0.1
+	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
 	go.uber.org/zap v1.10.0
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect

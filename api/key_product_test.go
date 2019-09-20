@@ -181,8 +181,8 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_Ok() {
 		Description:     map[string]string{"en": "A", "ru": "А"},
 		DefaultCurrency: "RUB",
 		ProjectId:       bson.NewObjectId().Hex(),
-		Object:          "bla-bla-bla",
 		Sku:             "some_sku",
+		Object:          "key_product",
 	}
 
 	b, err := json.Marshal(&body)
@@ -236,8 +236,8 @@ func (suite *KeyProductTestSuite) TestProject_ChangeKeyProduct_Ok() {
 		Description:     map[string]string{"en": "A", "ru": "А"},
 		DefaultCurrency: "RUB",
 		ProjectId:       bson.NewObjectId().Hex(),
-		Object:          "bla-bla-bla",
 		Sku:             "some_sku",
+		Object:          "key_product",
 	}
 
 	b, err := json.Marshal(&body)
