@@ -771,7 +771,6 @@ definitions:
         type: object
     type: object
     required:
-      - merchant_id
       - file_type
       - report_type
       - params
