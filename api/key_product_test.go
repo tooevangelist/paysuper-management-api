@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
+	billMock "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/stretchr/testify/assert"
@@ -76,7 +77,6 @@ func (suite *KeyProductTestSuite) TestProject_PublishKeyProduct_Ok() {
 	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
-
 
 func (suite *KeyProductTestSuite) TestProject_GetPlatformList_Error() {
 	req := httptest.NewRequest(http.MethodGet, "/platforms?limit=qwe", nil)
@@ -181,6 +181,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_Ok() {
 		Description:     map[string]string{"en": "A", "ru": "А"},
 		DefaultCurrency: "RUB",
 		ProjectId:       bson.NewObjectId().Hex(),
+		Object:          "bla-bla-bla",
 		Sku:             "some_sku",
 	}
 
@@ -235,6 +236,7 @@ func (suite *KeyProductTestSuite) TestProject_ChangeKeyProduct_Ok() {
 		Description:     map[string]string{"en": "A", "ru": "А"},
 		DefaultCurrency: "RUB",
 		ProjectId:       bson.NewObjectId().Hex(),
+		Object:          "bla-bla-bla",
 		Sku:             "some_sku",
 	}
 
@@ -289,7 +291,7 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProduct_ValidationError() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{}, nil)
 	suite.api.billingService = billingService
 
@@ -312,7 +314,7 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProduct_BillingServer() {
 	ctx.SetParamNames("key_product_id")
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetKeyProductInfo", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
 	suite.api.billingService = billingService
 
@@ -335,14 +337,14 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCurrency_Ok() {
 	ctx.SetParamNames("key_product_id")
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetKeyProductInfo", mock2.Anything, mock2.Anything).Return(&grpc.GetKeyProductInfoResponse{
 		Status: 200,
 		KeyProduct: &grpc.KeyProductInfo{
 			LongDescription: "Description",
-			Name: "Name",
+			Name:            "Name",
 			Platforms: []*grpc.PlatformPriceInfo{
-				{Name: "Steam", Id: "steam", Price: &grpc.ProductPriceInfo{Currency: "USD", Amount:10, Region:"USD"}},
+				{Name: "Steam", Id: "steam", Price: &grpc.ProductPriceInfo{Currency: "USD", Amount: 10, Region: "USD"}},
 			},
 		},
 	}, nil)
@@ -365,14 +367,14 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCountry_Ok() {
 	ctx.SetParamNames("key_product_id")
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetKeyProductInfo", mock2.Anything, mock2.Anything).Return(&grpc.GetKeyProductInfoResponse{
 		Status: 200,
 		KeyProduct: &grpc.KeyProductInfo{
 			LongDescription: "Description",
-			Name: "Name",
+			Name:            "Name",
 			Platforms: []*grpc.PlatformPriceInfo{
-				{Name: "Steam", Id: "steam", Price: &grpc.ProductPriceInfo{Currency: "USD", Amount:10, Region:"USD"}},
+				{Name: "Steam", Id: "steam", Price: &grpc.ProductPriceInfo{Currency: "USD", Amount: 10, Region: "USD"}},
 			},
 		},
 	}, nil)
@@ -384,7 +386,7 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProductWithCountry_Ok() {
 	assert.NotEmpty(suite.T(), rsp.Body.String())
 }
 
-func (suite *KeyProductTestSuite) Test_Init_Ok()  {
+func (suite *KeyProductTestSuite) Test_Init_Ok() {
 	assert.NotNil(suite.T(), suite.api.initKeyProductRoutes())
 }
 
@@ -399,14 +401,14 @@ func (suite *KeyProductTestSuite) TestProject_getKeyProduct_Ok() {
 	ctx.SetParamNames("key_product_id")
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetKeyProductInfo", mock2.Anything, mock2.Anything).Return(&grpc.GetKeyProductInfoResponse{
 		Status: 200,
 		KeyProduct: &grpc.KeyProductInfo{
 			LongDescription: "Description",
-			Name: "Name",
+			Name:            "Name",
 			Platforms: []*grpc.PlatformPriceInfo{
-				{Name: "Steam", Id: "steam", Price: &grpc.ProductPriceInfo{Currency: "USD", Amount:10, Region:"USD"}},
+				{Name: "Steam", Id: "steam", Price: &grpc.ProductPriceInfo{Currency: "USD", Amount: 10, Region: "USD"}},
 			},
 		},
 	}, nil)

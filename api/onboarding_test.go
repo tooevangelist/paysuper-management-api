@@ -7,10 +7,12 @@ import (
 	"errors"
 	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	awsWrapper "github.com/paysuper/paysuper-aws-manager"
 	awsWrapperMocks "github.com/paysuper/paysuper-aws-manager/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg"
+	billMock "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/config"
@@ -19,7 +21,6 @@ import (
 	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/go-playground/validator.v9"
-	"gopkg.in/mgo.v2/bson"
 	"html/template"
 	"image"
 	"image/color"
@@ -43,9 +44,6 @@ var onboardingRoutes = [][]string{
 	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id", http.MethodGet},
 	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id", http.MethodGet},
 	{"/admin/api/v1/merchants/:merchant_id/notifications/:notification_id/mark-as-read", http.MethodPut},
-	{"/admin/api/v1/merchants/:merchant_id/methods/:method_id", http.MethodGet},
-	{"/admin/api/v1/merchants/:merchant_id/methods", http.MethodGet},
-	{"/admin/api/v1/merchants/:merchant_id/methods/:method_id", http.MethodPut},
 }
 
 type OnboardingTestSuite struct {
@@ -194,7 +192,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchant_BillingServiceUnava
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
 	suite.handler.billingService = billingService
 
@@ -218,7 +216,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchant_LogicError() {
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -243,7 +241,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchant_EmptyId_Error() {
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("")
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -323,7 +321,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_BillingServiceUna
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ListMerchants", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
 	suite.handler.billingService = billingService
 
@@ -414,7 +412,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_BillingServe
 	ctx.SetParamNames(requestParameterMerchantId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("CreateNotification", mock2.Anything, mock2.Anything).
 		Return(&grpc.CreateNotificationResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -475,7 +473,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_BillingServerUn
 	ctx.SetParamNames(requestParameterMerchantId, requestParameterNotificationId)
 	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetNotification", mock2.Anything, mock2.Anything).
 		Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
@@ -573,7 +571,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BillingServer
 	ctx.SetParamNames(requestParameterMerchantId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ListNotifications", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
 	err := suite.handler.listNotifications(ctx)
@@ -634,7 +632,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_BillingS
 	ctx.SetParamNames(requestParameterMerchantId, requestParameterNotificationId)
 	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("MarkNotificationAsRead", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
 	err := suite.handler.markAsReadNotification(ctx)
@@ -644,365 +642,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_BillingS
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_Ok() {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchant/:merchant_id/payment-method/:payment_method_id")
-	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
-	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
-
-	err := suite.handler.getPaymentMethod(ctx)
-	assert.NoError(suite.T(), err)
-
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_ValidationError() {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchant/:merchant_id/payment-method/:payment_method_id")
-	ctx.SetParamNames(requestParameterMerchantId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	err := suite.handler.getPaymentMethod(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_BillingServer_Error() {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchant/:merchant_id/payment-method/:payment_method_id")
-	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
-	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
-
-	billingService := &mock.BillingService{}
-	billingService.On("GetMerchantPaymentMethod", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantPaymentMethodResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
-	suite.handler.billingService = billingService
-	err := suite.handler.getPaymentMethod(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GetPaymentMethod_BillingServerSystemError() {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchant/:merchant_id/payment-method/:payment_method_id")
-	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
-	ctx.SetParamValues(bson.NewObjectId().Hex(), bson.NewObjectId().Hex())
-
-	billingService := &mock.BillingService{}
-	billingService.On("GetMerchantPaymentMethod", mock2.Anything, mock2.Anything).
-		Return(nil, mock.SomeError)
-	suite.handler.billingService = billingService
-	err := suite.handler.getPaymentMethod(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_Ok() {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:merchant_id/methods")
-	ctx.SetParamNames(requestParameterMerchantId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	err := suite.handler.listPaymentMethods(ctx)
-	assert.NoError(suite.T(), err)
-
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_ValidationError() {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:merchant_id/methods")
-
-	err := suite.handler.listPaymentMethods(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), newValidationError("MerchantId"), httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ListPaymentMethods_BillingServer_Error() {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:merchant_id/methods")
-	ctx.SetParamNames(requestParameterMerchantId)
-	ctx.SetParamValues(bson.NewObjectId().Hex())
-
-	billingService := &mock.BillingService{}
-	billingService.On("ListMerchantPaymentMethods", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
-	suite.handler.billingService = billingService
-	err := suite.handler.listPaymentMethods(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_Ok() {
-	pm := &grpc.MerchantPaymentMethodRequest{
-		PaymentMethod: &billing.MerchantPaymentMethodIdentification{
-			Id:   bson.NewObjectId().Hex(),
-			Name: "Unit test",
-		},
-		Commission: &billing.MerchantPaymentMethodCommissions{
-			Fee: 3,
-			PerTransaction: &billing.MerchantPaymentMethodPerTransactionCommission{
-				Fee:      4,
-				Currency: "USD",
-			},
-		},
-		Integration: &billing.MerchantPaymentMethodIntegration{
-			TerminalId:       "1234567890",
-			TerminalPassword: "0987654321",
-		},
-		IsActive: true,
-	}
-
-	b, err := json.Marshal(pm)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
-	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
-	ctx.SetParamValues(bson.NewObjectId().Hex(), pm.PaymentMethod.Id)
-
-	err = suite.handler.changePaymentMethod(ctx)
-	assert.NoError(suite.T(), err)
-
-	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
-	assert.NotEmpty(suite.T(), rsp.Body.String())
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BindingError() {
-	pm := &grpc.MerchantPaymentMethodRequest{
-		PaymentMethod: &billing.MerchantPaymentMethodIdentification{
-			Id:   bson.NewObjectId().Hex(),
-			Name: "Unit test",
-		},
-		Commission: &billing.MerchantPaymentMethodCommissions{
-			Fee: 3,
-			PerTransaction: &billing.MerchantPaymentMethodPerTransactionCommission{
-				Fee:      4,
-				Currency: "USD",
-			},
-		},
-		Integration: &billing.MerchantPaymentMethodIntegration{
-			TerminalId:       "1234567890",
-			TerminalPassword: "0987654321",
-		},
-		IsActive: true,
-	}
-
-	b, err := json.Marshal(pm)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
-
-	err = suite.handler.changePaymentMethod(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_ValidationError() {
-	pm := &grpc.MerchantPaymentMethodRequest{
-		PaymentMethod: &billing.MerchantPaymentMethodIdentification{
-			Id:   bson.NewObjectId().Hex(),
-			Name: "Unit test",
-		},
-		Commission: &billing.MerchantPaymentMethodCommissions{
-			Fee: -1,
-			PerTransaction: &billing.MerchantPaymentMethodPerTransactionCommission{
-				Fee:      4,
-				Currency: "USD",
-			},
-		},
-		Integration: &billing.MerchantPaymentMethodIntegration{
-			TerminalId:       "1234567890",
-			TerminalPassword: "0987654321",
-		},
-		IsActive: true,
-	}
-
-	b, err := json.Marshal(pm)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
-	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
-	ctx.SetParamValues(bson.NewObjectId().Hex(), pm.PaymentMethod.Id)
-
-	err = suite.handler.changePaymentMethod(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), newValidationError("Fee"), httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BillingServer_Error() {
-	pm := &grpc.MerchantPaymentMethodRequest{
-		PaymentMethod: &billing.MerchantPaymentMethodIdentification{
-			Id:   bson.NewObjectId().Hex(),
-			Name: "Unit test",
-		},
-		Commission: &billing.MerchantPaymentMethodCommissions{
-			Fee: 3,
-			PerTransaction: &billing.MerchantPaymentMethodPerTransactionCommission{
-				Fee:      4,
-				Currency: "USD",
-			},
-		},
-		Integration: &billing.MerchantPaymentMethodIntegration{
-			TerminalId:       "1234567890",
-			TerminalPassword: "0987654321",
-		},
-		IsActive: true,
-	}
-
-	b, err := json.Marshal(pm)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
-	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
-	ctx.SetParamValues(bson.NewObjectId().Hex(), pm.PaymentMethod.Id)
-
-	billingService := &mock.BillingService{}
-	billingService.On("ChangeMerchantPaymentMethod", mock2.Anything, mock2.Anything).
-		Return(nil, mock.SomeError)
-	suite.handler.billingService = billingService
-	err = suite.handler.changePaymentMethod(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), errorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ChangePaymentMethod_BillingServerErrorResponse_Error() {
-	pm := &grpc.MerchantPaymentMethodRequest{
-		PaymentMethod: &billing.MerchantPaymentMethodIdentification{
-			Id:   bson.NewObjectId().Hex(),
-			Name: "Unit test",
-		},
-		Commission: &billing.MerchantPaymentMethodCommissions{
-			Fee: 3,
-			PerTransaction: &billing.MerchantPaymentMethodPerTransactionCommission{
-				Fee:      4,
-				Currency: "USD",
-			},
-		},
-		Integration: &billing.MerchantPaymentMethodIntegration{
-			TerminalId:       "1234567890",
-			TerminalPassword: "0987654321",
-		},
-		IsActive: true,
-	}
-
-	b, err := json.Marshal(pm)
-	assert.NoError(suite.T(), err)
-
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := e.NewContext(req, rsp)
-
-	ctx.SetPath("/merchants/:merchant_id/methods/:method_id")
-	ctx.SetParamNames(requestParameterMerchantId, requestParameterPaymentMethodId)
-	ctx.SetParamValues(bson.NewObjectId().Hex(), pm.PaymentMethod.Id)
-
-	billingService := &mock.BillingService{}
-	billingService.On("ChangeMerchantPaymentMethod", mock2.Anything, mock2.Anything).
-		Return(&grpc.MerchantPaymentMethodResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
-	suite.handler.billingService = billingService
-	err = suite.handler.changePaymentMethod(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_BindError() {
@@ -1193,7 +832,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerRe
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
 		Return(nil, mock.SomeError)
 	billingService.On("ChangeMerchantData", mock2.Anything, mock2.Anything).
@@ -1260,7 +899,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_BillingServer
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
 	err := suite.handler.generateAgreement(ctx)
@@ -1282,7 +921,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_BillingServer
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -1408,7 +1047,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_BillingSer
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
 	err := suite.handler.getAgreementDocument(ctx)
@@ -1430,7 +1069,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_BillingSer
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -1561,7 +1200,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_Billing
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
 		Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
@@ -1584,7 +1223,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_Billing
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(bson.NewObjectId().Hex())
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -2099,7 +1738,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_BillingServe
 
 	ctx.SetPath("/admin/api/v1/merchants/company")
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ChangeMerchant", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
 	err := suite.handler.setMerchantCompany(ctx)
@@ -2130,7 +1769,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_BillingServe
 
 	ctx.SetPath("/admin/api/v1/merchants/company")
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ChangeMerchant", mock2.Anything, mock2.Anything).
 		Return(&grpc.ChangeMerchantResponse{Status: http.StatusBadRequest, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -2484,7 +2123,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantContacts_BillingServ
 
 	ctx.SetPath("/admin/api/v1/merchants/contacts")
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ChangeMerchant", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
 	err := suite.handler.setMerchantContacts(ctx)
@@ -2509,7 +2148,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantContacts_BillingServ
 
 	ctx.SetPath("/admin/api/v1/merchants/contacts")
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ChangeMerchant", mock2.Anything, mock2.Anything).
 		Return(&grpc.ChangeMerchantResponse{Status: http.StatusBadRequest, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -2601,36 +2240,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_BindError() 
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), errorRequestParamsIncorrect, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationError_Currency() {
-	b := `{
-		"name": "Bank Name-Spb.",
-		"address": "St.Petersburg, Nevskiy st. 1",
-		"account_number": "408000000001",
-		"swift": "ALFARUMM",
-		"correspondent_account": "408000000001"
-	}`
-
-	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(b))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rsp := httptest.NewRecorder()
-	ctx := suite.api.Http.NewContext(req, rsp)
-
-	ctx.SetPath("/admin/api/v1/merchants/banking")
-
-	err := suite.handler.setMerchantBanking(ctx)
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-
-	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), errorIncorrectCurrencyIdentifier.Code, msg.Code)
-	assert.Equal(suite.T(), errorIncorrectCurrencyIdentifier.Message, msg.Message)
-	assert.Regexp(suite.T(), "Currency", msg.Details)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationError_Name() {
@@ -2801,7 +2410,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_BillingServe
 
 	ctx.SetPath("/admin/api/v1/merchants/banking")
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ChangeMerchant", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
 	err := suite.handler.setMerchantBanking(ctx)
@@ -2830,7 +2439,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_BillingServe
 
 	ctx.SetPath("/admin/api/v1/merchants/company")
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("ChangeMerchant", mock2.Anything, mock2.Anything).
 		Return(&grpc.ChangeMerchantResponse{Status: http.StatusBadRequest, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -2891,7 +2500,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServer
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(mock.SomeMerchantId)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantOnboardingCompleteData", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
 	err := suite.handler.getMerchantStatus(ctx)
@@ -2913,7 +2522,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServer
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(mock.SomeMerchantId)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantOnboardingCompleteData", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantOnboardingCompleteDataResponse{Status: http.StatusBadRequest, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -2980,7 +2589,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(mock.SomeMerchantId1)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantAgreementSignUrl", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
 	suite.handler.billingService = billingService
 	err := suite.handler.createAgreementSignature(ctx)
@@ -3003,7 +2612,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues(mock.SomeMerchantId1)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantAgreementSignUrl", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantAgreementSignUrlResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -3030,7 +2639,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantTariffRatesResponse{Status: pkg.ResponseStatusOk, Item: &billing.MerchantTariffRates{}}, nil)
 	suite.handler.billingService = billingService
@@ -3124,7 +2733,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerErr
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
 	suite.handler.billingService = billingService
 
@@ -3149,7 +2758,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerRes
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantTariffRatesResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService
@@ -3172,7 +2781,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_Ok() {
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything).
 		Return(&grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil)
 	suite.handler.billingService = billingService
@@ -3243,7 +2852,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerErr
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything).
 		Return(nil, errors.New("some error"))
 	suite.handler.billingService = billingService
@@ -3270,7 +2879,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerRes
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	billingService := &mock.BillingService{}
+	billingService := &billMock.BillingService{}
 	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything).
 		Return(&grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.handler.billingService = billingService

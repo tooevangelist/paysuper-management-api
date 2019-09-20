@@ -4,6 +4,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/labstack/echo/v4"
+	billingMocks "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
@@ -69,7 +70,7 @@ func (suite *PayoutDocumentsTestSuite) SetupTest() {
 	suite.api.authUserRouteGroup = suite.api.Http.Group(apiAuthUserGroupPath)
 	suite.router = &payoutDocumentsRoute{Api: suite.api}
 
-	billingService := &mock.BillingService{}
+	billingService := &billingMocks.BillingService{}
 
 	billingService.On("GetPayoutDocuments", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetPayoutDocumentsResponse{

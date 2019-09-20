@@ -52,7 +52,6 @@ paths:
           $ref: '#/components/responses/InternalError'
 
   /admin/api/v1/key-products/:key_product_id/platforms:
-<<<<<<< .merge_file_a05312
     get:
       tags:
         - product
@@ -84,9 +83,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalError'
-
-=======
->>>>>>> .merge_file_a14080
     post:
       tags:
         - product
@@ -110,14 +106,10 @@ paths:
         content:
           application/json:
             schema:
-<<<<<<< .merge_file_a05312
-              $ref: '#/components/schemas/KeyPlatform'
-=======
               type: object
               properties:
                 platform:
                   $ref: '#/components/schemas/KeyPlatform'
->>>>>>> .merge_file_a14080
       responses:
         200:
           description: OK
@@ -317,15 +309,9 @@ paths:
               schema:
                 type: object
                 properties:
-<<<<<<< .merge_file_a05312
-                  total_count:
-                    type: integer
-                  items:
-=======
                   count:
                     type: integer
                   platforms:
->>>>>>> .merge_file_a14080
                     type: array
                     items:
                       $ref: '#/components/schemas/Platform'
@@ -336,8 +322,6 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
-<<<<<<< .merge_file_a05312
-=======
   /api/v1/key-products/:key_product_id:
     get:
       tags:
@@ -376,7 +360,6 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
->>>>>>> .merge_file_a14080
 components:
   securitySchemes:
     bearerAuth:
@@ -522,8 +505,6 @@ components:
           type: string
           example: USD
 
-<<<<<<< .merge_file_a05312
-=======
     KeyProductInfo:
       type: object
       properties:
@@ -573,7 +554,6 @@ components:
               type: boolean
               description: Flag indicates that price was calculated in default currency instead of specified
 
->>>>>>> .merge_file_a14080
     KeyProduct:
       type: object
       properties:

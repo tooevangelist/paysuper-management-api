@@ -241,6 +241,7 @@ func (r *orderRoute) createJson(ctx echo.Context) error {
 			OrderId: order.Uuid,
 			Scheme:  r.httpScheme,
 			Host:    ctx.Request().Host,
+			Ip:      ctx.RealIP(),
 		}
 		rsp2, err := r.billingService.PaymentFormJsonDataProcess(ctxReq, req2)
 
