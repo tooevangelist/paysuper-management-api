@@ -322,10 +322,6 @@ func (s *BillingServerSystemErrorMock) DeleteProduct(ctx context.Context, in *gr
 	return nil, SomeError
 }
 
-func (s *BillingServerSystemErrorMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
-	return nil, SomeError
-}
-
 func (s *BillingServerSystemErrorMock) IsOrderCanBePaying(
 	ctx context.Context,
 	in *grpc.IsOrderCanBePayingRequest,
@@ -506,9 +502,6 @@ func (s *BillingServerSystemErrorMock) ListProjects(ctx context.Context, in *grp
 	return nil, SomeError
 }
 
-func (s *BillingServerSystemErrorMock) GetOrder(ctx context.Context, in *grpc.GetOrderRequest, opts ...client.CallOption) (*billing.Order, error) {
-	return nil, SomeError
-}
 func (s *BillingServerSystemErrorMock) ProcessVatReports(ctx context.Context, in *grpc.ProcessVatReportsRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	panic("implement me")
 }
@@ -770,4 +763,28 @@ func (s *BillingServerSystemErrorMock) FindAllOrdersPrivate(
 	opts ...client.CallOption,
 ) (*grpc.ListOrdersPrivateResponse, error) {
 	return &grpc.ListOrdersPrivateResponse{}, nil
+}
+
+func (s *BillingServerSystemErrorMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) UpdatePayoutDocument(ctx context.Context, in *grpc.UpdatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetPayoutDocuments(ctx context.Context, in *grpc.GetPayoutDocumentsRequest, opts ...client.CallOption) (*grpc.GetPayoutDocumentsResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetPayoutDocumentSignUrl(ctx context.Context, in *grpc.GetPayoutDocumentSignUrlRequest, opts ...client.CallOption) (*grpc.GetPayoutDocumentSignUrlResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) UpdatePayoutDocumentSignatures(ctx context.Context, in *grpc.UpdatePayoutDocumentSignaturesRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetMerchantBalance(ctx context.Context, in *grpc.GetMerchantBalanceRequest, opts ...client.CallOption) (*grpc.GetMerchantBalanceResponse, error) {
+	panic("implement me")
 }

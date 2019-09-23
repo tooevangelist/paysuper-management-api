@@ -3,6 +3,7 @@ package mock
 import (
 	"context"
 	"github.com/globalsign/mgo/bson"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	"github.com/micro/go-micro/client"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -1074,4 +1075,40 @@ func (s *BillingServerOkMock) GetDashboardBaseReport(
 	opts ...client.CallOption,
 ) (*grpc.GetDashboardBaseReportResponse, error) {
 	return &grpc.GetDashboardBaseReportResponse{}, nil
+}
+
+func (s *BillingServerOkMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) UpdatePayoutDocument(ctx context.Context, in *grpc.UpdatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPayoutDocuments(ctx context.Context, in *grpc.GetPayoutDocumentsRequest, opts ...client.CallOption) (*grpc.GetPayoutDocumentsResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPayoutDocumentSignUrl(ctx context.Context, in *grpc.GetPayoutDocumentSignUrlRequest, opts ...client.CallOption) (*grpc.GetPayoutDocumentSignUrlResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) UpdatePayoutDocumentSignatures(ctx context.Context, in *grpc.UpdatePayoutDocumentSignaturesRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetMerchantBalance(ctx context.Context, in *grpc.GetMerchantBalanceRequest, opts ...client.CallOption) (*grpc.GetMerchantBalanceResponse, error) {
+	return &grpc.GetMerchantBalanceResponse{
+		Status: pkg.ResponseStatusOk,
+		Item: &billing.MerchantBalance{
+			Id:             bson.NewObjectId().Hex(),
+			MerchantId:     bson.NewObjectId().Hex(),
+			Currency:       "RUB",
+			Debit:          0,
+			Credit:         0,
+			RollingReserve: 0,
+			Total:          0,
+			CreatedAt:      ptypes.TimestampNow(),
+		},
+	}, nil
 }

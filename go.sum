@@ -691,11 +691,16 @@ github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTK
 github.com/paysuper/document-signer v0.0.0-20190903102235-df82efbb7d26/go.mod h1:39VQOEQm+WdUrGOAHDGnE8ks86mAPEKpgBwxP9mQfSA=
 github.com/paysuper/document-signer v0.0.0-20190906075749-af06b306ee92 h1:OzcTm69qCoqQ2YqYjgf8zAmkjAVaEV0VmzRNMyePPUI=
 github.com/paysuper/document-signer v0.0.0-20190906075749-af06b306ee92/go.mod h1:gqEKigUzMNjJ9P+OYeKCu+wOA17/Q2EElpJnd6O3Zr4=
+github.com/paysuper/document-signer v0.0.0-20190916111907-052775c62716 h1:B4dw1lXXFaa1MC2lNGdpEBl6DuuQ2ref9dchQevEkeU=
+github.com/paysuper/document-signer v0.0.0-20190916111907-052775c62716/go.mod h1:3yaO+xYLvqjkj7mJqNKuzp8ncd7gj75jud4KIkiLMzc=
+github.com/paysuper/document-signer v0.0.0-20190923080905-cb9cc2665d8b h1:Jmg864eBJl/HS+xX5jana68ynYmi6ddp6klUI+Uu9Ec=
+github.com/paysuper/document-signer v0.0.0-20190923080905-cb9cc2665d8b/go.mod h1:3yaO+xYLvqjkj7mJqNKuzp8ncd7gj75jud4KIkiLMzc=
 github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82 h1:/p8k5EsVivYfSVFeWV9Pb7/EZj6PJt+f3v/OPmH2dr0=
 github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82/go.mod h1:TjXLdcbFp4VeSvZK3+sKv61uRS1tH0mtrEEqziaJ/+E=
 github.com/paysuper/paysuper-aws-manager v0.0.1 h1:792ZR+2Pva93ziJbV8zTxjod9gbx4jBlZ1ZUZpN/8Ts=
 github.com/paysuper/paysuper-aws-manager v0.0.1/go.mod h1:TjXLdcbFp4VeSvZK3+sKv61uRS1tH0mtrEEqziaJ/+E=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190903132256-814645b104e6/go.mod h1:0oiTCZU+Qp+Nhgj/kI7vCWJb13qSYkcQ/arq5TFsvgA=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190916111306-1178abb7a20f/go.mod h1:ZwR/bn4gQxv9h4CiVzZY+GZf6ri57oIIFQtb549Jodw=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190917131248-b22922882d02/go.mod h1:oxwtTZFhIv6pO74HtAzrjZ8wJ/qNX/dN4bfpLtBA1q4=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190918083056-4fbf54925f32 h1:qWwnMGb0MlAYjnPLshGujtOnbFbHscza0wi6uuS3GvM=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190918083056-4fbf54925f32/go.mod h1:ObWhJ6vODvmOwFGXpp0IOGHdohKdhTzdmP0poSMPg8E=
@@ -715,6 +720,10 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20190920145850-9e793a2bdda1 h
 github.com/paysuper/paysuper-billing-server v0.0.0-20190920145850-9e793a2bdda1/go.mod h1:A581nbfintO2s3gKM3/3phPJluXo2bN6i97/7q/vOo4=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190920154731-e23662d404c3 h1:ISXNpjv35Nf0m9PeVep0e7t4wD4ZNjLO73d+rF+A9yo=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190920154731-e23662d404c3/go.mod h1:A581nbfintO2s3gKM3/3phPJluXo2bN6i97/7q/vOo4=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190920205124-c369396d0f24 h1:zkazGpoh8AVajN9qTjGRYqubkYOWb9bK/nr3l5riLbs=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190920205124-c369396d0f24/go.mod h1:G1BN8XiUUX69qlVbJL/BmtnMwZrUTdTLZTthJmcayio=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190923081905-8df62fcd55f6 h1:FdJArA/1hW1ZhhWHpmrxb26u/i37jLDbGyUBO4m7Tv4=
+github.com/paysuper/paysuper-billing-server v0.0.0-20190923081905-8df62fcd55f6/go.mod h1:NKY+7+Xlj6cwOnbGhXzpUfIvdk30aDpTfOKLwPR/YSQ=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d h1:hoMkfdq4qEGOONvxajsZO0Mf6np++pGnrKVxegvplaw=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d/go.mod h1:C+QHdgbjIlAPxHD93/08yi+xWfUgk8maLY8FKFqNzMQ=
 github.com/paysuper/paysuper-database-mongo v0.1.0 h1:RMSIYB8rpTAAHc0wmIQz8XQVa8KB6/xX8iA8ceiDic8=
@@ -770,6 +779,7 @@ github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d/go.mod h1:c3At6R
 github.com/prometheus/procfs v0.0.0-20181204211112-1dc9a6cbc91a/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
 github.com/prometheus/procfs v0.0.0-20190117184657-bf6a532e95b1/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
 github.com/prometheus/procfs v0.0.2/go.mod h1:TjEm7ze935MbeOT/UhFTIMYKhuLP4wbCsTZCD3I8kEA=
+github.com/prometheus/procfs v0.0.3 h1:CTwfnzjQ+8dS6MhHHu4YswVAD99sL2wjPqP+VkURmKE=
 github.com/prometheus/procfs v0.0.3/go.mod h1:4A/X28fw3Fc593LaREMrKMqOKvUAntwMDaekg4FpcdQ=
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/rcrowley/go-metrics v0.0.0-20190706150252-9beb055b7962/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
@@ -1097,6 +1107,7 @@ gopkg.in/ProtocolONE/rabbitmq.v1 v1.0.0-20190719062839-9858d727f3ef h1:yksV6h53P
 gopkg.in/ProtocolONE/rabbitmq.v1 v1.0.0-20190719062839-9858d727f3ef/go.mod h1:rD6KjYTsLgxc51iWPhuInSeZ1HyrNdE/sxco/tz/sXs=
 gopkg.in/airbrake/gobrake.v2 v2.0.9/go.mod h1:/h5ZAUhDkGaJfjzjKLSjv6zCL6O0LLBxU4K+aSYdM/U=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
+gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc h1:2gGKlE2+asNV9m7xrywl36YYNnBG5ZQ0r/BOOxqPpmk=
 gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc/go.mod h1:m7x9LTH6d71AHyAX77c9yqWCCa3UKHcVEj9y7hAtKDk=
 gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d/go.mod h1:cuepJuh7vyXfUyUwEgHQXw849cJrilpS5NeIjOWESAw=
 gopkg.in/bsm/ratelimit.v1 v1.0.0-20160220154919-db14e161995a/go.mod h1:KF9sEfUPAXdG8Oev9e99iLGnl2uJMjc5B+4y3O7x610=
