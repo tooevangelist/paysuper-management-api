@@ -14,9 +14,8 @@ require (
 	github.com/labstack/echo/v4 v4.1.6
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
-	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190920154731-e23662d404c3
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190923084427-7be1ce40bedc
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-reporter v0.0.0-20190917180039-6701d139ca7f
