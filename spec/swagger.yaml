@@ -6909,7 +6909,7 @@ paths:
     post:
       summary: Create a payout document POST JSON request
       tags:
-        - Payout
+        - Payouts
       consumes:
         - application/json
       description: Create a payout document POST JSON request
@@ -6976,7 +6976,7 @@ paths:
     post:
       summary: Update a payout document POST JSON request
       tags:
-        - Payout
+        - Payouts
       consumes:
         - application/json
       description: Update a payout document POST JSON request
