@@ -63,12 +63,13 @@ func (r *reportFileRoute) create(ctx echo.Context) error {
 	}
 
 	req := &reporterProto.ReportFile{
-		UserId:     r.authUser.Id,
-		MerchantId: data.MerchantId,
-		ReportType: data.ReportType,
-		FileType:   data.FileType,
-		Template:   data.Template,
-		Params:     params,
+		UserId:           r.authUser.Id,
+		MerchantId:       data.MerchantId,
+		ReportType:       data.ReportType,
+		FileType:         data.FileType,
+		Template:         data.Template,
+		Params:           params,
+		SendNotification: true,
 	}
 
 	res, err := r.reporterService.CreateFile(ctx.Request().Context(), req)
