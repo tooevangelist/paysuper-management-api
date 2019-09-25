@@ -233,6 +233,35 @@ paths:
           $ref: '#/components/responses/InternalError'
 
   /admin/api/v1/key-products/:key_product_id:
+    delete:
+      tags:
+        - product
+      summary: "Change product"
+      parameters:
+        - name: key_product_id
+          in: path
+          description: "Key Product ID"
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyProduct'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
     put:
       tags:
         - product
@@ -477,6 +506,11 @@ components:
           additionalProperties:
             type: string
           description: name of product
+          example:
+            en: Best Game Ever
+            ru: Лучшая игра
+        object:
+          type: string
         project_id:
           type: string
           description: Id of project
@@ -485,14 +519,20 @@ components:
           additionalProperties:
             type: string
           description: description of description
+          example:
+            en: Description here
+            ru: Описание тут
         long_description:
           type: object
           additionalProperties:
             type: string
           description: long description of description
+          example:
+            en: Description here
+            ru: Описание тут
         sku:
           type: string
-          description: sku of product
+          description: sku of product (unique in project)
         images:
           type: array
           items:
