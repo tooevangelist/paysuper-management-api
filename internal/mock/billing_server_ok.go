@@ -1112,3 +1112,7 @@ func (s *BillingServerOkMock) GetMerchantBalance(ctx context.Context, in *grpc.G
 		},
 	}, nil
 }
+
+func (s *BillingServerOkMock) PayoutDocumentPdfUploaded(ctx context.Context, in *grpc.PayoutDocumentPdfUploadedRequest, opts ...client.CallOption) (*grpc.PayoutDocumentPdfUploadedResponse, error) {
+	panic("implement me")
+}

@@ -916,3 +916,7 @@ func (s *BillingServerErrorMock) UpdatePayoutDocumentSignatures(ctx context.Cont
 func (s *BillingServerErrorMock) GetMerchantBalance(ctx context.Context, in *grpc.GetMerchantBalanceRequest, opts ...client.CallOption) (*grpc.GetMerchantBalanceResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerErrorMock) PayoutDocumentPdfUploaded(ctx context.Context, in *grpc.PayoutDocumentPdfUploadedRequest, opts ...client.CallOption) (*grpc.PayoutDocumentPdfUploadedResponse, error) {
+	panic("implement me")
+}
