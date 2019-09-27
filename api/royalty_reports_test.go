@@ -59,17 +59,36 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_getRoyaltyReportsList()
 	}
 }
 
+func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_getRoyaltyReport() {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/royalty_reports/5ced34d689fce60bf4440829", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rsp := httptest.NewRecorder()
+	ctx := e.NewContext(req, rsp)
+
+	ctx.SetPath("/royalty_reports/:" + requestParameterId)
+	ctx.SetParamNames(requestParameterId)
+	ctx.SetParamValues("5ced34d689fce60bf4440829")
+
+	err := suite.router.getRoyaltyReport(ctx)
+
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+		assert.NotEmpty(suite.T(), rsp.Body.String())
+	}
+}
+
 func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_listRoyaltyReportOrders() {
 	e := echo.New()
 	q := make(url.Values)
 	q.Set("limit", "100")
 	q.Set("offset", "200")
-	req := httptest.NewRequest(http.MethodGet, "/royalty_reports/details/5ced34d689fce60bf4440829?"+q.Encode(), nil)
+	req := httptest.NewRequest(http.MethodGet, "/royalty_reports/5ced34d689fce60bf4440829/transactions?"+q.Encode(), nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rsp := httptest.NewRecorder()
 	ctx := e.NewContext(req, rsp)
 
-	ctx.SetPath("/royalty_reports/details/:" + requestParameterId + "?" + q.Encode())
+	ctx.SetPath("/royalty_reports/:" + requestParameterId + "/transactions?" + q.Encode())
 	ctx.SetParamNames(requestParameterId)
 	ctx.SetParamValues("5ced34d689fce60bf4440829")
 

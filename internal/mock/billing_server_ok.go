@@ -1116,3 +1116,11 @@ func (s *BillingServerOkMock) GetMerchantBalance(ctx context.Context, in *grpc.G
 func (s *BillingServerOkMock) PayoutDocumentPdfUploaded(ctx context.Context, in *grpc.PayoutDocumentPdfUploadedRequest, opts ...client.CallOption) (*grpc.PayoutDocumentPdfUploadedResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkMock) GetRoyaltyReport(ctx context.Context, in *grpc.GetRoyaltyReportRequest, opts ...client.CallOption) (*grpc.GetRoyaltyReportResponse, error) {
+	return &grpc.GetRoyaltyReportResponse{
+		Status:  pkg.ResponseStatusOk,
+		Message: nil,
+		Item:    &billing.RoyaltyReport{},
+	}, nil
+}

@@ -920,3 +920,7 @@ func (s *BillingServerErrorMock) GetMerchantBalance(ctx context.Context, in *grp
 func (s *BillingServerErrorMock) PayoutDocumentPdfUploaded(ctx context.Context, in *grpc.PayoutDocumentPdfUploadedRequest, opts ...client.CallOption) (*grpc.PayoutDocumentPdfUploadedResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerErrorMock) GetRoyaltyReport(ctx context.Context, in *grpc.GetRoyaltyReportRequest, opts ...client.CallOption) (*grpc.GetRoyaltyReportResponse, error) {
+	panic("implement me")
+}
