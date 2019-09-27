@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"go.uber.org/zap"
 	"net/http"
@@ -18,6 +19,7 @@ func (api *Api) InitProductRoutes() *Api {
 	}
 
 	api.authUserRouteGroup.GET("/products", productApiV1.getProductsList)
+	api.authUserRouteGroup.GET("/products/merchant/:id", productApiV1.getProductsList)
 	api.authUserRouteGroup.POST("/products", productApiV1.createProduct)
 	api.authUserRouteGroup.GET("/products/:id", productApiV1.getProduct)
 	api.authUserRouteGroup.PUT("/products/:id", productApiV1.updateProduct)
@@ -38,24 +40,47 @@ func (r *productRoute) getProductsList(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errorRequestParamsIncorrect)
 	}
 
-	merchant, err := r.billingService.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
-	if err != nil || merchant.Item == nil {
+	reqCtx := ctx.Request().Context()
+	merchantId := ctx.Param(requestParameterId)
+
+	if merchantId == "" {
+		merchant, err := r.billingService.GetMerchantBy(reqCtx, &grpc.GetMerchantByRequest{UserId: r.authUser.Id})
+
 		if err != nil {
-			zap.S().Errorf("internal error", "err", err.Error())
+			zap.L().Error(
+				pkg.ErrorGrpcServiceCallFailed,
+				zap.Error(err),
+				zap.String(ErrorFieldService, pkg.ServiceName),
+				zap.String(ErrorFieldMethod, "GetMerchantBy"),
+				zap.Any(ErrorFieldRequest, req),
+			)
+			return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, errorUnknown)
+
+		if merchant.Status != pkg.ResponseStatusOk {
+			return echo.NewHTTPError(int(merchant.Status), merchant.Message)
+		}
+
+		merchantId = merchant.Item.Id
 	}
 
-	req.MerchantId = merchant.Item.Id
-
+	req.MerchantId = merchantId
 	err = r.validate.Struct(req)
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, r.getValidationError(err))
 	}
 
-	res, err := r.billingService.ListProducts(ctx.Request().Context(), req)
+	res, err := r.billingService.ListProducts(reqCtx, req)
+
 	if err != nil {
-		zap.S().Errorf("internal error", "err", err.Error())
+		zap.L().Error(
+			pkg.ErrorGrpcServiceCallFailed,
+			zap.Error(err),
+			zap.String(ErrorFieldService, pkg.ServiceName),
+			zap.String(ErrorFieldMethod, "ListProducts"),
+			zap.Any(ErrorFieldRequest, req),
+		)
 		return echo.NewHTTPError(http.StatusInternalServerError, errorInternal)
 	}
 

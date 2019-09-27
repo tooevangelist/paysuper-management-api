@@ -2663,6 +2663,72 @@ definitions:
         type: string
         description: failure transaction
 
+  price:
+    properties:
+      amount:
+        description: price amount
+        type: number
+      currency:
+        description: price currency. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+      region:
+        description: "region name for this price. available regions: Oceania, EU, CIS, North Europe, North Africa, Polynesia, North America, Central Africa, South Europe, Antarctica, South America, South Asia, Caribbean, SOUTH ASIA, West Asia, Central America, West Africa, Southern Africa, Southeast Asia, East Africa, East Asia, Micronesia, West Europe, Latin America, Melanesia, Russia, Sub-Saharan Africa, South Africa"
+        type: string
+
+  product:
+    properties:
+      id:
+        description: product identifier
+        type: string
+      project_id:
+        description: project identifier for which created product
+        type: string
+      object:
+        description: system constant conteined returning object type. for product object always must be - product
+        type: string
+      type:
+        description: product type
+        type: string
+      sku:
+        description: product sku (simple slug name)
+        type: string
+      name:
+        description: "product names map in other language: {\"en\": \"project name\", \"ru\": \"имя проекта\"}"
+        type: object
+      default_currency:
+        description: default currency for selling product. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+      enabled:
+        description: true is product is enabled
+        type: boolean
+      prices:
+        description: array of available prices for product
+        type: array
+        items:
+          $ref: '#/definitions/price'
+      description:
+        description: "product short descriptions map in other language: {\"en\": \"project short description\", \"ru\": \"короткое описание проекта\"}"
+        type: object
+      long_description:
+        description: "product long descriptions map in other language: {\"en\": \"project long description\", \"ru\": \"длинное описание проекта\"}"
+        type: object
+      created_at:
+        description: time when retes record was created
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: time when retes record was updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+      images:
+        description: array of product images. if images not set then field can be null
+        type: array
+        items:
+          type: string
+      url:
+        description: url to product on project side
+        type: string
+      metadata:
+        description: object can contain any other information about product. object must contain only string values
+        type: object
 
 host: p1payapi.tst.protocol.one
 info:
@@ -6981,6 +7047,11 @@ paths:
         - application/json
       description: Update a payout document POST JSON request
       parameters:
+        - description: payout document unique identifier
+          in: path
+          name: id
+          type: string
+          required: true
         - description: update params
           in: body
           name: body
@@ -7000,5 +7071,130 @@ paths:
             $ref: '#/definitions/model.Error'
         "500":
           description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/products":
+    get:
+      summary: Get a list of products for a merchant in which the owner is an authorized user
+      tags:
+        - Products
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get products list for authorised user
+      parameters:
+        - description: product name
+          in: query
+          name: name
+          type: string
+          required: false
+        - description: product sku
+          in: query
+          name: sku
+          type: string
+          required: false
+        - description: maximum number of returning products. default value is 100
+          in: query
+          name: limit
+          type: integer
+          required: false
+        - description: offset products per page
+          in: query
+          name: offset
+          type: integer
+          required: false
+        - description: project identifier for which need get products list
+          in: query
+          name: project_id
+          type: string
+          required: false
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/product'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/products/merchant/{id}":
+    get:
+      summary: Get products list for any merchant
+      tags:
+        - Products
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get products list for any merchant
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: id
+          type: string
+          required: true
+        - description: product name
+          in: query
+          name: name
+          type: string
+          required: false
+        - description: product sku
+          in: query
+          name: sku
+          type: string
+          required: false
+        - description: maximum number of returning products. default value is 100
+          in: query
+          name: limit
+          type: integer
+          required: false
+        - description: offset products per page
+          in: query
+          name: offset
+          type: integer
+          required: false
+        - description: project identifier for which need get products list
+          in: query
+          name: project_id
+          type: string
+          required: false
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/product'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
