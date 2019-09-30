@@ -13,5 +13,5 @@ GO_PKG=github.com/paysuper/paysuper-management-api
 GOOS="linux"
 GOARCH="amd64"
 DOCKER_NETWORK="p1devnet"
-DOCKER_IMAGE=p1hub/paysupermgmt
+DOCKER_IMAGE=p1hub/p1payapi
 PROJECT_NAME="paysuper-management-api"
