@@ -48,14 +48,13 @@ spec:
               value: "static"
             - name: METRICS_PORT
               value: "{{ $deployment.healthPort }}"
-
-          {{- range .Values.backend.env }}
-          - name: {{ . }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $deploymentName }}-env
-                key: {{ . }}
-          {{- end }}
+            {{- range .Values.backend.env }}
+            - name: {{ . }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $deploymentName }}-env
+                  key: {{ . }}
+            {{- end }}
           ports:
             - containerPort: {{$deployment.port}}
           #livenessProbe:
