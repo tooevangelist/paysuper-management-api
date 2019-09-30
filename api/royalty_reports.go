@@ -18,8 +18,8 @@ func (api *Api) initRoyaltyReportsRoutes() *Api {
 	}
 
 	api.authUserRouteGroup.GET("/royalty_reports", cApiV1.getRoyaltyReportsList)
-	api.authUserRouteGroup.GET("/royalty_reports/:id/transactions", cApiV1.getRoyaltyReport)
-	api.authUserRouteGroup.GET("/royalty_reports/:id", cApiV1.listRoyaltyReportOrders)
+	api.authUserRouteGroup.GET("/royalty_reports/:id", cApiV1.getRoyaltyReport)
+	api.authUserRouteGroup.GET("/royalty_reports/:id/transactions", cApiV1.listRoyaltyReportOrders)
 	api.authUserRouteGroup.POST("/royalty_reports/:id/accept", cApiV1.MerchantReviewRoyaltyReport)
 	api.authUserRouteGroup.POST("/royalty_reports/:id/decline", cApiV1.merchantDeclineRoyaltyReport)
 	api.authUserRouteGroup.POST("/royalty_reports/:id/change", cApiV1.changeRoyaltyReport)
