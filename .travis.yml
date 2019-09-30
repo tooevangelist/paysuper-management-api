@@ -13,7 +13,7 @@ services:
 stages:
 - test
 - name: deploy
-  if: branch IN (master, feature/PAY-261)
+  if: branch IN (master, feature/PAY-261, casbin_middleware)
 env:
   global:
   - GO111MODULE=on
@@ -30,7 +30,8 @@ jobs:
   - stage: test
     install: true
     script:
-    - go test ./... -coverprofile=coverage.out -covermode=atomic -p=1
+    #- go test ./... -coverprofile=coverage.out -covermode=atomic -p=1
+    - make github-test
     - sonar-scanner
     after_success:
     - bash <(curl -s https://codecov.io/bash)
