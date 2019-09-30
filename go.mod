@@ -14,12 +14,11 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20190927111857-6ad0469f489a
+	github.com/paysuper/paysuper-billing-server v0.0.0-20190930122133-08e4a0cd855b
 	github.com/paysuper/paysuper-payment-link v0.0.0-20190903143854-b799a77c03ce
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-reporter v0.0.0-20190926160409-3dfa3c2d811f
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
-	github.com/prometheus/client_golang v1.1.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
