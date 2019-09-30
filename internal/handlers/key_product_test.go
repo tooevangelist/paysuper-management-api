@@ -47,21 +47,6 @@ func (suite *KeyProductTestSuite) SetupTest() {
 
 func (suite *KeyProductTestSuite) TearDownTest() {}
 
-func (suite *KeyProductTestSuite) TestProject_RemovePlatform_Ok() {
-
-	res, err := suite.caller.Builder().
-		Method(http.MethodDelete).
-		Params(":key_product_id", bson.NewObjectId().Hex()).
-		Params(":platform_id", "steam").
-		Path(common.AuthUserGroupPath + keyProductsPlatformIdPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, res.Code)
-	assert.NotEmpty(suite.T(), res.Body.String())
-}
-
 func (suite *KeyProductTestSuite) TestProject_PublishKeyProduct_Ok() {
 
 	res, err := suite.caller.Builder().

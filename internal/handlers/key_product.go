@@ -19,7 +19,6 @@ const (
 	keyProductsPath               = "/key-products"
 	keyProductsIdPath             = "/key-products/:key_product_id"
 	keyProductsPublishPath        = "/key-products/:key_product_id/publish"
-	keyProductsPlatformsPath      = "/key-products/:key_product_id/platforms"
 	keyProductsPlatformIdPath     = "/key-products/:key_product_id/platforms/:platform_id"
 	platformsPath                 = "/platforms"
 	keyProductsPlatformsFilePath  = "/key-products/:key_product_id/platforms/:platform_id/file"
@@ -47,8 +46,6 @@ func (h *KeyProductRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(keyProductsIdPath, h.getKeyProductById)
 	groups.AuthUser.PUT(keyProductsIdPath, h.changeKeyProduct)
 	groups.AuthUser.POST(keyProductsPublishPath, h.publishKeyProduct)
-	groups.AuthUser.POST(keyProductsPlatformsPath, h.changePlatformPricesForKeyProduct)
-	groups.AuthUser.DELETE(keyProductsPlatformIdPath, h.removePlatformForKeyProduct)
 	groups.AuthUser.DELETE(keyProductsIdPath, h.deleteKeyProductById)
 	groups.AuthUser.GET(platformsPath, h.getPlatformsList)
 
@@ -56,81 +53,6 @@ func (h *KeyProductRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(keyProductsPlatformsCountPath, h.getCountOfKeys)
 
 	groups.AuthProject.GET(keyProductsIdPath, h.getKeyProduct)
-}
-
-// @Description Remove platform from product
-// @Example DELETE /admin/api/v1/key-products/:key_product_id/platforms/:platform_id
-func (h *KeyProductRoute) removePlatformForKeyProduct(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-	req := &grpc.RemovePlatformRequest{}
-	req.KeyProductId = ctx.Param("key_product_id")
-	if req.KeyProductId == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorMessageKeyProductIdInvalid)
-	}
-
-	req.PlatformId = ctx.Param("platform_id")
-	merchant, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: authUser.Id})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-	}
-	if merchant.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
-	}
-	req.MerchantId = merchant.Item.Id
-
-	if err := h.dispatch.Validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
-	}
-
-	res, err := h.dispatch.Services.Billing.DeletePlatformFromProduct(ctx.Request().Context(), req)
-	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.PairArgs("err", err.Error()))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	if res.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(res.Status), res.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, res)
-}
-
-// @Description Change prices for specified platform and key product
-// @Example POST /admin/api/v1/key-products/:key_product_id/platforms
-func (h *KeyProductRoute) changePlatformPricesForKeyProduct(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-	req := &grpc.AddOrUpdatePlatformPricesRequest{}
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	req.KeyProductId = ctx.Param("key_product_id")
-
-	merchant, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: authUser.Id})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-	}
-	if merchant.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(http.StatusBadRequest, merchant.Message)
-	}
-	req.MerchantId = merchant.Item.Id
-
-	err = h.dispatch.Validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
-	}
-
-	res, err := h.dispatch.Services.Billing.UpdatePlatformPrices(ctx.Request().Context(), req)
-	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.PairArgs("err", err.Error()))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	if res.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(res.Status), res.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, res)
 }
 
 // @Description Publishes product
