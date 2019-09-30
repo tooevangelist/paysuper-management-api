@@ -1,9 +1,9 @@
 module github.com/paysuper/paysuper-management-api
 
 require (
-	github.com/Nerufa/go-shared v1.9.0
 	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681
 	github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679
+	github.com/ProtocolONE/go-core v1.9.0
 	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.4.1
 	github.com/aws/aws-sdk-go v1.23.16
 	github.com/davecgh/go-spew v1.1.1
@@ -29,7 +29,6 @@ require (
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
 	go.uber.org/automaxprocs v1.2.0
-	go.uber.org/zap v1.10.0
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
 )
