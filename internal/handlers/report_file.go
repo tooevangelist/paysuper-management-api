@@ -60,7 +60,7 @@ func (h *ReportFileRoute) Route(groups *common.Groups) {
 //
 func (h *ReportFileRoute) create(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
-	h.L().Error("report file user id: " + authUser.Id)
+
 	data := &reportFileRequest{}
 	if err := ctx.Bind(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
@@ -122,7 +122,8 @@ func (h *ReportFileRoute) download(ctx echo.Context) error {
 	_, err := h.awsManager.Download(ctx.Request().Context(), filePath, &awsWrapper.DownloadInput{FileName: fileName})
 
 	if err != nil {
-		h.L().Error("unable to find the file id")
+		h.L().Error("unable to find the file id " + fileName)
+		h.L().Error(err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageDownloadReportFile)
 	}
 
