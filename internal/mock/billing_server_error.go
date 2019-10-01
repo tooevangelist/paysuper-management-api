@@ -771,13 +771,6 @@ func (s *BillingServerErrorMock) GetPlatforms(ctx context.Context, in *grpc.List
 	}, nil
 }
 
-func (s *BillingServerErrorMock) UpdatePlatformPrices(ctx context.Context, in *grpc.AddOrUpdatePlatformPricesRequest, opts ...client.CallOption) (*grpc.UpdatePlatformPricesResponse, error) {
-	return &grpc.UpdatePlatformPricesResponse{
-		Status:  pkg.ResponseStatusBadData,
-		Message: SomeError,
-	}, nil
-}
-
 func (s *BillingServerErrorMock) DeletePlatformFromProduct(ctx context.Context, in *grpc.RemovePlatformRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	return &grpc.EmptyResponseWithStatus{
 		Status:  pkg.ResponseStatusBadData,
@@ -922,5 +915,9 @@ func (s *BillingServerErrorMock) PayoutDocumentPdfUploaded(ctx context.Context, 
 }
 
 func (s *BillingServerErrorMock) GetRoyaltyReport(ctx context.Context, in *grpc.GetRoyaltyReportRequest, opts ...client.CallOption) (*grpc.GetRoyaltyReportResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) UnPublishKeyProduct(ctx context.Context, in *grpc.UnPublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	panic("implement me")
 }

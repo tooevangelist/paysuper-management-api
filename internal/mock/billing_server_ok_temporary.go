@@ -11,6 +11,7 @@ import (
 
 type BillingServerOkTemporaryMock struct{}
 
+
 func NewBillingServerOkTemporaryMock() grpc.BillingService {
 	return &BillingServerOkTemporaryMock{}
 }
@@ -730,10 +731,6 @@ func (s *BillingServerOkTemporaryMock) GetPlatforms(ctx context.Context, in *grp
 	panic("implement me")
 }
 
-func (s *BillingServerOkTemporaryMock) UpdatePlatformPrices(ctx context.Context, in *grpc.AddOrUpdatePlatformPricesRequest, opts ...client.CallOption) (*grpc.UpdatePlatformPricesResponse, error) {
-	panic("implement me")
-}
-
 func (s *BillingServerOkTemporaryMock) DeletePlatformFromProduct(ctx context.Context, in *grpc.RemovePlatformRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
@@ -854,5 +851,9 @@ func (s *BillingServerOkTemporaryMock) PayoutDocumentPdfUploaded(ctx context.Con
 }
 
 func (s *BillingServerOkTemporaryMock) GetRoyaltyReport(ctx context.Context, in *grpc.GetRoyaltyReportRequest, opts ...client.CallOption) (*grpc.GetRoyaltyReportResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) UnPublishKeyProduct(ctx context.Context, in *grpc.UnPublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	panic("implement me")
 }
