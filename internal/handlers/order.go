@@ -29,6 +29,7 @@ const (
 	orderBillingAddressPath  = "/orders/:order_id/billing_address"
 	orderNotifySalesPath     = "/orders/:order_id/notify_sale"
 	orderNotifyNewRegionPath = "/orders/:order_id/notify_new_region"
+	orderPlatformPath        = "/orders/:order_id/platform"
 )
 
 const (
@@ -113,6 +114,7 @@ func (h *OrderRoute) Route(groups *common.Groups) {
 	groups.AuthProject.POST(orderBillingAddressPath, h.processBillingAddress)
 	groups.AuthProject.POST(orderNotifySalesPath, h.notifySale)
 	groups.AuthProject.POST(orderNotifyNewRegionPath, h.notifyNewRegion)
+	groups.AuthProject.POST(orderPlatformPath, h.changePlatform)
 }
 
 // @Summary Create order with HTML form
@@ -785,4 +787,38 @@ func (h *OrderRoute) notifyNewRegion(ctx echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
+}
+
+func (h *OrderRoute) changePlatform(ctx echo.Context) error {
+	orderId := ctx.Param(common.RequestParameterOrderId)
+
+	if orderId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectOrderId)
+	}
+
+	req := &grpc.PaymentFormUserChangePlatformRequest{}
+	err := ctx.Bind(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	req.OrderId = orderId
+	err = h.dispatch.Validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.PaymentFormPlatformChanged(ctx.Request().Context(), req)
+
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "PaymentFormPlatformChanged", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }
