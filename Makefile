@@ -8,6 +8,7 @@ override DOCKER_COMPOSE_ARGS ?= -f deployments/docker-compose/docker-compose.yml
 override DOCKER_BUILD_ARGS ?= -f ${ROOT_DIR}/build/docker/app/Dockerfile
 
 TAG ?= unknown
+AWS_DOCKER_IMAGE ?= unknown
 CACHE_TAG ?= unknown_cache
 GOOS ?= linux
 GOARCH ?= amd64
@@ -121,6 +122,11 @@ docker-image: ## build docker image
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
 	docker build --cache-from $${DOCKER_IMAGE}:${CACHE_TAG} ${DOCKER_BUILD_ARGS} -t $${DOCKER_IMAGE}:${TAG} ${ROOT_DIR}
 .PHONY: docker-image
+
+docker-image-aws: ## build docker image
+	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
+	docker build ${DOCKER_BUILD_ARGS} -t ${AWS_DOCKER_IMAGE}:${TAG} ${ROOT_DIR}
+.PHONY: docker-image-aws
 
 docker-push: ## push docker image to registry
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
