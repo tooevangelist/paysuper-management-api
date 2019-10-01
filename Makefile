@@ -2,7 +2,7 @@ ifndef VERBOSE
 .SILENT:
 endif
 
-override ROOT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+override CURRENT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 override DOCKER_MOUNT_SUFFIX ?= consistent
 override DOCKER_COMPOSE_ARGS ?= -f deployments/docker-compose/docker-compose.yml -f deployments/docker-compose/docker-compose-local.yml
 override DOCKER_BUILD_ARGS ?= -f ${ROOT_DIR}/build/docker/app/Dockerfile
@@ -15,6 +15,12 @@ GOARCH ?= amd64
 CGO_ENABLED ?= 0
 DIND_UID ?= 0
 DING_GUID ?= 0
+
+ifeq ($(OS),Windows_NT)
+override ROOT_DIR = $(shell echo $(CURRENT_DIR) | sed -e "s:^/./:\U&:g")
+else
+override ROOT_DIR = $(CURRENT_DIR)
+endif
 
 define build_resources
 	(find "$(ROOT_DIR)/assets" -maxdepth 1 -mindepth 1 -exec cp -R -f {} $(ROOT_DIR)/.artifacts/${1} \; 2>/dev/null || true) && \
