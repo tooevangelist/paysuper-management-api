@@ -19,7 +19,6 @@ const (
 	keyProductsPath               = "/key-products"
 	keyProductsIdPath             = "/key-products/:key_product_id"
 	keyProductsPublishPath        = "/key-products/:key_product_id/publish"
-	keyProductsPlatformIdPath     = "/key-products/:key_product_id/platforms/:platform_id"
 	platformsPath                 = "/platforms"
 	keyProductsPlatformsFilePath  = "/key-products/:key_product_id/platforms/:platform_id/file"
 	keyProductsPlatformsCountPath = "/key-products/:key_product_id/platforms/:platform_id/count"
