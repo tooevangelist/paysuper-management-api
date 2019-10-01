@@ -398,6 +398,7 @@ components:
       properties:
         region:
           type: string
+          example: EUR
         amount:
           type: number
           format: float
@@ -472,7 +473,7 @@ components:
         platforms:
           type: array
           items:
-            type: '#/components/schemas/KeyPlatform'
+            $ref: '#/components/schemas/KeyPlatform'
 
     KeyProductInfo:
       type: object
