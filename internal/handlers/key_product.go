@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/go-core/logger"
 	"github.com/ProtocolONE/go-core/provider"
-	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro/client"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -19,6 +19,7 @@ const (
 	keyProductsPath               = "/key-products"
 	keyProductsIdPath             = "/key-products/:key_product_id"
 	keyProductsPublishPath        = "/key-products/:key_product_id/publish"
+	keyProductsUnPublishPath      = "/key-products/:key_product_id/unpublish"
 	platformsPath                 = "/platforms"
 	keyProductsPlatformsFilePath  = "/key-products/:key_product_id/platforms/:platform_id/file"
 	keyProductsPlatformsCountPath = "/key-products/:key_product_id/platforms/:platform_id/count"
@@ -45,6 +46,7 @@ func (h *KeyProductRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(keyProductsIdPath, h.getKeyProductById)
 	groups.AuthUser.PUT(keyProductsIdPath, h.changeKeyProduct)
 	groups.AuthUser.POST(keyProductsPublishPath, h.publishKeyProduct)
+	groups.AuthUser.POST(keyProductsUnPublishPath, h.unpublishKeyProduct)
 	groups.AuthUser.DELETE(keyProductsIdPath, h.deleteKeyProductById)
 	groups.AuthUser.GET(platformsPath, h.getPlatformsList)
 
@@ -52,6 +54,29 @@ func (h *KeyProductRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(keyProductsPlatformsCountPath, h.getCountOfKeys)
 
 	groups.AuthProject.GET(keyProductsIdPath, h.getKeyProduct)
+}
+
+// @Description Set product inactive
+// @Example POST /admin/api/v1/key-products/:key_product_id/unpublish
+func (h *KeyProductRoute) unpublishKeyProduct(ctx echo.Context) error {
+	req := &grpc.UnPublishKeyProductRequest{}
+	req.KeyProductId = ctx.Param("key_product_id")
+
+	if err := h.dispatch.Validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.UnPublishKeyProduct(ctx.Request().Context(), req)
+	if err != nil {
+		h.L().Error(common.InternalErrorTemplate, logger.PairArgs("err", err.Error()))
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res.Product)
 }
 
 // @Description Publishes product
