@@ -9,9 +9,6 @@ dispatcher:
   global:
     returnPaymentForm: true
     paymentFormJsLibraryUrl: "unknown"
-    clientId: "unknown"
-    clientSecret: "unknown"
-    redirectUrl: "unknown"
     awsAccessKeyIdAgreement: "unknown"
     awsSecretAccessKeyAgreement: "unknown"
     awsBucketAgreement: "unknown"
