@@ -39,7 +39,10 @@ func (suite *ReportFileTestSuite) SetupTest() {
 		Billing: mock.NewBillingServerOkMock(),
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
-
+		mw.Pre(test.PreAuthUserMiddleware(&common.AuthUser{
+			Id:    "ffffffffffffffffffffffff",
+			Email: "test@unit.test",
+		}))
 		downloadMockResultFn := func(
 			ctx context.Context,
 			filePath string,
@@ -93,7 +96,7 @@ func (suite *ReportFileTestSuite) SetupTest() {
 }
 
 func (suite *ReportFileTestSuite) TestReportFile_create_Error_CreateFile() {
-	data := `{"period_from": 1, "period_to": 2}`
+	data := `{"merchant_id": "507f1f77bcf86cd799439011", "file_type": "pdf", "report_type": "vat"}`
 
 	reporterService := &reporterMocks.ReporterService{}
 	reporterService.
@@ -115,7 +118,7 @@ func (suite *ReportFileTestSuite) TestReportFile_create_Error_CreateFile() {
 }
 
 func (suite *ReportFileTestSuite) TestReportFile_create_Ok() {
-	data := `{"period_from": 1, "period_to": 2}`
+	data := `{"merchant_id": "507f1f77bcf86cd799439011", "file_type": "pdf", "report_type": "vat"}`
 
 	reporterService := &reporterMocks.ReporterService{}
 	reporterService.

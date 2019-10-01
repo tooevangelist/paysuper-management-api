@@ -10,6 +10,7 @@ import (
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/paysuper/paysuper-management-api/internal/test"
+	"github.com/paysuper/paysuper-reporter/pkg"
 	"github.com/stretchr/testify/assert"
 	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -71,6 +72,81 @@ func (suite *KeyProductTestSuite) TestProject_GetPlatformList_Error() {
 		Exec(suite.T())
 
 	assert.Error(suite.T(), err)
+}
+
+func (suite *KeyProductTestSuite) TestUnpublishKeyProduct_InternalError() {
+	billingService := &billMock.BillingService{}
+	billingService.On("UnPublishKeyProduct", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
+	suite.router.dispatch.Services.Billing = billingService
+
+	body := &grpc.UnPublishKeyProductRequest{
+	}
+
+	b, err := json.Marshal(&body)
+	assert.NoError(suite.T(), err)
+	_, err = suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":key_product_id", bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + keyProductsUnPublishPath).
+		Init(test.ReqInitJSON()).
+		BodyBytes(b).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+	assert.EqualValues(suite.T(), 500, err.(*echo.HTTPError).Code)
+}
+
+func (suite *KeyProductTestSuite) TestUnpublishKeyProduct_Error() {
+	billingService := &billMock.BillingService{}
+	billingService.On("UnPublishKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{
+		Status: pkg.ResponseStatusBadData,
+		Message: &grpc.ResponseErrorMessage{
+			Code: "Some code",
+			Message: "Some error",
+		},
+	}, nil)
+	suite.router.dispatch.Services.Billing = billingService
+
+	body := &grpc.UnPublishKeyProductRequest{
+	}
+
+	b, err := json.Marshal(&body)
+	assert.NoError(suite.T(), err)
+	_, err = suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":key_product_id", bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + keyProductsUnPublishPath).
+		Init(test.ReqInitJSON()).
+		BodyBytes(b).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+	assert.EqualValues(suite.T(), 400, err.(*echo.HTTPError).Code)
+}
+
+func (suite *KeyProductTestSuite) TestUnpublishKeyProduct_Ok() {
+	billingService := &billMock.BillingService{}
+	billingService.On("UnPublishKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{
+		Status: pkg.ResponseStatusOk,
+		Product: &grpc.KeyProduct{
+		},
+	}, nil)
+	suite.router.dispatch.Services.Billing = billingService
+
+	body := &grpc.UnPublishKeyProductRequest{
+	}
+
+	b, err := json.Marshal(&body)
+	assert.NoError(suite.T(), err)
+	_, err = suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":key_product_id", bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + keyProductsUnPublishPath).
+		Init(test.ReqInitJSON()).
+		BodyBytes(b).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
 }
 
 func (suite *KeyProductTestSuite) TestProject_GetPlatformList_Ok() {

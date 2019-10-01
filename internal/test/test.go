@@ -19,7 +19,6 @@ import (
 	"testing"
 )
 
-
 var (
 	HexId = bson.NewObjectId().Hex()
 )
@@ -259,9 +258,6 @@ func DefaultSettings() map[string]interface{} {
 				"returnPaymentForm":            true,
 				"disableAuthMiddleware":        true,
 				"paymentFormJsLibraryUrl":      "unknown",
-				"clientId":                     "unknown",
-				"clientSecret":                 "unknown",
-				"redirectUrl":                  "unknown",
 				"awsAccessKeyIdAgreement":      "unknown",
 				"awsSecretAccessKeyAgreement":  "unknown",
 				"awsBucketAgreement":           "unknown",
@@ -272,6 +268,11 @@ func DefaultSettings() map[string]interface{} {
 				"awsRegionReporter":            "eu-west-1",
 				"awsBucketReporterr":           "eu-west-1",
 				"customerTokenCookiesLifetime": "2592000s",
+				"auth1": map[string]interface{}{
+					"clientId":     "unknown",
+					"clientSecret": "unknown",
+					"redirectUrl":  "unknown",
+				},
 			},
 		},
 	}

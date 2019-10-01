@@ -21,10 +21,10 @@ const (
 )
 
 type reportFileRequest struct {
-	Id         string                 `json:"id" form:"id" bson:"_id"`
-	MerchantId string                 `json:"merchant_id" form:"merchant_id" bson:"merchant_id"`
-	FileType   string                 `json:"file_type" form:"file_type" bson:"file_type"`
-	ReportType string                 `json:"report_type" form:"report_type" bson:"report_type"`
+	Id         string                 `json:"id" form:"id" bson:"_id" validate:"required,hexadecimal,len=24"`
+	MerchantId string                 `json:"merchant_id" form:"merchant_id" bson:"merchant_id" validate:"required,hexadecimal,len=24"`
+	FileType   string                 `json:"file_type" form:"file_type" bson:"file_type" validate:"required,hexadecimal"`
+	ReportType string                 `json:"report_type" form:"report_type" bson:"report_type" validate:"required,hexadecimal"`
 	Template   string                 `json:"template" form:"template" bson:"template"`
 	Params     map[string]interface{} `json:"params" form:"params" bson:"params"`
 }
@@ -61,6 +61,7 @@ func (h *ReportFileRoute) Route(groups *common.Groups) {
 //
 func (h *ReportFileRoute) create(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
+	h.L().Error("report file user id: " + authUser.Id)
 	data := &reportFileRequest{}
 	if err := ctx.Bind(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
