@@ -46,17 +46,17 @@ func NewReportFileRoute(set common.HandlerSet, awsManager awsWrapper.AwsManagerI
 }
 
 func (h *ReportFileRoute) Route(groups *common.Groups) {
-	groups.Access.POST(reportFilePath, h.create)
-	groups.Access.GET(reportFileDownloadPath, h.download)
+	groups.AuthUser.POST(reportFilePath, h.create)
+	groups.AuthUser.GET(reportFileDownloadPath, h.download)
 }
 
 // Send a request to create a report for download.
-// POST /api/v1/s/report_file
+// POST /admin/api/v1/report_file
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
 //      -d '{"file_type": "pdf", "period_from": 1566727410, "period_to": "1566736763"}' \
-//      https://api.paysuper.online/api/v1/s/report_file
+//      https://api.paysuper.online/admin/api/v1/report_file
 //
 func (h *ReportFileRoute) create(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
@@ -96,11 +96,11 @@ func (h *ReportFileRoute) create(ctx echo.Context) error {
 }
 
 // Send a request to create a report for download.
-// GET /api/v1/s/report_file/download/5ced34d689fce60bf4440829.csv
+// GET /admin/api/v1/report_file/download/5ced34d689fce60bf4440829.csv
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
-//      https://api.paysuper.online/api/v1/s/report_file/download/5ced34d689fce60bf4440829.csv
+//      https://api.paysuper.online/admin/api/v1/report_file/download/5ced34d689fce60bf4440829.csv
 //
 func (h *ReportFileRoute) download(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
