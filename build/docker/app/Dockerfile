@@ -2,7 +2,7 @@ FROM alpine:3.10
 
 WORKDIR /app
 
-RUN apk --no-cache add tzdata bash ca-certificates mailcap wkhtmltopdf \
+RUN apk --no-cache add tzdata ca-certificates mailcap \
     && rm -rf /tmp/* \
     && rm -rf /var/cache/apk/*
 
