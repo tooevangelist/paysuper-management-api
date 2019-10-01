@@ -13,24 +13,16 @@ servers:
     url: https://p1payapi.tst.protocol.one
 
 paths:
-  /admin/api/v1/key-products/:key_product_id/platforms/:platform_id:
-    delete:
+  /admin/api/v1/key-products/:key_product_id/publish:
+    post:
       tags:
         - product
-        - platform
-      summary: Remove platform from product
+      summary: Publishes product
       parameters:
         - name: key_product_id
           in: path
           description: "Key Product ID"
           required: true
-          schema:
-            type: string
-        - name: platform_id
-          in: path
-          description: "Platform id"
-          required: true
-          example: steam
           schema:
             type: string
       responses:
@@ -51,84 +43,11 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
-  /admin/api/v1/key-products/:key_product_id/platforms:
-    get:
-      tags:
-        - product
-        - platform
-      summary: Get platforms with prices for specified key product
-      parameters:
-        - name: key_product_id
-          in: path
-          description: "Key Product ID"
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/KeyPlatform'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalError'
+  /admin/api/v1/key-products/:key_product_id/unpublish:
     post:
       tags:
         - product
-        - platform
-      summary: Change prices for specified platform and key product
-      parameters:
-        - name: key_product_id
-          in: path
-          description: "Key Product ID"
-          required: true
-          schema:
-            type: string
-        - name: platform_id
-          in: path
-          description: "Platform id"
-          required: true
-          example: steam
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                platform:
-                  $ref: '#/components/schemas/KeyPlatform'
-      responses:
-        200:
-          description: OK
-        400:
-          $ref: '#/components/responses/BadRequest'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalError'
-
-  /admin/api/v1/key-products/:key_product_id/publish:
-    post:
-      tags:
-        - product
-      summary: Publishes product
+      summary: Set key product inactive
       parameters:
         - name: key_product_id
           in: path
@@ -463,6 +382,12 @@ components:
         name:
           type: string
           example: Good old games.com
+        eula_url:
+          type: string
+          example: http://www.example.com
+        activation_url:
+          type: string
+          example: http://www.example.com
         prices:
           type: array
           items:
@@ -544,6 +469,10 @@ components:
         default_currency:
           type: string
           example: USD
+        platforms:
+          type: array
+          items:
+            type: '#/components/schemas/KeyPlatform'
 
     KeyProductInfo:
       type: object
