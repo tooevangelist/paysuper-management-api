@@ -51,7 +51,7 @@ down: dev-docker-compose-down ## reset to zero setting
 	(echo "Delete docker network" && docker network rm $${DOCKER_NETWORK}) || echo "Docker network \"$${DOCKER_NETWORK}\" already deleted")
 .PHONY: down
 
-build-resources: ## prepare artifacts for application binary
+build-resources: init ## prepare artifacts for application binary
 	$(call build_resources)
 .PHONY: build-resources
 
