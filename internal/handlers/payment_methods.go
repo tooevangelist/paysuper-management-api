@@ -33,16 +33,16 @@ func NewPaymentMethodApiV1(set common.HandlerSet, cfg *common.Config) *PaymentMe
 }
 
 func (h *PaymentMethodApiV1) Route(groups *common.Groups) {
-	groups.Access.POST(paymentMethodPath, h.create)
-	groups.Access.PUT(paymentMethodIdPath, h.update)
-	groups.Access.POST(paymentMethodProductionPath, h.createProductionSettings)
-	groups.Access.PUT(paymentMethodProductionPath, h.updateProductionSettings)
-	groups.Access.GET(paymentMethodProductionPath, h.getProductionSettings)
-	groups.Access.DELETE(paymentMethodProductionPath, h.deleteProductionSettings)
-	groups.Access.POST(paymentMethodTestPath, h.createTestSettings)
-	groups.Access.PUT(paymentMethodTestPath, h.updateTestSettings)
-	groups.Access.GET(paymentMethodTestPath, h.getTestSettings)
-	groups.Access.DELETE(paymentMethodTestPath, h.deleteTestSettings)
+	groups.AuthProject.POST(paymentMethodPath, h.create)
+	groups.AuthProject.PUT(paymentMethodIdPath, h.update)
+	groups.AuthProject.POST(paymentMethodProductionPath, h.createProductionSettings)
+	groups.AuthProject.PUT(paymentMethodProductionPath, h.updateProductionSettings)
+	groups.AuthProject.GET(paymentMethodProductionPath, h.getProductionSettings)
+	groups.AuthProject.DELETE(paymentMethodProductionPath, h.deleteProductionSettings)
+	groups.AuthProject.POST(paymentMethodTestPath, h.createTestSettings)
+	groups.AuthProject.PUT(paymentMethodTestPath, h.updateTestSettings)
+	groups.AuthProject.GET(paymentMethodTestPath, h.getTestSettings)
+	groups.AuthProject.DELETE(paymentMethodTestPath, h.deleteTestSettings)
 }
 
 // Create new payment method
