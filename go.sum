@@ -69,6 +69,8 @@ github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679 h1:1peWm
 github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679/go.mod h1:VwtmyyuVrzBuh5O9ENzV4/H/B6zBzs7vpCRR6MNnjNc=
 github.com/ProtocolONE/go-core v1.9.0 h1:WXhMbFDrhxkfipmXILzbbF83g7miXVYsY4DQ3WwI5Qo=
 github.com/ProtocolONE/go-core v1.9.0/go.mod h1:XRYYCcnX7PxqhjQsnCFGq+4XSBCC9TDDsiMi4VXT4F0=
+github.com/ProtocolONE/go-core v1.10.0 h1:fL6qi/3/FZpJPl/Wm2Uw/DHFfGjORBb35bSYuOlurk0=
+github.com/ProtocolONE/go-core v1.10.0/go.mod h1:XRYYCcnX7PxqhjQsnCFGq+4XSBCC9TDDsiMi4VXT4F0=
 github.com/ProtocolONE/go-micro-plugins v0.3.0/go.mod h1:/gvuHZoDRGfxS+ox0fHXuwwsTEVEHWRWKOhzbnozrZ8=
 github.com/ProtocolONE/nats v0.0.0-20190909153110-738ec68e5d7c/go.mod h1:JPYAFXrlhU58UMUoJsahDItIFIMFo5NQrqLqOXRpXLY=
 github.com/ProtocolONE/rabbitmq v0.0.0-20190129162844-9f24367e139c/go.mod h1:ZnV4uG7YnB4iU8c8co8XU4w7xL0sGaGEw5d9g1THmwk=

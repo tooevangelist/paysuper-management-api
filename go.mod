@@ -3,10 +3,9 @@ module github.com/paysuper/paysuper-management-api
 require (
 	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681
 	github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679
-	github.com/ProtocolONE/go-core v1.9.0
+	github.com/ProtocolONE/go-core v1.10.0
 	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.4.1
 	github.com/aws/aws-sdk-go v1.23.16
-	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.7.0
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-log/log v0.1.0

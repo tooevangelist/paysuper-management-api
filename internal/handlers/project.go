@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/ProtocolONE/go-core/logger"
 	"github.com/ProtocolONE/go-core/provider"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -125,8 +124,6 @@ func (h *ProjectRoute) getProject(ctx echo.Context) error {
 func (h *ProjectRoute) listProjects(ctx echo.Context) error {
 	req := &grpc.ListProjectsRequest{}
 	err := ctx.Bind(req)
-
-	spew.Dump(req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
