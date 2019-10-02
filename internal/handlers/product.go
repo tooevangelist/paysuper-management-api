@@ -212,12 +212,6 @@ func (h *ProductRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
-	if len(req.Prices) > 0 {
-		for _, v := range req.Prices {
-			v.Region = common.TariffRegions[v.Region]
-		}
-	}
-
 	res, err := h.dispatch.Services.Billing.CreateOrUpdateProduct(ctx.Request().Context(), req)
 
 	if err != nil {
