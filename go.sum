@@ -73,6 +73,8 @@ github.com/ProtocolONE/go-core v1.9.0 h1:WXhMbFDrhxkfipmXILzbbF83g7miXVYsY4DQ3Ww
 github.com/ProtocolONE/go-core v1.9.0/go.mod h1:XRYYCcnX7PxqhjQsnCFGq+4XSBCC9TDDsiMi4VXT4F0=
 github.com/ProtocolONE/go-core v1.10.0 h1:fL6qi/3/FZpJPl/Wm2Uw/DHFfGjORBb35bSYuOlurk0=
 github.com/ProtocolONE/go-core v1.10.0/go.mod h1:XRYYCcnX7PxqhjQsnCFGq+4XSBCC9TDDsiMi4VXT4F0=
+github.com/ProtocolONE/go-core v1.10.3 h1:SAVsnNHdhPdSJfEpQt2ZHGGDA3zIl4Y5Ri0UmkTWY20=
+github.com/ProtocolONE/go-core v1.10.3/go.mod h1:XRYYCcnX7PxqhjQsnCFGq+4XSBCC9TDDsiMi4VXT4F0=
 github.com/ProtocolONE/go-micro-plugins v0.3.0 h1:LMPWEsMiuJnBa92b+Bsi0CHOGl1LhNR9PwWxCkyvQkM=
 github.com/ProtocolONE/go-micro-plugins v0.3.0/go.mod h1:/gvuHZoDRGfxS+ox0fHXuwwsTEVEHWRWKOhzbnozrZ8=
 github.com/ProtocolONE/nats v0.0.0-20190909153110-738ec68e5d7c/go.mod h1:JPYAFXrlhU58UMUoJsahDItIFIMFo5NQrqLqOXRpXLY=
