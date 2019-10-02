@@ -860,3 +860,7 @@ func (s *BillingServerOkTemporaryMock) UnPublishKeyProduct(ctx context.Context, 
 func (s *BillingServerOkTemporaryMock) OrderReceipt(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkTemporaryMock) OrderReceiptRefund(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}

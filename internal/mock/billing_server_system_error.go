@@ -800,3 +800,7 @@ func (s *BillingServerSystemErrorMock) UnPublishKeyProduct(ctx context.Context, 
 func (s *BillingServerSystemErrorMock) OrderReceipt(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerSystemErrorMock) OrderReceiptRefund(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
