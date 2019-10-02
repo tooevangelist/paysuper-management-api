@@ -106,7 +106,7 @@ func (suite *ReportFileTestSuite) TestReportFile_create_Error_CreateFile() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AccessGroupPath + reportFilePath).
+		Path(common.AuthUserGroupPath + reportFilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -128,7 +128,7 @@ func (suite *ReportFileTestSuite) TestReportFile_create_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AccessGroupPath + reportFilePath).
+		Path(common.AuthUserGroupPath + reportFilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -140,7 +140,7 @@ func (suite *ReportFileTestSuite) TestReportFile_download_Error_EmptyId() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + reportFileDownloadPath).
+		Path(common.AuthUserGroupPath + reportFileDownloadPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -155,7 +155,7 @@ func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationFileEm
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterFile, " ").
-		Path(common.AccessGroupPath + reportFileDownloadPath).
+		Path(common.AuthUserGroupPath + reportFileDownloadPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -170,7 +170,7 @@ func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationFileIn
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterFile, "test").
-		Path(common.AccessGroupPath + reportFileDownloadPath).
+		Path(common.AuthUserGroupPath + reportFileDownloadPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -185,7 +185,7 @@ func (suite *ReportFileTestSuite) TestReportFile_download_Ok() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterFile, "string.csv").
-		Path(common.AccessGroupPath + reportFileDownloadPath).
+		Path(common.AuthUserGroupPath + reportFileDownloadPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 

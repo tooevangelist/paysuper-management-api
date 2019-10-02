@@ -32,10 +32,10 @@ func NewPriceGroup(set common.HandlerSet, cfg *common.Config) *PriceGroup {
 }
 
 func (h *PriceGroup) Route(groups *common.Groups) {
-	groups.Access.GET(priceGroupCountryPath, h.getPriceGroupByCountry)
-	groups.Access.GET(priceGroupCurrenciesPath, h.getCurrencyList)
-	groups.Access.GET(priceGroupRegionPath, h.getCurrencyByRegion)
-	groups.Access.GET(priceGroupRecommendedPath, h.getRecommendedPrice)
+	groups.AuthProject.GET(priceGroupCountryPath, h.getPriceGroupByCountry)
+	groups.AuthProject.GET(priceGroupCurrenciesPath, h.getCurrencyList)
+	groups.AuthProject.GET(priceGroupRegionPath, h.getCurrencyByRegion)
+	groups.AuthProject.GET(priceGroupRecommendedPath, h.getRecommendedPrice)
 }
 
 // Get currency and region by country code

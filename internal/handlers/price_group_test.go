@@ -50,7 +50,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_BindE
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupCountryPath).
+		Path(common.AuthProjectGroupPath + priceGroupCountryPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -75,7 +75,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Error
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupCountryPath).
+		Path(common.AuthProjectGroupPath + priceGroupCountryPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -95,7 +95,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Ok() 
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupCountryPath).
+		Path(common.AuthProjectGroupPath + priceGroupCountryPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -111,7 +111,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyList_Error_Billin
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupCurrenciesPath).
+		Path(common.AuthProjectGroupPath + priceGroupCurrenciesPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -129,7 +129,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyList_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupCurrenciesPath).
+		Path(common.AuthProjectGroupPath + priceGroupCurrenciesPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -141,7 +141,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_BindErro
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupRegionPath).
+		Path(common.AuthProjectGroupPath + priceGroupRegionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -166,7 +166,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Error_Bi
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupRegionPath).
+		Path(common.AuthProjectGroupPath + priceGroupRegionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -186,7 +186,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupRegionPath).
+		Path(common.AuthProjectGroupPath + priceGroupRegionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -199,7 +199,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_BindErro
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupRecommendedPath).
+		Path(common.AuthProjectGroupPath + priceGroupRecommendedPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -224,7 +224,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Error_Bi
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupRecommendedPath).
+		Path(common.AuthProjectGroupPath + priceGroupRecommendedPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -244,7 +244,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + priceGroupRecommendedPath).
+		Path(common.AuthProjectGroupPath + priceGroupRecommendedPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
