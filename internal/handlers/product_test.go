@@ -88,7 +88,7 @@ func (suite *ProductTestSuite) TestProduct_deleteProduct_Ok() {
 
 func (suite *ProductTestSuite) TestProduct_createProduct_Ok() {
 	bodyJson := `{"object": "product", "type": "simple_product", "sku": "ru_0_doom_2", "name": {"en": "Doom II"}, 
-        "default_currency": "USD", "enabled": true, "prices": [{"amount": 12.93, "currency": "USD", "region": "Russia"}], 
+        "default_currency": "USD", "enabled": true, "prices": [{"amount": 12.93, "currency": "USD", "region": "russia"}], 
         "description":  {"en": "Doom II description"}, "long_description": {}, "project_id": "5bdc39a95d1e1100019fb7df"}`
 
 	res, err := suite.caller.Builder().
@@ -106,7 +106,7 @@ func (suite *ProductTestSuite) TestProduct_createProduct_Ok() {
 func (suite *ProductTestSuite) TestProduct_updateProduct_Ok() {
 
 	bodyJson := `{"object": "product", "type": "simple_product", "sku": "ru_0_doom_4", "name":  {"en": "Doom IV"}, 
-        "default_currency": "USD", "enabled": true, "prices": [{"amount": 112.93, "currency": "USD", "region": "Russia"}], 
+        "default_currency": "USD", "enabled": true, "prices": [{"amount": 112.93, "currency": "USD", "region": "russia"}], 
         "description":  {"en": "Doom IV description"}, "long_description": {}, "project_id": "5bdc39a95d1e1100019fb7df"}`
 
 	res, err := suite.caller.Builder().

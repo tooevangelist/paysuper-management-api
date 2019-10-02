@@ -197,6 +197,7 @@ func (h *ProductRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 	}
 
 	merchant, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: authUser.Id})
+
 	if err != nil || merchant.Item == nil {
 		if err != nil {
 			h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
@@ -211,7 +212,14 @@ func (h *ProductRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
+	if len(req.Prices) > 0 {
+		for _, v := range req.Prices {
+			v.Region = common.TariffRegions[v.Region]
+		}
+	}
+
 	res, err := h.dispatch.Services.Billing.CreateOrUpdateProduct(ctx.Request().Context(), req)
+
 	if err != nil {
 		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
