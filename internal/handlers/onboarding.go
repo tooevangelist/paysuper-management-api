@@ -31,7 +31,6 @@ const (
 	merchantsIdStatusCompanyPath       = "/merchants/:id/status"
 	merchantsIdChangeStatusCompanyPath = "/merchants/:id/change-status"
 	merchantsNotificationsPath         = "/merchants/:merchant_id/notifications"
-	merchantsIdAgreementPath           = "/merchants/:id/agreement"
 	merchantsAgreementDocumentPath     = "/merchants/:id/agreement/document"
 	merchantsAgreementSignaturePath    = "/merchants/:id/agreement/signature"
 	merchantsNotificationsIdPath       = "/merchants/:merchant_id/notifications/:notification_id"
