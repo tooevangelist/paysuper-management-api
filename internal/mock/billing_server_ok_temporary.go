@@ -11,7 +11,6 @@ import (
 
 type BillingServerOkTemporaryMock struct{}
 
-
 func NewBillingServerOkTemporaryMock() grpc.BillingService {
 	return &BillingServerOkTemporaryMock{}
 }
@@ -855,5 +854,9 @@ func (s *BillingServerOkTemporaryMock) GetRoyaltyReport(ctx context.Context, in 
 }
 
 func (s *BillingServerOkTemporaryMock) UnPublishKeyProduct(ctx context.Context, in *grpc.UnPublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) OrderReceipt(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
 	panic("implement me")
 }
