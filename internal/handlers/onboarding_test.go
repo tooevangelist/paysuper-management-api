@@ -2423,3 +2423,43 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerRes
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementData_Ok() {
+	rsp, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterId, mock.SomeMerchantId1).
+		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	data := &OnboardingFileData{}
+	err = json.Unmarshal(rsp.Body.Bytes(), data)
+	assert.NoError(suite.T(), err)
+
+	assert.NotEmpty(suite.T(), data.Url)
+	assert.NotNil(suite.T(), data.Metadata)
+	assert.NotEmpty(suite.T(), data.Metadata.Name)
+	assert.NotEmpty(suite.T(), data.Metadata.Extension)
+	assert.NotEmpty(suite.T(), data.Metadata.ContentType)
+	assert.True(suite.T(), data.Metadata.Size > 0)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_MerchantIdInvalid_Error() {
+	_, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterId, "").
+		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
+}

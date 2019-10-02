@@ -31,6 +31,7 @@ const (
 	merchantsIdStatusCompanyPath       = "/merchants/:id/status"
 	merchantsIdChangeStatusCompanyPath = "/merchants/:id/change-status"
 	merchantsNotificationsPath         = "/merchants/:merchant_id/notifications"
+	merchantsIdAgreementPath           = "/merchants/:id/agreement"
 	merchantsAgreementDocumentPath     = "/merchants/:id/agreement/document"
 	merchantsAgreementSignaturePath    = "/merchants/:id/agreement/signature"
 	merchantsNotificationsIdPath       = "/merchants/:merchant_id/notifications/:notification_id"
@@ -92,6 +93,7 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.AuthUser.PUT(merchantsIdChangeStatusCompanyPath, h.changeMerchantStatus)
 	groups.AuthUser.PATCH(merchantsIdPath, h.changeAgreement)
 
+	groups.AuthUser.GET(merchantsIdAgreementPath, h.getAgreementData)
 	groups.AuthUser.GET(merchantsAgreementDocumentPath, h.getAgreementDocument)
 	groups.AuthUser.POST(merchantsAgreementDocumentPath, h.uploadAgreementDocument)
 	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createAgreementSignature)
@@ -798,4 +800,47 @@ func (h *OnboardingRoute) setTariffRates(ctx echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusOK)
+}
+
+func (h *OnboardingRoute) getAgreementData(ctx echo.Context) error {
+	merchantId := ctx.Param(common.RequestParameterId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	ctxReq := ctx.Request().Context()
+	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
+	res, err := h.dispatch.Services.Billing.GetMerchantBy(ctxReq, req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	if res.Item.S3AgreementName == "" {
+		return echo.NewHTTPError(http.StatusNotFound, common.ErrorMessageAgreementNotFound)
+	}
+
+	filePath := os.TempDir() + string(os.PathSeparator) + res.Item.S3AgreementName
+	_, err = h.awsManager.Download(ctxReq, filePath, &awsWrapper.DownloadInput{FileName: res.Item.S3AgreementName})
+
+	if err != nil {
+		h.L().Error("AWS api call to download file failed", logger.PairArgs("err", err.Error(), "file_name", res.Item.S3AgreementName))
+
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	fData, err := h.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
+
+	if err != nil {
+		h.L().Error("Get agreement structure failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
+
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+	}
+
+	return ctx.JSON(http.StatusOK, fData)
 }
