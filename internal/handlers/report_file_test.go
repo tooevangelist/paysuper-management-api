@@ -39,7 +39,10 @@ func (suite *ReportFileTestSuite) SetupTest() {
 		Billing: mock.NewBillingServerOkMock(),
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
-
+		mw.Pre(test.PreAuthUserMiddleware(&common.AuthUser{
+			Id:    "ffffffffffffffffffffffff",
+			Email: "test@unit.test",
+		}))
 		downloadMockResultFn := func(
 			ctx context.Context,
 			filePath string,
@@ -93,7 +96,7 @@ func (suite *ReportFileTestSuite) SetupTest() {
 }
 
 func (suite *ReportFileTestSuite) TestReportFile_create_Error_CreateFile() {
-	data := `{"period_from": 1, "period_to": 2}`
+	data := `{"merchant_id": "507f1f77bcf86cd799439011", "file_type": "pdf", "report_type": "vat"}`
 
 	reporterService := &reporterMocks.ReporterService{}
 	reporterService.
@@ -103,7 +106,7 @@ func (suite *ReportFileTestSuite) TestReportFile_create_Error_CreateFile() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AccessGroupPath + reportFilePath).
+		Path(common.AuthUserGroupPath + reportFilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -115,7 +118,7 @@ func (suite *ReportFileTestSuite) TestReportFile_create_Error_CreateFile() {
 }
 
 func (suite *ReportFileTestSuite) TestReportFile_create_Ok() {
-	data := `{"period_from": 1, "period_to": 2}`
+	data := `{"merchant_id": "507f1f77bcf86cd799439011", "file_type": "pdf", "report_type": "vat"}`
 
 	reporterService := &reporterMocks.ReporterService{}
 	reporterService.
@@ -125,7 +128,7 @@ func (suite *ReportFileTestSuite) TestReportFile_create_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AccessGroupPath + reportFilePath).
+		Path(common.AuthUserGroupPath + reportFilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -137,7 +140,7 @@ func (suite *ReportFileTestSuite) TestReportFile_download_Error_EmptyId() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AccessGroupPath + reportFileDownloadPath).
+		Path(common.AuthUserGroupPath + reportFileDownloadPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -152,7 +155,7 @@ func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationFileEm
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterFile, " ").
-		Path(common.AccessGroupPath + reportFileDownloadPath).
+		Path(common.AuthUserGroupPath + reportFileDownloadPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -167,7 +170,7 @@ func (suite *ReportFileTestSuite) TestReportFile_download_Error_ValidationFileIn
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterFile, "test").
-		Path(common.AccessGroupPath + reportFileDownloadPath).
+		Path(common.AuthUserGroupPath + reportFileDownloadPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -182,7 +185,7 @@ func (suite *ReportFileTestSuite) TestReportFile_download_Ok() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterFile, "string.csv").
-		Path(common.AccessGroupPath + reportFileDownloadPath).
+		Path(common.AuthUserGroupPath + reportFileDownloadPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 

@@ -21,10 +21,9 @@ const (
 )
 
 type reportFileRequest struct {
-	Id         string                 `json:"id" form:"id" bson:"_id"`
-	MerchantId string                 `json:"merchant_id" form:"merchant_id" bson:"merchant_id"`
-	FileType   string                 `json:"file_type" form:"file_type" bson:"file_type"`
-	ReportType string                 `json:"report_type" form:"report_type" bson:"report_type"`
+	MerchantId string                 `json:"merchant_id" form:"merchant_id" bson:"merchant_id" validate:"required,hexadecimal,len=24"`
+	FileType   string                 `json:"file_type" form:"file_type" bson:"file_type" validate:"required"`
+	ReportType string                 `json:"report_type" form:"report_type" bson:"report_type" validate:"required"`
 	Template   string                 `json:"template" form:"template" bson:"template"`
 	Params     map[string]interface{} `json:"params" form:"params" bson:"params"`
 }
@@ -47,20 +46,21 @@ func NewReportFileRoute(set common.HandlerSet, awsManager awsWrapper.AwsManagerI
 }
 
 func (h *ReportFileRoute) Route(groups *common.Groups) {
-	groups.Access.POST(reportFilePath, h.create)
-	groups.Access.GET(reportFileDownloadPath, h.download)
+	groups.AuthUser.POST(reportFilePath, h.create)
+	groups.AuthUser.GET(reportFileDownloadPath, h.download)
 }
 
 // Send a request to create a report for download.
-// POST /api/v1/s/report_file
+// POST /admin/api/v1/report_file
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
 //      -d '{"file_type": "pdf", "period_from": 1566727410, "period_to": "1566736763"}' \
-//      https://api.paysuper.online/api/v1/s/report_file
+//      https://api.paysuper.online/admin/api/v1/report_file
 //
 func (h *ReportFileRoute) create(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
+
 	data := &reportFileRequest{}
 	if err := ctx.Bind(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
@@ -96,11 +96,11 @@ func (h *ReportFileRoute) create(ctx echo.Context) error {
 }
 
 // Send a request to create a report for download.
-// GET /api/v1/s/report_file/download/5ced34d689fce60bf4440829.csv
+// GET /admin/api/v1/report_file/download/5ced34d689fce60bf4440829.csv
 //
 // @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
 //      -H "Authorization: Bearer %access_token_here%" \
-//      https://api.paysuper.online/api/v1/s/report_file/download/5ced34d689fce60bf4440829.csv
+//      https://api.paysuper.online/admin/api/v1/report_file/download/5ced34d689fce60bf4440829.csv
 //
 func (h *ReportFileRoute) download(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
@@ -122,7 +122,8 @@ func (h *ReportFileRoute) download(ctx echo.Context) error {
 	_, err := h.awsManager.Download(ctx.Request().Context(), filePath, &awsWrapper.DownloadInput{FileName: fileName})
 
 	if err != nil {
-		h.L().Error("unable to find the file id")
+		h.L().Error("unable to find the file id " + fileName)
+		h.L().Error(err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageDownloadReportFile)
 	}
 

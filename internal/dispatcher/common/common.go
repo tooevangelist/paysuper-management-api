@@ -1,8 +1,8 @@
 package common
 
 import (
-	"github.com/ProtocolONE/go-core/provider"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
+	"github.com/ProtocolONE/go-core/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	paylink "github.com/paysuper/paysuper-payment-link/proto"
@@ -17,7 +17,6 @@ const (
 	UnmarshalKey             = "dispatcher"
 	UnmarshalGlobalConfigKey = "dispatcher.global"
 	AuthProjectGroupPath     = "/api/v1"
-	AccessGroupPath          = "/api/v1/s"
 	AuthUserGroupPath        = "/admin/api/v1"
 	WebHookGroupPath         = "/webhook"
 )

@@ -2,18 +2,25 @@ ifndef VERBOSE
 .SILENT:
 endif
 
-override ROOT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+override CURRENT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 override DOCKER_MOUNT_SUFFIX ?= consistent
 override DOCKER_COMPOSE_ARGS ?= -f deployments/docker-compose/docker-compose.yml -f deployments/docker-compose/docker-compose-local.yml
 override DOCKER_BUILD_ARGS ?= -f ${ROOT_DIR}/build/docker/app/Dockerfile
 
 TAG ?= unknown
+AWS_DOCKER_IMAGE ?= unknown
 CACHE_TAG ?= unknown_cache
 GOOS ?= linux
 GOARCH ?= amd64
 CGO_ENABLED ?= 0
 DIND_UID ?= 0
 DING_GUID ?= 0
+
+ifeq ($(OS),Windows_NT)
+override ROOT_DIR = $(shell echo $(CURRENT_DIR) | sed -e "s:^/./:\U&:g")
+else
+override ROOT_DIR = $(CURRENT_DIR)
+endif
 
 define build_resources
 	(find "$(ROOT_DIR)/assets" -maxdepth 1 -mindepth 1 -exec cp -R -f {} $(ROOT_DIR)/.artifacts/${1} \; 2>/dev/null || true) && \
@@ -50,7 +57,7 @@ down: dev-docker-compose-down ## reset to zero setting
 	(echo "Delete docker network" && docker network rm $${DOCKER_NETWORK}) || echo "Docker network \"$${DOCKER_NETWORK}\" already deleted")
 .PHONY: down
 
-build-resources: ## prepare artifacts for application binary
+build-resources: init ## prepare artifacts for application binary
 	$(call build_resources)
 .PHONY: build-resources
 
@@ -121,6 +128,11 @@ docker-image: ## build docker image
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
 	docker build --cache-from $${DOCKER_IMAGE}:${CACHE_TAG} ${DOCKER_BUILD_ARGS} -t $${DOCKER_IMAGE}:${TAG} ${ROOT_DIR}
 .PHONY: docker-image
+
+docker-image-aws: ## build docker image
+	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
+	docker build ${DOCKER_BUILD_ARGS} -t ${AWS_DOCKER_IMAGE}:${TAG} ${ROOT_DIR}
+.PHONY: docker-image-aws
 
 docker-push: ## push docker image to registry
 	. ${ROOT_DIR}/scripts/common.sh ${ROOT_DIR}/scripts ;\
