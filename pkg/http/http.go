@@ -42,7 +42,8 @@ func (h *HTTP) ListenAndServe() (err error) {
 	if err = server.Start(h.cfg.Bind); err != nil {
 		if err == http.ErrServerClosed {
 			err = nil
-			return
+		} else {
+			return err
 		}
 	}
 

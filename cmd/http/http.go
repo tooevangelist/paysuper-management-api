@@ -9,7 +9,9 @@ import (
 	"github.com/paysuper/paysuper-management-api/cmd"
 	"github.com/paysuper/paysuper-management-api/internal/daemon"
 	"github.com/paysuper/paysuper-management-api/pkg/http"
+	"github.com/paysuper/paysuper-management-api/pkg/micro"
 	"github.com/spf13/cobra"
+	"sync"
 )
 
 var (
@@ -20,9 +22,12 @@ var (
 		SilenceErrors: true,
 		Run: func(_ *cobra.Command, _ []string) {
 			var (
-				s *http.HTTP
-				c func()
-				e error
+				sHttp     *http.HTTP
+				sMicro    *micro.Micro
+				c         func()
+				e         error
+				ctxAll    context.Context
+				ctxCancel context.CancelFunc
 			)
 			defer func() {
 				if c != nil {
@@ -31,16 +36,35 @@ var (
 			}()
 			cmd.Slave.Executor(func(ctx context.Context) error {
 				initial, _ := entrypoint.CtxExtractInitial(ctx)
-				s, c, e = daemon.BuildHTTP(ctx, initial, cmd.Observer)
+				ctxAll, ctxCancel = context.WithCancel(ctx)
+				sHttp, c, e = daemon.BuildHTTP(ctxAll, initial, cmd.Observer)
+				if e != nil {
+					return e
+				}
+				sMicro, c, e = daemon.BuildMicro(ctxAll, initial, cmd.Observer)
 				if e != nil {
 					return e
 				}
 				return nil
 			}, func(ctx context.Context) error {
-				if e := s.ListenAndServe(); e != nil {
-					return e
-				}
-				return nil
+				var wg sync.WaitGroup
+				wg.Add(2)
+				go func() {
+					if err := sHttp.ListenAndServe(); err != nil {
+						e = err
+						ctxCancel()
+					}
+					wg.Done()
+				}()
+				go func() {
+					if err := sMicro.ListenAndServe(); err != nil {
+						e = err
+						ctxCancel()
+					}
+					wg.Done()
+				}()
+				wg.Wait()
+				return e
 			})
 		},
 	}
