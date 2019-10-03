@@ -729,154 +729,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerRe
 	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_Ok() {
-
-	res, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), http.StatusOK, res.Code)
-	assert.NotEmpty(suite.T(), res.Body.String())
-
-	data := &OnboardingFileData{}
-	err = json.Unmarshal(res.Body.Bytes(), data)
-	assert.NoError(suite.T(), err)
-
-	assert.NotEmpty(suite.T(), data.Url)
-	assert.NotNil(suite.T(), data.Metadata)
-	assert.NotEmpty(suite.T(), data.Metadata.Name)
-	assert.NotEmpty(suite.T(), data.Metadata.Extension)
-	assert.NotEmpty(suite.T(), data.Metadata.ContentType)
-	assert.True(suite.T(), data.Metadata.Size > 0)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_MerchantIdInvalid_Error() {
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_BillingServerSystemError() {
-
-	billingService := &billMock.BillingService{}
-	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(nil, mock.SomeError)
-	suite.router.dispatch.Services.Billing = billingService
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_BillingServerResultError() {
-
-	billingService := &billMock.BillingService{}
-	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
-	suite.router.dispatch.Services.Billing = billingService
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_SetMerchantS3AgreementRequest_Error() {
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, mock.SomeMerchantId).
-		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExist_Ok() {
-
-	res, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, mock.OnboardingMerchantMock.Id).
-		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.NoError(suite.T(), err)
-
-	fData := &OnboardingFileData{}
-	err = json.Unmarshal(res.Body.Bytes(), fData)
-	assert.NoError(suite.T(), err)
-
-	assert.NotEmpty(suite.T(), fData.Url)
-	assert.NotNil(suite.T(), fData.Metadata)
-	assert.NotEmpty(suite.T(), fData.Metadata.Name)
-	assert.NotEmpty(suite.T(), fData.Metadata.Extension)
-	assert.NotEmpty(suite.T(), fData.Metadata.ContentType)
-	assert.True(suite.T(), fData.Metadata.Size > 0)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_AgreementExist_Error() {
-
-	awsManagerMock := &awsWrapperMocks.AwsManagerInterface{}
-	awsManagerMock.On("Upload", mock2.Anything, mock2.Anything, mock2.Anything).Return(&s3manager.UploadOutput{}, nil)
-	awsManagerMock.On("Download", mock2.Anything, mock2.Anything, mock2.Anything, mock2.Anything).
-		Return(int64(0), errors.New("some error"))
-	suite.router.awsManager = awsManagerMock
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, mock.SomeMerchantId2).
-		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
-}
-
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
 
 	res, err := suite.caller.Builder().
@@ -1168,14 +1020,15 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_S3Uploa
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_WithoutMerchantId_Ok() {
 	company := &billing.MerchantCompanyInfo{
-		Name:            mock.OnboardingMerchantMock.Company.Name,
-		AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-		Website:         "http://localhost",
-		Country:         "RU",
-		State:           "St.Petersburg",
-		Zip:             "190000",
-		City:            "St.Petersburg",
-		Address:         "Nevskiy st. 1",
+		Name:               mock.OnboardingMerchantMock.Company.Name,
+		AlternativeName:    mock.OnboardingMerchantMock.Company.Name,
+		Website:            "http://localhost",
+		Country:            "RU",
+		State:              "St.Petersburg",
+		Zip:                "190000",
+		City:               "St.Petersburg",
+		Address:            "Nevskiy st. 1",
+		RegistrationNumber: "1234567890",
 	}
 	b, err := json.Marshal(company)
 	assert.NoError(suite.T(), err)
@@ -1200,14 +1053,15 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_WithoutMerch
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_WithMerchantId_Ok() {
 	company := &billing.MerchantCompanyInfo{
-		Name:            mock.OnboardingMerchantMock.Company.Name,
-		AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-		Website:         "http://localhost",
-		Country:         "RU",
-		State:           "St.Petersburg",
-		Zip:             "190000",
-		City:            "St.Petersburg",
-		Address:         "Nevskiy st. 1",
+		Name:               mock.OnboardingMerchantMock.Company.Name,
+		AlternativeName:    mock.OnboardingMerchantMock.Company.Name,
+		Website:            "http://localhost",
+		Country:            "RU",
+		State:              "St.Petersburg",
+		Zip:                "190000",
+		City:               "St.Petersburg",
+		Address:            "Nevskiy st. 1",
+		RegistrationNumber: "1234567890",
 	}
 	b, err := json.Marshal(company)
 	assert.NoError(suite.T(), err)
@@ -1462,7 +1316,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_BillingServe
         "state": "St.Petersburg",
         "zip": "190000",
         "city": "St.Petersburg",
-        "address": "Nevskiy st. 1"
+        "address": "Nevskiy st. 1",
+		"registration_number": "1234567890"
     }`
 
 	billingService := &billMock.BillingService{}
@@ -1493,7 +1348,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_BillingServe
         "state": "St.Petersburg",
         "zip": "190000",
         "city": "St.Petersburg",
-        "address": "Nevskiy st. 1"
+        "address": "Nevskiy st. 1",
+		"registration_number": "1234567890"
     }`
 
 	billingService := &billMock.BillingService{}
@@ -2570,4 +2426,44 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerRes
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementData_Ok() {
+	rsp, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterId, mock.SomeMerchantId1).
+		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, rsp.Code)
+	assert.NotEmpty(suite.T(), rsp.Body.String())
+
+	data := &OnboardingFileData{}
+	err = json.Unmarshal(rsp.Body.Bytes(), data)
+	assert.NoError(suite.T(), err)
+
+	assert.NotEmpty(suite.T(), data.Url)
+	assert.NotNil(suite.T(), data.Metadata)
+	assert.NotEmpty(suite.T(), data.Metadata.Name)
+	assert.NotEmpty(suite.T(), data.Metadata.Extension)
+	assert.NotEmpty(suite.T(), data.Metadata.ContentType)
+	assert.True(suite.T(), data.Metadata.Size > 0)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_MerchantIdInvalid_Error() {
+	_, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterId, "").
+		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
 }

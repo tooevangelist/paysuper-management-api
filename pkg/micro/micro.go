@@ -27,6 +27,8 @@ func (m *Micro) Client() client.Client {
 // ListenAndServe
 func (m *Micro) ListenAndServe() (err error) {
 
+	m.srv.Init()
+
 	mlog.SetLogger(NewLoggerAdapter(m.L(), logger.LevelInfo))
 
 	m.L().Info("start listen and serve micro service")

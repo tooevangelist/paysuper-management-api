@@ -2672,7 +2672,7 @@ definitions:
         description: price currency. three-letter ISO 4217 currency code, in uppercase.
         type: string
       region:
-        description: "region name for this price. available regions: Oceania, EU, CIS, North Europe, North Africa, Polynesia, North America, Central Africa, South Europe, Antarctica, South America, South Asia, Caribbean, SOUTH ASIA, West Asia, Central America, West Africa, Southern Africa, Southeast Asia, East Africa, East Asia, Micronesia, West Europe, Latin America, Melanesia, Russia, Sub-Saharan Africa, South Africa"
+        description: "region name for this price. available regions: oceania, eu, cis, north_europe, north_africa, polynesia, north_america, central_africa, south_europe, antarctica, south_america, south_asia, caribbean, west_asia, central_america, west_africa, southern_africa, southeast_asia, east_africa, east_asia, micronesia, west_europe, latin_america, melanesia, russia, sub_saharan_africa, south_africa"
         type: string
 
   product:

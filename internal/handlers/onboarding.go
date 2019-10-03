@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/ProtocolONE/go-core/config"
 	"github.com/ProtocolONE/go-core/logger"
 	"github.com/ProtocolONE/go-core/provider"
-	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	awsWrapper "github.com/paysuper/paysuper-aws-manager"
@@ -18,7 +16,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"strings"
 )
 
 const (
@@ -96,7 +93,7 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.AuthUser.PUT(merchantsIdChangeStatusCompanyPath, h.changeMerchantStatus)
 	groups.AuthUser.PATCH(merchantsIdPath, h.changeAgreement)
 
-	groups.AuthUser.GET(merchantsIdAgreementPath, h.generateAgreement)
+	groups.AuthUser.GET(merchantsIdAgreementPath, h.getAgreementData)
 	groups.AuthUser.GET(merchantsAgreementDocumentPath, h.getAgreementDocument)
 	groups.AuthUser.POST(merchantsAgreementDocumentPath, h.uploadAgreementDocument)
 	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createAgreementSignature)
@@ -349,114 +346,6 @@ func (h *OnboardingRoute) changeAgreement(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res.Item)
-}
-
-func (h *OnboardingRoute) generateAgreement(ctx echo.Context) error {
-	merchantId := ctx.Param(common.RequestParameterId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	ctxReq := ctx.Request().Context()
-	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
-	res, err := h.dispatch.Services.Billing.GetMerchantBy(ctxReq, req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-	}
-
-	if res.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(res.Status), res.Message)
-	}
-
-	if res.Item.S3AgreementName != "" {
-		filePath := os.TempDir() + string(os.PathSeparator) + res.Item.S3AgreementName
-		_, err = h.awsManager.Download(ctxReq, filePath, &awsWrapper.DownloadInput{FileName: res.Item.S3AgreementName})
-
-		if err != nil {
-			h.L().Error("AWS api call to download file failed", logger.PairArgs("err", err.Error(), "file_name", res.Item.S3AgreementName))
-
-			return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-		}
-
-		fData, err := h.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
-
-		if err != nil {
-			h.L().Error("Get agreement structure failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
-
-			return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-		}
-
-		return ctx.JSON(http.StatusOK, fData)
-	}
-
-	if res.Item.CanGenerateAgreement() == false {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorMessageAgreementCanNotBeGenerate)
-	}
-
-	buf := new(bytes.Buffer)
-	data := map[string]interface{}{"Merchant": res.Item}
-	err = ctx.Echo().Renderer.Render(buf, common.AgreementPageTemplateName, data, ctx)
-
-	if err != nil {
-		h.L().Error("Render agreement document failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	pdf, err := wkhtmltopdf.NewPDFGenerator()
-
-	if err != nil {
-		h.L().Error("New pdf generator instance create failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	pdf.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buf.String())))
-	err = pdf.Create()
-
-	if err != nil {
-		h.L().Error("Create pdf document of agreement failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	fileName := fmt.Sprintf(agreementFileMask, res.Item.Id)
-	filePath := os.TempDir() + string(os.PathSeparator) + fileName
-	err = pdf.WriteFile(filePath)
-
-	if err != nil {
-		h.L().Error("Write generated agreement failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	_, err = h.awsManager.Upload(ctxReq, &awsWrapper.UploadInput{Body: bytes.NewReader(pdf.Bytes()), FileName: fileName})
-
-	if err != nil {
-		h.L().Error("AWS api call to upload file failed", logger.PairArgs("err", err.Error(), "file_name", fileName))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	req1 := &grpc.SetMerchantS3AgreementRequest{MerchantId: merchantId, S3AgreementName: fileName}
-	_, err = h.dispatch.Services.Billing.SetMerchantS3Agreement(ctx.Request().Context(), req1)
-
-	if err != nil {
-		h.L().Error(pkg.ErrorGrpcServiceCallFailed, logger.PairArgs("err", err.Error(), common.ErrorFieldService, pkg.ServiceName, common.ErrorFieldMethod, "SetMerchantS3Agreement", common.ErrorFieldRequest, req1))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-	}
-
-	fData, err := h.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
-
-	if err != nil {
-		h.L().Error("Get agreement structure failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	return ctx.JSON(http.StatusOK, fData)
 }
 
 func (h *OnboardingRoute) getAgreementDocument(ctx echo.Context) error {
@@ -911,4 +800,47 @@ func (h *OnboardingRoute) setTariffRates(ctx echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusOK)
+}
+
+func (h *OnboardingRoute) getAgreementData(ctx echo.Context) error {
+	merchantId := ctx.Param(common.RequestParameterId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	ctxReq := ctx.Request().Context()
+	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
+	res, err := h.dispatch.Services.Billing.GetMerchantBy(ctxReq, req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	if res.Item.S3AgreementName == "" {
+		return echo.NewHTTPError(http.StatusNotFound, common.ErrorMessageAgreementNotFound)
+	}
+
+	filePath := os.TempDir() + string(os.PathSeparator) + res.Item.S3AgreementName
+	_, err = h.awsManager.Download(ctxReq, filePath, &awsWrapper.DownloadInput{FileName: res.Item.S3AgreementName})
+
+	if err != nil {
+		h.L().Error("AWS api call to download file failed", logger.PairArgs("err", err.Error(), "file_name", res.Item.S3AgreementName))
+
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	fData, err := h.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
+
+	if err != nil {
+		h.L().Error("Get agreement structure failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
+
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+	}
+
+	return ctx.JSON(http.StatusOK, fData)
 }

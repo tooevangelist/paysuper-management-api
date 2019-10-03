@@ -1,7 +1,3 @@
-ifndef VERBOSE
-.SILENT:
-endif
-
 override CURRENT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 override DOCKER_MOUNT_SUFFIX ?= consistent
 override DOCKER_COMPOSE_ARGS ?= -f deployments/docker-compose/docker-compose.yml -f deployments/docker-compose/docker-compose-local.yml

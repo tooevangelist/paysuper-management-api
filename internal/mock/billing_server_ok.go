@@ -1121,6 +1121,14 @@ func (s *BillingServerOkMock) UnPublishKeyProduct(ctx context.Context, in *grpc.
 	panic("implement me")
 }
 
+func (s *BillingServerOkMock) PaymentFormPlatformChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangePlatformRequest,
+	opts ...client.CallOption,
+) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
 func (s *BillingServerOkMock) OrderReceipt(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
 	panic("implement me")
 }

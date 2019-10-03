@@ -6,6 +6,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	billMock "github.com/paysuper/paysuper-billing-server/pkg/mocks"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
@@ -26,6 +27,78 @@ type KeyProductTestSuite struct {
 
 func Test_keyProduct(t *testing.T) {
 	suite.Run(t, new(KeyProductTestSuite))
+}
+
+func (suite *KeyProductTestSuite) BeforeTest(suiteName, testName string) {
+	switch testName {
+	case "TestProject_CreateKeyProduct_GroupPrice_Error":
+		suite.SetupTestForTestProject_CreateKeyProduct_GroupPrice_Error()
+	case "TestProject_CreateKeyProduct_GroupPrice_Ok":
+		suite.SetupTestForTestProject_CreateKeyProduct_GroupPrice_Ok()
+	}
+}
+
+func (suite *KeyProductTestSuite) SetupTestForTestProject_CreateKeyProduct_GroupPrice_Ok() {
+	billingService := &billMock.BillingService{}
+
+	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
+		Status:  pkg.ResponseStatusOk,
+		Item:    &billing.Merchant {
+			Id: bson.NewObjectId().Hex(),
+		},
+	}, nil)
+
+	billingService.On("GetPriceGroup", mock2.Anything, mock2.Anything).Return(&billing.PriceGroup{Id: "some_id"}, &grpc.ResponseError{
+		Status: 200,
+	})
+
+	var e error
+	settings := test.DefaultSettings()
+	srv := common.Services{
+		Billing: billingService,
+		Geo:     mock.NewGeoIpServiceTestOk(),
+	}
+	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		suite.router = NewKeyProductRoute(set.HandlerSet, set.GlobalConfig)
+		return common.Handlers{
+			suite.router,
+		}
+	})
+	if e != nil {
+		panic(e)
+	}
+}
+
+func (suite *KeyProductTestSuite) SetupTestForTestProject_CreateKeyProduct_GroupPrice_Error() {
+	billingService := &billMock.BillingService{}
+
+	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
+		Status:  pkg.ResponseStatusOk,
+		Item:    &billing.Merchant {
+			Id: bson.NewObjectId().Hex(),
+		},
+	}, nil)
+
+	billingService.On("GetPriceGroup", mock2.Anything, mock2.Anything).Return(nil, &grpc.ResponseError{
+		Message: &grpc.ResponseErrorMessage{Message: "some message"},
+		Status: 400,
+	})
+
+	var e error
+	settings := test.DefaultSettings()
+	srv := common.Services{
+		Billing: billingService,
+		Geo:     mock.NewGeoIpServiceTestOk(),
+	}
+	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		suite.router = NewKeyProductRoute(set.HandlerSet, set.GlobalConfig)
+		return common.Handlers{
+			suite.router,
+		}
+	})
+	if e != nil {
+		panic(e)
+	}
 }
 
 func (suite *KeyProductTestSuite) SetupTest() {
@@ -79,8 +152,7 @@ func (suite *KeyProductTestSuite) TestUnpublishKeyProduct_InternalError() {
 	billingService.On("UnPublishKeyProduct", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
 	suite.router.dispatch.Services.Billing = billingService
 
-	body := &grpc.UnPublishKeyProductRequest{
-	}
+	body := &grpc.UnPublishKeyProductRequest{}
 
 	b, err := json.Marshal(&body)
 	assert.NoError(suite.T(), err)
@@ -101,14 +173,13 @@ func (suite *KeyProductTestSuite) TestUnpublishKeyProduct_Error() {
 	billingService.On("UnPublishKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{
 		Status: pkg.ResponseStatusBadData,
 		Message: &grpc.ResponseErrorMessage{
-			Code: "Some code",
+			Code:    "Some code",
 			Message: "Some error",
 		},
 	}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 
-	body := &grpc.UnPublishKeyProductRequest{
-	}
+	body := &grpc.UnPublishKeyProductRequest{}
 
 	b, err := json.Marshal(&body)
 	assert.NoError(suite.T(), err)
@@ -127,14 +198,12 @@ func (suite *KeyProductTestSuite) TestUnpublishKeyProduct_Error() {
 func (suite *KeyProductTestSuite) TestUnpublishKeyProduct_Ok() {
 	billingService := &billMock.BillingService{}
 	billingService.On("UnPublishKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{
-		Status: pkg.ResponseStatusOk,
-		Product: &grpc.KeyProduct{
-		},
+		Status:  pkg.ResponseStatusOk,
+		Product: &grpc.KeyProduct{},
 	}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 
-	body := &grpc.UnPublishKeyProductRequest{
-	}
+	body := &grpc.UnPublishKeyProductRequest{}
 
 	b, err := json.Marshal(&body)
 	assert.NoError(suite.T(), err)
@@ -309,6 +378,86 @@ func (suite *KeyProductTestSuite) TestProject_ChangeKeyProduct_Ok() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, res.Code)
 	assert.NotEmpty(suite.T(), res.Body.String())
+}
+
+func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Ok() {
+	body := &grpc.CreateOrUpdateKeyProductRequest{
+		Name: map[string]string{"en": "A", "ru": "А"},
+		MerchantId:      bson.NewObjectId().Hex(),
+		Description:     map[string]string{"en": "A", "ru": "А"},
+		DefaultCurrency: "RUB",
+		ProjectId:       bson.NewObjectId().Hex(),
+		Sku:             "some_sku",
+		Object:          "key_product",
+		Platforms: []*grpc.PlatformPrice{
+			{
+				Id: "gog",
+				Name: "Gog",
+				Prices: []*grpc.ProductPrice{
+					{
+						Currency: "RUB",
+						Region:   "RUB",
+						Amount:   666,
+					},
+				}},
+		},
+	}
+
+	b, err := json.Marshal(&body)
+	assert.NoError(suite.T(), err)
+
+	_, err = suite.caller.Builder().
+		Method(http.MethodPost).
+		Path(common.AuthUserGroupPath + keyProductsPath).
+		Init(test.ReqInitJSON()).
+		BodyBytes(b).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+	e, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), 400, e.Code)
+	assert.NotEmpty(suite.T(), e.Message)
+}
+
+func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Error() {
+	body := &grpc.CreateOrUpdateKeyProductRequest{
+		Name: map[string]string{"en": "A", "ru": "А"},
+		MerchantId:      bson.NewObjectId().Hex(),
+		Description:     map[string]string{"en": "A", "ru": "А"},
+		DefaultCurrency: "RUB",
+		ProjectId:       bson.NewObjectId().Hex(),
+		Sku:             "some_sku",
+		Object:          "key_product",
+		Platforms: []*grpc.PlatformPrice{
+			{
+				Id: "gog",
+				Name: "Gog",
+				Prices: []*grpc.ProductPrice{
+					{
+						Currency: "RUB",
+						Region:   "TestRegion",
+						Amount:   666,
+					},
+				}},
+		},
+	}
+
+	b, err := json.Marshal(&body)
+	assert.NoError(suite.T(), err)
+
+	_, err = suite.caller.Builder().
+		Method(http.MethodPost).
+		Path(common.AuthUserGroupPath + keyProductsPath).
+		Init(test.ReqInitJSON()).
+		BodyBytes(b).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+	e, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), 400, e.Code)
+	assert.NotEmpty(suite.T(), e.Message)
 }
 
 func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_ValidationError() {
