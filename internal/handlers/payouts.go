@@ -11,8 +11,10 @@ import (
 )
 
 const (
-	payoutsPath   = "/payout_documents"
-	payoutsIdPath = "/payout_documents/:id"
+	payoutsPath            = "/payout_documents"
+	payoutsIdPath          = "/payout_documents/:id"
+	payoutSignMerchantPath = "/payout_documents/:id/signurl/merchant"
+	payoutSignPsPath       = "/payout_documents/:id/signurl/ps"
 )
 
 type PayoutDocumentsRoute struct {
@@ -36,6 +38,8 @@ func (h *PayoutDocumentsRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(payoutsIdPath, h.getPayoutDocument)
 	groups.AuthUser.POST(payoutsPath, h.createPayoutDocument)
 	groups.AuthUser.POST(payoutsIdPath, h.updatePayoutDocument)
+	groups.AuthUser.GET(payoutSignMerchantPath, h.getPayoutSignUrlMerchant)
+	groups.AuthUser.GET(payoutSignPsPath, h.getPayoutSignUrlPs)
 }
 
 // Get payout documents list with filters and pagination
@@ -156,5 +160,40 @@ func (h *PayoutDocumentsRoute) updatePayoutDocument(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+	return ctx.JSON(http.StatusOK, res.Item)
+}
+
+// Get url for payout document signing by merchant
+// GET /admin/api/v1/payout_documents/5ced34d689fce60bf4440829/signurl/merchant
+func (h *PayoutDocumentsRoute) getPayoutSignUrlMerchant(ctx echo.Context) error {
+	return h.getPayoutSignUrl(ctx, pkg.SignerTypeMerchant)
+}
+
+// Get url for payout document signing by PaySuper
+// GET /admin/api/v1/payout_documents/5ced34d689fce60bf4440829/signurl/ps
+func (h *PayoutDocumentsRoute) getPayoutSignUrlPs(ctx echo.Context) error {
+	return h.getPayoutSignUrl(ctx, pkg.SignerTypePs)
+}
+
+func (h *PayoutDocumentsRoute) getPayoutSignUrl(ctx echo.Context, signerType int32) error {
+	req := &grpc.GetPayoutDocumentSignUrlRequest{
+		PayoutDocumentId: ctx.Param(common.RequestParameterId),
+		SignerType:       signerType,
+	}
+
+	err := h.dispatch.Validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.GetPayoutDocumentSignUrl(ctx.Request().Context(), req)
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetPayoutDocumentSignUrl", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
 	return ctx.JSON(http.StatusOK, res.Item)
 }

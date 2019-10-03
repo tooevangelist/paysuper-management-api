@@ -244,3 +244,11 @@ func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_updatePayoutDocument_Grp
 func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_updatePayoutDocument_ResponseStatusNotOk() {
 	assert.Equal(suite.T(), common.TestStubImplementMe, "implement me!")
 }
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Ok_getPayoutSignUrlMerchant() {
+	assert.Equal(suite.T(), common.TestStubImplementMe, "implement me!")
+}
+
+func (suite *BalanceTestSuite) TestPayoutDocuments_Ok_getPayoutSignUrlPs() {
+	assert.Equal(suite.T(), common.TestStubImplementMe, "implement me!")
+}
