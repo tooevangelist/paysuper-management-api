@@ -1128,3 +1128,11 @@ func (s *BillingServerOkMock) PaymentFormPlatformChanged(
 ) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkMock) OrderReceipt(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) OrderReceiptRefund(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}

@@ -13,7 +13,6 @@ import (
 
 type BillingServerSystemErrorMock struct{}
 
-
 func NewBillingServerSystemErrorMock() grpc.BillingService {
 	return &BillingServerSystemErrorMock{}
 }
@@ -803,5 +802,13 @@ func (s *BillingServerSystemErrorMock) PaymentFormPlatformChanged(
 	in *grpc.PaymentFormUserChangePlatformRequest,
 	opts ...client.CallOption,
 ) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) OrderReceipt(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) OrderReceiptRefund(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
 	panic("implement me")
 }

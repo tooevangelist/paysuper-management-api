@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ProtocolONE/go-core/logger"
 	"github.com/ProtocolONE/go-core/provider"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -30,6 +31,8 @@ const (
 	orderNotifySalesPath     = "/orders/:order_id/notify_sale"
 	orderNotifyNewRegionPath = "/orders/:order_id/notify_new_region"
 	orderPlatformPath        = "/orders/:order_id/platform"
+	orderReceiptPath         = "/orders/receipt/purchase/:receipt_id/:order_id"
+	orderReceiptRefundPath   = "/orders/receipt/refund/:receipt_id/:order_id"
 )
 
 const (
@@ -115,6 +118,9 @@ func (h *OrderRoute) Route(groups *common.Groups) {
 	groups.AuthProject.POST(orderNotifySalesPath, h.notifySale)
 	groups.AuthProject.POST(orderNotifyNewRegionPath, h.notifyNewRegion)
 	groups.AuthProject.POST(orderPlatformPath, h.changePlatform)
+
+	groups.Common.GET(orderReceiptPath, h.getReceipt)
+	groups.Common.GET(orderReceiptRefundPath, h.getReceiptRefund)
 }
 
 // @Summary Create order with HTML form
@@ -821,4 +827,59 @@ func (h *OrderRoute) changePlatform(ctx echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusOK)
+}
+func (h *OrderRoute) getReceipt(ctx echo.Context) error {
+	orderId := ctx.Param(common.RequestParameterOrderId)
+
+	if _, err := uuid.Parse(orderId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	receiptId := ctx.Param(common.RequestParameterReceiptId)
+
+	if _, err := uuid.Parse(receiptId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	req := &grpc.OrderReceiptRequest{OrderId: orderId, ReceiptId: receiptId}
+	res, err := h.dispatch.Services.Billing.OrderReceipt(ctx.Request().Context(), req)
+
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "OrderReceipt", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res.Receipt)
+}
+
+func (h *OrderRoute) getReceiptRefund(ctx echo.Context) error {
+	orderId := ctx.Param(common.RequestParameterOrderId)
+
+	if _, err := uuid.Parse(orderId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	receiptId := ctx.Param(common.RequestParameterReceiptId)
+
+	if _, err := uuid.Parse(receiptId); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	req := &grpc.OrderReceiptRequest{OrderId: orderId, ReceiptId: receiptId}
+	res, err := h.dispatch.Services.Billing.OrderReceiptRefund(ctx.Request().Context(), req)
+
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "OrderReceipt", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res.Receipt)
 }
