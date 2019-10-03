@@ -30,7 +30,7 @@ const (
 	orderBillingAddressPath  = "/orders/:order_id/billing_address"
 	orderNotifySalesPath     = "/orders/:order_id/notify_sale"
 	orderNotifyNewRegionPath = "/orders/:order_id/notify_new_region"
-	orderReceiptPath         = "/orders/receipt/:receipt_id/:order_id"
+	orderReceiptPath         = "/orders/receipt/purchase/:receipt_id/:order_id"
 	orderReceiptRefundPath   = "/orders/receipt/refund/:receipt_id/:order_id"
 )
 
