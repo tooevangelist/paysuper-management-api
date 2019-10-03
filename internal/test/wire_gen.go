@@ -68,7 +68,7 @@ func BuildTestSet(ctx context.Context, settings config.Settings, srv common.Serv
 		cleanup()
 		return nil, nil, err
 	}
-	validatorSet, cleanup7, err := validators.Provider()
+	validatorSet, cleanup7, err := validators.Provider(srv)
 	if err != nil {
 		cleanup6()
 		cleanup5()
