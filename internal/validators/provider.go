@@ -2,11 +2,12 @@ package validators
 
 import (
 	"github.com/google/wire"
+	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 )
 
 // Provider
-func Provider() (*ValidatorSet, func(), error) {
-	g := New()
+func Provider(services common.Services) (*ValidatorSet, func(), error) {
+	g := New(services)
 	return g, func() {}, nil
 }
 

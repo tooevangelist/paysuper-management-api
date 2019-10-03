@@ -1,6 +1,7 @@
 package validators
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -11,6 +12,7 @@ import (
 )
 
 type ValidatorSet struct {
+	services common.Services
 }
 
 var (
@@ -57,6 +59,21 @@ var (
 func (v *ValidatorSet) PhoneValidator(fl validator.FieldLevel) bool {
 	_, err := libphonenumber.Parse(fl.Field().String(), "US")
 	return err == nil
+}
+
+// PriceRegionValidator validates group price region for existing in dictionary
+func (v *ValidatorSet) PriceRegionValidator(fl validator.FieldLevel) bool {
+	region := fl.Field().String()
+	if region == "" {
+		return true
+	}
+
+	group, err := v.services.Billing.GetPriceGroup(context.TODO(), &billing.GetPriceGroupRequest{Id: region})
+	if err != nil {
+		return false
+	}
+
+	return group != nil
 }
 
 // UuidValidator
@@ -179,6 +196,6 @@ func (v *ValidatorSet) WorldRegionValidator(fl validator.FieldLevel) bool {
 }
 
 // New
-func New() *ValidatorSet {
-	return &ValidatorSet{}
+func New(services common.Services) *ValidatorSet {
+	return &ValidatorSet{services: services}
 }
