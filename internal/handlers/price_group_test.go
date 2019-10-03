@@ -33,7 +33,7 @@ func (suite *PriceGroupTestSuite) SetupTest() {
 		Billing: mock.NewBillingServerOkMock(),
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
-		suite.router = NewPriceGroup(set.HandlerSet, set.GlobalConfig)
+		suite.router = NewPriceGroupRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
 		}
