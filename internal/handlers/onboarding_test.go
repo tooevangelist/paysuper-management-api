@@ -1020,14 +1020,15 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_S3Uploa
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_WithoutMerchantId_Ok() {
 	company := &billing.MerchantCompanyInfo{
-		Name:            mock.OnboardingMerchantMock.Company.Name,
-		AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-		Website:         "http://localhost",
-		Country:         "RU",
-		State:           "St.Petersburg",
-		Zip:             "190000",
-		City:            "St.Petersburg",
-		Address:         "Nevskiy st. 1",
+		Name:               mock.OnboardingMerchantMock.Company.Name,
+		AlternativeName:    mock.OnboardingMerchantMock.Company.Name,
+		Website:            "http://localhost",
+		Country:            "RU",
+		State:              "St.Petersburg",
+		Zip:                "190000",
+		City:               "St.Petersburg",
+		Address:            "Nevskiy st. 1",
+		RegistrationNumber: "1234567890",
 	}
 	b, err := json.Marshal(company)
 	assert.NoError(suite.T(), err)
@@ -1052,14 +1053,15 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_WithoutMerch
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_WithMerchantId_Ok() {
 	company := &billing.MerchantCompanyInfo{
-		Name:            mock.OnboardingMerchantMock.Company.Name,
-		AlternativeName: mock.OnboardingMerchantMock.Company.Name,
-		Website:         "http://localhost",
-		Country:         "RU",
-		State:           "St.Petersburg",
-		Zip:             "190000",
-		City:            "St.Petersburg",
-		Address:         "Nevskiy st. 1",
+		Name:               mock.OnboardingMerchantMock.Company.Name,
+		AlternativeName:    mock.OnboardingMerchantMock.Company.Name,
+		Website:            "http://localhost",
+		Country:            "RU",
+		State:              "St.Petersburg",
+		Zip:                "190000",
+		City:               "St.Petersburg",
+		Address:            "Nevskiy st. 1",
+		RegistrationNumber: "1234567890",
 	}
 	b, err := json.Marshal(company)
 	assert.NoError(suite.T(), err)
@@ -1314,7 +1316,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_BillingServe
         "state": "St.Petersburg",
         "zip": "190000",
         "city": "St.Petersburg",
-        "address": "Nevskiy st. 1"
+        "address": "Nevskiy st. 1",
+		"registration_number": "1234567890"
     }`
 
 	billingService := &billMock.BillingService{}
@@ -1345,7 +1348,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_BillingServe
         "state": "St.Petersburg",
         "zip": "190000",
         "city": "St.Petersburg",
-        "address": "Nevskiy st. 1"
+        "address": "Nevskiy st. 1",
+		"registration_number": "1234567890"
     }`
 
 	billingService := &billMock.BillingService{}

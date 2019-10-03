@@ -921,3 +921,11 @@ func (s *BillingServerErrorMock) GetRoyaltyReport(ctx context.Context, in *grpc.
 func (s *BillingServerErrorMock) UnPublishKeyProduct(ctx context.Context, in *grpc.UnPublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerErrorMock) PaymentFormPlatformChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangePlatformRequest,
+	opts ...client.CallOption,
+) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}

@@ -796,3 +796,11 @@ func (s *BillingServerSystemErrorMock) GetRoyaltyReport(ctx context.Context, in 
 func (s *BillingServerSystemErrorMock) UnPublishKeyProduct(ctx context.Context, in *grpc.UnPublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerSystemErrorMock) PaymentFormPlatformChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangePlatformRequest,
+	opts ...client.CallOption,
+) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}

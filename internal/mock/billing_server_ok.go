@@ -13,7 +13,6 @@ import (
 
 type BillingServerOkMock struct{}
 
-
 func NewBillingServerOkMock() grpc.BillingService {
 	return &BillingServerOkMock{}
 }
@@ -954,7 +953,6 @@ func (s *BillingServerOkMock) GetPlatforms(ctx context.Context, in *grpc.ListPla
 	}, nil
 }
 
-
 func (s *BillingServerOkMock) DeletePlatformFromProduct(ctx context.Context, in *grpc.RemovePlatformRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	return &grpc.EmptyResponseWithStatus{
 		Status: pkg.ResponseStatusOk,
@@ -1120,5 +1118,13 @@ func (s *BillingServerOkMock) GetRoyaltyReport(ctx context.Context, in *grpc.Get
 }
 
 func (s *BillingServerOkMock) UnPublishKeyProduct(ctx context.Context, in *grpc.UnPublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) PaymentFormPlatformChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangePlatformRequest,
+	opts ...client.CallOption,
+) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
