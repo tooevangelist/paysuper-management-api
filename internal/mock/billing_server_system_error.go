@@ -13,6 +13,7 @@ import (
 
 type BillingServerSystemErrorMock struct{}
 
+
 func NewBillingServerSystemErrorMock() grpc.BillingService {
 	return &BillingServerSystemErrorMock{}
 }
