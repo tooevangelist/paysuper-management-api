@@ -526,7 +526,9 @@ func (s *BillingServerOkMock) UpdateCountry(ctx context.Context, in *billing.Cou
 }
 
 func (s *BillingServerOkMock) GetPriceGroup(ctx context.Context, in *billing.GetPriceGroupRequest, opts ...client.CallOption) (*billing.PriceGroup, error) {
-	panic("implement me")
+	return &billing.PriceGroup{
+		Id: "some_id",
+	}, nil
 }
 
 func (s *BillingServerOkMock) UpdatePriceGroup(ctx context.Context, in *billing.PriceGroup, opts ...client.CallOption) (*billing.PriceGroup, error) {
