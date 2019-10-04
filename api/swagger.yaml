@@ -1263,7 +1263,7 @@ definitions:
   onboarding.Merchant.ChangeStatus:
     properties:
       status:
-        description: new status identifier of merchant
+        description: "new status identifier of merchant. possible statuses: 5 - deleted, 6 - rejected"
         type: integer
       message:
         description: string description to new status
@@ -1456,20 +1456,12 @@ definitions:
 
   onboarding.Merchant.ChangeAgreementDataRequest:
     properties:
-      agreement_type:
-        description: "merchant agreement type. allowed values: 1 - paper agreement; 2 - e-sign agreement;"
       has_psp_signature:
         description: "flag for set peysuper signature on the agreement"
         type: boolean
       has_merchant_signature:
         description: "flag for set merchant signature on the agreement"
         type: boolean
-      agreement_sent_via_mail:
-        description: "mark agreement as sent via email"
-        type: boolean
-      mail_tracking_link:
-        description: "tracking link to mail"
-        type: string
 
   onboarding.Merchant.PrintableAgreementData.Metadata:
     properties:
