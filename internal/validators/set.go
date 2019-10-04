@@ -2,6 +2,7 @@ package validators
 
 import (
 	"context"
+	"github.com/ProtocolONE/go-core/provider"
 	"github.com/google/uuid"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -14,6 +15,7 @@ import (
 
 type ValidatorSet struct {
 	services common.Services
+	provider.LMT
 }
 
 var (
@@ -200,6 +202,6 @@ func (v *ValidatorSet) WorldRegionValidator(fl validator.FieldLevel) bool {
 }
 
 // New
-func New(services common.Services) *ValidatorSet {
-	return &ValidatorSet{services: services}
+func New(services common.Services, lmt provider.LMT) *ValidatorSet {
+	return &ValidatorSet{services: services, LMT: lmt}
 }
