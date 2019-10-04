@@ -122,8 +122,7 @@ func (h *ReportFileRoute) download(ctx echo.Context) error {
 	_, err := h.awsManager.Download(ctx.Request().Context(), filePath, &awsWrapper.DownloadInput{FileName: fileName})
 
 	if err != nil {
-		h.L().Error("unable to find the file id " + fileName)
-		h.L().Error(err.Error())
+		h.L().Error("unable to download the file " + fileName + " with message: " + err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageDownloadReportFile)
 	}
 

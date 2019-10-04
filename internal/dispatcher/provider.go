@@ -70,6 +70,9 @@ func ProviderServices(srv *micro.Micro) common.Services {
 // ProviderValidators
 func ProviderValidators(v *validators.ValidatorSet) (validate *validator.Validate, _ func(), err error) {
 	validate = validator.New()
+	if err = validate.RegisterValidation("region_price", v.PriceRegionValidator); err != nil {
+		return
+	}
 	if err = validate.RegisterValidation("phone", v.PhoneValidator); err != nil {
 		return
 	}

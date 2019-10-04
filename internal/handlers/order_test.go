@@ -1313,6 +1313,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ErrorInService() {
 	billingService := &billMock.BillingService{}
 	billingService.On("ChangeCodeInOrder", mock2.Anything, mock2.Anything).Return(&grpc.ChangeCodeInOrderResponse{
 		Status: 400,
+		Message: &grpc.ResponseErrorMessage{Message: "Some error"},
 	}, nil)
 
 	suite.router.dispatch.Services.Billing = billingService
@@ -1329,6 +1330,83 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ErrorInService() {
 	httpErr, ok := err.(*echo.HTTPError)
 	shouldBe.True(ok)
 	shouldBe.EqualValues(http.StatusBadRequest, httpErr.Code)
+}
+
+
+func (suite *OrderTestSuite) TestOrder_ChangePlatformPayment_InternalError() {
+	shouldBe := require.New(suite.T())
+	billingService := &billMock.BillingService{}
+	billingService.On("PaymentFormPlatformChanged", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	suite.router.dispatch.Services.Billing = billingService
+
+	changeOrderRequest := &grpc.PaymentFormUserChangePlatformRequest{
+		Platform: "gog",
+	}
+	b, err := json.Marshal(changeOrderRequest)
+	assert.NoError(suite.T(), err)
+
+	_, err = suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":order_id", uuid.New().String()).
+		Path(common.AuthProjectGroupPath + orderPlatformPath).
+		Init(test.ReqInitJSON()).
+		BodyBytes(b).
+		Exec(suite.T())
+
+	shouldBe.Error(err)
+	shouldBe.EqualValuesf(500, err.(*echo.HTTPError).Code, "%v", err.Error())
+}
+
+func (suite *OrderTestSuite) TestOrder_ChangePlatformPayment_Error() {
+	shouldBe := require.New(suite.T())
+	billingService := &billMock.BillingService{}
+	billingService.On("PaymentFormPlatformChanged", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
+		Status: 400,
+		Message: &grpc.ResponseErrorMessage{Message: "Some error"},
+	}, nil)
+	suite.router.dispatch.Services.Billing = billingService
+
+	changeOrderRequest := &grpc.PaymentFormUserChangePlatformRequest{
+		Platform: "gog",
+	}
+	b, err := json.Marshal(changeOrderRequest)
+	assert.NoError(suite.T(), err)
+
+	_, err = suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":order_id", uuid.New().String()).
+		Path(common.AuthProjectGroupPath + orderPlatformPath).
+		Init(test.ReqInitJSON()).
+		BodyBytes(b).
+		Exec(suite.T())
+
+	shouldBe.Error(err)
+	shouldBe.EqualValues(400, err.(*echo.HTTPError).Code)
+}
+
+func (suite *OrderTestSuite) TestOrder_ChangePlatformPayment_Ok() {
+	shouldBe := require.New(suite.T())
+	billingService := &billMock.BillingService{}
+	billingService.On("PaymentFormPlatformChanged", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
+		Status: 200,
+	}, nil)
+	suite.router.dispatch.Services.Billing = billingService
+
+	changeOrderRequest := &grpc.PaymentFormUserChangePlatformRequest{
+		Platform: "gog",
+	}
+	b, err := json.Marshal(changeOrderRequest)
+	assert.NoError(suite.T(), err)
+
+	_, err = suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":order_id", uuid.New().String()).
+		Path(common.AuthProjectGroupPath + orderPlatformPath).
+		Init(test.ReqInitJSON()).
+		BodyBytes(b).
+		Exec(suite.T())
+
+	shouldBe.NoError(err)
 }
 
 func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ValidationError() {
@@ -1360,4 +1438,144 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ValidationError() {
 	}
 	b, err = json.Marshal(changeOrderRequest)
 	assert.NoError(suite.T(), err)
+}
+
+func (suite *OrderTestSuite) TestOrder_getReceipt_Ok() {
+	bill := &billMock.BillingService{}
+	bill.
+		On("OrderReceipt", mock2.Anything, mock2.Anything).
+		Return(&grpc.OrderReceiptResponse{Status: int32(200), Receipt: &billing.OrderReceipt{}}, nil)
+	suite.router.dispatch.Services.Billing = bill
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterReceiptId, uuid.New().String(), ":"+common.RequestParameterOrderId, uuid.New().String()).
+		Path(orderReceiptPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, res.Code)
+	assert.NotEmpty(suite.T(), res.Body.String())
+	assert.Equal(suite.T(), echo.MIMEApplicationJSONCharsetUTF8, res.Header().Get(echo.HeaderContentType))
+}
+
+func (suite *OrderTestSuite) TestOrder_getReceipt_ParameterOrderIdNotFound_Error() {
+	_, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterReceiptId, uuid.New().String(), ":"+common.RequestParameterOrderId, "invalid").
+		Path(orderReceiptPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+}
+
+func (suite *OrderTestSuite) TestOrder_getReceipt_ParameterReceiptIdNotFound_Error() {
+	_, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterReceiptId, "", ":"+common.RequestParameterOrderId, uuid.New().String()).
+		Path(orderReceiptPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+}
+
+func (suite *OrderTestSuite) TestOrder_getReceipt_BillingServerSystemError() {
+	bill := &billMock.BillingService{}
+	bill.On("OrderReceipt", mock2.Anything, mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	suite.router.dispatch.Services.Billing = bill
+
+	_, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterReceiptId, uuid.New().String(), ":"+common.RequestParameterOrderId, uuid.New().String()).
+		Path(orderReceiptPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+}
+
+func (suite *OrderTestSuite) TestOrder_getReceiptRefund_Ok() {
+	bill := &billMock.BillingService{}
+	bill.
+		On("OrderReceiptRefund", mock2.Anything, mock2.Anything).
+		Return(&grpc.OrderReceiptResponse{Status: int32(200), Receipt: &billing.OrderReceipt{}}, nil)
+	suite.router.dispatch.Services.Billing = bill
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterReceiptId, uuid.New().String(), ":"+common.RequestParameterOrderId, uuid.New().String()).
+		Path(orderReceiptRefundPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, res.Code)
+	assert.NotEmpty(suite.T(), res.Body.String())
+	assert.Equal(suite.T(), echo.MIMEApplicationJSONCharsetUTF8, res.Header().Get(echo.HeaderContentType))
+}
+
+func (suite *OrderTestSuite) TestOrder_getReceiptRefund_ParameterOrderIdNotFound_Error() {
+	_, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterReceiptId, uuid.New().String(), ":"+common.RequestParameterOrderId, "invalid").
+		Path(orderReceiptRefundPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+}
+
+func (suite *OrderTestSuite) TestOrder_getReceiptRefund_ParameterReceiptIdNotFound_Error() {
+	_, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterReceiptId, "", ":"+common.RequestParameterOrderId, uuid.New().String()).
+		Path(orderReceiptRefundPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+}
+
+func (suite *OrderTestSuite) TestOrder_getReceiptRefund_BillingServerSystemError() {
+	bill := &billMock.BillingService{}
+	bill.On("OrderReceiptRefund", mock2.Anything, mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	suite.router.dispatch.Services.Billing = bill
+
+	_, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterReceiptId, uuid.New().String(), ":"+common.RequestParameterOrderId, uuid.New().String()).
+		Path(orderReceiptRefundPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
 }

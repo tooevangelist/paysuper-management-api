@@ -526,7 +526,9 @@ func (s *BillingServerOkMock) UpdateCountry(ctx context.Context, in *billing.Cou
 }
 
 func (s *BillingServerOkMock) GetPriceGroup(ctx context.Context, in *billing.GetPriceGroupRequest, opts ...client.CallOption) (*billing.PriceGroup, error) {
-	panic("implement me")
+	return &billing.PriceGroup{
+		Id: "some_id",
+	}, nil
 }
 
 func (s *BillingServerOkMock) UpdatePriceGroup(ctx context.Context, in *billing.PriceGroup, opts ...client.CallOption) (*billing.PriceGroup, error) {
@@ -1126,5 +1128,13 @@ func (s *BillingServerOkMock) PaymentFormPlatformChanged(
 	in *grpc.PaymentFormUserChangePlatformRequest,
 	opts ...client.CallOption,
 ) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) OrderReceipt(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) OrderReceiptRefund(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
 	panic("implement me")
 }
