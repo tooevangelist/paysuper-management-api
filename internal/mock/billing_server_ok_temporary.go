@@ -319,7 +319,7 @@ func (s *BillingServerOkTemporaryMock) ListProducts(ctx context.Context, in *grp
 }
 
 func (s *BillingServerOkTemporaryMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.GetProductResponse, error) {
-	return &grpc.GetProductResponse{}, nil
+	return GetProductResponse, nil
 }
 
 func (s *BillingServerOkTemporaryMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
@@ -588,9 +588,9 @@ func (s *BillingServerOkTemporaryMock) GetProductPrices(
 
 func (s *BillingServerOkTemporaryMock) GetPriceGroupRecommendedPrice(
 	ctx context.Context,
-	in *grpc.PriceGroupRecommendedPriceRequest,
+	in *grpc.RecommendedPriceRequest,
 	opts ...client.CallOption,
-) (*grpc.PriceGroupRecommendedPriceResponse, error) {
+) (*grpc.RecommendedPriceResponse, error) {
 	return nil, SomeError
 }
 
@@ -870,5 +870,13 @@ func (s *BillingServerOkTemporaryMock) OrderReceipt(ctx context.Context, in *grp
 }
 
 func (s *BillingServerOkTemporaryMock) OrderReceiptRefund(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetRecommendedPriceByPriceGroup(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetRecommendedPriceByConversion(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
 	panic("implement me")
 }

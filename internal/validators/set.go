@@ -7,6 +7,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/ttacon/libphonenumber"
+	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
 	"regexp"
 )
@@ -68,11 +69,14 @@ func (v *ValidatorSet) PriceRegionValidator(fl validator.FieldLevel) bool {
 		return true
 	}
 
+	zap.S().Infow("[PriceRegionValidator] getting regions", "region", region, "billing_null", v.services.Billing == nil)
 	resp, err := v.services.Billing.GetPriceGroupCurrencyByRegion(context.TODO(), &grpc.PriceGroupByRegionRequest{Region: region})
 	if err != nil {
+		zap.S().Errorw("[PriceRegionValidator] can't get price region", "err", err, "region", region)
 		return false
 	}
 
+	zap.S().Infow("[PriceRegionValidator] got regions", "region", region, "count", len(resp.Region))
 	return len(resp.Region) > 0
 }
 

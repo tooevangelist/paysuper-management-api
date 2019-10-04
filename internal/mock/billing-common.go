@@ -99,4 +99,28 @@ var (
 			ProductPrice,
 		},
 	}
+
+	GetProductResponse = &grpc.GetProductResponse{
+		Status: 200,
+		Item: &grpc.Product{
+			Id:              "5c99391568add439ccf0ffaf",
+			Object:          "product",
+			Type:            "simple_product",
+			Sku:             "ru_double_yeti_rel",
+			Name:            map[string]string{"en": "Double Yeti"},
+			DefaultCurrency: "USD",
+			Enabled:         true,
+			Description:     map[string]string{"en": "Yet another cool game"},
+			LongDescription: map[string]string{"en": "Super game steam keys"},
+			Url:             "http://mygame.ru/duoble_yeti",
+			Images:          []string{"/home/image.jpg"},
+			MerchantId:      "5bdc35de5d1e1100019fb7db",
+			Metadata: map[string]string{
+				"SomeKey": "SomeValue",
+			},
+			Prices: []*grpc.ProductPrice{
+				ProductPrice,
+			},
+		},
+	}
 )

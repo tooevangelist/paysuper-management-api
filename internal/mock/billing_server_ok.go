@@ -488,7 +488,7 @@ func (s *BillingServerOkMock) ListProducts(ctx context.Context, in *grpc.ListPro
 }
 
 func (s *BillingServerOkMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.GetProductResponse, error) {
-	return &grpc.GetProductResponse{Status: pkg.ResponseStatusOk}, nil
+	return GetProductResponse, nil
 }
 
 func (s *BillingServerOkMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
@@ -782,10 +782,10 @@ func (s *BillingServerOkMock) GetProductPrices(
 
 func (s *BillingServerOkMock) GetPriceGroupRecommendedPrice(
 	ctx context.Context,
-	in *grpc.PriceGroupRecommendedPriceRequest,
+	in *grpc.RecommendedPriceRequest,
 	opts ...client.CallOption,
-) (*grpc.PriceGroupRecommendedPriceResponse, error) {
-	return &grpc.PriceGroupRecommendedPriceResponse{}, nil
+) (*grpc.RecommendedPriceResponse, error) {
+	return &grpc.RecommendedPriceResponse{}, nil
 }
 
 func (s *BillingServerOkMock) GetPriceGroupCurrencyByRegion(
@@ -793,7 +793,11 @@ func (s *BillingServerOkMock) GetPriceGroupCurrencyByRegion(
 	in *grpc.PriceGroupByRegionRequest,
 	opts ...client.CallOption,
 ) (*grpc.PriceGroupCurrenciesResponse, error) {
-	return &grpc.PriceGroupCurrenciesResponse{}, nil
+	return &grpc.PriceGroupCurrenciesResponse{
+		Region: []*grpc.PriceGroupRegions{
+			{Currency: "USD"},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) GetPriceGroupCurrencies(
@@ -1136,5 +1140,13 @@ func (s *BillingServerOkMock) OrderReceipt(ctx context.Context, in *grpc.OrderRe
 }
 
 func (s *BillingServerOkMock) OrderReceiptRefund(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetRecommendedPriceByPriceGroup(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetRecommendedPriceByConversion(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
 	panic("implement me")
 }

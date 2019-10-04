@@ -3805,11 +3805,38 @@ paths:
       summary: Get currency for a region and a list of countries in it
       tags:
         - Price group
-  /api/v1/price_group/recommended:
+  /api/v1/pricing/recommended/steam:
     get:
       consumes:
         - application/json
-      description: Get recommended prices for regions
+      description: Get recommended prices for regions by price groups
+      parameters:
+        - description: base price in USD
+          in: query
+          name: amount
+          type: string
+          required: true
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/price_group.RecommendedPriceResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Get recommended prices for regions
+      tags:
+        - Price group
+  /api/v1/pricing/recommended/conversion:
+    get:
+      consumes:
+        - application/json
+      description: Get recommended prices for regions by currency conversion
       parameters:
         - description: base price in USD
           in: query

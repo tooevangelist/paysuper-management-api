@@ -33,7 +33,7 @@ func (suite *PriceGroupTestSuite) SetupTest() {
 		Billing: mock.NewBillingServerOkMock(),
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
-		suite.router = NewPriceGroup(set.HandlerSet, set.GlobalConfig)
+		suite.router = NewPriceGroupRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
 		}
@@ -45,7 +45,7 @@ func (suite *PriceGroupTestSuite) SetupTest() {
 
 func (suite *PriceGroupTestSuite) TearDownTest() {}
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_BindError_RequiredCountry() {
+func (suite *PriceGroupTestSuite) TestPriceGroup_getPriceGroupByCountry_BindError_RequiredCountry() {
 	data := `{"variable": "test"}`
 
 	_, err := suite.caller.Builder().
@@ -66,7 +66,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_BindE
 	assert.Regexp(suite.T(), "field validation for 'Country' failed on the 'required' tag", msg.Details)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Error_BillingServer() {
+func (suite *PriceGroupTestSuite) TestPriceGroup_getPriceGroupByCountry_Error_BillingServer() {
 	data := `{"country": "RU"}`
 
 	billingService := &billingMocks.BillingService{}
@@ -86,7 +86,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Error
 	assert.Regexp(suite.T(), common.ErrorMessagePriceGroupByCountry.Message, httpErr.Message)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Ok() {
+func (suite *PriceGroupTestSuite) TestPriceGroup_getPriceGroupByCountry_Ok() {
 	data := `{"country": "RU"}`
 
 	billingService := &billingMocks.BillingService{}
@@ -103,7 +103,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getPriceGroupByCountry_Ok() 
 	assert.NoError(suite.T(), err)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyList_Error_BillingServer() {
+func (suite *PriceGroupTestSuite) TestPriceGroup_getCurrencyList_Error_BillingServer() {
 
 	billingService := &billingMocks.BillingService{}
 	billingService.On("GetPriceGroupCurrencies", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
@@ -121,7 +121,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyList_Error_Billin
 	assert.Regexp(suite.T(), common.ErrorMessagePriceGroupCurrencyList.Message, httpErr.Message)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyList_Ok() {
+func (suite *PriceGroupTestSuite) TestPriceGroup_getCurrencyList_Ok() {
 
 	billingService := &billingMocks.BillingService{}
 	billingService.On("GetPriceGroupCurrencies", mock2.Anything, mock2.Anything).Return(&grpc.PriceGroupCurrenciesResponse{}, nil)
@@ -136,7 +136,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyList_Ok() {
 	assert.NoError(suite.T(), err)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_BindError_RequiredRegion() {
+func (suite *PriceGroupTestSuite) TestPriceGroup_getCurrencyByRegion_BindError_RequiredRegion() {
 	data := `{"variable": "test"}`
 
 	_, err := suite.caller.Builder().
@@ -157,7 +157,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_BindErro
 	assert.Regexp(suite.T(), "field validation for 'Region' failed on the 'required' tag", msg.Details)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Error_BillingServer() {
+func (suite *PriceGroupTestSuite) TestPriceGroup_getCurrencyByRegion_Error_BillingServer() {
 	data := `{"region": "RUB"}`
 
 	billingService := &billingMocks.BillingService{}
@@ -177,7 +177,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Error_Bi
 	assert.Regexp(suite.T(), common.ErrorMessagePriceGroupCurrencyByRegion.Message, httpErr.Message)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Ok() {
+func (suite *PriceGroupTestSuite) TestPriceGroup_getCurrencyByRegion_Ok() {
 	data := `{"region": "RU"}`
 
 	billingService := &billingMocks.BillingService{}
@@ -187,64 +187,6 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getCurrencyByRegion_Ok() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Path(common.AuthProjectGroupPath + priceGroupRegionPath).
-		Init(test.ReqInitJSON()).
-		BodyString(data).
-		Exec(suite.T())
-
-	assert.NoError(suite.T(), err)
-}
-
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_BindError_RequiredAmount() {
-	data := `{"variable": "test"}`
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupRecommendedPath).
-		Init(test.ReqInitJSON()).
-		BodyString(data).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-
-	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
-	assert.True(suite.T(), ok)
-	assert.Regexp(suite.T(), "field validation for 'Amount' failed on the 'required' tag", msg.Details)
-}
-
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Error_BillingServer() {
-	data := `{"amount": 1}`
-
-	billingService := &billingMocks.BillingService{}
-	billingService.On("GetPriceGroupRecommendedPrice", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
-	suite.router.dispatch.Services.Billing = billingService
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupRecommendedPath).
-		Init(test.ReqInitJSON()).
-		BodyString(data).
-		Exec(suite.T())
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Regexp(suite.T(), common.ErrorMessagePriceGroupRecommendedList.Message, httpErr.Message)
-}
-
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Ok() {
-	data := `{"amount": 1}`
-
-	billingService := &billingMocks.BillingService{}
-	billingService.On("GetPriceGroupRecommendedPrice", mock2.Anything, mock2.Anything).Return(&grpc.PriceGroupRecommendedPriceResponse{}, nil)
-	suite.router.dispatch.Services.Billing = billingService
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupRecommendedPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())

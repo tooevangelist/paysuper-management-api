@@ -310,6 +310,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_Ok() {
 		ProjectId:       bson.NewObjectId().Hex(),
 		Sku:             "some_sku",
 		Object:          "key_product",
+		Pricing:         "manual",
 	}
 
 	b, err := json.Marshal(&body)
@@ -336,6 +337,7 @@ func (suite *KeyProductTestSuite) TestProject_ChangeKeyProduct_ValidationError()
 		ProjectId:       bson.NewObjectId().Hex(),
 		Sku:             "some_sku",
 		Object:          "key_product",
+		Pricing:         "manual",
 	}
 
 	b, err := json.Marshal(&body)
@@ -366,6 +368,7 @@ func (suite *KeyProductTestSuite) TestProject_ChangeKeyProduct_Ok() {
 		ProjectId:       bson.NewObjectId().Hex(),
 		Sku:             "some_sku",
 		Object:          "key_product",
+		Pricing:         "manual",
 	}
 
 	b, err := json.Marshal(&body)
@@ -405,6 +408,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Ok() {
 					},
 				}},
 		},
+		Pricing:         "manual",
 	}
 
 	b, err := json.Marshal(&body)
@@ -441,6 +445,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Error(
 					},
 				}},
 		},
+		Pricing:         "manual",
 	}
 
 	b, err := json.Marshal(&body)
@@ -468,6 +473,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_ValidationError()
 		ProjectId:       bson.NewObjectId().Hex(),
 		Sku:             "some_sku",
 		Object:          "key_product",
+		Pricing:         "manual",
 	}
 
 	b, err := json.Marshal(&body)

@@ -52,7 +52,7 @@ func ProviderHandlers(initial config.Initial, srv common.Services, validator *va
 		NewPayLinkRoute(hSet, &copyCfg),
 		NewPaymentCostRoute(hSet, &copyCfg),
 		NewPaymentMethodApiV1(hSet, &copyCfg),
-		NewPriceGroup(hSet, &copyCfg),
+		NewPriceGroupRoute(hSet, &copyCfg),
 		NewProductRoute(hSet, &copyCfg),
 		NewProjectRoute(hSet, &copyCfg),
 		NewReportFileRoute(hSet, awsManagerReporter, &copyCfg),
@@ -64,5 +64,6 @@ func ProviderHandlers(initial config.Initial, srv common.Services, validator *va
 		NewZipCodeRoute(hSet, &copyCfg),
 		NewBalanceRoute(hSet, &copyCfg),
 		NewPayoutDocumentsRoute(hSet, &copyCfg),
+		NewPricingRoute(hSet, &copyCfg),
 	}, func() {}, nil
 }
