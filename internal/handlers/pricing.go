@@ -20,9 +20,9 @@ type Pricing struct {
 	provider.LMT
 }
 
-func NewPricingRoute(set common.HandlerSet, cfg *common.Config) *PriceGroup {
+func NewPricingRoute(set common.HandlerSet, cfg *common.Config) *Pricing {
 	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "PriceGroup"})
-	return &PriceGroup{
+	return &Pricing{
 		dispatch: set,
 		LMT:      &set.AwareSet,
 		cfg:      *cfg,

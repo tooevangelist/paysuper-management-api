@@ -10,10 +10,9 @@ import (
 )
 
 const (
-	priceGroupCountryPath     = "/price_group/country"
-	priceGroupCurrenciesPath  = "/price_group/currencies"
-	priceGroupRegionPath      = "/price_group/region"
-	priceGroupRecommendedPath = "/price_group/recommended"
+	priceGroupCountryPath    = "/price_group/country"
+	priceGroupCurrenciesPath = "/price_group/currencies"
+	priceGroupRegionPath     = "/price_group/region"
 )
 
 type PriceGroup struct {
