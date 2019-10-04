@@ -2,18 +2,20 @@ package validators
 
 import (
 	"context"
+	"github.com/ProtocolONE/go-core/logger"
+	"github.com/ProtocolONE/go-core/provider"
 	"github.com/google/uuid"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/ttacon/libphonenumber"
-	"go.uber.org/zap"
 	"gopkg.in/go-playground/validator.v9"
 	"regexp"
 )
 
 type ValidatorSet struct {
 	services common.Services
+	provider.LMT
 }
 
 var (
@@ -69,14 +71,18 @@ func (v *ValidatorSet) PriceRegionValidator(fl validator.FieldLevel) bool {
 		return true
 	}
 
-	zap.S().Infow("[PriceRegionValidator] getting regions", "region", region, "billing_null", v.services.Billing == nil)
+	v.L().Info("getting regions", logger.PairArgs("region", region), logger.PairArgs("billing_null", v.services.Billing == nil))
 	resp, err := v.services.Billing.GetPriceGroupCurrencyByRegion(context.TODO(), &grpc.PriceGroupByRegionRequest{Region: region})
 	if err != nil {
-		zap.S().Errorw("[PriceRegionValidator] can't get price region", "err", err, "region", region)
+		v.L().Error("can't get price region", logger.PairArgs("method", "PriceRegionValidator"),
+			logger.PairArgs("region", region),
+			logger.PairArgs("err", err))
 		return false
 	}
 
-	zap.S().Infow("[PriceRegionValidator] got regions", "region", region, "count", len(resp.Region))
+	v.L().Error("can't get price region", logger.PairArgs("method", "PriceRegionValidator"),
+		logger.PairArgs("region", region),
+		logger.PairArgs("count", len(resp.Region)))
 	return len(resp.Region) > 0
 }
 
@@ -200,6 +206,7 @@ func (v *ValidatorSet) WorldRegionValidator(fl validator.FieldLevel) bool {
 }
 
 // New
-func New(services common.Services) *ValidatorSet {
-	return &ValidatorSet{services: services}
+func New(services common.Services, set provider.AwareSet) *ValidatorSet {
+	set.Logger = set.Logger.WithFields(logger.Fields{"service": Prefix})
+	return &ValidatorSet{services: services, LMT: &set,}
 }
