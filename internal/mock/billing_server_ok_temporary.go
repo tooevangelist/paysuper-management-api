@@ -318,8 +318,8 @@ func (s *BillingServerOkTemporaryMock) ListProducts(ctx context.Context, in *grp
 	}, nil
 }
 
-func (s *BillingServerOkTemporaryMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
-	return Product, nil
+func (s *BillingServerOkTemporaryMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.GetProductResponse, error) {
+	return &grpc.GetProductResponse{}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {

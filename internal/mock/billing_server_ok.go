@@ -487,8 +487,8 @@ func (s *BillingServerOkMock) ListProducts(ctx context.Context, in *grpc.ListPro
 	}, nil
 }
 
-func (s *BillingServerOkMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
-	return Product, nil
+func (s *BillingServerOkMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.GetProductResponse, error) {
+	return &grpc.GetProductResponse{Status: pkg.ResponseStatusOk}, nil
 }
 
 func (s *BillingServerOkMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
