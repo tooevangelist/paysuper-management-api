@@ -68,12 +68,12 @@ func (v *ValidatorSet) PriceRegionValidator(fl validator.FieldLevel) bool {
 		return true
 	}
 
-	group, err := v.services.Billing.GetPriceGroup(context.TODO(), &billing.GetPriceGroupRequest{Id: region})
+	resp, err := v.services.Billing.GetPriceGroupCurrencyByRegion(context.TODO(), &grpc.PriceGroupByRegionRequest{Region: region})
 	if err != nil {
 		return false
 	}
 
-	return group != nil
+	return len(resp.Region) > 0
 }
 
 // UuidValidator
