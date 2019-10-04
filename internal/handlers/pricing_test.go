@@ -44,7 +44,7 @@ func (suite *PricingTestSuite) SetupTest() {
 
 func (suite *PricingTestSuite) TearDownTest() {}
 
-func (suite *PricingTestSuite) TestPaymentMethod_getRecommendedPrice_BindError_RequiredAmount() {
+func (suite *PricingTestSuite) TestPricing_getRecommendedPrice_BindError_RequiredAmount() {
 	data := `{"variable": "test"}`
 
 	_, err := suite.caller.Builder().
@@ -65,11 +65,11 @@ func (suite *PricingTestSuite) TestPaymentMethod_getRecommendedPrice_BindError_R
 	assert.Regexp(suite.T(), "field validation for 'Amount' failed on the 'required' tag", msg.Details)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Error_BillingServer() {
+func (suite *PricingTestSuite) TestPricing_getRecommendedPrice_Error_BillingServer() {
 	data := `{"amount": 1}`
 
 	billingService := &billingMocks.BillingService{}
-	billingService.On("GetPriceGroupRecommendedPrice", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
+	billingService.On("GetRecommendedPriceByPriceGroup", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
 	suite.router.dispatch.Services.Billing = billingService
 
 	_, err := suite.caller.Builder().
@@ -85,11 +85,11 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Error_Bi
 	assert.Regexp(suite.T(), common.ErrorMessagePriceGroupRecommendedList.Message, httpErr.Message)
 }
 
-func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Ok() {
+func (suite *PricingTestSuite) TestPricing_getRecommendedPrice_Ok() {
 	data := `{"amount": 1}`
 
 	billingService := &billingMocks.BillingService{}
-	billingService.On("GetPriceGroupRecommendedPrice", mock2.Anything, mock2.Anything).Return(&grpc.RecommendedPriceResponse{}, nil)
+	billingService.On("GetRecommendedPriceByPriceGroup", mock2.Anything, mock2.Anything).Return(&grpc.RecommendedPriceResponse{}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 
 	_, err := suite.caller.Builder().
