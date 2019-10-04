@@ -945,3 +945,7 @@ func (s *BillingServerErrorMock) GetRecommendedPriceByPriceGroup(ctx context.Con
 func (s *BillingServerErrorMock) GetRecommendedPriceByConversion(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerErrorMock) CheckSkuAndKeyProject(ctx context.Context, in *grpc.CheckSkuAndKeyProjectRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
