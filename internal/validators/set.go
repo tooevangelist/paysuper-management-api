@@ -69,6 +69,7 @@ func (v *ValidatorSet) PriceRegionValidator(fl validator.FieldLevel) bool {
 		return true
 	}
 
+	zap.S().Infow("[PriceRegionValidator] getting regions", "region", region, "billing_null", v.services.Billing == nil)
 	resp, err := v.services.Billing.GetPriceGroupCurrencyByRegion(context.TODO(), &grpc.PriceGroupByRegionRequest{Region: region})
 	if err != nil {
 		zap.S().Errorw("[PriceRegionValidator] can't get price region", "err", err, "region", region)
