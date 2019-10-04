@@ -46,7 +46,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
-  /admin/api/v1/key-products/:key_product_id/platforms/:platform_id/keys/count:
+  /admin/api/v1/key-products/:key_product_id/platforms/:platform_id/count:
     get:
       tags:
         - key
