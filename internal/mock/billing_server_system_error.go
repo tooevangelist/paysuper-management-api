@@ -314,7 +314,7 @@ func (s *BillingServerSystemErrorMock) ListProducts(ctx context.Context, in *grp
 	return nil, SomeError
 }
 
-func (s *BillingServerSystemErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
+func (s *BillingServerSystemErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.GetProductResponse, error) {
 	return nil, SomeError
 }
 
@@ -810,5 +810,13 @@ func (s *BillingServerSystemErrorMock) OrderReceipt(ctx context.Context, in *grp
 }
 
 func (s *BillingServerSystemErrorMock) OrderReceiptRefund(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetRecommendedPriceByPriceGroup(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetRecommendedPriceByConversion(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
 	panic("implement me")
 }
