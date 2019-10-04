@@ -3018,7 +3018,7 @@ paths:
       summary: Get order data
       tags:
         - Order
-  /admin/api/v1/order/{id}/platform:
+  /api/v1/order/{id}/platform:
     post:
       consumes:
         - application/json
@@ -3035,8 +3035,6 @@ paths:
           schema:
             type: object
             properties:
-              order_id:
-                type: string
               platform:
                 type: string
       produces:
