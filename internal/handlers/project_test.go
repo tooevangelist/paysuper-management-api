@@ -2,14 +2,19 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
+	billMock "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/paysuper/paysuper-management-api/internal/test"
 	"github.com/stretchr/testify/assert"
+	mock2 "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"testing"
@@ -480,4 +485,93 @@ func (suite *ProjectTestSuite) TestProject_DeleteProject_BillingServerResultErro
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
+}
+
+
+func (suite *ProjectTestSuite) TestProjectCheckSku_ValidationError() {
+	shouldBe := require.New(suite.T())
+	body := `{}`
+
+	_, err := suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + projectsSkuPath).
+		Init(test.ReqInitJSON()).
+		BodyString(body).
+		Exec(suite.T())
+
+	shouldBe.Error(err)
+	httpErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.Equal(http.StatusBadRequest, httpErr.Code)
+}
+
+func (suite *ProjectTestSuite) TestProjectCheckSku_InternalError() {
+	shouldBe := require.New(suite.T())
+	body := `{"sku": "test"}`
+
+	billingService := &billMock.BillingService{}
+	billingService.On("CheckSkuAndKeyProject", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
+	suite.router.dispatch.Services.Billing = billingService
+
+	_, err := suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + projectsSkuPath).
+		Init(test.ReqInitJSON()).
+		BodyString(body).
+		Exec(suite.T())
+
+	shouldBe.Error(err)
+	httpErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.Equal(http.StatusInternalServerError, httpErr.Code)
+}
+
+func (suite *ProjectTestSuite) TestProjectCheckSku_ServiceError() {
+	shouldBe := require.New(suite.T())
+	body := `{"sku": "test"}`
+
+	billingService := &billMock.BillingService{}
+	billingService.On("CheckSkuAndKeyProject", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
+		Status: 400,
+		Message: &grpc.ResponseErrorMessage{
+			Message: "some error",
+		},
+	}, nil)
+	suite.router.dispatch.Services.Billing = billingService
+
+	_, err := suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + projectsSkuPath).
+		Init(test.ReqInitJSON()).
+		BodyString(body).
+		Exec(suite.T())
+
+	shouldBe.Error(err)
+	httpErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.Equal(http.StatusBadRequest, httpErr.Code)
+}
+
+func (suite *ProjectTestSuite) TestProjectCheckSku_Ok() {
+	shouldBe := require.New(suite.T())
+	body := `{"sku": "test"}`
+
+	billingService := &billMock.BillingService{}
+	billingService.On("CheckSkuAndKeyProject", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
+		Status: 200,
+	}, nil)
+	suite.router.dispatch.Services.Billing = billingService
+
+	_, err := suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + projectsSkuPath).
+		Init(test.ReqInitJSON()).
+		BodyString(body).
+		Exec(suite.T())
+
+	shouldBe.NoError(err)
 }
