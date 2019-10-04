@@ -42,15 +42,19 @@ func (suite *KeyProductTestSuite) SetupTestForTestProject_CreateKeyProduct_Group
 	billingService := &billMock.BillingService{}
 
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
-		Status:  pkg.ResponseStatusOk,
-		Item:    &billing.Merchant {
+		Status: pkg.ResponseStatusOk,
+		Item: &billing.Merchant{
 			Id: bson.NewObjectId().Hex(),
 		},
 	}, nil)
 
-	billingService.On("GetPriceGroup", mock2.Anything, mock2.Anything).Return(&billing.PriceGroup{Id: "some_id"}, &grpc.ResponseError{
-		Status: 200,
-	})
+	billingService.On("GetPriceGroupCurrencyByRegion", mock2.Anything, mock2.Anything).Return(&grpc.PriceGroupCurrenciesResponse{Region: []*grpc.PriceGroupRegions{
+		{Currency: "USD"},
+	}}, nil)
+
+	billingService.On("CreateOrUpdateKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{Status: 200, Product:&grpc.KeyProduct{
+		Id: "some_id",
+	}}, nil)
 
 	var e error
 	settings := test.DefaultSettings()
@@ -73,15 +77,15 @@ func (suite *KeyProductTestSuite) SetupTestForTestProject_CreateKeyProduct_Group
 	billingService := &billMock.BillingService{}
 
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
-		Status:  pkg.ResponseStatusOk,
-		Item:    &billing.Merchant {
+		Status: pkg.ResponseStatusOk,
+		Item: &billing.Merchant{
 			Id: bson.NewObjectId().Hex(),
 		},
 	}, nil)
 
-	billingService.On("GetPriceGroup", mock2.Anything, mock2.Anything).Return(nil, &grpc.ResponseError{
+	billingService.On("GetPriceGroupCurrencyByRegion", mock2.Anything, mock2.Anything).Return(nil, &grpc.ResponseError{
 		Message: &grpc.ResponseErrorMessage{Message: "some message"},
-		Status: 400,
+		Status:  400,
 	})
 
 	var e error
@@ -382,7 +386,7 @@ func (suite *KeyProductTestSuite) TestProject_ChangeKeyProduct_Ok() {
 
 func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Ok() {
 	body := &grpc.CreateOrUpdateKeyProductRequest{
-		Name: map[string]string{"en": "A", "ru": "А"},
+		Name:            map[string]string{"en": "A", "ru": "А"},
 		MerchantId:      bson.NewObjectId().Hex(),
 		Description:     map[string]string{"en": "A", "ru": "А"},
 		DefaultCurrency: "RUB",
@@ -391,7 +395,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Ok() {
 		Object:          "key_product",
 		Platforms: []*grpc.PlatformPrice{
 			{
-				Id: "gog",
+				Id:   "gog",
 				Name: "Gog",
 				Prices: []*grpc.ProductPrice{
 					{
@@ -413,16 +417,12 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Ok() {
 		BodyBytes(b).
 		Exec(suite.T())
 
-	assert.Error(suite.T(), err)
-	e, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), 400, e.Code)
-	assert.NotEmpty(suite.T(), e.Message)
+	assert.NoError(suite.T(), err)
 }
 
 func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Error() {
 	body := &grpc.CreateOrUpdateKeyProductRequest{
-		Name: map[string]string{"en": "A", "ru": "А"},
+		Name:            map[string]string{"en": "A", "ru": "А"},
 		MerchantId:      bson.NewObjectId().Hex(),
 		Description:     map[string]string{"en": "A", "ru": "А"},
 		DefaultCurrency: "RUB",
@@ -431,7 +431,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Error(
 		Object:          "key_product",
 		Platforms: []*grpc.PlatformPrice{
 			{
-				Id: "gog",
+				Id:   "gog",
 				Name: "Gog",
 				Prices: []*grpc.ProductPrice{
 					{
