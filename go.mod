@@ -28,6 +28,7 @@ require (
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
 	go.uber.org/automaxprocs v1.2.0
+	go.uber.org/zap v1.10.0
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
 )
@@ -37,4 +38,4 @@ replace (
 	github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
 )
 
-go 1.13
+go 1.12
