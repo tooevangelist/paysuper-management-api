@@ -239,7 +239,7 @@ func (suite *PriceGroupTestSuite) TestPaymentMethod_getRecommendedPrice_Ok() {
 	data := `{"amount": 1}`
 
 	billingService := &billingMocks.BillingService{}
-	billingService.On("GetPriceGroupRecommendedPrice", mock2.Anything, mock2.Anything).Return(&grpc.PriceGroupRecommendedPriceResponse{}, nil)
+	billingService.On("GetPriceGroupRecommendedPrice", mock2.Anything, mock2.Anything).Return(&grpc.RecommendedPriceResponse{}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 
 	_, err := suite.caller.Builder().
