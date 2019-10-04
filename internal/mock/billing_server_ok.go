@@ -782,10 +782,10 @@ func (s *BillingServerOkMock) GetProductPrices(
 
 func (s *BillingServerOkMock) GetPriceGroupRecommendedPrice(
 	ctx context.Context,
-	in *grpc.PriceGroupRecommendedPriceRequest,
+	in *grpc.RecommendedPriceRequest,
 	opts ...client.CallOption,
-) (*grpc.PriceGroupRecommendedPriceResponse, error) {
-	return &grpc.PriceGroupRecommendedPriceResponse{}, nil
+) (*grpc.RecommendedPriceResponse, error) {
+	return &grpc.RecommendedPriceResponse{}, nil
 }
 
 func (s *BillingServerOkMock) GetPriceGroupCurrencyByRegion(
