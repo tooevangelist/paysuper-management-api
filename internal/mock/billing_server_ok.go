@@ -793,7 +793,11 @@ func (s *BillingServerOkMock) GetPriceGroupCurrencyByRegion(
 	in *grpc.PriceGroupByRegionRequest,
 	opts ...client.CallOption,
 ) (*grpc.PriceGroupCurrenciesResponse, error) {
-	return &grpc.PriceGroupCurrenciesResponse{}, nil
+	return &grpc.PriceGroupCurrenciesResponse{
+		Region: []*grpc.PriceGroupRegions{
+			{Currency: "USD"},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) GetPriceGroupCurrencies(
