@@ -22,7 +22,7 @@ type PriceGroup struct {
 	provider.LMT
 }
 
-func NewPriceGroup(set common.HandlerSet, cfg *common.Config) *PriceGroup {
+func NewPriceGroupRoute(set common.HandlerSet, cfg *common.Config) *PriceGroup {
 	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "PriceGroup"})
 	return &PriceGroup{
 		dispatch: set,
@@ -35,7 +35,6 @@ func (h *PriceGroup) Route(groups *common.Groups) {
 	groups.AuthProject.GET(priceGroupCountryPath, h.getPriceGroupByCountry)
 	groups.AuthProject.GET(priceGroupCurrenciesPath, h.getCurrencyList)
 	groups.AuthProject.GET(priceGroupRegionPath, h.getCurrencyByRegion)
-	groups.AuthProject.GET(priceGroupRecommendedPath, h.getRecommendedPrice)
 }
 
 // Get currency and region by country code
@@ -105,30 +104,6 @@ func (h *PriceGroup) getCurrencyByRegion(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.GetPriceGroupCurrencyByRegion(ctx.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessagePriceGroupCurrencyByRegion)
-	}
-
-	return ctx.JSON(http.StatusOK, res)
-}
-
-// Get a list of recommended prices for all regions
-// GET /api/v1/price_group/recommended
-func (h *PriceGroup) getRecommendedPrice(ctx echo.Context) error {
-	req := &grpc.PriceGroupRecommendedPriceRequest{}
-	err := ctx.Bind(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	err = h.dispatch.Validate.Struct(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
-	}
-
-	res, err := h.dispatch.Services.Billing.GetPriceGroupRecommendedPrice(ctx.Request().Context(), req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessagePriceGroupRecommendedList)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
