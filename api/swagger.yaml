@@ -3010,6 +3010,53 @@ paths:
       summary: Get order data
       tags:
         - Order
+  /api/v1/order/{id}/platform:
+    post:
+      consumes:
+        - application/json
+      description: Change platform for order
+      parameters:
+        - description: Order unique identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: platform change request
+          in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              platform:
+                type: string
+      produces:
+        - application/json
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Change platform for order
+      tags:
+        - Order
   /admin/api/v1/projects:
     get:
       consumes:

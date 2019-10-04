@@ -388,6 +388,9 @@ components:
         activation_url:
           type: string
           example: http://www.example.com
+        count:
+          type: number
+          description: count of available keys. (used only in merchant listings)
         prices:
           type: array
           items:

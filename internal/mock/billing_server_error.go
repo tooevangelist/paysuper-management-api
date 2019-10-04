@@ -13,6 +13,7 @@ import (
 
 type BillingServerErrorMock struct{}
 
+
 func NewBillingServerErrorMock() grpc.BillingService {
 	return &BillingServerErrorMock{}
 }
@@ -946,10 +947,6 @@ func (s *BillingServerErrorMock) GetRecommendedPriceByConversion(ctx context.Con
 	panic("implement me")
 }
 
-func (s *BillingServerErrorMock) CheckSkuAndKeyProject(
-	ctx context.Context,
-	in *grpc.CheckSkuAndKeyProjectRequest,
-	opts ...client.CallOption,
-) (*grpc.EmptyResponseWithStatus, error) {
+func (s *BillingServerErrorMock) CheckSkuAndKeyProject(ctx context.Context, in *grpc.CheckSkuAndKeyProjectRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }

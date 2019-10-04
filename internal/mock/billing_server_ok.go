@@ -115,7 +115,7 @@ func (s *BillingServerOkMock) GetMerchantBy(
 	if in.MerchantId == SomeMerchantId3 {
 		OnboardingMerchantMock.Status = pkg.MerchantStatusDraft
 	} else {
-		OnboardingMerchantMock.Status = pkg.MerchantStatusAgreementSigning
+		OnboardingMerchantMock.Status = pkg.MerchantStatusOnReview
 	}
 
 	rsp := &grpc.GetMerchantResponse{
@@ -1151,10 +1151,6 @@ func (s *BillingServerOkMock) GetRecommendedPriceByConversion(ctx context.Contex
 	panic("implement me")
 }
 
-func (s *BillingServerOkMock) CheckSkuAndKeyProject(
-	ctx context.Context,
-	in *grpc.CheckSkuAndKeyProjectRequest,
-	opts ...client.CallOption,
-) (*grpc.EmptyResponseWithStatus, error) {
+func (s *BillingServerOkMock) CheckSkuAndKeyProject(ctx context.Context, in *grpc.CheckSkuAndKeyProjectRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
