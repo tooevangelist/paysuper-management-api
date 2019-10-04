@@ -365,7 +365,7 @@ func (s *BillingServerErrorMock) ListProducts(ctx context.Context, in *grpc.List
 	return nil, SomeError
 }
 
-func (s *BillingServerErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
+func (s *BillingServerErrorMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.GetProductResponse, error) {
 	return nil, SomeError
 }
 
