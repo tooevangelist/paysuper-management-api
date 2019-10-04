@@ -101,7 +101,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return nil, nil, err
 	}
 	services := dispatcher.ProviderServices(microMicro)
-	validatorSet, cleanup10, err := validators.Provider(services)
+	validatorSet, cleanup10, err := validators.Provider(services, awareSet)
 	if err != nil {
 		cleanup9()
 		cleanup8()

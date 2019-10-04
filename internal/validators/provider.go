@@ -7,8 +7,8 @@ import (
 )
 
 // Provider
-func Provider(services common.Services, lmt provider.LMT) (*ValidatorSet, func(), error) {
-	g := New(services, lmt)
+func Provider(services common.Services, set provider.AwareSet) (*ValidatorSet, func(), error) {
+	g := New(services, set)
 	return g, func() {}, nil
 }
 

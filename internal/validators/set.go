@@ -2,6 +2,7 @@ package validators
 
 import (
 	"context"
+	"github.com/ProtocolONE/go-core/logger"
 	"github.com/ProtocolONE/go-core/provider"
 	"github.com/google/uuid"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -202,6 +203,7 @@ func (v *ValidatorSet) WorldRegionValidator(fl validator.FieldLevel) bool {
 }
 
 // New
-func New(services common.Services, lmt provider.LMT) *ValidatorSet {
-	return &ValidatorSet{services: services, LMT: lmt}
+func New(services common.Services, set provider.AwareSet) *ValidatorSet {
+	set.Logger = set.Logger.WithFields(logger.Fields{"service": Prefix})
+	return &ValidatorSet{services: services, LMT: &set,}
 }
