@@ -7,12 +7,12 @@ package test
 
 import (
 	"context"
-	"github.com/ProtocolONE/go-core/config"
-	"github.com/ProtocolONE/go-core/invoker"
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/metric"
-	"github.com/ProtocolONE/go-core/provider"
-	"github.com/ProtocolONE/go-core/tracing"
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/metric"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/tracing"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/validators"
@@ -229,7 +229,7 @@ func ProviderTestSet(initial config.Initial, awareSet provider.AwareSet, srv com
 func ProviderTestInitial() config.Initial {
 	wd := os.Getenv("WD")
 	if len(wd) == 0 {
-		wd = "./../../.artifacts"
+		wd = "./../../"
 	}
 	return config.Initial{WorkDir: wd}
 }

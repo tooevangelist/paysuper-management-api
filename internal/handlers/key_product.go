@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/micro/go-micro/client"
 	"github.com/paysuper/paysuper-billing-server/pkg"
