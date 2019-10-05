@@ -1,7 +1,7 @@
 package validators
 
 import (
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 )

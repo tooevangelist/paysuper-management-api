@@ -2,7 +2,7 @@ package common
 
 import (
 	"fmt"
-	"github.com/ProtocolONE/go-core/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
