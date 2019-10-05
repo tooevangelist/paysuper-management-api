@@ -4,9 +4,9 @@ package daemon
 
 import (
 	"context"
-	"github.com/ProtocolONE/go-core/config"
-	"github.com/ProtocolONE/go-core/invoker"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher"
 	"github.com/paysuper/paysuper-management-api/internal/handlers"

@@ -2,9 +2,9 @@ package http
 
 import (
 	"context"
-	"github.com/ProtocolONE/go-core/invoker"
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )

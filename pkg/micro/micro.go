@@ -2,9 +2,9 @@ package micro
 
 import (
 	"context"
-	"github.com/ProtocolONE/go-core/invoker"
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/client"
 	mlog "github.com/micro/go-micro/util/log"

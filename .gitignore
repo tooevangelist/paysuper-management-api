@@ -1,6 +1,7 @@
 .artifacts
 vendor
 
+bin
 *.exe
 *.exe~
 *.dll

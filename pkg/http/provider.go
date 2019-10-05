@@ -2,9 +2,9 @@ package http
 
 import (
 	"context"
-	"github.com/ProtocolONE/go-core/config"
-	"github.com/ProtocolONE/go-core/invoker"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
 )
 

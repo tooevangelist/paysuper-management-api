@@ -5,10 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/ProtocolONE/go-core/config"
-	"github.com/ProtocolONE/go-core/entrypoint"
-	"github.com/ProtocolONE/go-core/invoker"
-	"github.com/ProtocolONE/go-core/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/fatih/color"
 	"github.com/paysuper/paysuper-management-api/cmd"
 	"github.com/paysuper/paysuper-management-api/cmd/version"
@@ -63,9 +63,14 @@ var rootCmd = &cobra.Command{
 		// initializing
 		initial.WorkDir = os.Getenv(envWorkDir)
 		if len(initial.WorkDir) == 0 {
-			initial.WorkDir, e = filepath.Abs(filepath.Dir(os.Args[0]))
-			if e != nil {
-				return e
+			dir, err := os.Getwd()
+			if err == nil {
+				initial.WorkDir = dir
+			} else {
+				initial.WorkDir, e = filepath.Abs(filepath.Dir(os.Args[0]))
+				if e != nil {
+					return e
+				}
 			}
 		}
 		initial.WorkDir, e = filepath.Abs(initial.WorkDir)
@@ -171,6 +176,23 @@ func init() {
 }
 
 func Execute(cmds ...*cobra.Command) {
+	rootCmd.AddCommand(cmds...)
+	if e := rootCmd.Execute(); e != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%v\n", e.Error())
+		os.Exit(1)
+	}
+}
+
+func ExecuteDefault(defaultArgs []string, cmds ...*cobra.Command) {
+	if len(defaultArgs) != 0 {
+		var cmdFromArgs string
+		if len(os.Args) > 1 {
+			cmdFromArgs = os.Args[1]
+		}
+		if strings.HasPrefix(cmdFromArgs, "-") || cmdFromArgs == "" {
+			os.Args = append(os.Args[:1], append(defaultArgs, os.Args[1:]...)...)
+		}
+	}
 	rootCmd.AddCommand(cmds...)
 	if e := rootCmd.Execute(); e != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%v\n", e.Error())
