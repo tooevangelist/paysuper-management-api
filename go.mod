@@ -3,7 +3,8 @@ module github.com/paysuper/paysuper-management-api
 require (
 	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681
 	github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679
-	github.com/ProtocolONE/go-core/v2 v2.0.0
+	github.com/ProtocolONE/go-core/v2 v2.1.0
+	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
 	github.com/aws/aws-sdk-go v1.23.16
 	github.com/fatih/color v1.7.0
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
@@ -11,6 +12,7 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/google/uuid v1.1.1
 	github.com/google/wire v0.3.0
+	github.com/gurukami/typ/v2 v2.0.1
 	github.com/karlseguin/expect v1.0.1 // indirect
 	github.com/labstack/echo/v4 v4.1.6
 	github.com/mattn/go-colorable v0.1.4 // indirect
