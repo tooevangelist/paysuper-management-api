@@ -6,7 +6,7 @@ override CURRENT_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 override DOCKER_MOUNT_SUFFIX ?= consistent
 override DOCKER_COMPOSE_ARGS ?= -f deployments/docker-compose/docker-compose.yml -f deployments/docker-compose/docker-compose-local.yml
 override DOCKER_BUILD_ARGS ?= -f ${ROOT_DIR}/build/docker/app/Dockerfile
-override GO_PATH = $(shell echo "$(GOPATH)" | cut -d';' -f1 | sed -e "s~^\(.\):~/\1~g" -e "s~\\\~/~g" )
+override GO_PATH = $(shell echo "$(GOPATH)" | cut -d';' -f1 | sed -e "s~^\(.\):~/\1~g" -e "s~\\\~/~g" -e "s~^/go:~~g" )
 
 TAG ?= unknown
 AWS_DOCKER_IMAGE ?= unknown
