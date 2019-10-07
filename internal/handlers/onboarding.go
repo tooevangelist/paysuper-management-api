@@ -486,7 +486,7 @@ func (h *OnboardingRoute) getAgreementStructure(
 	}
 
 	data := &OnboardingFileData{
-		Url: fmt.Sprintf(agreementUrlMask, ctx.Request().URL.Scheme, ctx.Request().URL.Host, merchantId),
+		Url: fmt.Sprintf(agreementUrlMask, h.cfg.HttpScheme, ctx.Request().Host, merchantId),
 		Metadata: &OnboardingFileMetadata{
 			Name:        fi.Name(),
 			Extension:   ext,
