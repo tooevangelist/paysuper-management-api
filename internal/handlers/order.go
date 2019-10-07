@@ -258,7 +258,7 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 	if h.cfg.ReturnPaymentForm {
 		req2 := &grpc.PaymentFormJsonDataRequest{
 			OrderId: order.Uuid,
-			Scheme:  ctx.Request().URL.Scheme,
+			Scheme:  h.cfg.HttpScheme,
 			Host:    ctx.Request().Host,
 			Ip:      ctx.RealIP(),
 		}
@@ -290,7 +290,7 @@ func (h *OrderRoute) getOrderForm(ctx echo.Context) error {
 
 	req := &grpc.PaymentFormJsonDataRequest{
 		OrderId: id,
-		Scheme:  ctx.Request().URL.Scheme,
+		Scheme:  h.cfg.HttpScheme,
 		Host:    ctx.Request().Host,
 		Locale:  ctx.Request().Header.Get(common.HeaderAcceptLanguage),
 		Ip:      ctx.RealIP(),
@@ -386,7 +386,7 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		return echo.NewHTTPError(int(orderResponse.Status), orderResponse.Message)
 	}
 
-	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, ctx.Request().URL.Scheme, ctx.Request().Host, orderResponse.Item.Uuid)
+	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, orderResponse.Item.Uuid)
 	qs := ctx.QueryString()
 
 	if qs != "" {
