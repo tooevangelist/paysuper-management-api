@@ -3856,7 +3856,7 @@ paths:
     get:
       consumes:
         - application/json
-      description: Get recommended prices for regions by price groups
+      description: Calculation of recommended prices based on price ranges as in Steam, taking into account regional factors.
       parameters:
         - description: base price in USD
           in: query
@@ -3876,14 +3876,14 @@ paths:
           description: Error description
           schema:
             type: string
-      summary: Get recommended prices for regions
+      summary: Get recommended prices for regions by price groups
       tags:
         - Price group
   /api/v1/pricing/recommended/conversion:
     get:
       consumes:
         - application/json
-      description: Get recommended prices for regions by currency conversion
+      description: Calculation of recommended prices based on exchange rates.
       parameters:
         - description: base price in USD
           in: query
@@ -3903,7 +3903,7 @@ paths:
           description: Error description
           schema:
             type: string
-      summary: Get recommended prices for regions
+      summary: Get recommended prices for regions by currency conversion
       tags:
         - Price group
 
