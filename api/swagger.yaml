@@ -3018,7 +3018,7 @@ paths:
       summary: Get order data
       tags:
         - Order
-  /api/v1/order/{id}/platform:
+  /api/v1/orders/{id}/platform:
     post:
       consumes:
         - application/json
