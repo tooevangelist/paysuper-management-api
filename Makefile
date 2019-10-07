@@ -34,7 +34,7 @@ define go_docker
 		-v /${ROOT_DIR}:/${ROOT_DIR}:${DOCKER_MOUNT_SUFFIX} \
         $${VOLUME_PKG_MOD} \
 		-w /${ROOT_DIR} \
-		-e GO111MODULE=on
+		-e GO111MODULE=on \
 		-e GOPATH=/${GO_PATH}:/go \
 		$${GO_IMAGE}:$${GO_IMAGE_TAG} \
 		sh -c 'GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=${CGO_ENABLED} TAG=${TAG} $(subst ",,${1}); if [ "${DIND_UID}" != "0" ]; then chown -R ${DIND_UID}:${DIND_GUID} ${ROOT_DIR}; fi'
