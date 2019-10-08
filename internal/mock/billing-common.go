@@ -48,7 +48,7 @@ var (
 		},
 		IsVatEnabled:              true,
 		IsCommissionToUserEnabled: true,
-		Status:                    pkg.MerchantStatusOnReview,
+		Status:                    pkg.MerchantStatusAgreementSigning,
 		LastPayout:                &billing.MerchantLastPayout{},
 		IsSigned:                  true,
 		PaymentMethods: map[string]*billing.MerchantPaymentMethod{

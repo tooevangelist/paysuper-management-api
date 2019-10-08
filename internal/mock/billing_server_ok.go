@@ -115,7 +115,7 @@ func (s *BillingServerOkMock) GetMerchantBy(
 	if in.MerchantId == SomeMerchantId3 {
 		OnboardingMerchantMock.Status = pkg.MerchantStatusDraft
 	} else {
-		OnboardingMerchantMock.Status = pkg.MerchantStatusOnReview
+		OnboardingMerchantMock.Status = pkg.MerchantStatusAgreementSigning
 	}
 
 	rsp := &grpc.GetMerchantResponse{

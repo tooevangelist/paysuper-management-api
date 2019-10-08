@@ -121,9 +121,14 @@ func (h *ProductRoute) getProduct(ctx echo.Context) error {
 	}
 
 	res, err := h.dispatch.Services.Billing.GetProduct(ctx.Request().Context(), req)
+
 	if err != nil {
 		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

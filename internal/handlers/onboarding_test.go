@@ -665,25 +665,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BindError() {
 	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_ValidationError() {
-	body := `{"has_merchant_signature": true, "agreement_type": 3}`
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + merchantsIdPath).
-		Init(test.ReqInitJSON()).
-		BodyString(body).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Regexp(suite.T(), common.NewValidationError("AgreementType"), httpErr.Message)
-}
-
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerSystemError() {
 	body := `{"has_merchant_signature": true, "agreement_sent_via_mail": true}`
 
