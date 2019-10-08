@@ -884,3 +884,7 @@ func (s *BillingServerOkTemporaryMock) GetRecommendedPriceByConversion(ctx conte
 func (s *BillingServerOkTemporaryMock) CheckSkuAndKeyProject(ctx context.Context, in *grpc.CheckSkuAndKeyProjectRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkTemporaryMock) GetPriceGroupByRegion(ctx context.Context, in *grpc.GetPriceGroupByRegionRequest, opts ...client.CallOption) (*grpc.GetPriceGroupByRegionResponse, error) {
+	panic("implement me")
+}

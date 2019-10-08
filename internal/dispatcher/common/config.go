@@ -12,6 +12,7 @@ type Auth1 struct {
 type Config struct {
 	Auth1
 
+	HttpScheme              string `envconfig:"HTTP_SCHEME" default:"https"`
 	PaymentFormJsLibraryUrl string `envconfig:"PAYMENT_FORM_JS_LIBRARY_URL" required:"true"`
 	WebsocketUrl            string `envconfig:"WEBSOCKET_URL" default:"wss://cf.tst.protocol.one/connection/websocket"`
 
