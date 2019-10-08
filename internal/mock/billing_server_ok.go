@@ -1156,5 +1156,10 @@ func (s *BillingServerOkMock) CheckSkuAndKeyProject(ctx context.Context, in *grp
 }
 
 func (s *BillingServerOkMock) GetPriceGroupByRegion(ctx context.Context, in *grpc.GetPriceGroupByRegionRequest, opts ...client.CallOption) (*grpc.GetPriceGroupByRegionResponse, error) {
-	panic("implement me")
+	return &grpc.GetPriceGroupByRegionResponse{
+		Status: 200,
+		Group: &billing.PriceGroup{
+			Id: "some id",
+		},
+	}, nil
 }
