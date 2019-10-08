@@ -13,7 +13,7 @@ import (
 
 const (
 	productsPath         = "/products"
-	productsMerchantPath = "/products"
+	productsMerchantPath = "/products/merchant/:id"
 	productsIdPath       = "/products/:id"
 	productsPricesPath   = "/products/:id/prices"
 )

@@ -2722,6 +2722,58 @@ definitions:
         description: object can contain any other information about product. object must contain only string values
         type: object
 
+  product.create_or_update:
+    properties:
+      project_id:
+        description: project identifier for which created product
+        type: string
+      object:
+        description: system constant conteined returning object type. for product object always must be - product
+        type: string
+      type:
+        description: product type
+        type: string
+      sku:
+        description: product sku (simple slug name)
+        type: string
+      name:
+        description: "product names map in other language: {\"en\": \"project name\", \"ru\": \"имя проекта\"}"
+        type: object
+      default_currency:
+        description: default currency for selling product. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+      enabled:
+        description: true is product is enabled
+        type: boolean
+      prices:
+        description: array of available prices for product
+        type: array
+        items:
+          $ref: '#/definitions/price'
+      description:
+        description: "product short descriptions map in other language: {\"en\": \"project short description\", \"ru\": \"короткое описание проекта\"}"
+        type: object
+      long_description:
+        description: "product long descriptions map in other language: {\"en\": \"project long description\", \"ru\": \"длинное описание проекта\"}"
+        type: object
+      created_at:
+        description: time when retes record was created
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: time when retes record was updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+      images:
+        description: array of product images. if images not set then field can be null
+        type: array
+        items:
+          type: string
+      url:
+        description: url to product on project side
+        type: string
+      metadata:
+        description: object can contain any other information about product. object must contain only string values
+        type: object
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -4906,7 +4958,7 @@ paths:
         - XAPISignatureHeader: []
       summary: Get product prices
       tags:
-        - Product
+        - Products
       consumes:
         - application/json
       produces:
@@ -4938,7 +4990,7 @@ paths:
         - XAPISignatureHeader: []
       summary: Set product prices
       tags:
-        - Product
+        - Products
       consumes:
         - application/json
       produces:
@@ -7230,6 +7282,139 @@ paths:
             $ref: '#/definitions/model.Error'
         500:
           description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    post:
+      consumes:
+        - application/json
+      description: Create product
+      summary: Create product with json request
+      parameters:
+        - description: Product create data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/product.create_or_update'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Created product
+          schema:
+            $ref: '#/definitions/product'
+        "400":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      tags:
+        - Products
+
+  "/admin/api/v1/products/{id}":
+    get:
+      summary: Get a product by it's id for authorised user
+      tags:
+        - Products
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get a product by it's id for authorised user
+      parameters:
+        - description: Product identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/product'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      consumes:
+        - application/json
+      description: Update product
+      summary: Update product with json request
+      parameters:
+        - description: Product identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: Product create data
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/product.create_or_update'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Updated product
+          schema:
+            $ref: '#/definitions/product'
+        "400":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      tags:
+        - Products
+    delete:
+      consumes:
+        - application/x-www-form-urlencoded
+      tags:
+        - Products
+      description: Delete product by it's id for authorised user
+      summary: Delete product
+      parameters:
+        - description: Product identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "204":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error
           schema:
             $ref: '#/definitions/model.Error'
 
