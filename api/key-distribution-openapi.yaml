@@ -462,10 +462,8 @@ components:
         sku:
           type: string
           description: sku of product (unique in project)
-        images:
-          type: array
-          items:
-            type: string
+        cover:
+          $ref: '#/components/schemas/ImageCollection'
         url:
           type: string
         enabled:
@@ -571,10 +569,8 @@ components:
         sku:
           type: string
           description: sku of product
-        images:
-          type: array
-          items:
-            type: string
+        cover:
+          $ref: '#/components/schemas/ImageCollection'
         url:
           type: string
         enabled:
@@ -594,3 +590,20 @@ components:
           description: Pricing mode (currency, manual, steam or default)
           type: string
           example: 'steam'
+
+    ImageCollection:
+      type: object
+      properties:
+        images:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            en: "http://example.com"
+            ru: "http://example.com"
+            de: "http://example.com"
+          description: Localized images
+        use_one_for_all:
+          type: boolean
+          description: Use "en" as default image for all
+          example: true
