@@ -199,5 +199,5 @@ func (h *ProjectRoute) checkSku(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, res)
+	return ctx.NoContent(http.StatusOK)
 }

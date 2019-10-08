@@ -3269,6 +3269,57 @@ paths:
       summary: Update project
       tags:
         - Project
+
+  /admin/api/v1/projects/{id}/sku:
+    post:
+      consumes:
+        - application/json
+      description: Update project for authenticated merchant
+      parameters:
+        - description: Project object with new data
+          in: body
+          name: data
+          required: true
+          schema:
+            type: object
+            properties:
+              sku:
+                type: string
+                example: my_awesome_sku_001
+        - description: Project identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Check sku+project unique
+      tags:
+        - Project
+
   /order/create:
     get:
       consumes:
