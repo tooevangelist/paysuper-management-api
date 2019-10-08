@@ -48,11 +48,9 @@ func (suite *KeyProductTestSuite) SetupTestForTestProject_CreateKeyProduct_Group
 		},
 	}, nil)
 
-	billingService.On("GetPriceGroupCurrencyByRegion", mock2.Anything, mock2.Anything).Return(&grpc.PriceGroupCurrenciesResponse{Region: []*grpc.PriceGroupRegions{
-		{Currency: "USD"},
-	}}, nil)
+	billingService.On("GetPriceGroupByRegion", mock2.Anything, mock2.Anything).Return(&grpc.GetPriceGroupByRegionResponse{Status: 200, Group: &billing.PriceGroup{Id: "Some id"}}, nil)
 
-	billingService.On("CreateOrUpdateKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{Status: 200, Product:&grpc.KeyProduct{
+	billingService.On("CreateOrUpdateKeyProduct", mock2.Anything, mock2.Anything).Return(&grpc.KeyProductResponse{Status: 200, Product: &grpc.KeyProduct{
 		Id: "some_id",
 	}}, nil)
 
@@ -83,10 +81,7 @@ func (suite *KeyProductTestSuite) SetupTestForTestProject_CreateKeyProduct_Group
 		},
 	}, nil)
 
-	billingService.On("GetPriceGroupCurrencyByRegion", mock2.Anything, mock2.Anything).Return(nil, &grpc.ResponseError{
-		Message: &grpc.ResponseErrorMessage{Message: "some message"},
-		Status:  400,
-	})
+	billingService.On("GetPriceGroupByRegion", mock2.Anything, mock2.Anything).Return(&grpc.GetPriceGroupByRegionResponse{Status: 400, Group: nil, Message: &grpc.ResponseErrorMessage{Message: "some error"}}, nil)
 
 	var e error
 	settings := test.DefaultSettings()
@@ -408,7 +403,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Ok() {
 					},
 				}},
 		},
-		Pricing:         "manual",
+		Pricing: "manual",
 	}
 
 	b, err := json.Marshal(&body)
@@ -445,7 +440,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Error(
 					},
 				}},
 		},
-		Pricing:         "manual",
+		Pricing: "manual",
 	}
 
 	b, err := json.Marshal(&body)

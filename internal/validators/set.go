@@ -71,7 +71,7 @@ func (v *ValidatorSet) PriceRegionValidator(fl validator.FieldLevel) bool {
 		return true
 	}
 
-	resp, err := v.services.Billing.GetPriceGroupCurrencyByRegion(context.TODO(), &grpc.PriceGroupByRegionRequest{Region: region})
+	resp, err := v.services.Billing.GetPriceGroupByRegion(context.TODO(), &grpc.GetPriceGroupByRegionRequest{Region: region})
 	if err != nil {
 		v.L().Error("can't get price region", logger.PairArgs("method", "PriceRegionValidator"),
 			logger.PairArgs("region", region),
@@ -79,7 +79,7 @@ func (v *ValidatorSet) PriceRegionValidator(fl validator.FieldLevel) bool {
 		return false
 	}
 
-	return len(resp.Region) > 0
+	return resp.Group != nil
 }
 
 // UuidValidator
