@@ -135,7 +135,7 @@ func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Fail_getPayoutDocumen
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
-	assert.NoError(suite.T(), err)
+	assert.Error(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusBadRequest, res.Code)
 	assert.NotEmpty(suite.T(), res.Body.String())
 }

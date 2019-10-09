@@ -214,24 +214,25 @@ type MiddlewareHandlerFunc func(echo.Context) (echo.Context, error)
 
 // Request
 func (c *EchoReqResCaller) Request(method, target string, body io.Reader, init func(*http.Request, Middleware)) (resRec *httptest.ResponseRecorder, err error) {
-	e := echo.New()
+	he := echo.New()
 	req := httptest.NewRequest(method, target, body)
 	if init == nil {
 		panic("request init function should be present")
 	}
 	init(req, c.middlewareSetUp)
-	e.Pre(c.middlewareSetUp.ListPre()...)
-	e.Use(c.middlewareSetUp.ListUse()...)
+	he.Pre(c.middlewareSetUp.ListPre()...)
+	he.Use(c.middlewareSetUp.ListUse()...)
 	resRec = httptest.NewRecorder()
-	if err = c.dispatcher.Dispatch(e); err != nil {
+	if err = c.dispatcher.Dispatch(he); err != nil {
 		return
 	}
 	//
-	e.HTTPErrorHandler = func(e error, context echo.Context) {
+	he.HTTPErrorHandler = func(e error, context echo.Context) {
 		err = e
+		he.DefaultHTTPErrorHandler(e, context)
 	}
 	//
-	e.ServeHTTP(resRec, req)
+	he.ServeHTTP(resRec, req)
 	return
 }
 

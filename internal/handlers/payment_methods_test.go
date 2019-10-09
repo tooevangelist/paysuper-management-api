@@ -58,7 +58,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_Required
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusOK, res.Code)
+	assert.Equal(suite.T(), http.StatusBadRequest, res.Code)
 
 	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
 	assert.True(suite.T(), ok)
