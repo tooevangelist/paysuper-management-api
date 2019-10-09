@@ -100,7 +100,8 @@ func (suite *PayoutDocumentsTestSuite) TearDownTest() {}
 
 func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Ok_getPayoutDocumentsList() {
 	q := make(url.Values)
-	q.Set("status", "pending")
+	q.Add("status[]", "pending")
+	q.Add("status[]", "paid")
 	q.Set("merchant_id", "5bdc39a95d1e1100019fb7df")
 	q.Set("limit", "10")
 	q.Set("signed", "true")
@@ -117,6 +118,26 @@ func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Ok_getPayoutDocuments
 		assert.Equal(suite.T(), http.StatusOK, res.Code)
 		assert.NotEmpty(suite.T(), res.Body.String())
 	}
+}
+
+func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Fail_getPayoutDocumentsList_validationFailed() {
+	q := make(url.Values)
+	q.Add("status[]", "bla-bla-bla")
+	q.Set("merchant_id", "5bdc39a95d1e1100019fb7df")
+	q.Set("limit", "10")
+	q.Set("signed", "true")
+	q.Set("offset", "10")
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		SetQueryParams(q).
+		Path(common.AuthUserGroupPath + payoutsPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusBadRequest, res.Code)
+	assert.NotEmpty(suite.T(), res.Body.String())
 }
 
 func (suite *BalanceTestSuite) TestPayoutDocuments_Fail_getPayoutDocumentsList_MerchantNotFound() {

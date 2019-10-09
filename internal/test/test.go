@@ -78,8 +78,8 @@ func (s *QueryBuilder) SetQueryParam(key, value string) *QueryBuilder {
 // SetQueryParams
 func (s *QueryBuilder) SetQueryParams(values url.Values) *QueryBuilder {
 	for key, value := range values {
-		if len(value) != 0 {
-			s.query.Set(key, value[0])
+		for _, val := range value {
+			s.query.Add(key, val)
 		}
 	}
 	return s
