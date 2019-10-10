@@ -145,13 +145,22 @@ func (h *RoyaltyReportsRoute) merchantReviewRoyaltyReport(ctx echo.Context) erro
 
 // Decline royalty report by merchant and start a dispute
 // POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/decline
+//
+// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
+//      -H "Authorization: Bearer %access_token_here%" \
+//      -d '{"dispute_reason": "bla-bla-bla"}' \
+//      https://api.paysuper.online/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/decline
 func (h *RoyaltyReportsRoute) merchantDeclineRoyaltyReport(ctx echo.Context) error {
+	req := &grpc.MerchantReviewRoyaltyReportRequest{}
+	err := ctx.Bind(req)
 
-	req := &grpc.MerchantReviewRoyaltyReportRequest{
-		IsAccepted: false,
-		Ip:         ctx.RealIP(),
-		ReportId:   ctx.Param(common.RequestParameterId),
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.NewValidationError(err.Error()))
 	}
+
+	req.IsAccepted = false
+	req.Ip = ctx.RealIP()
+	req.ReportId = ctx.Param(common.RequestParameterId)
 
 	res, err := h.dispatch.Services.Billing.MerchantReviewRoyaltyReport(ctx.Request().Context(), req)
 	if err != nil {
