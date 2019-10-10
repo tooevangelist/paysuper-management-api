@@ -127,11 +127,14 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_MerchantReviewRoyaltyRe
 
 func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_merchantDeclineRoyaltyReport() {
 
+	bodyJson := `{"dispute_reason": "accepted"}`
+
 	res, err := suite.caller.Builder().
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
 		Method(http.MethodPost).
 		Path(common.AuthUserGroupPath + royaltyReportsDeclinePath).
 		Init(test.ReqInitJSON()).
+		BodyString(bodyJson).
 		Exec(suite.T())
 
 	if assert.NoError(suite.T(), err) {
