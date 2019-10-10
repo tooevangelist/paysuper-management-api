@@ -9,6 +9,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"net/http"
 )
 
 type BillingServerOkMock struct{}
@@ -493,10 +494,6 @@ func (s *BillingServerOkMock) GetProduct(ctx context.Context, in *grpc.RequestPr
 
 func (s *BillingServerOkMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	return &grpc.EmptyResponse{}, nil
-}
-
-func (s *BillingServerOkMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
-	return &billing.OrderPaginate{Count: 1, Items: []*billing.Order{}}, nil
 }
 
 func (s *BillingServerOkMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
@@ -1162,4 +1159,8 @@ func (s *BillingServerOkMock) GetPriceGroupByRegion(ctx context.Context, in *grp
 			Id: "some id",
 		},
 	}, nil
+}
+
+func (s *BillingServerOkMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*grpc.ListOrdersResponse, error) {
+	return &grpc.ListOrdersResponse{Status: http.StatusOK}, nil
 }

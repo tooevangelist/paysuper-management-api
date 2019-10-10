@@ -373,10 +373,6 @@ func (s *BillingServerErrorMock) DeleteProduct(ctx context.Context, in *grpc.Req
 	return nil, SomeError
 }
 
-func (s *BillingServerErrorMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
-	return nil, SomeError
-}
-
 func (s *BillingServerErrorMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
 	return nil, SomeError
 }
@@ -952,4 +948,8 @@ func (s *BillingServerErrorMock) CheckSkuAndKeyProject(ctx context.Context, in *
 
 func (s *BillingServerErrorMock) GetPriceGroupByRegion(ctx context.Context, in *grpc.GetPriceGroupByRegionRequest, opts ...client.CallOption) (*grpc.GetPriceGroupByRegionResponse, error) {
 	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*grpc.ListOrdersResponse, error) {
+	return nil, SomeError
 }
