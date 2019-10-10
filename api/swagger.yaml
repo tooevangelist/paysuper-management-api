@@ -7009,7 +7009,9 @@ paths:
         - description: filter by document's status
           in: query
           name: status
-          type: string
+          type: array
+          items:
+            type: string
         - description: filter by document's merchant
           in: query
           name: merchant_id
