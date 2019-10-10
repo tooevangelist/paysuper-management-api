@@ -9,7 +9,12 @@ import (
 )
 
 const (
-	userEmptyPath = "/user"
+	userInviteMerchantPath       = "/user/invite/merchant"
+	userInviteAdminPath          = "/user/invite/member"
+	userResendInviteMerchantPath = "/user/resend/merchant"
+	userResendInviteAdminPath    = "/user/resend/member"
+	userAcceptInviteMerchantPath = "/user/accept/merchant"
+	userAcceptInviteAdminPath    = "/user/accept/member"
 )
 
 type UserRoute struct {
@@ -28,9 +33,34 @@ func NewUserRoute(set common.HandlerSet, cfg *common.Config) *UserRoute {
 }
 
 func (h *UserRoute) Route(groups *common.Groups) {
-	groups.AuthUser.GET(userEmptyPath, h.temp)
+	groups.AuthUser.GET(userInviteMerchantPath, h.inviteMerchant)
+	groups.AuthUser.GET(userInviteAdminPath, h.inviteAdmin)
+	groups.AuthUser.GET(userResendInviteMerchantPath, h.resendInviteMerchant)
+	groups.AuthUser.GET(userResendInviteAdminPath, h.resendInviteAdmin)
+	groups.AuthUser.GET(userAcceptInviteMerchantPath, h.acceptInviteMerchant)
+	groups.AuthUser.GET(userAcceptInviteAdminPath, h.acceptInviteAdmin)
 }
 
-func (h *UserRoute) temp(ctx echo.Context) error {
+func (h *UserRoute) inviteMerchant(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, nil)
+}
+
+func (h *UserRoute) inviteAdmin(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, nil)
+}
+
+func (h *UserRoute) resendInviteMerchant(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, nil)
+}
+
+func (h *UserRoute) resendInviteAdmin(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, nil)
+}
+
+func (h *UserRoute) acceptInviteMerchant(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, nil)
+}
+
+func (h *UserRoute) acceptInviteAdmin(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, nil)
 }
