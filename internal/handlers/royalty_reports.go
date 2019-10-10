@@ -38,7 +38,7 @@ func (h *RoyaltyReportsRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(royaltyReportsPath, h.getRoyaltyReportsList)
 	groups.AuthUser.GET(royaltyReportsIdPath, h.getRoyaltyReport)
 	groups.AuthUser.GET(royaltyReportsTransactionsPath, h.listRoyaltyReportOrders)
-	groups.AuthUser.POST(royaltyReportsAcceptPath, h.MerchantReviewRoyaltyReport)
+	groups.AuthUser.POST(royaltyReportsAcceptPath, h.merchantReviewRoyaltyReport)
 	groups.AuthUser.POST(royaltyReportsDeclinePath, h.merchantDeclineRoyaltyReport)
 	groups.AuthUser.POST(royaltyReportsChangePath, h.changeRoyaltyReport)
 }
@@ -124,7 +124,7 @@ func (h *RoyaltyReportsRoute) listRoyaltyReportOrders(ctx echo.Context) error {
 
 // Accept royalty report by merchant
 // POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/accept
-func (h *RoyaltyReportsRoute) MerchantReviewRoyaltyReport(ctx echo.Context) error {
+func (h *RoyaltyReportsRoute) merchantReviewRoyaltyReport(ctx echo.Context) error {
 
 	req := &grpc.MerchantReviewRoyaltyReportRequest{
 		IsAccepted: true,
