@@ -885,6 +885,10 @@ func (s *BillingServerOkTemporaryMock) GetPriceGroupByRegion(ctx context.Context
 	panic("implement me")
 }
 
+func (s *BillingServerOkTemporaryMock) GetMerchantUsers(ctx context.Context, in *grpc.GetMerchantUsersRequest, opts ...client.CallOption) (*grpc.GetMerchantUsersResponse, error) {
+	panic("implement me")
+}
+
 func (s *BillingServerOkTemporaryMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*grpc.ListOrdersResponse, error) {
 	return &grpc.ListOrdersResponse{}, nil
 }
