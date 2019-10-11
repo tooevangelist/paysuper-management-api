@@ -1172,3 +1172,7 @@ func (s *BillingServerOkMock) GetMerchantUsers(ctx context.Context, in *grpc.Get
 func (s *BillingServerOkMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*grpc.ListOrdersResponse, error) {
 	return &grpc.ListOrdersResponse{Status: http.StatusOK}, nil
 }
+
+func (s *BillingServerOkMock) GetAdminUsers(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetAdminUsersResponse, error) {
+	panic("implement me")
+}
