@@ -51,7 +51,7 @@ func (suite *AdminUsersTestSuite) SetupTest() {
 func (suite *AdminUsersTestSuite) TearDownTest() {}
 
 
-func (suite *MerchantUsersTestSuite) TestAdminUsers_GetList_InternalError() {
+func (suite *AdminUsersTestSuite) TestAdminUsers_GetList_InternalError() {
 	shouldBe := require.New(suite.T())
 
 	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
@@ -70,7 +70,7 @@ func (suite *MerchantUsersTestSuite) TestAdminUsers_GetList_InternalError() {
 	shouldBe.NotEmpty(res.Body.String())
 }
 
-func (suite *MerchantUsersTestSuite) TestAdminUsers_GetList_ServiceError() {
+func (suite *AdminUsersTestSuite) TestAdminUsers_GetList_ServiceError() {
 	shouldBe := require.New(suite.T())
 
 	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
@@ -93,7 +93,7 @@ func (suite *MerchantUsersTestSuite) TestAdminUsers_GetList_ServiceError() {
 	shouldBe.NotEmpty(res.Body.String())
 }
 
-func (suite *MerchantUsersTestSuite) TestAdminUsers_GetList_Ok() {
+func (suite *AdminUsersTestSuite) TestAdminUsers_GetList_Ok() {
 	shouldBe := require.New(suite.T())
 
 	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
