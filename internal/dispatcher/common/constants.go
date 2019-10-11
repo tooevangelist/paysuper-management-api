@@ -102,6 +102,10 @@ const (
 	QueryParameterNameOffset = "offset"
 	QueryParameterNameSort   = "sort[]"
 
+	QueryParameterNameUtmMedium   = "utm_medium"
+	QueryParameterNameUtmCampaign = "utm_campaign"
+	QueryParameterNameUtmSource   = "utm_source"
+
 	ErrorMessageMask = "field validation for '%s' failed on the '%s' tag"
 
 	HeaderAcceptLanguage      = "Accept-Language"
