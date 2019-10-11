@@ -961,3 +961,7 @@ func (s *BillingServerOkTemporaryMock) GetPayoutDocumentRoyaltyReports(ctx conte
 func (s *BillingServerOkTemporaryMock) AutoCreatePayoutDocuments(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkTemporaryMock) GetAdminUsers(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetAdminUsersResponse, error) {
+	panic("implement me")
+}

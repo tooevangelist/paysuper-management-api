@@ -905,3 +905,7 @@ func (s *BillingServerSystemErrorMock) GetPayoutDocumentRoyaltyReports(ctx conte
 func (s *BillingServerSystemErrorMock) AutoCreatePayoutDocuments(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerSystemErrorMock) GetAdminUsers(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetAdminUsersResponse, error) {
+	panic("implement me")
+}
