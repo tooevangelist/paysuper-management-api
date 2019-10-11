@@ -892,3 +892,7 @@ func (s *BillingServerOkTemporaryMock) GetMerchantUsers(ctx context.Context, in 
 func (s *BillingServerOkTemporaryMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*grpc.ListOrdersResponse, error) {
 	return &grpc.ListOrdersResponse{}, nil
 }
+
+func (s *BillingServerOkTemporaryMock) GetAdminUsers(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetAdminUsersResponse, error) {
+	panic("implement me")
+}
