@@ -6,6 +6,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	casbinMiddleware "github.com/paysuper/echo-casbin-middleware"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"io/ioutil"
 	"net/http"
@@ -101,6 +102,20 @@ func (d *Dispatcher) RawBodyPreMiddleware(next echo.HandlerFunc) echo.HandlerFun
 		common.SetRawBodyContext(c, buf)
 		return next(c)
 	}
+}
+
+// RawBodyPreMiddleware
+func (d *Dispatcher) CasbinMiddleware() echo.MiddlewareFunc {
+	cfg := casbinMiddleware.Config{
+		Skipper: middleware.DefaultSkipper,
+		Mode:    casbinMiddleware.EnforceModeEnforcing,
+		Logger:  d.L(),
+		CtxUserExtractor: func(c echo.Context) string {
+			user := common.ExtractUserContext(c)
+			return user.Id
+		},
+	}
+	return casbinMiddleware.MiddlewareWithConfig(d.ms.Client(), cfg)
 }
 
 // BodyDumpMiddleware

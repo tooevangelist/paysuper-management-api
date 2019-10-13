@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
+	"github.com/paysuper/paysuper-management-api/pkg/micro"
 	"html/template"
 	"net/http"
 )
@@ -21,6 +22,7 @@ type Dispatcher struct {
 	appSet AppSet
 	provider.LMT
 	globalCfg *common.Config
+	ms        *micro.Micro
 }
 
 // dispatch
@@ -39,11 +41,11 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			`"host":"${host}","method":"${method}","uri":"${uri}","user_agent":"${user_agent}",` +
 			`"status":${status},"error":"${error}","latency":${latency},"latency_human":"${latency_human}"` +
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}}`,
-	})) // 3
+	}))                                 // 3
 	echoHttp.Use(d.RecoverMiddleware()) // 2
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowHeaders: []string{"authorization", "content-type"},
-	})) // 1
+	}))                                 // 1
 	// Called before routes
 	echoHttp.Use(d.RawBodyPreMiddleware)         // 2
 	echoHttp.Use(d.LimitOffsetSortPreMiddleware) // 1
@@ -104,6 +106,8 @@ func (d *Dispatcher) authUserGroup(grp *echo.Group) {
 		// Called before routes
 		grp.Use(d.GetUserDetailsMiddleware) // 1
 	}
+	// Called before routes
+	grp.Use(d.CasbinMiddleware()) // 1
 }
 
 func (d *Dispatcher) webHookGroup(grp *echo.Group) {
@@ -136,7 +140,7 @@ type AppSet struct {
 }
 
 // New
-func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, globalCfg *common.Config) *Dispatcher {
+func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, globalCfg *common.Config, ms *micro.Micro) *Dispatcher {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
 	return &Dispatcher{
 		ctx:       ctx,
@@ -144,5 +148,6 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 		appSet:    appSet,
 		LMT:       &set,
 		globalCfg: globalCfg,
+		ms:        ms,
 	}
 }
