@@ -2774,6 +2774,232 @@ definitions:
         description: object can contain any other information about product. object must contain only string values
         type: object
 
+  billingRoyaltyReport:
+    type: object
+    properties:
+      id:
+        type: string
+        description: report id
+      merchant_id:
+        type: string
+        description: merchant id
+      created_at:
+        type: string
+        format: date-time
+        description: date of report creation
+      updated_at:
+        type: string
+        format: date-time
+        description: date of report last update
+      payout_date:
+        type: string
+        format: date-time
+        description: date when report was paid
+      status:
+        type: string
+        description: status of report
+      period_from:
+        type: string
+        format: date-time
+        description: start of report time period
+      period_to:
+        type: string
+        format: date-time
+        description: end of report time period
+      accept_expire_at:
+        type: string
+        format: date-time
+        description: date when report will be auto-accepted, if merchant didn't accept or start a dispute yet
+      accepted_at:
+        type: string
+        format: date-time
+        description: date when report was accepted
+      totals:
+        "$ref": "#/definitions/billingRoyaltyReportTotals"
+        description: totals section of report
+      currency:
+        type: string
+        description: currency of report
+      summary:
+        "$ref": "#/definitions/billingRoyaltyReportSummary"
+        description: summary section
+      dispute_reason:
+        type: string
+        description: reason of dispute (if it was started)
+      dispute_started_at:
+        type: string
+        format: date-time
+        description: date of dispute beginning (if it was started)
+      dispute_closed_at:
+        type: string
+        format: date-time
+        description: date of dispute resolve (if it was started)
+      is_auto_accepted:
+        type: boolean
+        format: boolean
+        description: flag of auto-acceptance
+      payout_document_id:
+        type: string
+        description: cross-link to payout invoice, that includes this royalty report
+
+  billingRoyaltyReportCorrectionItem:
+    type: object
+    properties:
+      accounting_entry_id:
+        type: string
+        description: linked accounting entry id
+      amount:
+        type: number
+        format: double
+        description: amount of correction
+      currency:
+        type: string
+        description: currency
+      reason:
+        type: string
+        description: reason if correction
+      entry_date:
+        type: string
+        format: date-time
+        description: date of correction
+
+  billingRoyaltyReportProductSummaryItem:
+    type: object
+    properties:
+      product:
+        type: string
+        description: product or project name
+      region:
+        type: string
+        description: country ISO Alpha2 code
+      total_transactions:
+        type: integer
+        format: int32
+        description: total number of transactions for current product/project in current country (including sales and returns)
+      sales_count:
+        type: integer
+        format: int32
+        description: number of sales for current product/project in current country
+      gross_sales_amount:
+        type: number
+        format: double
+        description: gross amount of sales for current product/project in current country
+      returns_count:
+        type: integer
+        format: int32
+        description: number of returns for current product/project in current country
+      gross_returns_amount:
+        type: number
+        format: double
+        description: gross amount of returns for current product/project in current country
+      gross_total_amount:
+        type: number
+        format: double
+        description: resulting gross amount for current product/project in current country (sales minus returns)
+      total_fees:
+        type: number
+        format: double
+        description: fees amount for current product/project in current country
+      total_vat:
+        type: number
+        format: double
+        description: vat amount for current product/project in current country
+      payout_amount:
+        type: number
+        format: double
+        description: payout amount for current product/project in current country
+
+  billingRoyaltyReportSummary:
+    type: object
+    properties:
+      products_items:
+        type: array
+        items:
+          "$ref": "#/definitions/billingRoyaltyReportProductSummaryItem"
+        description: summary details for each product/project and country
+      products_total:
+        "$ref": "#/definitions/billingRoyaltyReportProductSummaryItem"
+        description: summary totals for all product/project and country
+      corrections:
+        type: array
+        items:
+          "$ref": "#/definitions/billingRoyaltyReportCorrectionItem"
+        description: list of corrections applied (if any)
+      rolling_reserves:
+        type: array
+        items:
+          "$ref": "#/definitions/billingRoyaltyReportCorrectionItem"
+        description: list of rolling reserves applied (if any)
+
+  billingRoyaltyReportTotals:
+    type: object
+    properties:
+      transactions_count:
+        type: integer
+        format: int32
+        description: total transactions count (including sales and returns)
+      fee_amount:
+        type: number
+        format: double
+        description: fees amount
+      vat_amount:
+        type: number
+        format: double
+        description: vat amount
+      payout_amount:
+        type: number
+        format: double
+        description: payput amount
+      rolling_reserve_amount:
+        type: number
+        format: double
+        description: applied rolling reserve total amount
+      correction_amount:
+        type: number
+        format: double
+        description: applied corrections total amount
+
+  grpcChangeRoyaltyReport:
+    type: object
+    properties:
+      status:
+        type: string
+        description: new report status
+      reason:
+        type: string
+        required: true
+        description: correction reason
+      correction:
+        type: object
+        schema:
+          "$ref": "#/definitions/grpcChangeRoyaltyReportCorrection"
+
+  grpcChangeRoyaltyReportCorrection:
+    type: object
+    properties:
+      amount:
+        type: number
+        format: double
+        required: true
+        description: correction amount (in report's currency)
+      reason:
+        type: string
+        required: true
+        description: correction reason
+
+  grpcRoyaltyReportsPaginate:
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        description: total items count
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/billingRoyaltyReport"
+        description: royalty reports
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -7009,7 +7235,9 @@ paths:
         - description: filter by document's status
           in: query
           name: status
-          type: string
+          type: array
+          items:
+            type: string
         - description: filter by document's merchant
           in: query
           name: merchant_id
@@ -7292,6 +7520,7 @@ paths:
       parameters:
         - description: Product create data
           in: body
+          name: body
           required: true
           schema:
             $ref: '#/definitions/product.create_or_update'
@@ -7362,6 +7591,7 @@ paths:
           required: true
           type: string
         - description: Product create data
+          name: body
           in: body
           required: true
           schema:
@@ -7480,5 +7710,271 @@ paths:
             $ref: '#/definitions/model.Error'
         500:
           description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports":
+    get:
+      summary: Get a list of royalty reports, matching to filters
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get a list of royalty reports, matching to filters
+      parameters:
+        - description: period start date
+          in: query
+          name: period_from
+          type: string
+          required: false
+        - description: period end date
+          in: query
+          name: period_to
+          type: string
+          required: false
+        - description: maximum number of returning reports per page. default value is 100
+          in: query
+          name: limit
+          type: integer
+          required: false
+        - description: offset reports per page
+          in: query
+          name: offset
+          type: integer
+          required: false
+        - description: merchant id
+          in: query
+          name: merchant_id
+          type: string
+          required: false
+        - description: matching status list
+          in: query
+          name: status[]
+          required: false
+          type: array
+          items:
+            type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/grpcRoyaltyReportsPaginate'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}":
+    get:
+      summary: Get an royalty reports by it's id
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get an royalty reports by it's id
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/billingRoyaltyReport'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}/transactions":
+    get:
+      summary: Get a list of transactions, included in royalty report
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get a list of transactions, included in royalty report
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/order.list.public'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}/accept":
+    post:
+      summary: Accept royalty report by merchant
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Accept royalty report by merchant
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}/decline":
+    get:
+      summary: Start royalty report dispute
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Start royalty report dispute
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: dispute reason
+          in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              dispute_reason:
+                type: string
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}/change":
+    get:
+      summary: Change royalty report
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Change royalty report
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: changes
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/grpcChangeRoyaltyReport"
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'

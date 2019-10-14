@@ -354,6 +354,8 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		return ctx.Render(http.StatusNotFound, errorTemplateName, map[string]interface{}{})
 	}
 
+	qParams := ctx.QueryParams()
+
 	oReq := &billing.OrderCreateRequest{
 		ProjectId: pl.ProjectId,
 		PayerIp:   ctx.RealIP(),
@@ -361,18 +363,13 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		PrivateMetadata: map[string]string{
 			"PaylinkId": paylinkId,
 		},
-		IssuerUrl:  ctx.Request().Header.Get(common.HeaderReferer),
-		IsEmbedded: false,
-	}
-	params := ctx.QueryParams()
-	if v, ok := params[common.RequestParameterUtmSource]; ok {
-		oReq.PrivateMetadata[common.RequestParameterUtmSource] = v[0]
-	}
-	if v, ok := params[common.RequestParameterUtmMedium]; ok {
-		oReq.PrivateMetadata[common.RequestParameterUtmMedium] = v[0]
-	}
-	if v, ok := params[common.RequestParameterUtmCampaign]; ok {
-		oReq.PrivateMetadata[common.RequestParameterUtmCampaign] = v[0]
+		IssuerUrl:           ctx.Request().Header.Get(common.HeaderReferer),
+		IsEmbedded:          false,
+		IssuerReferenceType: pkg.OrderIssuerReferenceTypePaylink,
+		IssuerReference:     paylinkId,
+		UtmMedium:           qParams.Get(common.QueryParameterNameUtmMedium),
+		UtmCampaign:         qParams.Get(common.QueryParameterNameUtmCampaign),
+		UtmSource:           qParams.Get(common.QueryParameterNameUtmSource),
 	}
 
 	orderResponse, err := h.dispatch.Services.Billing.OrderCreateProcess(ctxReq, oReq)
