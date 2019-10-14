@@ -46,6 +46,20 @@ func (suite *PaylinkTestSuite) SetupTest() {
 
 func (suite *PaylinkTestSuite) TearDownTest() {}
 
+func (suite *PaylinkTestSuite) TestPaylink_getPaylinksList_Merchant_Ok() {
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Path(common.AuthUserGroupPath + paylinksPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusOK, res.Code)
+		assert.NotEmpty(suite.T(), res.Body.String())
+	}
+}
+
 func (suite *PaylinkTestSuite) TestPaylink_getPaylinksList_Ok() {
 
 	res, err := suite.caller.Builder().
@@ -122,7 +136,8 @@ func (suite *PaylinkTestSuite) TestPaylink_deletePaylink_Ok() {
 }
 
 func (suite *PaylinkTestSuite) TestPaylink_createPaylink_Ok() {
-	bodyJson := `{"life_days": 7, "products": ["5c3c962781258d0001e65930"], "project_id": "5c8f6a914dad6a0001839408"}`
+	bodyJson := `{"life_days": 7, "products": ["5c3c962781258d0001e65930"], "project_id": "5c8f6a914dad6a0001839408", 
+					"merchant_id": "5c8f6a914dad6a0001839408", "products_type": "product", "name": "unit-test"}`
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
@@ -139,7 +154,8 @@ func (suite *PaylinkTestSuite) TestPaylink_createPaylink_Ok() {
 }
 
 func (suite *PaylinkTestSuite) TestPaylink_updatePaylink_Ok() {
-	bodyJson := `{"life_days": 30, "products": ["5c3c962781258d0001e65930"], "project_id": "5c8f6a914dad6a0001839408"}`
+	bodyJson := `{"life_days": 30, "products": ["5c3c962781258d0001e65930"], "project_id": "5c8f6a914dad6a0001839408", 
+			"merchant_id": "5c8f6a914dad6a0001839408", "products_type": "product", "name": "unit-test"}`
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).

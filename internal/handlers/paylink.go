@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
-	"github.com/paysuper/paysuper-payment-link/proto"
+	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"net/http"
 )
 
@@ -34,6 +34,7 @@ func NewPayLinkRoute(set common.HandlerSet, cfg *common.Config) *PayLinkRoute {
 }
 
 func (h *PayLinkRoute) Route(groups *common.Groups) {
+	groups.AuthUser.GET(paylinksPath, h.getPaylinksList)
 	groups.AuthUser.GET(paylinksProjectIdPath, h.getPaylinksList)
 	groups.AuthUser.GET(paylinksIdPath, h.getPaylink)
 	groups.AuthUser.GET(paylinksStartPath, h.getPaylinkStat)
@@ -43,7 +44,8 @@ func (h *PayLinkRoute) Route(groups *common.Groups) {
 	groups.AuthUser.PUT(paylinksIdPath, h.updatePaylink)
 }
 
-// @Description Get list of paylinks for project, for authenticated merchant
+// @Description Get list of paylinks for authenticated merchant (and also for project, if passed)
+// @Example GET /admin/api/v1/paylinks?offset=0&limit=10
 // @Example GET /admin/api/v1/paylinks/project/21784001599a47e5a69ac28f7af2ec22?offset=0&limit=10
 func (h *PayLinkRoute) getPaylinksList(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)

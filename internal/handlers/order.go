@@ -11,7 +11,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
-	"github.com/paysuper/paysuper-payment-link/proto"
+	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"net/http"
 	"time"
 )
@@ -363,6 +363,7 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		PrivateMetadata: map[string]string{
 			"PaylinkId": paylinkId,
 		},
+		Type:                pl.ProductsType,
 		IssuerUrl:           ctx.Request().Header.Get(common.HeaderReferer),
 		IsEmbedded:          false,
 		IssuerReferenceType: pkg.OrderIssuerReferenceTypePaylink,
