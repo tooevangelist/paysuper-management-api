@@ -105,9 +105,9 @@ func (d *Dispatcher) authUserGroup(grp *echo.Group) {
 		) // 1
 		// Called before routes
 		grp.Use(d.GetUserDetailsMiddleware) // 1
+		// Called before routes
+		grp.Use(d.CasbinMiddleware()) // 1
 	}
-	// Called before routes
-	grp.Use(d.CasbinMiddleware()) // 1
 }
 
 func (d *Dispatcher) webHookGroup(grp *echo.Group) {
