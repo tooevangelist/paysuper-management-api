@@ -1030,3 +1030,44 @@ func (s *BillingServerErrorMock) AutoCreatePayoutDocuments(ctx context.Context, 
 func (s *BillingServerErrorMock) GetAdminUsers(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetAdminUsersResponse, error) {
 	panic("implement me")
 }
+
+
+func (s *BillingServerErrorMock) GetMerchantsForUser(ctx context.Context, in *grpc.GetMerchantsForUserRequest, opts ...client.CallOption) (*grpc.GetMerchantsForUserResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) InviteUserMerchant(ctx context.Context, in *grpc.InviteUserMerchantRequest, opts ...client.CallOption) (*grpc.InviteUserMerchantResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) InviteUserAdmin(ctx context.Context, in *grpc.InviteUserAdminRequest, opts ...client.CallOption) (*grpc.InviteUserAdminResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) ResendInviteMerchant(ctx context.Context, in *grpc.ResendInviteMerchantRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) ResendInviteAdmin(ctx context.Context, in *grpc.ResendInviteAdminRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) GetMerchantUser(ctx context.Context, in *grpc.GetMerchantUserRequest, opts ...client.CallOption) (*grpc.GetMerchantUserResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) GetAdminUser(ctx context.Context, in *grpc.GetAdminUserRequest, opts ...client.CallOption) (*grpc.GetAdminUserResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) AcceptMerchantInvite(ctx context.Context, in *grpc.AcceptMerchantInviteRequest, opts ...client.CallOption) (*grpc.AcceptMerchantInviteResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) AcceptAdminInvite(ctx context.Context, in *grpc.AcceptAdminInviteRequest, opts ...client.CallOption) (*grpc.AcceptAdminInviteResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) CheckInviteToken(ctx context.Context, in *grpc.CheckInviteTokenRequest, opts ...client.CallOption) (*grpc.CheckInviteTokenResponse, error) {
+	panic("implement me")
+}
