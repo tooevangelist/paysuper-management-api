@@ -26,6 +26,11 @@ func Test_user(t *testing.T) {
 }
 
 func (suite *UserTestSuite) SetupTest() {
+	user := &common.AuthUser{
+		Id:    "ffffffffffffffffffffffff",
+		Email: "test@unit.test",
+	}
+
 	var e error
 	settings := test.DefaultSettings()
 	srv := common.Services{
@@ -33,6 +38,7 @@ func (suite *UserTestSuite) SetupTest() {
 		Geo:     mock.NewGeoIpServiceTestOk(),
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewUserRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
@@ -62,15 +68,12 @@ func (suite *UserTestSuite) TestUser_getMerchantList_Ok() {
 
 
 	res, err := suite.caller.Builder().
-		Method(http.MethodPost).
+		Method(http.MethodGet).
 		Path(common.AuthUserGroupPath + userMerchantsPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
-	shouldBe.Error(err)
-	hErr, ok := err.(*echo.HTTPError)
-	shouldBe.True(ok)
-	shouldBe.Equal(http.StatusBadRequest, hErr.Code)
+	shouldBe.NoError(err)
 	shouldBe.NotEmpty(res.Body.String())
 }
 
@@ -86,7 +89,7 @@ func (suite *UserTestSuite) TestUser_getMerchantList_ServiceError() {
 
 
 	res, err := suite.caller.Builder().
-		Method(http.MethodPost).
+		Method(http.MethodGet).
 		Path(common.AuthUserGroupPath + userMerchantsPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -104,7 +107,7 @@ func (suite *UserTestSuite) TestUser_getMerchantList_InternalError() {
 	billingService.On("GetMerchantsForUser", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
 
 	res, err := suite.caller.Builder().
-		Method(http.MethodPost).
+		Method(http.MethodGet).
 		Path(common.AuthUserGroupPath + userMerchantsPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
