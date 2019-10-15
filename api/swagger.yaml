@@ -3000,6 +3000,201 @@ definitions:
           "$ref": "#/definitions/billingRoyaltyReport"
         description: royalty reports
 
+  InviteUserAdmin:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email on which to send an invitation"
+      role:
+        type: string
+        example: "support"
+        description: "Role of user (risk_manager, financial, support, read_only)"
+
+  InviteUserResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  ResendInviteAdmin:
+    type: object
+    properties:
+      roleId:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "Role of invite identifier"
+
+  EmptyResponseWithStatus:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+
+  ListUsersResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      users:
+        type: array
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  AcceptInvite:
+    type: object
+    properties:
+      token:
+        type: string
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        description: "Invitation token"
+      firstName:
+        type: string
+        example: "John"
+        description: "First name of invitation user"
+      lastName:
+        type: string
+        example: "Malkovich"
+        description: "Last name of invitation user"
+
+  AcceptInviteResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        description: "User role"
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  CheckInviteToken:
+    type: object
+    properties:
+      token:
+        type: string
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        description: "Invitation token"
+
+  CheckInviteTokenResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role_id:
+        type: string
+        description: "Identifier of invitation"
+      role_type:
+        type: string
+        example: "admin"
+        description: "Type of invitation: admin or merchant"
+
+  InviteUserMerchant:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email on which to send an invitation"
+      projectRole:
+        type: array
+        items:
+          "$ref": "#/definitions/UserMerchantProjectRole"
+        description: "List of user roles for each project"
+
+  ResendInviteMerchant:
+    type: object
+    properties:
+      roleId:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "Role of invite identifier"
+
+  UserMerchantProjectRole:
+    type: object
+    properties:
+      projectId:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "Project identifier"
+      role:
+        type: string
+        example: "developer"
+        description: "Role of user (developer, accounting, read_only)"
+
+  UserRole:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "User role identifier"
+      user:
+        type: object
+        items:
+          "$ref": "#/definitions/UserRoleProfile"
+        description: "User information"
+      merchantId:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "Merchant identifier (only for merchant users)"
+      role:
+        type: string
+        example: "developer"
+        description: "Single role (for admin users or merchant owner)"
+      projectRole:
+        type: array
+        items:
+          "$ref": "#/definitions/UserMerchantProjectRole"
+        description: "List of user roles for each project"
+      createdAt:
+        type: string
+        example: "developer"
+        description: "User role (developer, accounting, read_only)"
+      updatedAt:
+        type: string
+        example: "developer"
+        description: "User role (developer, accounting, read_only)"
+
+  UserRoleProfile:
+    type: object
+    properties:
+      userId:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "User identifier"
+      firstName:
+        type: string
+        example: "John"
+        description: "First name of user"
+      lastName:
+        type: string
+        example: "Malkovich"
+        description: "Last name of user"
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email of user"
+      status:
+        type: string
+        example: "invited"
+        description: "Status of invitation: invited or approved"
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -7962,6 +8157,384 @@ paths:
       responses:
         "204":
           description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/users/invite":
+    post:
+      summary: Send invitation for admin user
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Send invitation to add user as administrator
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/InviteUserAdmin"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/InviteUserResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/users":
+    post:
+      summary: List of admin users
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of admin users
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListUsersResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/users/invite_resend":
+    post:
+      summary: Resend invitation for admin user
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Resend invitation to add user as administrator
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/ResendInviteAdmin"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/users/approve_invite":
+    post:
+      summary: Approve of invitation for admin user
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Approve of invitation for admin user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/AcceptInvite"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AcceptInviteResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/users/check_invite":
+    post:
+      summary: Check invitation token
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Check invitation token
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/CheckInviteToken"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/CheckInviteTokenResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/invite":
+    post:
+      summary: Send invitation for admin user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Send invitation to add user as administrator
+      parameters:
+        - description: Merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/InviteUserMerchant"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/InviteUserResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/invite_resend":
+    post:
+      summary: Resend invitation for admin user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Resend invitation to add user as administrator
+      parameters:
+        - description: Merchant identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/ResendInviteMerchant"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/approve_invite":
+    post:
+      summary: Approve of invitation for admin user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Approve of invitation for admin user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/AcceptInvite"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AcceptInviteResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/check_invite":
+    post:
+      summary: Check invitation token
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Check invitation token
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/CheckInviteToken"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/CheckInviteTokenResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/users":
+    post:
+      summary: List of merchant users
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of merchant users
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListUsersResponse'
         "400":
           description: Invalid request data
           schema:
