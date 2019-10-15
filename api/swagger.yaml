@@ -8195,7 +8195,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/users":
-    post:
+    get:
       summary: List of admin users
       tags:
         - Admin user roles
@@ -8503,7 +8503,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/merchants/{id}/users":
-    post:
+    get:
       summary: List of merchant users
       tags:
         - Merchant user roles
