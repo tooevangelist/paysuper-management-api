@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -349,8 +350,17 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 	pl, err := h.dispatch.Services.PayLink.GetPaylink(ctxReq, req)
 
 	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, paylinkServiceConst.ServiceName, "GetPaylink", req)
 		return ctx.Render(http.StatusNotFound, errorTemplateName, map[string]interface{}{})
 	}
+
+	go func() {
+		_, err := h.dispatch.Services.PayLink.IncrPaylinkVisits(context.TODO(), &paylink.PaylinkRequest{Id: paylinkId})
+
+		if err != nil {
+			common.LogSrvCallFailedGRPC(h.L(), err, paylinkServiceConst.ServiceName, "IncrPaylinkVisits", req)
+		}
+	}()
 
 	qParams := ctx.QueryParams()
 
@@ -388,14 +398,6 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 	if qs != "" {
 		inlineFormRedirectUrl += "?" + qs
 	}
-
-	go func() {
-		_, err := h.dispatch.Services.PayLink.IncrPaylinkVisits(ctxReq, &paylink.PaylinkRequest{Id: paylinkId})
-
-		if err != nil {
-			common.LogSrvCallFailedGRPC(h.L(), err, paylinkServiceConst.ServiceName, "IncrPaylinkVisits", req)
-		}
-	}()
 
 	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)
 }
