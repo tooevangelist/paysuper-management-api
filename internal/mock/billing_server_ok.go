@@ -1164,3 +1164,7 @@ func (s *BillingServerOkMock) GetPriceGroupByRegion(ctx context.Context, in *grp
 func (s *BillingServerOkMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*grpc.ListOrdersResponse, error) {
 	return &grpc.ListOrdersResponse{Status: http.StatusOK}, nil
 }
+
+func (s *BillingServerOkMock) ChangeMerchantManualPayouts(ctx context.Context, in *grpc.ChangeMerchantManualPayoutsRequest, opts ...client.CallOption) (*grpc.ChangeMerchantManualPayoutsResponse, error) {
+	return &grpc.ChangeMerchantManualPayoutsResponse{Status: http.StatusOK, Item: &billing.Merchant{}}, nil
+}
