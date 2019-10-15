@@ -99,7 +99,7 @@ func (suite *AdminUsersTestSuite) TestAdminUsers_GetList_Ok() {
 	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
 	billingService.On("GetAdminUsers", mock2.Anything, mock2.Anything).Return(&grpc.GetAdminUsersResponse{
 		Status: 200,
-		Users: []*billing.UserRoleAdmin{
+		Users: []*billing.UserRole{
 			{Id: bson.NewObjectId().Hex(), Role: "some_role"},
 		},
 	}, nil)
