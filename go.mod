@@ -19,11 +19,10 @@ require (
 	github.com/karlseguin/expect v1.0.1 // indirect
 	github.com/labstack/echo/v4 v4.1.6
 	github.com/mattn/go-colorable v0.1.4 // indirect
-	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191011140553-be2e01721e28
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191015091129-e9c636b9891d
 	github.com/paysuper/paysuper-recurring-repository v1.0.124
 	github.com/paysuper/paysuper-reporter v0.0.0-20191003072342-610371fc9395
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
@@ -38,8 +37,17 @@ require (
 )
 
 replace (
+	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.0
 	github.com/gogo/protobuf v0.0.0-20190410021324-65acae22fc9 => github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
+	github.com/golang/lint => github.com/golang/lint v0.0.0-20190227174305-8f45f776aaf1
 	github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
+	github.com/hashicorp/consul/api => github.com/hashicorp/consul/api v1.1.0
+	github.com/lucas-clemente/quic-go => github.com/lucas-clemente/quic-go v0.12.0
+	github.com/marten-seemann/qtls => github.com/marten-seemann/qtls v0.3.2
+	golang.org/x/sys => golang.org/x/sys v0.0.0-20190927073244-c990c680b611
+	gopkg.in/DATA-DOG/go-sqlmock.v1 => github.com/DATA-DOG/go-sqlmock v1.3.3
+	gopkg.in/urfave/cli.v1 => github.com/urfave/cli v1.21.0
+	sourcegraph.com/sourcegraph/go-diff => github.com/sourcegraph/go-diff v0.5.1
 )
 
 go 1.12

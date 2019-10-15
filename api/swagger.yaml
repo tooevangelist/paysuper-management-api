@@ -3371,7 +3371,7 @@ definitions:
       role:
         type: string
         example: "support"
-        description: "Role of user (risk_manager, financial, support, read_only)"
+        description: "Role of user (system_risk_manager, system_financial, system_support, system_view_only)"
 
   InviteUserResponse:
     type: object
@@ -3472,11 +3472,10 @@ definitions:
         type: string
         example: "test@paysuper.com"
         description: "Email on which to send an invitation"
-      projectRole:
-        type: array
-        items:
-          "$ref": "#/definitions/UserMerchantProjectRole"
-        description: "List of user roles for each project"
+      role:
+        type: string
+        example: "support"
+        description: "Role of user (merchant_developer, merchant_accounting, merchant_support, system_view_only)"
 
   ResendInviteMerchant:
     type: object
@@ -3485,18 +3484,6 @@ definitions:
         type: string
         example: "507f1f77bcf86cd799439011"
         description: "Role of invite identifier"
-
-  UserMerchantProjectRole:
-    type: object
-    properties:
-      projectId:
-        type: string
-        example: "507f1f77bcf86cd799439011"
-        description: "Project identifier"
-      role:
-        type: string
-        example: "developer"
-        description: "Role of user (developer, accounting, read_only)"
 
   UserRole:
     type: object
@@ -3517,12 +3504,7 @@ definitions:
       role:
         type: string
         example: "developer"
-        description: "Single role (for admin users or merchant owner)"
-      projectRole:
-        type: array
-        items:
-          "$ref": "#/definitions/UserMerchantProjectRole"
-        description: "List of user roles for each project"
+        description: "Role of user"
       createdAt:
         type: string
         example: "developer"
