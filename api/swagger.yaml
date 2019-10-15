@@ -8342,14 +8342,14 @@ paths:
 
   "/admin/api/v1/merchants/{id}/invite":
     post:
-      summary: Send invitation for admin user
+      summary: Send invitation for merchant user
       tags:
         - Merchant user roles
       consumes:
         - application/json
       produces:
         - application/json
-      description: Send invitation to add user as administrator
+      description: Send invitation to add user as merchant user
       parameters:
         - description: Merchant identifier
           in: path
@@ -8385,14 +8385,14 @@ paths:
 
   "/admin/api/v1/merchants/{id}/invite_resend":
     post:
-      summary: Resend invitation for admin user
+      summary: Resend invitation for merchant user
       tags:
         - Merchant user roles
       consumes:
         - application/json
       produces:
         - application/json
-      description: Resend invitation to add user as administrator
+      description: Resend invitation to add user as merchant user
       parameters:
         - description: Merchant identifier
           in: path
@@ -8428,14 +8428,14 @@ paths:
 
   "/admin/api/v1/merchants/approve_invite":
     post:
-      summary: Approve of invitation for admin user
+      summary: Approve of invitation for merchant user
       tags:
         - Merchant user roles
       consumes:
         - application/json
       produces:
         - application/json
-      description: Approve of invitation for admin user
+      description: Approve of invitation for merchant user
       parameters:
         - description: JSON request body
           in: body
