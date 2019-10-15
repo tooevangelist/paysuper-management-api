@@ -153,6 +153,9 @@ var (
 	ErrorMessageMerchantNotFound                  = NewManagementApiResponseError("ma000100", "merchant not found")
 	ErrorMessageCreateReportFile                  = NewManagementApiResponseError("ma000101", "unable to create report file")
 	ErrorMessageDownloadReportFile                = NewManagementApiResponseError("ma000102", "unable to download report file")
+	ErrorMessageUnableToSendInvite                = NewManagementApiResponseError("ma000103", "unable to send invite")
+	ErrorMessageUnableToAcceptInvite              = NewManagementApiResponseError("ma000104", "unable to accept invite")
+	ErrorMessageUnableToCheckInviteToken          = NewManagementApiResponseError("ma000105", "unable to check invite token")
 
 	ValidationErrors = map[string]*grpc.ResponseErrorMessage{
 		UserProfileFieldNumberOfEmployees: ErrorMessageIncorrectNumberOfEmployees,
