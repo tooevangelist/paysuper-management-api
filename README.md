@@ -1,12 +1,23 @@
+PaySuper Management API
+=====
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/paysuper/paysuper-management-api.svg?branch=master)](https://travis-ci.org/paysuper/paysuper-management-api.api)
 [![codecov](https://codecov.io/gh/paysuper/paysuper-management-api/branch/master/graph/badge.svg)](https://codecov.io/gh/paysuper/paysuper-management-api)
-[![Go Report Card](https://goreportcard.com/badge/github.com/paysuper/paysuper-management-api)](https://goreportcard.com/report/github.com/paysuper/paysuper-management-api) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=paysuper_paysuper-management-api&metric=alert_status)](https://sonarcloud.io/dashboard?id=paysuper_paysuper-management-api)
+[![Go Report Card](https://goreportcard.com/badge/github.com/paysuper/paysuper-management-api)](https://goreportcard.com/report/github.com/paysuper/paysuper-management-api)
 
-The documentation under construction
+PaySuper is a unique, simple payment toolkit designed to make developers self-reliant. It’s an open-source payment service 
+with a highly customizable payment form, an intuitive API, and comprehensible, eye-catching reports.
 
-### Accounting currency
+Management API is the [dashboard](https://github.com/paysuper/paysuper-management-server) and [payment form](https://github.com/paysuper/paysuper-payment-form)
+REST API backend. Do not handle any payment processing business logic - just proxy all requests to [billing server](https://github.com/paysuper/paysuper-billing-server)
+micro-service.
+
+## Getting Started
+
+UNDONE
+
+## Accounting currency
 
 1. PSP Currency - used to save the amount of the payment transaction in the PSP accounting currency. PSP currency can 
 be set using the environment variable named "PSP_ACCOUNTING_CURRENCY"
