@@ -3508,11 +3508,11 @@ definitions:
       createdAt:
         type: string
         example: "developer"
-        description: "User role (developer, accounting, read_only)"
+        description: "Date of creation"
       updatedAt:
         type: string
         example: "developer"
-        description: "User role (developer, accounting, read_only)"
+        description: "Date of updating"
 
   UserRoleProfile:
     type: object
