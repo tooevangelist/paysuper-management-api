@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-payment-link/proto"
+	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"io/ioutil"
 	"strconv"
 )
@@ -504,19 +504,8 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 
 	structure := i.(*grpc.ChangeMerchantDataRequest)
 	structure.MerchantId = merchantId
-	structure.AgreementType = mRsp.Item.AgreementType
 	structure.HasMerchantSignature = mRsp.Item.HasMerchantSignature
 	structure.HasPspSignature = mRsp.Item.HasPspSignature
-	structure.AgreementSentViaMail = mRsp.Item.AgreementSentViaMail
-	structure.MailTrackingLink = mRsp.Item.MailTrackingLink
-
-	if v, ok := req[RequestParameterAgreementType]; ok {
-		if tv, ok := v.(float64); !ok {
-			return ErrorMessageAgreementTypeIncorrectType
-		} else {
-			structure.AgreementType = int32(tv)
-		}
-	}
 
 	if v, ok := req[RequestParameterHasMerchantSignature]; ok {
 		if tv, ok := v.(bool); !ok {
@@ -531,22 +520,6 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 			return ErrorMessageHasPspSignatureIncorrectType
 		} else {
 			structure.HasPspSignature = tv
-		}
-	}
-
-	if v, ok := req[RequestParameterAgreementSentViaMail]; ok {
-		if tv, ok := v.(bool); !ok {
-			return ErrorMessageAgreementSentViaMailIncorrectType
-		} else {
-			structure.AgreementSentViaMail = tv
-		}
-	}
-
-	if v, ok := req[RequestParameterMailTrackingLink]; ok {
-		if tv, ok := v.(string); !ok {
-			return ErrorMessageMailTrackingLinkIncorrectType
-		} else {
-			structure.MailTrackingLink = tv
 		}
 	}
 

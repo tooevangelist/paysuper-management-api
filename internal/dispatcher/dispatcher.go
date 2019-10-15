@@ -4,9 +4,9 @@ import (
 	"context"
 	jwtverifier "github.com/ProtocolONE/authone-jwt-verifier-golang"
 	jwtMiddleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
-	"github.com/ProtocolONE/go-core/invoker"
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
@@ -26,7 +26,7 @@ type Dispatcher struct {
 // dispatch
 func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 
-	t, e := template.New("").Funcs(common.FuncMap).ParseGlob(d.cfg.WorkDir + "/web/template/*.html")
+	t, e := template.New("").Funcs(common.FuncMap).ParseGlob(d.cfg.WorkDir + "/assets/web/template/*.html")
 	if e != nil {
 		return e
 	}
@@ -65,7 +65,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 }
 
 func (d *Dispatcher) commonRoutes(echoHttp *echo.Echo) {
-	echoHttp.Static("/", d.cfg.WorkDir+"/web/static")
+	echoHttp.Static("/", d.cfg.WorkDir+"/assets/web/static")
 	echoHttp.Static("/spec", d.cfg.WorkDir+"/api")
 	echoHttp.GET("/docs", func(ctx echo.Context) error {
 		return ctx.Render(http.StatusOK, "docs.html", map[string]interface{}{})

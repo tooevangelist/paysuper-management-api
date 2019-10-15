@@ -366,10 +366,6 @@ func (s *BillingServerOkTemporaryMock) SetMerchantS3Agreement(
 	return &grpc.ChangeMerchantDataResponse{}, nil
 }
 
-func (s *BillingServerOkTemporaryMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
-	return &billing.OrderPaginate{}, nil
-}
-
 func (s *BillingServerOkTemporaryMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
 	return &grpc.ListProjectsResponse{}, nil
 }
@@ -879,4 +875,16 @@ func (s *BillingServerOkTemporaryMock) GetRecommendedPriceByPriceGroup(ctx conte
 
 func (s *BillingServerOkTemporaryMock) GetRecommendedPriceByConversion(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
 	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) CheckSkuAndKeyProject(ctx context.Context, in *grpc.CheckSkuAndKeyProjectRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPriceGroupByRegion(ctx context.Context, in *grpc.GetPriceGroupByRegionRequest, opts ...client.CallOption) (*grpc.GetPriceGroupByRegionResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*grpc.ListOrdersResponse, error) {
+	return &grpc.ListOrdersResponse{}, nil
 }

@@ -1,7 +1,5 @@
-metric:
-  disabled: true
-tracing:
-  disabled: true
+http:
+  bind: :3001
 micro:
   selector: static
   name: p1payapi
@@ -15,3 +13,7 @@ dispatcher:
     awsAccessKeyIdReporter: "unknown"
     awsSecretAccessKeyReporter: "unknown"
     awsBucketReporter: "unknown"
+    auth1:
+      clientId: "unknown"
+      clientSecret: "unknown"
+      redirectUrl: "unknown"

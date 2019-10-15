@@ -3,7 +3,7 @@ os:
 language: go
 sudo: required
 go:
-- 1.11.x
+- 1.12.x
 dist: trusty
 addons:
   sonarcloud:

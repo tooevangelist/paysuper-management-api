@@ -2,7 +2,7 @@ package http
 
 import (
 	"context"
-	"github.com/ProtocolONE/go-core/entrypoint"
+	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
 	_ "github.com/micro/go-plugins/broker/rabbitmq"
 	_ "github.com/micro/go-plugins/registry/kubernetes"
 	_ "github.com/micro/go-plugins/transport/grpc"
@@ -72,5 +72,5 @@ var (
 
 func init() {
 	// pflags
-	Cmd.PersistentFlags().StringP(http.UnmarshalKeyBind, "b", ":8081", "bind address")
+	Cmd.PersistentFlags().StringP(http.UnmarshalKeyBind, "b", ":0000", "bind address")
 }

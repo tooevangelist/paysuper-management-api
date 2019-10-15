@@ -7,12 +7,12 @@ package daemon
 
 import (
 	"context"
-	"github.com/ProtocolONE/go-core/config"
-	"github.com/ProtocolONE/go-core/invoker"
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/metric"
-	"github.com/ProtocolONE/go-core/provider"
-	"github.com/ProtocolONE/go-core/tracing"
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/metric"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/tracing"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher"
 	"github.com/paysuper/paysuper-management-api/internal/handlers"
 	"github.com/paysuper/paysuper-management-api/internal/validators"
@@ -53,7 +53,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	configuration, cleanup6, err := tracing.ProviderCfg(configurator)
+	tracingConfig, cleanup6, err := tracing.ProviderCfg(configurator)
 	if err != nil {
 		cleanup5()
 		cleanup4()
@@ -62,7 +62,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	tracer, cleanup7, err := tracing.Provider(ctx, configuration, zap)
+	tracer, cleanup7, err := tracing.Provider(ctx, tracingConfig, zap)
 	if err != nil {
 		cleanup6()
 		cleanup5()
@@ -101,7 +101,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		return nil, nil, err
 	}
 	services := dispatcher.ProviderServices(microMicro)
-	validatorSet, cleanup10, err := validators.Provider(services)
+	validatorSet, cleanup10, err := validators.Provider(services, awareSet)
 	if err != nil {
 		cleanup9()
 		cleanup8()
@@ -291,7 +291,7 @@ func BuildMicro(ctx context.Context, initial config.Initial, observer invoker.Ob
 		cleanup()
 		return nil, nil, err
 	}
-	configuration, cleanup6, err := tracing.ProviderCfg(configurator)
+	tracingConfig, cleanup6, err := tracing.ProviderCfg(configurator)
 	if err != nil {
 		cleanup5()
 		cleanup4()
@@ -300,7 +300,7 @@ func BuildMicro(ctx context.Context, initial config.Initial, observer invoker.Ob
 		cleanup()
 		return nil, nil, err
 	}
-	tracer, cleanup7, err := tracing.Provider(ctx, configuration, zap)
+	tracer, cleanup7, err := tracing.Provider(ctx, tracingConfig, zap)
 	if err != nil {
 		cleanup6()
 		cleanup5()

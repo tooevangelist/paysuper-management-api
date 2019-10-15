@@ -2,10 +2,10 @@ package common
 
 import (
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	paylink "github.com/paysuper/paysuper-payment-link/proto"
+	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
 	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
 	tax_service "github.com/paysuper/paysuper-tax-service/proto"

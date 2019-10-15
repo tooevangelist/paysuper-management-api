@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/ProtocolONE/go-core/config"
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	awsWrapper "github.com/paysuper/paysuper-aws-manager"
@@ -486,7 +486,7 @@ func (h *OnboardingRoute) getAgreementStructure(
 	}
 
 	data := &OnboardingFileData{
-		Url: fmt.Sprintf(agreementUrlMask, ctx.Request().URL.Scheme, ctx.Request().URL.Host, merchantId),
+		Url: fmt.Sprintf(agreementUrlMask, h.cfg.HttpScheme, ctx.Request().Host, merchantId),
 		Metadata: &OnboardingFileMetadata{
 			Name:        fi.Name(),
 			Extension:   ext,

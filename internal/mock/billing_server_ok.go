@@ -9,6 +9,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"net/http"
 )
 
 type BillingServerOkMock struct{}
@@ -115,7 +116,7 @@ func (s *BillingServerOkMock) GetMerchantBy(
 	if in.MerchantId == SomeMerchantId3 {
 		OnboardingMerchantMock.Status = pkg.MerchantStatusDraft
 	} else {
-		OnboardingMerchantMock.Status = pkg.MerchantStatusOnReview
+		OnboardingMerchantMock.Status = pkg.MerchantStatusAgreementSigning
 	}
 
 	rsp := &grpc.GetMerchantResponse{
@@ -493,10 +494,6 @@ func (s *BillingServerOkMock) GetProduct(ctx context.Context, in *grpc.RequestPr
 
 func (s *BillingServerOkMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	return &grpc.EmptyResponse{}, nil
-}
-
-func (s *BillingServerOkMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
-	return &billing.OrderPaginate{Count: 1, Items: []*billing.Order{}}, nil
 }
 
 func (s *BillingServerOkMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
@@ -1149,4 +1146,21 @@ func (s *BillingServerOkMock) GetRecommendedPriceByPriceGroup(ctx context.Contex
 
 func (s *BillingServerOkMock) GetRecommendedPriceByConversion(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
 	panic("implement me")
+}
+
+func (s *BillingServerOkMock) CheckSkuAndKeyProject(ctx context.Context, in *grpc.CheckSkuAndKeyProjectRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPriceGroupByRegion(ctx context.Context, in *grpc.GetPriceGroupByRegionRequest, opts ...client.CallOption) (*grpc.GetPriceGroupByRegionResponse, error) {
+	return &grpc.GetPriceGroupByRegionResponse{
+		Status: 200,
+		Group: &billing.PriceGroup{
+			Id: "some id",
+		},
+	}, nil
+}
+
+func (s *BillingServerOkMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*grpc.ListOrdersResponse, error) {
+	return &grpc.ListOrdersResponse{Status: http.StatusOK}, nil
 }

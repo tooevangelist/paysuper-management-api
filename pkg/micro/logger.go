@@ -2,7 +2,7 @@ package micro
 
 import (
 	"fmt"
-	"github.com/ProtocolONE/go-core/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	logIface "github.com/go-log/log"
 )
 

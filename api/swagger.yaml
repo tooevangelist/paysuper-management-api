@@ -1263,7 +1263,7 @@ definitions:
   onboarding.Merchant.ChangeStatus:
     properties:
       status:
-        description: new status identifier of merchant
+        description: "new status identifier of merchant. possible statuses: 5 - deleted, 6 - rejected"
         type: integer
       message:
         description: string description to new status
@@ -1456,20 +1456,12 @@ definitions:
 
   onboarding.Merchant.ChangeAgreementDataRequest:
     properties:
-      agreement_type:
-        description: "merchant agreement type. allowed values: 1 - paper agreement; 2 - e-sign agreement;"
       has_psp_signature:
         description: "flag for set peysuper signature on the agreement"
         type: boolean
       has_merchant_signature:
         description: "flag for set merchant signature on the agreement"
         type: boolean
-      agreement_sent_via_mail:
-        description: "mark agreement as sent via email"
-        type: boolean
-      mail_tracking_link:
-        description: "tracking link to mail"
-        type: string
 
   onboarding.Merchant.PrintableAgreementData.Metadata:
     properties:
@@ -2730,6 +2722,284 @@ definitions:
         description: object can contain any other information about product. object must contain only string values
         type: object
 
+  product.create_or_update:
+    properties:
+      project_id:
+        description: project identifier for which created product
+        type: string
+      object:
+        description: system constant conteined returning object type. for product object always must be - product
+        type: string
+      type:
+        description: product type
+        type: string
+      sku:
+        description: product sku (simple slug name)
+        type: string
+      name:
+        description: "product names map in other language: {\"en\": \"project name\", \"ru\": \"имя проекта\"}"
+        type: object
+      default_currency:
+        description: default currency for selling product. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+      enabled:
+        description: true is product is enabled
+        type: boolean
+      prices:
+        description: array of available prices for product
+        type: array
+        items:
+          $ref: '#/definitions/price'
+      description:
+        description: "product short descriptions map in other language: {\"en\": \"project short description\", \"ru\": \"короткое описание проекта\"}"
+        type: object
+      long_description:
+        description: "product long descriptions map in other language: {\"en\": \"project long description\", \"ru\": \"длинное описание проекта\"}"
+        type: object
+      created_at:
+        description: time when retes record was created
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: time when retes record was updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+      images:
+        description: array of product images. if images not set then field can be null
+        type: array
+        items:
+          type: string
+      url:
+        description: url to product on project side
+        type: string
+      metadata:
+        description: object can contain any other information about product. object must contain only string values
+        type: object
+
+  billingRoyaltyReport:
+    type: object
+    properties:
+      id:
+        type: string
+        description: report id
+      merchant_id:
+        type: string
+        description: merchant id
+      created_at:
+        type: string
+        format: date-time
+        description: date of report creation
+      updated_at:
+        type: string
+        format: date-time
+        description: date of report last update
+      payout_date:
+        type: string
+        format: date-time
+        description: date when report was paid
+      status:
+        type: string
+        description: status of report
+      period_from:
+        type: string
+        format: date-time
+        description: start of report time period
+      period_to:
+        type: string
+        format: date-time
+        description: end of report time period
+      accept_expire_at:
+        type: string
+        format: date-time
+        description: date when report will be auto-accepted, if merchant didn't accept or start a dispute yet
+      accepted_at:
+        type: string
+        format: date-time
+        description: date when report was accepted
+      totals:
+        "$ref": "#/definitions/billingRoyaltyReportTotals"
+        description: totals section of report
+      currency:
+        type: string
+        description: currency of report
+      summary:
+        "$ref": "#/definitions/billingRoyaltyReportSummary"
+        description: summary section
+      dispute_reason:
+        type: string
+        description: reason of dispute (if it was started)
+      dispute_started_at:
+        type: string
+        format: date-time
+        description: date of dispute beginning (if it was started)
+      dispute_closed_at:
+        type: string
+        format: date-time
+        description: date of dispute resolve (if it was started)
+      is_auto_accepted:
+        type: boolean
+        format: boolean
+        description: flag of auto-acceptance
+      payout_document_id:
+        type: string
+        description: cross-link to payout invoice, that includes this royalty report
+
+  billingRoyaltyReportCorrectionItem:
+    type: object
+    properties:
+      accounting_entry_id:
+        type: string
+        description: linked accounting entry id
+      amount:
+        type: number
+        format: double
+        description: amount of correction
+      currency:
+        type: string
+        description: currency
+      reason:
+        type: string
+        description: reason if correction
+      entry_date:
+        type: string
+        format: date-time
+        description: date of correction
+
+  billingRoyaltyReportProductSummaryItem:
+    type: object
+    properties:
+      product:
+        type: string
+        description: product or project name
+      region:
+        type: string
+        description: country ISO Alpha2 code
+      total_transactions:
+        type: integer
+        format: int32
+        description: total number of transactions for current product/project in current country (including sales and returns)
+      sales_count:
+        type: integer
+        format: int32
+        description: number of sales for current product/project in current country
+      gross_sales_amount:
+        type: number
+        format: double
+        description: gross amount of sales for current product/project in current country
+      returns_count:
+        type: integer
+        format: int32
+        description: number of returns for current product/project in current country
+      gross_returns_amount:
+        type: number
+        format: double
+        description: gross amount of returns for current product/project in current country
+      gross_total_amount:
+        type: number
+        format: double
+        description: resulting gross amount for current product/project in current country (sales minus returns)
+      total_fees:
+        type: number
+        format: double
+        description: fees amount for current product/project in current country
+      total_vat:
+        type: number
+        format: double
+        description: vat amount for current product/project in current country
+      payout_amount:
+        type: number
+        format: double
+        description: payout amount for current product/project in current country
+
+  billingRoyaltyReportSummary:
+    type: object
+    properties:
+      products_items:
+        type: array
+        items:
+          "$ref": "#/definitions/billingRoyaltyReportProductSummaryItem"
+        description: summary details for each product/project and country
+      products_total:
+        "$ref": "#/definitions/billingRoyaltyReportProductSummaryItem"
+        description: summary totals for all product/project and country
+      corrections:
+        type: array
+        items:
+          "$ref": "#/definitions/billingRoyaltyReportCorrectionItem"
+        description: list of corrections applied (if any)
+      rolling_reserves:
+        type: array
+        items:
+          "$ref": "#/definitions/billingRoyaltyReportCorrectionItem"
+        description: list of rolling reserves applied (if any)
+
+  billingRoyaltyReportTotals:
+    type: object
+    properties:
+      transactions_count:
+        type: integer
+        format: int32
+        description: total transactions count (including sales and returns)
+      fee_amount:
+        type: number
+        format: double
+        description: fees amount
+      vat_amount:
+        type: number
+        format: double
+        description: vat amount
+      payout_amount:
+        type: number
+        format: double
+        description: payput amount
+      rolling_reserve_amount:
+        type: number
+        format: double
+        description: applied rolling reserve total amount
+      correction_amount:
+        type: number
+        format: double
+        description: applied corrections total amount
+
+  grpcChangeRoyaltyReport:
+    type: object
+    properties:
+      status:
+        type: string
+        description: new report status
+      reason:
+        type: string
+        required: true
+        description: correction reason
+      correction:
+        type: object
+        schema:
+          "$ref": "#/definitions/grpcChangeRoyaltyReportCorrection"
+
+  grpcChangeRoyaltyReportCorrection:
+    type: object
+    properties:
+      amount:
+        type: number
+        format: double
+        required: true
+        description: correction amount (in report's currency)
+      reason:
+        type: string
+        required: true
+        description: correction reason
+
+  grpcRoyaltyReportsPaginate:
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        description: total items count
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/billingRoyaltyReport"
+        description: royalty reports
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -3018,6 +3288,53 @@ paths:
       summary: Get order data
       tags:
         - Order
+  /api/v1/orders/{id}/platform:
+    post:
+      consumes:
+        - application/json
+      description: Change platform for order
+      parameters:
+        - description: Order unique identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: platform change request
+          in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              platform:
+                type: string
+      produces:
+        - application/json
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Change platform for order
+      tags:
+        - Order
   /admin/api/v1/projects:
     get:
       consumes:
@@ -3222,6 +3539,57 @@ paths:
       summary: Update project
       tags:
         - Project
+
+  /admin/api/v1/projects/{id}/sku:
+    post:
+      consumes:
+        - application/json
+      description: Update project for authenticated merchant
+      parameters:
+        - description: Project object with new data
+          in: body
+          name: data
+          required: true
+          schema:
+            type: object
+            properties:
+              sku:
+                type: string
+                example: my_awesome_sku_001
+        - description: Project identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Check sku+project unique
+      tags:
+        - Project
+
   /order/create:
     get:
       consumes:
@@ -3809,7 +4177,7 @@ paths:
     get:
       consumes:
         - application/json
-      description: Get recommended prices for regions by price groups
+      description: Calculation of recommended prices based on price ranges as in Steam, taking into account regional factors.
       parameters:
         - description: base price in USD
           in: query
@@ -3829,14 +4197,14 @@ paths:
           description: Error description
           schema:
             type: string
-      summary: Get recommended prices for regions
+      summary: Get recommended prices for regions by price groups
       tags:
         - Price group
   /api/v1/pricing/recommended/conversion:
     get:
       consumes:
         - application/json
-      description: Get recommended prices for regions by currency conversion
+      description: Calculation of recommended prices based on exchange rates.
       parameters:
         - description: base price in USD
           in: query
@@ -3856,7 +4224,7 @@ paths:
           description: Error description
           schema:
             type: string
-      summary: Get recommended prices for regions
+      summary: Get recommended prices for regions by currency conversion
       tags:
         - Price group
 
@@ -4816,7 +5184,7 @@ paths:
         - XAPISignatureHeader: []
       summary: Get product prices
       tags:
-        - Product
+        - Products
       consumes:
         - application/json
       produces:
@@ -4848,7 +5216,7 @@ paths:
         - XAPISignatureHeader: []
       summary: Set product prices
       tags:
-        - Product
+        - Products
       consumes:
         - application/json
       produces:
@@ -6867,7 +7235,9 @@ paths:
         - description: filter by document's status
           in: query
           name: status
-          type: string
+          type: array
+          items:
+            type: string
         - description: filter by document's merchant
           in: query
           name: merchant_id
@@ -7142,6 +7512,141 @@ paths:
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
+    post:
+      consumes:
+        - application/json
+      description: Create product
+      summary: Create product with json request
+      parameters:
+        - description: Product create data
+          in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/product.create_or_update'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Created product
+          schema:
+            $ref: '#/definitions/product'
+        "400":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      tags:
+        - Products
+
+  "/admin/api/v1/products/{id}":
+    get:
+      summary: Get a product by it's id for authorised user
+      tags:
+        - Products
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get a product by it's id for authorised user
+      parameters:
+        - description: Product identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/product'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      consumes:
+        - application/json
+      description: Update product
+      summary: Update product with json request
+      parameters:
+        - description: Product identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: Product create data
+          name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/product.create_or_update'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Updated product
+          schema:
+            $ref: '#/definitions/product'
+        "400":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      tags:
+        - Products
+    delete:
+      consumes:
+        - application/x-www-form-urlencoded
+      tags:
+        - Products
+      description: Delete product by it's id for authorised user
+      summary: Delete product
+      parameters:
+        - description: Product identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "204":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error
+          schema:
+            $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/products/merchant/{id}":
     get:
@@ -7205,5 +7710,271 @@ paths:
             $ref: '#/definitions/model.Error'
         500:
           description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports":
+    get:
+      summary: Get a list of royalty reports, matching to filters
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get a list of royalty reports, matching to filters
+      parameters:
+        - description: period start date
+          in: query
+          name: period_from
+          type: string
+          required: false
+        - description: period end date
+          in: query
+          name: period_to
+          type: string
+          required: false
+        - description: maximum number of returning reports per page. default value is 100
+          in: query
+          name: limit
+          type: integer
+          required: false
+        - description: offset reports per page
+          in: query
+          name: offset
+          type: integer
+          required: false
+        - description: merchant id
+          in: query
+          name: merchant_id
+          type: string
+          required: false
+        - description: matching status list
+          in: query
+          name: status[]
+          required: false
+          type: array
+          items:
+            type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/grpcRoyaltyReportsPaginate'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}":
+    get:
+      summary: Get an royalty reports by it's id
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get an royalty reports by it's id
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/billingRoyaltyReport'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}/transactions":
+    get:
+      summary: Get a list of transactions, included in royalty report
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get a list of transactions, included in royalty report
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/order.list.public'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}/accept":
+    post:
+      summary: Accept royalty report by merchant
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Accept royalty report by merchant
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}/decline":
+    get:
+      summary: Start royalty report dispute
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Start royalty report dispute
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: dispute reason
+          in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              dispute_reason:
+                type: string
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}/change":
+    get:
+      summary: Change royalty report
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Change royalty report
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: changes
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/grpcChangeRoyaltyReport"
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'

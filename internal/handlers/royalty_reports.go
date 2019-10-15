@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -38,7 +38,7 @@ func (h *RoyaltyReportsRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(royaltyReportsPath, h.getRoyaltyReportsList)
 	groups.AuthUser.GET(royaltyReportsIdPath, h.getRoyaltyReport)
 	groups.AuthUser.GET(royaltyReportsTransactionsPath, h.listRoyaltyReportOrders)
-	groups.AuthUser.POST(royaltyReportsAcceptPath, h.MerchantReviewRoyaltyReport)
+	groups.AuthUser.POST(royaltyReportsAcceptPath, h.merchantReviewRoyaltyReport)
 	groups.AuthUser.POST(royaltyReportsDeclinePath, h.merchantDeclineRoyaltyReport)
 	groups.AuthUser.POST(royaltyReportsChangePath, h.changeRoyaltyReport)
 }
@@ -124,7 +124,7 @@ func (h *RoyaltyReportsRoute) listRoyaltyReportOrders(ctx echo.Context) error {
 
 // Accept royalty report by merchant
 // POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/accept
-func (h *RoyaltyReportsRoute) MerchantReviewRoyaltyReport(ctx echo.Context) error {
+func (h *RoyaltyReportsRoute) merchantReviewRoyaltyReport(ctx echo.Context) error {
 
 	req := &grpc.MerchantReviewRoyaltyReportRequest{
 		IsAccepted: true,
@@ -145,13 +145,22 @@ func (h *RoyaltyReportsRoute) MerchantReviewRoyaltyReport(ctx echo.Context) erro
 
 // Decline royalty report by merchant and start a dispute
 // POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/decline
+//
+// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
+//      -H "Authorization: Bearer %access_token_here%" \
+//      -d '{"dispute_reason": "bla-bla-bla"}' \
+//      https://api.paysuper.online/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/decline
 func (h *RoyaltyReportsRoute) merchantDeclineRoyaltyReport(ctx echo.Context) error {
+	req := &grpc.MerchantReviewRoyaltyReportRequest{}
+	err := ctx.Bind(req)
 
-	req := &grpc.MerchantReviewRoyaltyReportRequest{
-		IsAccepted: false,
-		Ip:         ctx.RealIP(),
-		ReportId:   ctx.Param(common.RequestParameterId),
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.NewValidationError(err.Error()))
 	}
+
+	req.IsAccepted = false
+	req.Ip = ctx.RealIP()
+	req.ReportId = ctx.Param(common.RequestParameterId)
 
 	res, err := h.dispatch.Services.Billing.MerchantReviewRoyaltyReport(ctx.Request().Context(), req)
 	if err != nil {

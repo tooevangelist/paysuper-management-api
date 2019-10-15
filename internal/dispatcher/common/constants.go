@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/ProtocolONE/go-core/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"regexp"
 )
@@ -101,6 +101,10 @@ const (
 	QueryParameterNameLimit  = "limit"
 	QueryParameterNameOffset = "offset"
 	QueryParameterNameSort   = "sort[]"
+
+	QueryParameterNameUtmMedium   = "utm_medium"
+	QueryParameterNameUtmCampaign = "utm_campaign"
+	QueryParameterNameUtmSource   = "utm_source"
 
 	ErrorMessageMask = "field validation for '%s' failed on the '%s' tag"
 

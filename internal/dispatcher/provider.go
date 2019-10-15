@@ -2,12 +2,12 @@ package dispatcher
 
 import (
 	"context"
-	"github.com/ProtocolONE/go-core/config"
-	"github.com/ProtocolONE/go-core/invoker"
-	"github.com/ProtocolONE/go-core/provider"
 	jwtverifier "github.com/ProtocolONE/authone-jwt-verifier-golang"
 	geoip "github.com/ProtocolONE/geoip-service/pkg"
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
+	"github.com/ProtocolONE/go-core/v2/pkg/config"
+	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/wire"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -16,7 +16,7 @@ import (
 	"github.com/paysuper/paysuper-management-api/internal/validators"
 	"github.com/paysuper/paysuper-management-api/pkg/micro"
 	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
-	paylink "github.com/paysuper/paysuper-payment-link/proto"
+	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
 	reporterPkg "github.com/paysuper/paysuper-reporter/pkg"
@@ -38,8 +38,7 @@ func ProviderCfg(cfg config.Configurator) (*Config, func(), error) {
 
 // ProviderGlobalCfg
 func ProviderGlobalCfg(cfg config.Configurator) (*common.Config, func(), error) {
-	c := &common.Config{
-	}
+	c := &common.Config{}
 	e := cfg.UnmarshalKey(common.UnmarshalGlobalConfigKey, c)
 	return c, func() {}, e
 }

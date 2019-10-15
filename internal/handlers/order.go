@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -11,7 +11,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
-	"github.com/paysuper/paysuper-payment-link/proto"
+	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"net/http"
 	"time"
 )
@@ -252,14 +252,14 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 
 	response := &CreateOrderJsonProjectResponse{
 		Id:             order.Uuid,
-		PaymentFormUrl: fmt.Sprintf(pkg.OrderInlineFormUrlMask, ctx.Request().URL.Scheme, ctx.Request().URL.Host, order.Uuid),
+		PaymentFormUrl: fmt.Sprintf(pkg.OrderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, order.Uuid),
 	}
 
 	if h.cfg.ReturnPaymentForm {
 		req2 := &grpc.PaymentFormJsonDataRequest{
 			OrderId: order.Uuid,
-			Scheme:  ctx.Request().URL.Scheme,
-			Host:    ctx.Request().URL.Host,
+			Scheme:  h.cfg.HttpScheme,
+			Host:    ctx.Request().Host,
 			Ip:      ctx.RealIP(),
 		}
 		rsp2, err := h.dispatch.Services.Billing.PaymentFormJsonDataProcess(ctxReq, req2)
@@ -290,8 +290,8 @@ func (h *OrderRoute) getOrderForm(ctx echo.Context) error {
 
 	req := &grpc.PaymentFormJsonDataRequest{
 		OrderId: id,
-		Scheme:  ctx.Request().URL.Scheme,
-		Host:    ctx.Request().URL.Host,
+		Scheme:  h.cfg.HttpScheme,
+		Host:    ctx.Request().Host,
 		Locale:  ctx.Request().Header.Get(common.HeaderAcceptLanguage),
 		Ip:      ctx.RealIP(),
 	}
@@ -354,6 +354,8 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		return ctx.Render(http.StatusNotFound, errorTemplateName, map[string]interface{}{})
 	}
 
+	qParams := ctx.QueryParams()
+
 	oReq := &billing.OrderCreateRequest{
 		ProjectId: pl.ProjectId,
 		PayerIp:   ctx.RealIP(),
@@ -361,18 +363,14 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		PrivateMetadata: map[string]string{
 			"PaylinkId": paylinkId,
 		},
-		IssuerUrl:  ctx.Request().Header.Get(common.HeaderReferer),
-		IsEmbedded: false,
-	}
-	params := ctx.QueryParams()
-	if v, ok := params[common.RequestParameterUtmSource]; ok {
-		oReq.PrivateMetadata[common.RequestParameterUtmSource] = v[0]
-	}
-	if v, ok := params[common.RequestParameterUtmMedium]; ok {
-		oReq.PrivateMetadata[common.RequestParameterUtmMedium] = v[0]
-	}
-	if v, ok := params[common.RequestParameterUtmCampaign]; ok {
-		oReq.PrivateMetadata[common.RequestParameterUtmCampaign] = v[0]
+		Type:                pl.ProductsType,
+		IssuerUrl:           ctx.Request().Header.Get(common.HeaderReferer),
+		IsEmbedded:          false,
+		IssuerReferenceType: pkg.OrderIssuerReferenceTypePaylink,
+		IssuerReference:     paylinkId,
+		UtmMedium:           qParams.Get(common.QueryParameterNameUtmMedium),
+		UtmCampaign:         qParams.Get(common.QueryParameterNameUtmCampaign),
+		UtmSource:           qParams.Get(common.QueryParameterNameUtmSource),
 	}
 
 	orderResponse, err := h.dispatch.Services.Billing.OrderCreateProcess(ctxReq, oReq)
@@ -386,7 +384,7 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		return echo.NewHTTPError(int(orderResponse.Status), orderResponse.Message)
 	}
 
-	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, ctx.Request().URL.Scheme, ctx.Request().URL.Host, orderResponse.Item.Uuid)
+	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, orderResponse.Item.Uuid)
 	qs := ctx.QueryString()
 
 	if qs != "" {

@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/ProtocolONE/go-core/logger"
-	"github.com/ProtocolONE/go-core/provider"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
+	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	projectsPath   = "/projects"
-	projectsIdPath = "/projects/:id"
+	projectsPath    = "/projects"
+	projectsIdPath  = "/projects/:id"
+	projectsSkuPath = "/projects/:id/sku"
 )
 
 type ProjectRoute struct {
@@ -37,6 +38,7 @@ func (h *ProjectRoute) Route(groups *common.Groups) {
 	groups.AuthUser.POST(projectsPath, h.createProject)
 	groups.AuthUser.PATCH(projectsIdPath, h.updateProject)
 	groups.AuthUser.DELETE(projectsIdPath, h.deleteProject)
+	groups.AuthUser.POST(projectsSkuPath, h.checkSku)
 }
 
 func (h *ProjectRoute) createProject(ctx echo.Context) error {
@@ -172,4 +174,30 @@ func (h *ProjectRoute) deleteProject(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res)
+}
+func (h *ProjectRoute) checkSku(ctx echo.Context) error {
+	req := &grpc.CheckSkuAndKeyProjectRequest{}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	req.ProjectId = ctx.Param(common.RequestParameterId)
+
+	if err := h.dispatch.Validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.CheckSkuAndKeyProject(ctx.Request().Context(), req)
+
+	if err != nil {
+		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }

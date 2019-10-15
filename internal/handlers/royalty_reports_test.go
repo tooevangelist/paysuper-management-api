@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"net/http"
+	"net/url"
 	"testing"
 )
 
@@ -40,11 +41,16 @@ func (suite *RoyaltyReportsTestSuite) SetupTest() {
 
 func (suite *RoyaltyReportsTestSuite) TearDownTest() {}
 
-func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_getRoyaltyReportsList() {
+func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_getRoyaltyReportsList_Ok() {
+	q := make(url.Values)
+	q.Add("status[]", "pending")
+	q.Add("status[]", "accepted")
+	q.Set("merchant_id", "5ced34d689fce60bf444082b")
+	q.Set("limit", "10")
+	q.Set("offset", "10")
 
 	res, err := suite.caller.Builder().
-		SetQueryParam("id", "5ced34d689fce60bf4440829").
-		SetQueryParam("merchant_id", "5ced34d689fce60bf444082b").
+		SetQueryParams(q).
 		Method(http.MethodGet).
 		Path(common.AuthUserGroupPath + royaltyReportsPath).
 		Init(test.ReqInitJSON()).
@@ -52,6 +58,23 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_getRoyaltyReportsList()
 
 	if assert.NoError(suite.T(), err) {
 		assert.Equal(suite.T(), http.StatusOK, res.Code)
+		assert.NotEmpty(suite.T(), res.Body.String())
+	}
+}
+
+func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_getRoyaltyReportsList_ValidationFailed() {
+	q := make(url.Values)
+	q.Add("status[]", "bla-bla-bla")
+
+	res, err := suite.caller.Builder().
+		SetQueryParams(q).
+		Method(http.MethodGet).
+		Path(common.AuthUserGroupPath + royaltyReportsPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	if assert.Error(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusBadRequest, res.Code)
 		assert.NotEmpty(suite.T(), res.Body.String())
 	}
 }
@@ -104,11 +127,14 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_MerchantReviewRoyaltyRe
 
 func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_merchantDeclineRoyaltyReport() {
 
+	bodyJson := `{"dispute_reason": "accepted"}`
+
 	res, err := suite.caller.Builder().
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
 		Method(http.MethodPost).
 		Path(common.AuthUserGroupPath + royaltyReportsDeclinePath).
 		Init(test.ReqInitJSON()).
+		BodyString(bodyJson).
 		Exec(suite.T())
 
 	if assert.NoError(suite.T(), err) {
