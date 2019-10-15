@@ -65,6 +65,7 @@ func ProviderHandlers(initial config.Initial, srv common.Services, validator *va
 		NewBalanceRoute(hSet, &copyCfg),
 		NewPayoutDocumentsRoute(hSet, &copyCfg),
 		NewPricingRoute(hSet, &copyCfg),
-		NewUserRoute(hSet, &copyCfg),
+		NewAdminUsersRoute(hSet, &copyCfg),
+		NewMerchantUsersRoute(hSet, &copyCfg),
 	}, func() {}, nil
 }
