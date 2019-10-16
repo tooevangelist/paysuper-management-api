@@ -16,6 +16,7 @@ const (
 	merchantInviteResend = "/merchants/:merchant_id/invite_resend"
 	merchantApprove      = "/merchants/approve_invite"
 	merchantCheckInvite  = "/merchants/check_invite"
+	merchantListRoles    = "/merchants/roles"
 )
 
 type MerchantUsersRoute struct {
@@ -39,6 +40,7 @@ func (h *MerchantUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.POST(merchantInviteResend, h.resendInvite)
 	groups.AuthUser.POST(merchantCheckInvite, h.checkInvite)
 	groups.AuthUser.POST(merchantApprove, h.approveInvite)
+	groups.AuthUser.GET(merchantListRoles, h.listRoles)
 }
 
 func (h *MerchantUsersRoute) getMerchantUsers(ctx echo.Context) error {
@@ -169,6 +171,18 @@ func (h *MerchantUsersRoute) checkInvite(ctx echo.Context) error {
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "CheckInviteToken", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToCheckInviteToken)
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+func (h *MerchantUsersRoute) listRoles(ctx echo.Context) error {
+	req := &grpc.GetRoleListRequest{Type: pkg.RoleTypeMerchant}
+	res, err := h.dispatch.Services.Billing.GetRoleList(ctx.Request().Context(), req)
+
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetRoleList", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageInvalidRoleType)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

@@ -962,7 +962,6 @@ func (s *BillingServerErrorMock) GetAdminUsers(ctx context.Context, in *grpc.Emp
 	panic("implement me")
 }
 
-
 func (s *BillingServerErrorMock) GetMerchantsForUser(ctx context.Context, in *grpc.GetMerchantsForUserRequest, opts ...client.CallOption) (*grpc.GetMerchantsForUserResponse, error) {
 	panic("implement me")
 }
@@ -1000,5 +999,17 @@ func (s *BillingServerErrorMock) AcceptAdminInvite(ctx context.Context, in *grpc
 }
 
 func (s *BillingServerErrorMock) CheckInviteToken(ctx context.Context, in *grpc.CheckInviteTokenRequest, opts ...client.CallOption) (*grpc.CheckInviteTokenResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) ChangeRoleForMerchantUser(ctx context.Context, in *grpc.ChangeRoleForMerchantUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) ChangeRoleForAdminUser(ctx context.Context, in *grpc.ChangeRoleForAdminUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) GetRoleList(ctx context.Context, in *grpc.GetRoleListRequest, opts ...client.CallOption) (*grpc.GetRoleListResponse, error) {
 	panic("implement me")
 }

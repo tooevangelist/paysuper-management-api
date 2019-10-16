@@ -880,3 +880,15 @@ func (s *BillingServerSystemErrorMock) AcceptAdminInvite(ctx context.Context, in
 func (s *BillingServerSystemErrorMock) CheckInviteToken(ctx context.Context, in *grpc.CheckInviteTokenRequest, opts ...client.CallOption) (*grpc.CheckInviteTokenResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerSystemErrorMock) ChangeRoleForMerchantUser(ctx context.Context, in *grpc.ChangeRoleForMerchantUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) ChangeRoleForAdminUser(ctx context.Context, in *grpc.ChangeRoleForAdminUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetRoleList(ctx context.Context, in *grpc.GetRoleListRequest, opts ...client.CallOption) (*grpc.GetRoleListResponse, error) {
+	panic("implement me")
+}
