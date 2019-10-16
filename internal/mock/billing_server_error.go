@@ -1079,7 +1079,7 @@ func (s *BillingServerErrorMock) GetRoleList(ctx context.Context, in *grpc.GetRo
 	panic("implement me")
 }
 
-func (s *BillingServerErrorMock) ChangeMerchantManualPayouts(ctx context.Context, in *grpc.ChangeMerchantManualPayoutsRequest, opts ...client.CallOption) (*grpc.ChangeMerchantManualPayoutsResponse, error) {
+func (s *BillingServerErrorMock) GetMerchantUsers(ctx context.Context, in *grpc.GetMerchantUsersRequest, opts ...client.CallOption) (*grpc.GetMerchantUsersResponse, error) {
 	panic("implement me")
 }
 
