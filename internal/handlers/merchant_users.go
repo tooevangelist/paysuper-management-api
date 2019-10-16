@@ -14,6 +14,7 @@ const (
 	merchantUsers        = "/merchants/:merchant_id/users"
 	merchantInvite       = "/merchants/:merchant_id/invite"
 	merchantInviteResend = "/merchants/:merchant_id/invite_resend"
+	merchantDeleteUser   = "/merchants/:merchant_id/delete_user"
 	merchantListRoles    = "/merchants/roles"
 )
 
@@ -37,6 +38,7 @@ func (h *MerchantUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.POST(merchantInvite, h.sendInvite)
 	groups.AuthUser.POST(merchantInviteResend, h.resendInvite)
 	groups.AuthUser.GET(merchantListRoles, h.listRoles)
+	groups.AuthUser.DELETE(merchantDeleteUser, h.deleteUser)
 }
 
 func (h *MerchantUsersRoute) getMerchantUsers(ctx echo.Context) error {
@@ -75,7 +77,7 @@ func (h *MerchantUsersRoute) sendInvite(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.UserId = authUser.Id
+	req.PerformerId = authUser.Id
 	req.MerchantId = merchantId
 
 	err := h.dispatch.Validate.Struct(req)
@@ -106,7 +108,7 @@ func (h *MerchantUsersRoute) resendInvite(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.UserId = authUser.Id
+	req.PerformerId = authUser.Id
 	req.MerchantId = merchantId
 
 	err := h.dispatch.Validate.Struct(req)
@@ -130,6 +132,37 @@ func (h *MerchantUsersRoute) listRoles(ctx echo.Context) error {
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetRoleList", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageInvalidRoleType)
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+func (h *MerchantUsersRoute) deleteUser(ctx echo.Context) error {
+	authUser := common.ExtractUserContext(ctx)
+
+	req := &grpc.DeleteMerchantUserRequest{}
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
+	}
+
+	merchantId := ctx.Param("merchant_id")
+	if merchantId == "" {
+		h.L().Error("merchant_id param not found in the request")
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	req.PerformerId = authUser.Id
+	req.MerchantId = merchantId
+
+	err := h.dispatch.Validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.DeleteMerchantUser(ctx.Request().Context(), req)
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "DeleteMerchantUser", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToDeleteUser)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
