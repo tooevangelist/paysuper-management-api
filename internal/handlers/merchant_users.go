@@ -14,8 +14,6 @@ const (
 	merchantUsers        = "/merchants/:merchant_id/users"
 	merchantInvite       = "/merchants/:merchant_id/invite"
 	merchantInviteResend = "/merchants/:merchant_id/invite_resend"
-	merchantApprove      = "/merchants/approve_invite"
-	merchantCheckInvite  = "/merchants/check_invite"
 	merchantListRoles    = "/merchants/roles"
 )
 
@@ -38,8 +36,6 @@ func (h *MerchantUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(merchantUsers, h.getMerchantUsers)
 	groups.AuthUser.POST(merchantInvite, h.sendInvite)
 	groups.AuthUser.POST(merchantInviteResend, h.resendInvite)
-	groups.AuthUser.POST(merchantCheckInvite, h.checkInvite)
-	groups.AuthUser.POST(merchantApprove, h.approveInvite)
 	groups.AuthUser.GET(merchantListRoles, h.listRoles)
 }
 
@@ -122,55 +118,6 @@ func (h *MerchantUsersRoute) resendInvite(ctx echo.Context) error {
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ResendInviteMerchant", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToSendInvite)
-	}
-
-	return ctx.JSON(http.StatusOK, res)
-}
-
-func (h *MerchantUsersRoute) approveInvite(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-
-	req := &grpc.AcceptMerchantInviteRequest{}
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
-	}
-
-	req.UserId = authUser.Id
-	req.Email = authUser.Email
-
-	err := h.dispatch.Validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
-	}
-
-	res, err := h.dispatch.Services.Billing.AcceptMerchantInvite(ctx.Request().Context(), req)
-	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "AcceptMerchantInvite", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToAcceptInvite)
-	}
-
-	return ctx.JSON(http.StatusOK, res)
-}
-
-func (h *MerchantUsersRoute) checkInvite(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-
-	req := &grpc.CheckInviteTokenRequest{}
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
-	}
-
-	req.Email = authUser.Email
-
-	err := h.dispatch.Validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
-	}
-
-	res, err := h.dispatch.Services.Billing.CheckInviteToken(ctx.Request().Context(), req)
-	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "CheckInviteToken", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToCheckInviteToken)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

@@ -20,8 +20,6 @@ const (
 	users             = "/users"
 	usersInvite       = "/users/invite"
 	usersInviteResend = "/users/invite_resend"
-	usersApprove      = "/users/approve_invite"
-	usersCheckInvite  = "/users/check_invite"
 	usersListRoles    = "/users/roles"
 )
 
@@ -38,8 +36,6 @@ func (h *AdminUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(users, h.listUsers)
 	groups.AuthUser.POST(usersInvite, h.sendInvite)
 	groups.AuthUser.POST(usersInviteResend, h.resendInvite)
-	groups.AuthUser.POST(usersCheckInvite, h.checkInvite)
-	groups.AuthUser.POST(usersApprove, h.approveInvite)
 	groups.AuthUser.GET(usersListRoles, h.listRoles)
 }
 
@@ -100,55 +96,6 @@ func (h *AdminUsersRoute) resendInvite(ctx echo.Context) error {
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ResendInviteAdmin", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToSendInvite)
-	}
-
-	return ctx.JSON(http.StatusOK, res)
-}
-
-func (h *AdminUsersRoute) approveInvite(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-
-	req := &grpc.AcceptAdminInviteRequest{}
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
-	}
-
-	req.UserId = authUser.Id
-	req.Email = authUser.Email
-
-	err := h.dispatch.Validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
-	}
-
-	res, err := h.dispatch.Services.Billing.AcceptAdminInvite(ctx.Request().Context(), req)
-	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "AcceptAdminInvite", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToAcceptInvite)
-	}
-
-	return ctx.JSON(http.StatusOK, res)
-}
-
-func (h *AdminUsersRoute) checkInvite(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-
-	req := &grpc.CheckInviteTokenRequest{}
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
-	}
-
-	req.Email = authUser.Email
-
-	err := h.dispatch.Validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
-	}
-
-	res, err := h.dispatch.Services.Billing.CheckInviteToken(ctx.Request().Context(), req)
-	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "CheckInviteToken", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToCheckInviteToken)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

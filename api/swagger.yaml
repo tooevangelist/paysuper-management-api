@@ -9474,82 +9474,6 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/approve_invite":
-    post:
-      summary: Approve of invitation for admin user
-      tags:
-        - Admin user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Approve of invitation for admin user
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/AcceptInvite"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/AcceptInviteResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/users/check_invite":
-    post:
-      summary: Check invitation token
-      tags:
-        - Admin user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Check invitation token
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/CheckInviteToken"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/CheckInviteTokenResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
   "/admin/api/v1/users/roles":
     get:
       summary: List of admin role types
@@ -9664,82 +9588,6 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/approve_invite":
-    post:
-      summary: Approve of invitation for merchant user
-      tags:
-        - Merchant user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Approve of invitation for merchant user
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/AcceptInvite"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/AcceptInviteResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/merchants/check_invite":
-    post:
-      summary: Check invitation token
-      tags:
-        - Merchant user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Check invitation token
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/CheckInviteToken"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/CheckInviteTokenResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
   "/admin/api/v1/merchants/{id}/users":
     get:
       summary: List of merchant users
@@ -9797,5 +9645,81 @@ paths:
             $ref: '#/definitions/model.Error'
         "403":
           description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/invite/check":
+    post:
+      summary: Check invitation token
+      tags:
+        - User invite
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Check invitation token
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/CheckInviteToken"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/CheckInviteTokenResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/invite/approve":
+    post:
+      summary: Approve of invitation for user
+      tags:
+        - User invite
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Approve of invitation for user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/AcceptInvite"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AcceptInviteResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
