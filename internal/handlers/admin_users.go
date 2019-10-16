@@ -22,6 +22,7 @@ const (
 	usersInviteResend = "/users/invite_resend"
 	usersApprove      = "/users/approve_invite"
 	usersCheckInvite  = "/users/check_invite"
+	usersListRoles    = "/users/roles"
 )
 
 func NewAdminUsersRoute(set common.HandlerSet, cfg *common.Config) *AdminUsersRoute {
@@ -39,6 +40,7 @@ func (h *AdminUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.POST(usersInviteResend, h.resendInvite)
 	groups.AuthUser.POST(usersCheckInvite, h.checkInvite)
 	groups.AuthUser.POST(usersApprove, h.approveInvite)
+	groups.AuthUser.GET(usersListRoles, h.listRoles)
 }
 
 func (h *AdminUsersRoute) listUsers(ctx echo.Context) error {
@@ -147,6 +149,18 @@ func (h *AdminUsersRoute) checkInvite(ctx echo.Context) error {
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "CheckInviteToken", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToCheckInviteToken)
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+func (h *AdminUsersRoute) listRoles(ctx echo.Context) error {
+	req := &grpc.GetRoleListRequest{Type: pkg.RoleTypeSystem}
+	res, err := h.dispatch.Services.Billing.GetRoleList(ctx.Request().Context(), req)
+
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetRoleList", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageInvalidRoleType)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

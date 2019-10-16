@@ -3538,6 +3538,23 @@ definitions:
         example: "invited"
         description: "Status of invitation: invited or approved"
 
+  ListRoleType:
+    type: array
+    items:
+      "$ref": "#/definitions/ListRoleTypeItem"
+
+  ListRoleTypeItem:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "owner"
+        description: "Role identity"
+      name:
+        type: string
+        example: "Owner"
+        description: "Role name"
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -9533,6 +9550,34 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
+  "/admin/api/v1/users/roles":
+    get:
+      summary: List of admin role types
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of admin role types
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListRoleType'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+
   "/admin/api/v1/merchants/{id}/invite":
     post:
       summary: Send invitation for merchant user
@@ -9724,5 +9769,33 @@ paths:
             $ref: '#/definitions/model.Error'
         "500":
           description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/roles":
+    get:
+      summary: List of merchant role types
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of merchant role types
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListRoleType'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
           schema:
             $ref: '#/definitions/model.Error'

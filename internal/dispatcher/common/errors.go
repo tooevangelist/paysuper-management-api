@@ -158,6 +158,7 @@ var (
 	ErrorMessageUnableToSendInvite                = NewManagementApiResponseError("ma000105", "unable to send invite")
 	ErrorMessageUnableToAcceptInvite              = NewManagementApiResponseError("ma000106", "unable to accept invite")
 	ErrorMessageUnableToCheckInviteToken          = NewManagementApiResponseError("ma000107", "unable to check invite token")
+	ErrorMessageInvalidRoleType                   = NewManagementApiResponseError("ma000108", "invalid role type")
 
 	ValidationErrors = map[string]*grpc.ResponseErrorMessage{
 		UserProfileFieldNumberOfEmployees: ErrorMessageIncorrectNumberOfEmployees,
