@@ -36,9 +36,8 @@ const (
 )
 
 const (
-	orderFormTemplateName  = "order.html"
-	orderInlineFormUrlMask = "%s://%s/order/%s"
-	errorTemplateName      = "error.html"
+	orderFormTemplateName = "order.html"
+	errorTemplateName     = "error.html"
 )
 
 type CreateOrderJsonProjectResponse struct {
@@ -251,7 +250,7 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 
 	response := &CreateOrderJsonProjectResponse{
 		Id:             order.Uuid,
-		PaymentFormUrl: fmt.Sprintf(pkg.OrderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, order.Uuid),
+		PaymentFormUrl: fmt.Sprintf(h.cfg.OrderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, order.Uuid),
 	}
 
 	if h.cfg.ReturnPaymentForm {
@@ -392,7 +391,7 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		return echo.NewHTTPError(int(orderResponse.Status), orderResponse.Message)
 	}
 
-	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, orderResponse.Item.Uuid)
+	inlineFormRedirectUrl := fmt.Sprintf(h.cfg.OrderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, orderResponse.Item.Uuid)
 	qs := ctx.QueryString()
 
 	if qs != "" {
