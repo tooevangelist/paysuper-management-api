@@ -2448,3 +2448,39 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_MerchantIdInv
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
 }
+
+func (suite *OnboardingTestSuite) TestOnboarding_enableMerchantManualPayout_Ok() {
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + merchantsIdManualPayoutEnablePath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+
+	obj := &billing.Merchant{}
+	err = json.Unmarshal(res.Body.Bytes(), obj)
+	assert.NoError(suite.T(), err)
+
+	assert.Equal(suite.T(), http.StatusOK, res.Code)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_disableMerchantManualPayout_Ok() {
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + merchantsIdManualPayoutDisablePath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+
+	obj := &billing.Merchant{}
+	err = json.Unmarshal(res.Body.Bytes(), obj)
+	assert.NoError(suite.T(), err)
+
+	assert.Equal(suite.T(), http.StatusOK, res.Code)
+}

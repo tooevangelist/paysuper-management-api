@@ -45,6 +45,7 @@ backend:
     - AWS_SECRET_ACCESS_KEY_REPORTER
     - AWS_REGION_REPORTER
     - AWS_BUCKET_REPORTER
+    - ORDER_INLINE_FORM_URL_MASK
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -11,7 +12,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
-	"github.com/paysuper/paysuper-payment-link/proto"
+	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"net/http"
 	"time"
 )
@@ -31,14 +32,12 @@ const (
 	orderNotifySalesPath     = "/orders/:order_id/notify_sale"
 	orderNotifyNewRegionPath = "/orders/:order_id/notify_new_region"
 	orderPlatformPath        = "/orders/:order_id/platform"
-	orderReceiptPath         = "/orders/receipt/purchase/:receipt_id/:order_id"
-	orderReceiptRefundPath   = "/orders/receipt/refund/:receipt_id/:order_id"
+	orderReceiptPath         = "/orders/receipt/:receipt_id/:order_id"
 )
 
 const (
-	orderFormTemplateName  = "order.html"
-	orderInlineFormUrlMask = "%s://%s/order/%s"
-	errorTemplateName      = "error.html"
+	orderFormTemplateName = "order.html"
+	errorTemplateName     = "error.html"
 )
 
 type CreateOrderJsonProjectResponse struct {
@@ -350,8 +349,17 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 	pl, err := h.dispatch.Services.PayLink.GetPaylink(ctxReq, req)
 
 	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, paylinkServiceConst.ServiceName, "GetPaylink", req)
 		return ctx.Render(http.StatusNotFound, errorTemplateName, map[string]interface{}{})
 	}
+
+	go func() {
+		_, err := h.dispatch.Services.PayLink.IncrPaylinkVisits(context.TODO(), &paylink.PaylinkRequest{Id: paylinkId})
+
+		if err != nil {
+			common.LogSrvCallFailedGRPC(h.L(), err, paylinkServiceConst.ServiceName, "IncrPaylinkVisits", req)
+		}
+	}()
 
 	qParams := ctx.QueryParams()
 
@@ -362,6 +370,7 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		PrivateMetadata: map[string]string{
 			"PaylinkId": paylinkId,
 		},
+		Type:                pl.ProductsType,
 		IssuerUrl:           ctx.Request().Header.Get(common.HeaderReferer),
 		IsEmbedded:          false,
 		IssuerReferenceType: pkg.OrderIssuerReferenceTypePaylink,
@@ -382,20 +391,12 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		return echo.NewHTTPError(int(orderResponse.Status), orderResponse.Message)
 	}
 
-	inlineFormRedirectUrl := fmt.Sprintf(orderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, orderResponse.Item.Uuid)
+	inlineFormRedirectUrl := fmt.Sprintf(h.cfg.OrderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, orderResponse.Item.Uuid)
 	qs := ctx.QueryString()
 
 	if qs != "" {
 		inlineFormRedirectUrl += "?" + qs
 	}
-
-	go func() {
-		_, err := h.dispatch.Services.PayLink.IncrPaylinkVisits(ctxReq, &paylink.PaylinkRequest{Id: paylinkId})
-
-		if err != nil {
-			common.LogSrvCallFailedGRPC(h.L(), err, paylinkServiceConst.ServiceName, "IncrPaylinkVisits", req)
-		}
-	}()
 
 	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)
 }

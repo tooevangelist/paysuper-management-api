@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/micro/go-micro/client"
-	"github.com/paysuper/paysuper-payment-link/proto"
+	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 )
 
 var (
@@ -27,10 +27,7 @@ var (
 		Limit:      2,
 		Offset:     0,
 		Total:      100,
-		Paylinks: []string{
-			"21784001599a47e5a69ac28f7af2ec22",
-			"10159921784a47e8f7af2ec225a69ac2",
-		},
+		Paylinks:   []*paylink.Paylink{},
 	}
 
 	stat = &paylink.GetPaylinkStatResponse{

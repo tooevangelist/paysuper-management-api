@@ -38,6 +38,8 @@ const (
 	merchantsNotificationsMarkReadPath = "/merchants/:merchant_id/notifications/:notification_id/mark-as-read"
 	merchantsTariffsPath               = "/merchants/tariffs"
 	merchantsIdTariffsPath             = "/merchants/:id/tariffs"
+	merchantsIdManualPayoutEnablePath  = "/merchants/:merchant_id/manual_payout/enable"
+	merchantsIdManualPayoutDisablePath = "/merchants/:merchant_id/manual_payout/disable"
 )
 
 const (
@@ -105,6 +107,9 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 
 	groups.AuthUser.GET(merchantsTariffsPath, h.getTariffRates)
 	groups.AuthUser.POST(merchantsIdTariffsPath, h.setTariffRates)
+
+	groups.AuthUser.PUT(merchantsIdManualPayoutEnablePath, h.enableMerchantManualPayout)
+	groups.AuthUser.PUT(merchantsIdManualPayoutDisablePath, h.disableMerchantManualPayout)
 }
 
 func (h *OnboardingRoute) getMerchant(ctx echo.Context) error {
@@ -843,4 +848,44 @@ func (h *OnboardingRoute) getAgreementData(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, fData)
+}
+
+// @Description Enable merchant manual payouts
+// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
+//  'https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/manual_payout/enable'
+func (h *OnboardingRoute) enableMerchantManualPayout(ctx echo.Context) error {
+	return h.changeMerchantManualPayout(ctx, true)
+}
+
+// @Description Disable merchant manual payouts
+// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
+//  'https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/manual_payout/disable'
+func (h *OnboardingRoute) disableMerchantManualPayout(ctx echo.Context) error {
+	return h.changeMerchantManualPayout(ctx, false)
+}
+
+func (h *OnboardingRoute) changeMerchantManualPayout(ctx echo.Context, enableManualPayout bool) error {
+	req := &grpc.ChangeMerchantManualPayoutsRequest{
+		MerchantId:           ctx.Param(common.RequestParameterMerchantId),
+		ManualPayoutsEnabled: enableManualPayout,
+	}
+
+	err := h.dispatch.Validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.ChangeMerchantManualPayouts(ctx.Request().Context(), req)
+
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ChangeMerchantManualPayouts", req)
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorUnknown)
+	}
+
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res.Item)
 }
