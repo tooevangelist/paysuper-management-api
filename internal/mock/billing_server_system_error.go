@@ -869,11 +869,7 @@ func (s *BillingServerSystemErrorMock) GetAdminUser(ctx context.Context, in *grp
 	panic("implement me")
 }
 
-func (s *BillingServerSystemErrorMock) AcceptMerchantInvite(ctx context.Context, in *grpc.AcceptMerchantInviteRequest, opts ...client.CallOption) (*grpc.AcceptMerchantInviteResponse, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerSystemErrorMock) AcceptAdminInvite(ctx context.Context, in *grpc.AcceptAdminInviteRequest, opts ...client.CallOption) (*grpc.AcceptAdminInviteResponse, error) {
+func (s *BillingServerSystemErrorMock) AcceptInvite(ctx context.Context, in *grpc.AcceptInviteRequest, opts ...client.CallOption) (*grpc.AcceptInviteResponse, error) {
 	panic("implement me")
 }
 
