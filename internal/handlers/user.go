@@ -10,55 +10,92 @@ import (
 	"net/http"
 )
 
-const (
-	userEmptyPath = "/user"
-	userMerchantsPath = "/user/merchants"
-)
-
-type UserRoute struct {
+type InviteRoute struct {
 	dispatch common.HandlerSet
 	cfg      common.Config
 	provider.LMT
 }
 
-func NewUserRoute(set common.HandlerSet, cfg *common.Config) *UserRoute {
-	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "UserRoute"})
-	return &UserRoute{
+const (
+	inviteCheck   = "/user/invite/check"
+	inviteApprove = "/user/invite/approve"
+	getMerchants  = "/user/merchants"
+)
+
+func NewInviteRoute(set common.HandlerSet, cfg *common.Config) *InviteRoute {
+	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "AdminUsersRoute"})
+	return &InviteRoute{
 		dispatch: set,
 		LMT:      &set.AwareSet,
 		cfg:      *cfg,
 	}
 }
 
-func (h *UserRoute) Route(groups *common.Groups) {
-	groups.AuthUser.GET(userEmptyPath, h.temp)
-	groups.AuthUser.GET(userMerchantsPath, h.merchantList)
+func (h *InviteRoute) Route(groups *common.Groups) {
+	groups.AuthUser.POST(inviteCheck, h.checkInvite)
+	groups.AuthUser.POST(inviteApprove, h.approveInvite)
+	groups.AuthUser.POST(getMerchants, h.getMerchants)
 }
 
-func (h *UserRoute) merchantList(ctx echo.Context) error {
+func (h *InviteRoute) checkInvite(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 
-	req := &grpc.GetMerchantsForUserRequest{
-		UserId: authUser.Id,
+	req := &grpc.CheckInviteTokenRequest{}
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
-	if err := h.dispatch.Validate.Struct(req); err != nil {
+	req.Email = authUser.Email
+
+	err := h.dispatch.Validate.Struct(req)
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
-	res, err := h.dispatch.Services.Billing.GetMerchantsForUser(ctx.Request().Context(), req)
+	res, err := h.dispatch.Services.Billing.CheckInviteToken(ctx.Request().Context(), req)
 	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.PairArgs("err", err.Error()))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "CheckInviteToken", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToCheckInviteToken)
 	}
 
-	if res.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(res.Status), res.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, res.Merchants)
+	return ctx.JSON(http.StatusOK, res)
 }
 
-func (h *UserRoute) temp(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK, nil)
+func (h *InviteRoute) approveInvite(ctx echo.Context) error {
+	authUser := common.ExtractUserContext(ctx)
+
+	req := &grpc.AcceptInviteRequest{}
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
+	}
+
+	req.UserId = authUser.Id
+	req.Email = authUser.Email
+
+	err := h.dispatch.Validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.AcceptInvite(ctx.Request().Context(), req)
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "AcceptInvite", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToAcceptInvite)
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+func (h *InviteRoute) getMerchants(ctx echo.Context) error {
+	authUser := common.ExtractUserContext(ctx)
+
+	req := &grpc.GetMerchantsForUserRequest{UserId: authUser.Id}
+
+	res, err := h.dispatch.Services.Billing.GetMerchantsForUser(ctx.Request().Context(), req)
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetMerchantsForUser", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	return ctx.JSON(http.StatusOK, res)
 }

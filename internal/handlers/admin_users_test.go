@@ -74,9 +74,9 @@ func (suite *AdminUsersTestSuite) TestAdminUsers_GetList_ServiceError() {
 
 	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
 	billingService.On("GetAdminUsers", mock2.Anything, mock2.Anything).Return(&grpc.GetAdminUsersResponse{
-		Status: 400,
+		Status:  400,
 		Message: &grpc.ResponseErrorMessage{Message: "some error"},
-		Users: nil,
+		Users:   nil,
 	}, nil)
 
 	res, err := suite.caller.Builder().
@@ -122,7 +122,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_InternalError() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + adminUserRole).
 		Init(test.ReqInitJSON()).
 		BodyString(`{"role": "some_role"}`).
@@ -140,13 +140,13 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_ValidationError() {
 
 	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
 	billingService.On("ChangeRoleForAdminUser", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
-		Status: 400,
+		Status:  400,
 		Message: &grpc.ResponseErrorMessage{Message: "some error"},
 	}, nil)
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + adminUserRole).
 		BodyString(`{"no_role": "some_role"}`).
 		Init(test.ReqInitJSON()).
@@ -164,13 +164,13 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_Error() {
 
 	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
 	billingService.On("ChangeRoleForAdminUser", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
-		Status: 400,
+		Status:  400,
 		Message: &grpc.ResponseErrorMessage{Message: "some error"},
 	}, nil)
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + adminUserRole).
 		BodyString(`{"role": "some_role"}`).
 		Init(test.ReqInitJSON()).
@@ -188,7 +188,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_EmptyBodyError() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + adminUserRole).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -210,7 +210,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + adminUserRole).
 		Init(test.ReqInitJSON()).
 		BodyString(`{"role": "some_role"}`).

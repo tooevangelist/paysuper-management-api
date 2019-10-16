@@ -11,12 +11,12 @@ import (
 )
 
 const (
+	merchantListRoles    = "/merchants/roles"
 	merchantUsers        = "/merchants/:merchant_id/users"
 	merchantInvite       = "/merchants/:merchant_id/invite"
-	merchantInviteResend = "/merchants/:merchant_id/invite_resend"
-	merchantDeleteUser   = "/merchants/:merchant_id/delete_user"
-	merchantListRoles    = "/merchants/roles"
-	merchantUsersRole = "/merchants/:merchant_id/users/:user/role"
+	merchantInviteResend = "/merchants/:merchant_id/users/:role_id/resend"
+	merchantDeleteUser   = "/merchants/:merchant_id/users/:role_id/role"
+	merchantUsersRole    = "/merchants/:merchant_id/users/:role_id/role"
 )
 
 type MerchantUsersRoute struct {
@@ -37,7 +37,6 @@ func NewMerchantUsersRoute(set common.HandlerSet, cfg *common.Config) *MerchantU
 func (h *MerchantUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(merchantUsers, h.getMerchantUsers)
 	groups.AuthUser.PUT(merchantUsersRole, h.changeRole)
-
 	groups.AuthUser.POST(merchantInvite, h.sendInvite)
 	groups.AuthUser.POST(merchantInviteResend, h.resendInvite)
 	groups.AuthUser.GET(merchantListRoles, h.listRoles)
@@ -45,17 +44,25 @@ func (h *MerchantUsersRoute) Route(groups *common.Groups) {
 }
 
 func (h *MerchantUsersRoute) changeRole(ctx echo.Context) error {
+	authUser := common.ExtractUserContext(ctx)
 	merchantId := ctx.Param(common.RequestParameterMerchantId)
-	userId := ctx.Param(common.RequestParameterUserId)
+	roleId := ctx.Param(common.RequestParameterRoleId)
 
 	req := &grpc.ChangeRoleForMerchantUserRequest{}
 
 	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.NewManagementApiResponseError(common.ErrorRequestParamsIncorrect.Code, common.ErrorRequestParamsIncorrect.Message, err.Error()))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			common.NewManagementApiResponseError(
+				common.ErrorRequestParamsIncorrect.Code,
+				common.ErrorRequestParamsIncorrect.Message, err.Error(),
+			),
+		)
 	}
 
-	req.UserId = userId
+	req.PerformerId = authUser.Id
 	req.MerchantId = merchantId
+	req.RoleId = roleId
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
@@ -98,16 +105,11 @@ func (h *MerchantUsersRoute) getMerchantUsers(ctx echo.Context) error {
 
 func (h *MerchantUsersRoute) sendInvite(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
+	merchantId := ctx.Param(common.RequestParameterMerchantId)
 
 	req := &grpc.InviteUserMerchantRequest{}
 	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
-	}
-
-	merchantId := ctx.Param("merchant_id")
-	if merchantId == "" {
-		h.L().Error("merchant_id param not found in the request")
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
 	req.PerformerId = authUser.Id
@@ -129,20 +131,14 @@ func (h *MerchantUsersRoute) sendInvite(ctx echo.Context) error {
 
 func (h *MerchantUsersRoute) resendInvite(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
+	roleId := ctx.Param(common.RequestParameterRoleId)
+	merchantId := ctx.Param(common.RequestParameterMerchantId)
 
-	req := &grpc.ResendInviteMerchantRequest{}
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
+	req := &grpc.ResendInviteMerchantRequest{
+		PerformerId: authUser.Id,
+		MerchantId:  merchantId,
+		RoleId:      roleId,
 	}
-
-	merchantId := ctx.Param("merchant_id")
-	if merchantId == "" {
-		h.L().Error("merchant_id param not found in the request")
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	req.PerformerId = authUser.Id
-	req.MerchantId = merchantId
 
 	err := h.dispatch.Validate.Struct(req)
 	if err != nil {
@@ -172,20 +168,14 @@ func (h *MerchantUsersRoute) listRoles(ctx echo.Context) error {
 
 func (h *MerchantUsersRoute) deleteUser(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
+	merchantId := ctx.Param(common.RequestParameterMerchantId)
+	roleId := ctx.Param(common.RequestParameterRoleId)
 
-	req := &grpc.DeleteMerchantUserRequest{}
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
+	req := &grpc.DeleteMerchantUserRequest{
+		PerformerId: authUser.Id,
+		MerchantId:  merchantId,
+		RoleId:      roleId,
 	}
-
-	merchantId := ctx.Param("merchant_id")
-	if merchantId == "" {
-		h.L().Error("merchant_id param not found in the request")
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	req.PerformerId = authUser.Id
-	req.MerchantId = merchantId
 
 	err := h.dispatch.Validate.Struct(req)
 	if err != nil {
