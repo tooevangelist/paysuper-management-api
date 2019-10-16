@@ -15,6 +15,7 @@ import (
 
 type BillingServerOkMock struct{}
 
+
 func NewBillingServerOkMock() grpc.BillingService {
 	return &BillingServerOkMock{}
 }
