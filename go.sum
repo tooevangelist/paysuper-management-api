@@ -551,6 +551,8 @@ github.com/labstack/echo v3.3.10+incompatible/go.mod h1:0INS7j/VjnFxD4E2wkz67b8c
 github.com/labstack/echo/v4 v4.0.0/go.mod h1:tZv7nai5buKSg5h/8E6zz4LsD/Dqh9/91Mvs7Z5Zyno=
 github.com/labstack/echo/v4 v4.1.6 h1:WOvLa4T1KzWCRpANwz0HGgWDelXSSGwIKtKBbFdHTv4=
 github.com/labstack/echo/v4 v4.1.6/go.mod h1:kU/7PwzgNxZH4das4XNsSpBSOD09XIF5YEPzjpkGnGE=
+github.com/labstack/echo/v4 v4.1.11 h1:z0BZoArY4FqdpUEl+wlHp4hnr/oSR6MTmQmv8OHSoww=
+github.com/labstack/echo/v4 v4.1.11/go.mod h1:i541M3Fj6f76NZtHSj7TXnyM8n2gaodfvfxNnFqi74g=
 github.com/labstack/gommon v0.2.8/go.mod h1:/tj9csK2iPSBvn+3NLM9e52usepMtrd5ilFYA+wQNJ4=
 github.com/labstack/gommon v0.2.9 h1:heVeuAYtevIQVYkGj6A41dtfT91LrvFG220lavpWhrU=
 github.com/labstack/gommon v0.2.9/go.mod h1:E8ZTmW9vw5az5/ZyHWCp0Lw4OH2ecsaBP1C/NKavGG4=
@@ -719,6 +721,8 @@ github.com/patrickmn/go-cache v0.0.0-20180527043350-9f6ff22cfff8/go.mod h1:3Qf8k
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
 github.com/paysuper/casbin-server v0.0.0-20191015130642-f4e02a8b00e5 h1:Kb02TuhduipenXp7j0pbX6s4oxvp76M4PIAE9OaeiSU=
 github.com/paysuper/casbin-server v0.0.0-20191015130642-f4e02a8b00e5/go.mod h1:+bJredwbVLTpQpu4CFTYphIzzZQYEOepVQqsBcEHd/0=
+github.com/paysuper/casbin-server v0.0.0-20191016092241-d25e3cf41561 h1:TlTSsozB3VlekDb/g0nlKmv9+JjgOCx544zGvLjCVLU=
+github.com/paysuper/casbin-server v0.0.0-20191016092241-d25e3cf41561/go.mod h1:kP4kntb1yUsWmPvPEnkWUbAs+yDd2yLwEhxJ923HCHI=
 github.com/paysuper/document-signer v0.0.0-20190903102235-df82efbb7d26/go.mod h1:39VQOEQm+WdUrGOAHDGnE8ks86mAPEKpgBwxP9mQfSA=
 github.com/paysuper/document-signer v0.0.0-20190906075749-af06b306ee92/go.mod h1:gqEKigUzMNjJ9P+OYeKCu+wOA17/Q2EElpJnd6O3Zr4=
 github.com/paysuper/document-signer v0.0.0-20190923080905-cb9cc2665d8b/go.mod h1:3yaO+xYLvqjkj7mJqNKuzp8ncd7gj75jud4KIkiLMzc=
@@ -786,6 +790,8 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20191016063533-ca71d4de7979 h
 github.com/paysuper/paysuper-billing-server v0.0.0-20191016063533-ca71d4de7979/go.mod h1:bFlpYaqr7PLhjJAJdPPLHUqYrkLkD+i9x01+ETagy5A=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191016074503-243b87239242 h1:8rMsD4mPmiF2ycBFQ3u88XAn0q6h3rmSnhxUsMiromU=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191016074503-243b87239242/go.mod h1:bFlpYaqr7PLhjJAJdPPLHUqYrkLkD+i9x01+ETagy5A=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191016101606-08cd89cf6736 h1:K03o0wtKBY2Sw3t5UCTBaP7s3fCEuB+mxqzk5Y3LGh8=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191016101606-08cd89cf6736/go.mod h1:z2HZg2VkUqubbVACOikyrGlOqPRP2zttTOmCL4sTm0Q=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d h1:hoMkfdq4qEGOONvxajsZO0Mf6np++pGnrKVxegvplaw=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d/go.mod h1:C+QHdgbjIlAPxHD93/08yi+xWfUgk8maLY8FKFqNzMQ=
 github.com/paysuper/paysuper-database-mongo v0.1.0/go.mod h1:IZu996j//Qoq+uzzCBL5GEYisfF4di/fwedWHlLz7sc=

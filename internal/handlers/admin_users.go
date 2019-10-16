@@ -21,6 +21,7 @@ const (
 	usersInvite       = "/users/invite"
 	usersInviteResend = "/users/invite_resend"
 	usersListRoles    = "/users/roles"
+	usersDelete       = "/users/delete"
 )
 
 func NewAdminUsersRoute(set common.HandlerSet, cfg *common.Config) *AdminUsersRoute {
@@ -37,6 +38,7 @@ func (h *AdminUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.POST(usersInvite, h.sendInvite)
 	groups.AuthUser.POST(usersInviteResend, h.resendInvite)
 	groups.AuthUser.GET(usersListRoles, h.listRoles)
+	groups.AuthUser.DELETE(usersDelete, h.deleteUser)
 }
 
 func (h *AdminUsersRoute) listUsers(ctx echo.Context) error {
@@ -61,7 +63,7 @@ func (h *AdminUsersRoute) sendInvite(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
-	req.UserId = authUser.Id
+	req.PerformerId = authUser.Id
 
 	err := h.dispatch.Validate.Struct(req)
 	if err != nil {
@@ -85,7 +87,7 @@ func (h *AdminUsersRoute) resendInvite(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
-	req.UserId = authUser.Id
+	req.PerformerId = authUser.Id
 
 	err := h.dispatch.Validate.Struct(req)
 	if err != nil {
@@ -108,6 +110,30 @@ func (h *AdminUsersRoute) listRoles(ctx echo.Context) error {
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetRoleList", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageInvalidRoleType)
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+func (h *AdminUsersRoute) deleteUser(ctx echo.Context) error {
+	authUser := common.ExtractUserContext(ctx)
+
+	req := &grpc.DeleteAdminUserRequest{}
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
+	}
+
+	req.PerformerId = authUser.Id
+
+	err := h.dispatch.Validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.DeleteAdminUser(ctx.Request().Context(), req)
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "DeleteAdminUser", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToDeleteUser)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
