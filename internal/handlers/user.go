@@ -17,8 +17,9 @@ type InviteRoute struct {
 }
 
 const (
-	inviteCheck   = "/invite/check"
-	inviteApprove = "/invite/approve"
+	inviteCheck   = "/user/invite/check"
+	inviteApprove = "/user/invite/approve"
+	getMerchants  = "/user/merchants"
 )
 
 func NewInviteRoute(set common.HandlerSet, cfg *common.Config) *InviteRoute {
@@ -33,6 +34,7 @@ func NewInviteRoute(set common.HandlerSet, cfg *common.Config) *InviteRoute {
 func (h *InviteRoute) Route(groups *common.Groups) {
 	groups.AuthUser.POST(inviteCheck, h.checkInvite)
 	groups.AuthUser.POST(inviteApprove, h.approveInvite)
+	groups.AuthUser.POST(getMerchants, h.getMerchants)
 }
 
 func (h *InviteRoute) checkInvite(ctx echo.Context) error {
@@ -79,6 +81,20 @@ func (h *InviteRoute) approveInvite(ctx echo.Context) error {
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "AcceptInvite", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToAcceptInvite)
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+func (h *InviteRoute) getMerchants(ctx echo.Context) error {
+	authUser := common.ExtractUserContext(ctx)
+
+	req := &grpc.GetMerchantsForUserRequest{UserId: authUser.Id}
+
+	res, err := h.dispatch.Services.Billing.GetMerchantsForUser(ctx.Request().Context(), req)
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetMerchantsForUser", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

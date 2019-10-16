@@ -32,4 +32,6 @@ type Config struct {
 	ReturnPaymentForm            bool  `envconfig:"DEBUG_RETURN_PAYMENT_FORM"`
 	DisableAuthMiddleware        bool
 	CustomerTokenCookiesLifetime time.Duration // CustomerTokenCookiesLifetime = 2592000
+
+	OrderInlineFormUrlMask string `envconfig:"ORDER_INLINE_FORM_URL_MASK" default:"%s://%s/order/%s"`
 }

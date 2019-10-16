@@ -18,11 +18,11 @@ type AdminUsersRoute struct {
 
 const (
 	users             = "/users"
-	usersInvite       = "/users/invite"
-	usersInviteResend = "/users/invite_resend"
-	usersListRoles    = "/users/roles"
-	adminUserRole = "/users/:user/role"
-	usersDelete       = "/users/delete"
+	adminListRoles    = "/users/roles"
+	adminUserInvite   = "/users/invite"
+	adminResendInvite = "/users/:role_id/resend"
+	adminUserRole     = "/users/:role_id/role"
+	adminUserDelete   = "/users/:role_id/role"
 )
 
 func NewAdminUsersRoute(set common.HandlerSet, cfg *common.Config) *AdminUsersRoute {
@@ -37,24 +37,30 @@ func NewAdminUsersRoute(set common.HandlerSet, cfg *common.Config) *AdminUsersRo
 func (h *AdminUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(users, h.listUsers)
 	groups.AuthUser.PUT(adminUserRole, h.changeRole)
-
-	groups.AuthUser.POST(usersInvite, h.sendInvite)
-	groups.AuthUser.POST(usersInviteResend, h.resendInvite)
-	groups.AuthUser.GET(usersListRoles, h.listRoles)
-	groups.AuthUser.DELETE(usersDelete, h.deleteUser)
+	groups.AuthUser.POST(adminUserInvite, h.sendInvite)
+	groups.AuthUser.POST(adminResendInvite, h.resendInvite)
+	groups.AuthUser.GET(adminListRoles, h.listRoles)
+	groups.AuthUser.DELETE(adminUserDelete, h.deleteUser)
 }
 
-
 func (h *AdminUsersRoute) changeRole(ctx echo.Context) error {
-	userId := ctx.Param(common.RequestParameterUserId)
+	authUser := common.ExtractUserContext(ctx)
+	roleId := ctx.Param(common.RequestParameterRoleId)
 
 	req := &grpc.ChangeRoleForAdminUserRequest{}
 
 	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.NewManagementApiResponseError(common.ErrorRequestParamsIncorrect.Code, common.ErrorRequestParamsIncorrect.Message, err.Error()))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			common.NewManagementApiResponseError(
+				common.ErrorRequestParamsIncorrect.Code,
+				common.ErrorRequestParamsIncorrect.Message, err.Error(),
+			),
+		)
 	}
 
-	req.UserId = userId
+	req.PerformerId = authUser.Id
+	req.RoleId = roleId
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
@@ -72,7 +78,6 @@ func (h *AdminUsersRoute) changeRole(ctx echo.Context) error {
 
 	return ctx.NoContent(http.StatusOK)
 }
-
 
 func (h *AdminUsersRoute) listUsers(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.GetAdminUsers(ctx.Request().Context(), &grpc.EmptyRequest{})
@@ -114,13 +119,12 @@ func (h *AdminUsersRoute) sendInvite(ctx echo.Context) error {
 
 func (h *AdminUsersRoute) resendInvite(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
+	roleId := ctx.Param(common.RequestParameterRoleId)
 
-	req := &grpc.ResendInviteAdminRequest{}
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
+	req := &grpc.ResendInviteAdminRequest{
+		PerformerId: authUser.Id,
+		RoleId:      roleId,
 	}
-
-	req.PerformerId = authUser.Id
 
 	err := h.dispatch.Validate.Struct(req)
 	if err != nil {
@@ -150,13 +154,12 @@ func (h *AdminUsersRoute) listRoles(ctx echo.Context) error {
 
 func (h *AdminUsersRoute) deleteUser(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
+	roleId := ctx.Param(common.RequestParameterRoleId)
 
-	req := &grpc.DeleteAdminUserRequest{}
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
+	req := &grpc.DeleteAdminUserRequest{
+		PerformerId: authUser.Id,
+		RoleId:      roleId,
 	}
-
-	req.PerformerId = authUser.Id
 
 	err := h.dispatch.Validate.Struct(req)
 	if err != nil {

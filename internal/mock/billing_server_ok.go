@@ -14,7 +14,6 @@ import (
 
 type BillingServerOkMock struct{}
 
-
 func NewBillingServerOkMock() grpc.BillingService {
 	return &BillingServerOkMock{}
 }
@@ -1223,5 +1222,17 @@ func (s *BillingServerOkMock) ChangeRoleForAdminUser(ctx context.Context, in *gr
 }
 
 func (s *BillingServerOkMock) GetRoleList(ctx context.Context, in *grpc.GetRoleListRequest, opts ...client.CallOption) (*grpc.GetRoleListResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) ChangeMerchantManualPayouts(ctx context.Context, in *grpc.ChangeMerchantManualPayoutsRequest, opts ...client.CallOption) (*grpc.ChangeMerchantManualPayoutsResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) DeleteMerchantUser(ctx context.Context, in *grpc.DeleteMerchantUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) DeleteAdminUser(ctx context.Context, in *grpc.DeleteAdminUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }

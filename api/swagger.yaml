@@ -3194,6 +3194,39 @@ definitions:
         example: "Owner"
         description: "Role name"
 
+  UpdateUserRoleRequest:
+    type: object
+    properties:
+      role:
+        type: string
+        example: "owner"
+        description: "Role identity"
+
+  MerchantsForUserResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        description: "User role"
+        items:
+          "$ref": "#/definitions/MerchantsForUser"
+
+  MerchantsForUser:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "Merchant identity"
+      name:
+        type: string
+        example: "R&K"
+        description: "Merchant name"
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -8243,7 +8276,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/invite_resend":
+  "/admin/api/v1/users/{role_id}/resend":
     post:
       summary: Resend invitation for admin user
       tags:
@@ -8254,6 +8287,11 @@ paths:
         - application/json
       description: Resend invitation to add user as administrator
       parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
         - description: JSON request body
           in: body
           name: body
@@ -8309,7 +8347,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/delete":
+  "/admin/api/v1/users/{role_id}/role":
     delete:
       summary: Delete admin user
       tags:
@@ -8319,6 +8357,53 @@ paths:
       produces:
         - application/json
       description: Delete admin user
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      summary: Update admin user role
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Update admin user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/UpdateUserRoleRequest"
       responses:
         "200":
           description: OK
@@ -8341,7 +8426,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/invite":
+  "/admin/api/v1/merchants/{merchant_id}/invite":
     post:
       summary: Send invitation for merchant user
       tags:
@@ -8354,7 +8439,7 @@ paths:
       parameters:
         - description: Merchant identifier
           in: path
-          name: id
+          name: merchant_id
           required: true
           type: string
         - description: JSON request body
@@ -8384,7 +8469,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/invite_resend":
+  "/admin/api/v1/merchants/{merchant_id}/users/{role_id}/resend":
     post:
       summary: Resend invitation for merchant user
       tags:
@@ -8397,7 +8482,12 @@ paths:
       parameters:
         - description: Merchant identifier
           in: path
-          name: id
+          name: merchant_id
+          required: true
+          type: string
+        - description: User role identifier
+          in: path
+          name: role_id
           required: true
           type: string
         - description: JSON request body
@@ -8427,7 +8517,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/users":
+  "/admin/api/v1/merchants/{merchant_id}/users":
     get:
       summary: List of merchant users
       tags:
@@ -8437,6 +8527,12 @@ paths:
       produces:
         - application/json
       description: List of merchant users
+      parameters:
+        - description: Merchant identifier
+          in: path
+          name: merchant_id
+          required: true
+          type: string
       responses:
         "200":
           description: OK
@@ -8459,7 +8555,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/delete_user":
+  "/admin/api/v1/merchants/{merchant_id}/users/{role_id}/role":
     delete:
       summary: Delete merchant user
       tags:
@@ -8469,6 +8565,63 @@ paths:
       produces:
         - application/json
       description: Delete merchant user
+      parameters:
+        - description: Merchant identifier
+          in: path
+          name: merchant_id
+          required: true
+          type: string
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      summary: Update merchant user role
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Update merchant user role
+      parameters:
+        - description: Merchant identifier
+          in: path
+          name: merchant_id
+          required: true
+          type: string
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/UpdateUserRoleRequest"
       responses:
         "200":
           description: OK
@@ -8519,11 +8672,11 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/invite/check":
+  "/admin/api/v1/user/invite/check":
     post:
       summary: Check invitation token
       tags:
-        - User invite
+        - User
       consumes:
         - application/json
       produces:
@@ -8557,11 +8710,11 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/invite/approve":
+  "/admin/api/v1/user/invite/approve":
     post:
       summary: Approve of invitation for user
       tags:
-        - User invite
+        - User
       consumes:
         - application/json
       produces:
@@ -8578,6 +8731,44 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/AcceptInviteResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/user/merchants":
+    post:
+      summary: Get merchants list for user
+      tags:
+        - User
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get merchants list for user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/AcceptInvite"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/MerchantsForUserResponse'
         "400":
           description: Invalid request data
           schema:
