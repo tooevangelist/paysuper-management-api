@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-type InviteRoute struct {
+type UserRoute struct {
 	dispatch common.HandlerSet
 	cfg      common.Config
 	provider.LMT
@@ -22,22 +22,22 @@ const (
 	getMerchants  = "/user/merchants"
 )
 
-func NewInviteRoute(set common.HandlerSet, cfg *common.Config) *InviteRoute {
+func NewUserRoute(set common.HandlerSet, cfg *common.Config) *UserRoute {
 	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "AdminUsersRoute"})
-	return &InviteRoute{
+	return &UserRoute{
 		dispatch: set,
 		LMT:      &set.AwareSet,
 		cfg:      *cfg,
 	}
 }
 
-func (h *InviteRoute) Route(groups *common.Groups) {
+func (h *UserRoute) Route(groups *common.Groups) {
 	groups.AuthUser.POST(inviteCheck, h.checkInvite)
 	groups.AuthUser.POST(inviteApprove, h.approveInvite)
 	groups.AuthUser.POST(getMerchants, h.getMerchants)
 }
 
-func (h *InviteRoute) checkInvite(ctx echo.Context) error {
+func (h *UserRoute) checkInvite(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 
 	req := &grpc.CheckInviteTokenRequest{}
@@ -61,7 +61,7 @@ func (h *InviteRoute) checkInvite(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (h *InviteRoute) approveInvite(ctx echo.Context) error {
+func (h *UserRoute) approveInvite(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 
 	req := &grpc.AcceptInviteRequest{}
@@ -86,7 +86,7 @@ func (h *InviteRoute) approveInvite(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-func (h *InviteRoute) getMerchants(ctx echo.Context) error {
+func (h *UserRoute) getMerchants(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 
 	req := &grpc.GetMerchantsForUserRequest{UserId: authUser.Id}
