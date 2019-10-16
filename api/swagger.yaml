@@ -8833,7 +8833,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/user/merchants":
-    post:
+    get:
       summary: Get merchants list for user
       tags:
         - User
