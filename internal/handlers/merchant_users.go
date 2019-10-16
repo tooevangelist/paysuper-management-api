@@ -16,6 +16,7 @@ const (
 	merchantInviteResend = "/merchants/:merchant_id/invite_resend"
 	merchantDeleteUser   = "/merchants/:merchant_id/delete_user"
 	merchantListRoles    = "/merchants/roles"
+	merchantUsersRole = "/merchants/:merchant_id/users/:user/role"
 )
 
 type MerchantUsersRoute struct {
@@ -35,10 +36,42 @@ func NewMerchantUsersRoute(set common.HandlerSet, cfg *common.Config) *MerchantU
 
 func (h *MerchantUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(merchantUsers, h.getMerchantUsers)
+	groups.AuthUser.PUT(merchantUsersRole, h.changeRole)
+
 	groups.AuthUser.POST(merchantInvite, h.sendInvite)
 	groups.AuthUser.POST(merchantInviteResend, h.resendInvite)
 	groups.AuthUser.GET(merchantListRoles, h.listRoles)
 	groups.AuthUser.DELETE(merchantDeleteUser, h.deleteUser)
+}
+
+func (h *MerchantUsersRoute) changeRole(ctx echo.Context) error {
+	merchantId := ctx.Param(common.RequestParameterMerchantId)
+	userId := ctx.Param(common.RequestParameterUserId)
+
+	req := &grpc.ChangeRoleForMerchantUserRequest{}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.NewManagementApiResponseError(common.ErrorRequestParamsIncorrect.Code, common.ErrorRequestParamsIncorrect.Message, err.Error()))
+	}
+
+	req.UserId = userId
+	req.MerchantId = merchantId
+
+	if err := h.dispatch.Validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.ChangeRoleForMerchantUser(ctx.Request().Context(), req)
+	if err != nil {
+		h.L().Error(common.InternalErrorTemplate, logger.PairArgs("err", err.Error()))
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }
 
 func (h *MerchantUsersRoute) getMerchantUsers(ctx echo.Context) error {

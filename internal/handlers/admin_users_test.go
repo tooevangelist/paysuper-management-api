@@ -50,7 +50,6 @@ func (suite *AdminUsersTestSuite) SetupTest() {
 
 func (suite *AdminUsersTestSuite) TearDownTest() {}
 
-
 func (suite *AdminUsersTestSuite) TestAdminUsers_GetList_InternalError() {
 	shouldBe := require.New(suite.T())
 
@@ -113,4 +112,111 @@ func (suite *AdminUsersTestSuite) TestAdminUsers_GetList_Ok() {
 	shouldBe.NoError(err)
 	shouldBe.Equal(http.StatusOK, res.Code)
 	shouldBe.NotEmpty(res.Body.String())
+}
+
+func (suite *AdminUsersTestSuite) TestAdminChangeRole_InternalError() {
+	shouldBe := require.New(suite.T())
+
+	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
+	billingService.On("ChangeRoleForAdminUser", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + adminUserRole).
+		Init(test.ReqInitJSON()).
+		BodyString(`{"role": "some_role"}`).
+		Exec(suite.T())
+
+	shouldBe.Error(err)
+	hErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.Equal(http.StatusInternalServerError, hErr.Code)
+	shouldBe.NotEmpty(res.Body.String())
+}
+
+func (suite *AdminUsersTestSuite) TestAdminChangeRole_ValidationError() {
+	shouldBe := require.New(suite.T())
+
+	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
+	billingService.On("ChangeRoleForAdminUser", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
+		Status: 400,
+		Message: &grpc.ResponseErrorMessage{Message: "some error"},
+	}, nil)
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + adminUserRole).
+		BodyString(`{"no_role": "some_role"}`).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	shouldBe.Error(err)
+	hErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.Equal(http.StatusBadRequest, hErr.Code)
+	shouldBe.NotEmpty(res.Body.String())
+}
+
+func (suite *AdminUsersTestSuite) TestAdminChangeRole_Error() {
+	shouldBe := require.New(suite.T())
+
+	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
+	billingService.On("ChangeRoleForAdminUser", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
+		Status: 400,
+		Message: &grpc.ResponseErrorMessage{Message: "some error"},
+	}, nil)
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + adminUserRole).
+		BodyString(`{"role": "some_role"}`).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	shouldBe.Error(err)
+	hErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.Equal(http.StatusBadRequest, hErr.Code)
+	shouldBe.NotEmpty(res.Body.String())
+}
+
+func (suite *AdminUsersTestSuite) TestAdminChangeRole_EmptyBodyError() {
+	shouldBe := require.New(suite.T())
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + adminUserRole).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	shouldBe.Error(err)
+	hErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.Equal(http.StatusBadRequest, hErr.Code)
+	shouldBe.NotEmpty(res.Body.String())
+}
+
+func (suite *AdminUsersTestSuite) TestAdminChangeRole_Ok() {
+	shouldBe := require.New(suite.T())
+
+	billingService := suite.router.dispatch.Services.Billing.(*mocks.BillingService)
+	billingService.On("ChangeRoleForAdminUser", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
+		Status: 200,
+	}, nil)
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + adminUserRole).
+		Init(test.ReqInitJSON()).
+		BodyString(`{"role": "some_role"}`).
+		Exec(suite.T())
+
+	shouldBe.NoError(err)
+	shouldBe.Equal(http.StatusOK, res.Code)
+	shouldBe.Empty(res.Body.String())
 }

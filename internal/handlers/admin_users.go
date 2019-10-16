@@ -21,6 +21,7 @@ const (
 	usersInvite       = "/users/invite"
 	usersInviteResend = "/users/invite_resend"
 	usersListRoles    = "/users/roles"
+	adminUserRole = "/users/:user/role"
 	usersDelete       = "/users/delete"
 )
 
@@ -35,11 +36,43 @@ func NewAdminUsersRoute(set common.HandlerSet, cfg *common.Config) *AdminUsersRo
 
 func (h *AdminUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(users, h.listUsers)
+	groups.AuthUser.PUT(adminUserRole, h.changeRole)
+
 	groups.AuthUser.POST(usersInvite, h.sendInvite)
 	groups.AuthUser.POST(usersInviteResend, h.resendInvite)
 	groups.AuthUser.GET(usersListRoles, h.listRoles)
 	groups.AuthUser.DELETE(usersDelete, h.deleteUser)
 }
+
+
+func (h *AdminUsersRoute) changeRole(ctx echo.Context) error {
+	userId := ctx.Param(common.RequestParameterUserId)
+
+	req := &grpc.ChangeRoleForAdminUserRequest{}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.NewManagementApiResponseError(common.ErrorRequestParamsIncorrect.Code, common.ErrorRequestParamsIncorrect.Message, err.Error()))
+	}
+
+	req.UserId = userId
+
+	if err := h.dispatch.Validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.ChangeRoleForAdminUser(ctx.Request().Context(), req)
+	if err != nil {
+		h.L().Error(common.InternalErrorTemplate, logger.PairArgs("err", err.Error()))
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}
+
 
 func (h *AdminUsersRoute) listUsers(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.GetAdminUsers(ctx.Request().Context(), &grpc.EmptyRequest{})
