@@ -11,6 +11,7 @@ import (
 	awsWrapperMocks "github.com/paysuper/paysuper-aws-manager/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	billMock "github.com/paysuper/paysuper-billing-server/pkg/mocks"
+	billingMocks "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
@@ -2450,6 +2451,11 @@ func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_MerchantIdInv
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_enableMerchantManualPayout_Ok() {
+	billingService := &billingMocks.BillingService{}
+	billingService.
+		On("ChangeMerchantManualPayouts", mock2.Anything, mock2.Anything).
+		Return(&grpc.ChangeMerchantManualPayoutsResponse{Status: http.StatusOK}, nil)
+	suite.router.dispatch.Services.Billing = billingService
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
@@ -2468,6 +2474,11 @@ func (suite *OnboardingTestSuite) TestOnboarding_enableMerchantManualPayout_Ok()
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_disableMerchantManualPayout_Ok() {
+	billingService := &billingMocks.BillingService{}
+	billingService.
+		On("ChangeMerchantManualPayouts", mock2.Anything, mock2.Anything).
+		Return(&grpc.ChangeMerchantManualPayoutsResponse{Status: http.StatusOK}, nil)
+	suite.router.dispatch.Services.Billing = billingService
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
