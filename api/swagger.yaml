@@ -8309,6 +8309,38 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
+  "/admin/api/v1/users/delete":
+    delete:
+      summary: Delete admin user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete admin user
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
   "/admin/api/v1/merchants/{id}/invite":
     post:
       summary: Send invitation for merchant user
@@ -8410,6 +8442,38 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ListUsersResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/{id}/delete_user":
+    delete:
+      summary: Delete merchant user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete merchant user
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
         "400":
           description: Invalid request data
           schema:
