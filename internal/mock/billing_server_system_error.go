@@ -13,6 +13,7 @@ import (
 
 type BillingServerSystemErrorMock struct{}
 
+
 func NewBillingServerSystemErrorMock() grpc.BillingService {
 	return &BillingServerSystemErrorMock{}
 }
@@ -898,5 +899,9 @@ func (s *BillingServerSystemErrorMock) DeleteMerchantUser(ctx context.Context, i
 }
 
 func (s *BillingServerSystemErrorMock) DeleteAdminUser(ctx context.Context, in *grpc.DeleteAdminUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) GetPermissionsForUser(ctx context.Context, in *grpc.GetPermissionsForUserRequest, opts ...client.CallOption) (*grpc.GetPermissionsForUserResponse, error) {
 	panic("implement me")
 }
