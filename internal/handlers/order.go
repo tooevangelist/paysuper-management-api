@@ -95,7 +95,7 @@ func (h *OrderRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(orderRefundsPath, h.listRefunds)
 	groups.AuthUser.GET(orderRefundsIdsPath, h.getRefund)
 	groups.AuthUser.POST(orderRefundsPath, h.createRefund)
-	groups.AuthUser.PUT(orderReplaceCodePath, h.replaceCode)
+	groups.SystemUser.PUT(orderReplaceCodePath, h.replaceCode)
 
 	groups.AuthProject.PATCH(orderLanguagePath, h.changeLanguage)
 	groups.AuthProject.PATCH(orderCustomerPath, h.changeCustomer)

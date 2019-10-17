@@ -33,10 +33,10 @@ func NewVatReportsRoute(set common.HandlerSet, cfg *common.Config) *VatReportsRo
 }
 
 func (h *VatReportsRoute) Route(groups *common.Groups) {
-	groups.AuthUser.GET(vatReportsPath, h.getVatReportsDashboard)
-	groups.AuthUser.GET(vatReportsCountryPath, h.getVatReportsForCountry)
-	groups.AuthUser.GET(vatReportsDetailsPath, h.getVatReportTransactions)
-	groups.AuthUser.POST(vatReportsStatusPath, h.updateVatReportStatus)
+	groups.SystemUser.GET(vatReportsPath, h.getVatReportsDashboard)
+	groups.SystemUser.GET(vatReportsCountryPath, h.getVatReportsForCountry)
+	groups.SystemUser.GET(vatReportsDetailsPath, h.getVatReportTransactions)
+	groups.SystemUser.POST(vatReportsStatusPath, h.updateVatReportStatus)
 }
 
 // Get vat reports dashboard

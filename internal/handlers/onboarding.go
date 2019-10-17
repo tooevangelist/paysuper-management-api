@@ -82,7 +82,7 @@ func NewOnboardingRoute(set common.HandlerSet, initial config.Initial, awsManage
 }
 
 func (h *OnboardingRoute) Route(groups *common.Groups) {
-	groups.AuthUser.GET(merchantsPath, h.listMerchants)
+	groups.SystemUser.GET(merchantsPath, h.listMerchants)
 	groups.AuthUser.GET(merchantsIdPath, h.getMerchant)
 	groups.AuthUser.GET(merchantsUserPath, h.getMerchantByUser)
 
@@ -94,7 +94,7 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.AuthUser.PUT(merchantsIdBankingPath, h.setMerchantBanking)
 	groups.AuthUser.GET(merchantsIdStatusCompanyPath, h.getMerchantStatus)
 
-	groups.AuthUser.PUT(merchantsIdChangeStatusCompanyPath, h.changeMerchantStatus)
+	groups.SystemUser.PUT(merchantsIdChangeStatusCompanyPath, h.changeMerchantStatus)
 	groups.AuthUser.PATCH(merchantsIdPath, h.changeAgreement)
 
 	groups.AuthUser.GET(merchantsIdAgreementPath, h.getAgreementData)
@@ -102,7 +102,7 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.AuthUser.POST(merchantsAgreementDocumentPath, h.uploadAgreementDocument)
 	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createAgreementSignature)
 
-	groups.AuthUser.POST(merchantsNotificationsPath, h.createNotification)
+	groups.SystemUser.POST(merchantsNotificationsPath, h.createNotification)
 	groups.AuthUser.GET(merchantsNotificationsIdPath, h.getNotification)
 	groups.AuthUser.GET(merchantsNotificationsPath, h.listNotifications)
 	groups.AuthUser.PUT(merchantsNotificationsMarkReadPath, h.markAsReadNotification)

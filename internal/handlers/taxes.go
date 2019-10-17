@@ -31,9 +31,9 @@ func NewTaxesRoute(set common.HandlerSet, cfg *common.Config) *TaxesRoute {
 }
 
 func (h *TaxesRoute) Route(groups *common.Groups) {
-	groups.AuthUser.GET(taxesPath, h.getTaxes)
-	groups.AuthUser.POST(taxesPath, h.setTax)
-	groups.AuthUser.DELETE(taxesIDPath, h.deleteTax)
+	groups.SystemUser.GET(taxesPath, h.getTaxes)
+	groups.SystemUser.POST(taxesPath, h.setTax)
+	groups.SystemUser.DELETE(taxesIDPath, h.deleteTax)
 }
 
 func (h *TaxesRoute) getTaxes(ctx echo.Context) error {

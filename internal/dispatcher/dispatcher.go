@@ -57,6 +57,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AuthUser:    echoHttp.Group(common.AuthUserGroupPath),
 		WebHooks:    echoHttp.Group(common.WebHookGroupPath),
 		Common:      echoHttp,
+		SystemUser:  echoHttp.Group(common.SystemUserGroupPath),
 	}
 	d.authProjectGroup(grp.AuthProject)
 	d.authUserGroup(grp.AuthUser)

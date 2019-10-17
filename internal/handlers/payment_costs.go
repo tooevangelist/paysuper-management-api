@@ -41,30 +41,30 @@ const (
 )
 
 func (h *PaymentCostRoute) Route(groups *common.Groups) {
-	groups.AuthUser.GET(paymentCostsChannelSystemAllPath, h.getAllPaymentChannelCostSystem)
-	groups.AuthUser.GET(paymentCostsChannelMerchantAllPath, h.getAllPaymentChannelCostMerchant) //надо править
-	groups.AuthUser.GET(paymentCostsMoneyBackAllPath, h.getAllMoneyBackCostSystem)
-	groups.AuthUser.GET(paymentCostsMoneyBackMerchantAllPath, h.getAllMoneyBackCostMerchant) //надо править
+	groups.SystemUser.GET(paymentCostsChannelSystemAllPath, h.getAllPaymentChannelCostSystem)
+	groups.SystemUser.GET(paymentCostsChannelMerchantAllPath, h.getAllPaymentChannelCostMerchant) //надо править
+	groups.SystemUser.GET(paymentCostsMoneyBackAllPath, h.getAllMoneyBackCostSystem)
+	groups.SystemUser.GET(paymentCostsMoneyBackMerchantAllPath, h.getAllMoneyBackCostMerchant) //надо править
 
-	groups.AuthUser.GET(paymentCostsChannelSystemPath, h.getPaymentChannelCostSystem)
-	groups.AuthUser.GET(paymentCostsChannelMerchantPath, h.getPaymentChannelCostMerchant)
-	groups.AuthUser.GET(paymentCostsMoneyBackSystemPath, h.getMoneyBackCostSystem)
-	groups.AuthUser.GET(paymentCostsMoneyBackMerchantPath, h.getMoneyBackCostMerchant)
+	groups.SystemUser.GET(paymentCostsChannelSystemPath, h.getPaymentChannelCostSystem)
+	groups.SystemUser.GET(paymentCostsChannelMerchantPath, h.getPaymentChannelCostMerchant)
+	groups.SystemUser.GET(paymentCostsMoneyBackSystemPath, h.getMoneyBackCostSystem)
+	groups.SystemUser.GET(paymentCostsMoneyBackMerchantPath, h.getMoneyBackCostMerchant)
 
-	groups.AuthUser.DELETE(paymentCostsChannelSystemIdPath, h.deletePaymentChannelCostSystem)
-	groups.AuthUser.DELETE(paymentCostsChannelMerchantPath, h.deletePaymentChannelCostMerchant)
-	groups.AuthUser.DELETE(paymentCostsMoneyBackSystemIdPath, h.deleteMoneyBackCostSystem)
-	groups.AuthUser.DELETE(paymentCostsMoneyBackMerchantPath, h.deleteMoneyBackCostMerchant)
+	groups.SystemUser.DELETE(paymentCostsChannelSystemIdPath, h.deletePaymentChannelCostSystem)
+	groups.SystemUser.DELETE(paymentCostsChannelMerchantPath, h.deletePaymentChannelCostMerchant)
+	groups.SystemUser.DELETE(paymentCostsMoneyBackSystemIdPath, h.deleteMoneyBackCostSystem)
+	groups.SystemUser.DELETE(paymentCostsMoneyBackMerchantPath, h.deleteMoneyBackCostMerchant)
 
-	groups.AuthUser.POST(paymentCostsChannelSystemPath, h.setPaymentChannelCostSystem)
-	groups.AuthUser.POST(paymentCostsChannelMerchantPath, h.setPaymentChannelCostMerchant)
-	groups.AuthUser.POST(paymentCostsMoneyBackSystemPath, h.setMoneyBackCostSystem)
-	groups.AuthUser.POST(paymentCostsMoneyBackMerchantPath, h.setMoneyBackCostMerchant)
+	groups.SystemUser.POST(paymentCostsChannelSystemPath, h.setPaymentChannelCostSystem)
+	groups.SystemUser.POST(paymentCostsChannelMerchantPath, h.setPaymentChannelCostMerchant)
+	groups.SystemUser.POST(paymentCostsMoneyBackSystemPath, h.setMoneyBackCostSystem)
+	groups.SystemUser.POST(paymentCostsMoneyBackMerchantPath, h.setMoneyBackCostMerchant)
 
-	groups.AuthUser.PUT(paymentCostsChannelSystemIdPath, h.setPaymentChannelCostSystem)
-	groups.AuthUser.PUT(paymentCostsChannelMerchantIdsPath, h.setPaymentChannelCostMerchant)
-	groups.AuthUser.PUT(paymentCostsMoneyBackSystemIdPath, h.setMoneyBackCostSystem)
-	groups.AuthUser.PUT(paymentCostsChannelMerchantIdsPath, h.setMoneyBackCostMerchant)
+	groups.SystemUser.PUT(paymentCostsChannelSystemIdPath, h.setPaymentChannelCostSystem)
+	groups.SystemUser.PUT(paymentCostsChannelMerchantIdsPath, h.setPaymentChannelCostMerchant)
+	groups.SystemUser.PUT(paymentCostsMoneyBackSystemIdPath, h.setMoneyBackCostSystem)
+	groups.SystemUser.PUT(paymentCostsChannelMerchantIdsPath, h.setMoneyBackCostMerchant)
 }
 
 // @Description Get system costs for payments operations
