@@ -1090,3 +1090,7 @@ func (s *BillingServerErrorMock) DeleteMerchantUser(ctx context.Context, in *grp
 func (s *BillingServerErrorMock) DeleteAdminUser(ctx context.Context, in *grpc.DeleteAdminUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerErrorMock) GetPermissionsForUser(ctx context.Context, in *grpc.GetPermissionsForUserRequest, opts ...client.CallOption) (*grpc.GetPermissionsForUserResponse, error) {
+	panic("implement me")
+}
