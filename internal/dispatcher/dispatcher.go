@@ -39,11 +39,11 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			`"host":"${host}","method":"${method}","uri":"${uri}","user_agent":"${user_agent}",` +
 			`"status":${status},"error":"${error}","latency":${latency},"latency_human":"${latency_human}"` +
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}}`,
-	})) // 3
+	}))                                 // 3
 	echoHttp.Use(d.RecoverMiddleware()) // 2
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowHeaders: []string{"authorization", "content-type"},
-	})) // 1
+	}))                                 // 1
 	// Called before routes
 	echoHttp.Use(d.RawBodyPreMiddleware)         // 2
 	echoHttp.Use(d.LimitOffsetSortPreMiddleware) // 1
@@ -53,6 +53,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AuthUser:    echoHttp.Group(common.AuthUserGroupPath),
 		WebHooks:    echoHttp.Group(common.WebHookGroupPath),
 		Common:      echoHttp,
+		SystemUser:  echoHttp.Group(common.SystemUserGroupPath),
 	}
 	d.authProjectGroup(grp.AuthProject)
 	d.authUserGroup(grp.AuthUser)

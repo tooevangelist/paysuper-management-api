@@ -40,7 +40,7 @@ func (h *RoyaltyReportsRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(royaltyReportsTransactionsPath, h.listRoyaltyReportOrders)
 	groups.AuthUser.POST(royaltyReportsAcceptPath, h.merchantReviewRoyaltyReport)
 	groups.AuthUser.POST(royaltyReportsDeclinePath, h.merchantDeclineRoyaltyReport)
-	groups.AuthUser.POST(royaltyReportsChangePath, h.changeRoyaltyReport)
+	groups.SystemUser.POST(royaltyReportsChangePath, h.changeRoyaltyReport)
 }
 
 // Get royalty reports list by params (by merchant, for period) with pagination

@@ -37,7 +37,7 @@ func (h *PayoutDocumentsRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(payoutsPath, h.getPayoutDocumentsList)
 	groups.AuthUser.GET(payoutsIdPath, h.getPayoutDocument)
 	groups.AuthUser.POST(payoutsPath, h.createPayoutDocument)
-	groups.AuthUser.POST(payoutsIdPath, h.updatePayoutDocument)
+	groups.SystemUser.POST(payoutsIdPath, h.updatePayoutDocument)
 	groups.AuthUser.GET(payoutSignMerchantPath, h.getPayoutSignUrlMerchant)
 	groups.AuthUser.GET(payoutSignPsPath, h.getPayoutSignUrlPs)
 }

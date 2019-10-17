@@ -35,12 +35,12 @@ func NewAdminUsersRoute(set common.HandlerSet, cfg *common.Config) *AdminUsersRo
 }
 
 func (h *AdminUsersRoute) Route(groups *common.Groups) {
-	groups.AuthUser.GET(users, h.listUsers)
-	groups.AuthUser.PUT(adminUserRole, h.changeRole)
-	groups.AuthUser.POST(adminUserInvite, h.sendInvite)
-	groups.AuthUser.POST(adminResendInvite, h.resendInvite)
-	groups.AuthUser.GET(adminListRoles, h.listRoles)
-	groups.AuthUser.DELETE(adminUserDelete, h.deleteUser)
+	groups.SystemUser.GET(users, h.listUsers)
+	groups.SystemUser.PUT(adminUserRole, h.changeRole)
+	groups.SystemUser.POST(adminUserInvite, h.sendInvite)
+	groups.SystemUser.POST(adminResendInvite, h.resendInvite)
+	groups.SystemUser.GET(adminListRoles, h.listRoles)
+	groups.SystemUser.DELETE(adminUserDelete, h.deleteUser)
 }
 
 func (h *AdminUsersRoute) changeRole(ctx echo.Context) error {

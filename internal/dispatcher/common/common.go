@@ -18,6 +18,7 @@ const (
 	UnmarshalGlobalConfigKey = "dispatcher.global"
 	AuthProjectGroupPath     = "/api/v1"
 	AuthUserGroupPath        = "/admin/api/v1"
+	SystemUserGroupPath      = "/system/api/v1"
 	WebHookGroupPath         = "/webhook"
 )
 
@@ -73,6 +74,7 @@ type Groups struct {
 	AuthUser    *echo.Group
 	WebHooks    *echo.Group
 	Common      *echo.Echo
+	SystemUser  *echo.Group
 }
 
 // Handler
