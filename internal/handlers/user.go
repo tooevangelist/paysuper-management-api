@@ -17,9 +17,10 @@ type UserRoute struct {
 }
 
 const (
-	inviteCheck   = "/user/invite/check"
-	inviteApprove = "/user/invite/approve"
-	getMerchants  = "/user/merchants"
+	inviteCheck      = "/user/invite/check"
+	inviteApprove    = "/user/invite/approve"
+	getMerchants     = "/user/merchants"
+	permissionsRoute = "/permissions"
 )
 
 func NewUserRoute(set common.HandlerSet, cfg *common.Config) *UserRoute {
@@ -35,6 +36,8 @@ func (h *UserRoute) Route(groups *common.Groups) {
 	groups.AuthUser.POST(inviteCheck, h.checkInvite)
 	groups.AuthUser.POST(inviteApprove, h.approveInvite)
 	groups.AuthUser.POST(getMerchants, h.getMerchants)
+	groups.AuthProject.GET(permissionsRoute, h.getPermissions)
+
 }
 
 func (h *UserRoute) checkInvite(ctx echo.Context) error {
@@ -98,4 +101,24 @@ func (h *UserRoute) getMerchants(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res)
+}
+
+func (h *UserRoute) getPermissions(ctx echo.Context) error {
+	authUser := common.ExtractUserContext(ctx)
+
+	res, err := h.dispatch.Services.Billing.GetPermissionsForUser(ctx.Request().Context(), &grpc.GetPermissionsForUserRequest{
+		UserId:     authUser.Id,
+		MerchantId: authUser.MerchantId,
+	})
+
+	if err != nil {
+		h.L().Error(common.InternalErrorTemplate, logger.PairArgs("err", err.Error()))
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res.Permissions)
 }

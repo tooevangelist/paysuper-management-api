@@ -17,7 +17,7 @@ import (
 
 type PermissionsTestSuite struct {
 	suite.Suite
-	router *PermissionsRoute
+	router *UserRoute
 	caller *test.EchoReqResCaller
 }
 
@@ -34,7 +34,7 @@ func (suite *PermissionsTestSuite) SetupTest() {
 	}
 
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
-		suite.router = NewPermissionsRoute(set.HandlerSet, set.GlobalConfig)
+		suite.router = NewUserRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
 		}
