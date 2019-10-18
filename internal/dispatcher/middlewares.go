@@ -3,6 +3,8 @@ package dispatcher
 import (
 	"bytes"
 	"fmt"
+	jwtverifier "github.com/ProtocolONE/authone-jwt-verifier-golang"
+	jwtMiddleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -113,5 +115,38 @@ func (d *Dispatcher) BodyDumpMiddleware() echo.MiddlewareFunc {
 			"response_body":    string(resBody),
 		}
 		d.L().Info(ctx.Path(), logger.WithFields(data))
+	})
+}
+
+// MerchantBinderPreMiddleware
+func (d *Dispatcher) MerchantBinderPreMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		common.SetBinder(c, common.MerchantBinderDefault)
+		return next(c)
+	}
+}
+
+// SystemBinderPreMiddleware
+func (d *Dispatcher) SystemBinderPreMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		common.SetBinder(c, common.SystemBinderDefault)
+		return next(c)
+	}
+}
+
+// AuthOnePreMiddleware
+func (d *Dispatcher) AuthOnePreMiddleware() echo.MiddlewareFunc {
+	return common.ContextWrapperCallback(func(c echo.Context, next echo.HandlerFunc) error {
+		handleFn := jwtMiddleware.AuthOneJwtCallableWithConfig(
+			d.appSet.JwtVerifier,
+			func(ui *jwtverifier.UserInfo) {
+				user := common.ExtractUserContext(c)
+				user.Id = ui.UserID
+				user.Name = "System User"
+				user.Role = ""
+				common.SetUserContext(c, user)
+			},
+		)(next)
+		return handleFn(c)
 	})
 }

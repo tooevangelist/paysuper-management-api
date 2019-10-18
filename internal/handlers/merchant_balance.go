@@ -40,7 +40,7 @@ func (h *BalanceRoute) Route(groups *common.Groups) {
 // GET /admin/api/v1/balance - for current merchant
 // GET /admin/api/v1/balance/:merchant_id - for admin by merchant id
 func (h *BalanceRoute) getBalance(ctx echo.Context) error {
-	req := &grpc.GetMerchantBalanceRequest{MerchantId: common.ExtractMerchantIdContext(ctx)}
+	req := &grpc.GetMerchantBalanceRequest{}
 	res, err := h.dispatch.Services.Billing.GetMerchantBalance(ctx.Request().Context(), req)
 
 	if err != nil {

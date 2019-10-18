@@ -16,6 +16,37 @@ import (
 	"strconv"
 )
 
+var (
+	SystemBinderDefault   = &SystemBinder{}
+	MerchantBinderDefault = &MerchantBinder{}
+	BinderDefault         = &Binder{}
+	EchoBinderDefault     = &echo.DefaultBinder{}
+)
+
+type SystemBinder struct{}
+
+func (b *SystemBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+	return nil
+}
+
+type MerchantBinder struct{}
+
+func (b *MerchantBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+	return nil
+}
+
+type Binder struct{}
+
+func (b *Binder) Bind(i interface{}, ctx echo.Context) (err error) {
+	if err := EchoBinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+	if binder := ExtractBinderContext(ctx); binder != nil {
+		return binder.Bind(i, ctx)
+	}
+	return nil
+}
+
 type OrderFormBinder struct{}
 type OrderJsonBinder struct{}
 type OrderRevenueDynamicRequestBinder struct{}
@@ -64,6 +95,7 @@ type ChangeProjectRequestBinder struct {
 	dispatch HandlerSet
 	provider.LMT
 	cfg Config
+	Binder
 }
 
 // NewChangeProjectRequestBinder
@@ -77,9 +109,8 @@ func NewChangeProjectRequestBinder(set HandlerSet, cfg Config) *ChangeProjectReq
 
 // Bind
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
-	db := new(echo.DefaultBinder)
 
-	if err = db.Bind(i, ctx); err != nil {
+	if err = BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -122,8 +153,7 @@ func (cb *OrderJsonBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 		ctx.Request().Body = rdr
 	}
 
-	db := new(echo.DefaultBinder)
-	if err = db.Bind(i, ctx); err != nil {
+	if err = BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -135,10 +165,9 @@ func (cb *OrderJsonBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 
 // Bind
 func (cb *PaymentCreateProcessBinder) Bind(i interface{}, ctx echo.Context) (err error) {
-	db := new(echo.DefaultBinder)
 	untypedData := make(map[string]interface{})
 
-	if err = db.Bind(&untypedData, ctx); err != nil {
+	if err = BinderDefault.Bind(&untypedData, ctx); err != nil {
 		return
 	}
 
@@ -163,10 +192,8 @@ func (cb *PaymentCreateProcessBinder) Bind(i interface{}, ctx echo.Context) (err
 
 // Bind
 func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context) (err error) {
-	db := new(echo.DefaultBinder)
-	err = db.Bind(i, ctx)
 
-	if err != nil {
+	if err = BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -194,10 +221,8 @@ func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context)
 
 // Bind
 func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
 
-	if err != nil {
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -222,6 +247,11 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 
 // Bind
 func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+
 	merchantId := ctx.Param(RequestParameterMerchantId)
 	paymentMethodId := ctx.Param(RequestParameterPaymentMethodId)
 
@@ -242,10 +272,8 @@ func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context
 
 // Bind
 func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
 
-	if err != nil {
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -269,10 +297,8 @@ func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Cont
 
 // Bind
 func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
 
-	if err != nil {
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -290,10 +316,8 @@ func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Cont
 
 // Bind
 func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
 
-	if err != nil {
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -311,6 +335,11 @@ func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Contex
 
 // Bind
 func (b *PaylinksListBinder) Bind(i interface{}, ctx echo.Context) error {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+
 	params := ctx.QueryParams()
 	structure := i.(*paylink.GetPaylinksRequest)
 
@@ -340,6 +369,11 @@ func (b *PaylinksListBinder) Bind(i interface{}, ctx echo.Context) error {
 
 // Bind
 func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+
 	params := ctx.QueryParams()
 	structure := i.(*paylink.GetPaylinkURLRequest)
 
@@ -363,9 +397,8 @@ func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
 
 // Bind
 func (b *PaylinksCreateBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-	if err != nil {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -381,9 +414,8 @@ func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
 	if id == "" {
 		return ErrorIncorrectPaylinkId
 	}
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-	if err != nil {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -395,6 +427,11 @@ func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
 
 // Bind
 func (b *ProductsGetProductsListBinder) Bind(i interface{}, ctx echo.Context) error {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+
 	limit := int32(b.LimitDefault)
 	offset := int32(b.OffsetDefault)
 
@@ -443,9 +480,8 @@ func (b *ProductsGetProductsListBinder) Bind(i interface{}, ctx echo.Context) er
 
 // Bind
 func (b *ProductsCreateProductBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-	if err != nil {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -461,9 +497,8 @@ func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) erro
 	if id == "" || bson.IsObjectIdHex(id) == false {
 		return ErrorIncorrectProductId
 	}
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-	if err != nil {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -477,11 +512,8 @@ func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) erro
 func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) error {
 	req := make(map[string]interface{})
 
-	db := new(echo.DefaultBinder)
-	err := db.Bind(&req, ctx)
-
-	if err != nil {
-		return ErrorRequestParamsIncorrect
+	if err := BinderDefault.Bind(&req, ctx); err != nil {
+		return err
 	}
 
 	merchantId := ctx.Param(RequestParameterId)
@@ -530,11 +562,8 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error {
 	req := make(map[string]interface{})
 
-	db := new(echo.DefaultBinder)
-	err := db.Bind(&req, ctx)
-
-	if err != nil {
-		return ErrorRequestParamsIncorrect
+	if err := b.Binder.Bind(&req, ctx); err != nil {
+		return err
 	}
 
 	projectId := ctx.Param(RequestParameterId)
