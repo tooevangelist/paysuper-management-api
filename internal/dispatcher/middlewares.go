@@ -121,6 +121,12 @@ func (d *Dispatcher) BodyDumpMiddleware() echo.MiddlewareFunc {
 // MerchantBinderPreMiddleware
 func (d *Dispatcher) MerchantBinderPreMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		if paramValue := c.Param(common.RequestParameterMerchantId); paramValue != "" {
+			user := common.ExtractUserContext(c)
+			if paramValue != user.MerchantId {
+				return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
+			}
+		}
 		common.SetBinder(c, common.MerchantBinderDefault)
 		return next(c)
 	}
