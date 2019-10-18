@@ -51,22 +51,17 @@ func ExtractCursorContext(ctx echo.Context) *Cursor {
 	return &Cursor{}
 }
 
-// ExtractMerchantIdContext
-func ExtractMerchantIdContext(ctx echo.Context) string {
-	if merchantId, ok := ctx.Get("merchantId").(string); ok {
-		return merchantId
+// ExtractBinderContext
+func ExtractBinderContext(ctx echo.Context) echo.Binder {
+	if binder, ok := ctx.Get("binder").(echo.Binder); ok {
+		return binder
 	}
-	return ""
+	return nil
 }
 
 // SetUserContext
 func SetUserContext(ctx echo.Context, user *AuthUser) {
 	ctx.Set("user", user)
-}
-
-// SetMerchantIdContext
-func SetMerchantIdContext(ctx echo.Context, merchantId string) {
-	ctx.Set("merchantId", merchantId)
 }
 
 // SetRawBodyContext
@@ -77,6 +72,11 @@ func SetRawBodyContext(ctx echo.Context, rawBody []byte) {
 // SetCursorContext
 func SetCursorContext(ctx echo.Context, cursor *Cursor) {
 	ctx.Set("cursor", cursor)
+}
+
+// SetBinder
+func SetBinder(ctx echo.Context, binder echo.Binder) {
+	ctx.Set("binder", binder)
 }
 
 // Groups

@@ -3,7 +3,6 @@ package dispatcher
 import (
 	"context"
 	jwtverifier "github.com/ProtocolONE/authone-jwt-verifier-golang"
-	jwtMiddleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
@@ -35,6 +34,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		return e
 	}
 	echoHttp.Renderer = common.NewTemplate(t)
+	echoHttp.Binder = common.BinderDefault
 
 	// Called after routes
 	echoHttp.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -61,7 +61,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	}
 	d.authProjectGroup(grp.AuthProject)
 	d.authUserGroup(grp.AuthUser)
-	d.systemUserGroup(grp.AuthUser)
+	d.systemUserGroup(grp.SystemUser)
 	d.webHookGroup(grp.WebHooks)
 	// init routes
 	for _, handler := range d.appSet.Handlers {
@@ -138,52 +138,24 @@ func (d *Dispatcher) accessGroup(grp *echo.Group) {
 }
 
 func (d *Dispatcher) authUserGroup(grp *echo.Group) {
-	// Called after routes
+	// Called before routes
+	grp.Use(d.MerchantBinderPreMiddleware) // 1
 	if !d.globalCfg.DisableAuthMiddleware {
-		grp.Use(
-			common.ContextWrapperCallback(func(c echo.Context, next echo.HandlerFunc) error {
-				handleFn := jwtMiddleware.AuthOneJwtCallableWithConfig(
-					d.appSet.JwtVerifier,
-					func(ui *jwtverifier.UserInfo) {
-						user := common.ExtractUserContext(c)
-						user.Id = ui.UserID
-						user.Name = "System User"
-						// TODO: How to get merchant for the User? Get all merchants for user and take first?
-						user.MerchantId = ""
-						user.Role = ""
-						common.SetUserContext(c, user)
-						common.SetMerchantIdContext(c, user.MerchantId)
-					},
-				)(next)
-				return handleFn(c)
-			}),
-		) // 1
 		// Called before routes
 		grp.Use(d.GetUserDetailsMiddleware) // 1
+		// Called after routes
+		grp.Use(d.AuthOnePreMiddleware()) // 1
 	}
 }
 
 func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
-	// Called after routes
+	// Called before routes
+	grp.Use(d.SystemBinderPreMiddleware) // 1
 	if !d.globalCfg.DisableAuthMiddleware {
-		grp.Use(
-			common.ContextWrapperCallback(func(c echo.Context, next echo.HandlerFunc) error {
-				handleFn := jwtMiddleware.AuthOneJwtCallableWithConfig(
-					d.appSet.JwtVerifier,
-					func(ui *jwtverifier.UserInfo) {
-						user := common.ExtractUserContext(c)
-						user.Id = ui.UserID
-						user.Name = "System User"
-						user.Role = ""
-						common.SetUserContext(c, user)
-						common.SetMerchantIdContext(c, c.Param(common.RequestParameterMerchantId))
-					},
-				)(next)
-				return handleFn(c)
-			}),
-		) // 1
 		// Called before routes
 		grp.Use(d.GetUserDetailsMiddleware) // 1
+		// Called after routes
+		grp.Use(d.AuthOnePreMiddleware()) // 1
 	}
 }
 
