@@ -24,7 +24,10 @@ var (
 	EchoBinderDefault     = &echo.DefaultBinder{}
 )
 
-const MerchantIdField = "MerchantId"
+const (
+	MerchantIdField = "MerchantId"
+	ParamTag        = "param"
+)
 
 type SystemBinder struct{}
 
@@ -49,21 +52,22 @@ func (b *MerchantBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 		return nil
 	}
 
+	u := ExtractUserContext(ctx)
+
 	for i := 0; i < irv.NumField(); i++ {
 
 		rv := irv.Field(i)
 		tf := irt.Field(i)
 
-		if strings.EqualFold(tf.Name, MerchantIdField) {
+		if v, ok := tf.Tag.Lookup(ParamTag); ok {
+			rv.Set(reflect.ValueOf(ctx.Param(v)))
+		}
 
+		if strings.EqualFold(tf.Name, MerchantIdField) {
 			if tf.Type.Kind() != reflect.String {
 				return ErrorInternal
 			}
-
-			u := ExtractUserContext(ctx)
 			rv.Set(reflect.ValueOf(u.MerchantId))
-
-			break
 		}
 	}
 

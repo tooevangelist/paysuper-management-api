@@ -28,14 +28,12 @@ type Dispatcher struct {
 
 // dispatch
 func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
-
 	t, e := template.New("").Funcs(common.FuncMap).ParseGlob(d.cfg.WorkDir + "/assets/web/template/*.html")
 	if e != nil {
 		return e
 	}
 	echoHttp.Renderer = common.NewTemplate(t)
 	echoHttp.Binder = common.BinderDefault
-
 	// Called after routes
 	echoHttp.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Output: logger.NewLevelWriter(d.L(), logger.LevelInfo),
@@ -139,24 +137,20 @@ func (d *Dispatcher) accessGroup(grp *echo.Group) {
 
 func (d *Dispatcher) authUserGroup(grp *echo.Group) {
 	// Called before routes
-	grp.Use(d.MerchantBinderPreMiddleware) // 1
 	if !d.globalCfg.DisableAuthMiddleware {
-		// Called before routes
 		grp.Use(d.GetUserDetailsMiddleware) // 1
-		// Called after routes
-		grp.Use(d.AuthOnePreMiddleware()) // 1
+		grp.Use(d.AuthOnePreMiddleware()) // 2
 	}
+	grp.Use(d.MerchantBinderPreMiddleware) // 3
 }
 
 func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
 	// Called before routes
-	grp.Use(d.SystemBinderPreMiddleware) // 1
 	if !d.globalCfg.DisableAuthMiddleware {
-		// Called before routes
 		grp.Use(d.GetUserDetailsMiddleware) // 1
-		// Called after routes
-		grp.Use(d.AuthOnePreMiddleware()) // 1
+		grp.Use(d.AuthOnePreMiddleware()) // 2
 	}
+	grp.Use(d.SystemBinderPreMiddleware) // 3
 }
 
 func (d *Dispatcher) webHookGroup(grp *echo.Group) {
