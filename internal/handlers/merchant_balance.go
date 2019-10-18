@@ -36,9 +36,6 @@ func (h *BalanceRoute) Route(groups *common.Groups) {
 	groups.SystemUser.GET(balanceMerchantPath, h.getBalance)
 }
 
-// Get merchant balance
-// GET /admin/api/v1/balance - for current merchant
-// GET /admin/api/v1/balance/:merchant_id - for admin by merchant id
 func (h *BalanceRoute) getBalance(ctx echo.Context) error {
 	req := &grpc.GetMerchantBalanceRequest{}
 	err := ctx.Bind(req)

@@ -29,13 +29,13 @@ func NewPaymentCostRoute(set common.HandlerSet, cfg *common.Config) *PaymentCost
 const (
 	paymentCostsChannelSystemPath        = "/payment_costs/channel/system"
 	paymentCostsChannelSystemAllPath     = "/payment_costs/channel/system/all"
-	paymentCostsChannelMerchantPath      = "/payment_costs/channel/merchant/:id"
-	paymentCostsChannelMerchantAllPath   = "/payment_costs/channel/merchant/:id/all"
+	paymentCostsChannelMerchantPath      = "/payment_costs/channel/merchant/:merchant_id"
+	paymentCostsChannelMerchantAllPath   = "/payment_costs/channel/merchant/:merchant_id/all"
 	paymentCostsChannelSystemIdPath      = "/payment_costs/channel/system/:id"
 	paymentCostsChannelMerchantIdsPath   = "/payment_costs/channel/merchant/:merchant_id/:rate_id"
 	paymentCostsMoneyBackAllPath         = "/payment_costs/money_back/system/all"
-	paymentCostsMoneyBackMerchantPath    = "/payment_costs/money_back/merchant/:id"
-	paymentCostsMoneyBackMerchantAllPath = "/payment_costs/money_back/merchant/:id/all"
+	paymentCostsMoneyBackMerchantPath    = "/payment_costs/money_back/merchant/:merchant_id"
+	paymentCostsMoneyBackMerchantAllPath = "/payment_costs/money_back/merchant/:merchant_id/all"
 	paymentCostsMoneyBackSystemPath      = "/payment_costs/money_back/system"
 	paymentCostsMoneyBackSystemIdPath    = "/payment_costs/money_back/system/:id"
 )

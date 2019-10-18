@@ -45,7 +45,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Get
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthUserGroupPath + paymentCostsChannelSystemAllPath).
+		Path(common.SystemUserGroupPath + paymentCostsChannelSystemAllPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -63,7 +63,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Get
 		SetQueryParam("name", "VISA").
 		SetQueryParam("region", "CIS").
 		SetQueryParam("country", "AZ").
-		Path(common.AuthUserGroupPath + paymentCostsChannelSystemPath).
+		Path(common.SystemUserGroupPath + paymentCostsChannelSystemPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -79,7 +79,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Add
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthUserGroupPath + paymentCostsChannelSystemPath).
+		Path(common.SystemUserGroupPath + paymentCostsChannelSystemPath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
 		Exec(suite.T())
@@ -95,7 +95,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Del
 	res, err := suite.caller.Builder().
 		Method(http.MethodDelete).
 		Params(":"+common.RequestParameterId, "5be2d0b4b0b30d0007383ce6").
-		Path(common.AuthUserGroupPath + paymentCostsChannelSystemIdPath).
+		Path(common.SystemUserGroupPath + paymentCostsChannelSystemIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -109,8 +109,8 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_G
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paymentCostsMoneyBackMerchantAllPath).
+		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Path(common.SystemUserGroupPath + paymentCostsMoneyBackMerchantAllPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -123,13 +123,13 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_G
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
 		SetQueryParam("name", "VISA").
 		SetQueryParam("region", "CIS").
 		SetQueryParam("country", "AZ").
 		SetQueryParam("payout_currency", "USD").
 		SetQueryParam("amount", "100").
-		Path(common.AuthUserGroupPath + paymentCostsChannelMerchantPath).
+		Path(common.SystemUserGroupPath + paymentCostsChannelMerchantPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -145,8 +145,8 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_A
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paymentCostsChannelMerchantPath).
+		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Path(common.SystemUserGroupPath + paymentCostsChannelMerchantPath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
 		Exec(suite.T())
@@ -160,8 +160,8 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_D
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paymentCostsChannelMerchantPath).
+		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Path(common.SystemUserGroupPath + paymentCostsChannelMerchantPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -176,7 +176,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_GetAll()
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paymentCostsMoneyBackAllPath).
+		Path(common.SystemUserGroupPath + paymentCostsMoneyBackAllPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -198,7 +198,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Get() {
 		SetQueryParam("days", "10").
 		SetQueryParam("undo_reason", "chargeback").
 		SetQueryParam("payment_stage", "1").
-		Path(common.AuthUserGroupPath + paymentCostsMoneyBackSystemPath).
+		Path(common.SystemUserGroupPath + paymentCostsMoneyBackSystemPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -215,7 +215,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Add() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paymentCostsMoneyBackSystemPath).
+		Path(common.SystemUserGroupPath + paymentCostsMoneyBackSystemPath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
 		Exec(suite.T())
@@ -231,7 +231,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Delete()
 	res, err := suite.caller.Builder().
 		Method(http.MethodDelete).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paymentCostsMoneyBackSystemIdPath).
+		Path(common.SystemUserGroupPath + paymentCostsMoneyBackSystemIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -245,8 +245,8 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_GetAll
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paymentCostsMoneyBackMerchantAllPath).
+		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Path(common.SystemUserGroupPath + paymentCostsMoneyBackMerchantAllPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -259,7 +259,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Get() 
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
 		SetQueryParam("name", "VISA").
 		SetQueryParam("region", "CIS").
 		SetQueryParam("country", "AZ").
@@ -267,7 +267,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Get() 
 		SetQueryParam("days", "10").
 		SetQueryParam("undo_reason", "chargeback").
 		SetQueryParam("payment_stage", "1").
-		Path(common.AuthUserGroupPath + paymentCostsMoneyBackMerchantPath).
+		Path(common.SystemUserGroupPath + paymentCostsMoneyBackMerchantPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -283,8 +283,8 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Add() 
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paymentCostsMoneyBackMerchantPath).
+		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Path(common.SystemUserGroupPath + paymentCostsMoneyBackMerchantPath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
 		Exec(suite.T())
@@ -298,8 +298,8 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Delete
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paymentCostsMoneyBackMerchantPath).
+		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Path(common.SystemUserGroupPath + paymentCostsMoneyBackMerchantPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
