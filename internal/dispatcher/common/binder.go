@@ -25,8 +25,9 @@ var (
 )
 
 const (
-	MerchantIdField = "MerchantId"
-	ParamTag        = "param"
+	MerchantIdField    = "MerchantId"
+	MerchantSliceField = "Merchant"
+	ParamTag           = "param"
 )
 
 type SystemBinder struct{}
@@ -68,6 +69,12 @@ func (b *MerchantBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 				return ErrorInternal
 			}
 			rv.Set(reflect.ValueOf(u.MerchantId))
+		}
+
+		if strings.EqualFold(tf.Name, MerchantSliceField) {
+			if rv.Type().Elem().Kind() == reflect.String {
+				rv.Set(reflect.ValueOf([]string{u.MerchantId}))
+			}
 		}
 	}
 
