@@ -188,15 +188,12 @@ func (h *OnboardingRoute) listMerchants(ctx echo.Context) error {
 func (h *OnboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.MerchantChangeStatusRequest{}
-	err := (&common.OnboardingChangeMerchantStatusBinder{}).Bind(req, ctx)
 
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	err = h.dispatch.Validate.Struct(req)
-
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -218,15 +215,12 @@ func (h *OnboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 func (h *OnboardingRoute) createNotification(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.NotificationRequest{}
-	err := (&common.OnboardingCreateNotificationBinder{}).Bind(req, ctx)
 
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	err = h.dispatch.Validate.Struct(req)
-
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 

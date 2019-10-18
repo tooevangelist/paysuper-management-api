@@ -34,6 +34,45 @@ const (
 type SystemBinder struct{}
 
 func (b *SystemBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+	rv := reflect.ValueOf(i)
+
+	if rv.Type().Kind() != reflect.Ptr || rv.IsNil() {
+		return ErrorInternal
+	}
+
+	irv := rv.Elem()
+	irt := irv.Type()
+
+	if irt.Kind() != reflect.Struct {
+		return nil
+	}
+
+	for i := 0; i < irv.NumField(); i++ {
+
+		rv := irv.Field(i)
+		tf := irt.Field(i)
+
+		if v, ok := tf.Tag.Lookup(ParamTag); ok {
+			rv.Set(reflect.ValueOf(ctx.Param(v)))
+		}
+
+		if strings.EqualFold(tf.Name, MerchantIdField) {
+			if tf.Type.Kind() != reflect.String {
+				return ErrorInternal
+			}
+			rv.Set(reflect.ValueOf(ctx.Param(RequestParameterMerchantId)))
+		}
+
+		if strings.EqualFold(tf.Name, MerchantSliceField) {
+			if tf.Type.Kind() != reflect.Slice {
+				return ErrorInternal
+			}
+			if rv.Type().Elem().Kind() == reflect.String {
+				rv.Set(reflect.ValueOf([]string{ctx.Param(RequestParameterMerchantId)}))
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -99,19 +138,13 @@ func (b *Binder) Bind(i interface{}, ctx echo.Context) (err error) {
 
 type OrderFormBinder struct{}
 type OrderJsonBinder struct{}
-type OrderRevenueDynamicRequestBinder struct{}
-type OrderAccountingPaymentRequestBinder struct{}
 type PaymentCreateProcessBinder struct{}
 type OnboardingMerchantListingBinder struct {
 	LimitDefault, OffsetDefault int32
 }
-type OnboardingChangeMerchantStatusBinder struct{}
 type OnboardingNotificationsListBinder struct {
 	LimitDefault, OffsetDefault int32
 }
-type OnboardingGetPaymentMethodBinder struct{}
-type OnboardingChangePaymentMethodBinder struct{}
-type OnboardingCreateNotificationBinder struct{}
 type PaylinksListBinder struct {
 	LimitDefault, OffsetDefault int32
 }
@@ -278,12 +311,12 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 
 	params := ctx.QueryParams()
 	structure := i.(*grpc.ListingNotificationRequest)
-	structure.MerchantId = ctx.Param(RequestParameterMerchantId)
 
 	if structure.Limit <= 0 {
 		structure.Limit = cb.LimitDefault
 	}
 
+	// TODO: to remove
 	if v, ok := params[RequestParameterIsSystem]; ok {
 		if v[0] == "0" || v[0] == "false" {
 			structure.IsSystem = 1
@@ -291,94 +324,6 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 			structure.IsSystem = 2
 		}
 	}
-
-	return nil
-}
-
-// Bind
-func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
-
-	if err := BinderDefault.Bind(i, ctx); err != nil {
-		return err
-	}
-
-	merchantId := ctx.Param(RequestParameterMerchantId)
-	paymentMethodId := ctx.Param(RequestParameterPaymentMethodId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return ErrorIncorrectMerchantId
-	}
-
-	if paymentMethodId == "" || bson.IsObjectIdHex(paymentMethodId) == false {
-		return ErrorIncorrectPaymentMethodId
-	}
-
-	structure := i.(*grpc.GetMerchantPaymentMethodRequest)
-	structure.MerchantId = merchantId
-	structure.PaymentMethodId = paymentMethodId
-
-	return nil
-}
-
-// Bind
-func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
-
-	if err := BinderDefault.Bind(i, ctx); err != nil {
-		return err
-	}
-
-	structure := i.(*grpc.MerchantPaymentMethodRequest)
-	merchantId := ctx.Param(RequestParameterMerchantId)
-	methodId := ctx.Param(RequestParameterPaymentMethodId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return ErrorIncorrectMerchantId
-	}
-
-	if methodId == "" || bson.IsObjectIdHex(methodId) == false ||
-		structure.PaymentMethod.Id != methodId {
-		return ErrorIncorrectPaymentMethodId
-	}
-
-	structure.MerchantId = merchantId
-
-	return nil
-}
-
-// Bind
-func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Context) error {
-
-	if err := BinderDefault.Bind(i, ctx); err != nil {
-		return err
-	}
-
-	merchantId := ctx.Param(RequestParameterId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return ErrorIncorrectMerchantId
-	}
-
-	structure := i.(*grpc.MerchantChangeStatusRequest)
-	structure.MerchantId = merchantId
-
-	return nil
-}
-
-// Bind
-func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Context) error {
-
-	if err := BinderDefault.Bind(i, ctx); err != nil {
-		return err
-	}
-
-	merchantId := ctx.Param(RequestParameterMerchantId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return ErrorIncorrectMerchantId
-	}
-
-	structure := i.(*grpc.NotificationRequest)
-	structure.MerchantId = merchantId
 
 	return nil
 }
@@ -560,6 +505,9 @@ func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) erro
 
 // Bind
 func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) error {
+
+	// TODO: to remove  a whole method, need make check in billing
+
 	req := make(map[string]interface{})
 
 	if err := BinderDefault.Bind(&req, ctx); err != nil {
