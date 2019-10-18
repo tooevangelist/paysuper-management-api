@@ -12,11 +12,11 @@ import (
 
 const (
 	royaltyReportsPath             = "/royalty_reports"
-	royaltyReportsIdPath           = "/royalty_reports/:id"
-	royaltyReportsTransactionsPath = "/royalty_reports/:id/transactions"
-	royaltyReportsAcceptPath       = "/royalty_reports/:id/accept"
-	royaltyReportsDeclinePath      = "/royalty_reports/:id/decline"
-	royaltyReportsChangePath       = "/royalty_reports/:id/change"
+	royaltyReportsIdPath           = "/royalty_reports/:report_id"
+	royaltyReportsTransactionsPath = "/royalty_reports/:report_id/transactions"
+	royaltyReportsAcceptPath       = "/royalty_reports/:report_id/accept"
+	royaltyReportsDeclinePath      = "/royalty_reports/:report_id/decline"
+	royaltyReportsChangePath       = "/royalty_reports/:report_id/change"
 )
 
 type RoyaltyReportsRoute struct {
@@ -47,50 +47,53 @@ func (h *RoyaltyReportsRoute) Route(groups *common.Groups) {
 // GET /admin/api/v1/royalty_reports
 func (h *RoyaltyReportsRoute) getRoyaltyReportsList(ctx echo.Context) error {
 	req := &grpc.ListRoyaltyReportsRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.NewValidationError(err.Error()))
 	}
 
-	err = h.dispatch.Validate.Struct(req)
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
 	res, err := h.dispatch.Services.Billing.ListRoyaltyReports(ctx.Request().Context(), req)
-	if err != nil {
 
+	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ListRoyaltyReports", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.JSON(http.StatusOK, res.Data)
 }
 
-// Get royalty reports list by id
-// GET /admin/api/v1/royalty_reports
+// Get royalty report by id
+// GET /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829
 func (h *RoyaltyReportsRoute) getRoyaltyReport(ctx echo.Context) error {
-	req := &grpc.GetRoyaltyReportRequest{
-		ReportId: ctx.Param(common.RequestParameterId),
+	req := &grpc.GetRoyaltyReportRequest{}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.NewValidationError(err.Error()))
 	}
 
-	err := h.dispatch.Validate.Struct(req)
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
 	res, err := h.dispatch.Services.Billing.GetRoyaltyReport(ctx.Request().Context(), req)
+
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetRoyaltyReport", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
@@ -98,48 +101,52 @@ func (h *RoyaltyReportsRoute) getRoyaltyReport(ctx echo.Context) error {
 // GET /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/transactions
 func (h *RoyaltyReportsRoute) listRoyaltyReportOrders(ctx echo.Context) error {
 	req := &grpc.ListRoyaltyReportOrdersRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.NewValidationError(err.Error()))
 	}
 
-	req.ReportId = ctx.Param(common.RequestParameterId)
-
-	err = h.dispatch.Validate.Struct(req)
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
 	res, err := h.dispatch.Services.Billing.ListRoyaltyReportOrders(ctx.Request().Context(), req)
+
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ListRoyaltyReportOrders", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.JSON(http.StatusOK, res.Data)
 }
 
 // Accept royalty report by merchant
 // POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/accept
 func (h *RoyaltyReportsRoute) merchantReviewRoyaltyReport(ctx echo.Context) error {
+	req := &grpc.MerchantReviewRoyaltyReportRequest{}
 
-	req := &grpc.MerchantReviewRoyaltyReportRequest{
-		IsAccepted: true,
-		Ip:         ctx.RealIP(),
-		ReportId:   ctx.Param(common.RequestParameterId),
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.NewValidationError(err.Error()))
 	}
 
+	req.IsAccepted = true
+	req.Ip = ctx.RealIP()
+
 	res, err := h.dispatch.Services.Billing.MerchantReviewRoyaltyReport(ctx.Request().Context(), req)
+
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "MerchantReviewRoyaltyReport", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.NoContent(http.StatusNoContent)
 }
 
@@ -152,24 +159,25 @@ func (h *RoyaltyReportsRoute) merchantReviewRoyaltyReport(ctx echo.Context) erro
 //      https://api.paysuper.online/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/decline
 func (h *RoyaltyReportsRoute) merchantDeclineRoyaltyReport(ctx echo.Context) error {
 	req := &grpc.MerchantReviewRoyaltyReportRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.NewValidationError(err.Error()))
 	}
 
 	req.IsAccepted = false
 	req.Ip = ctx.RealIP()
-	req.ReportId = ctx.Param(common.RequestParameterId)
 
 	res, err := h.dispatch.Services.Billing.MerchantReviewRoyaltyReport(ctx.Request().Context(), req)
+
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "MerchantReviewRoyaltyReport", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.NoContent(http.StatusNoContent)
 }
 
@@ -182,27 +190,28 @@ func (h *RoyaltyReportsRoute) merchantDeclineRoyaltyReport(ctx echo.Context) err
 //      https://api.paysuper.online/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/change
 func (h *RoyaltyReportsRoute) changeRoyaltyReport(ctx echo.Context) error {
 	req := &grpc.ChangeRoyaltyReportRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.NewValidationError(err.Error()))
 	}
 
-	req.ReportId = ctx.Param(common.RequestParameterId)
+	req.ReportId = ctx.Param(common.RequestParameterReportId)
 	req.Ip = ctx.RealIP()
 
-	err = h.dispatch.Validate.Struct(req)
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
 	res, err := h.dispatch.Services.Billing.ChangeRoyaltyReport(ctx.Request().Context(), req)
+
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ChangeRoyaltyReport", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.NoContent(http.StatusNoContent)
 }
