@@ -73,6 +73,9 @@ func (b *MerchantBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 		}
 
 		if strings.EqualFold(tf.Name, MerchantSliceField) {
+			if tf.Type.Kind() != reflect.Slice {
+				return ErrorInternal
+			}
 			if rv.Type().Elem().Kind() == reflect.String {
 				rv.Set(reflect.ValueOf([]string{u.MerchantId}))
 			}
