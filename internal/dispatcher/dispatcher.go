@@ -39,11 +39,11 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			`"host":"${host}","method":"${method}","uri":"${uri}","user_agent":"${user_agent}",` +
 			`"status":${status},"error":"${error}","latency":${latency},"latency_human":"${latency_human}"` +
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}}`,
-	}))                                 // 3
+	})) // 3
 	echoHttp.Use(d.RecoverMiddleware()) // 2
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowHeaders: []string{"authorization", "content-type"},
-	}))                                 // 1
+	})) // 1
 	// Called before routes
 	echoHttp.Use(d.RawBodyPreMiddleware)         // 2
 	echoHttp.Use(d.LimitOffsetSortPreMiddleware) // 1
@@ -57,6 +57,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	}
 	d.authProjectGroup(grp.AuthProject)
 	d.authUserGroup(grp.AuthUser)
+	d.systemUserGroup(grp.AuthUser)
 	d.webHookGroup(grp.WebHooks)
 	// init routes
 	for _, handler := range d.appSet.Handlers {
@@ -94,9 +95,35 @@ func (d *Dispatcher) authUserGroup(grp *echo.Group) {
 						user := common.ExtractUserContext(c)
 						user.Id = ui.UserID
 						user.Name = "System User"
-						user.Merchants = make(map[string]bool)
-						user.Roles = make(map[string]bool)
+						// TODO: How to get merchant for the User? Get all merchants for user and take first?
+						user.MerchantId = ""
+						user.Role = ""
 						common.SetUserContext(c, user)
+						common.SetMerchantIdContext(c, user.MerchantId)
+					},
+				)(next)
+				return handleFn(c)
+			}),
+		) // 1
+		// Called before routes
+		grp.Use(d.GetUserDetailsMiddleware) // 1
+	}
+}
+
+func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
+	// Called after routes
+	if !d.globalCfg.DisableAuthMiddleware {
+		grp.Use(
+			common.ContextWrapperCallback(func(c echo.Context, next echo.HandlerFunc) error {
+				handleFn := jwtMiddleware.AuthOneJwtCallableWithConfig(
+					d.appSet.JwtVerifier,
+					func(ui *jwtverifier.UserInfo) {
+						user := common.ExtractUserContext(c)
+						user.Id = ui.UserID
+						user.Name = "System User"
+						user.Role = ""
+						common.SetUserContext(c, user)
+						common.SetMerchantIdContext(c, c.Param(common.RequestParameterMerchantId))
 					},
 				)(next)
 				return handleFn(c)
