@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
-	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -44,10 +43,7 @@ func (h *ProductRoute) Route(groups *common.Groups) {
 	groups.AuthUser.PUT(productsPricesPath, h.updateProductPrices) // TODO: Need test
 }
 
-// @Description Get list of products for authenticated merchant
-// @Example GET /admin/api/v1/products?name=car&sku=ru_0&project_id=5bdc39a95d1e1100019fb7df&offset=0&limit=10
 func (h *ProductRoute) getProductsList(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.ListProductsRequest{}
 	err := (&common.ProductsGetProductsListBinder{
 		LimitDefault:  h.cfg.LimitDefault,
@@ -59,24 +55,6 @@ func (h *ProductRoute) getProductsList(ctx echo.Context) error {
 	}
 
 	reqCtx := ctx.Request().Context()
-	merchantId := ctx.Param(common.RequestParameterId)
-
-	if merchantId == "" {
-		merchant, err := h.dispatch.Services.Billing.GetMerchantBy(reqCtx, &grpc.GetMerchantByRequest{UserId: authUser.Id})
-
-		if err != nil {
-			common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetMerchantBy", req)
-			return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-		}
-
-		if merchant.Status != pkg.ResponseStatusOk {
-			return echo.NewHTTPError(int(merchant.Status), merchant.Message)
-		}
-
-		merchantId = merchant.Item.Id
-	}
-
-	req.MerchantId = merchantId
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -92,31 +70,17 @@ func (h *ProductRoute) getProductsList(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// @Description Get product for authenticated merchant
-// @Example GET /admin/api/v1/products/5c99288068add43f74be9c1d
 func (h *ProductRoute) getProduct(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-
-	id := ctx.Param(common.RequestParameterId)
-	if id == "" || bson.IsObjectIdHex(id) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectProductId)
-	}
-
-	merchant, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: authUser.Id})
-	if err != nil || merchant.Item == nil {
-		if err != nil {
-			h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-	}
 
 	req := &grpc.RequestProduct{
-		Id:         id,
-		MerchantId: merchant.Item.Id,
+		Id: ctx.Param(common.RequestParameterId),
 	}
 
-	err = h.dispatch.Validate.Struct(req)
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -134,35 +98,20 @@ func (h *ProductRoute) getProduct(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// @Description Delete product for authenticated merchant
-// @Example DELETE /admin/api/v1/products/5c99288068add43f74be9c1d
 func (h *ProductRoute) deleteProduct(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-	id := ctx.Param(common.RequestParameterId)
-	if id == "" || bson.IsObjectIdHex(id) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectProductId)
-	}
-
-	merchant, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: authUser.Id})
-	if err != nil || merchant.Item == nil {
-		if err != nil {
-			h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-	}
-
 	req := &grpc.RequestProduct{
-		Id:         id,
-		MerchantId: merchant.Item.Id,
+		Id: ctx.Param(common.RequestParameterId),
 	}
 
-	err = h.dispatch.Validate.Struct(req)
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
-	_, err = h.dispatch.Services.Billing.DeleteProduct(ctx.Request().Context(), req)
-	if err != nil {
+	if _, err := h.dispatch.Services.Billing.DeleteProduct(ctx.Request().Context(), req); err != nil {
 		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
 	}
@@ -170,51 +119,22 @@ func (h *ProductRoute) deleteProduct(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-// @Description Create new product for authenticated merchant
-// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
-//      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{"object": "product", "type": "simple_product", "sku": "ru_0_doom_2", "name": {"en": "Doom II"},
-//          "default_currency": "USD", "enabled": true, "prices": [{"amount": 12.93, "currency": "USD"}],
-//          "description": {"en": "Doom II description"}, "long_description": {}, "project_id": "5bdc39a95d1e1100019fb7df"}' \
-//      https://api.paysuper.online/admin/api/v1/products
 func (h *ProductRoute) createProduct(ctx echo.Context) error {
 	return h.createOrUpdateProduct(ctx, &common.ProductsCreateProductBinder{})
 }
 
-// @Description Update existing product for authenticated merchant
-// @Example curl -X PUT -H "Accept: application/json" -H "Content-Type: application/json" \
-//      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{"object": "product", "type": "simple_product", "sku": "ru_0_doom_4", "name": {"en": "Doom IV"},
-//          "default_currency": "USD", "enabled": true, "prices": [{"amount": 146.00, "currency": "USD"}],
-//          "description": {"en": "Doom IV description"}, "long_description": {}, "project_id": "5bdc39a95d1e1100019fb7df"}' \
-//      https://api.paysuper.online/admin/api/v1/products/5c99288068add43f74be9c1d
 func (h *ProductRoute) updateProduct(ctx echo.Context) error {
 	return h.createOrUpdateProduct(ctx, &common.ProductsUpdateProductBinder{})
 }
 
 func (h *ProductRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binder) error {
-	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.Product{}
 
-    err := binder.Bind(req, ctx)
-
-	if err != nil {
+	if err := binder.Bind(req, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	merchant, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), &grpc.GetMerchantByRequest{UserId: authUser.Id})
-
-	if err != nil || merchant.Item == nil {
-		if err != nil {
-			h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-	}
-
-	req.MerchantId = merchant.Item.Id
-
-	err = h.dispatch.Validate.Struct(req)
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -229,13 +149,13 @@ func (h *ProductRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 }
 
 func (h *ProductRoute) getProductPrices(ctx echo.Context) error {
-	id := ctx.Param(common.RequestParameterId)
-	if id == "" || bson.IsObjectIdHex(id) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectProductId)
-	}
 
 	req := &grpc.RequestProduct{
-		Id: id,
+		Id: ctx.Param(common.RequestParameterId),
+	}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {
@@ -252,12 +172,12 @@ func (h *ProductRoute) getProductPrices(ctx echo.Context) error {
 }
 
 func (h *ProductRoute) updateProductPrices(ctx echo.Context) error {
-	id := ctx.Param(common.RequestParameterId)
-	if id == "" || bson.IsObjectIdHex(id) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectProductId)
-	}
 
-	req := &grpc.UpdateProductPricesRequest{}
+	req := &grpc.UpdateProductPricesRequest{ProductId: ctx.Param(common.RequestParameterId)}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
