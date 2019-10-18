@@ -78,6 +78,7 @@ const (
 	RequestParameterVirtualCurrency          = "virtual_currency"
 	RequestParameterRoleId                   = "role_id"
 	RequestParameterReportId                 = "report_id"
+	RequestProductId                         = "product_id"
 
 	ImageCollectionImagesField = "images"
 	ImageCollectionUseOneForAll = "use_one_for_all"
