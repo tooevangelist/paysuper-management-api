@@ -13,7 +13,9 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"io/ioutil"
+	"reflect"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -22,6 +24,8 @@ var (
 	BinderDefault         = &Binder{}
 	EchoBinderDefault     = &echo.DefaultBinder{}
 )
+
+const MerchantIdField = "MerchantId"
 
 type SystemBinder struct{}
 
@@ -32,6 +36,38 @@ func (b *SystemBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 type MerchantBinder struct{}
 
 func (b *MerchantBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+
+	rv := reflect.ValueOf(i)
+
+	if rv.Type().Kind() != reflect.Ptr || rv.IsNil() {
+		return ErrorInternal
+	}
+
+	irv := rv.Elem()
+	irt := irv.Type()
+
+	if irt.Kind() != reflect.Struct {
+		return nil
+	}
+
+	for i := 0; i < irv.NumField(); i++ {
+
+		rv := irv.Field(i)
+		tf := irt.Field(i)
+
+		if strings.EqualFold(tf.Name, MerchantIdField) {
+
+			if tf.Type.Kind() != reflect.String {
+				return ErrorInternal
+			}
+
+			u := ExtractUserContext(ctx)
+			rv.Set(reflect.ValueOf(u.MerchantId))
+
+			break
+		}
+	}
+
 	return nil
 }
 

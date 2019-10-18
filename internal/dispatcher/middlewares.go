@@ -144,6 +144,7 @@ func (d *Dispatcher) AuthOnePreMiddleware() echo.MiddlewareFunc {
 				user.Id = ui.UserID
 				user.Name = "System User"
 				user.Role = ""
+				user.MerchantId = "TODO:MerchantId"
 				common.SetUserContext(c, user)
 			},
 		)(next)
