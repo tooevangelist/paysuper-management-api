@@ -46,39 +46,6 @@ type CreateOrderJsonProjectResponse struct {
 	PaymentFormData *grpc.PaymentFormJsonData `json:"payment_form_data,omitempty"`
 }
 
-type OrderListRefundsBinder struct {
-	dispatch common.HandlerSet
-	provider.LMT
-	cfg common.Config
-}
-
-func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-
-	if err != nil {
-		return err
-	}
-
-	structure := i.(*grpc.ListRefundsRequest)
-	structure.OrderId = ctx.Param(common.RequestParameterOrderId)
-
-	if structure.Limit <= 0 {
-		structure.Limit = b.cfg.LimitDefault
-	}
-
-	return nil
-}
-
-// NewOrderListRefundsBinder
-func NewOrderListRefundsBinde(set common.HandlerSet, cfg common.Config) *OrderListRefundsBinder {
-	return &OrderListRefundsBinder{
-		dispatch: set,
-		LMT:      &set.AwareSet,
-		cfg:      cfg,
-	}
-}
-
 type OrderRoute struct {
 	dispatch common.HandlerSet
 	cfg      common.Config
@@ -532,7 +499,7 @@ func (h *OrderRoute) getRefund(ctx echo.Context) error {
 
 func (h *OrderRoute) listRefunds(ctx echo.Context) error {
 	req := &grpc.ListRefundsRequest{}
-	err := (&OrderListRefundsBinder{}).Bind(req, ctx)
+	err := (&common.OrderListRefundsBinder{}).Bind(req, ctx)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)

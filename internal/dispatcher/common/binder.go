@@ -121,6 +121,10 @@ type ChangeMerchantDataRequestBinder struct {
 	cfg Config
 }
 
+type OrderListRefundsBinder struct {
+	cfg Config
+}
+
 // NewChangeMerchantDataRequestBinder
 func NewChangeMerchantDataRequestBinder(set HandlerSet, cfg Config) *ChangeMerchantDataRequestBinder {
 	return &ChangeMerchantDataRequestBinder{
@@ -854,6 +858,24 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		} else {
 			structure.UrlRefundPayment = tv
 		}
+	}
+
+	return nil
+}
+
+func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	structure := i.(*grpc.ListRefundsRequest)
+	structure.OrderId = ctx.Param(RequestParameterOrderId)
+
+	if structure.Limit <= 0 {
+		structure.Limit = b.cfg.LimitDefault
 	}
 
 	return nil
