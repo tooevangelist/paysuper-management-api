@@ -51,9 +51,22 @@ func ExtractCursorContext(ctx echo.Context) *Cursor {
 	return &Cursor{}
 }
 
+// ExtractMerchantIdContext
+func ExtractMerchantIdContext(ctx echo.Context) string {
+	if merchantId, ok := ctx.Get("merchantId").(string); ok {
+		return merchantId
+	}
+	return ""
+}
+
 // SetUserContext
 func SetUserContext(ctx echo.Context, user *AuthUser) {
 	ctx.Set("user", user)
+}
+
+// SetMerchantIdContext
+func SetMerchantIdContext(ctx echo.Context, merchantId string) {
+	ctx.Set("merchantId", merchantId)
 }
 
 // SetRawBodyContext
@@ -110,7 +123,6 @@ type AuthUser struct {
 	Id         string
 	Name       string
 	Email      string
-	Roles      map[string]bool
-	Merchants  map[string]bool
+	Role       string
 	MerchantId string
 }

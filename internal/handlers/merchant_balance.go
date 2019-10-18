@@ -32,46 +32,25 @@ func NewBalanceRoute(set common.HandlerSet, cfg *common.Config) *BalanceRoute {
 }
 
 func (h *BalanceRoute) Route(groups *common.Groups) {
-	groups.AuthUser.GET(balancePath, h.getMerchantBalance)
-	groups.AuthUser.GET(balanceMerchantPath, h.getMerchantBalance)
+	groups.AuthUser.GET(balancePath, h.getBalance)
+	groups.SystemUser.GET(balanceMerchantPath, h.getBalance)
 }
 
 // Get merchant balance
 // GET /admin/api/v1/balance - for current merchant
-// GET /admin/api/v1/balance/:merchant_id - for any merchant by it's id
-func (h *BalanceRoute) getMerchantBalance(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-
-	req := &grpc.GetMerchantBalanceRequest{}
-	merchantId := ctx.Param(common.RequestParameterMerchantId)
-
-	if merchantId == "" {
-		mReq := &grpc.GetMerchantByRequest{UserId: authUser.Id}
-		merchant, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), mReq)
-		if err != nil {
-			common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetMerchantBy", req)
-			return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-		}
-		if merchant.Status != http.StatusOK {
-			return echo.NewHTTPError(int(merchant.Status), merchant.Message)
-		}
-		merchantId = merchant.Item.Id
-	}
-
-	req.MerchantId = merchantId
-
-	err := h.dispatch.Validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
-	}
-
+// GET /admin/api/v1/balance/:merchant_id - for admin by merchant id
+func (h *BalanceRoute) getBalance(ctx echo.Context) error {
+	req := &grpc.GetMerchantBalanceRequest{MerchantId: common.ExtractMerchantIdContext(ctx)}
 	res, err := h.dispatch.Services.Billing.GetMerchantBalance(ctx.Request().Context(), req)
+
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetMerchantBalance", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.JSON(http.StatusOK, res.Item)
 }
