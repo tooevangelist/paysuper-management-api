@@ -62,7 +62,7 @@ func (suite *ProductTestSuite) TestProduct_getProduct_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, "5c99391568add439ccf0ffaf").
+		Params(":"+common.RequestProductId, "5c99391568add439ccf0ffaf").
 		Path(common.AuthUserGroupPath + productsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -76,7 +76,7 @@ func (suite *ProductTestSuite) TestProduct_deleteProduct_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Params(":"+common.RequestParameterId, "5c99391568add439ccf0ffaf").
+		Params(":"+common.RequestProductId, "5c99391568add439ccf0ffaf").
 		Path(common.AuthUserGroupPath + productsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -111,7 +111,7 @@ func (suite *ProductTestSuite) TestProduct_updateProduct_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterId, "5c99391568add439ccf0ffaf").
+		Params(":"+common.RequestProductId, "5c99391568add439ccf0ffaf").
 		Path(common.AuthUserGroupPath + productsIdPath).
 		BodyString(bodyJson).
 		Init(test.ReqInitJSON()).

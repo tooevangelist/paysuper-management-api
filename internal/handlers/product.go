@@ -13,8 +13,8 @@ import (
 const (
 	productsPath         = "/products"
 	productsMerchantPath = "/products/merchant/:merchant_id"
-	productsIdPath       = "/products/:id"
-	productsPricesPath   = "/products/:id/prices"
+	productsIdPath       = "/products/:product_id"
+	productsPricesPath   = "/products/:product_id/prices"
 )
 
 type ProductRoute struct {
@@ -44,51 +44,32 @@ func (h *ProductRoute) Route(groups *common.Groups) {
 }
 
 func (h *ProductRoute) getProductsList(ctx echo.Context) error {
+
 	req := &grpc.ListProductsRequest{}
-	err := (&common.ProductsGetProductsListBinder{
-		LimitDefault:  h.cfg.LimitDefault,
-		OffsetDefault: h.cfg.OffsetDefault,
-	}).Bind(req, ctx)
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
-	reqCtx := ctx.Request().Context()
-	err = h.dispatch.Validate.Struct(req)
-
+	res, err := h.dispatch.Services.Billing.ListProducts(ctx.Request().Context(), req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ListProducts")
 	}
-
-	res, err := h.dispatch.Services.Billing.ListProducts(reqCtx, req)
-	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ListProducts", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
 	return ctx.JSON(http.StatusOK, res)
 }
 
 func (h *ProductRoute) getProduct(ctx echo.Context) error {
 
-	req := &grpc.RequestProduct{
-		Id: ctx.Param(common.RequestParameterId),
-	}
+	req := &grpc.RequestProduct{}
 
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	if err := h.dispatch.Validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.GetProduct(ctx.Request().Context(), req)
 
 	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetProduct")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -99,21 +80,17 @@ func (h *ProductRoute) getProduct(ctx echo.Context) error {
 }
 
 func (h *ProductRoute) deleteProduct(ctx echo.Context) error {
-	req := &grpc.RequestProduct{
-		Id: ctx.Param(common.RequestParameterId),
+
+	req := &grpc.RequestProduct{}
+
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
+	_, err := h.dispatch.Services.Billing.DeleteProduct(ctx.Request().Context(), req)
 
-	if err := h.dispatch.Validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
-	}
-
-	if _, err := h.dispatch.Services.Billing.DeleteProduct(ctx.Request().Context(), req); err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+	if err != nil {
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "DeleteProduct")
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
@@ -128,21 +105,17 @@ func (h *ProductRoute) updateProduct(ctx echo.Context) error {
 }
 
 func (h *ProductRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binder) error {
+
 	req := &grpc.Product{}
 
-	if err := binder.Bind(req, ctx); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	if err := h.dispatch.Validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.CreateOrUpdateProduct(ctx.Request().Context(), req)
 
 	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "CreateOrUpdateProduct")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -150,22 +123,16 @@ func (h *ProductRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 
 func (h *ProductRoute) getProductPrices(ctx echo.Context) error {
 
-	req := &grpc.RequestProduct{
-		Id: ctx.Param(common.RequestParameterId),
-	}
+	req := &grpc.RequestProduct{}
 
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	if err := h.dispatch.Validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.GetProductPrices(ctx.Request().Context(), req)
+
 	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageGetProductPrice)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetProductPrices")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -173,20 +140,16 @@ func (h *ProductRoute) getProductPrices(ctx echo.Context) error {
 
 func (h *ProductRoute) updateProductPrices(ctx echo.Context) error {
 
-	req := &grpc.UpdateProductPricesRequest{ProductId: ctx.Param(common.RequestParameterId)}
+	req := &grpc.UpdateProductPricesRequest{}
 
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	if err := h.dispatch.Validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.UpdateProductPrices(ctx.Request().Context(), req)
+
 	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUpdateProductPrice)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "UpdateProductPrices")
 	}
 
 	return ctx.JSON(http.StatusOK, res)

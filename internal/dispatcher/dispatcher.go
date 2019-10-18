@@ -29,7 +29,11 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		return e
 	}
 	echoHttp.Renderer = common.NewTemplate(t)
-	echoHttp.Binder = common.BinderDefault
+	echoHttp.Binder = &common.Binder{
+		LimitDefault:  d.globalCfg.LimitDefault,
+		OffsetDefault: d.globalCfg.OffsetDefault,
+		LimitMax:      d.globalCfg.LimitMax,
+	}
 	// Called after routes
 	echoHttp.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Output: logger.NewLevelWriter(d.L(), logger.LevelInfo),
@@ -37,11 +41,11 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			`"host":"${host}","method":"${method}","uri":"${uri}","user_agent":"${user_agent}",` +
 			`"status":${status},"error":"${error}","latency":${latency},"latency_human":"${latency_human}"` +
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}}`,
-	})) // 3
+	}))                                 // 3
 	echoHttp.Use(d.RecoverMiddleware()) // 2
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowHeaders: []string{"authorization", "content-type"},
-	})) // 1
+	}))                                 // 1
 	// Called before routes
 	echoHttp.Use(d.RawBodyPreMiddleware)         // 2
 	echoHttp.Use(d.LimitOffsetSortPreMiddleware) // 1
@@ -86,7 +90,7 @@ func (d *Dispatcher) authUserGroup(grp *echo.Group) {
 	// Called before routes
 	if !d.globalCfg.DisableAuthMiddleware {
 		grp.Use(d.GetUserDetailsMiddleware) // 1
-		grp.Use(d.AuthOnePreMiddleware()) // 2
+		grp.Use(d.AuthOnePreMiddleware())   // 2
 	}
 	grp.Use(d.MerchantBinderPreMiddleware) // 3
 }
@@ -95,7 +99,7 @@ func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
 	// Called before routes
 	if !d.globalCfg.DisableAuthMiddleware {
 		grp.Use(d.GetUserDetailsMiddleware) // 1
-		grp.Use(d.AuthOnePreMiddleware()) // 2
+		grp.Use(d.AuthOnePreMiddleware())   // 2
 	}
 	grp.Use(d.SystemBinderPreMiddleware) // 3
 }

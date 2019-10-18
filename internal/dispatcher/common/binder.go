@@ -7,6 +7,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/globalsign/mgo/bson"
+	"github.com/gurukami/typ/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -16,6 +17,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
 )
 
 var (
@@ -124,12 +126,25 @@ func (b *MerchantBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 	return nil
 }
 
-type Binder struct{}
+type Binder struct {
+	LimitDefault, OffsetDefault, LimitMax int32
+}
 
 func (b *Binder) Bind(i interface{}, ctx echo.Context) (err error) {
 	if err := EchoBinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
+	//
+	params := ctx.QueryParams()
+	if ta := typ.StringInt32(params.Get(RequestParameterLimit)); ta.Err() != nil {
+		return ta.Err()
+	} else if ta.V() > b.LimitMax {
+		return ErrorRequestParamsIncorrect
+	}
+	if ta := typ.StringInt32(params.Get(RequestParameterOffset)); ta.Err() != nil {
+		return ta.Err()
+	}
+	//
 	if binder := ExtractBinderContext(ctx); binder != nil {
 		return binder.Bind(i, ctx)
 	}
@@ -151,9 +166,6 @@ type PaylinksListBinder struct {
 type PaylinksUrlBinder struct{}
 type PaylinksCreateBinder struct{}
 type PaylinksUpdateBinder struct{}
-type ProductsGetProductsListBinder struct {
-	LimitDefault, OffsetDefault int32
-}
 type ProductsCreateProductBinder struct{}
 type ProductsUpdateProductBinder struct{}
 
@@ -416,59 +428,6 @@ func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
 
 	structure := i.(*paylink.CreatePaylinkRequest)
 	structure.Id = id
-
-	return nil
-}
-
-// Bind
-func (b *ProductsGetProductsListBinder) Bind(i interface{}, ctx echo.Context) error {
-
-	if err := BinderDefault.Bind(i, ctx); err != nil {
-		return err
-	}
-
-	limit := int32(b.LimitDefault)
-	offset := int32(b.OffsetDefault)
-
-	params := ctx.QueryParams()
-
-	if v, ok := params[RequestParameterLimit]; ok {
-		i, err := strconv.ParseInt(v[0], 10, 32)
-		if err != nil {
-			return err
-		}
-		limit = int32(i)
-	}
-
-	if v, ok := params[RequestParameterOffset]; ok {
-		i, err := strconv.ParseInt(v[0], 10, 32)
-		if err != nil {
-			return err
-		}
-		offset = int32(i)
-	}
-
-	structure := i.(*grpc.ListProductsRequest)
-	structure.Limit = limit
-	structure.Offset = offset
-
-	if v, ok := params[RequestParameterName]; ok {
-		if v[0] != "" {
-			structure.Name = v[0]
-		}
-	}
-
-	if v, ok := params[RequestParameterSku]; ok {
-		if v[0] != "" {
-			structure.Sku = v[0]
-		}
-	}
-
-	if v, ok := params[RequestParameterProjectId]; ok {
-		if v[0] != "" {
-			structure.ProjectId = v[0]
-		}
-	}
 
 	return nil
 }
