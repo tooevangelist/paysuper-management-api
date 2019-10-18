@@ -193,7 +193,7 @@ func (suite *ProjectTestSuite) TestProject_UpdateProject_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
@@ -209,7 +209,7 @@ func (suite *ProjectTestSuite) TestProject_UpdateProject_BindError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
@@ -228,7 +228,7 @@ func (suite *ProjectTestSuite) TestProject_UpdateProject_ValidationError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
@@ -249,7 +249,7 @@ func (suite *ProjectTestSuite) TestProject_UpdateProject_BillingServerError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterId, mock.SomeMerchantId).
+		Params(":"+common.RequestParameterProjectId, mock.SomeMerchantId).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
@@ -270,7 +270,7 @@ func (suite *ProjectTestSuite) TestProject_UpdateProject_BillingServerResultErro
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterId, mock.SomeMerchantId).
+		Params(":"+common.RequestParameterProjectId, mock.SomeMerchantId).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
@@ -288,7 +288,7 @@ func (suite *ProjectTestSuite) TestProject_GetProject_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -320,7 +320,7 @@ func (suite *ProjectTestSuite) TestProject_GetProject_BillingServerError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -339,7 +339,7 @@ func (suite *ProjectTestSuite) TestProject_GetProject_BillingServerResultError()
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -423,7 +423,7 @@ func (suite *ProjectTestSuite) TestProject_DeleteProject_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -455,7 +455,7 @@ func (suite *ProjectTestSuite) TestProject_DeleteProject_BillingServerError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -474,7 +474,7 @@ func (suite *ProjectTestSuite) TestProject_DeleteProject_BillingServerResultErro
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -487,14 +487,13 @@ func (suite *ProjectTestSuite) TestProject_DeleteProject_BillingServerResultErro
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
-
 func (suite *ProjectTestSuite) TestProjectCheckSku_ValidationError() {
 	shouldBe := require.New(suite.T())
 	body := `{}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsSkuPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
@@ -516,7 +515,7 @@ func (suite *ProjectTestSuite) TestProjectCheckSku_InternalError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsSkuPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
@@ -543,7 +542,7 @@ func (suite *ProjectTestSuite) TestProjectCheckSku_ServiceError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsSkuPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
@@ -567,7 +566,7 @@ func (suite *ProjectTestSuite) TestProjectCheckSku_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + projectsSkuPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
