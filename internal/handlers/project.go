@@ -13,8 +13,8 @@ import (
 
 const (
 	projectsPath    = "/projects"
-	projectsIdPath  = "/projects/:id"
-	projectsSkuPath = "/projects/:id/sku"
+	projectsIdPath  = "/projects/:project_id"
+	projectsSkuPath = "/projects/:project_id/sku"
 )
 
 type ProjectRoute struct {
@@ -99,8 +99,6 @@ func (h *ProjectRoute) getProject(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.ProjectId = ctx.Param(common.RequestParameterId)
-
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
@@ -151,8 +149,6 @@ func (h *ProjectRoute) deleteProject(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.ProjectId = ctx.Param(common.RequestParameterId)
-
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
@@ -176,8 +172,6 @@ func (h *ProjectRoute) checkSku(ctx echo.Context) error {
 	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
-
-	req.ProjectId = ctx.Param(common.RequestParameterId)
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
