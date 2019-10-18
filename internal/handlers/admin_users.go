@@ -50,13 +50,7 @@ func (h *AdminUsersRoute) changeRole(ctx echo.Context) error {
 	req := &grpc.ChangeRoleForAdminUserRequest{}
 
 	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			common.NewManagementApiResponseError(
-				common.ErrorRequestParamsIncorrect.Code,
-				common.ErrorRequestParamsIncorrect.Message, err.Error(),
-			),
-		)
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
 	req.PerformerId = authUser.Id

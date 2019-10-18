@@ -45,23 +45,15 @@ func (h *MerchantUsersRoute) Route(groups *common.Groups) {
 
 func (h *MerchantUsersRoute) changeRole(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
-	merchantId := ctx.Param(common.RequestParameterMerchantId)
 	roleId := ctx.Param(common.RequestParameterRoleId)
 
 	req := &grpc.ChangeRoleForMerchantUserRequest{}
 
 	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			common.NewManagementApiResponseError(
-				common.ErrorRequestParamsIncorrect.Code,
-				common.ErrorRequestParamsIncorrect.Message, err.Error(),
-			),
-		)
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
 	req.PerformerId = authUser.Id
-	req.MerchantId = merchantId
 	req.RoleId = roleId
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {
@@ -82,12 +74,9 @@ func (h *MerchantUsersRoute) changeRole(ctx echo.Context) error {
 }
 
 func (h *MerchantUsersRoute) getMerchantUsers(ctx echo.Context) error {
-	merchantId := ctx.Param(common.RequestParameterMerchantId)
-
-	req := &grpc.GetMerchantUsersRequest{
-		MerchantId: merchantId,
-	}
+	req := &grpc.GetMerchantUsersRequest{}
 	err := h.dispatch.Validate.Struct(req)
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
@@ -108,6 +97,7 @@ func (h *MerchantUsersRoute) sendInvite(ctx echo.Context) error {
 	merchantId := ctx.Param(common.RequestParameterMerchantId)
 
 	req := &grpc.InviteUserMerchantRequest{}
+
 	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
@@ -132,11 +122,9 @@ func (h *MerchantUsersRoute) sendInvite(ctx echo.Context) error {
 func (h *MerchantUsersRoute) resendInvite(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	roleId := ctx.Param(common.RequestParameterRoleId)
-	merchantId := ctx.Param(common.RequestParameterMerchantId)
 
 	req := &grpc.ResendInviteMerchantRequest{
 		PerformerId: authUser.Id,
-		MerchantId:  merchantId,
 		RoleId:      roleId,
 	}
 
@@ -168,12 +156,10 @@ func (h *MerchantUsersRoute) listRoles(ctx echo.Context) error {
 
 func (h *MerchantUsersRoute) deleteUser(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
-	merchantId := ctx.Param(common.RequestParameterMerchantId)
 	roleId := ctx.Param(common.RequestParameterRoleId)
 
 	req := &grpc.DeleteMerchantUserRequest{
 		PerformerId: authUser.Id,
-		MerchantId:  merchantId,
 		RoleId:      roleId,
 	}
 
