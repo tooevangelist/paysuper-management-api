@@ -12,11 +12,11 @@ import (
 
 const (
 	merchantListRoles    = "/merchants/roles"
-	merchantUsers        = "/merchants/:merchant_id/users"
-	merchantInvite       = "/merchants/:merchant_id/invite"
-	merchantInviteResend = "/merchants/:merchant_id/users/:role_id/resend"
-	merchantDeleteUser   = "/merchants/:merchant_id/users/:role_id/role"
-	merchantUsersRole    = "/merchants/:merchant_id/users/:role_id/role"
+	merchantUsers        = "/merchants/users"
+	merchantInvite       = "/merchants/invite"
+	merchantInviteResend = "/merchants/users/:role_id/resend"
+	merchantDeleteUser   = "/merchants/users/:role_id/role"
+	merchantUsersRole    = "/merchants/users/:role_id/role"
 )
 
 type MerchantUsersRoute struct {

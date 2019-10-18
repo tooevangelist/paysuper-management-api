@@ -13,7 +13,7 @@ import (
 
 const (
 	productsPath         = "/products"
-	productsMerchantPath = "/products/merchant/:id"
+	productsMerchantPath = "/products/merchant/:merchant_id"
 	productsIdPath       = "/products/:id"
 	productsPricesPath   = "/products/:id/prices"
 )
@@ -35,7 +35,7 @@ func NewProductRoute(set common.HandlerSet, cfg *common.Config) *ProductRoute {
 
 func (h *ProductRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(productsPath, h.getProductsList)
-	groups.AuthUser.GET(productsMerchantPath, h.getProductsList)
+	groups.SystemUser.GET(productsMerchantPath, h.getProductsList)
 	groups.AuthUser.POST(productsPath, h.createProduct)
 	groups.AuthUser.GET(productsIdPath, h.getProduct)
 	groups.AuthUser.PUT(productsIdPath, h.updateProduct)

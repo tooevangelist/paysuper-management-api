@@ -64,7 +64,7 @@ func (suite *BalanceTestSuite) TestBalance_Ok_getBalanceForOtherMerchant() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + balanceMerchantPath).
+		Path(common.SystemUserGroupPath + balanceMerchantPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 

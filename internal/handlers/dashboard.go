@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	dashboardMainPath            = "/merchants/:id/dashboard/main"
-	dashboardRevenueDynamicsPath = "/merchants/:id/dashboard/revenue_dynamics"
-	dashboardBasePath            = "/merchants/:id/dashboard/base"
+	dashboardMainPath            = "/merchants/dashboard/main"
+	dashboardRevenueDynamicsPath = "/merchants/dashboard/revenue_dynamics"
+	dashboardBasePath            = "/merchants/dashboard/base"
 )
 
 type DashboardRoute struct {

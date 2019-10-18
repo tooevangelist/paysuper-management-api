@@ -238,7 +238,7 @@ func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Ok_updatePayoutDocume
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + payoutsIdPath).
+		Path(common.SystemUserGroupPath + payoutsIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
 		Exec(suite.T())
