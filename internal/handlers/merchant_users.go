@@ -60,8 +60,7 @@ func (h *MerchantUsersRoute) changeRole(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.ChangeRoleForMerchantUser(ctx.Request().Context(), req)
 
 	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.PairArgs("err", err.Error()))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ChangeRoleForMerchantUser")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -74,26 +73,20 @@ func (h *MerchantUsersRoute) changeRole(ctx echo.Context) error {
 func (h *MerchantUsersRoute) getMerchantUsers(ctx echo.Context) error {
 	req := &grpc.GetMerchantUsersRequest{}
 
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
-	}
-
-	err := h.dispatch.Validate.Struct(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.GetMerchantUsers(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetMerchantUsers", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetMerchantUsers")
 	}
 
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.JSON(http.StatusOK, res.Users)
 }
 
@@ -105,7 +98,6 @@ func (h *MerchantUsersRoute) sendInvite(ctx echo.Context) error {
 	}
 
 	req.PerformerId = common.ExtractUserContext(ctx).Id
-
 	err := h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -115,8 +107,7 @@ func (h *MerchantUsersRoute) sendInvite(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.InviteUserMerchant(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "InviteUserMerchant", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToSendInvite)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "InviteUserMerchant")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -141,8 +132,7 @@ func (h *MerchantUsersRoute) resendInvite(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.ResendInviteMerchant(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ResendInviteMerchant", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToSendInvite)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ResendInviteMerchant")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -153,8 +143,7 @@ func (h *MerchantUsersRoute) listRoles(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.GetRoleList(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetRoleList", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageInvalidRoleType)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetRoleList")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -179,8 +168,7 @@ func (h *MerchantUsersRoute) deleteUser(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.DeleteMerchantUser(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "DeleteMerchantUser", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToDeleteUser)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "DeleteMerchantUser")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
