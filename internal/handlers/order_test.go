@@ -1001,7 +1001,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_ProductionEnvironment_Ok() {
 func (suite *OrderTestSuite) TestOrder_GetPaymentFormData_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, uuid.New().String()).
+		Params(":"+common.RequestParameterOrderId, uuid.New().String()).
 		Path(common.AuthProjectGroupPath + orderIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -1027,7 +1027,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_TokenCookieExist_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		AddCookie(cookie).
-		Params(":"+common.RequestParameterId, mock.SomeMerchantId1).
+		Params(":"+common.RequestParameterOrderId, mock.SomeMerchantId1).
 		Path(common.AuthProjectGroupPath + orderIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -1048,7 +1048,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_ParameterIdNotFound_Error() 
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, "").
+		Params(":"+common.RequestParameterOrderId, "").
 		Path(orderIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -1066,7 +1066,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterOrderId, bson.NewObjectId().Hex()).
 		Path(common.AuthProjectGroupPath + orderIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())

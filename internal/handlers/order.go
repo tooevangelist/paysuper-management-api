@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	orderIdPath              = "/order/:id"
+	orderIdPath              = "/order/:order_id"
 	paylinkIdPath            = "/paylink/:id"
 	orderCreatePath          = "/order/create"
 	orderPath                = "/order"
@@ -243,7 +243,7 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 }
 
 func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
-	id := ctx.Param(common.RequestParameterId)
+	id := ctx.Param(common.RequestParameterOrderId)
 
 	if id == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
@@ -332,13 +332,13 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 // @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
 //  https://api.paysuper.online/admin/api/v1/order/%order_id_here%
 func (h *OrderRoute) getOrderPublic(ctx echo.Context) error {
-	req := &grpc.GetOrderRequest{
-		Id: ctx.Param(common.RequestParameterId),
+	req := &grpc.GetOrderRequest{}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	err := h.dispatch.Validate.Struct(req)
-
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -360,7 +360,6 @@ func (h *OrderRoute) getOrderPublic(ctx echo.Context) error {
 // @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
 //  https://api.paysuper.online/admin/api/v1/order?project[]=%project_identifier_here%
 func (h *OrderRoute) listOrdersPublic(ctx echo.Context) error {
-
 	req := &grpc.ListOrdersRequest{}
 	err := ctx.Bind(req)
 
@@ -432,14 +431,13 @@ func (h *OrderRoute) processCreatePayment(ctx echo.Context) error {
 }
 
 func (h *OrderRoute) getRefund(ctx echo.Context) error {
-	req := &grpc.GetRefundRequest{
-		OrderId:  ctx.Param(common.RequestParameterOrderId),
-		RefundId: ctx.Param(common.RequestParameterRefundId),
+	req := &grpc.GetRefundRequest{}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
-	err := h.dispatch.Validate.Struct(req)
-
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -459,15 +457,12 @@ func (h *OrderRoute) getRefund(ctx echo.Context) error {
 
 func (h *OrderRoute) listRefunds(ctx echo.Context) error {
 	req := &grpc.ListRefundsRequest{}
-	err := (&common.OrderListRefundsBinder{}).Bind(req, ctx)
 
-	if err != nil {
+	if err := (&common.OrderListRefundsBinder{}).Bind(req, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	err = h.dispatch.Validate.Struct(req)
-
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
