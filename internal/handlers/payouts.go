@@ -48,25 +48,20 @@ func (h *PayoutDocumentsRoute) Route(groups *common.Groups) {
 // GET /admin/api/v1/payout_documents?status=pending&limit=10&offset=0
 func (h *PayoutDocumentsRoute) getPayoutDocumentsList(ctx echo.Context) error {
 	req := &grpc.GetPayoutDocumentsRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	err = h.dispatch.Validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.GetPayoutDocuments(ctx.Request().Context(), req)
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetPayoutDocuments", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetPayoutDocuments")
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.JSON(http.StatusOK, res.Data)
 }
 
@@ -120,12 +115,13 @@ func (h *PayoutDocumentsRoute) createPayoutDocument(ctx echo.Context) error {
 
 	res, err := h.dispatch.Services.Billing.CreatePayoutDocument(ctx.Request().Context(), req)
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "CreatePayoutDocument", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "CreatePayoutDocument")
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
@@ -176,21 +172,17 @@ func (h *PayoutDocumentsRoute) getPayoutSignUrlPs(ctx echo.Context) error {
 }
 
 func (h *PayoutDocumentsRoute) getPayoutSignUrl(ctx echo.Context, signerType int32) error {
-	req := &grpc.GetPayoutDocumentSignUrlRequest{
-		PayoutDocumentId: ctx.Param(common.RequestParameterId),
-		SignerType:       signerType,
-	}
+	req := &grpc.GetPayoutDocumentSignUrlRequest{SignerType: signerType}
 
-	err := h.dispatch.Validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.GetPayoutDocumentSignUrl(ctx.Request().Context(), req)
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetPayoutDocumentSignUrl", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetPayoutDocumentSignUrl")
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
