@@ -72,6 +72,7 @@ const (
 	RequestParameterReceiptId                = "receipt_id"
 	RequestParameterRoleId                   = "role_id"
 	RequestParameterReportId                 = "report_id"
+	RequestProductId                         = "product_id"
 
 	UserProfileFieldNumberOfEmployees = "NumberOfEmployees"
 	UserProfileFieldAnnualIncome      = "AnnualIncome"

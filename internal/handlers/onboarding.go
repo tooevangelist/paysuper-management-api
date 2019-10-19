@@ -20,24 +20,24 @@ import (
 
 const (
 	merchantsPath                      = "/merchants"
-	merchantsIdPath                    = "/merchants/:id"
+	merchantsIdPath                    = "/merchants/:merchant_id"
 	merchantsUserPath                  = "/merchants/user"
 	merchantsCompanyPath               = "/merchants/company"
 	merchantsContactsPath              = "/merchants/contacts"
 	merchantsBankingPath               = "/merchants/banking"
-	merchantsIdCompanyPath             = "/merchants/:id/company"
-	merchantsIdContactsPath            = "/merchants/:id/contacts"
-	merchantsIdBankingPath             = "/merchants/:id/banking"
-	merchantsIdStatusCompanyPath       = "/merchants/:id/status"
-	merchantsIdChangeStatusCompanyPath = "/merchants/:id/change-status"
+	merchantsIdCompanyPath             = "/merchants/:merchant_id/company"
+	merchantsIdContactsPath            = "/merchants/:merchant_id/contacts"
+	merchantsIdBankingPath             = "/merchants/:merchant_id/banking"
+	merchantsIdStatusCompanyPath       = "/merchants/:merchant_id/status"
+	merchantsIdChangeStatusCompanyPath = "/merchants/:merchant_id/change-status"
 	merchantsNotificationsPath         = "/merchants/:merchant_id/notifications"
-	merchantsIdAgreementPath           = "/merchants/:id/agreement"
-	merchantsAgreementDocumentPath     = "/merchants/:id/agreement/document"
-	merchantsAgreementSignaturePath    = "/merchants/:id/agreement/signature"
+	merchantsIdAgreementPath           = "/merchants/:merchant_id/agreement"
+	merchantsAgreementDocumentPath     = "/merchants/:merchant_id/agreement/document"
+	merchantsAgreementSignaturePath    = "/merchants/:merchant_id/agreement/signature"
 	merchantsNotificationsIdPath       = "/merchants/:merchant_id/notifications/:notification_id"
 	merchantsNotificationsMarkReadPath = "/merchants/:merchant_id/notifications/:notification_id/mark-as-read"
 	merchantsTariffsPath               = "/merchants/tariffs"
-	merchantsIdTariffsPath             = "/merchants/:id/tariffs"
+	merchantsIdTariffsPath             = "/merchants/:merchant_id/tariffs"
 	merchantsIdManualPayoutEnablePath  = "/merchants/:merchant_id/manual_payout/enable"
 	merchantsIdManualPayoutDisablePath = "/merchants/:merchant_id/manual_payout/disable"
 )
@@ -188,15 +188,12 @@ func (h *OnboardingRoute) listMerchants(ctx echo.Context) error {
 func (h *OnboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.MerchantChangeStatusRequest{}
-	err := (&common.OnboardingChangeMerchantStatusBinder{}).Bind(req, ctx)
 
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	err = h.dispatch.Validate.Struct(req)
-
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -218,15 +215,12 @@ func (h *OnboardingRoute) changeMerchantStatus(ctx echo.Context) error {
 func (h *OnboardingRoute) createNotification(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.NotificationRequest{}
-	err := (&common.OnboardingCreateNotificationBinder{}).Bind(req, ctx)
 
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	err = h.dispatch.Validate.Struct(req)
-
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 

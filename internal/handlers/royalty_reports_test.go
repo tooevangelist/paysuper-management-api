@@ -149,7 +149,7 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_changeRoyaltyReport() {
 	res, err := suite.caller.Builder().
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + royaltyReportsChangePath).
+		Path(common.SystemUserGroupPath + royaltyReportsChangePath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
 		Exec(suite.T())

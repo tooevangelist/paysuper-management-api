@@ -44,7 +44,7 @@ func (suite *VatReportsTestSuite) TearDownTest() {}
 func (suite *VatReportsTestSuite) TestVatReports_getVatReportsDashboard() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthUserGroupPath + vatReportsPath).
+		Path(common.SystemUserGroupPath + vatReportsPath).
 		Init(test.ReqInitApplicationForm()).
 		Exec(suite.T())
 
@@ -64,7 +64,7 @@ func (suite *VatReportsTestSuite) TestVatReports_getVatReportsForCountry() {
 		Method(http.MethodGet).
 		SetQueryParams(q).
 		Params(":country", "ru").
-		Path(common.AuthUserGroupPath + vatReportsCountryPath).
+		Path(common.SystemUserGroupPath + vatReportsCountryPath).
 		Init(test.ReqInitApplicationForm()).
 		Exec(suite.T())
 
@@ -84,7 +84,7 @@ func (suite *VatReportsTestSuite) TestVatReports_getVatReportTransactions() {
 		Method(http.MethodGet).
 		SetQueryParams(q).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + vatReportsDetailsPath).
+		Path(common.SystemUserGroupPath + vatReportsDetailsPath).
 		Init(test.ReqInitApplicationForm()).
 		Exec(suite.T())
 
@@ -101,7 +101,7 @@ func (suite *VatReportsTestSuite) TestVatReports_updateVatReportStatus() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + vatReportsStatusPath).
+		Path(common.SystemUserGroupPath + vatReportsStatusPath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
 		Exec(suite.T())

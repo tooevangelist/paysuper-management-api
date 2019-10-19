@@ -1262,7 +1262,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":order_id", bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + orderReplaceCodePath).
+		Path(common.SystemUserGroupPath + orderReplaceCodePath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())

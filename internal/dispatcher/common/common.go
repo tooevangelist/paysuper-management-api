@@ -2,14 +2,17 @@ package common
 
 import (
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
 	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
 	tax_service "github.com/paysuper/paysuper-tax-service/proto"
 	"gopkg.in/go-playground/validator.v9"
+	"net/http"
 )
 
 const (
@@ -118,6 +121,29 @@ type HandlerSet struct {
 	Services Services
 	Validate *validator.Validate
 	AwareSet provider.AwareSet
+}
+
+// BindAndValidate
+func (h HandlerSet) BindAndValidate(req interface{}, ctx echo.Context) *echo.HTTPError {
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, ErrorRequestParamsIncorrect)
+	}
+	if err := h.Validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, GetValidationError(err))
+	}
+	return nil
+}
+
+// SrvCallHandler returns error if present, otherwise response as JSON with 200 OK
+func (h HandlerSet) SrvCallHandler(req interface{}, err error, name, method string) *echo.HTTPError {
+	h.AwareSet.L().Error(pkg.ErrorGrpcServiceCallFailed,
+		logger.PairArgs(
+			ErrorFieldService, name,
+			ErrorFieldMethod, method,
+		),
+		logger.WithPrettyFields(logger.Fields{"err": err, ErrorFieldRequest: req}),
+	)
+	return echo.NewHTTPError(http.StatusInternalServerError, ErrorInternal)
 }
 
 // AuthUser
