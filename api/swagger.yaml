@@ -9619,7 +9619,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{merchant_id}/invite":
+  "/admin/api/v1/merchants/invite":
     post:
       summary: Send invitation for merchant user
       tags:
@@ -9630,11 +9630,6 @@ paths:
         - application/json
       description: Send invitation to add user as merchant user
       parameters:
-        - description: Merchant identifier
-          in: path
-          name: merchant_id
-          required: true
-          type: string
         - description: JSON request body
           in: body
           name: body
@@ -9662,7 +9657,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{merchant_id}/users/{role_id}/resend":
+  "/admin/api/v1/merchants/users/{role_id}/resend":
     post:
       summary: Resend invitation for merchant user
       tags:
@@ -9673,11 +9668,6 @@ paths:
         - application/json
       description: Resend invitation to add user as merchant user
       parameters:
-        - description: Merchant identifier
-          in: path
-          name: merchant_id
-          required: true
-          type: string
         - description: User role identifier
           in: path
           name: role_id
@@ -9710,7 +9700,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{merchant_id}/users":
+  "/admin/api/v1/merchants/users":
     get:
       summary: List of merchant users
       tags:
@@ -9720,12 +9710,6 @@ paths:
       produces:
         - application/json
       description: List of merchant users
-      parameters:
-        - description: Merchant identifier
-          in: path
-          name: merchant_id
-          required: true
-          type: string
       responses:
         "200":
           description: OK
@@ -9748,7 +9732,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{merchant_id}/users/{role_id}/role":
+  "/admin/api/v1/merchants/users/{role_id}/role":
     delete:
       summary: Delete merchant user
       tags:
@@ -9759,11 +9743,6 @@ paths:
         - application/json
       description: Delete merchant user
       parameters:
-        - description: Merchant identifier
-          in: path
-          name: merchant_id
-          required: true
-          type: string
         - description: User role identifier
           in: path
           name: role_id
