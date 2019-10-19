@@ -34,7 +34,7 @@ func NewUserProfileRoute(set common.HandlerSet, cfg *common.Config) *UserProfile
 
 func (h *UserProfileRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(userProfilePath, h.getUserProfile)
-	groups.AuthUser.GET(userProfilePathId, h.getUserProfile)
+	groups.SystemUser.GET(userProfilePathId, h.getUserProfile)
 	groups.AuthUser.PATCH(userProfilePath, h.setUserProfile)
 	groups.AuthUser.POST(userProfilePathFeedback, h.createFeedback)
 	groups.AuthProject.PUT(userProfileConfirmEmailPath, h.confirmEmail)
