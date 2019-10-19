@@ -5,6 +5,7 @@ require (
 	github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679
 	github.com/ProtocolONE/go-core/v2 v2.1.0
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
+	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/aws/aws-sdk-go v1.23.16
 	github.com/fatih/color v1.7.0
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
@@ -20,7 +21,7 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191017131612-badca06380de
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191019063456-cf4a0f735826
 	github.com/paysuper/paysuper-payment-link v0.0.0-20191014102956-21b508fc9e9c
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-reporter v0.0.0-20191003072342-610371fc9395
@@ -30,6 +31,7 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
+	github.com/yuin/gopher-lua v0.0.0-20190514113301-1cd887cd7036 // indirect
 	go.uber.org/automaxprocs v1.2.0
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
