@@ -98,7 +98,6 @@ func (suite *MerchantUsersTestSuite) TestMerchantChangeRole_InternalError() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
 		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + merchantUsersRole).
 		Init(test.ReqInitJSON()).
@@ -123,7 +122,6 @@ func (suite *MerchantUsersTestSuite) TestMerchantChangeRole_ValidationError() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
 		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + merchantUsersRole).
 		BodyString(`{"no_role": "some_role"}`).
@@ -148,7 +146,6 @@ func (suite *MerchantUsersTestSuite) TestMerchantChangeRole_Error() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
 		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + merchantUsersRole).
 		BodyString(`{"role": "some_role"}`).
@@ -167,7 +164,6 @@ func (suite *MerchantUsersTestSuite) TestMerchantChangeRole_EmptyBodyError() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
 		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + merchantUsersRole).
 		Init(test.ReqInitJSON()).
@@ -190,7 +186,6 @@ func (suite *MerchantUsersTestSuite) TestMerchantChangeRole_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
 		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + merchantUsersRole).
 		Init(test.ReqInitJSON()).
