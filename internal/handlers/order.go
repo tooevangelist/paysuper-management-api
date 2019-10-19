@@ -133,8 +133,7 @@ func (h *OrderRoute) createFromFormData(ctx echo.Context) error {
 	orderResponse, err := h.dispatch.Services.Billing.OrderCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "OrderCreateProcess", req)
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "OrderCreateProcess")
 	}
 
 	if orderResponse.Status != http.StatusOK {
@@ -191,8 +190,7 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 		rsp1, err := h.dispatch.Services.Billing.IsOrderCanBePaying(ctxReq, req1)
 
 		if err != nil {
-			common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "IsOrderCanBePaying", req)
-			return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+			return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "IsOrderCanBePaying")
 		}
 
 		if rsp1.Status != pkg.ResponseStatusOk {
@@ -204,8 +202,7 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 		orderResponse, err = h.dispatch.Services.Billing.OrderCreateProcess(ctxReq, req)
 
 		if err != nil {
-			common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "OrderCreateProcess", req)
-			return echo.NewHTTPError(http.StatusBadRequest, common.ErrorUnknown)
+			return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "OrderCreateProcess")
 		}
 
 		if orderResponse.Status != http.StatusOK {
@@ -230,8 +227,7 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 		rsp2, err := h.dispatch.Services.Billing.PaymentFormJsonDataProcess(ctxReq, req2)
 
 		if err != nil {
-			common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "PaymentFormJsonDataProcess", req)
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "PaymentFormJsonDataProcess")
 		}
 		if rsp2.Status != pkg.ResponseStatusOk {
 			return echo.NewHTTPError(int(rsp2.Status), rsp2.Message)
@@ -268,8 +264,7 @@ func (h *OrderRoute) getOrderForm(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.PaymentFormJsonDataProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "PaymentFormJsonDataProcess", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "PaymentFormJsonDataProcess")
 	}
 
 	if res.Status != http.StatusOK {
@@ -374,19 +369,14 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 func (h *OrderRoute) getOrderPublic(ctx echo.Context) error {
 	req := &grpc.GetOrderRequest{}
 
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	if err := h.dispatch.Validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.GetOrderPublic(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetOrderPublic", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetOrderPublic")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -424,8 +414,7 @@ func (h *OrderRoute) listOrdersPublic(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.FindAllOrdersPublic(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "FindAllOrdersPublic", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "FindAllOrdersPublic")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -454,8 +443,7 @@ func (h *OrderRoute) processCreatePayment(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.PaymentCreateProcess(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "PaymentCreateProcess", req)
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "PaymentCreateProcess")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -473,19 +461,14 @@ func (h *OrderRoute) processCreatePayment(ctx echo.Context) error {
 func (h *OrderRoute) getRefund(ctx echo.Context) error {
 	req := &grpc.GetRefundRequest{}
 
-	if err := ctx.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
-	}
-
-	if err := h.dispatch.Validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.GetRefund(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetRefund", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetRefund")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -509,8 +492,7 @@ func (h *OrderRoute) listRefunds(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.ListRefunds(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ListRefunds", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ListRefunds")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -531,8 +513,7 @@ func (h *OrderRoute) replaceCode(ctx echo.Context) error {
 
 	res, err := h.dispatch.Services.Billing.ChangeCodeInOrder(ctx.Request().Context(), req)
 	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ChangeCodeInOrder")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -562,8 +543,7 @@ func (h *OrderRoute) createRefund(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.CreateRefund(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "CreateRefund", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "CreateRefund")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -600,8 +580,7 @@ func (h *OrderRoute) changeLanguage(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.PaymentFormLanguageChanged(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "PaymentFormLanguageChanged", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "PaymentFormLanguageChanged")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -638,8 +617,7 @@ func (h *OrderRoute) changeCustomer(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.PaymentFormPaymentAccountChanged(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "PaymentFormPaymentAccountChanged", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "PaymentFormPaymentAccountChanged")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -673,8 +651,7 @@ func (h *OrderRoute) processBillingAddress(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.ProcessBillingAddress(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ProcessBillingAddress", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ProcessBillingAddress")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -712,8 +689,7 @@ func (h *OrderRoute) notifySale(ctx echo.Context) error {
 
 	_, err = h.dispatch.Services.Billing.SetUserNotifySales(ctx.Request().Context(), req)
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "SetUserNotifySales", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "SetUserNotifySales")
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
@@ -747,8 +723,7 @@ func (h *OrderRoute) notifyNewRegion(ctx echo.Context) error {
 
 	_, err = h.dispatch.Services.Billing.SetUserNotifyNewRegion(ctx.Request().Context(), req)
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "SetUserNotifyNewRegion", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "SetUserNotifyNewRegion")
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
@@ -777,8 +752,7 @@ func (h *OrderRoute) changePlatform(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.PaymentFormPlatformChanged(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "PaymentFormPlatformChanged", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "PaymentFormPlatformChanged")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -804,8 +778,7 @@ func (h *OrderRoute) getReceipt(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.OrderReceipt(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "OrderReceipt", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "OrderReceipt")
 	}
 
 	if res.Status != http.StatusOK {
