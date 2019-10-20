@@ -89,7 +89,6 @@ func ProviderValidators(v *validators.ValidatorSet) (validate *validator.Validat
 	}
 	validate.RegisterStructValidation(v.CompanyValidator, grpc.UserProfileCompany{})
 	validate.RegisterStructValidation(v.MerchantCompanyValidator, billing.MerchantCompanyInfo{})
-	validate.RegisterStructValidation(v.MerchantTariffRatesValidator, grpc.GetMerchantTariffRatesRequest{})
 	if err = validate.RegisterValidation("company_name", v.CompanyNameValidator); err != nil {
 		return
 	}
@@ -100,6 +99,9 @@ func ProviderValidators(v *validators.ValidatorSet) (validate *validator.Validat
 		return
 	}
 	if err = validate.RegisterValidation("world_region", v.WorldRegionValidator); err != nil {
+		return
+	}
+	if err = validate.RegisterValidation("tariff_region", v.TariffRegionValidator); err != nil {
 		return
 	}
 	return validate, func() {}, nil

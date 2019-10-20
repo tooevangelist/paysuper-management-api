@@ -1,28 +1,5 @@
 swagger: "2.0"
 definitions:
-  model.AccountingPayment:
-    properties:
-      success_with_commissions:
-        description: |
-          total amount to accounting payment to merchant include commissions
-        type: number
-      success_without_commissions:
-        description: |
-          total amount to accounting payment to merchant exclude commissions
-        type: number
-      total_chargeback:
-        description: |
-          total amount charged payments
-        type: number
-      total_commission:
-        description: |
-          total amount of commissions
-        type: number
-      total_refund:
-        description: |
-          total amount refunded payments
-        type: number
-    type: object
   model.Country:
     properties:
       code_a2:
@@ -687,50 +664,6 @@ definitions:
         type: string
     type: object
 
-  model.RevenueDynamicMainData:
-    properties:
-      avg:
-        type: number
-      count:
-        type: integer
-      total:
-        type: number
-    type: object
-  model.RevenueDynamicPoint:
-    properties:
-      amount:
-        type: number
-      date:
-        $ref: '#/definitions/model.RevenueDynamicPointDate'
-        type: object
-    type: object
-  model.RevenueDynamicPointDate:
-    properties:
-      day:
-        type: integer
-      hour:
-        type: integer
-      month:
-        type: integer
-      week:
-        type: integer
-      year:
-        type: integer
-    type: object
-  model.RevenueDynamicResult:
-    properties:
-      points:
-        items:
-          $ref: '#/definitions/model.RevenueDynamicPoint'
-        type: array
-      refund:
-        $ref: '#/definitions/model.RevenueDynamicMainData'
-        type: object
-      revenue:
-        $ref: '#/definitions/model.RevenueDynamicMainData'
-        type: object
-    type: object
-
   payment_system.PaymentResponse:
     properties:
       error:
@@ -1052,29 +985,17 @@ definitions:
         description: last payout amount to merchant
         type: number
 
-  onboarding.Tariff.Payment.NumberRange:
-    properties:
-      from:
-        type: number
-        description: start value
-      to:
-        type: number
-        description: end value
-
   onboarding.Tariff.Payment:
     properties:
-      method:
+      min_amount:
+        description: min payment amount
+        type: number
+      max_amount:
+        description: max payment amount
+        type: number
+      method_name:
         type: string
         description: payment method name
-      payout_currency:
-        type: string
-        description: payout cyrrency. 3 letters code by ISO 4217
-      amount_range:
-        description: merchan turnover range
-        $ref: '#/definitions/onboarding.Tariff.Payment.NumberRange'
-      country:
-        type: string
-        description: tariff country. 2 letters code by ISO 3166-1
       method_percent_fee:
         description: payment method fee in percents
         type: number
@@ -1093,85 +1014,18 @@ definitions:
       ps_fixed_fee_currency:
         type: string
         description: currency of paysuper fixed fee.  letters code by ISO 4217
-
-  onboarding.Tariff.MoneyBack:
-    properties:
-      method:
+      merchant_home_region:
+        description: merchant region name
         type: string
-        description: payment method name
-      payout_currency:
+      payer_regions:
+        description: payer region name
         type: string
-        description: payout cyrrency. 3 letters code by ISO 4217
-      country:
-        type: string
-        description: tariff country. 2 letters code by ISO 3166-1
-      days_range:
-        description: days range after payment
-        $ref: '#/definitions/RangeInt'
-      payment_stage:
-        type: integer
-        description: payment stage
-      percent_fee:
-        type: number
-        description: payment method fee in percents
-      fixed_fee:
-        type: number
-        description: payment method fixed fee in particular currency
-      fixed_fee_currency:
-        type: string
-        description: currency of payment method fixed fee. letters code by ISO 4217
-      is_paid_by_merchant:
-        type: boolean
-        description: fee will be withdrawn from the merchant account
-
-  onboarding.Tariff.TariffRatesItem:
-    properties:
-      fixed_fee:
-        type: number
-        description: fixed fee in particular currency
-      fixed_fee_currency:
-        type: string
-        description: currency of fixed fee. letters code by ISO 4217
-      is_paid_by_merchant:
-        type: boolean
-        description: fee will be withdrawn from the merchant account
-
-  onboarding.Tariff:
-    properties:
-      payment:
-        type: array
-        description: list of payment tarrifs by other payment methods
-        items:
-          $ref: '#/definitions/onboarding.Tariff.Payment'
-      money_back:
-        type: array
-        description: list of refund tarrifs by other payment methods
-        items:
-          $ref: '#/definitions/onboarding.Tariff.MoneyBack'
-      payout:
-        description: payout fee
-        $ref: '#/definitions/onboarding.Tariff.TariffRatesItem'
-      chargeback:
-        description: chargeback fee
-        $ref: '#/definitions/onboarding.Tariff.TariffRatesItem'
-      region:
-        type: string
-        description: fee region
 
   onboarding.Tariff.Set.Request:
     properties:
-      region:
+      home_region:
         type: string
-        description: "region identifier. possible values: cis, russia, west_asia, eu, north_america, central_america, south_america, uk, worldwide, south_pacific"
-      payout_currency:
-        type: string
-        description: merchant payout currency. letters code by ISO 4217
-      amount_from:
-        type: number
-        description: start amount of merchant turnover
-      amount_to:
-        type: number
-        description: end amount of merchant turnover
+        description: "merchant home region name. possible values: asia, europe, latin_america, russia_and_cis, worldwide"
 
   onboarding.Merchant.user:
     properties:
@@ -2967,12 +2821,11 @@ definitions:
         description: new report status
       reason:
         type: string
-        required: true
         description: correction reason
       correction:
-        type: object
-        schema:
-          "$ref": "#/definitions/grpcChangeRoyaltyReportCorrection"
+        "$ref": "#/definitions/grpcChangeRoyaltyReportCorrection"
+    required:
+      - reason
 
   grpcChangeRoyaltyReportCorrection:
     type: object
@@ -2980,12 +2833,13 @@ definitions:
       amount:
         type: number
         format: double
-        required: true
         description: correction amount (in report's currency)
       reason:
         type: string
-        required: true
         description: correction reason
+    required:
+      - amount
+      - reason
 
   grpcRoyaltyReportsPaginate:
     type: object
@@ -5862,31 +5716,33 @@ paths:
         - application/json
       description: Get tariff rates
       parameters:
-        - description: "region name. possible values: cis, russia, west_asia, eu, north_america, central_america, south_america, uk, worldwide, south_pacific"
+        - description: "merchant home region name. possible values: asia, europe, latin_america, russia_and_cis, worldwide"
           in: query
           name: region
           type: string
           required: true
-        - description: "merchant payout currency. 3 letters code by ISO 4217"
+        - description: "payer possible region name. possible values: asia, europe, latin_america, russia_and_cis, worldwide"
           in: query
-          name: payout_currency
+          name: payer_region
           type: string
-          required: true
-        - description: "merchant start amount of turnover"
+          required: false
+        - description: "payment min amount"
           in: query
-          name: amount_from
+          name: min_amount
           type: number
           required: false
-        - description: "merchant end amount of turnover"
+        - description: "payment max amount"
           in: query
-          name: amount_to
+          name: max_amount
           type: number
           required: false
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/onboarding.Tariff'
+            type: array
+            items:
+              $ref: '#/definitions/onboarding.Tariff.Payment'
         "400":
           description: Invalid request data
           schema:
