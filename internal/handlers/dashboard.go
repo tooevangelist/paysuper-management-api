@@ -48,7 +48,6 @@ func (h *DashboardRoute) getMainReports(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -80,7 +79,6 @@ func (h *DashboardRoute) getRevenueDynamicsReport(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -112,7 +110,6 @@ func (h *DashboardRoute) getBaseReports(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {

@@ -26,6 +26,7 @@ func (suite *UserProfileTestSuite) SetupTest() {
 	user := &common.AuthUser{
 		Id:    "ffffffffffffffffffffffff",
 		Email: "test@unit.test",
+		MerchantId: "ffffffffffffffffffffffff",
 	}
 
 	var e error

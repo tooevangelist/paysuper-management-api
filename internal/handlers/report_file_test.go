@@ -42,6 +42,7 @@ func (suite *ReportFileTestSuite) SetupTest() {
 		mw.Pre(test.PreAuthUserMiddleware(&common.AuthUser{
 			Id:    "ffffffffffffffffffffffff",
 			Email: "test@unit.test",
+			MerchantId: "ffffffffffffffffffffffff",
 		}))
 		downloadMockResultFn := func(
 			ctx context.Context,
