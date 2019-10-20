@@ -5,7 +5,6 @@ require (
 	github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679
 	github.com/ProtocolONE/go-core/v2 v2.1.0
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
-	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/aws/aws-sdk-go v1.23.16
 	github.com/fatih/color v1.7.0
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
@@ -31,7 +30,6 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
-	github.com/yuin/gopher-lua v0.0.0-20190514113301-1cd887cd7036 // indirect
 	go.uber.org/automaxprocs v1.2.0
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
@@ -42,7 +40,6 @@ replace (
 	github.com/gogo/protobuf v0.0.0-20190410021324-65acae22fc9 => github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
 	github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
 	github.com/hashicorp/consul/api => github.com/hashicorp/consul/api v1.1.0
-	github.com/labstack/echo/v4 v4.1.11 => github.com/labstack/echo/v4 v4.1.6
 	github.com/lucas-clemente/quic-go => github.com/lucas-clemente/quic-go v0.12.0
 	github.com/marten-seemann/qtls => github.com/marten-seemann/qtls v0.3.2
 	golang.org/x/sys => golang.org/x/sys v0.0.0-20190927073244-c990c680b611

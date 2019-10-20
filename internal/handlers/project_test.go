@@ -36,7 +36,13 @@ func (suite *ProjectTestSuite) SetupTest() {
 	srv := common.Services{
 		Billing: mock.NewBillingServerOkMock(),
 	}
+	user := &common.AuthUser{
+		Id:    "ffffffffffffffffffffffff",
+		Email: "test@unit.test",
+		MerchantId: "ffffffffffffffffffffffff",
+	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewProjectRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,

@@ -30,6 +30,7 @@ func (suite *MerchantUsersTestSuite) SetupTest() {
 	user := &common.AuthUser{
 		Id:    "ffffffffffffffffffffffff",
 		Email: "test@unit.test",
+		MerchantId: "ffffffffffffffffffffffff",
 	}
 	var e error
 	settings := test.DefaultSettings()
@@ -50,23 +51,6 @@ func (suite *MerchantUsersTestSuite) SetupTest() {
 
 func (suite *MerchantUsersTestSuite) TearDownTest() {}
 
-func (suite *MerchantUsersTestSuite) TestMerchantUsers_GetList_ValidationError() {
-	shouldBe := require.New(suite.T())
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "").
-		Path(common.AuthUserGroupPath + merchantUsers).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	shouldBe.Error(err)
-	hErr, ok := err.(*echo.HTTPError)
-	shouldBe.True(ok)
-	shouldBe.Equal(400, hErr.Code)
-	shouldBe.NotEmpty(hErr.Message)
-}
-
 func (suite *MerchantUsersTestSuite) TestMerchantUsers_GetList_Ok() {
 	shouldBe := require.New(suite.T())
 
@@ -80,7 +64,6 @@ func (suite *MerchantUsersTestSuite) TestMerchantUsers_GetList_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + merchantUsers).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())

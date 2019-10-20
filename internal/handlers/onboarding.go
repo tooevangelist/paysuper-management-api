@@ -348,7 +348,7 @@ func (h *OnboardingRoute) changeAgreement(ctx echo.Context) error {
 }
 
 func (h *OnboardingRoute) getAgreementDocument(ctx echo.Context) error {
-	merchantId := ctx.Param(common.RequestParameterId)
+	merchantId := ctx.Param(common.RequestParameterMerchantId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)

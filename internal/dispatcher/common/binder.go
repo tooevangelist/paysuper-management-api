@@ -136,13 +136,22 @@ func (b *Binder) Bind(i interface{}, ctx echo.Context) (err error) {
 	}
 	//
 	params := ctx.QueryParams()
-	if ta := typ.StringInt32(params.Get(RequestParameterLimit)); ta.Err() != nil {
-		return ta.Err()
-	} else if ta.V() > b.LimitMax {
-		return ErrorRequestParamsIncorrect
+	limit := params.Get(RequestParameterLimit)
+	if len(limit) > 0 {
+		if ta := typ.StringInt32(limit); ta.Err() != nil {
+			return ta.Err()
+		} else if ta.V() < 0 {
+			ta.Set(b.LimitDefault)
+		} else if ta.V() > b.LimitMax {
+			ta.Set(b.LimitMax)
+		}
 	}
-	if ta := typ.StringInt32(params.Get(RequestParameterOffset)); ta.Err() != nil {
-		return ta.Err()
+
+	offset := params.Get(RequestParameterOffset)
+	if len(offset) > 0 {
+		if ta := typ.StringInt32(offset); ta.Err() != nil {
+			return ta.Err()
+		}
 	}
 	//
 	if binder := ExtractBinderContext(ctx); binder != nil {
