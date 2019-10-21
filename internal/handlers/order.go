@@ -442,7 +442,7 @@ func (h *OrderRoute) getRefund(ctx echo.Context) error {
 func (h *OrderRoute) listRefunds(ctx echo.Context) error {
 	req := &grpc.ListRefundsRequest{}
 
-	if err := (&common.OrderListRefundsBinder{}).Bind(req, ctx); err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 

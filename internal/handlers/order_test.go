@@ -37,6 +37,7 @@ func Test_Order(t *testing.T) {
 func (suite *OrderTestSuite) SetupTest() {
 	user := &common.AuthUser{
 		Id: "ffffffffffffffffffffffff",
+		MerchantId: "ffffffffffffffffffffffff",
 	}
 
 	var e error
@@ -131,7 +132,7 @@ func (suite *OrderTestSuite) TestOrder_GetRefund_BillingServerError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetRefund_BillingServer_RefundNotFound_Error() {
@@ -200,7 +201,7 @@ func (suite *OrderTestSuite) TestOrder_ListRefunds_BillingServerError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateRefund_Ok() {
@@ -275,7 +276,7 @@ func (suite *OrderTestSuite) TestOrder_CreateRefund_BillingServerError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateRefund_BillingServer_CreateError() {
@@ -336,10 +337,13 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_OrderIdEmpty_Error() {
 
 func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BindError() {
 
+	data := `<datawrong>`
+
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
 		Path(common.AuthProjectGroupPath + orderLanguagePath).
+		BodyString(data).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -388,7 +392,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BillingServerSystemError()
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BillingServerErrorResult_Error() {
@@ -448,10 +452,13 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_OrderIdEmpty_Error()
 }
 
 func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BindError() {
+	data := `<data wrong>`
+
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
 		Path(common.AuthProjectGroupPath + orderCustomerPath).
+		BodyString(data).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -500,7 +507,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BillingServerSystemE
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BillingServerErrorResult_Error() {
@@ -576,11 +583,13 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_OrderIdEmpty_Error() {
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BindError() {
+	body := "<some wrong body>"
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
 		Path(common.AuthProjectGroupPath + orderBillingAddressPath).
+		BodyString(body).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -652,7 +661,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerSystemError
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerErrorResult_Error() {
@@ -1076,7 +1085,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrders_Ok() {
@@ -1124,7 +1133,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrders_BillingServerError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrders_BindError_Id() {
@@ -1209,7 +1218,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithPreparedOrderId_BillingSer
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateJson_WithPreparedOrderId_BillingServiceResultError() {
@@ -1286,7 +1295,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ServiceError() {
 	_, err = suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":order_id", bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + orderReplaceCodePath).
+		Path(common.SystemUserGroupPath + orderReplaceCodePath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1317,7 +1326,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ErrorInService() {
 	_, err = suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":order_id", bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + orderReplaceCodePath).
+		Path(common.SystemUserGroupPath + orderReplaceCodePath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1417,7 +1426,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeOrderCode_ValidationError() {
 	_, err = suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":order_id", bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + orderReplaceCodePath).
+		Path(common.SystemUserGroupPath + orderReplaceCodePath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1502,5 +1511,5 @@ func (suite *OrderTestSuite) TestOrder_getReceipt_BillingServerSystemError() {
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
