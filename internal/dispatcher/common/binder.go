@@ -62,7 +62,10 @@ func (b *SystemBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 			if tf.Type.Kind() != reflect.String {
 				return ErrorInternal
 			}
-			rv.Set(reflect.ValueOf(ctx.Param(RequestParameterMerchantId)))
+			mId := ctx.Param(RequestParameterMerchantId)
+			if mId != "" {
+				rv.Set(reflect.ValueOf(mId))
+			}
 		}
 
 		if strings.EqualFold(tf.Name, MerchantSliceField) {
@@ -70,7 +73,10 @@ func (b *SystemBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 				return ErrorInternal
 			}
 			if rv.Type().Elem().Kind() == reflect.String {
-				rv.Set(reflect.ValueOf([]string{ctx.Param(RequestParameterMerchantId)}))
+				mId := ctx.Param(RequestParameterMerchantId)
+				if mId != "" {
+					rv.Set(reflect.ValueOf([]string{mId}))
+				}
 			}
 		}
 	}
@@ -80,9 +86,9 @@ func (b *SystemBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 
 type MerchantBinder struct{}
 
-func (b *MerchantBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+func (b *MerchantBinder) Bind(bindInterface interface{}, ctx echo.Context) (err error) {
 
-	rv := reflect.ValueOf(i)
+	rv := reflect.ValueOf(bindInterface)
 
 	if rv.Type().Kind() != reflect.Ptr || rv.IsNil() {
 		return ErrorInternal
@@ -486,7 +492,7 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 		return err
 	}
 
-	merchantId := ctx.Param(RequestParameterId)
+	merchantId := ctx.Param(RequestParameterMerchantId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
 		return ErrorIncorrectMerchantId

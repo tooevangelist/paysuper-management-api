@@ -115,7 +115,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_G
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.SystemUserGroupPath + paymentCostsMoneyBackMerchantAllPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -129,7 +129,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_G
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		SetQueryParam("name", "VISA").
 		SetQueryParam("region", "CIS").
 		SetQueryParam("country", "AZ").
@@ -151,7 +151,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_A
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.SystemUserGroupPath + paymentCostsChannelMerchantPath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
@@ -166,7 +166,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_D
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.SystemUserGroupPath + paymentCostsChannelMerchantPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -251,7 +251,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_GetAll
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.SystemUserGroupPath + paymentCostsMoneyBackMerchantAllPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())

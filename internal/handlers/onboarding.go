@@ -315,6 +315,10 @@ func (h *OnboardingRoute) markAsReadNotification(ctx echo.Context) error {
 }
 
 func (h *OnboardingRoute) changeAgreement(ctx echo.Context) error {
+	if ctx.Request().ContentLength == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
 	req := &grpc.ChangeMerchantDataRequest{}
 	binder := common.NewChangeMerchantDataRequestBinder(h.dispatch, h.cfg)
 	err := binder.Bind(req, ctx)
@@ -380,7 +384,7 @@ func (h *OnboardingRoute) getAgreementDocument(ctx echo.Context) error {
 }
 
 func (h *OnboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
-	merchantId := ctx.Param(common.RequestParameterId)
+	merchantId := ctx.Param(common.RequestParameterMerchantId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
@@ -550,7 +554,7 @@ func (h *OnboardingRoute) setMerchantCompany(ctx echo.Context) error {
 
 	req := &grpc.OnboardingRequest{
 		Company: in,
-		Id:      ctx.Param(common.RequestParameterId),
+		Id:      ctx.Param(common.RequestParameterMerchantId),
 		User: &billing.MerchantUser{
 			Id:    authUser.Id,
 			Email: authUser.Email,
@@ -597,7 +601,7 @@ func (h *OnboardingRoute) setMerchantContacts(ctx echo.Context) error {
 
 	req := &grpc.OnboardingRequest{
 		Contacts: in,
-		Id:       ctx.Param(common.RequestParameterId),
+		Id:       ctx.Param(common.RequestParameterMerchantId),
 		User: &billing.MerchantUser{
 			Id:    authUser.Id,
 			Email: authUser.Email,
@@ -644,7 +648,7 @@ func (h *OnboardingRoute) setMerchantBanking(ctx echo.Context) error {
 
 	req := &grpc.OnboardingRequest{
 		Banking: in,
-		Id:      ctx.Param(common.RequestParameterId),
+		Id:      ctx.Param(common.RequestParameterMerchantId),
 		User: &billing.MerchantUser{
 			Id:    authUser.Id,
 			Email: authUser.Email,
@@ -676,7 +680,7 @@ func (h *OnboardingRoute) setMerchantBanking(ctx echo.Context) error {
 // https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/status
 func (h *OnboardingRoute) getMerchantStatus(ctx echo.Context) error {
 	req := &grpc.SetMerchantS3AgreementRequest{
-		MerchantId: ctx.Param(common.RequestParameterId),
+		MerchantId: ctx.Param(common.RequestParameterMerchantId),
 	}
 
 	err := h.dispatch.Validate.Struct(req)
@@ -710,7 +714,6 @@ func (h *OnboardingRoute) createAgreementSignature(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -775,7 +778,6 @@ func (h *OnboardingRoute) setTariffRates(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -798,7 +800,7 @@ func (h *OnboardingRoute) setTariffRates(ctx echo.Context) error {
 }
 
 func (h *OnboardingRoute) getAgreementData(ctx echo.Context) error {
-	merchantId := ctx.Param(common.RequestParameterId)
+	merchantId := ctx.Param(common.RequestParameterMerchantId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)

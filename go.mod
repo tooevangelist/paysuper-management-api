@@ -20,7 +20,7 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191021105307-b53bc1bb2e71
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191021143242-ed518bc672b7
 	github.com/paysuper/paysuper-payment-link v0.0.0-20191014102956-21b508fc9e9c
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-reporter v0.0.0-20191003072342-610371fc9395
@@ -33,6 +33,7 @@ require (
 	go.uber.org/automaxprocs v1.2.0
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
+	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 )
 
 replace (

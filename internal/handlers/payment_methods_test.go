@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"testing"
 )
@@ -177,6 +178,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_update_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
 		Path(common.AuthProjectGroupPath + paymentMethodIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
