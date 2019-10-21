@@ -62,7 +62,10 @@ func (b *SystemBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 			if tf.Type.Kind() != reflect.String {
 				return ErrorInternal
 			}
-			rv.Set(reflect.ValueOf(ctx.Param(RequestParameterMerchantId)))
+			mId := ctx.Param(RequestParameterMerchantId)
+			if mId != "" {
+				rv.Set(reflect.ValueOf(mId))
+			}
 		}
 
 		if strings.EqualFold(tf.Name, MerchantSliceField) {
@@ -70,7 +73,10 @@ func (b *SystemBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 				return ErrorInternal
 			}
 			if rv.Type().Elem().Kind() == reflect.String {
-				rv.Set(reflect.ValueOf([]string{ctx.Param(RequestParameterMerchantId)}))
+				mId := ctx.Param(RequestParameterMerchantId)
+				if mId != "" {
+					rv.Set(reflect.ValueOf([]string{mId}))
+				}
 			}
 		}
 	}
