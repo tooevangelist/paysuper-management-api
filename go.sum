@@ -557,9 +557,13 @@ github.com/labstack/echo v3.3.10+incompatible/go.mod h1:0INS7j/VjnFxD4E2wkz67b8c
 github.com/labstack/echo/v4 v4.0.0/go.mod h1:tZv7nai5buKSg5h/8E6zz4LsD/Dqh9/91Mvs7Z5Zyno=
 github.com/labstack/echo/v4 v4.1.6 h1:WOvLa4T1KzWCRpANwz0HGgWDelXSSGwIKtKBbFdHTv4=
 github.com/labstack/echo/v4 v4.1.6/go.mod h1:kU/7PwzgNxZH4das4XNsSpBSOD09XIF5YEPzjpkGnGE=
+github.com/labstack/echo/v4 v4.1.11 h1:z0BZoArY4FqdpUEl+wlHp4hnr/oSR6MTmQmv8OHSoww=
+github.com/labstack/echo/v4 v4.1.11/go.mod h1:i541M3Fj6f76NZtHSj7TXnyM8n2gaodfvfxNnFqi74g=
 github.com/labstack/gommon v0.2.8/go.mod h1:/tj9csK2iPSBvn+3NLM9e52usepMtrd5ilFYA+wQNJ4=
 github.com/labstack/gommon v0.2.9 h1:heVeuAYtevIQVYkGj6A41dtfT91LrvFG220lavpWhrU=
 github.com/labstack/gommon v0.2.9/go.mod h1:E8ZTmW9vw5az5/ZyHWCp0Lw4OH2ecsaBP1C/NKavGG4=
+github.com/labstack/gommon v0.3.0 h1:JEeO0bvc78PKdyHxloTKiF8BD5iGrH8T6MSeGvSgob0=
+github.com/labstack/gommon v0.3.0/go.mod h1:MULnywXg0yavhxWKc+lOruYdAhDwPK9wf0OL7NoOu+k=
 github.com/leodido/go-urn v1.1.0 h1:Sm1gr51B1kKyfD2BlRcLSiEkffoG96g6TPv6eRoEiB8=
 github.com/leodido/go-urn v1.1.0/go.mod h1:+cyI34gQWZcE1eQU7NVgKkkzdXDQHr1dBMtdAPozLkw=
 github.com/lestrrat-go/jwx v0.0.0-20180928232350-0d477e6a1f0e h1:BsBWIgqA7BFb5sdQeFVQqXYL0P9ZwiNYvL3nywtEmnY=
@@ -590,6 +594,8 @@ github.com/mattn/go-isatty v0.0.3/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNx
 github.com/mattn/go-isatty v0.0.4/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
 github.com/mattn/go-isatty v0.0.8 h1:HLtExJ+uU2HOZ+wI0Tt5DtUDrx8yhUqDcp7fYERX4CE=
 github.com/mattn/go-isatty v0.0.8/go.mod h1:Iq45c/XA43vh69/j3iqttzPXn0bhXyGjM0Hdxcsrc5s=
+github.com/mattn/go-isatty v0.0.9 h1:d5US/mDsogSGW37IV293h//ZFaeajb69h+EHFsv2xGg=
+github.com/mattn/go-isatty v0.0.9/go.mod h1:YNRxwqDuOph6SZLI9vUUz6OYw3QyUt7WiY2yME+cCiQ=
 github.com/mattn/go-runewidth v0.0.4/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzpuz5H//U1FU=
 github.com/mattn/go-sqlite3 v1.10.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
 github.com/matttproud/golang_protobuf_extensions v1.0.1 h1:4hp9jkHxhMHkqkrB3Ix0jegS5sx/RkqARlsWZ6pIwiU=
@@ -735,10 +741,6 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20190926065953-0100f748197d/g
 github.com/paysuper/paysuper-billing-server v0.0.0-20190926070734-3da75bc375c7/go.mod h1:ejy2ffHoEEQMtmvo6Dt38a9hzYSPBiW6C1KSEOL9d+k=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190926100841-ae41a61c4745/go.mod h1:ejy2ffHoEEQMtmvo6Dt38a9hzYSPBiW6C1KSEOL9d+k=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191002130927-fb4dc5d0cb2c/go.mod h1:RsZbiKkMgJ/c4NDxCj2JnUpQs3Q7238HgvTSpuJvxEk=
-github.com/paysuper/paysuper-billing-server v0.0.0-20191017131612-badca06380de h1:kgh/KZZaw+789YTeMJW6W08uLsXqfW6ruSfO6UDdi5g=
-github.com/paysuper/paysuper-billing-server v0.0.0-20191017131612-badca06380de/go.mod h1:z2HZg2VkUqubbVACOikyrGlOqPRP2zttTOmCL4sTm0Q=
-github.com/paysuper/paysuper-billing-server v0.0.0-20191019063456-cf4a0f735826 h1:T7qK8IdTE0inuS2kkGkYDrwKwa28wKf6QxVwKxBacPo=
-github.com/paysuper/paysuper-billing-server v0.0.0-20191019063456-cf4a0f735826/go.mod h1:goEeXhc22XLW4oiEzXH11A/f/+znmZT5xFFcc/2yhkc=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191019074833-be8807f842f3 h1:xhUFBtd3adv0vWQszN8Ptd8k0vXwJS4gcRmXlsGVcFY=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191019074833-be8807f842f3/go.mod h1:goEeXhc22XLW4oiEzXH11A/f/+znmZT5xFFcc/2yhkc=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191021095757-fb42f2d4a06a h1:mQXRJ+zpgVnNXK5xnp+7vOGEW+Znxau2qElmeAXWAwM=

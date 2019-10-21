@@ -85,7 +85,13 @@ func (suite *PayoutDocumentsTestSuite) SetupTest() {
 	srv := common.Services{
 		Billing: billingService,
 	}
+	user := &common.AuthUser{
+		Id:    "ffffffffffffffffffffffff",
+		Email: "test@unit.test",
+		MerchantId: "ffffffffffffffffffffffff",
+	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewPayoutDocumentsRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,

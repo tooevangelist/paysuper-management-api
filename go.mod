@@ -40,7 +40,6 @@ replace (
 	github.com/gogo/protobuf v0.0.0-20190410021324-65acae22fc9 => github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
 	github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
 	github.com/hashicorp/consul/api => github.com/hashicorp/consul/api v1.1.0
-	github.com/labstack/echo/v4 v4.1.11 => github.com/labstack/echo/v4 v4.1.6
 	github.com/lucas-clemente/quic-go => github.com/lucas-clemente/quic-go v0.12.0
 	github.com/marten-seemann/qtls => github.com/marten-seemann/qtls v0.3.2
 	golang.org/x/sys => golang.org/x/sys v0.0.0-20190927073244-c990c680b611

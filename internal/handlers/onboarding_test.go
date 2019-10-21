@@ -46,6 +46,7 @@ func (suite *OnboardingTestSuite) SetupTest() {
 	user := &common.AuthUser{
 		Id:    "ffffffffffffffffffffffff",
 		Email: "test@unit.test",
+		MerchantId: "ffffffffffffffffffffffff",
 	}
 
 	var e error
@@ -145,7 +146,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchant_BillingServiceUnava
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -697,7 +698,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerRe
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterMerchantId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
@@ -715,7 +716,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, mock.SomeMerchantId1).
+		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsAgreementDocumentPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
