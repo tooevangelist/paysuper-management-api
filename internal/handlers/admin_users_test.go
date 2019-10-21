@@ -183,23 +183,6 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_Error() {
 	shouldBe.NotEmpty(res.Body.String())
 }
 
-func (suite *AdminUsersTestSuite) TestAdminChangeRole_EmptyBodyError() {
-	shouldBe := require.New(suite.T())
-
-	res, err := suite.caller.Builder().
-		Method(http.MethodPut).
-		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
-		Path(common.SystemUserGroupPath + adminUserRole).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	shouldBe.Error(err)
-	hErr, ok := err.(*echo.HTTPError)
-	shouldBe.True(ok)
-	shouldBe.Equal(http.StatusBadRequest, hErr.Code)
-	shouldBe.NotEmpty(res.Body.String())
-}
-
 func (suite *AdminUsersTestSuite) TestAdminChangeRole_Ok() {
 	shouldBe := require.New(suite.T())
 

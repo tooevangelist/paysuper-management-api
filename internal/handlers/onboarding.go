@@ -115,13 +115,9 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 }
 
 func (h *OnboardingRoute) getMerchant(ctx echo.Context) error {
-	id := ctx.Param(common.RequestParameterId)
+	req := &grpc.GetMerchantByRequest{}
+	err := ctx.Bind(req)
 
-	if id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIdIsEmpty)
-	}
-
-	req := &grpc.GetMerchantByRequest{MerchantId: id}
 	res, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), req)
 
 	if err != nil {
