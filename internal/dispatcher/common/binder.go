@@ -557,7 +557,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		return ErrorRequestParamsIncorrect
 	}
 
-	projectId := ctx.Param(RequestParameterId)
+	projectId := ctx.Param(RequestParameterProjectId)
 
 	if projectId == "" || bson.IsObjectIdHex(projectId) == false {
 		return ErrorIncorrectProjectId
