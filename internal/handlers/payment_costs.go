@@ -110,7 +110,7 @@ func (h *PaymentCostRoute) getPaymentChannelCostMerchant(ctx echo.Context) error
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
+	req.MerchantId = ctx.Param(common.RequestParameterMerchantId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -173,7 +173,7 @@ func (h *PaymentCostRoute) getMoneyBackCostMerchant(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
+	req.MerchantId = ctx.Param(common.RequestParameterMerchantId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -223,7 +223,7 @@ func (h *PaymentCostRoute) deletePaymentChannelCostSystem(ctx echo.Context) erro
 // @Example curl -X DELETE -H "Authorization: Bearer %access_token_here%" -H "Content-Type: application/json" \
 // 		https://api.paysuper.online/admin/api/v1/payment_costs/channel/merchant/ffffffffffffffffffffffff
 func (h *PaymentCostRoute) deletePaymentChannelCostMerchant(ctx echo.Context) error {
-	req := &billing.PaymentCostDeleteRequest{Id: ctx.Param(common.RequestParameterId)}
+	req := &billing.PaymentCostDeleteRequest{Id: ctx.Param(common.RequestParameterMerchantId)}
 	err := h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -273,7 +273,7 @@ func (h *PaymentCostRoute) deleteMoneyBackCostSystem(ctx echo.Context) error {
 // @Example curl -X DELETE -H "Authorization: Bearer %access_token_here%" -H "Content-Type: application/json" \
 // 		https://api.paysuper.online/admin/api/v1/payment_costs/money_back/merchant/ffffffffffffffffffffffff
 func (h *PaymentCostRoute) deleteMoneyBackCostMerchant(ctx echo.Context) error {
-	req := &billing.PaymentCostDeleteRequest{Id: ctx.Param(common.RequestParameterId)}
+	req := &billing.PaymentCostDeleteRequest{Id: ctx.Param(common.RequestParameterMerchantId)}
 	err := h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -356,7 +356,7 @@ func (h *PaymentCostRoute) setPaymentChannelCostMerchant(ctx echo.Context) error
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
+	req.MerchantId = ctx.Param(common.RequestParameterMerchantId)
 
 	if ctx.Request().Method == http.MethodPut {
 		req.Id = ctx.Param(common.RequestParameterRateId)
@@ -444,7 +444,7 @@ func (h *PaymentCostRoute) setMoneyBackCostMerchant(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
+	req.MerchantId = ctx.Param(common.RequestParameterMerchantId)
 
 	if ctx.Request().Method == http.MethodPut {
 		req.Id = ctx.Param(common.RequestParameterRateId)
@@ -492,7 +492,7 @@ func (h *PaymentCostRoute) getAllPaymentChannelCostSystem(ctx echo.Context) erro
 // @Example @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' \
 // 		https://api.paysuper.online/admin/api/v1/payment_costs/channel/merchant/ffffffffffffffffffffffff/all
 func (h *PaymentCostRoute) getAllPaymentChannelCostMerchant(ctx echo.Context) error {
-	req := &billing.PaymentChannelCostMerchantListRequest{MerchantId: ctx.Param(common.RequestParameterId)}
+	req := &billing.PaymentChannelCostMerchantListRequest{MerchantId: ctx.Param(common.RequestParameterMerchantId)}
 	err := h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -535,7 +535,7 @@ func (h *PaymentCostRoute) getAllMoneyBackCostSystem(ctx echo.Context) error {
 // @Example @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' \
 // 		https://api.paysuper.online/admin/api/v1/payment_costs/money_back/merchant/ffffffffffffffffffffffff/all
 func (h *PaymentCostRoute) getAllMoneyBackCostMerchant(ctx echo.Context) error {
-	req := &billing.MoneyBackCostMerchantListRequest{MerchantId: ctx.Param(common.RequestParameterId)}
+	req := &billing.MoneyBackCostMerchantListRequest{MerchantId: ctx.Param(common.RequestParameterMerchantId)}
 	err := h.dispatch.Validate.Struct(req)
 
 	if err != nil {
