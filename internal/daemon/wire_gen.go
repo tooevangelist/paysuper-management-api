@@ -182,7 +182,7 @@ func BuildHTTP(ctx context.Context, initial config.Initial, observer invoker.Obs
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcherDispatcher, cleanup15, err := dispatcher.ProviderDispatcher(ctx, awareSet, appSet, dispatcherConfig, commonConfig)
+	dispatcherDispatcher, cleanup15, err := dispatcher.ProviderDispatcher(ctx, awareSet, appSet, dispatcherConfig, commonConfig, microMicro)
 	if err != nil {
 		cleanup14()
 		cleanup13()

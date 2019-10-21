@@ -14,6 +14,7 @@ import (
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/validators"
+	"github.com/paysuper/paysuper-management-api/pkg/micro"
 	"gopkg.in/go-playground/validator.v9"
 	"os"
 )
@@ -80,6 +81,7 @@ func BuildDispatcher(ctx context.Context, settings config.Settings, srv common.S
 			tracing.WireTestSet,
 			wire.Struct(new(provider.AwareSet), "*"),
 			dispatcher.WireTestSet, // Dispatcher | Dependencies: AwareSet, ValidatorSet, Services, Handlers, Configurator
+			micro.WireTestSet,
 		),
 	)
 }

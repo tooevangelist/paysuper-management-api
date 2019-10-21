@@ -8,6 +8,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	casbinMiddleware "github.com/paysuper/echo-casbin-middleware"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"io/ioutil"
 	"net/http"
@@ -105,6 +106,21 @@ func (d *Dispatcher) RawBodyPreMiddleware(next echo.HandlerFunc) echo.HandlerFun
 	}
 }
 
+// RawBodyPreMiddleware
+func (d *Dispatcher) CasbinMiddleware() echo.MiddlewareFunc {
+	cfg := casbinMiddleware.Config{
+		Skipper: middleware.DefaultSkipper,
+		Mode:    casbinMiddleware.EnforceModeEnforcing,
+		Logger:  d.L(),
+		CtxUserExtractor: func(c echo.Context) string {
+			// TODO: change for enforce policy
+			user := common.ExtractUserContext(c)
+			return user.Id
+		},
+	}
+	return casbinMiddleware.MiddlewareWithConfig(d.ms.Client(), cfg)
+}
+
 // BodyDumpMiddleware
 func (d *Dispatcher) BodyDumpMiddleware() echo.MiddlewareFunc {
 	return middleware.BodyDump(func(ctx echo.Context, reqBody, resBody []byte) {
@@ -150,6 +166,7 @@ func (d *Dispatcher) AuthOnePreMiddleware() echo.MiddlewareFunc {
 				user.Id = ui.UserID
 				user.Name = "System User"
 				user.Role = ""
+				// TODO: to get actual MerchantId
 				user.MerchantId = "TODO:MerchantId"
 				common.SetUserContext(c, user)
 			},
