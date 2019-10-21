@@ -114,6 +114,12 @@ func (h *UserProfileRoute) confirmEmail(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
+	err = h.dispatch.Validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
 	res, err := h.dispatch.Services.Billing.ConfirmUserEmail(ctx.Request().Context(), req)
 
 	if err != nil {
