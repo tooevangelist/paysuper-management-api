@@ -3,7 +3,6 @@ package mock
 import (
 	"context"
 	"errors"
-	"github.com/globalsign/mgo/bson"
 	"github.com/micro/go-micro/client"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -268,7 +267,7 @@ func (s *BillingServerSystemErrorMock) GetProject(
 		return &grpc.ChangeProjectResponse{
 			Status: pkg.ResponseStatusOk,
 			Item: &billing.Project{
-				MerchantId:         bson.NewObjectId().Hex(),
+				MerchantId:         "ffffffffffffffffffffffff",
 				Name:               map[string]string{"en": "A", "ru": "А"},
 				CallbackCurrency:   "RUB",
 				CallbackProtocol:   pkg.ProjectCallbackProtocolEmpty,
