@@ -51,6 +51,7 @@ func (suite *ProductTestSuite) TestProduct_getProductsList_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
+		SetQueryParam("limit", "100").
 		Path(common.AuthUserGroupPath + productsPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
