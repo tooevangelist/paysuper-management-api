@@ -80,9 +80,9 @@ func (b *SystemBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 
 type MerchantBinder struct{}
 
-func (b *MerchantBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+func (b *MerchantBinder) Bind(bindInterface interface{}, ctx echo.Context) (err error) {
 
-	rv := reflect.ValueOf(i)
+	rv := reflect.ValueOf(bindInterface)
 
 	if rv.Type().Kind() != reflect.Ptr || rv.IsNil() {
 		return ErrorInternal
