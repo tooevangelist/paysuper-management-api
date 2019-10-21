@@ -122,7 +122,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_InternalError() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
 		Path(common.SystemUserGroupPath + adminUserRole).
 		Init(test.ReqInitJSON()).
 		BodyString(`{"role": "some_role"}`).
@@ -146,7 +146,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_ValidationError() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
 		Path(common.SystemUserGroupPath + adminUserRole).
 		BodyString(`{"no_role": "some_role"}`).
 		Init(test.ReqInitJSON()).
@@ -170,7 +170,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_Error() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
 		Path(common.SystemUserGroupPath + adminUserRole).
 		BodyString(`{"role": "some_role"}`).
 		Init(test.ReqInitJSON()).
@@ -188,7 +188,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_EmptyBodyError() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
 		Path(common.SystemUserGroupPath + adminUserRole).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -210,7 +210,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterRoleId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
 		Path(common.SystemUserGroupPath + adminUserRole).
 		Init(test.ReqInitJSON()).
 		BodyString(`{"role": "some_role"}`).
