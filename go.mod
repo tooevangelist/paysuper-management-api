@@ -20,6 +20,7 @@ require (
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
+	github.com/paysuper/casbin-server v0.0.0-20191017135201-31d8aba0dd57
 	github.com/paysuper/paysuper-aws-manager v0.0.1
 	github.com/paysuper/paysuper-billing-server v0.0.0-20191016101606-08cd89cf6736
 	github.com/paysuper/paysuper-recurring-repository v1.0.124
@@ -33,7 +34,6 @@ require (
 	go.uber.org/automaxprocs v1.2.0
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
-	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 )
 
 replace (
