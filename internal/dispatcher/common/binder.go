@@ -481,7 +481,7 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 		return err
 	}
 
-	merchantId := ctx.Param(RequestParameterId)
+	merchantId := ctx.Param(RequestParameterMerchantId)
 
 	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
 		return ErrorIncorrectMerchantId
