@@ -2854,6 +2854,212 @@ definitions:
           "$ref": "#/definitions/billingRoyaltyReport"
         description: royalty reports
 
+  grpcPaylinksPaginate:
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        title: 'total found paylinks counter'
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/paylinkPaylink"
+        title: 'paylikns'
+
+  paylinkGroupStatCommon:
+    type: object
+    properties:
+      top:
+        type: array
+        items:
+          "$ref": "#/definitions/paylinkStatCommon"
+        description: 'top items of grouping stat data'
+      total:
+        "$ref": "#/definitions/paylinkStatCommon"
+        description: 'overall results of grouping stat data'
+
+  paylinkPaylink:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 'paylink id'
+      object:
+        type: string
+        description: 'object type'
+      products:
+        type: array
+        items:
+          type: string
+        description: 'list of products included to paylink'
+      expires_at:
+        type: string
+        format: date-time
+        description: 'expiration date'
+      created_at:
+        type: string
+        format: date-time
+        description: 'creation date'
+      updated_at:
+        type: string
+        format: date-time
+        description: 'last updation date'
+      merchant_id:
+        type: string
+        description: 'paylink merchant id"'
+      project_id:
+        type: string
+        description: 'paylink project id"'
+      name:
+        type: string
+        description: 'paylink name'
+      is_expired:
+        type: boolean
+        format: boolean
+        description: 'is expired flag'
+      visits:
+        type: integer
+        format: int32
+        description: 'total visits count'
+      no_expiry_date:
+        type: boolean
+        format: boolean
+        description: 'no expiry date flag'
+      products_type:
+        type: string
+        description: 'products type'
+      total_transactions:
+        type: integer
+        format: int32
+        description: 'total transactions count'
+      sales_count:
+        type: integer
+        format: int32
+        description: 'sales count'
+      returns_count:
+        type: integer
+        format: int32
+        description: 'returns count'
+      conversion:
+        type: number
+        format: double
+        description: 'conversion (sales per visits relation)'
+      gross_sales_amount:
+        type: number
+        format: double
+        description: 'gross sales amount'
+      gross_returns_amount:
+        type: number
+        format: double
+        description: 'gross returns amount'
+      gross_total_amount:
+        type: number
+        format: double
+        description: 'gross total amount'
+      transactions_currency:
+        type: string
+        description: 'transactions currency ISO code'
+
+  paylinkStatCommon:
+    type: object
+    properties:
+      paylink_id:
+        type: string
+        description: 'paylink id'
+      visits:
+        type: integer
+        format: int32
+        description: 'total visits count'
+      total_transactions:
+        type: integer
+        format: int32
+        description: 'total transactions count'
+      sales_count:
+        type: integer
+        format: int32
+        description: 'sales count'
+      returns_count:
+        type: integer
+        format: int32
+        description: 'returns count'
+      gross_sales_amount:
+        type: number
+        format: double
+        description: 'gross sales amount'
+      gross_returns_amount:
+        type: number
+        format: double
+        description: 'gross returns amount'
+      gross_total_amount:
+        type: number
+        format: double
+        description: 'gross total amount'
+      transactions_currency:
+        type: string
+        description: 'transactions currency ISO code'
+      conversion:
+        type: number
+        format: double
+        description: 'conversion, optional'
+      country_code:
+        type: string
+        description: 'country iso code A2, optional'
+      date:
+        type: string
+        description: 'date yyyy-mm-dd, optional'
+      referrer_host:
+        type: string
+        description: 'referrer host value, optional'
+      utm:
+        "$ref": "#/definitions/paylinkUtm"
+        description: 'utm stat values, optional'
+
+  paylinkUtm:
+    type: object
+    properties:
+      utm_source:
+        type: string
+        description: 'utm_source value'
+      utm_medium:
+        type: string
+        description: 'utm_medium value'
+      utm_campaign:
+        type: string
+        description: 'utm_campaign value'
+
+  createPaylinkRequest:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 'paylink id, optional'
+      products:
+        type: array
+        items:
+          type: string
+        description: 'list of products included to paylink'
+      expires_at:
+        type: string
+        format: date-time
+        description: 'expiration date'
+      merchant_id:
+        type: string
+        description: 'paylink merchant id"'
+      project_id:
+        type: string
+        description: 'paylink project id"'
+      name:
+        type: string
+        description: 'paylink name'
+      no_expiry_date:
+        type: boolean
+        format: boolean
+        description: 'no expiry date flag'
+      products_type:
+        type: string
+        description: 'products type'
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -7912,6 +8118,552 @@ paths:
             $ref: '#/definitions/model.Error'
         "403":
           description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/paylinks":
+    get:
+      summary: Get a list of payment links for current authenticated merchant
+      tags:
+        - Payment links
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get a list of payment links for current authenticated merchant
+      parameters:
+        - description: maximum number of returning orders. default value is 100
+          in: query
+          name: limit
+          type: integer
+        - description: offset from which you want to return the list of orders. default value is 0
+          in: query
+          name: offset
+          type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/grpcPaylinksPaginate'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    post:
+      consumes:
+        - application/json
+      summary: Create payment link with json request
+      description: Create payment link use POST JSON request
+      tags:
+        - Payment links
+      parameters:
+        - description: Payment link create data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/createPaylinkRequest'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Object which contain created payment link
+          schema:
+            $ref: '#/definitions/paylinkPaylink'
+        "400":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/paylinks/project/{id}":
+    get:
+      summary: Get a list of payment links for current authenticated merchant, filtered by project
+      tags:
+        - Payment links
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get a list of payment links for current authenticated merchant, filtered by project
+      parameters:
+        - description: Project identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: maximum number of returning orders. default value is 100
+          in: query
+          name: limit
+          type: integer
+        - description: offset from which you want to return the list of orders. default value is 0
+          in: query
+          name: offset
+          type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/grpcPaylinksPaginate'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/paylinks/{id}":
+    get:
+      summary: Get a payment link by id for current authenticated merchant
+      tags:
+        - Payment links
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get a payment link by id for current authenticated merchant
+      parameters:
+        - description: Payment link identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/paylinkPaylink'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      consumes:
+        - application/json
+      summary: Create payment link with json request
+      description: Create payment link use POST JSON request
+      tags:
+        - Payment links
+      parameters:
+        - description: Payment link identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: Payment link create data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/createPaylinkRequest'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Object which contain created payment link
+          schema:
+            $ref: '#/definitions/paylinkPaylink'
+        "400":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    delete:
+      summary: Delete a payment link by id for current authenticated merchant
+      tags:
+        - Payment links
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete a payment link by id for current authenticated merchant
+      parameters:
+        - description: Payment link identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+
+
+  "/admin/api/v1/paylinks/{id}/url":
+    get:
+      summary: Get a payment link url by id for current authenticated merchant
+      tags:
+        - Payment links
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get a payment link url by id for current authenticated merchant
+      parameters:
+        - description: Payment link identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              url:
+                type: string
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/paylinks/{id}/summary":
+    get:
+      summary: Get summary stat for a payment link by id for current authenticated merchant
+      tags:
+        - Payment links
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get summary stat for a payment link by id for current authenticated merchant
+      parameters:
+        - description: Payment link identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: period start date in unix timestamp format
+          in: query
+          name: period_from
+          type: number
+          required: false
+        - description: period end date in unix timestamp format
+          in: query
+          name: period_to
+          type: number
+          required: false
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/paylinkStatCommon'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+
+  "/admin/api/v1/paylinks/{id}/by/country":
+    get:
+      summary: Get a grouping stat by country for a payment link by its id for current authenticated merchant
+      tags:
+        - Payment links
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get a grouping stat by country for a payment link by its id for current authenticated merchant
+      parameters:
+        - description: Payment link identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: period start date in unix timestamp format
+          in: query
+          name: period_from
+          type: number
+          required: false
+        - description: period end date in unix timestamp format
+          in: query
+          name: period_to
+          type: number
+          required: false
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/paylinkGroupStatCommon'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/paylinks/{id}/by/referrer":
+    get:
+      summary: Get a grouping stat by referrer for a payment link by its id for current authenticated merchant
+      tags:
+        - Payment links
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get a grouping stat by referrer for a payment link by its id for current authenticated merchant
+      parameters:
+        - description: Payment link identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: period start date in unix timestamp format
+          in: query
+          name: period_from
+          type: number
+          required: false
+        - description: period end date in unix timestamp format
+          in: query
+          name: period_to
+          type: number
+          required: false
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/paylinkGroupStatCommon'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+
+  "/admin/api/v1/paylinks/{id}/by/date":
+    get:
+      summary: Get a grouping stat by date for a payment link by its id for current authenticated merchant
+      tags:
+        - Payment links
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get a grouping stat by date for a payment link by its id for current authenticated merchant
+      parameters:
+        - description: Payment link identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: period start date in unix timestamp format
+          in: query
+          name: period_from
+          type: number
+          required: false
+        - description: period end date in unix timestamp format
+          in: query
+          name: period_to
+          type: number
+          required: false
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/paylinkGroupStatCommon'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/paylinks/{id}/by/utm":
+    get:
+      summary: Get a grouping stat by utm for a payment link by its id for current authenticated merchant
+      tags:
+        - Payment links
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Get a grouping stat by utm for a payment link by its id for current authenticated merchant
+      parameters:
+        - description: Payment link identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: period start date in unix timestamp format
+          in: query
+          name: period_from
+          type: number
+          required: false
+        - description: period end date in unix timestamp format
+          in: query
+          name: period_to
+          type: number
+          required: false
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/paylinkGroupStatCommon'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
           schema:
             $ref: '#/definitions/model.Error'
         "500":
