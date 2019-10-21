@@ -48,6 +48,11 @@ func (h *ProjectRoute) createProject(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
+	authUser := common.ExtractUserContext(ctx)
+	if req.MerchantId != authUser.MerchantId {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectMerchantId)
+	}
+
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
@@ -72,6 +77,11 @@ func (h *ProjectRoute) updateProject(ctx echo.Context) error {
 
 	if err := binder.Bind(req, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	authUser := common.ExtractUserContext(ctx)
+	if req.MerchantId != authUser.MerchantId {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectMerchantId)
 	}
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {

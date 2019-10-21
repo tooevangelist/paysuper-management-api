@@ -435,7 +435,7 @@ func (s *BillingServerOkMock) GetProject(
 	return &grpc.ChangeProjectResponse{
 		Status: pkg.ResponseStatusOk,
 		Item: &billing.Project{
-			MerchantId:         bson.NewObjectId().Hex(),
+			MerchantId:         "ffffffffffffffffffffffff",
 			Name:               map[string]string{"en": "A", "ru": "А"},
 			CallbackCurrency:   "RUB",
 			CallbackProtocol:   pkg.ProjectCallbackProtocolEmpty,
