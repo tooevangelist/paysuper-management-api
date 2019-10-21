@@ -64,7 +64,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_ValidationErro
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, "qwerty").
-		Path(common.AuthUserGroupPath + userProfilePathId).
+		Path(common.SystemUserGroupPath + userProfilePathId).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -361,10 +361,14 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_Ok() {
 	assert.NoError(suite.T(), err)
 }
 
-func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_EmptyToken_Error() {
+
+func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BadData_Error() {
+	body := `<"token": "">`
+
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
 		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		BodyString(body).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -374,6 +378,23 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_EmptyToken_Error
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
+}
+
+func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_EmptyToken_Error() {
+	body := `{"token": ""}`
+
+	_, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		BodyString(body).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerSystemError() {
