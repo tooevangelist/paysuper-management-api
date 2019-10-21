@@ -3027,10 +3027,10 @@ definitions:
   ResendInviteAdmin:
     type: object
     properties:
-      roleId:
+      email:
         type: string
-        example: "507f1f77bcf86cd799439011"
-        description: "Role of invite identifier"
+        example: "test@paysuper.com"
+        description: "Email of invite"
 
   EmptyResponseWithStatus:
     type: object
@@ -3119,10 +3119,10 @@ definitions:
   ResendInviteMerchant:
     type: object
     properties:
-      roleId:
+      email:
         type: string
-        example: "507f1f77bcf86cd799439011"
-        description: "Role of invite identifier"
+        example: "test@paysuper.com"
+        description: "Email of invite identifier"
 
   UserRole:
     type: object
@@ -3197,10 +3197,10 @@ definitions:
   UpdateUserRoleRequest:
     type: object
     properties:
-      role:
+      email:
         type: string
-        example: "owner"
-        description: "Role identity"
+        example: "test@paysuper.com"
+        description: "User identity"
 
   MerchantsForUserResponse:
     type: object
@@ -8360,7 +8360,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/{role_id}/resend":
+  "/admin/api/v1/users/resend":
     post:
       summary: Resend invitation for admin user
       tags:
@@ -8371,11 +8371,6 @@ paths:
         - application/json
       description: Resend invitation to add user as administrator
       parameters:
-        - description: User role identifier
-          in: path
-          name: role_id
-          required: true
-          type: string
         - description: JSON request body
           in: body
           name: body
@@ -8431,20 +8426,20 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/{role_id}/role":
+  "/admin/api/v1/users/{user_id}/role":
     delete:
       summary: Delete admin user
       tags:
-        - Merchant user roles
+        - Admin user roles
       consumes:
         - application/json
       produces:
         - application/json
       description: Delete admin user
       parameters:
-        - description: User role identifier
+        - description: User identifier
           in: path
-          name: role_id
+          name: user_id
           required: true
           type: string
       responses:
@@ -8478,9 +8473,9 @@ paths:
         - application/json
       description: Update admin user role
       parameters:
-        - description: User role identifier
+        - description: User identifier
           in: path
-          name: role_id
+          name: user_id
           required: true
           type: string
         - description: JSON request body
@@ -8548,7 +8543,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/users/{role_id}/resend":
+  "/admin/api/v1/merchants/users/resend":
     post:
       summary: Resend invitation for merchant user
       tags:
@@ -8559,11 +8554,6 @@ paths:
         - application/json
       description: Resend invitation to add user as merchant user
       parameters:
-        - description: User role identifier
-          in: path
-          name: role_id
-          required: true
-          type: string
         - description: JSON request body
           in: body
           name: body
@@ -8623,7 +8613,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/users/{role_id}/role":
+  "/admin/api/v1/merchants/users/{user_id}/role":
     delete:
       summary: Delete merchant user
       tags:
@@ -8634,9 +8624,9 @@ paths:
         - application/json
       description: Delete merchant user
       parameters:
-        - description: User role identifier
+        - description: User identifier
           in: path
-          name: role_id
+          name: user_id
           required: true
           type: string
       responses:
@@ -8670,14 +8660,9 @@ paths:
         - application/json
       description: Update merchant user role
       parameters:
-        - description: Merchant identifier
+        - description: User identifier
           in: path
-          name: merchant_id
-          required: true
-          type: string
-        - description: User role identifier
-          in: path
-          name: role_id
+          name: user_id
           required: true
           type: string
         - description: JSON request body

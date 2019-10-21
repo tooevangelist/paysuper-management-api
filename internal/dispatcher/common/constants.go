@@ -70,7 +70,6 @@ const (
 	RequestParameterZipUsa                   = "zip_usa"
 	RequestParameterRateId                   = "rate_id"
 	RequestParameterReceiptId                = "receipt_id"
-	RequestParameterRoleId                   = "role_id"
 	RequestParameterReportId                 = "report_id"
 	RequestProductId                         = "product_id"
 
