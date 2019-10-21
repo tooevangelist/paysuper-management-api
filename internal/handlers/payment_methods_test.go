@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	billingMocks "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -11,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"gopkg.in/mgo.v2/bson"
 	"net/http"
 	"testing"
 )
@@ -33,8 +33,8 @@ func (suite *PaymentMethodTestSuite) SetupTest() {
 		Billing: mock.NewBillingServerOkMock(),
 	}
 	user := &common.AuthUser{
-		Id:    "ffffffffffffffffffffffff",
-		Email: "test@unit.test",
+		Id:         "ffffffffffffffffffffffff",
+		Email:      "test@unit.test",
 		MerchantId: "ffffffffffffffffffffffff",
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
