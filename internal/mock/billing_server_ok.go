@@ -101,6 +101,8 @@ func (s *BillingServerOkMock) GetMerchantBy(
 ) (*grpc.GetMerchantResponse, error) {
 	if in.MerchantId == OnboardingMerchantMock.Id {
 		OnboardingMerchantMock.S3AgreementName = SomeAgreementName
+	} else if in.MerchantId == "ffffffffffffffffffffffff" {
+		OnboardingMerchantMock.S3AgreementName = SomeAgreementName1
 	} else {
 		if in.MerchantId == SomeMerchantId1 {
 			OnboardingMerchantMock.S3AgreementName = SomeAgreementName1
