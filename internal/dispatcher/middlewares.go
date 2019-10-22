@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	casbinMiddleware "github.com/paysuper/echo-casbin-middleware"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"io/ioutil"
 	"net/http"
@@ -107,15 +108,12 @@ func (d *Dispatcher) RawBodyPreMiddleware(next echo.HandlerFunc) echo.HandlerFun
 }
 
 // RawBodyPreMiddleware
-func (d *Dispatcher) CasbinMiddleware() echo.MiddlewareFunc {
+func (d *Dispatcher) CasbinMiddleware(fn func(c echo.Context) string) echo.MiddlewareFunc {
 	cfg := casbinMiddleware.Config{
-		Skipper: middleware.DefaultSkipper,
-		Mode:    casbinMiddleware.EnforceModeEnforcing,
-		Logger:  d.L(),
-		CtxUserExtractor: func(c echo.Context) string {
-			user := common.ExtractUserContext(c)
-			return user.Id
-		},
+		Skipper:          middleware.DefaultSkipper,
+		Mode:             casbinMiddleware.EnforceModeEnforcing,
+		Logger:           d.L(),
+		CtxUserExtractor: fn,
 	}
 	return casbinMiddleware.MiddlewareWithConfig(d.ms.Client(), cfg)
 }
@@ -155,8 +153,42 @@ func (d *Dispatcher) SystemBinderPreMiddleware(next echo.HandlerFunc) echo.Handl
 	}
 }
 
-// AuthOnePreMiddleware
-func (d *Dispatcher) AuthOnePreMiddleware() echo.MiddlewareFunc {
+// AuthOneMerchantPreMiddleware
+func (d *Dispatcher) AuthOneMerchantPreMiddleware() echo.MiddlewareFunc {
+	return common.ContextWrapperCallback(func(c echo.Context, next echo.HandlerFunc) error {
+		handleFn := jwtMiddleware.AuthOneJwtCallableWithConfig(
+			d.appSet.JwtVerifier,
+			func(ui *jwtverifier.UserInfo) {
+				user := common.ExtractUserContext(c)
+				user.Id = ui.UserID
+				user.Name = "Merchant User"
+
+				res, err := d.appSet.Services.Billing.GetMerchantsForUser(
+					c.Request().Context(),
+					&grpc.GetMerchantsForUserRequest{UserId: user.Id},
+				)
+
+				if err != nil {
+					d.L().Error(c.Path(), logger.Args(err.Error()), logger.Stack("stacktrace"))
+					return
+				}
+
+				if len(res.Merchants) < 1 {
+					d.L().Error(c.Path(), logger.Args("user_id", user.Id))
+					return
+				}
+
+				user.Role = res.Merchants[0].Role
+				user.MerchantId = res.Merchants[0].Id
+				common.SetUserContext(c, user)
+			},
+		)(next)
+		return handleFn(c)
+	})
+}
+
+// AuthOnAdminPreMiddleware
+func (d *Dispatcher) AuthOnAdminPreMiddleware() echo.MiddlewareFunc {
 	return common.ContextWrapperCallback(func(c echo.Context, next echo.HandlerFunc) error {
 		handleFn := jwtMiddleware.AuthOneJwtCallableWithConfig(
 			d.appSet.JwtVerifier,
@@ -164,8 +196,6 @@ func (d *Dispatcher) AuthOnePreMiddleware() echo.MiddlewareFunc {
 				user := common.ExtractUserContext(c)
 				user.Id = ui.UserID
 				user.Name = "System User"
-				user.Role = ""
-				user.MerchantId = "TODO:MerchantId"
 				common.SetUserContext(c, user)
 			},
 		)(next)
