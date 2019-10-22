@@ -3063,6 +3063,99 @@ definitions:
         type: string
         description: 'products type'
 
+  billingVatReport:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 'vat report id'
+      country:
+        type: string
+        description: 'country ISO A2 code'
+      vat_rate:
+        type: number
+        format: double
+        description: 'rate value of VAT'
+      currency:
+        type: string
+        description: 'vat currency ISO code'
+      transactions_count:
+        type: integer
+        format: int32
+        description: 'total transactions count in period'
+      gross_revenue:
+        type: number
+        format: double
+        description: 'gross revenue amount in period'
+      vat_amount:
+        type: number
+        format: double
+        description: 'vat amount in period'
+      fees_amount:
+        type: number
+        format: double
+        description: 'fees amount in period'
+      deduction_amount:
+        type: number
+        format: double
+        description: 'deduction amount in period'
+      correction_amount:
+        type: number
+        format: double
+        description: 'manual correction amount in period'
+      status:
+        type: string
+        description: 'status'
+      country_annual_turnover:
+        type: number
+        format: double
+        description: 'annual turnover for country'
+      world_annual_turnover:
+        type: number
+        format: double
+        description: 'world annual turnover'
+      amounts_approximate:
+        type: boolean
+        format: boolean
+        description: 'flag of non-final amounts due to currency exchange rates delay'
+      date_from:
+        type: string
+        format: date-time
+        description: 'period start date'
+      date_to:
+        type: string
+        format: date-time
+        description: 'period end date'
+      pay_until_date:
+        type: string
+        format: date-time
+        description: 'VAT payment deadline date'
+      created_at:
+        type: string
+        format: date-time
+        description: 'report creation date'
+      updated_at:
+        type: string
+        format: date-time
+        description: 'report last update date'
+      paid_at:
+        type: string
+        format: date-time
+        description: 'date of payment'
+
+  grpcVatReportsPaginate:
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        description: 'total reports count'
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/billingVatReport"
+        description: 'reports'
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -8653,6 +8746,174 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/paylinkGroupStatCommon'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/vat_reports":
+    get:
+      summary: Get a VAT reports dashboard
+      tags:
+        - VAT Reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:   Get a VAT reports dashboard
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/grpcVatReportsPaginate'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/vat_reports/country/{country}":
+    get:
+      summary: Get a VAT reports list by country
+      tags:
+        - VAT Reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:   Get a VAT reports list by country
+      parameters:
+        - description: country code ISO A2
+          in: path
+          name: country
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/grpcVatReportsPaginate'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/vat_reports/details/{id}":
+    get:
+      summary: Get a VAT report transaction
+      tags:
+        - VAT Reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get a VAT report transaction
+      parameters:
+        - description: VAT report id
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/order.list.public'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/vat_reports/status/{id}":
+    post:
+      summary: Change a VAT report status
+      tags:
+        - VAT Reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Change a VAT report status
+      parameters:
+        - description: VAT report id
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: status
+          in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+      responses:
+        "204":
+          description: OK
         "400":
           description: Invalid request data
           schema:
