@@ -24,13 +24,13 @@ func Test_Paylink(t *testing.T) {
 func (suite *PaylinkTestSuite) SetupTest() {
 	user := &common.AuthUser{
 		Id: "ffffffffffffffffffffffff",
+		MerchantId: "ffffffffffffffffffffffff",
 	}
 
 	var e error
 	settings := test.DefaultSettings()
 	srv := common.Services{
 		Billing: mock.NewBillingServerOkMock(),
-		PayLink: mock.NewPaymentLinkOkMock(),
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
 		mw.Pre(test.PreAuthUserMiddleware(user))
@@ -60,42 +60,12 @@ func (suite *PaylinkTestSuite) TestPaylink_getPaylinksList_Merchant_Ok() {
 	}
 }
 
-func (suite *PaylinkTestSuite) TestPaylink_getPaylinksList_Ok() {
-
-	res, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":project_id", bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paylinksProjectIdPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	if assert.NoError(suite.T(), err) {
-		assert.Equal(suite.T(), http.StatusOK, res.Code)
-		assert.NotEmpty(suite.T(), res.Body.String())
-	}
-}
-
 func (suite *PaylinkTestSuite) TestPaylink_getPaylink_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + paylinksIdPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	if assert.NoError(suite.T(), err) {
-		assert.Equal(suite.T(), http.StatusOK, res.Code)
-		assert.NotEmpty(suite.T(), res.Body.String())
-	}
-}
-
-func (suite *PaylinkTestSuite) TestPaylink_getPaylinkStat_Ok() {
-
-	res, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paylinksStartPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -163,6 +133,81 @@ func (suite *PaylinkTestSuite) TestPaylink_updatePaylink_Ok() {
 		Path(common.AuthUserGroupPath + paylinksIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
+		Exec(suite.T())
+
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusOK, res.Code)
+		assert.NotEmpty(suite.T(), res.Body.String())
+	}
+}
+
+func (suite *PaylinkTestSuite) TestPaylink_getPaylinkStatSummary_Ok() {
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + paylinksIdStatSummaryPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusOK, res.Code)
+		assert.NotEmpty(suite.T(), res.Body.String())
+	}
+}
+
+func (suite *PaylinkTestSuite) TestPaylink_getPaylinkStatByCountry_Ok() {
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + paylinksIdStatCountryPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusOK, res.Code)
+		assert.NotEmpty(suite.T(), res.Body.String())
+	}
+}
+
+func (suite *PaylinkTestSuite) TestPaylink_getPaylinkStatByReferrer_Ok() {
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + paylinksIdStatReferrerPath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusOK, res.Code)
+		assert.NotEmpty(suite.T(), res.Body.String())
+	}
+}
+
+func (suite *PaylinkTestSuite) TestPaylink_getPaylinkStatByDate_Ok() {
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + paylinksIdStatDatePath).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	if assert.NoError(suite.T(), err) {
+		assert.Equal(suite.T(), http.StatusOK, res.Code)
+		assert.NotEmpty(suite.T(), res.Body.String())
+	}
+}
+
+func (suite *PaylinkTestSuite) TestPaylink_getPaylinkStatByUtm_Ok() {
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + paylinksIdStatUtmPath).
+		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
 	if assert.NoError(suite.T(), err) {

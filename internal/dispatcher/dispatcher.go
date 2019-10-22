@@ -7,13 +7,17 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	"github.com/alexeyco/simpletable"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/pkg/micro"
 	"html/template"
+	"io/ioutil"
 	"net/http"
+	"sort"
+	"strings"
 )
 
 // Dispatcher
@@ -69,7 +73,56 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	for _, handler := range d.appSet.Handlers {
 		handler.Route(grp)
 	}
+	if d.cfg.PathRouteDump != "" {
+		d.dumpRoutesToFile(echoHttp)
+	}
 	return nil
+}
+
+func (d *Dispatcher) dumpRoutesToFile(echoHttp *echo.Echo) {
+
+	var list []string
+
+	strRepl := strings.NewReplacer("github.com/paysuper/paysuper-management-api/internal/handlers.", "", "-fm", "")
+	rts := echoHttp.Routes()
+
+	for _, r := range rts {
+		if strings.Contains(r.Name, "v4.glob..func1") {
+			continue
+		}
+		list = append(list, r.Path+" "+r.Method+" "+strRepl.Replace(r.Name))
+	}
+
+	sort.Strings(list)
+
+	table := simpletable.New()
+
+	table.Header = &simpletable.Header{
+		Cells: []*simpletable.Cell{
+			{Align: simpletable.AlignCenter, Text: "Path"},
+			{Align: simpletable.AlignCenter, Text: "Method"},
+			{Align: simpletable.AlignCenter, Text: "Handler"},
+		},
+	}
+
+	for _, sl := range list {
+		row := strings.Split(sl, " ")
+		r := []*simpletable.Cell{
+			{Align: simpletable.AlignLeft, Text: row[0]},
+			{Align: simpletable.AlignLeft, Text: row[1]},
+			{Align: simpletable.AlignLeft, Text: row[2]},
+		}
+		table.Body.Cells = append(table.Body.Cells, r)
+	}
+
+	table.SetStyle(simpletable.StyleUnicode)
+
+	if e := ioutil.WriteFile(d.cfg.PathRouteDump, []byte(table.String()), 0777); e != nil {
+		d.L().Error("routes dump can't save to %v, err %v", logger.Args(d.cfg.PathRouteDump, e.Error()))
+		return
+	}
+
+	d.L().Info("routes dump successfully saved to %v", logger.Args(d.cfg.PathRouteDump))
 }
 
 func (d *Dispatcher) commonRoutes(echoHttp *echo.Echo) {
@@ -123,9 +176,10 @@ func (d *Dispatcher) webHookGroup(grp *echo.Group) {
 
 // Config
 type Config struct {
-	Debug   bool `fallback:"shared.debug"`
-	WorkDir string
-	invoker *invoker.Invoker
+	Debug         bool `fallback:"shared.debug"`
+	WorkDir       string
+	PathRouteDump string
+	invoker       *invoker.Invoker
 }
 
 // OnReload

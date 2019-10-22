@@ -21,11 +21,11 @@ require (
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
+	github.com/mongodb/mongo-go-driver v0.3.0 // indirect
 	github.com/paysuper/casbin-server v0.0.0-20191021200344-f8e360aaf04d
 	github.com/paysuper/echo-casbin-middleware v0.0.0-20191021231103-f3d820b11545
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191022114416-972377949ab7
-	github.com/paysuper/paysuper-payment-link v0.0.0-20191014102956-21b508fc9e9c
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191022110105-d032b271be10
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-reporter v0.0.0-20191021130041-24bff0252418
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122

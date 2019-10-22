@@ -44,7 +44,6 @@ func (suite *OrderTestSuite) SetupTest() {
 	settings := test.DefaultSettings()
 	srv := common.Services{
 		Billing: mock.NewBillingServerOkMock(),
-		PayLink: mock.NewPaymentLinkOkMock(),
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
 		mw.Pre(test.PreAuthUserMiddleware(user))

@@ -2191,13 +2191,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_Ok() {
 	q := make(url.Values)
-	q.Set("region", "north_america")
-	q.Set("payout_currency", "USD")
-	q.Set("amount_from", "0.75")
-	q.Set("amount_to", "5")
+	q.Set("region", "russia_and_cis")
 	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantTariffRatesResponse{Status: pkg.ResponseStatusOk, Item: &billing.MerchantTariffRates{}}, nil)
+		Return(&grpc.GetMerchantTariffRatesResponse{Status: pkg.ResponseStatusOk, Items: &grpc.GetMerchantTariffRatesResponseItems{}}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 
 	res, err := suite.caller.Builder().
@@ -2214,9 +2211,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_Ok() {
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BindError() {
 	q := make(url.Values)
-	q.Set("region", "North America")
-	q.Set("payout_currency", "USD")
-	q.Set("amount_from", "qwerty")
+	q.Set("region", "russia_and_cis")
+	q.Set("min_amount", "qwerty")
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
@@ -2256,33 +2252,9 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_ValidateError() 
 	assert.Regexp(suite.T(), "Region", msg.Details)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_ValidateAmountRangeError() {
-	q := make(url.Values)
-	q.Set("region", "cis")
-	q.Set("payout_currency", "USD")
-	q.Set("amount_to", "2")
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		SetQueryParams(q).
-		Path(common.AuthUserGroupPath + merchantsTariffsPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-
-	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
-	assert.True(suite.T(), ok)
-	assert.Regexp(suite.T(), "AmountFrom", msg.Details)
-}
-
 func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerError() {
 	q := make(url.Values)
-	q.Set("region", "north_america")
+	q.Set("region", "russia_and_cis")
 	q.Set("payout_currency", "USD")
 	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
@@ -2305,8 +2277,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerErr
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerResultError() {
 	q := make(url.Values)
-	q.Set("region", "north_america")
-	q.Set("payout_currency", "USD")
+	q.Set("region", "russia_and_cis")
 	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantTariffRatesResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
@@ -2328,10 +2299,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerRes
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_Ok() {
-	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": 10, "amount_to": 1000}`
+	body := `{"home_region": "russia_and_cis"}`
 
 	billingService := &billMock.BillingService{}
-	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything).
+	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(&grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 
@@ -2349,7 +2320,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_Ok() {
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BindError() {
-	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": "qwerty"}`
+	body := `{"home_region": 2222}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
@@ -2368,7 +2339,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BindError() {
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_ValidationError() {
-	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": -100}`
+	body := `{"home_region": "north_america"}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
@@ -2386,14 +2357,14 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_ValidationError(
 
 	msg, ok := httpErr.Message.(*grpc.ResponseErrorMessage)
 	assert.True(suite.T(), ok)
-	assert.Regexp(suite.T(), "AmountFrom", msg.Details)
+	assert.Regexp(suite.T(), "HomeRegion", msg.Details)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerError() {
-	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
+	body := `{"home_region": "russia_and_cis"}`
 
 	billingService := &billMock.BillingService{}
-	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything).
+	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(nil, errors.New("some error"))
 	suite.router.dispatch.Services.Billing = billingService
 
@@ -2414,10 +2385,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerErr
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerResultError() {
-	body := `{"region": "north_america", "payout_currency": "USD", "amount_from": 100, "amount_to": 10000}`
+	body := `{"home_region": "russia_and_cis"}`
 
 	billingService := &billMock.BillingService{}
-	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything).
+	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(&grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 

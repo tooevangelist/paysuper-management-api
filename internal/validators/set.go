@@ -5,6 +5,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/google/uuid"
+	billPkg "github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
@@ -120,27 +121,6 @@ func (v *ValidatorSet) CompanyValidator(sl validator.StructLevel) {
 	}
 }
 
-// MerchantTariffRatesValidator
-func (v *ValidatorSet) MerchantTariffRatesValidator(sl validator.StructLevel) {
-	tariff := sl.Current().Interface().(grpc.GetMerchantTariffRatesRequest)
-
-	if tariff.AmountFrom <= 0 && tariff.AmountTo <= 0 {
-		return
-	}
-
-	res := v.RangeFloatValidator(
-		&billing.PriceTableCurrency{
-			From: tariff.AmountFrom,
-			To:   tariff.AmountTo,
-		},
-		availableTariffPaymentAmountRange,
-	)
-
-	if res == false {
-		sl.ReportError(tariff.AmountFrom, "AmountFrom", "amount_from", "amount_from", "")
-	}
-}
-
 // RangeIntValidator
 func (v *ValidatorSet) RangeIntValidator(in *billing.RangeInt, rng []*billing.RangeInt) bool {
 	for _, v := range rng {
@@ -201,8 +181,14 @@ func (v *ValidatorSet) WorldRegionValidator(fl validator.FieldLevel) bool {
 	return ok
 }
 
+// TariffRegionValidator
+func (v *ValidatorSet) TariffRegionValidator(fl validator.FieldLevel) bool {
+	_, ok := billPkg.HomeRegions[fl.Field().String()]
+	return ok
+}
+
 // New
 func New(services common.Services, set provider.AwareSet) *ValidatorSet {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": Prefix})
-	return &ValidatorSet{services: services, LMT: &set,}
+	return &ValidatorSet{services: services, LMT: &set}
 }
