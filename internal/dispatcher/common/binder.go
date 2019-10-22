@@ -12,7 +12,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"io/ioutil"
 	"reflect"
 	"strconv"
@@ -175,12 +174,6 @@ type OnboardingMerchantListingBinder struct {
 type OnboardingNotificationsListBinder struct {
 	LimitDefault, OffsetDefault int32
 }
-type PaylinksListBinder struct {
-	LimitDefault, OffsetDefault int32
-}
-type PaylinksUrlBinder struct{}
-type PaylinksCreateBinder struct{}
-type PaylinksUpdateBinder struct{}
 type ProductsCreateProductBinder struct{}
 type ProductsUpdateProductBinder struct{}
 
@@ -447,6 +440,67 @@ func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
 
 	structure := i.(*paylink.CreatePaylinkRequest)
 	structure.Id = id
+
+	return nil
+}
+
+// Bind
+	structure := i.(*grpc.MerchantPaymentMethodRequest)
+	merchantId := ctx.Param(RequestParameterMerchantId)
+	methodId := ctx.Param(RequestParameterPaymentMethodId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return ErrorIncorrectMerchantId
+	}
+
+	if methodId == "" || bson.IsObjectIdHex(methodId) == false ||
+		structure.PaymentMethod.Id != methodId {
+		return ErrorIncorrectPaymentMethodId
+	}
+
+	structure.MerchantId = merchantId
+
+	return nil
+}
+
+// Bind
+func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(RequestParameterId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return ErrorIncorrectMerchantId
+	}
+
+	structure := i.(*grpc.MerchantChangeStatusRequest)
+	structure.MerchantId = merchantId
+
+	return nil
+}
+
+// Bind
+func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(RequestParameterMerchantId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return ErrorIncorrectMerchantId
+	}
+
+	structure := i.(*grpc.NotificationRequest)
+	structure.MerchantId = merchantId
 
 	return nil
 }

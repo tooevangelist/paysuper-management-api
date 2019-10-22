@@ -7,6 +7,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
+	"github.com/micro/go-micro/client"
 	awsWrapper "github.com/paysuper/paysuper-aws-manager"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -16,6 +17,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"time"
 )
 
 const (
@@ -751,7 +753,6 @@ func (h *OnboardingRoute) getTariffRates(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
-	req.Region = common.TariffRegions[req.Region]
 	res, err := h.dispatch.Services.Billing.GetMerchantTariffRates(ctx.Request().Context(), req)
 
 	if err != nil {
@@ -763,7 +764,7 @@ func (h *OnboardingRoute) getTariffRates(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, res.Item)
+	return ctx.JSON(http.StatusOK, res.Items.Payment)
 }
 
 // @Description set tariff to merchant
@@ -784,8 +785,11 @@ func (h *OnboardingRoute) setTariffRates(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
-	req.Region = common.TariffRegions[req.Region]
-	res, err := h.dispatch.Services.Billing.SetMerchantTariffRates(ctx.Request().Context(), req)
+	res, err := h.dispatch.Services.Billing.SetMerchantTariffRates(
+		ctx.Request().Context(),
+		req,
+		client.WithRequestTimeout(time.Minute*10),
+	)
 
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "SetMerchantTariffRates", req)

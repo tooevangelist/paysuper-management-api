@@ -11,8 +11,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
-	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
-	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"net/http"
 	"time"
 )
@@ -294,58 +292,34 @@ func (h *OrderRoute) getOrderForm(ctx echo.Context) error {
 // Create order from payment link and redirect to order payment form
 func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 	paylinkId := ctx.Param(common.RequestParameterId)
-
-	req := &paylink.PaylinkRequest{
-		Id: paylinkId,
-	}
-
-	err := h.dispatch.Validate.Struct(req)
-
-	if err != nil {
-		h.L().Error("Cannot validate request", logger.PairArgs("err", err.Error(), common.ErrorFieldRequest, req))
-
-		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
-	}
-
 	ctxReq := ctx.Request().Context()
-	pl, err := h.dispatch.Services.PayLink.GetPaylink(ctxReq, req)
-
-	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, paylinkServiceConst.ServiceName, "GetPaylink", req)
-		return ctx.Render(http.StatusNotFound, errorTemplateName, map[string]interface{}{})
-	}
 
 	go func() {
-		_, err := h.dispatch.Services.PayLink.IncrPaylinkVisits(context.TODO(), &paylink.PaylinkRequest{Id: paylinkId})
+		req := &grpc.PaylinkRequestById{Id: paylinkId}
+		// call with background context to prevent request abandoning when redirect will bw returned in responce below
+		_, err := h.dispatch.Services.Billing.IncrPaylinkVisits(context.Background(), req)
 
 		if err != nil {
-			common.LogSrvCallFailedGRPC(h.L(), err, paylinkServiceConst.ServiceName, "IncrPaylinkVisits", req)
+			common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "IncrPaylinkVisits", req)
 		}
 	}()
 
 	qParams := ctx.QueryParams()
 
-	oReq := &billing.OrderCreateRequest{
-		ProjectId: pl.ProjectId,
-		PayerIp:   ctx.RealIP(),
-		Products:  pl.Products,
-		PrivateMetadata: map[string]string{
-			"PaylinkId": paylinkId,
-		},
-		Type:                pl.ProductsType,
-		IssuerUrl:           ctx.Request().Header.Get(common.HeaderReferer),
-		IsEmbedded:          false,
-		IssuerReferenceType: pkg.OrderIssuerReferenceTypePaylink,
-		IssuerReference:     paylinkId,
-		UtmMedium:           qParams.Get(common.QueryParameterNameUtmMedium),
-		UtmCampaign:         qParams.Get(common.QueryParameterNameUtmCampaign),
-		UtmSource:           qParams.Get(common.QueryParameterNameUtmSource),
+	oReq := &billing.OrderCreateByPaylink{
+		PaylinkId:   paylinkId,
+		PayerIp:     ctx.RealIP(),
+		IssuerUrl:   ctx.Request().Header.Get(common.HeaderReferer),
+		UtmSource:   qParams.Get(common.QueryParameterNameUtmSource),
+		UtmMedium:   qParams.Get(common.QueryParameterNameUtmMedium),
+		UtmCampaign: qParams.Get(common.QueryParameterNameUtmCampaign),
+		IsEmbedded:  false,
 	}
 
-	orderResponse, err := h.dispatch.Services.Billing.OrderCreateProcess(ctxReq, oReq)
+	orderResponse, err := h.dispatch.Services.Billing.OrderCreateByPaylink(ctxReq, oReq)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "OrderCreateProcess", req)
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "OrderCreateByPaylink", oReq)
 		return ctx.Render(http.StatusBadRequest, errorTemplateName, map[string]interface{}{})
 	}
 
