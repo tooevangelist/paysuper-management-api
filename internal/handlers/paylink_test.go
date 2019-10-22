@@ -59,21 +59,6 @@ func (suite *PaylinkTestSuite) TestPaylink_getPaylinksList_Merchant_Ok() {
 	}
 }
 
-func (suite *PaylinkTestSuite) TestPaylink_getPaylinksList_Ok() {
-
-	res, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":project_id", bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + paylinksProjectIdPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	if assert.NoError(suite.T(), err) {
-		assert.Equal(suite.T(), http.StatusOK, res.Code)
-		assert.NotEmpty(suite.T(), res.Body.String())
-	}
-}
-
 func (suite *PaylinkTestSuite) TestPaylink_getPaylink_Ok() {
 
 	res, err := suite.caller.Builder().

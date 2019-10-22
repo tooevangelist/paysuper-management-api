@@ -13,14 +13,13 @@ import (
 
 const (
 	paylinksPath               = "/paylinks"
-	paylinksProjectIdPath      = "/paylinks/project/:project_id"
 	paylinksIdPath             = "/paylinks/:id"
 	paylinksUrlPath            = "/paylinks/:id/url"
-	paylinksIdStatSummaryPath  = "/paylinks/:id/stat/summary"
-	paylinksIdStatCountryPath  = "/paylinks/:id/stat/by/country"
-	paylinksIdStatReferrerPath = "/paylinks/:id/stat/by/referrer"
-	paylinksIdStatDatePath     = "/paylinks/:id/stat/by/date"
-	paylinksIdStatUtmPath      = "/paylinks/:id/stat/by/utm"
+	paylinksIdStatSummaryPath  = "/paylinks/:id/dashboard/summary"
+	paylinksIdStatCountryPath  = "/paylinks/:id/dashboard/country"
+	paylinksIdStatReferrerPath = "/paylinks/:id/dashboard/referrer"
+	paylinksIdStatDatePath     = "/paylinks/:id/dashboard/date"
+	paylinksIdStatUtmPath      = "/paylinks/:id/dashboard/utm"
 )
 
 type PayLinkRoute struct {
@@ -40,7 +39,6 @@ func NewPayLinkRoute(set common.HandlerSet, cfg *common.Config) *PayLinkRoute {
 
 func (h *PayLinkRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(paylinksPath, h.getPaylinksList)
-	groups.AuthUser.GET(paylinksProjectIdPath, h.getPaylinksList)
 	groups.AuthUser.GET(paylinksIdPath, h.getPaylink)
 	groups.AuthUser.GET(paylinksUrlPath, h.getPaylinkUrl)
 	groups.AuthUser.DELETE(paylinksIdPath, h.deletePaylink)
@@ -53,9 +51,8 @@ func (h *PayLinkRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(paylinksIdStatUtmPath, h.getPaylinkStatByUtm)
 }
 
-// @Description Get list of paylinks for authenticated merchant (and also for project, if passed)
+// @Description Get list of paylinks for authenticated merchant
 // @Example GET /admin/api/v1/paylinks?offset=0&limit=10
-// @Example GET /admin/api/v1/paylinks/project/21784001599a47e5a69ac28f7af2ec22?offset=0&limit=10
 func (h *PayLinkRoute) getPaylinksList(ctx echo.Context) error {
 	req := &grpc.GetPaylinksRequest{}
 	err := ctx.Bind(req)
@@ -75,13 +72,7 @@ func (h *PayLinkRoute) getPaylinksList(ctx echo.Context) error {
 	}
 
 	req.MerchantId = merchant.Item.Id
-
-	projectId := ctx.Param(common.RequestParameterProjectId)
-	if projectId != "" {
-		req.ProjectId = projectId
-	} else {
-		req.ProjectId = ""
-	}
+	req.ProjectId = ""
 
 	if req.Limit == 0 {
 		req.Limit = h.cfg.LimitDefault

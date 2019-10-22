@@ -8409,7 +8409,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/paylinks/{id}/summary":
+  "/admin/api/v1/paylinks/{id}/dashboard/summary":
     get:
       summary: Get summary stat for a payment link by id for current authenticated merchant
       tags:
@@ -8462,7 +8462,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
 
-  "/admin/api/v1/paylinks/{id}/by/country":
+  "/admin/api/v1/paylinks/{id}/dashboard/country":
     get:
       summary: Get a grouping stat by country for a payment link by its id for current authenticated merchant
       tags:
@@ -8514,7 +8514,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/paylinks/{id}/by/referrer":
+  "/admin/api/v1/paylinks/{id}/dashboard/referrer":
     get:
       summary: Get a grouping stat by referrer for a payment link by its id for current authenticated merchant
       tags:
@@ -8567,7 +8567,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
 
-  "/admin/api/v1/paylinks/{id}/by/date":
+  "/admin/api/v1/paylinks/{id}/dashboard/date":
     get:
       summary: Get a grouping stat by date for a payment link by its id for current authenticated merchant
       tags:
@@ -8619,7 +8619,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/paylinks/{id}/by/utm":
+  "/admin/api/v1/paylinks/{id}/dashboard/utm":
     get:
       summary: Get a grouping stat by utm for a payment link by its id for current authenticated merchant
       tags:
