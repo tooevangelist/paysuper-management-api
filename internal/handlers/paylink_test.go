@@ -25,6 +25,7 @@ func Test_Paylink(t *testing.T) {
 func (suite *PaylinkTestSuite) SetupTest() {
 	user := &common.AuthUser{
 		Id: "ffffffffffffffffffffffff",
+		MerchantId: "ffffffffffffffffffffffff",
 	}
 
 	var e error
