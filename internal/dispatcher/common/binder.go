@@ -14,9 +14,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"io/ioutil"
 	"reflect"
-	"strconv"
 	"strings"
-
 )
 
 var (
@@ -184,10 +182,6 @@ type ChangeMerchantDataRequestBinder struct {
 	cfg Config
 }
 
-type OrderListRefundsBinder struct {
-	cfg Config
-}
-
 // NewChangeMerchantDataRequestBinder
 func NewChangeMerchantDataRequestBinder(set HandlerSet, cfg Config) *ChangeMerchantDataRequestBinder {
 	return &ChangeMerchantDataRequestBinder{
@@ -348,159 +342,6 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 			structure.IsSystem = 2
 		}
 	}
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksListBinder) Bind(i interface{}, ctx echo.Context) error {
-
-	if err := BinderDefault.Bind(i, ctx); err != nil {
-		return err
-	}
-
-	params := ctx.QueryParams()
-	structure := i.(*paylink.GetPaylinksRequest)
-
-	structure.Limit = uint32(b.LimitDefault)
-	structure.Offset = uint32(b.OffsetDefault)
-
-	if v, ok := params[RequestParameterLimit]; ok {
-		i, err := strconv.ParseInt(v[0], 10, 32)
-		if err != nil {
-			return err
-		}
-		structure.Limit = uint32(i)
-	}
-
-	if v, ok := params[RequestParameterOffset]; ok {
-		i, err := strconv.ParseInt(v[0], 10, 32)
-		if err != nil {
-			return err
-		}
-		structure.Offset = uint32(i)
-	}
-
-	structure.ProjectId = ctx.Param(RequestParameterProjectId)
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
-
-	if err := BinderDefault.Bind(i, ctx); err != nil {
-		return err
-	}
-
-	params := ctx.QueryParams()
-	structure := i.(*paylink.GetPaylinkURLRequest)
-
-	id := ctx.Param(RequestParameterId)
-	structure.Id = id
-
-	if v, ok := params[RequestParameterUtmSource]; ok {
-		structure.UtmSource = v[0]
-	}
-
-	if v, ok := params[RequestParameterUtmMedium]; ok {
-		structure.UtmMedium = v[0]
-	}
-
-	if v, ok := params[RequestParameterUtmCampaign]; ok {
-		structure.UtmCampaign = v[0]
-	}
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksCreateBinder) Bind(i interface{}, ctx echo.Context) error {
-
-	if err := BinderDefault.Bind(i, ctx); err != nil {
-		return err
-	}
-
-	structure := i.(*paylink.CreatePaylinkRequest)
-	structure.Id = ""
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
-	id := ctx.Param(RequestParameterId)
-	if id == "" {
-		return ErrorIncorrectPaylinkId
-	}
-
-	if err := BinderDefault.Bind(i, ctx); err != nil {
-		return err
-	}
-
-	structure := i.(*paylink.CreatePaylinkRequest)
-	structure.Id = id
-
-	return nil
-}
-
-// Bind
-	structure := i.(*grpc.MerchantPaymentMethodRequest)
-	merchantId := ctx.Param(RequestParameterMerchantId)
-	methodId := ctx.Param(RequestParameterPaymentMethodId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return ErrorIncorrectMerchantId
-	}
-
-	if methodId == "" || bson.IsObjectIdHex(methodId) == false ||
-		structure.PaymentMethod.Id != methodId {
-		return ErrorIncorrectPaymentMethodId
-	}
-
-	structure.MerchantId = merchantId
-
-	return nil
-}
-
-// Bind
-func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-
-	if err != nil {
-		return err
-	}
-
-	merchantId := ctx.Param(RequestParameterId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return ErrorIncorrectMerchantId
-	}
-
-	structure := i.(*grpc.MerchantChangeStatusRequest)
-	structure.MerchantId = merchantId
-
-	return nil
-}
-
-// Bind
-func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-
-	if err != nil {
-		return err
-	}
-
-	merchantId := ctx.Param(RequestParameterMerchantId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return ErrorIncorrectMerchantId
-	}
-
-	structure := i.(*grpc.NotificationRequest)
-	structure.MerchantId = merchantId
 
 	return nil
 }
@@ -844,24 +685,6 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		} else {
 			structure.UrlRefundPayment = tv
 		}
-	}
-
-	return nil
-}
-
-func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-
-	if err != nil {
-		return err
-	}
-
-	structure := i.(*grpc.ListRefundsRequest)
-	structure.OrderId = ctx.Param(RequestParameterOrderId)
-
-	if structure.Limit <= 0 {
-		structure.Limit = b.cfg.LimitDefault
 	}
 
 	return nil
