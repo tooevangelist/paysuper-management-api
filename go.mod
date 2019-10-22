@@ -25,7 +25,7 @@ require (
 	github.com/paysuper/casbin-server v0.0.0-20191021200344-f8e360aaf04d
 	github.com/paysuper/echo-casbin-middleware v0.0.0-20191021231103-f3d820b11545
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191022120752-231e43edc6e2
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191022121038-5297c1fabb6f
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-reporter v0.0.0-20191021130041-24bff0252418
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
@@ -35,7 +35,6 @@ require (
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
 	go.uber.org/automaxprocs v1.2.0
-	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
 )
