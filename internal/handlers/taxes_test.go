@@ -168,7 +168,6 @@ func testCreateTaxWithError(t *testing.T, suite *TaxesTestSuite, obj *tax_servic
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Params(":"+common.RequestParameterId, "1").
 		Path(common.SystemUserGroupPath + taxesPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(body).

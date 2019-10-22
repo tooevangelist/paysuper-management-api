@@ -1,5 +1,7 @@
 module github.com/paysuper/paysuper-management-api
 
+go 1.12
+
 require (
 	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681
 	github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679
@@ -13,12 +15,13 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/google/wire v0.3.0
 	github.com/gurukami/typ/v2 v2.0.1
-	github.com/hashicorp/consul v1.4.2 // indirect
 	github.com/karlseguin/expect v1.0.1 // indirect
 	github.com/labstack/echo/v4 v4.1.11
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
+	github.com/paysuper/casbin-server v0.0.0-20191021200344-f8e360aaf04d
+	github.com/paysuper/echo-casbin-middleware v0.0.0-20191021231103-f3d820b11545
 	github.com/paysuper/paysuper-aws-manager v0.0.1
 	github.com/paysuper/paysuper-billing-server v0.0.0-20191021143242-ed518bc672b7
 	github.com/paysuper/paysuper-payment-link v0.0.0-20191014102956-21b508fc9e9c
@@ -33,7 +36,6 @@ require (
 	go.uber.org/automaxprocs v1.2.0
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
-	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 )
 
 replace (
@@ -48,5 +50,3 @@ replace (
 	gopkg.in/urfave/cli.v1 => github.com/urfave/cli v1.21.0
 	sourcegraph.com/sourcegraph/go-diff => github.com/sourcegraph/go-diff v0.5.1
 )
-
-go 1.12

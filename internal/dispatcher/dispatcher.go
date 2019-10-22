@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
+	"github.com/paysuper/paysuper-management-api/pkg/micro"
 	"html/template"
 	"net/http"
 )
@@ -20,6 +21,7 @@ type Dispatcher struct {
 	appSet AppSet
 	provider.LMT
 	globalCfg *common.Config
+	ms        *micro.Micro
 }
 
 // dispatch
@@ -91,8 +93,9 @@ func (d *Dispatcher) authUserGroup(grp *echo.Group) {
 	if !d.globalCfg.DisableAuthMiddleware {
 		grp.Use(d.GetUserDetailsMiddleware) // 1
 		grp.Use(d.AuthOnePreMiddleware())   // 2
+		grp.Use(d.CasbinMiddleware()) // 3
 	}
-	grp.Use(d.MerchantBinderPreMiddleware) // 3
+	grp.Use(d.MerchantBinderPreMiddleware) // 4
 }
 
 func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
@@ -100,8 +103,9 @@ func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
 	if !d.globalCfg.DisableAuthMiddleware {
 		grp.Use(d.GetUserDetailsMiddleware) // 1
 		grp.Use(d.AuthOnePreMiddleware())   // 2
+		grp.Use(d.CasbinMiddleware()) // 3
 	}
-	grp.Use(d.SystemBinderPreMiddleware) // 3
+	grp.Use(d.SystemBinderPreMiddleware) // 4
 }
 
 func (d *Dispatcher) webHookGroup(grp *echo.Group) {
@@ -134,7 +138,7 @@ type AppSet struct {
 }
 
 // New
-func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, globalCfg *common.Config) *Dispatcher {
+func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, globalCfg *common.Config, ms *micro.Micro) *Dispatcher {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
 	return &Dispatcher{
 		ctx:       ctx,
@@ -142,5 +146,6 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 		appSet:    appSet,
 		LMT:       &set,
 		globalCfg: globalCfg,
+		ms:        ms,
 	}
 }

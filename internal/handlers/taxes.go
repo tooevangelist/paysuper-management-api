@@ -89,6 +89,10 @@ func (h *TaxesRoute) bindGetTaxes(ctx echo.Context) *tax_service.GetRatesRequest
 }
 
 func (h *TaxesRoute) setTax(ctx echo.Context) error {
+	if ctx.Request().ContentLength == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
+	}
+
 	req := &tax_service.TaxRate{}
 	err := ctx.Bind(req)
 
