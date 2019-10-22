@@ -1567,6 +1567,9 @@ definitions:
       region:
         description: region
         type: string
+      is_virtual_currency:
+        description: virtual currency flag
+        type: boolean
 
   product.PutPrice:
     properties:
