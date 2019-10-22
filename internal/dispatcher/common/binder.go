@@ -14,9 +14,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"io/ioutil"
 	"reflect"
-	"strconv"
 	"strings"
-
 )
 
 var (
@@ -187,10 +185,6 @@ type ProductsUpdateProductBinder struct{}
 type ChangeMerchantDataRequestBinder struct {
 	dispatch HandlerSet
 	provider.LMT
-	cfg Config
-}
-
-type OrderListRefundsBinder struct {
 	cfg Config
 }
 
@@ -826,24 +820,6 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if _, ok := req[RequestParameterVirtualCurrency]; ok {
 		structure.VirtualCurrency = projectReq.VirtualCurrency
-	}
-
-	return nil
-}
-
-func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-
-	if err != nil {
-		return err
-	}
-
-	structure := i.(*grpc.ListRefundsRequest)
-	structure.OrderId = ctx.Param(RequestParameterOrderId)
-
-	if structure.Limit <= 0 {
-		structure.Limit = b.cfg.LimitDefault
 	}
 
 	return nil
