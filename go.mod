@@ -44,7 +44,6 @@ require (
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
 	go.uber.org/automaxprocs v1.2.0
-	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
 )
