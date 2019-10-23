@@ -265,6 +265,14 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		if rsp2.Status != pkg.ResponseStatusOk {
+			if rsp2.Item != nil {
+				return ctx.JSON(int(rsp2.Status), &grpc.ResponseErrorMessage{
+					Code:    rsp2.Message.Code,
+					Message: rsp2.Message.Message,
+					Details: rsp2.Item.Id,
+				})
+			}
+
 			return echo.NewHTTPError(int(rsp2.Status), rsp2.Message)
 		}
 
