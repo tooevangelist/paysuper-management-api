@@ -414,7 +414,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerRet
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Ok() {
-	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
+	body := `{"review": "some review text", "url": "primary_onboarding"}`
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Path(common.AuthUserGroupPath + userProfilePathFeedback).
@@ -448,7 +448,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Unauthorized
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() {
 
-	body := `{"review": "some review text", "page_id": "merchant_onboarding"}`
+	body := `{"review": "some review text", "url": "merchant_onboarding"}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
@@ -467,7 +467,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() 
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidatePageIdError() {
 
-	body := `{"review": "some review text", "page_id": "unknown_page"}`
+	body := `{"review": "some review text", "url": "unknown_page"}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
@@ -486,7 +486,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidatePage
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateReviewError() {
 
-	body := `{"review": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "page_id": "primary_onboarding"}`
+	body := `{"review": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "url": "primary_onboarding"}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
@@ -506,7 +506,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateRevi
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServerSystemError() {
 
 	suite.router.dispatch.Services.Billing = mock.NewBillingServerSystemErrorMock()
-	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
+	body := `{"review": "some review text", "url": "primary_onboarding"}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
@@ -526,7 +526,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServe
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServerResultError() {
 
 	suite.router.dispatch.Services.Billing = mock.NewBillingServerErrorMock()
-	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
+	body := `{"review": "some review text", "url": "primary_onboarding"}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).

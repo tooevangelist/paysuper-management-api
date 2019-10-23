@@ -11,7 +11,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"io/ioutil"
 	"strconv"
 )
@@ -31,12 +30,6 @@ type OnboardingNotificationsListBinder struct {
 type OnboardingGetPaymentMethodBinder struct{}
 type OnboardingChangePaymentMethodBinder struct{}
 type OnboardingCreateNotificationBinder struct{}
-type PaylinksListBinder struct {
-	LimitDefault, OffsetDefault int32
-}
-type PaylinksUrlBinder struct{}
-type PaylinksCreateBinder struct{}
-type PaylinksUpdateBinder struct{}
 type ProductsGetProductsListBinder struct {
 	LimitDefault, OffsetDefault int32
 }
@@ -305,90 +298,6 @@ func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Contex
 
 	structure := i.(*grpc.NotificationRequest)
 	structure.MerchantId = merchantId
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksListBinder) Bind(i interface{}, ctx echo.Context) error {
-	params := ctx.QueryParams()
-	structure := i.(*paylink.GetPaylinksRequest)
-
-	structure.Limit = uint32(b.LimitDefault)
-	structure.Offset = uint32(b.OffsetDefault)
-
-	if v, ok := params[RequestParameterLimit]; ok {
-		i, err := strconv.ParseInt(v[0], 10, 32)
-		if err != nil {
-			return err
-		}
-		structure.Limit = uint32(i)
-	}
-
-	if v, ok := params[RequestParameterOffset]; ok {
-		i, err := strconv.ParseInt(v[0], 10, 32)
-		if err != nil {
-			return err
-		}
-		structure.Offset = uint32(i)
-	}
-
-	structure.ProjectId = ctx.Param(RequestParameterProjectId)
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
-	params := ctx.QueryParams()
-	structure := i.(*paylink.GetPaylinkURLRequest)
-
-	id := ctx.Param(RequestParameterId)
-	structure.Id = id
-
-	if v, ok := params[RequestParameterUtmSource]; ok {
-		structure.UtmSource = v[0]
-	}
-
-	if v, ok := params[RequestParameterUtmMedium]; ok {
-		structure.UtmMedium = v[0]
-	}
-
-	if v, ok := params[RequestParameterUtmCampaign]; ok {
-		structure.UtmCampaign = v[0]
-	}
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksCreateBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-	if err != nil {
-		return err
-	}
-
-	structure := i.(*paylink.CreatePaylinkRequest)
-	structure.Id = ""
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
-	id := ctx.Param(RequestParameterId)
-	if id == "" {
-		return ErrorIncorrectPaylinkId
-	}
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-	if err != nil {
-		return err
-	}
-
-	structure := i.(*paylink.CreatePaylinkRequest)
-	structure.Id = id
 
 	return nil
 }
