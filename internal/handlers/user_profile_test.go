@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
@@ -24,8 +25,8 @@ func Test_UserProfile(t *testing.T) {
 
 func (suite *UserProfileTestSuite) SetupTest() {
 	user := &common.AuthUser{
-		Id:    "ffffffffffffffffffffffff",
-		Email: "test@unit.test",
+		Id:         "ffffffffffffffffffffffff",
+		Email:      "test@unit.test",
 		MerchantId: "ffffffffffffffffffffffff",
 	}
 
@@ -361,7 +362,6 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_Ok() {
 	assert.NoError(suite.T(), err)
 }
 
-
 func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BadData_Error() {
 	body := `<"token": "">`
 
@@ -413,7 +413,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerSys
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerReturnError() {
@@ -431,7 +431,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerRet
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), int(pkg.ResponseStatusBadData), httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
