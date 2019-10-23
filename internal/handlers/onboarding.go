@@ -771,7 +771,7 @@ func (h *OnboardingRoute) getTariffRates(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, res.Items.Payment)
+	return ctx.JSON(http.StatusOK, res.Items)
 }
 
 // @Description set tariff to merchant
