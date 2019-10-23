@@ -467,7 +467,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() 
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidatePageIdError() {
 
-	body := `{"review": "some review text", "url": "unknown_page"}`
+	body := `{"review": "some review text", "url": ""}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
