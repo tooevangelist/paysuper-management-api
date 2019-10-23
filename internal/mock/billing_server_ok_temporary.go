@@ -651,7 +651,7 @@ func (s *BillingServerOkTemporaryMock) ConfirmUserEmail(
 	ctx context.Context,
 	in *grpc.ConfirmUserEmailRequest,
 	opts ...client.CallOption,
-) (*grpc.CheckProjectRequestSignatureResponse, error) {
+) (*grpc.ConfirmUserEmailResponse, error) {
 	return nil, SomeError
 }
 
