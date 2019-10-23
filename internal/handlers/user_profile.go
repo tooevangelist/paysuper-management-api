@@ -5,6 +5,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"net/http"
@@ -122,11 +123,31 @@ func (h *UserProfileRoute) confirmEmail(ctx echo.Context) error {
 
 	res, err := h.dispatch.Services.Billing.ConfirmUserEmail(ctx.Request().Context(), req)
 
+	if err != nil || res.Status != http.StatusOK {
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	req2 := &grpc.OnboardingRequest{
+		User: &billing.MerchantUser{
+			ProfileId:        res.Profile.Id,
+			Id:               res.Profile.UserId,
+			Email:            res.Profile.Email.Email,
+			RegistrationDate: res.Profile.CreatedAt,
+		},
+	}
+	err = h.dispatch.Validate.Struct(req2)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res2, err := h.dispatch.Services.Billing.ChangeMerchant(ctx.Request().Context(), req2)
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
 
-	if res.Status != http.StatusOK {
+	if res2.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
