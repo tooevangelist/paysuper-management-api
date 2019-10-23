@@ -15,13 +15,11 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/google/wire v0.3.0
 	github.com/gurukami/typ/v2 v2.0.1
-	github.com/hashicorp/consul v1.4.2 // indirect
 	github.com/karlseguin/expect v1.0.1 // indirect
 	github.com/labstack/echo/v4 v4.1.11
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
-	github.com/mongodb/mongo-go-driver v0.3.0 // indirect
 	github.com/paysuper/casbin-server v0.0.0-20191021200344-f8e360aaf04d
 	github.com/paysuper/echo-casbin-middleware v0.0.0-20191021231103-f3d820b11545
 	github.com/paysuper/paysuper-aws-manager v0.0.1

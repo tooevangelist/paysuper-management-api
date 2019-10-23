@@ -3,10 +3,12 @@ package http
 import (
 	"context"
 	"github.com/ProtocolONE/go-core/v2/pkg/entrypoint"
+	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	_ "github.com/micro/go-plugins/broker/rabbitmq"
 	_ "github.com/micro/go-plugins/registry/kubernetes"
 	_ "github.com/micro/go-plugins/transport/grpc"
 	"github.com/paysuper/paysuper-management-api/cmd"
+	"github.com/paysuper/paysuper-management-api/internal/casbin"
 	"github.com/paysuper/paysuper-management-api/internal/daemon"
 	"github.com/paysuper/paysuper-management-api/pkg/http"
 	"github.com/paysuper/paysuper-management-api/pkg/micro"
@@ -15,7 +17,8 @@ import (
 )
 
 var (
-	Cmd = &cobra.Command{
+	casbinFlag bool
+	Cmd    = &cobra.Command{
 		Use:           "http",
 		Short:         "HTTP API daemon",
 		SilenceUsage:  true,
@@ -24,6 +27,7 @@ var (
 			var (
 				sHttp     *http.HTTP
 				sMicro    *micro.Micro
+				sCabin    *casbin.Casbin
 				c         func()
 				e         error
 				ctxAll    context.Context
@@ -37,6 +41,12 @@ var (
 			cmd.Slave.Executor(func(ctx context.Context) error {
 				initial, _ := entrypoint.CtxExtractInitial(ctx)
 				ctxAll, ctxCancel = context.WithCancel(ctx)
+				if casbinFlag {
+					sCabin, c, e = casbin.Build(ctxAll, initial, cmd.Observer)
+					if e != nil {
+						return e
+					}
+				}
 				sHttp, c, e = daemon.BuildHTTP(ctxAll, initial, cmd.Observer)
 				if e != nil {
 					return e
@@ -47,6 +57,14 @@ var (
 				}
 				return nil
 			}, func(ctx context.Context) error {
+				if casbinFlag {
+					e := sCabin.ImportPolicy(cmd.Slave.WorkDir() + "/assets/policy.conf")
+					if e != nil {
+						sCabin.L().Error("import policy failed: %v", logger.Args(e.Error()))
+						return e
+					}
+					sCabin.L().Info("casbin policy successfully applied")
+				}
 				var wg sync.WaitGroup
 				wg.Add(2)
 				go func() {
@@ -73,4 +91,5 @@ var (
 func init() {
 	// pflags
 	Cmd.PersistentFlags().StringP(http.UnmarshalKeyBind, "b", ":0000", "bind address")
+	Cmd.PersistentFlags().BoolVar(&casbinFlag, "casbin", false, "apply policy to casbin server")
 }
