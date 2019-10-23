@@ -80,7 +80,7 @@ const (
 	UserProfileFieldWebsite           = "Website"
 	UserProfileFieldKindOfActivity    = "KindOfActivity"
 	UserProfileFieldReview            = "Review"
-	UserProfileFieldPageId            = "PageId"
+	UserProfileFieldPageId            = "Url"
 
 	OrderFieldProjectId     = "PP_PROJECT_ID"
 	OrderFieldSignature     = "PP_SIGNATURE"

@@ -985,6 +985,21 @@ definitions:
         description: last payout amount to merchant
         type: number
 
+  onboarding.Tariff.Item:
+    properties:
+      method_percent_fee:
+        description: payment method fee in percents
+        type: number
+      method_fixed_fee:
+        description: payment method fixed fee in particular currency
+        type: number
+      method_fixed_fee_currency:
+        type: string
+        description: currency of payment method fixed fee.  letters code by ISO 4217
+      is_paid_by_merchant:
+        description: if true than commission will to take from merchant
+        type: boolean
+
   onboarding.Tariff.Payment:
     properties:
       min_amount:
@@ -1020,6 +1035,18 @@ definitions:
       payer_regions:
         description: payer region name
         type: string
+
+  onboarding.Tariff:
+    properties:
+      payment:
+        description: payment tariffs
+        $ref: '#/definitions/onboarding.Tariff.Payment'
+      chargeback:
+        description: chargeback tariff
+        $ref: '#/definitions/onboarding.Tariff.Item'
+      payout:
+        description: payout tariff
+        $ref: '#/definitions/onboarding.Tariff.Item'
 
   onboarding.Tariff.Set.Request:
     properties:
@@ -3036,19 +3063,15 @@ definitions:
     properties:
       id:
         type: string
-        description: 'paylink id, optional'
+        description: 'paylink id, optional, used only for edit existing paylink'
       products:
         type: array
         items:
           type: string
         description: 'list of products included to paylink'
       expires_at:
-        type: string
-        format: date-time
-        description: 'expiration date'
-      merchant_id:
-        type: string
-        description: 'paylink merchant id"'
+        type: number
+        description: 'expiration date as unix timestamp'
       project_id:
         type: string
         description: 'paylink project id"'
