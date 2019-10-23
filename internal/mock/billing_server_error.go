@@ -658,8 +658,8 @@ func (s *BillingServerErrorMock) ConfirmUserEmail(
 	ctx context.Context,
 	in *grpc.ConfirmUserEmailRequest,
 	opts ...client.CallOption,
-) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return &grpc.CheckProjectRequestSignatureResponse{
+) (*grpc.ConfirmUserEmailResponse, error) {
+	return &grpc.ConfirmUserEmailResponse{
 		Status:  pkg.ResponseStatusBadData,
 		Message: SomeError,
 	}, nil

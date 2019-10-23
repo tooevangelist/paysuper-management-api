@@ -854,8 +854,8 @@ func (s *BillingServerOkMock) ConfirmUserEmail(
 	ctx context.Context,
 	in *grpc.ConfirmUserEmailRequest,
 	opts ...client.CallOption,
-) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
+) (*grpc.ConfirmUserEmailResponse, error) {
+	return &grpc.ConfirmUserEmailResponse{Status: pkg.ResponseStatusOk}, nil
 }
 
 func (s *BillingServerOkMock) CreatePageReview(
