@@ -109,22 +109,19 @@ func (h *UserProfileRoute) setUserProfile(ctx echo.Context) error {
 
 func (h *UserProfileRoute) confirmEmail(ctx echo.Context) error {
 	req := &grpc.ConfirmUserEmailRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	err = h.dispatch.Validate.Struct(req)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
 	res, err := h.dispatch.Services.Billing.ConfirmUserEmail(ctx.Request().Context(), req)
 
-	if err != nil || res.Status != http.StatusOK {
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	if err != nil {
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ConfirmUserEmail")
+	}
+
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
 	req2 := &grpc.OnboardingRequest{
@@ -135,16 +132,15 @@ func (h *UserProfileRoute) confirmEmail(ctx echo.Context) error {
 			RegistrationDate: res.Profile.CreatedAt,
 		},
 	}
-	err = h.dispatch.Validate.Struct(req2)
 
-	if err != nil {
+	if err = h.dispatch.Validate.Struct(req2); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
 	res2, err := h.dispatch.Services.Billing.ChangeMerchant(ctx.Request().Context(), req2)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ChangeMerchant")
 	}
 
 	if res2.Status != http.StatusOK {

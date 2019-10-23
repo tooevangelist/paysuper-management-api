@@ -855,7 +855,14 @@ func (s *BillingServerOkMock) ConfirmUserEmail(
 	in *grpc.ConfirmUserEmailRequest,
 	opts ...client.CallOption,
 ) (*grpc.ConfirmUserEmailResponse, error) {
-	return &grpc.ConfirmUserEmailResponse{Status: pkg.ResponseStatusOk}, nil
+	return &grpc.ConfirmUserEmailResponse{
+		Status: pkg.ResponseStatusOk,
+		Profile: &grpc.UserProfile{
+			Id:     bson.NewObjectId().Hex(),
+			UserId: bson.NewObjectId().Hex(),
+			Email:  &grpc.UserProfileEmail{Email: "test@test.com"},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) CreatePageReview(
