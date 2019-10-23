@@ -3063,19 +3063,15 @@ definitions:
     properties:
       id:
         type: string
-        description: 'paylink id, optional'
+        description: 'paylink id, optional, used only for edit existing paylink'
       products:
         type: array
         items:
           type: string
         description: 'list of products included to paylink'
       expires_at:
-        type: string
-        format: date-time
-        description: 'expiration date'
-      merchant_id:
-        type: string
-        description: 'paylink merchant id"'
+        type: number
+        description: 'expiration date as unix timestamp'
       project_id:
         type: string
         description: 'paylink project id"'
