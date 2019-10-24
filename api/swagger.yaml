@@ -8160,7 +8160,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/royalty_reports/{id}/decline":
-    get:
+    post:
       summary: Start royalty report dispute
       tags:
         - Royalty reports
