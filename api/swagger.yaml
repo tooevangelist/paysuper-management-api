@@ -5960,7 +5960,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user/profile":
+  "/api/v1/user/profile":
     get:
       summary: Get user profile
       tags:
@@ -6038,7 +6038,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/api/v1/user/confirm_email":
+  "/user/confirm_email":
     put:
       summary: Confirm user email
       tags:
@@ -6114,7 +6114,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user/feedback":
+  "/api/v1/user/feedback":
     post:
       summary: Create page review
       tags:
