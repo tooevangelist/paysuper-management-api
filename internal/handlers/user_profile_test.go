@@ -53,7 +53,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_Ok() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, "qwerty").
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -84,7 +84,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_BillingServerS
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -101,7 +101,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_BillingServerR
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -127,7 +127,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -140,7 +140,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_BindError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -163,7 +163,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationErro
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(reqInit).
 		BodyString(body).
 		Exec(suite.T())
@@ -185,7 +185,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationUser
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -207,7 +207,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationUser
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -236,7 +236,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationAnnu
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -265,7 +265,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationNumb
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -294,7 +294,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationComp
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -317,7 +317,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_BillingServerS
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -336,7 +336,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_BillingServerR
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -354,7 +354,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		Path(userProfileConfirmEmailPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -367,7 +367,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BadData_Error() 
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		Path(userProfileConfirmEmailPath).
 		BodyString(body).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -385,7 +385,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_EmptyToken_Error
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		Path(userProfileConfirmEmailPath).
 		BodyString(body).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -403,7 +403,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerSys
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		Path(userProfileConfirmEmailPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -422,7 +422,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerRet
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		Path(userProfileConfirmEmailPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -439,7 +439,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Ok() {
 	body := `{"review": "some review text", "url": "primary_onboarding"}`
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -456,7 +456,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Unauthorized
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(reqInit).
 		Exec(suite.T())
 
@@ -474,7 +474,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() 
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitXML()).
 		BodyString(body).
 		Exec(suite.T())
@@ -493,7 +493,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidatePage
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -512,7 +512,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateRevi
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -532,7 +532,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServe
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
