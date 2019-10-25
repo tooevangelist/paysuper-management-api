@@ -163,6 +163,7 @@ func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
 		grp.Use(d.AuthOnAdminPreMiddleware()) // 2
 		grp.Use(d.CasbinMiddleware(func(c echo.Context) string {
 			user := common.ExtractUserContext(c)
+			d.L().Error("Extract user for admin middleware: %v", logger.Args(user.Id))
 			return user.Id
 		})) // 3
 	}
