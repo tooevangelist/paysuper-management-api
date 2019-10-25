@@ -468,7 +468,6 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.Id = projectId
 	structure.MerchantId = pRsp.Item.MerchantId
 	structure.Name = pRsp.Item.Name
-	structure.Image = pRsp.Item.Image
 	structure.CallbackCurrency = pRsp.Item.CallbackCurrency
 	structure.CallbackProtocol = pRsp.Item.CallbackProtocol
 	structure.CreateOrderAllowedUrls = pRsp.Item.CreateOrderAllowedUrls
@@ -497,14 +496,6 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 		for k, tvv := range tv {
 			structure.Name[k] = tvv.(string)
-		}
-	}
-
-	if v, ok := req[RequestParameterImage]; ok {
-		if tv, ok := v.(string); !ok {
-			return ErrorMessageImageIncorrectType
-		} else {
-			structure.Image = tv
 		}
 	}
 
