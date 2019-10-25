@@ -3492,11 +3492,6 @@ definitions:
         type: string
         example: "507f1f77bcf86cd799439011"
         description: "User role identifier"
-      user:
-        type: object
-        items:
-          "$ref": "#/definitions/UserRoleProfile"
-        description: "User information"
       merchantId:
         type: string
         example: "507f1f77bcf86cd799439011"
@@ -3505,18 +3500,10 @@ definitions:
         type: string
         example: "developer"
         description: "Role of user"
-      createdAt:
+      status:
         type: string
-        example: "developer"
-        description: "Date of creation"
-      updatedAt:
-        type: string
-        example: "developer"
-        description: "Date of updating"
-
-  UserRoleProfile:
-    type: object
-    properties:
+        example: "invited"
+        description: "Status of invitation: invited or approved"
       userId:
         type: string
         example: "507f1f77bcf86cd799439011"
@@ -3533,10 +3520,14 @@ definitions:
         type: string
         example: "test@paysuper.com"
         description: "Email of user"
-      status:
+      createdAt:
         type: string
-        example: "invited"
-        description: "Status of invitation: invited or approved"
+        example: "developer"
+        description: "Date of creation"
+      updatedAt:
+        type: string
+        example: "developer"
+        description: "Date of updating"
 
   ListRoleType:
     type: array
