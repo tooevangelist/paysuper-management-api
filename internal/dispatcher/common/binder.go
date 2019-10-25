@@ -439,6 +439,23 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error {
 	req := make(map[string]interface{})
 
+	// Read the content
+	var bodyBytes []byte
+	if ctx.Request().Body != nil {
+		bodyBytes, _ = ioutil.ReadAll(ctx.Request().Body)
+	}
+
+	// Restore the io.ReadCloser to its original state
+	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	projectReq := &billing.Project{}
+	if err := ctx.Bind(projectReq); err != nil {
+		return ErrorRequestParamsIncorrect
+	}
+
+	// Restore the io.ReadCloser to its original state
+	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
 	db := new(echo.DefaultBinder)
 	err := db.Bind(&req, ctx)
 
@@ -490,6 +507,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.Cover = pRsp.Item.Cover
 	structure.FullDescription = pRsp.Item.FullDescription
 	structure.Localizations = pRsp.Item.Localizations
+	structure.Currencies = pRsp.Item.Currencies
 
 	if v, ok := req[RequestParameterName]; ok {
 		tv, ok := v.(map[string]interface{})
@@ -691,44 +709,25 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		}
 	}
 
-	if v, ok := req[RequestParameterFullDescription]; ok {
-		if tv, ok := v.(map[string]interface{}); !ok {
-			return ErrorMessageLocalizedFieldIncorrectType
-		} else {
-			for k, tvv := range tv {
-				structure.FullDescription[k] = tvv.(string)
-			}
-		}
+	if _, ok := req[RequestParameterFullDescription]; ok {
+		structure.FullDescription = projectReq.FullDescription
 	}
 
-	if v, ok := req[RequestParameterShortDescription]; ok {
-		if tv, ok := v.(map[string]interface{}); !ok {
-			return ErrorMessageLocalizedFieldIncorrectType
-		} else {
-			for k, tvv := range tv {
-				structure.ShortDescription[k] = tvv.(string)
-			}
-		}
+	if _, ok := req[RequestParameterShortDescription]; ok {
+		structure.ShortDescription = projectReq.ShortDescription
 	}
 
-	if v, ok := req[RequestParameterCover]; ok {
-		if tv, ok := v.(*billing.ImageCollection); !ok {
-			return ErrorMessageCoverFieldIncorrectType
-		} else {
-			structure.Cover = tv
-		}
+	if _, ok := req[RequestParameterCover]; ok {
+		structure.Cover = projectReq.Cover
 	}
 
-	if v, ok := req[RequestParameterLocalizations]; ok {
-		if tv, ok := v.([]interface{}); !ok {
-			return ErrorMessageCoverFieldIncorrectType
-		} else {
-			for _, tvv := range tv {
-				structure.Localizations = append(structure.Localizations, tvv.(string))
-			}
-		}
+	if _, ok := req[RequestParameterLocalizations]; ok {
+		structure.Localizations = projectReq.Localizations
 	}
 
+	if _, ok := req[RequestParameterCurrencies]; ok {
+		structure.Currencies = projectReq.Currencies
+	}
 
 	return nil
 }

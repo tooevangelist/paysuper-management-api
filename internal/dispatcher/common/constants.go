@@ -74,6 +74,10 @@ const (
 	RequestParameterShortDescription         = "short_description"
 	RequestParameterCover                    = "cover"
 	RequestParameterLocalizations            = "localizations"
+	RequestParameterCurrencies               = "currencies"
+
+	ImageCollectionImagesField = "images"
+	ImageCollectionUseOneForAll = "use_one_for_all"
 
 	UserProfileFieldNumberOfEmployees = "NumberOfEmployees"
 	UserProfileFieldAnnualIncome      = "AnnualIncome"
