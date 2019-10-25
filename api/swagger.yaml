@@ -647,6 +647,33 @@ definitions:
       updated_at:
         description: date of update merchant in system in unix timestamp
         type: object
+      localizations:
+        description: languages for product to localize
+        type: array
+        items:
+          type: string
+      full_description:
+        description: localized full description for product
+        type: object
+        additionalProperties:
+          type: string
+      short_description:
+        description: localized short description for product
+        type: object
+        additionalProperties:
+          type: string
+      cover:
+        type: object
+        properties:
+          images:
+            type: object
+            additionalProperties:
+              type: string
+            example:
+              en: 'en_image'
+              ru: 'ru_image'
+          use_one_for_all:
+            type: boolean
     type: object
   model.ProjectJsonOrderResponse:
     properties:
@@ -1445,6 +1472,7 @@ definitions:
       url_redirect_success:
         description: default url to redirect user after successfully completed payment
         type: string
+
 
   order.BillingAddress:
     properties:

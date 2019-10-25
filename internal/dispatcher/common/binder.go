@@ -486,6 +486,10 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.UrlRedirectFail = pRsp.Item.UrlRedirectFail
 	structure.UrlRedirectSuccess = pRsp.Item.UrlRedirectSuccess
 	structure.Status = pRsp.Item.Status
+	structure.ShortDescription = pRsp.Item.ShortDescription
+	structure.Cover = pRsp.Item.Cover
+	structure.FullDescription = pRsp.Item.FullDescription
+	structure.Localizations = pRsp.Item.Localizations
 
 	if v, ok := req[RequestParameterName]; ok {
 		tv, ok := v.(map[string]interface{})
@@ -686,6 +690,45 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 			structure.UrlRefundPayment = tv
 		}
 	}
+
+	if v, ok := req[RequestParameterFullDescription]; ok {
+		if tv, ok := v.(map[string]interface{}); !ok {
+			return ErrorMessageLocalizedFieldIncorrectType
+		} else {
+			for k, tvv := range tv {
+				structure.FullDescription[k] = tvv.(string)
+			}
+		}
+	}
+
+	if v, ok := req[RequestParameterShortDescription]; ok {
+		if tv, ok := v.(map[string]interface{}); !ok {
+			return ErrorMessageLocalizedFieldIncorrectType
+		} else {
+			for k, tvv := range tv {
+				structure.ShortDescription[k] = tvv.(string)
+			}
+		}
+	}
+
+	if v, ok := req[RequestParameterCover]; ok {
+		if tv, ok := v.(*billing.ImageCollection); !ok {
+			return ErrorMessageCoverFieldIncorrectType
+		} else {
+			structure.Cover = tv
+		}
+	}
+
+	if v, ok := req[RequestParameterLocalizations]; ok {
+		if tv, ok := v.([]interface{}); !ok {
+			return ErrorMessageCoverFieldIncorrectType
+		} else {
+			for _, tvv := range tv {
+				structure.Localizations = append(structure.Localizations, tvv.(string))
+			}
+		}
+	}
+
 
 	return nil
 }

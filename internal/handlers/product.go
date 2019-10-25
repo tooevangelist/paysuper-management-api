@@ -195,7 +195,8 @@ func (h *ProductRoute) updateProduct(ctx echo.Context) error {
 func (h *ProductRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binder) error {
 	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.Product{}
-	err := binder.Bind(req, ctx)
+
+    err := binder.Bind(req, ctx)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
