@@ -70,6 +70,14 @@ const (
 	RequestParameterZipUsa                   = "zip_usa"
 	RequestParameterRateId                   = "rate_id"
 	RequestParameterReceiptId                = "receipt_id"
+	RequestParameterFullDescription          = "full_description"
+	RequestParameterShortDescription         = "short_description"
+	RequestParameterCover                    = "cover"
+	RequestParameterLocalizations            = "localizations"
+	RequestParameterCurrencies               = "currencies"
+
+	ImageCollectionImagesField = "images"
+	ImageCollectionUseOneForAll = "use_one_for_all"
 
 	UserProfileFieldNumberOfEmployees = "NumberOfEmployees"
 	UserProfileFieldAnnualIncome      = "AnnualIncome"

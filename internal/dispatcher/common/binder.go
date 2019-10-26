@@ -439,6 +439,23 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error {
 	req := make(map[string]interface{})
 
+	// Read the content
+	var bodyBytes []byte
+	if ctx.Request().Body != nil {
+		bodyBytes, _ = ioutil.ReadAll(ctx.Request().Body)
+	}
+
+	// Restore the io.ReadCloser to its original state
+	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	projectReq := &billing.Project{}
+	if err := ctx.Bind(projectReq); err != nil {
+		return ErrorRequestParamsIncorrect
+	}
+
+	// Restore the io.ReadCloser to its original state
+	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
 	db := new(echo.DefaultBinder)
 	err := db.Bind(&req, ctx)
 
@@ -486,6 +503,11 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.UrlRedirectFail = pRsp.Item.UrlRedirectFail
 	structure.UrlRedirectSuccess = pRsp.Item.UrlRedirectSuccess
 	structure.Status = pRsp.Item.Status
+	structure.ShortDescription = pRsp.Item.ShortDescription
+	structure.Cover = pRsp.Item.Cover
+	structure.FullDescription = pRsp.Item.FullDescription
+	structure.Localizations = pRsp.Item.Localizations
+	structure.Currencies = pRsp.Item.Currencies
 
 	if v, ok := req[RequestParameterName]; ok {
 		tv, ok := v.(map[string]interface{})
@@ -685,6 +707,26 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		} else {
 			structure.UrlRefundPayment = tv
 		}
+	}
+
+	if _, ok := req[RequestParameterFullDescription]; ok {
+		structure.FullDescription = projectReq.FullDescription
+	}
+
+	if _, ok := req[RequestParameterShortDescription]; ok {
+		structure.ShortDescription = projectReq.ShortDescription
+	}
+
+	if _, ok := req[RequestParameterCover]; ok {
+		structure.Cover = projectReq.Cover
+	}
+
+	if _, ok := req[RequestParameterLocalizations]; ok {
+		structure.Localizations = projectReq.Localizations
+	}
+
+	if _, ok := req[RequestParameterCurrencies]; ok {
+		structure.Currencies = projectReq.Currencies
 	}
 
 	return nil
