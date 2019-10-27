@@ -703,7 +703,8 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_Ok() {
 	var response *CreateOrderJsonProjectResponse
 	err = json.Unmarshal(res.Body.Bytes(), &response)
 	assert.NoError(suite.T(), err)
-	assert.NotNil(suite.T(), response.PaymentFormData)
+	assert.NotEmpty(suite.T(), response.PaymentFormUrl)
+	assert.NotEmpty(suite.T(), response.Id)
 }
 
 func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_Ok() {
@@ -979,8 +980,6 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_ProductionEnvironment_Ok() {
 	b, err := json.Marshal(order)
 	assert.NoError(suite.T(), err)
 
-	suite.router.cfg.ReturnPaymentForm = false
-
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, uuid.New().String()).
@@ -999,28 +998,26 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_ProductionEnvironment_Ok() {
 	assert.Nil(suite.T(), response.PaymentFormData)
 }
 
-func (suite *OrderTestSuite) TestOrder_GetOrderForm_Ok() {
-
+func (suite *OrderTestSuite) TestOrder_GetPaymentFormData_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, uuid.New().String()).
-		Path(orderIdPath).
+		Path(common.AuthProjectGroupPath + orderIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, res.Code)
 	assert.NotEmpty(suite.T(), res.Body.String())
-	assert.Equal(suite.T(), echo.MIMETextHTMLCharsetUTF8, res.Header().Get(echo.HeaderContentType))
+	assert.Equal(suite.T(), echo.MIMEApplicationJSONCharsetUTF8, res.Header().Get(echo.HeaderContentType))
 
-	cookies := res.Result().Cookies()
-	assert.True(suite.T(), len(cookies) == 1)
-	assert.Equal(suite.T(), common.CustomerTokenCookiesName, cookies[0].Name)
-	assert.True(suite.T(), cookies[0].HttpOnly)
+	data := new(grpc.PaymentFormJsonData)
+	err = json.Unmarshal(res.Body.Bytes(), data)
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), data.Cookie)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrderForm_TokenCookieExist_Ok() {
-
 	cookie := new(http.Cookie)
 	cookie.Name = common.CustomerTokenCookiesName
 	cookie.Value = bson.NewObjectId().Hex()
@@ -1031,20 +1028,20 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_TokenCookieExist_Ok() {
 		Method(http.MethodGet).
 		AddCookie(cookie).
 		Params(":"+common.RequestParameterId, mock.SomeMerchantId1).
-		Path(orderIdPath).
+		Path(common.AuthProjectGroupPath + orderIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, res.Code)
 	assert.NotEmpty(suite.T(), res.Body.String())
-	assert.Equal(suite.T(), echo.MIMETextHTMLCharsetUTF8, res.Header().Get(echo.HeaderContentType))
+	assert.Equal(suite.T(), echo.MIMEApplicationJSONCharsetUTF8, res.Header().Get(echo.HeaderContentType))
 
-	cookies := res.Result().Cookies()
-
-	assert.True(suite.T(), len(cookies) > 0)
-	assert.Equal(suite.T(), cookie.Name, cookies[0].Name)
-	assert.Equal(suite.T(), cookie.Value, cookies[0].Value)
+	data := new(grpc.PaymentFormJsonData)
+	err = json.Unmarshal(res.Body.Bytes(), data)
+	assert.NoError(suite.T(), err)
+	assert.NotEmpty(suite.T(), data.Cookie)
+	assert.Equal(suite.T(), cookie.Value, data.Cookie)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrderForm_ParameterIdNotFound_Error() {
@@ -1070,7 +1067,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(orderIdPath).
+		Path(common.AuthProjectGroupPath + orderIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 

@@ -34,7 +34,9 @@ func (s *BillingServerOkMock) OrderCreateProcess(
 ) (*grpc.OrderCreateProcessResponse, error) {
 	return &grpc.OrderCreateProcessResponse{
 		Status: pkg.ResponseStatusOk,
-		Item:   &billing.Order{},
+		Item: &billing.Order{
+			Uuid: uuid.New().String(),
+		},
 	}, nil
 }
 
