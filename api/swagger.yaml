@@ -1569,7 +1569,7 @@ definitions:
         description: payment description
         type: string
       type:
-        description: "payment type. now available next values: simple, project, key"
+        description: "payment type. now available next values: simple, product, key"
         type: string
       metadata:
         description: object can contain any other information about payment. object must contain only string values. this object will return in project notification about payment.
