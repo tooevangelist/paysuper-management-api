@@ -8776,7 +8776,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user/invite/check":
+  "/api/v1/user/invite/check":
     post:
       summary: Check invitation token
       tags:
@@ -8814,7 +8814,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user/invite/approve":
+  "/api/v1/user/invite/approve":
     post:
       summary: Approve of invitation for user
       tags:
@@ -8852,7 +8852,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user/merchants":
+  "/api/v1/user/merchants":
     get:
       summary: Get merchants list for user
       tags:
