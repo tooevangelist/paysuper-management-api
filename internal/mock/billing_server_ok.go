@@ -1219,3 +1219,7 @@ func (s *BillingServerOkMock) GetPaylinkStatByDate(ctx context.Context, in *grpc
 func (s *BillingServerOkMock) GetPaylinkStatByUtm(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
 	return &grpc.GetPaylinkStatCommonGroupResponse{Status: http.StatusOK, Item: &paylink.GroupStatCommon{}}, nil
 }
+
+func (s *BillingServerOkMock) GetRecommendedPriceTable(ctx context.Context, in *grpc.RecommendedPriceTableRequest, opts ...client.CallOption) (*grpc.RecommendedPriceTableResponse, error) {
+	panic("implement me")
+}

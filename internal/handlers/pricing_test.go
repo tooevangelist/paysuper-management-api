@@ -66,7 +66,7 @@ func (suite *PricingTestSuite) TestPricing_getRecommendedPrice_BindError_Require
 }
 
 func (suite *PricingTestSuite) TestPricing_getRecommendedPrice_Error_BillingServer() {
-	data := `{"amount": 1}`
+	data := `{"amount": 1, "currency": "USD"}`
 
 	billingService := &billingMocks.BillingService{}
 	billingService.On("GetRecommendedPriceByPriceGroup", mock2.Anything, mock2.Anything).Return(nil, errors.New("error"))
@@ -86,7 +86,7 @@ func (suite *PricingTestSuite) TestPricing_getRecommendedPrice_Error_BillingServ
 }
 
 func (suite *PricingTestSuite) TestPricing_getRecommendedPrice_Ok() {
-	data := `{"amount": 1}`
+	data := `{"amount": 1, "currency": "USD"}`
 
 	billingService := &billingMocks.BillingService{}
 	billingService.On("GetRecommendedPriceByPriceGroup", mock2.Anything, mock2.Anything).Return(&grpc.RecommendedPriceResponse{}, nil)

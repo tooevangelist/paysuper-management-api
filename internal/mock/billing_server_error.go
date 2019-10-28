@@ -1006,3 +1006,7 @@ func (s *BillingServerErrorMock) GetPaylinkStatByDate(ctx context.Context, in *g
 func (s *BillingServerErrorMock) GetPaylinkStatByUtm(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerErrorMock) GetRecommendedPriceTable(ctx context.Context, in *grpc.RecommendedPriceTableRequest, opts ...client.CallOption) (*grpc.RecommendedPriceTableResponse, error) {
+	panic("implement me")
+}

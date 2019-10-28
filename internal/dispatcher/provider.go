@@ -101,6 +101,9 @@ func ProviderValidators(v *validators.ValidatorSet) (validate *validator.Validat
 	if err = validate.RegisterValidation("tariff_region", v.TariffRegionValidator); err != nil {
 		return
 	}
+	if err = validate.RegisterValidation("iban", v.IBANValidator); err != nil {
+		return
+	}
 	return validate, func() {}, nil
 }
 
