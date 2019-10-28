@@ -13,6 +13,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/google/wire v0.3.0
 	github.com/gurukami/typ/v2 v2.0.1
+	github.com/hashicorp/consul v1.4.2 // indirect
 	github.com/karlseguin/expect v1.0.1 // indirect
 	github.com/labstack/echo/v4 v4.1.6
 	github.com/mattn/go-colorable v0.1.4 // indirect
@@ -20,7 +21,7 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191028135415-0b237668324f
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191028154814-df2a76d58cb7
 	github.com/paysuper/paysuper-recurring-repository v1.0.123
 	github.com/paysuper/paysuper-reporter v0.0.0-20191021130041-24bff0252418
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
