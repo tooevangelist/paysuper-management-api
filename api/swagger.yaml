@@ -528,79 +528,99 @@ definitions:
         type: array
     type: object
 
+  order.create.request.user:
+    properties:
+      external_id:
+        description: user identifier on project side
+        type: string
+      name:
+        description: user name
+        type: string
+      email:
+        description: user email
+        type: string
+      email_verified:
+        description: user email was verified by project
+        type: boolean
+      phone:
+        description: user phone
+        type: string
+      phone_verified:
+        description: user phone was verified by project
+        type: boolean
+      ip:
+        description: user ip address
+        type: string
+      locale:
+        description: user's locale. two-letter code in lowercase
+        type: string
+      address:
+        description: user address information
+        $ref: '#/definitions/order.BillingAddress'
+      metadata:
+        description: object can contain any other information about user. object must contain only string values.
+        type: object
+
   model.OrderScalar:
     properties:
       account:
-        description: |
-          user unique account in project
+        description: user unique account in project
         type: string
       amount:
-        description: |
-          order amount
+        description: order amount. if payment type is simple this field is required
         type: number
       currency:
-        description: |
-          order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency
+        description: amount currency. three-letter ISO 4217 currency code, in uppercase. if payment type is simple this field is required
         type: string
       description:
-        description: |
-          order description. If this field not send in request, then we're create standard order description
+        description: order description
         type: string
       order_id:
-        description: |
-          unique order identifier in project. This field not required, BUT we're recommend send this field always
-        type: string
-      other:
-        description: |
-          object with any fields on the project side that do not match the names of the reserved fields
-        type: object
-      payer_email:
-        description: |
-          user (payer) email
-        type: string
-      payer_ip:
-        description: |
-          user (payer) ip
-        type: string
-      payer_phone:
-        description: |
-          user (payer) phone
-        type: string
-      payment_method:
-        description: |
-          payment method identifier in Protocol One payment solution
+        description: unique order identifier on project side. this field not required, BUT we're recommend send this field always
         type: string
       project:
-        description: |
-          project unique identifier in Protocol One payment solution
-        type: string
-      region:
-        description: |
-          user (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip
-        type: string
-      signature:
-        description: |
-          signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always
+        description: project unique identifier in PaySuper
         type: string
       url_fail:
-        description: |
-          URL for redirect user after failed payment. This field can be send if it allowed in project admin panel
-        type: string
-      url_notify:
-        description: |
-          URL for payment notification request to project. This field can be send if it allowed in project admin panel
+        description: url for redirect user after failed payment. this field can be send if it allowed in project admin panel
         type: string
       url_success:
-        description: |
-          URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel
+        description: url for redirect user after successfully completed payment. this field can be send if it allowed in project admin panel
         type: string
-      url_verify:
-        description: |
-          URL for payment data verification request to project. This field can be send if it allowed in project admin panel
+      type:
+        description: "order type. now available next types: simple, product and key"
         type: string
+        enum:
+          - simple
+          - product
+          - key
+      products:
+        description: list of products (or key products) of project which customer want to buy. if payment type is product or key this field is required.
+        type: array
+        items:
+          type: string
+      platform_id:
+        description: platform identifier for which customer buy key products. if payment type is key this field is required.
+        type: string
+        enum:
+          - steam
+          - gog
+          - uplay
+          - origin
+          - psn
+          - xbox
+          - nintendo
+          - itch
+          - egs
+      token:
+        description: pre-created customer payment token. if sending pre-created token other request parameters not required.
+        type: string
+      user:
+        description: object may contain information about user. if project send this parameter in request than project must send authorisation header X-API-SIGNATURE
+        $ref: '#/definitions/order.create.request.user'
     required:
       - project
-      - amount
+      - type
     type: object
 
   model.PaymentMethodJsonOrderResponse:
