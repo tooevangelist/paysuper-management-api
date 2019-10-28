@@ -21,6 +21,7 @@ env:
   - AWS_SECRET_ACCESS_KEY_AGREEMENT=secret_key
   - AWS_REGION_AGREEMENT=eu-west-1
   - AWS_BUCKET_AGREEMENT=bucket
+  - ORDER_INLINE_FORM_URL_MASK=https://paysupermgmt.tst.protocol.one/order
 jobs:
   include:
   - stage: test
