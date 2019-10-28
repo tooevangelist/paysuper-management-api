@@ -5,7 +5,6 @@ micro:
   name: p1payapi
 dispatcher:
   global:
-    returnPaymentForm: true
     paymentFormJsLibraryUrl: "unknown"
     awsAccessKeyIdAgreement: "unknown"
     awsSecretAccessKeyAgreement: "unknown"

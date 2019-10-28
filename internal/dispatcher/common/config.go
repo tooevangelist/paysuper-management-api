@@ -29,7 +29,6 @@ type Config struct {
 	LimitDefault                 int32 `default:"100"`
 	OffsetDefault                int32 `default:"0"`
 	LimitMax                     int32 `default:"1000"`
-	ReturnPaymentForm            bool  `envconfig:"DEBUG_RETURN_PAYMENT_FORM"`
 	DisableAuthMiddleware        bool
 	CustomerTokenCookiesLifetime time.Duration // CustomerTokenCookiesLifetime = 2592000
 
