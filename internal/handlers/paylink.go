@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
@@ -20,6 +21,8 @@ const (
 	paylinksIdStatReferrerPath = "/paylinks/:id/dashboard/referrer"
 	paylinksIdStatDatePath     = "/paylinks/:id/dashboard/date"
 	paylinksIdStatUtmPath      = "/paylinks/:id/dashboard/utm"
+
+	paylinkUrlMask = "%s://%s/%s"
 )
 
 type PayLinkRoute struct {
@@ -168,7 +171,9 @@ func (h *PayLinkRoute) getPaylinkUrl(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, res.Url)
+	url := fmt.Sprintf(paylinkUrlMask, h.cfg.HttpScheme, ctx.Request().Host, res.Url)
+
+	return ctx.JSON(http.StatusOK, url)
 }
 
 // @Description Get paylink, for authenticated merchant
