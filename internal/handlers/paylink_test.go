@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"net/http"
+	"net/url"
 	"testing"
 )
 
@@ -76,9 +77,15 @@ func (suite *PaylinkTestSuite) TestPaylink_getPaylink_Ok() {
 
 func (suite *PaylinkTestSuite) TestPaylink_getPaylinkUrl_Ok() {
 
+	q := make(url.Values)
+	q.Add("utm_source", "google")
+	q.Add("utm_medium", "cpc")
+	q.Add("utm_campaign", "someval")
+
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		SetQueryParams(q).
 		Path(common.AuthUserGroupPath + paylinksUrlPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
