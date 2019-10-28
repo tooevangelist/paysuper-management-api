@@ -33,5 +33,5 @@ type Config struct {
 	DisableAuthMiddleware        bool
 	CustomerTokenCookiesLifetime time.Duration // CustomerTokenCookiesLifetime = 2592000
 
-	OrderInlineFormUrlMask string `envconfig:"ORDER_INLINE_FORM_URL_MASK" default:"%s://%s/order/%s"`
+	OrderInlineFormUrlMask string `envconfig:"ORDER_INLINE_FORM_URL_MASK" required:"true"`
 }

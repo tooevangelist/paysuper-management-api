@@ -248,7 +248,7 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 
 	response := &CreateOrderJsonProjectResponse{
 		Id:             order.Uuid,
-		PaymentFormUrl: fmt.Sprintf(h.cfg.OrderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, order.Uuid),
+		PaymentFormUrl: h.cfg.OrderInlineFormUrlMask + "?order_id=" + order.Uuid,
 	}
 
 	if h.cfg.ReturnPaymentForm {

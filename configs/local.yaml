@@ -13,7 +13,6 @@ dispatcher:
     awsAccessKeyIdReporter: "unknown"
     awsSecretAccessKeyReporter: "unknown"
     awsBucketReporter: "unknown"
-    orderInlineFormUrlMask: "%s://%s/order/%s"
     auth1:
       clientId: "unknown"
       clientSecret: "unknown"

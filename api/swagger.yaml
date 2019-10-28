@@ -1591,6 +1591,8 @@ definitions:
       metadata:
         description: object can contain any other information about user. object must contain only string values.
         type: object
+    required:
+      - id
 
   token.TokenRequest.Settings.ReturnUrl:
     properties:
@@ -1601,52 +1603,37 @@ definitions:
         description: url to redirect user after payment failed
         type: string
 
-  token.TokenRequest.Settings.Item:
-    properties:
-      sku:
-        description: sku identifier
-        type: string
-      amount:
-        description: item price
-        type: number
-      currency:
-        description: item price currency. 3 characters currency code in upper registry by ISO 4217
-        type: string
-    required:
-      - sku
-      - amount
-      - currency
-
   token.TokenRequest.Settings:
     properties:
       project_id:
         description: project identifier
         type: string
       return_url:
-        description: object contain urls for redirect user after payment ended
+        description: object contain urls for redirect user after payment ended. can be set if project settings allow this.
         $ref: '#/definitions/token.TokenRequest.Settings.ReturnUrl'
       currency:
-        description: 3 characters currency code in upper registry by ISO 4217
+        description: 3 characters currency code in upper registry by ISO 4217. this field is required if payment type is simple
         type: string
       amount:
-        description: payment amount. this field is required if project use simple checkout payment to process payments.
+        description: payment amount. this field is required if payment type is simple
         type: number
-      payment_method:
-        description: predefined payment method identifier
-        type: string
-      items:
-        description: object contain information about items which user want to buy. this field is required if project not use simple checkout payment to process payments.
+      products_ids:
+        description: array of products identifiers or key products identifiers. this field is required if payment type is product or simple
         type: array
         items:
-          $ref: '#/definitions/token.TokenRequest.Settings.Item'
+          type: string
       description:
         description: payment description
+        type: string
+      type:
+        description: "payment type. now available next values: simple, product, key"
         type: string
       metadata:
         description: object can contain any other information about payment. object must contain only string values. this object will return in project notification about payment.
         type: object
     required:
       - project_id
+      - type
 
   token.TokenRequest:
     properties:
@@ -1664,6 +1651,9 @@ definitions:
     properties:
       token:
         description: payment token
+        type: string
+      payment_form_url:
+        description: url to payment form
         type: string
     required:
       - token
