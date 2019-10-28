@@ -1255,6 +1255,24 @@ definitions:
         description: recommended amount
         type: number
 
+  price_group.RecommendedPriceTableResponse:
+    properties:
+      ranges:
+        type: array
+        description: list of price
+        $ref: '#/definitions/price_group.RecommendedPriceTableItem'
+
+  price_group.RecommendedPriceTableItem:
+    properties:
+      from:
+        type: integer
+        description: start point of range
+        example: 0.99
+      to:
+        type: integer
+        description: end point of range
+        example: 1.99
+
   onboarding.Merchant.Notification.Statuses:
     properties:
       from:
@@ -4390,11 +4408,17 @@ paths:
         - application/json
       description: Calculation of recommended prices based on price ranges as in Steam, taking into account regional factors.
       parameters:
-        - description: base price in USD
-          in: query
-          name: amount
-          type: string
+        - description: Request param
+          in: body
+          name: data
           required: true
+          schema:
+            type: object
+            properties:
+              amount:
+                type: integer
+              currency:
+                type: string
       produces:
         - application/json
       responses:
@@ -4410,18 +4434,25 @@ paths:
             type: string
       summary: Get recommended prices for regions by price groups
       tags:
-        - Price group
+        - Pricing
+
   /api/v1/pricing/recommended/conversion:
     get:
       consumes:
         - application/json
       description: Calculation of recommended prices based on exchange rates.
       parameters:
-        - description: base price in USD
-          in: query
-          name: amount
-          type: string
+        - description: Request param
+          in: body
+          name: data
           required: true
+          schema:
+            type: object
+            properties:
+              amount:
+                type: integer
+              currency:
+                type: string
       produces:
         - application/json
       responses:
@@ -4437,7 +4468,39 @@ paths:
             type: string
       summary: Get recommended prices for regions by currency conversion
       tags:
-        - Price group
+        - Pricing
+
+  /api/v1/pricing/recommended/table:
+    get:
+      consumes:
+        - application/json
+      description: Get table of recommended prices for currency.
+      parameters:
+        - description: Request param
+          in: body
+          name: data
+          required: true
+          schema:
+            type: object
+            properties:
+              currency:
+                type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/price_group.RecommendedPriceTableResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Get table of recommended prices for currency
+      tags:
+        - Pricing
 
   "/admin/api/v1/merchants":
     get:
