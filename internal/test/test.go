@@ -288,6 +288,9 @@ func SetUp(settings map[string]interface{}, services common.Services, setUp func
 		services,
 		nil,
 	)
+	if e != nil {
+		return nil, e
+	}
 	d, _, e := BuildDispatcher(
 		context.Background(),
 		settings,
