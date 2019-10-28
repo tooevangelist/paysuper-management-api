@@ -674,7 +674,46 @@ definitions:
               ru: 'ru_image'
           use_one_for_all:
             type: boolean
+      virtual_currency:
+        $ref: '#/definitions/model.VirtualCurrency'
     type: object
+
+  model.VirtualCurrency:
+    type: object
+    properties:
+      logo:
+        type: string
+      name:
+        type: string
+        additionalProperties:
+          type: string
+        example:
+          en: "Some name"
+          ru: "Какое то имя"
+      SuccessMessage:
+        type: string
+        additionalProperties:
+          type: string
+        example:
+          en: "Thanks!"
+          ru: "Спасибо!"
+      MinPurchaseValue:
+        type: number
+        format: double
+      MaxPurchaseValue:
+        type: number
+        format: double
+      SellCountType:
+        type: string
+        enum:
+          - fractional
+          - integral
+      Prices:
+        type: array
+        items:
+          $ref: '#/definitions/product.Price'
+
+
   model.ProjectJsonOrderResponse:
     properties:
       name:
@@ -2655,6 +2694,12 @@ definitions:
       metadata:
         description: object can contain any other information about product. object must contain only string values
         type: object
+      billing_type:
+        description: Type of billing
+        type: string
+        enum:
+          - real
+          - virtual
 
   product.create_or_update:
     properties:
