@@ -590,6 +590,12 @@ components:
           description: Pricing mode (currency, manual, steam or default)
           type: string
           example: 'steam'
+        billing_type:
+          description: Type of billing
+          type: string
+          enum:
+            - real
+            - virtual
 
     ImageCollection:
       type: object

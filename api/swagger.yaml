@@ -674,7 +674,46 @@ definitions:
               ru: 'ru_image'
           use_one_for_all:
             type: boolean
+      virtual_currency:
+        $ref: '#/definitions/model.VirtualCurrency'
     type: object
+
+  model.VirtualCurrency:
+    type: object
+    properties:
+      logo:
+        type: string
+      name:
+        type: string
+        additionalProperties:
+          type: string
+        example:
+          en: "Some name"
+          ru: "Какое то имя"
+      SuccessMessage:
+        type: string
+        additionalProperties:
+          type: string
+        example:
+          en: "Thanks!"
+          ru: "Спасибо!"
+      MinPurchaseValue:
+        type: number
+        format: double
+      MaxPurchaseValue:
+        type: number
+        format: double
+      SellCountType:
+        type: string
+        enum:
+          - fractional
+          - integral
+      Prices:
+        type: array
+        items:
+          $ref: '#/definitions/product.Price'
+
+
   model.ProjectJsonOrderResponse:
     properties:
       name:
@@ -2641,6 +2680,12 @@ definitions:
       metadata:
         description: object can contain any other information about product. object must contain only string values
         type: object
+      billing_type:
+        description: Type of billing
+        type: string
+        enum:
+          - real
+          - virtual
 
   product.create_or_update:
     properties:
@@ -8392,52 +8437,6 @@ paths:
             $ref: '#/definitions/model.Error'
         "401":
           description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/paylinks/project/{id}":
-    get:
-      summary: Get a list of payment links for current authenticated merchant, filtered by project
-      tags:
-        - Payment links
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description:  Get a list of payment links for current authenticated merchant, filtered by project
-      parameters:
-        - description: Project identifier
-          in: path
-          name: id
-          required: true
-          type: string
-        - description: maximum number of returning orders. default value is 100
-          in: query
-          name: limit
-          type: integer
-        - description: offset from which you want to return the list of orders. default value is 0
-          in: query
-          name: offset
-          type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/grpcPaylinksPaginate'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
         "500":
