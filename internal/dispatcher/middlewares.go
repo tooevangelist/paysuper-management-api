@@ -161,6 +161,7 @@ func (d *Dispatcher) AuthOneMerchantPreMiddleware() echo.MiddlewareFunc {
 			func(ui *jwtverifier.UserInfo) {
 				user := common.ExtractUserContext(c)
 				user.Id = ui.UserID
+				user.Email = ui.Email
 				user.Name = "Merchant User"
 
 				res, err := d.appSet.Services.Billing.GetMerchantsForUser(
@@ -195,6 +196,7 @@ func (d *Dispatcher) AuthOnAdminPreMiddleware() echo.MiddlewareFunc {
 			func(ui *jwtverifier.UserInfo) {
 				user := common.ExtractUserContext(c)
 				user.Id = ui.UserID
+				user.Email = ui.Email
 				user.Name = "System User"
 				common.SetUserContext(c, user)
 			},
