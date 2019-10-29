@@ -15,8 +15,6 @@ import (
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/validators"
 	"github.com/paysuper/paysuper-management-api/pkg/micro"
-	paylinkServiceConst "github.com/paysuper/paysuper-payment-link/pkg"
-	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/constant"
 	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
 	reporterPkg "github.com/paysuper/paysuper-reporter/pkg"
@@ -61,7 +59,6 @@ func ProviderServices(srv *micro.Micro) common.Services {
 		Geo:        proto.NewGeoIpService(geoip.ServiceName, srv.Client()),
 		Billing:    grpc.NewBillingService(pkg.ServiceName, srv.Client()),
 		Tax:        tax_service.NewTaxService(taxServiceConst.ServiceName, srv.Client()),
-		PayLink:    paylink.NewPaylinkService(paylinkServiceConst.ServiceName, srv.Client()),
 		Reporter:   reporterProto.NewReporterService(reporterPkg.ServiceName, srv.Client()),
 	}
 }
@@ -89,7 +86,6 @@ func ProviderValidators(v *validators.ValidatorSet) (validate *validator.Validat
 	}
 	validate.RegisterStructValidation(v.CompanyValidator, grpc.UserProfileCompany{})
 	validate.RegisterStructValidation(v.MerchantCompanyValidator, billing.MerchantCompanyInfo{})
-	validate.RegisterStructValidation(v.MerchantTariffRatesValidator, grpc.GetMerchantTariffRatesRequest{})
 	if err = validate.RegisterValidation("company_name", v.CompanyNameValidator); err != nil {
 		return
 	}
@@ -100,6 +96,12 @@ func ProviderValidators(v *validators.ValidatorSet) (validate *validator.Validat
 		return
 	}
 	if err = validate.RegisterValidation("world_region", v.WorldRegionValidator); err != nil {
+		return
+	}
+	if err = validate.RegisterValidation("tariff_region", v.TariffRegionValidator); err != nil {
+		return
+	}
+	if err = validate.RegisterValidation("iban", v.IBANValidator); err != nil {
 		return
 	}
 	return validate, func() {}, nil

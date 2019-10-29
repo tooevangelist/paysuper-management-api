@@ -11,7 +11,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-payment-link/proto/paylink"
 	"io/ioutil"
 	"strconv"
 )
@@ -31,12 +30,6 @@ type OnboardingNotificationsListBinder struct {
 type OnboardingGetPaymentMethodBinder struct{}
 type OnboardingChangePaymentMethodBinder struct{}
 type OnboardingCreateNotificationBinder struct{}
-type PaylinksListBinder struct {
-	LimitDefault, OffsetDefault int32
-}
-type PaylinksUrlBinder struct{}
-type PaylinksCreateBinder struct{}
-type PaylinksUpdateBinder struct{}
 type ProductsGetProductsListBinder struct {
 	LimitDefault, OffsetDefault int32
 }
@@ -310,90 +303,6 @@ func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Contex
 }
 
 // Bind
-func (b *PaylinksListBinder) Bind(i interface{}, ctx echo.Context) error {
-	params := ctx.QueryParams()
-	structure := i.(*paylink.GetPaylinksRequest)
-
-	structure.Limit = uint32(b.LimitDefault)
-	structure.Offset = uint32(b.OffsetDefault)
-
-	if v, ok := params[RequestParameterLimit]; ok {
-		i, err := strconv.ParseInt(v[0], 10, 32)
-		if err != nil {
-			return err
-		}
-		structure.Limit = uint32(i)
-	}
-
-	if v, ok := params[RequestParameterOffset]; ok {
-		i, err := strconv.ParseInt(v[0], 10, 32)
-		if err != nil {
-			return err
-		}
-		structure.Offset = uint32(i)
-	}
-
-	structure.ProjectId = ctx.Param(RequestParameterProjectId)
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksUrlBinder) Bind(i interface{}, ctx echo.Context) error {
-	params := ctx.QueryParams()
-	structure := i.(*paylink.GetPaylinkURLRequest)
-
-	id := ctx.Param(RequestParameterId)
-	structure.Id = id
-
-	if v, ok := params[RequestParameterUtmSource]; ok {
-		structure.UtmSource = v[0]
-	}
-
-	if v, ok := params[RequestParameterUtmMedium]; ok {
-		structure.UtmMedium = v[0]
-	}
-
-	if v, ok := params[RequestParameterUtmCampaign]; ok {
-		structure.UtmCampaign = v[0]
-	}
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksCreateBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-	if err != nil {
-		return err
-	}
-
-	structure := i.(*paylink.CreatePaylinkRequest)
-	structure.Id = ""
-
-	return nil
-}
-
-// Bind
-func (b *PaylinksUpdateBinder) Bind(i interface{}, ctx echo.Context) error {
-	id := ctx.Param(RequestParameterId)
-	if id == "" {
-		return ErrorIncorrectPaylinkId
-	}
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-	if err != nil {
-		return err
-	}
-
-	structure := i.(*paylink.CreatePaylinkRequest)
-	structure.Id = id
-
-	return nil
-}
-
-// Bind
 func (b *ProductsGetProductsListBinder) Bind(i interface{}, ctx echo.Context) error {
 	limit := int32(b.LimitDefault)
 	offset := int32(b.OffsetDefault)
@@ -530,6 +439,23 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error {
 	req := make(map[string]interface{})
 
+	// Read the content
+	var bodyBytes []byte
+	if ctx.Request().Body != nil {
+		bodyBytes, _ = ioutil.ReadAll(ctx.Request().Body)
+	}
+
+	// Restore the io.ReadCloser to its original state
+	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	projectReq := &billing.Project{}
+	if err := ctx.Bind(projectReq); err != nil {
+		return ErrorRequestParamsIncorrect
+	}
+
+	// Restore the io.ReadCloser to its original state
+	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
 	db := new(echo.DefaultBinder)
 	err := db.Bind(&req, ctx)
 
@@ -559,7 +485,6 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.Id = projectId
 	structure.MerchantId = pRsp.Item.MerchantId
 	structure.Name = pRsp.Item.Name
-	structure.Image = pRsp.Item.Image
 	structure.CallbackCurrency = pRsp.Item.CallbackCurrency
 	structure.CallbackProtocol = pRsp.Item.CallbackProtocol
 	structure.CreateOrderAllowedUrls = pRsp.Item.CreateOrderAllowedUrls
@@ -578,6 +503,11 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.UrlRedirectFail = pRsp.Item.UrlRedirectFail
 	structure.UrlRedirectSuccess = pRsp.Item.UrlRedirectSuccess
 	structure.Status = pRsp.Item.Status
+	structure.ShortDescription = pRsp.Item.ShortDescription
+	structure.Cover = pRsp.Item.Cover
+	structure.FullDescription = pRsp.Item.FullDescription
+	structure.Localizations = pRsp.Item.Localizations
+	structure.Currencies = pRsp.Item.Currencies
 
 	if v, ok := req[RequestParameterName]; ok {
 		tv, ok := v.(map[string]interface{})
@@ -588,14 +518,6 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 		for k, tvv := range tv {
 			structure.Name[k] = tvv.(string)
-		}
-	}
-
-	if v, ok := req[RequestParameterImage]; ok {
-		if tv, ok := v.(string); !ok {
-			return ErrorMessageImageIncorrectType
-		} else {
-			structure.Image = tv
 		}
 	}
 
@@ -785,6 +707,26 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		} else {
 			structure.UrlRefundPayment = tv
 		}
+	}
+
+	if _, ok := req[RequestParameterFullDescription]; ok {
+		structure.FullDescription = projectReq.FullDescription
+	}
+
+	if _, ok := req[RequestParameterShortDescription]; ok {
+		structure.ShortDescription = projectReq.ShortDescription
+	}
+
+	if _, ok := req[RequestParameterCover]; ok {
+		structure.Cover = projectReq.Cover
+	}
+
+	if _, ok := req[RequestParameterLocalizations]; ok {
+		structure.Localizations = projectReq.Localizations
+	}
+
+	if _, ok := req[RequestParameterCurrencies]; ok {
+		structure.Currencies = projectReq.Currencies
 	}
 
 	return nil

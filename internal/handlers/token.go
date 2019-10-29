@@ -64,5 +64,10 @@ func (h *TokenRoute) createToken(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, map[string]string{"token": res.Token})
+	response := map[string]string{
+		"token":            res.Token,
+		"payment_form_url": h.cfg.OrderInlineFormUrlMask + "?token=" + res.Token,
+	}
+
+	return ctx.JSON(http.StatusOK, response)
 }

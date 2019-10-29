@@ -153,6 +153,8 @@ var (
 	ErrorMessageMerchantNotFound                  = NewManagementApiResponseError("ma000100", "merchant not found")
 	ErrorMessageCreateReportFile                  = NewManagementApiResponseError("ma000101", "unable to create report file")
 	ErrorMessageDownloadReportFile                = NewManagementApiResponseError("ma000102", "unable to download report file")
+	ErrorMessageLocalizedFieldIncorrectType                = NewManagementApiResponseError("ma000103", "localized field has invalid type")
+	ErrorMessageCoverFieldIncorrectType                = NewManagementApiResponseError("ma000104", "cover field has invalid type")
 
 	ValidationErrors = map[string]*grpc.ResponseErrorMessage{
 		UserProfileFieldNumberOfEmployees: ErrorMessageIncorrectNumberOfEmployees,
