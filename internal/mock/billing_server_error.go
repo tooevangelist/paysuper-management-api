@@ -1093,7 +1093,3 @@ func (s *BillingServerErrorMock) DeleteAdminUser(ctx context.Context, in *grpc.D
 func (s *BillingServerErrorMock) GetPermissionsForUser(ctx context.Context, in *grpc.GetPermissionsForUserRequest, opts ...client.CallOption) (*grpc.GetPermissionsForUserResponse, error) {
 	panic("implement me")
 }
-
-func (s *BillingServerErrorMock) GetRecommendedPriceTable(ctx context.Context, in *grpc.RecommendedPriceTableRequest, opts ...client.CallOption) (*grpc.RecommendedPriceTableResponse, error) {
-	panic("implement me")
-}
