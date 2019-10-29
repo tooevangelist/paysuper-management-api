@@ -21,7 +21,7 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191029093404-c3288fdde292
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191029094149-bd636b19b815
 	github.com/paysuper/paysuper-recurring-repository v1.0.124
 	github.com/paysuper/paysuper-reporter v0.0.0-20191021130041-24bff0252418
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
