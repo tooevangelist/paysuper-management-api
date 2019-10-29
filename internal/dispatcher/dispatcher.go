@@ -134,8 +134,11 @@ func (d *Dispatcher) commonRoutes(echoHttp *echo.Echo) {
 }
 
 func (d *Dispatcher) authProjectGroup(grp *echo.Group) {
-	// Called after routes
-	grp.Use(d.BodyDumpMiddleware()) // 1
+	// Called before routes
+	if !d.globalCfg.DisableAuthMiddleware {
+		grp.Use(d.GetUserDetailsMiddleware) // 1
+	}
+	grp.Use(d.SystemBinderPreMiddleware) // 2
 }
 
 func (d *Dispatcher) accessGroup(grp *echo.Group) {
