@@ -3,11 +3,14 @@ package mock
 import (
 	"context"
 	"github.com/globalsign/mgo/bson"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	"github.com/micro/go-micro/client"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/paylink"
+	"net/http"
 )
 
 type BillingServerOkMock struct{}
@@ -31,7 +34,9 @@ func (s *BillingServerOkMock) OrderCreateProcess(
 ) (*grpc.OrderCreateProcessResponse, error) {
 	return &grpc.OrderCreateProcessResponse{
 		Status: pkg.ResponseStatusOk,
-		Item:   &billing.Order{},
+		Item: &billing.Order{
+			Uuid: uuid.New().String(),
+		},
 	}, nil
 }
 
@@ -40,10 +45,14 @@ func (s *BillingServerOkMock) PaymentFormJsonDataProcess(
 	in *grpc.PaymentFormJsonDataRequest,
 	opts ...client.CallOption,
 ) (*grpc.PaymentFormJsonDataResponse, error) {
+	cookie := in.Cookie
+	if cookie == "" {
+		cookie = bson.NewObjectId().Hex()
+	}
 	return &grpc.PaymentFormJsonDataResponse{
 		Status: pkg.ResponseStatusOk,
 		Item: &grpc.PaymentFormJsonData{
-			Cookie: bson.NewObjectId().Hex(),
+			Cookie: cookie,
 		},
 	}, nil
 }
@@ -110,7 +119,7 @@ func (s *BillingServerOkMock) GetMerchantBy(
 	if in.MerchantId == SomeMerchantId3 {
 		OnboardingMerchantMock.Status = pkg.MerchantStatusDraft
 	} else {
-		OnboardingMerchantMock.Status = pkg.MerchantStatusOnReview
+		OnboardingMerchantMock.Status = pkg.MerchantStatusAgreementSigning
 	}
 
 	rsp := &grpc.GetMerchantResponse{
@@ -482,16 +491,12 @@ func (s *BillingServerOkMock) ListProducts(ctx context.Context, in *grpc.ListPro
 	}, nil
 }
 
-func (s *BillingServerOkMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
-	return Product, nil
+func (s *BillingServerOkMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.GetProductResponse, error) {
+	return GetProductResponse, nil
 }
 
 func (s *BillingServerOkMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	return &grpc.EmptyResponse{}, nil
-}
-
-func (s *BillingServerOkMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
-	return &billing.OrderPaginate{Count: 1, Items: []*billing.Order{}}, nil
 }
 
 func (s *BillingServerOkMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
@@ -521,7 +526,9 @@ func (s *BillingServerOkMock) UpdateCountry(ctx context.Context, in *billing.Cou
 }
 
 func (s *BillingServerOkMock) GetPriceGroup(ctx context.Context, in *billing.GetPriceGroupRequest, opts ...client.CallOption) (*billing.PriceGroup, error) {
-	panic("implement me")
+	return &billing.PriceGroup{
+		Id: "some_id",
+	}, nil
 }
 
 func (s *BillingServerOkMock) UpdatePriceGroup(ctx context.Context, in *billing.PriceGroup, opts ...client.CallOption) (*billing.PriceGroup, error) {
@@ -775,10 +782,10 @@ func (s *BillingServerOkMock) GetProductPrices(
 
 func (s *BillingServerOkMock) GetPriceGroupRecommendedPrice(
 	ctx context.Context,
-	in *grpc.PriceGroupRecommendedPriceRequest,
+	in *grpc.RecommendedPriceRequest,
 	opts ...client.CallOption,
-) (*grpc.PriceGroupRecommendedPriceResponse, error) {
-	return &grpc.PriceGroupRecommendedPriceResponse{}, nil
+) (*grpc.RecommendedPriceResponse, error) {
+	return &grpc.RecommendedPriceResponse{}, nil
 }
 
 func (s *BillingServerOkMock) GetPriceGroupCurrencyByRegion(
@@ -786,7 +793,11 @@ func (s *BillingServerOkMock) GetPriceGroupCurrencyByRegion(
 	in *grpc.PriceGroupByRegionRequest,
 	opts ...client.CallOption,
 ) (*grpc.PriceGroupCurrenciesResponse, error) {
-	return &grpc.PriceGroupCurrenciesResponse{}, nil
+	return &grpc.PriceGroupCurrenciesResponse{
+		Region: []*grpc.PriceGroupRegions{
+			{Currency: "USD"},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) GetPriceGroupCurrencies(
@@ -948,18 +959,6 @@ func (s *BillingServerOkMock) GetPlatforms(ctx context.Context, in *grpc.ListPla
 	}, nil
 }
 
-func (s *BillingServerOkMock) UpdatePlatformPrices(ctx context.Context, in *grpc.AddOrUpdatePlatformPricesRequest, opts ...client.CallOption) (*grpc.UpdatePlatformPricesResponse, error) {
-	return &grpc.UpdatePlatformPricesResponse{
-		Status: pkg.ResponseStatusOk,
-		Price: &grpc.PlatformPrice{
-			Id: "steam",
-			Prices: []*grpc.ProductPrice{
-				{},
-			},
-		},
-	}, nil
-}
-
 func (s *BillingServerOkMock) DeletePlatformFromProduct(ctx context.Context, in *grpc.RemovePlatformRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	return &grpc.EmptyResponseWithStatus{
 		Status: pkg.ResponseStatusOk,
@@ -1017,7 +1016,222 @@ func (s *BillingServerOkMock) GetKeyProductInfo(ctx context.Context, in *grpc.Ge
 func (s *BillingServerOkMock) ChangeCodeInOrder(ctx context.Context, in *grpc.ChangeCodeInOrderRequest, opts ...client.CallOption) (*grpc.ChangeCodeInOrderResponse, error) {
 	return &grpc.ChangeCodeInOrderResponse{
 		Status: pkg.ResponseStatusOk,
-		Order: &billing.Order{
+		Order:  &billing.Order{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) GetOrderPublic(
+	ctx context.Context,
+	in *grpc.GetOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.GetOrderPublicResponse, error) {
+	return &grpc.GetOrderPublicResponse{}, nil
+}
+
+func (s *BillingServerOkMock) GetOrderPrivate(
+	ctx context.Context,
+	in *grpc.GetOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.GetOrderPrivateResponse, error) {
+	return &grpc.GetOrderPrivateResponse{}, nil
+}
+
+func (s *BillingServerOkMock) FindAllOrdersPublic(
+	ctx context.Context,
+	in *grpc.ListOrdersRequest,
+	opts ...client.CallOption,
+) (*grpc.ListOrdersPublicResponse, error) {
+	return &grpc.ListOrdersPublicResponse{}, nil
+}
+
+func (s *BillingServerOkMock) FindAllOrdersPrivate(
+	ctx context.Context,
+	in *grpc.ListOrdersRequest,
+	opts ...client.CallOption,
+) (*grpc.ListOrdersPrivateResponse, error) {
+	return &grpc.ListOrdersPrivateResponse{}, nil
+}
+
+func (s *BillingServerOkMock) GetDashboardMainReport(
+	ctx context.Context,
+	in *grpc.GetDashboardMainRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardMainResponse, error) {
+	return &grpc.GetDashboardMainResponse{}, nil
+}
+func (s *BillingServerOkMock) GetDashboardRevenueDynamicsReport(
+	ctx context.Context,
+	in *grpc.GetDashboardMainRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardRevenueDynamicsReportResponse, error) {
+	return &grpc.GetDashboardRevenueDynamicsReportResponse{}, nil
+}
+
+func (s *BillingServerOkMock) GetDashboardBaseReport(
+	ctx context.Context,
+	in *grpc.GetDashboardBaseReportRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardBaseReportResponse, error) {
+	return &grpc.GetDashboardBaseReportResponse{}, nil
+}
+
+func (s *BillingServerOkMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) UpdatePayoutDocument(ctx context.Context, in *grpc.UpdatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPayoutDocuments(ctx context.Context, in *grpc.GetPayoutDocumentsRequest, opts ...client.CallOption) (*grpc.GetPayoutDocumentsResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) UpdatePayoutDocumentSignatures(ctx context.Context, in *grpc.UpdatePayoutDocumentSignaturesRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetMerchantBalance(ctx context.Context, in *grpc.GetMerchantBalanceRequest, opts ...client.CallOption) (*grpc.GetMerchantBalanceResponse, error) {
+	return &grpc.GetMerchantBalanceResponse{
+		Status: pkg.ResponseStatusOk,
+		Item: &billing.MerchantBalance{
+			Id:             bson.NewObjectId().Hex(),
+			MerchantId:     bson.NewObjectId().Hex(),
+			Currency:       "RUB",
+			Debit:          0,
+			Credit:         0,
+			RollingReserve: 0,
+			Total:          0,
+			CreatedAt:      ptypes.TimestampNow(),
 		},
 	}, nil
+}
+
+func (s *BillingServerOkMock) PayoutDocumentPdfUploaded(ctx context.Context, in *grpc.PayoutDocumentPdfUploadedRequest, opts ...client.CallOption) (*grpc.PayoutDocumentPdfUploadedResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetRoyaltyReport(ctx context.Context, in *grpc.GetRoyaltyReportRequest, opts ...client.CallOption) (*grpc.GetRoyaltyReportResponse, error) {
+	return &grpc.GetRoyaltyReportResponse{
+		Status:  pkg.ResponseStatusOk,
+		Message: nil,
+		Item:    &billing.RoyaltyReport{},
+	}, nil
+}
+
+func (s *BillingServerOkMock) UnPublishKeyProduct(ctx context.Context, in *grpc.UnPublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) PaymentFormPlatformChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangePlatformRequest,
+	opts ...client.CallOption,
+) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) OrderReceipt(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) OrderReceiptRefund(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetRecommendedPriceByPriceGroup(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetRecommendedPriceByConversion(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) CheckSkuAndKeyProject(ctx context.Context, in *grpc.CheckSkuAndKeyProjectRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPriceGroupByRegion(ctx context.Context, in *grpc.GetPriceGroupByRegionRequest, opts ...client.CallOption) (*grpc.GetPriceGroupByRegionResponse, error) {
+	return &grpc.GetPriceGroupByRegionResponse{
+		Status: 200,
+		Group: &billing.PriceGroup{
+			Id: "some id",
+		},
+	}, nil
+}
+
+func (s *BillingServerOkMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*grpc.ListOrdersResponse, error) {
+	return &grpc.ListOrdersResponse{Status: http.StatusOK}, nil
+}
+
+func (s *BillingServerOkMock) ChangeMerchantManualPayouts(ctx context.Context, in *grpc.ChangeMerchantManualPayoutsRequest, opts ...client.CallOption) (*grpc.ChangeMerchantManualPayoutsResponse, error) {
+	return &grpc.ChangeMerchantManualPayoutsResponse{Status: http.StatusOK, Item: &billing.Merchant{}}, nil
+}
+
+func (s *BillingServerOkMock) OrderCreateByPaylink(ctx context.Context, in *billing.OrderCreateByPaylink, opts ...client.CallOption) (*grpc.OrderCreateProcessResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPaylinks(ctx context.Context, in *grpc.GetPaylinksRequest, opts ...client.CallOption) (*grpc.GetPaylinksResponse, error) {
+	return &grpc.GetPaylinksResponse{Status: http.StatusOK, Data: &grpc.PaylinksPaginate{Count: 0, Items: []*paylink.Paylink{}}}, nil
+}
+
+func (s *BillingServerOkMock) GetPaylink(ctx context.Context, in *grpc.PaylinkRequest, opts ...client.CallOption) (*grpc.GetPaylinkResponse, error) {
+	return &grpc.GetPaylinkResponse{Status: http.StatusOK, Item: &paylink.Paylink{}}, nil
+}
+
+func (s *BillingServerOkMock) IncrPaylinkVisits(ctx context.Context, in *grpc.PaylinkRequestById, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	return &grpc.EmptyResponse{}, nil
+}
+
+func (s *BillingServerOkMock) GetPaylinkURL(ctx context.Context, in *grpc.GetPaylinkURLRequest, opts ...client.CallOption) (*grpc.GetPaylinkUrlResponse, error) {
+	return &grpc.GetPaylinkUrlResponse{Status: http.StatusOK, Url: "http://someurl"}, nil
+}
+
+func (s *BillingServerOkMock) CreateOrUpdatePaylink(ctx context.Context, in *paylink.CreatePaylinkRequest, opts ...client.CallOption) (*grpc.GetPaylinkResponse, error) {
+	return &grpc.GetPaylinkResponse{Status: http.StatusOK, Item: &paylink.Paylink{}}, nil
+}
+
+func (s *BillingServerOkMock) DeletePaylink(ctx context.Context, in *grpc.PaylinkRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	return &grpc.EmptyResponseWithStatus{Status: http.StatusOK}, nil
+}
+
+func (s *BillingServerOkMock) GetPaylinkStatTotal(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonResponse, error) {
+	return &grpc.GetPaylinkStatCommonResponse{Status: http.StatusOK, Item: &paylink.StatCommon{}}, nil
+}
+
+func (s *BillingServerOkMock) GetPaylinkStatByCountry(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
+	return &grpc.GetPaylinkStatCommonGroupResponse{Status: http.StatusOK, Item: &paylink.GroupStatCommon{}}, nil
+}
+
+func (s *BillingServerOkMock) GetPaylinkStatByReferrer(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
+	return &grpc.GetPaylinkStatCommonGroupResponse{Status: http.StatusOK, Item: &paylink.GroupStatCommon{}}, nil
+}
+
+func (s *BillingServerOkMock) GetPaylinkStatByDate(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
+	return &grpc.GetPaylinkStatCommonGroupResponse{Status: http.StatusOK, Item: &paylink.GroupStatCommon{}}, nil
+}
+
+func (s *BillingServerOkMock) GetPaylinkStatByUtm(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
+	return &grpc.GetPaylinkStatCommonGroupResponse{Status: http.StatusOK, Item: &paylink.GroupStatCommon{}}, nil
+}
+
+func (s *BillingServerOkMock) GetRecommendedPriceTable(ctx context.Context, in *grpc.RecommendedPriceTableRequest, opts ...client.CallOption) (*grpc.RecommendedPriceTableResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) RoyaltyReportPdfUploaded(ctx context.Context, in *grpc.RoyaltyReportPdfUploadedRequest, opts ...client.CallOption) (*grpc.RoyaltyReportPdfUploadedResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPayoutDocument(ctx context.Context, in *grpc.GetPayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPayoutDocumentRoyaltyReports(ctx context.Context, in *grpc.GetPayoutDocumentRequest, opts ...client.CallOption) (*grpc.ListRoyaltyReportsResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) AutoCreatePayoutDocuments(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
 }

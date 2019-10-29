@@ -1,0 +1,18 @@
+micro:
+  selector: static
+  name: p1payapi
+dispatcher:
+  global:
+    returnPaymentForm: true
+    paymentFormJsLibraryUrl: "unknown"
+    awsAccessKeyIdAgreement: "unknown"
+    awsSecretAccessKeyAgreement: "unknown"
+    awsBucketAgreement: "unknown"
+    awsAccessKeyIdReporter: "unknown"
+    awsSecretAccessKeyReporter: "unknown"
+    awsBucketReporter: "unknown"
+    orderInlineFormUrlMask: "%s://%s/order/%s"
+    auth1:
+      clientId: "unknown"
+      clientSecret: "unknown"
+      redirectUrl: "unknown"

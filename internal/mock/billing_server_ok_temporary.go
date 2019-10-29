@@ -7,6 +7,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/paylink"
 )
 
 type BillingServerOkTemporaryMock struct{}
@@ -318,8 +319,8 @@ func (s *BillingServerOkTemporaryMock) ListProducts(ctx context.Context, in *grp
 	}, nil
 }
 
-func (s *BillingServerOkTemporaryMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.Product, error) {
-	return Product, nil
+func (s *BillingServerOkTemporaryMock) GetProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.GetProductResponse, error) {
+	return GetProductResponse, nil
 }
 
 func (s *BillingServerOkTemporaryMock) DeleteProduct(ctx context.Context, in *grpc.RequestProduct, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
@@ -364,10 +365,6 @@ func (s *BillingServerOkTemporaryMock) SetMerchantS3Agreement(
 	opts ...client.CallOption,
 ) (*grpc.ChangeMerchantDataResponse, error) {
 	return &grpc.ChangeMerchantDataResponse{}, nil
-}
-
-func (s *BillingServerOkTemporaryMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*billing.OrderPaginate, error) {
-	return &billing.OrderPaginate{}, nil
 }
 
 func (s *BillingServerOkTemporaryMock) ListProjects(ctx context.Context, in *grpc.ListProjectsRequest, opts ...client.CallOption) (*grpc.ListProjectsResponse, error) {
@@ -588,9 +585,9 @@ func (s *BillingServerOkTemporaryMock) GetProductPrices(
 
 func (s *BillingServerOkTemporaryMock) GetPriceGroupRecommendedPrice(
 	ctx context.Context,
-	in *grpc.PriceGroupRecommendedPriceRequest,
+	in *grpc.RecommendedPriceRequest,
 	opts ...client.CallOption,
-) (*grpc.PriceGroupRecommendedPriceResponse, error) {
+) (*grpc.RecommendedPriceResponse, error) {
 	return nil, SomeError
 }
 
@@ -730,10 +727,6 @@ func (s *BillingServerOkTemporaryMock) GetPlatforms(ctx context.Context, in *grp
 	panic("implement me")
 }
 
-func (s *BillingServerOkTemporaryMock) UpdatePlatformPrices(ctx context.Context, in *grpc.AddOrUpdatePlatformPricesRequest, opts ...client.CallOption) (*grpc.UpdatePlatformPricesResponse, error) {
-	panic("implement me")
-}
-
 func (s *BillingServerOkTemporaryMock) DeletePlatformFromProduct(ctx context.Context, in *grpc.RemovePlatformRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
@@ -767,5 +760,200 @@ func (s *BillingServerOkTemporaryMock) GetKeyProductInfo(ctx context.Context, in
 }
 
 func (s *BillingServerOkTemporaryMock) ChangeCodeInOrder(ctx context.Context, in *grpc.ChangeCodeInOrderRequest, opts ...client.CallOption) (*grpc.ChangeCodeInOrderResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetDashboardMainReport(
+	ctx context.Context,
+	in *grpc.GetDashboardMainRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardMainResponse, error) {
+	return &grpc.GetDashboardMainResponse{}, nil
+}
+func (s *BillingServerOkTemporaryMock) GetDashboardRevenueDynamicsReport(
+	ctx context.Context,
+	in *grpc.GetDashboardMainRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardRevenueDynamicsReportResponse, error) {
+	return &grpc.GetDashboardRevenueDynamicsReportResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetDashboardBaseReport(
+	ctx context.Context,
+	in *grpc.GetDashboardBaseReportRequest,
+	opts ...client.CallOption,
+) (*grpc.GetDashboardBaseReportResponse, error) {
+	return &grpc.GetDashboardBaseReportResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetOrderPublic(
+	ctx context.Context,
+	in *grpc.GetOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.GetOrderPublicResponse, error) {
+	return &grpc.GetOrderPublicResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) GetOrderPrivate(
+	ctx context.Context,
+	in *grpc.GetOrderRequest,
+	opts ...client.CallOption,
+) (*grpc.GetOrderPrivateResponse, error) {
+	return &grpc.GetOrderPrivateResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) FindAllOrdersPublic(
+	ctx context.Context,
+	in *grpc.ListOrdersRequest,
+	opts ...client.CallOption,
+) (*grpc.ListOrdersPublicResponse, error) {
+	return &grpc.ListOrdersPublicResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) FindAllOrdersPrivate(
+	ctx context.Context,
+	in *grpc.ListOrdersRequest,
+	opts ...client.CallOption,
+) (*grpc.ListOrdersPrivateResponse, error) {
+	return &grpc.ListOrdersPrivateResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) UpdatePayoutDocument(ctx context.Context, in *grpc.UpdatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPayoutDocuments(ctx context.Context, in *grpc.GetPayoutDocumentsRequest, opts ...client.CallOption) (*grpc.GetPayoutDocumentsResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) UpdatePayoutDocumentSignatures(ctx context.Context, in *grpc.UpdatePayoutDocumentSignaturesRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetMerchantBalance(ctx context.Context, in *grpc.GetMerchantBalanceRequest, opts ...client.CallOption) (*grpc.GetMerchantBalanceResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) PayoutDocumentPdfUploaded(ctx context.Context, in *grpc.PayoutDocumentPdfUploadedRequest, opts ...client.CallOption) (*grpc.PayoutDocumentPdfUploadedResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetRoyaltyReport(ctx context.Context, in *grpc.GetRoyaltyReportRequest, opts ...client.CallOption) (*grpc.GetRoyaltyReportResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) UnPublishKeyProduct(ctx context.Context, in *grpc.UnPublishKeyProductRequest, opts ...client.CallOption) (*grpc.KeyProductResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) PaymentFormPlatformChanged(
+	ctx context.Context,
+	in *grpc.PaymentFormUserChangePlatformRequest,
+	opts ...client.CallOption,
+) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) OrderReceipt(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) OrderReceiptRefund(ctx context.Context, in *grpc.OrderReceiptRequest, opts ...client.CallOption) (*grpc.OrderReceiptResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetRecommendedPriceByPriceGroup(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetRecommendedPriceByConversion(ctx context.Context, in *grpc.RecommendedPriceRequest, opts ...client.CallOption) (*grpc.RecommendedPriceResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) CheckSkuAndKeyProject(ctx context.Context, in *grpc.CheckSkuAndKeyProjectRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPriceGroupByRegion(ctx context.Context, in *grpc.GetPriceGroupByRegionRequest, opts ...client.CallOption) (*grpc.GetPriceGroupByRegionResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) FindAllOrders(ctx context.Context, in *grpc.ListOrdersRequest, opts ...client.CallOption) (*grpc.ListOrdersResponse, error) {
+	return &grpc.ListOrdersResponse{}, nil
+}
+
+func (s *BillingServerOkTemporaryMock) ChangeMerchantManualPayouts(ctx context.Context, in *grpc.ChangeMerchantManualPayoutsRequest, opts ...client.CallOption) (*grpc.ChangeMerchantManualPayoutsResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) OrderCreateByPaylink(ctx context.Context, in *billing.OrderCreateByPaylink, opts ...client.CallOption) (*grpc.OrderCreateProcessResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPaylinks(ctx context.Context, in *grpc.GetPaylinksRequest, opts ...client.CallOption) (*grpc.GetPaylinksResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPaylink(ctx context.Context, in *grpc.PaylinkRequest, opts ...client.CallOption) (*grpc.GetPaylinkResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) IncrPaylinkVisits(ctx context.Context, in *grpc.PaylinkRequestById, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPaylinkURL(ctx context.Context, in *grpc.GetPaylinkURLRequest, opts ...client.CallOption) (*grpc.GetPaylinkUrlResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) CreateOrUpdatePaylink(ctx context.Context, in *paylink.CreatePaylinkRequest, opts ...client.CallOption) (*grpc.GetPaylinkResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) DeletePaylink(ctx context.Context, in *grpc.PaylinkRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPaylinkStatTotal(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPaylinkStatByCountry(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPaylinkStatByReferrer(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPaylinkStatByDate(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPaylinkStatByUtm(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetRecommendedPriceTable(ctx context.Context, in *grpc.RecommendedPriceTableRequest, opts ...client.CallOption) (*grpc.RecommendedPriceTableResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) RoyaltyReportPdfUploaded(ctx context.Context, in *grpc.RoyaltyReportPdfUploadedRequest, opts ...client.CallOption) (*grpc.RoyaltyReportPdfUploadedResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPayoutDocument(ctx context.Context, in *grpc.GetPayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPayoutDocumentRoyaltyReports(ctx context.Context, in *grpc.GetPayoutDocumentRequest, opts ...client.CallOption) (*grpc.ListRoyaltyReportsResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) AutoCreatePayoutDocuments(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	panic("implement me")
 }

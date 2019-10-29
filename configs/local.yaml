@@ -1,0 +1,18 @@
+http:
+  bind: :3001
+micro:
+  selector: static
+  name: p1payapi
+dispatcher:
+  global:
+    paymentFormJsLibraryUrl: "unknown"
+    awsAccessKeyIdAgreement: "unknown"
+    awsSecretAccessKeyAgreement: "unknown"
+    awsBucketAgreement: "unknown"
+    awsAccessKeyIdReporter: "unknown"
+    awsSecretAccessKeyReporter: "unknown"
+    awsBucketReporter: "unknown"
+    auth1:
+      clientId: "unknown"
+      clientSecret: "unknown"
+      redirectUrl: "unknown"
