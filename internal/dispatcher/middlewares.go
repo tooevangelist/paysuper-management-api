@@ -57,6 +57,7 @@ func (d *Dispatcher) GetUserDetailsMiddleware(next echo.HandlerFunc) echo.Handle
 		}
 
 		user := common.ExtractUserContext(ctx)
+		user.Id = u.UserID
 		user.Email = u.Email
 		common.SetUserContext(ctx, user)
 
