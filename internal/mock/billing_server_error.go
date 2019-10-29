@@ -1003,6 +1003,10 @@ func (s *BillingServerErrorMock) GetPaylinkStatByUtm(ctx context.Context, in *gr
 	panic("implement me")
 }
 
+func (s *BillingServerErrorMock) GetRecommendedPriceTable(ctx context.Context, in *grpc.RecommendedPriceTableRequest, opts ...client.CallOption) (*grpc.RecommendedPriceTableResponse, error) {
+	panic("implement me")
+}
+
 func (s *BillingServerErrorMock) RoyaltyReportPdfUploaded(ctx context.Context, in *grpc.RoyaltyReportPdfUploadedRequest, opts ...client.CallOption) (*grpc.RoyaltyReportPdfUploadedResponse, error) {
 	panic("implement me")
 }

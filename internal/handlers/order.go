@@ -12,7 +12,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"net/http"
-	"time"
 )
 
 const (
@@ -34,8 +33,7 @@ const (
 )
 
 const (
-	orderFormTemplateName = "order.html"
-	errorTemplateName     = "error.html"
+	errorTemplateName = "error.html"
 )
 
 type CreateOrderJsonProjectResponse struct {
@@ -68,15 +66,6 @@ func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
 	return nil
 }
 
-// NewOrderListRefundsBinder
-func NewOrderListRefundsBinde(set common.HandlerSet, cfg common.Config) *OrderListRefundsBinder {
-	return &OrderListRefundsBinder{
-		dispatch: set,
-		LMT:      &set.AwareSet,
-		cfg:      cfg,
-	}
-}
-
 type OrderRoute struct {
 	dispatch common.HandlerSet
 	cfg      common.Config
@@ -93,8 +82,7 @@ func NewOrderRoute(set common.HandlerSet, cfg *common.Config) *OrderRoute {
 }
 
 func (h *OrderRoute) Route(groups *common.Groups) {
-
-	groups.Common.GET(orderIdPath, h.getOrderForm)
+	groups.AuthProject.GET(orderIdPath, h.getPaymentFormData)
 	groups.Common.GET(paylinkIdPath, h.getOrderForPaylink)       // TODO: Need a test
 	groups.Common.GET(orderCreatePath, h.createFromFormData)     // TODO: Need a test
 	groups.Common.POST(orderCreatePath, h.createFromFormData)    // TODO: Need a test
@@ -248,42 +236,13 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 
 	response := &CreateOrderJsonProjectResponse{
 		Id:             order.Uuid,
-		PaymentFormUrl: fmt.Sprintf(h.cfg.OrderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, order.Uuid),
-	}
-
-	if h.cfg.ReturnPaymentForm {
-		req2 := &grpc.PaymentFormJsonDataRequest{
-			OrderId: order.Uuid,
-			Scheme:  h.cfg.HttpScheme,
-			Host:    ctx.Request().Host,
-			Ip:      ctx.RealIP(),
-		}
-		rsp2, err := h.dispatch.Services.Billing.PaymentFormJsonDataProcess(ctxReq, req2)
-
-		if err != nil {
-			common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "PaymentFormJsonDataProcess", req)
-			return echo.NewHTTPError(http.StatusBadRequest, err)
-		}
-		if rsp2.Status != pkg.ResponseStatusOk {
-			if rsp2.Item != nil {
-				return ctx.JSON(int(rsp2.Status), &grpc.ResponseErrorMessage{
-					Code:    rsp2.Message.Code,
-					Message: rsp2.Message.Message,
-					Details: rsp2.Item.Id,
-				})
-			}
-
-			return echo.NewHTTPError(int(rsp2.Status), rsp2.Message)
-		}
-
-		response.PaymentFormData = rsp2.Item
+		PaymentFormUrl: h.cfg.OrderInlineFormUrlMask + "?order_id=" + order.Uuid,
 	}
 
 	return ctx.JSON(http.StatusOK, response)
 }
 
-func (h *OrderRoute) getOrderForm(ctx echo.Context) error {
-
+func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
 	id := ctx.Param(common.RequestParameterId)
 
 	if id == "" {
@@ -315,24 +274,7 @@ func (h *OrderRoute) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	if res.Item.Cookie != "" {
-		cookie := new(http.Cookie)
-		cookie.Name = common.CustomerTokenCookiesName
-		cookie.Value = res.Item.Cookie
-		cookie.Expires = time.Now().Add(h.cfg.CustomerTokenCookiesLifetime)
-		cookie.HttpOnly = true
-		ctx.SetCookie(cookie)
-	}
-
-	return ctx.Render(
-		http.StatusOK,
-		orderFormTemplateName,
-		map[string]interface{}{
-			"Order":                   res,
-			"WebSocketUrl":            h.cfg.WebsocketUrl,
-			"PaymentFormJsLibraryUrl": h.cfg.PaymentFormJsLibraryUrl,
-		},
-	)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // Create order from payment link and redirect to order payment form

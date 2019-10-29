@@ -34,7 +34,9 @@ func (s *BillingServerOkMock) OrderCreateProcess(
 ) (*grpc.OrderCreateProcessResponse, error) {
 	return &grpc.OrderCreateProcessResponse{
 		Status: pkg.ResponseStatusOk,
-		Item:   &billing.Order{},
+		Item: &billing.Order{
+			Uuid: uuid.New().String(),
+		},
 	}, nil
 }
 
@@ -1212,6 +1214,10 @@ func (s *BillingServerOkMock) GetPaylinkStatByDate(ctx context.Context, in *grpc
 
 func (s *BillingServerOkMock) GetPaylinkStatByUtm(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
 	return &grpc.GetPaylinkStatCommonGroupResponse{Status: http.StatusOK, Item: &paylink.GroupStatCommon{}}, nil
+}
+
+func (s *BillingServerOkMock) GetRecommendedPriceTable(ctx context.Context, in *grpc.RecommendedPriceTableRequest, opts ...client.CallOption) (*grpc.RecommendedPriceTableResponse, error) {
+	panic("implement me")
 }
 
 func (s *BillingServerOkMock) RoyaltyReportPdfUploaded(ctx context.Context, in *grpc.RoyaltyReportPdfUploadedRequest, opts ...client.CallOption) (*grpc.RoyaltyReportPdfUploadedResponse, error) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	"github.com/go-pascal/iban"
 	"github.com/google/uuid"
 	billPkg "github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -45,10 +46,6 @@ var (
 		{From: 11, To: 50},
 		{From: 51, To: 100},
 		{From: 100, To: 0},
-	}
-
-	availableTariffPaymentAmountRange = []*billing.PriceTableCurrency{
-		{From: 0.75, To: 5},
 	}
 
 	zipUsaRegexp      = regexp.MustCompile("^[0-9]{5}(?:-[0-9]{4})?$")
@@ -132,17 +129,6 @@ func (v *ValidatorSet) RangeIntValidator(in *billing.RangeInt, rng []*billing.Ra
 	return false
 }
 
-// RangeFloatValidator
-func (v *ValidatorSet) RangeFloatValidator(in *billing.PriceTableCurrency, rng []*billing.PriceTableCurrency) bool {
-	for _, v := range rng {
-		if in.From == v.From && in.To == v.To {
-			return true
-		}
-	}
-
-	return false
-}
-
 // CompanyNameValidator
 func (v *ValidatorSet) CompanyNameValidator(fl validator.FieldLevel) bool {
 	return companyNameRegexp.MatchString(fl.Field().String())
@@ -185,6 +171,12 @@ func (v *ValidatorSet) WorldRegionValidator(fl validator.FieldLevel) bool {
 func (v *ValidatorSet) TariffRegionValidator(fl validator.FieldLevel) bool {
 	_, ok := billPkg.HomeRegions[fl.Field().String()]
 	return ok
+}
+
+// IBAN validator
+func (v *ValidatorSet) IBANValidator(fl validator.FieldLevel) bool {
+	_, err := iban.NewIBAN(fl.Field().String())
+	return err == nil
 }
 
 // New

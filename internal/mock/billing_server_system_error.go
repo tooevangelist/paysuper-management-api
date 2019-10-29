@@ -882,6 +882,10 @@ func (s *BillingServerSystemErrorMock) GetPaylinkStatByUtm(ctx context.Context, 
 	panic("implement me")
 }
 
+func (s *BillingServerSystemErrorMock) GetRecommendedPriceTable(ctx context.Context, in *grpc.RecommendedPriceTableRequest, opts ...client.CallOption) (*grpc.RecommendedPriceTableResponse, error) {
+	panic("implement me")
+}
+
 func (s *BillingServerSystemErrorMock) RoyaltyReportPdfUploaded(ctx context.Context, in *grpc.RoyaltyReportPdfUploadedRequest, opts ...client.CallOption) (*grpc.RoyaltyReportPdfUploadedResponse, error) {
 	panic("implement me")
 }

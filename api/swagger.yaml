@@ -40,7 +40,74 @@ definitions:
         description: error code
     type: object
 
+  model.JsonOrderCreateResponse.user.address:
+    properties:
+      country:
+        type: string
+        description: string representing the the user's country. two-letter uppercase country code in ISO 3166-1 alpha-2 format
+      city:
+        type: string
+        description: user's city
+      zip:
+        type: string
+        description: postal code
+
+  model.JsonOrderCreateResponse.item:
+    properties:
+      id:
+        description: item identifier
+        type: string
+      object:
+        description: item type
+        type: string
+      sku:
+        description: item sku identifier
+        type: string
+      name:
+        description: item name
+        type: string
+      description:
+        description: item description
+        type: string
+      amount:
+        description: item price
+        type: number
+      currency:
+        description: item price currency. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+      images:
+        description: list of urls to item images
+        type: array
+        items:
+          type: string
+      url:
+        description: url to item on project site
+      metadata:
+        description: object contain item metadata
+        type: object
+      code:
+        description: item code
+        type: string
+      created_at:
+        description: object contain information about time when payment created
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: object contain information about time when payment updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+      platform_id:
+        description: item platform identifier
+        type: string
+
   model.JsonOrderCreateResponse:
+    properties:
+      id:
+        description: order unique identifier
+        type: string
+      payment_form_url:
+        description: url to payment form
+        type: string
+
+  model.PaymentFormDataResponse:
     properties:
       account:
         description: |
@@ -69,10 +136,6 @@ definitions:
         description: |
           order unique identifier
         type: string
-      inline_form_redirect_url:
-        description: |
-          url to redirect user to inline form in PSP side
-        type: string
       payment_methods:
         description: |
           contain data about payment methods
@@ -88,20 +151,34 @@ definitions:
         description: |
           access token to websocket private chanel
         type: string
-      platform_id:
-        description: |
-          id of platform for key product (steam, gog, xbox, etc.)
+      user_ip_data:
+        description: object contain information about user address get by user ip address
+        $ref: '#/definitions/model.JsonOrderCreateResponse.user.address'
+      items:
+        description: list of buyed items in order
+        type: array
+        items:
+          $ref: '#/definitions/model.JsonOrderCreateResponse.item'
+      cookie:
+        description: value to set to cookie for user identification. if user was identified by other data than value can be empty.
         type: string
-        example: steam
-      type:
-        description: |
-          type of products in order (simple, product, key)
+      email:
+        description: user email
         type: string
-        example: simple
-        enum:
-          - simple
-          - product
-          - key
+      description:
+        description: order description
+        type: string
+      country_payments_allowed:
+        description: true is payments from user country is allowed
+        type: boolean
+      country_change_allowed:
+        description: true if user can change self country if payments from his country disallow
+        type: boolean
+      platforms:
+        description: list of supported platforms if this payment with type key (for other types this field can be empty)
+        type: array
+        items:
+          type: string
     type: object
 
   model.Name:
@@ -451,79 +528,99 @@ definitions:
         type: array
     type: object
 
+  order.create.request.user:
+    properties:
+      external_id:
+        description: user identifier on project side
+        type: string
+      name:
+        description: user name
+        type: string
+      email:
+        description: user email
+        type: string
+      email_verified:
+        description: user email was verified by project
+        type: boolean
+      phone:
+        description: user phone
+        type: string
+      phone_verified:
+        description: user phone was verified by project
+        type: boolean
+      ip:
+        description: user ip address
+        type: string
+      locale:
+        description: user's locale. two-letter code in lowercase
+        type: string
+      address:
+        description: user address information
+        $ref: '#/definitions/order.BillingAddress'
+      metadata:
+        description: object can contain any other information about user. object must contain only string values.
+        type: object
+
   model.OrderScalar:
     properties:
       account:
-        description: |
-          user unique account in project
+        description: user unique account in project
         type: string
       amount:
-        description: |
-          order amount
+        description: order amount. if payment type is simple this field is required
         type: number
       currency:
-        description: |
-          order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency
+        description: amount currency. three-letter ISO 4217 currency code, in uppercase. if payment type is simple this field is required
         type: string
       description:
-        description: |
-          order description. If this field not send in request, then we're create standard order description
+        description: order description
         type: string
       order_id:
-        description: |
-          unique order identifier in project. This field not required, BUT we're recommend send this field always
-        type: string
-      other:
-        description: |
-          object with any fields on the project side that do not match the names of the reserved fields
-        type: object
-      payer_email:
-        description: |
-          user (payer) email
-        type: string
-      payer_ip:
-        description: |
-          user (payer) ip
-        type: string
-      payer_phone:
-        description: |
-          user (payer) phone
-        type: string
-      payment_method:
-        description: |
-          payment method identifier in Protocol One payment solution
+        description: unique order identifier on project side. this field not required, BUT we're recommend send this field always
         type: string
       project:
-        description: |
-          project unique identifier in Protocol One payment solution
-        type: string
-      region:
-        description: |
-          user (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip
-        type: string
-      signature:
-        description: |
-          signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always
+        description: project unique identifier in PaySuper
         type: string
       url_fail:
-        description: |
-          URL for redirect user after failed payment. This field can be send if it allowed in project admin panel
-        type: string
-      url_notify:
-        description: |
-          URL for payment notification request to project. This field can be send if it allowed in project admin panel
+        description: url for redirect user after failed payment. this field can be send if it allowed in project admin panel
         type: string
       url_success:
-        description: |
-          URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel
+        description: url for redirect user after successfully completed payment. this field can be send if it allowed in project admin panel
         type: string
-      url_verify:
-        description: |
-          URL for payment data verification request to project. This field can be send if it allowed in project admin panel
+      type:
+        description: "order type. now available next types: simple, product and key"
         type: string
+        enum:
+          - simple
+          - product
+          - key
+      products:
+        description: list of products (or key products) of project which customer want to buy. if payment type is product or key this field is required.
+        type: array
+        items:
+          type: string
+      platform_id:
+        description: platform identifier for which customer buy key products. if payment type is key this field is required.
+        type: string
+        enum:
+          - steam
+          - gog
+          - uplay
+          - origin
+          - psn
+          - xbox
+          - nintendo
+          - itch
+          - egs
+      token:
+        description: pre-created customer payment token. if sending pre-created token other request parameters not required.
+        type: string
+      user:
+        description: object may contain information about user. if project send this parameter in request than project must send authorisation header X-API-SIGNATURE
+        $ref: '#/definitions/order.create.request.user'
     required:
       - project
-      - amount
+      - type
     type: object
 
   model.PaymentMethodJsonOrderResponse:
@@ -1591,6 +1688,8 @@ definitions:
       metadata:
         description: object can contain any other information about user. object must contain only string values.
         type: object
+    required:
+      - id
 
   token.TokenRequest.Settings.ReturnUrl:
     properties:
@@ -1601,52 +1700,37 @@ definitions:
         description: url to redirect user after payment failed
         type: string
 
-  token.TokenRequest.Settings.Item:
-    properties:
-      sku:
-        description: sku identifier
-        type: string
-      amount:
-        description: item price
-        type: number
-      currency:
-        description: item price currency. 3 characters currency code in upper registry by ISO 4217
-        type: string
-    required:
-      - sku
-      - amount
-      - currency
-
   token.TokenRequest.Settings:
     properties:
       project_id:
         description: project identifier
         type: string
       return_url:
-        description: object contain urls for redirect user after payment ended
+        description: object contain urls for redirect user after payment ended. can be set if project settings allow this.
         $ref: '#/definitions/token.TokenRequest.Settings.ReturnUrl'
       currency:
-        description: 3 characters currency code in upper registry by ISO 4217
+        description: 3 characters currency code in upper registry by ISO 4217. this field is required if payment type is simple
         type: string
       amount:
-        description: payment amount. this field is required if project use simple checkout payment to process payments.
+        description: payment amount. this field is required if payment type is simple
         type: number
-      payment_method:
-        description: predefined payment method identifier
-        type: string
-      items:
-        description: object contain information about items which user want to buy. this field is required if project not use simple checkout payment to process payments.
+      products_ids:
+        description: array of products identifiers or key products identifiers. this field is required if payment type is product or simple
         type: array
         items:
-          $ref: '#/definitions/token.TokenRequest.Settings.Item'
+          type: string
       description:
         description: payment description
+        type: string
+      type:
+        description: "payment type. now available next values: simple, product, key"
         type: string
       metadata:
         description: object can contain any other information about payment. object must contain only string values. this object will return in project notification about payment.
         type: object
     required:
       - project_id
+      - type
 
   token.TokenRequest:
     properties:
@@ -1664,6 +1748,9 @@ definitions:
     properties:
       token:
         description: payment token
+        type: string
+      payment_form_url:
+        description: url to payment form
         type: string
     required:
       - token
@@ -9051,3 +9138,37 @@ paths:
           description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
+
+  /api/v1/order/{id}:
+    get:
+      consumes:
+        - application/json
+      description: Get data for rendering payment form
+      parameters:
+        - description: Order unique identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PaymentFormDataResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get data for rendering payment form
+      tags:
+        - Order
