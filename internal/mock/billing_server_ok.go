@@ -1320,3 +1320,7 @@ func (s *BillingServerOkMock) DeleteAdminUser(ctx context.Context, in *grpc.Dele
 func (s *BillingServerOkMock) GetPermissionsForUser(ctx context.Context, in *grpc.GetPermissionsForUserRequest, opts ...client.CallOption) (*grpc.GetPermissionsForUserResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkMock) GetRecommendedPriceTable(ctx context.Context, in *grpc.RecommendedPriceTableRequest, opts ...client.CallOption) (*grpc.RecommendedPriceTableResponse, error) {
+	panic("implement me")
+}
