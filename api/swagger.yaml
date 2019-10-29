@@ -6063,7 +6063,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user/profile/{id}":
+  "/system/api/v1/user/profile/{id}":
     get:
       summary: Get user profile by proifile identifier
       tags:
