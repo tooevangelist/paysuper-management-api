@@ -8927,9 +8927,9 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/paylinks/{id}/dashboard/summary":
-    get:
-      summary: Get summary stat for a payment link by id for current authenticated merchant
+  "/admin/api/v1/users/{user_id}":
+    delete:
+      summary: Delete admin user
       tags:
         - Payment links
       consumes:
@@ -9189,9 +9189,9 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/vat_reports":
-    get:
-      summary: Get a VAT reports dashboard
+  "/admin/api/v1/merchants/users/{user_id}":
+    delete:
+      summary: Delete merchant user
       tags:
         - VAT Reports
       consumes:
