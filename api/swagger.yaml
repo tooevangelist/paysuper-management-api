@@ -8482,7 +8482,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/{user_id}/role":
+  "/admin/api/v1/users/{user_id}":
     delete:
       summary: Delete admin user
       tags:
@@ -8669,7 +8669,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/users/{user_id}/role":
+  "/admin/api/v1/merchants/users/{user_id}":
     delete:
       summary: Delete merchant user
       tags:

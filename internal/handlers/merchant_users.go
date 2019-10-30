@@ -15,8 +15,8 @@ const (
 	merchantUsers        = "/merchants/users"
 	merchantInvite       = "/merchants/invite"
 	merchantInviteResend = "/merchants/users/resend"
-	merchantDeleteUser   = "/merchants/users/:user/role"
-	merchantUsersRole    = "/merchants/users/:user/role"
+	merchantDeleteUser   = "/merchants/users/:user"
+	merchantUsersRole    = "/merchants/users/:user"
 )
 
 type MerchantUsersRoute struct {
