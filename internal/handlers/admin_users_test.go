@@ -122,7 +122,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_InternalError() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestRoleId, bson.NewObjectId().Hex()).
 		Path(common.SystemUserGroupPath + adminUserRole).
 		Init(test.ReqInitJSON()).
 		BodyString(`{"role": "some_role"}`).
@@ -146,7 +146,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_ValidationError() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestRoleId, bson.NewObjectId().Hex()).
 		Path(common.SystemUserGroupPath + adminUserRole).
 		BodyString(`{"no_role": "some_role"}`).
 		Init(test.ReqInitJSON()).
@@ -170,9 +170,26 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_Error() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestRoleId, bson.NewObjectId().Hex()).
 		Path(common.SystemUserGroupPath + adminUserRole).
 		BodyString(`{"role": "some_role"}`).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	shouldBe.Error(err)
+	hErr, ok := err.(*echo.HTTPError)
+	shouldBe.True(ok)
+	shouldBe.Equal(http.StatusBadRequest, hErr.Code)
+	shouldBe.NotEmpty(res.Body.String())
+}
+
+func (suite *AdminUsersTestSuite) TestAdminChangeRole_EmptyBodyError() {
+	shouldBe := require.New(suite.T())
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Params(":"+common.RequestRoleId, bson.NewObjectId().Hex()).
+		Path(common.SystemUserGroupPath + adminUserRole).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -193,7 +210,7 @@ func (suite *AdminUsersTestSuite) TestAdminChangeRole_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterUserId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestRoleId, bson.NewObjectId().Hex()).
 		Path(common.SystemUserGroupPath + adminUserRole).
 		Init(test.ReqInitJSON()).
 		BodyString(`{"role": "some_role"}`).

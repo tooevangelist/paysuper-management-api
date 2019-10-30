@@ -8927,7 +8927,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/{user_id}":
+  "/admin/api/v1/users/roles/{role_id}":
     delete:
       summary: Delete admin user
       tags:
@@ -8938,9 +8938,9 @@ paths:
         - application/json
       description:  Get summary stat for a payment link by id for current authenticated merchant
       parameters:
-        - description: Payment link identifier
+        - description: User role identifier
           in: path
-          name: id
+          name: role_id
           required: true
           type: string
         - description: period start date in unix timestamp format
@@ -8991,9 +8991,9 @@ paths:
         - application/json
       description:  Get a grouping stat by country for a payment link by its id for current authenticated merchant
       parameters:
-        - description: Payment link identifier
+        - description: User role identifier
           in: path
-          name: id
+          name: role_id
           required: true
           type: string
         - description: period start date in unix timestamp format
@@ -9189,7 +9189,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/users/{user_id}":
+  "/admin/api/v1/merchants/users/roles/{role_id}":
     delete:
       summary: Delete merchant user
       tags:
@@ -9198,7 +9198,13 @@ paths:
         - application/x-www-form-urlencoded
       produces:
         - application/json
-      description:   Get a VAT reports dashboard
+      description: Delete merchant user
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
       responses:
         "200":
           description: OK
@@ -9236,9 +9242,9 @@ paths:
         - application/json
       description:   Get a VAT reports list by country
       parameters:
-        - description: country code ISO A2
+        - description: User role identifier
           in: path
-          name: country
+          name: role_id
           required: true
           type: string
       responses:
