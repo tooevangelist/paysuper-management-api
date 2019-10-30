@@ -315,12 +315,9 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		return echo.NewHTTPError(int(orderResponse.Status), orderResponse.Message)
 	}
 
-	inlineFormRedirectUrl := h.cfg.OrderInlineFormUrlMask + "/" + orderResponse.Item.Uuid
-	qs := ctx.QueryString()
+	qParams.Set("order_id", orderResponse.Item.Uuid)
 
-	if qs != "" {
-		inlineFormRedirectUrl += "?" + qs
-	}
+	inlineFormRedirectUrl := h.cfg.OrderInlineFormUrlMask + "?" + qParams.Encode()
 
 	inlineFormRedirectUrl, err = u.NormalizeURLString(inlineFormRedirectUrl, u.FlagsUsuallySafeGreedy|u.FlagRemoveDuplicateSlashes)
 	if err != nil {
