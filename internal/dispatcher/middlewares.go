@@ -41,19 +41,19 @@ func (d *Dispatcher) GetUserDetailsMiddleware(next echo.HandlerFunc) echo.Handle
 		auth := ctx.Request().Header.Get(echo.HeaderAuthorization)
 
 		if auth == "" {
-			return common.ErrorMessageAuthorizationHeaderNotFound
+			return echo.NewHTTPError(http.StatusUnauthorized, common.ErrorMessageAuthorizationHeaderNotFound.Message)
 		}
 
 		match := common.TokenRegex.FindStringSubmatch(auth)
 
 		if len(match) < 1 {
-			return common.ErrorMessageAuthorizationTokenNotFound
+			return echo.NewHTTPError(http.StatusUnauthorized, common.ErrorMessageAuthorizationTokenNotFound.Message)
 		}
 
 		u, err := d.appSet.JwtVerifier.GetUserInfo(ctx.Request().Context(), match[1])
 
 		if err != nil {
-			return common.ErrorMessageAuthorizedUserNotFound
+			return echo.NewHTTPError(http.StatusUnauthorized, common.ErrorMessageAuthorizedUserNotFound.Message)
 		}
 
 		user := common.ExtractUserContext(ctx)
