@@ -787,25 +787,25 @@ definitions:
         example:
           en: "Some name"
           ru: "Какое то имя"
-      SuccessMessage:
+      success_message:
         type: string
         additionalProperties:
           type: string
         example:
           en: "Thanks!"
           ru: "Спасибо!"
-      MinPurchaseValue:
+      min_purchase_value:
         type: number
         format: double
-      MaxPurchaseValue:
+      max_purchase_value:
         type: number
         format: double
-      SellCountType:
+      sell_count_type:
         type: string
         enum:
           - fractional
           - integral
-      Prices:
+      prices:
         type: array
         items:
           $ref: '#/definitions/product.Price'
