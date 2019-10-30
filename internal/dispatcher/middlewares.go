@@ -59,8 +59,6 @@ func (d *Dispatcher) GetUserDetailsMiddleware(next echo.HandlerFunc) echo.Handle
 		user := common.ExtractUserContext(ctx)
 		user.Id = u.UserID
 		user.Email = u.Email
-		d.L().Error("GetUserDetailsMiddleware [user id]: ", logger.Args("user_id", user.Id))
-		d.L().Error("GetUserDetailsMiddleware [email id]: ", logger.Args("email", user.Email))
 		common.SetUserContext(ctx, user)
 
 		return next(ctx)
@@ -163,12 +161,6 @@ func (d *Dispatcher) AuthOneMerchantPreMiddleware() echo.MiddlewareFunc {
 			d.appSet.JwtVerifier,
 			func(ui *jwtverifier.UserInfo) {
 				user := common.ExtractUserContext(c)
-				d.L().Error("AuthOneMerchantPreMiddleware [ui user id]: ", logger.Args("user_id", ui.UserID))
-				d.L().Error("AuthOneMerchantPreMiddleware [ui email id]: ", logger.Args("email", ui.Email))
-				d.L().Error("AuthOneMerchantPreMiddleware [user user id]: ", logger.Args("user_id", user.Id))
-				d.L().Error("AuthOneMerchantPreMiddleware [user email id]: ", logger.Args("email", user.Email))
-				user.Id = ui.UserID
-				user.Email = ui.Email
 				user.Name = "Merchant User"
 
 				res, err := d.appSet.Services.Billing.GetMerchantsForUser(
