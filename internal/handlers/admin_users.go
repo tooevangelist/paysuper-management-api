@@ -21,8 +21,8 @@ const (
 	adminListRoles    = "/users/roles"
 	adminUserInvite   = "/users/invite"
 	adminResendInvite = "/users/resend"
-	adminUserRole     = "/users/:user"
-	adminUserDelete   = "/users/:user"
+	adminUserRole     = "/users/roles/:role_id"
+	adminUserDelete   = "/users/roles/:role_id"
 )
 
 func NewAdminUsersRoute(set common.HandlerSet, cfg *common.Config) *AdminUsersRoute {

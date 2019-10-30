@@ -8482,7 +8482,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/{user_id}":
+  "/admin/api/v1/users/roles/{role_id}":
     delete:
       summary: Delete admin user
       tags:
@@ -8493,9 +8493,9 @@ paths:
         - application/json
       description: Delete admin user
       parameters:
-        - description: User identifier
+        - description: User role identifier
           in: path
-          name: user_id
+          name: role_id
           required: true
           type: string
       responses:
@@ -8529,9 +8529,9 @@ paths:
         - application/json
       description: Update admin user role
       parameters:
-        - description: User identifier
+        - description: User role identifier
           in: path
-          name: user_id
+          name: role_id
           required: true
           type: string
         - description: JSON request body
@@ -8669,7 +8669,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/users/{user_id}":
+  "/admin/api/v1/merchants/users/roles/{role_id}":
     delete:
       summary: Delete merchant user
       tags:
@@ -8680,9 +8680,9 @@ paths:
         - application/json
       description: Delete merchant user
       parameters:
-        - description: User identifier
+        - description: User role identifier
           in: path
-          name: user_id
+          name: role_id
           required: true
           type: string
       responses:
@@ -8716,9 +8716,9 @@ paths:
         - application/json
       description: Update merchant user role
       parameters:
-        - description: User identifier
+        - description: User role identifier
           in: path
-          name: user_id
+          name: role_id
           required: true
           type: string
         - description: JSON request body
