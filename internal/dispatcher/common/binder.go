@@ -508,6 +508,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.FullDescription = pRsp.Item.FullDescription
 	structure.Localizations = pRsp.Item.Localizations
 	structure.Currencies = pRsp.Item.Currencies
+	structure.VirtualCurrency = pRsp.Item.VirtualCurrency
 
 	if v, ok := req[RequestParameterName]; ok {
 		tv, ok := v.(map[string]interface{})
@@ -727,6 +728,10 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if _, ok := req[RequestParameterCurrencies]; ok {
 		structure.Currencies = projectReq.Currencies
+	}
+
+	if _, ok := req[RequestParameterVirtualCurrency]; ok {
+		structure.VirtualCurrency = projectReq.VirtualCurrency
 	}
 
 	return nil
