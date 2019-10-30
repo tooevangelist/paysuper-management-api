@@ -1709,13 +1709,13 @@ definitions:
         description: object contain urls for redirect user after payment ended. can be set if project settings allow this.
         $ref: '#/definitions/token.TokenRequest.Settings.ReturnUrl'
       currency:
-        description: 3 characters currency code in upper registry by ISO 4217. this field is required if payment type is simple
+        description: "3 characters currency code in upper registry by ISO 4217. this field is required if payment type is simple. WARNING: this field is disallowed if creating payment token with types product or key"
         type: string
       amount:
-        description: payment amount. this field is required if payment type is simple
+        description: "payment amount. this field is required if payment type is simple. WARNING: this field is disallowed if creating payment token with types product or key"
         type: number
       products_ids:
-        description: array of products identifiers or key products identifiers. this field is required if payment type is product or simple
+        description: "array of products identifiers or key products identifiers. this field is required if payment types are product or key. WARNING: this field is disallowed if creating payment token with type simple"
         type: array
         items:
           type: string

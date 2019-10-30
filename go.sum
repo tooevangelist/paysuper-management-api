@@ -402,6 +402,7 @@ github.com/grpc-ecosystem/grpc-gateway v1.9.5/go.mod h1:vNeuVxBJEsws4ogUvrchl83t
 github.com/gurukami/typ/v2 v2.0.1 h1:ZUcXSLTL9IaPVMlS2RCEXYw4+ouaG1rTP6oJlMHT7KM=
 github.com/gurukami/typ/v2 v2.0.1/go.mod h1:/Rvw4v0yqZKMPi4r1kc9LPnwXj/BdeTgOAtxoZuI9Z8=
 github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed/go.mod h1:tMWxXQ9wFIaZeTI9F+hmhFiGpFmhOHzyShyFUhRm0H4=
+github.com/hashicorp/consul v1.5.1 h1:p7tRmQ4m3ZMYkGQkuyjLXKbdU1weeumgZFqZOvw7o4c=
 github.com/hashicorp/consul v1.5.1/go.mod h1:QsmgXh2YA9Njv6y3/FHXqHYhsMye++3oBoAZ6SR8R8I=
 github.com/hashicorp/consul/api v1.1.0 h1:BNQPM9ytxj6jbjjdRPioQ94T6YXriSopn0i8COv6SRA=
 github.com/hashicorp/consul/api v1.1.0/go.mod h1:VmuI/Lkw1nC05EYQWNKwWGbkg+FbDBtguAZLlVdkD9Q=
@@ -736,6 +737,8 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20191020124804-ebda379fcb1a/g
 github.com/paysuper/paysuper-billing-server v0.0.0-20191021125729-7bb90fb336aa/go.mod h1:epJRI1WusRkEkd5cR3f295XQTcianRZCLWNiaHF/s1Q=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191029094149-bd636b19b815 h1:l6xYoyGxqpeXKQyR61kq3i90UYrqUEVF+1CwNGZW/cU=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191029094149-bd636b19b815/go.mod h1:gOX3JQfEkB6vdnQPmS5fH/Z2voMn+goLES5C2XnGb2I=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191030203719-61a3dcb86e9d h1:lHPH9+1CwGqgZyZxY6AvvjSXI8+ED3vd/i2+UDx2Yfo=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191030203719-61a3dcb86e9d/go.mod h1:gOX3JQfEkB6vdnQPmS5fH/Z2voMn+goLES5C2XnGb2I=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d h1:hoMkfdq4qEGOONvxajsZO0Mf6np++pGnrKVxegvplaw=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d/go.mod h1:C+QHdgbjIlAPxHD93/08yi+xWfUgk8maLY8FKFqNzMQ=
 github.com/paysuper/paysuper-database-mongo v0.1.0/go.mod h1:IZu996j//Qoq+uzzCBL5GEYisfF4di/fwedWHlLz7sc=
