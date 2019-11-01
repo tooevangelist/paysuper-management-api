@@ -1078,18 +1078,22 @@ func (s *BillingServerErrorMock) GetRoleList(ctx context.Context, in *grpc.GetRo
 	panic("implement me")
 }
 
-func (s *BillingServerErrorMock) GetMerchantUsers(ctx context.Context, in *grpc.GetMerchantUsersRequest, opts ...client.CallOption) (*grpc.GetMerchantUsersResponse, error) {
+func (s *BillingServerErrorMock) DeleteMerchantUser(ctx context.Context, in *grpc.MerchantRoleRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
 
-func (s *BillingServerErrorMock) DeleteMerchantUser(ctx context.Context, in *grpc.DeleteMerchantUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
-	panic("implement me")
-}
-
-func (s *BillingServerErrorMock) DeleteAdminUser(ctx context.Context, in *grpc.DeleteAdminUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+func (s *BillingServerErrorMock) DeleteAdminUser(ctx context.Context, in *grpc.AdminRoleRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
 
 func (s *BillingServerErrorMock) GetPermissionsForUser(ctx context.Context, in *grpc.GetPermissionsForUserRequest, opts ...client.CallOption) (*grpc.GetPermissionsForUserResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) GetAdminUserRole(ctx context.Context, in *grpc.AdminRoleRequest, opts ...client.CallOption) (*grpc.UserRoleResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerErrorMock) GetMerchantUserRole(ctx context.Context, in *grpc.MerchantRoleRequest, opts ...client.CallOption) (*grpc.UserRoleResponse, error) {
 	panic("implement me")
 }

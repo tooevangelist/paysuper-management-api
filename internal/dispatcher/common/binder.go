@@ -166,6 +166,7 @@ func (b *Binder) Bind(i interface{}, ctx echo.Context) (err error) {
 type OrderFormBinder struct{}
 type OrderJsonBinder struct{}
 type PaymentCreateProcessBinder struct{}
+type OnboardingChangeMerchantStatusBinder struct{}
 type OnboardingMerchantListingBinder struct {
 	LimitDefault, OffsetDefault int32
 }

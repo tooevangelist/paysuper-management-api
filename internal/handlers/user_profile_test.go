@@ -552,7 +552,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServe
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())

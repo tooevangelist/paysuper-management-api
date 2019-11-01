@@ -174,9 +174,6 @@ func (h *PayoutDocumentsRoute) getPayoutRoyaltyReports(ctx echo.Context) error {
 	req := &grpc.GetPayoutDocumentRequest{}
 	req.PayoutDocumentId = ctx.Param(common.RequestParameterId)
 
-func (h *PayoutDocumentsRoute) getPayoutSignUrl(ctx echo.Context, signerType int32) error {
-	req := &grpc.GetPayoutDocumentSignUrlRequest{SignerType: signerType}
-
 	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
 		return err
 	}

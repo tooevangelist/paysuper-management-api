@@ -1,15 +1,5 @@
 module github.com/paysuper/paysuper-management-api
 
-go 1.12
-
-replace (
-	github.com/gogo/protobuf v0.0.0-20190410021324-65acae22fc9 => github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d
-	github.com/hashicorp/consul => github.com/hashicorp/consul v1.5.1
-	github.com/lucas-clemente/quic-go => github.com/lucas-clemente/quic-go v0.12.0
-	github.com/marten-seemann/qtls => github.com/marten-seemann/qtls v0.3.2
-	gopkg.in/DATA-DOG/go-sqlmock.v1 => github.com/DATA-DOG/go-sqlmock v1.3.3
-)
-
 require (
 	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681
 	github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679
@@ -31,12 +21,13 @@ require (
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
-	github.com/paysuper/echo-casbin-middleware v0.0.0-20191013103908-5b498939147a
-	github.com/paysuper/casbin-server v0.0.0-20191017135201-31d8aba0dd57
+	github.com/mongodb/mongo-go-driver v0.3.0 // indirect
+	github.com/paysuper/casbin-server v0.0.0-20191031114753-f40b0e2b42ba
+	github.com/paysuper/echo-casbin-middleware v0.0.0-20191021231103-f3d820b11545
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191016101606-08cd89cf6736
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191101115300-5fcc5897c702
 	github.com/paysuper/paysuper-recurring-repository v1.0.124
-	github.com/paysuper/paysuper-reporter v0.0.0-20191003072342-610371fc9395
+	github.com/paysuper/paysuper-reporter v0.0.0-20191029094334-763f0076e220
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
@@ -44,6 +35,7 @@ require (
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
 	go.uber.org/automaxprocs v1.2.0
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
 )
