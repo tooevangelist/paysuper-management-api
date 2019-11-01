@@ -1175,6 +1175,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_ValidationEr
 	assert.Regexp(suite.T(), "Country", msg.Details)
 }
 
+/*
+INFO After the #192483 State field is not required in Merchant on-boarding process. So this test should be
+disabled.
+
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_ValidationError_CompanyState() {
 	b := `{"name": "123", "alternative_name": "123", "website": "http://localhost", "country": "RU"}`
 
@@ -1197,6 +1201,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_ValidationEr
 	assert.Equal(suite.T(), common.ErrorMessageIncorrectState.Message, msg.Message)
 	assert.Regexp(suite.T(), "State", msg.Details)
 }
+*/
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_ValidationError_CompanyZip() {
 	b := `{
