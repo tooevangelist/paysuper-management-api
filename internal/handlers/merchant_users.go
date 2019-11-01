@@ -15,7 +15,6 @@ const (
 	merchantUsers        = "/merchants/users"
 	merchantInvite       = "/merchants/invite"
 	merchantInviteResend = "/merchants/users/resend"
-	merchantDeleteUser   = "/merchants/users/roles/:role_id"
 	merchantUsersRole    = "/merchants/users/roles/:role_id"
 )
 
@@ -40,7 +39,8 @@ func (h *MerchantUsersRoute) Route(groups *common.Groups) {
 	groups.AuthUser.POST(merchantInvite, h.sendInvite)
 	groups.AuthUser.POST(merchantInviteResend, h.resendInvite)
 	groups.AuthUser.GET(merchantListRoles, h.listRoles)
-	groups.AuthUser.DELETE(merchantDeleteUser, h.deleteUser)
+	groups.AuthUser.DELETE(merchantUsersRole, h.deleteUser)
+	groups.AuthUser.GET(merchantUsersRole, h.getUser)
 }
 
 func (h *MerchantUsersRoute) changeRole(ctx echo.Context) error {
@@ -127,7 +127,7 @@ func (h *MerchantUsersRoute) listRoles(ctx echo.Context) error {
 }
 
 func (h *MerchantUsersRoute) deleteUser(ctx echo.Context) error {
-	req := &grpc.DeleteMerchantUserRequest{}
+	req := &grpc.MerchantRoleRequest{}
 
 	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
 		return err
@@ -137,6 +137,22 @@ func (h *MerchantUsersRoute) deleteUser(ctx echo.Context) error {
 
 	if err != nil {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "DeleteMerchantUser")
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+func (h *MerchantUsersRoute) getUser(ctx echo.Context) error {
+	req := &grpc.MerchantRoleRequest{}
+
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
+	}
+
+	res, err := h.dispatch.Services.Billing.GetMerchantUserRole(ctx.Request().Context(), req)
+
+	if err != nil {
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetMerchantUserRole")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
