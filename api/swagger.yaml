@@ -3380,7 +3380,7 @@ securityDefinitions:
     type: apiKey
     in: header
     name: X-API-SIGNATURE
-    description: must contain sha512 hash of concationation request body and project secret key
+    description: must contain project secret key
 
 paths:
   /api/v1/country:
