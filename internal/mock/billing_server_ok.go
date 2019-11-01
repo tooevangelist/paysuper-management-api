@@ -1235,3 +1235,7 @@ func (s *BillingServerOkMock) GetPayoutDocumentRoyaltyReports(ctx context.Contex
 func (s *BillingServerOkMock) AutoCreatePayoutDocuments(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkMock) DeleteSavedCard(ctx context.Context, in *grpc.DeleteSavedCardRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
