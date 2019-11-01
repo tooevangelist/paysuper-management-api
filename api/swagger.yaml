@@ -3529,6 +3529,19 @@ definitions:
         example: "developer"
         description: "Date of updating"
 
+  UserRoleResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        description: "User role"
+        items:
+          "$ref": "#/definitions/UserRole"
+
   ListRoleType:
     type: array
     items:
@@ -8927,59 +8940,6 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/roles/{role_id}":
-    delete:
-      summary: Delete admin user
-      tags:
-        - Payment links
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description:  Get summary stat for a payment link by id for current authenticated merchant
-      parameters:
-        - description: User role identifier
-          in: path
-          name: role_id
-          required: true
-          type: string
-        - description: period start date in unix timestamp format
-          in: query
-          name: period_from
-          type: number
-          required: false
-        - description: period end date in unix timestamp format
-          in: query
-          name: period_to
-          type: number
-          required: false
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/paylinkStatCommon'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-
   "/admin/api/v1/paylinks/{id}/dashboard/country":
     get:
       summary: Get a grouping stat by country for a payment link by its id for current authenticated merchant
@@ -9168,48 +9128,6 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/paylinkGroupStatCommon'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/merchants/users/roles/{role_id}":
-    delete:
-      summary: Delete merchant user
-      tags:
-        - VAT Reports
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description: Delete merchant user
-      parameters:
-        - description: User role identifier
-          in: path
-          name: role_id
-          required: true
-          type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/grpcVatReportsPaginate'
         "400":
           description: Invalid request data
           schema:
@@ -9532,7 +9450,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/{user_id}/role":
+  "/admin/api/v1/users/roles/{role_id}":
     delete:
       summary: Delete admin user
       tags:
@@ -9543,9 +9461,9 @@ paths:
         - application/json
       description: Delete admin user
       parameters:
-        - description: User identifier
+        - description: User role identifier
           in: path
-          name: user_id
+          name: role_id
           required: true
           type: string
       responses:
@@ -9579,9 +9497,9 @@ paths:
         - application/json
       description: Update admin user role
       parameters:
-        - description: User identifier
+        - description: User role identifier
           in: path
-          name: user_id
+          name: role_id
           required: true
           type: string
         - description: JSON request body
@@ -9594,6 +9512,42 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    get:
+      summary: Get admin user role
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get admin user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UserRoleResponse'
         "400":
           description: Invalid request data
           schema:
@@ -9719,7 +9673,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/users/{user_id}/role":
+  "/admin/api/v1/merchants/users/roles/{role_id}":
     delete:
       summary: Delete merchant user
       tags:
@@ -9730,9 +9684,9 @@ paths:
         - application/json
       description: Delete merchant user
       parameters:
-        - description: User identifier
+        - description: User role identifier
           in: path
-          name: user_id
+          name: role_id
           required: true
           type: string
       responses:
@@ -9766,9 +9720,9 @@ paths:
         - application/json
       description: Update merchant user role
       parameters:
-        - description: User identifier
+        - description: User role identifier
           in: path
-          name: user_id
+          name: role_id
           required: true
           type: string
         - description: JSON request body
@@ -9776,6 +9730,47 @@ paths:
           name: body
           schema:
             "$ref": "#/definitions/UpdateUserRoleRequest"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    get:
+      summary: Get merchant user role
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get merchant user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/UserRoleResponse"
       responses:
         "200":
           description: OK
