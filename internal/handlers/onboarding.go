@@ -42,6 +42,7 @@ const (
 	merchantsIdTariffsPath             = "/merchants/:id/tariffs"
 	merchantsIdManualPayoutEnablePath  = "/merchants/:merchant_id/manual_payout/enable"
 	merchantsIdManualPayoutDisablePath = "/merchants/:merchant_id/manual_payout/disable"
+	merchantsIdSetOperatingCompanyPath = "/merchants/:id/set_operating_company"
 )
 
 const (
@@ -112,6 +113,8 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 
 	groups.AuthUser.PUT(merchantsIdManualPayoutEnablePath, h.enableMerchantManualPayout)
 	groups.AuthUser.PUT(merchantsIdManualPayoutDisablePath, h.disableMerchantManualPayout)
+
+	groups.AuthUser.POST(merchantsIdSetOperatingCompanyPath, h.setOperatingCompany)
 }
 
 func (h *OnboardingRoute) getMerchant(ctx echo.Context) error {
@@ -888,6 +891,35 @@ func (h *OnboardingRoute) changeMerchantManualPayout(ctx echo.Context, enableMan
 	}
 
 	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res.Item)
+}
+
+func (h *OnboardingRoute) setOperatingCompany(ctx echo.Context) error {
+	req := &grpc.SetMerchantOperatingCompanyRequest{}
+	err := ctx.Bind(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	req.MerchantId = ctx.Param(common.RequestParameterId)
+	err = h.dispatch.Validate.Struct(req)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.SetMerchantOperatingCompany(ctx.Request().Context(), req)
+
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "SetMerchantOperatingCompany", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 

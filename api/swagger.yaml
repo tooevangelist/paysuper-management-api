@@ -515,6 +515,23 @@ definitions:
       refund_fees_total_local:
         $ref: '#/definitions/order.money'
         description: object contain information about refund fees total local
+      items:
+        description: list of buyed items in order
+        type: array
+        items:
+          $ref: '#/definitions/model.JsonOrderCreateResponse.item'
+      issuer:
+        description: order issuer info
+        $ref: '#/definitions/order.issuer'
+      merchant_payout_currency:
+        type: string
+        description: merchant payout currency
+      operating_company_id:
+        type: string
+        description: merchant operating company id
+      refund_allowed:
+        type: string
+        description: refund allowed flag
 
   order.list.public:
     properties:
@@ -527,6 +544,34 @@ definitions:
           $ref: '#/definitions/order.public'
         type: array
     type: object
+
+  order.issuer:
+    type: object
+    properties:
+      url:
+        type: string
+        description: referrer full url
+      embedded:
+        type: boolean
+        description: flag of embedded form
+      reference:
+        type: string
+        description: reference id
+      reference_type:
+        type: string
+        description: reference type
+      utm_source:
+        type: string
+        description: 'utm_source value'
+      utm_medium:
+        type: string
+        description: 'utm_medium value'
+      utm_campaign:
+        type: string
+        description: 'utm_campaign value'
+      referrer_host:
+        type: string
+        description: 'referrer host'
 
   order.create.request.user:
     properties:
@@ -1216,6 +1261,9 @@ definitions:
       home_region:
         type: string
         description: "merchant home region name. possible values: asia, europe, latin_america, russia_and_cis, worldwide"
+      merchant_operations_type:
+        description: "merchant operations type. possible values are low-risk, high-risk"
+        type: string
 
   onboarding.Merchant.user:
     properties:
@@ -1303,6 +1351,12 @@ definitions:
       user:
         description: object contain main information about merchant owner from primary onboarding profile
         $ref: '#/definitions/onboarding.Merchant.user'
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
+      operating_company_id:
+        description: id of operation company for which this cost is applicable
+        type: string
 
   onboarding.Merchant.ChangeStatus:
     properties:
@@ -2025,6 +2079,12 @@ definitions:
       is_active:
         description: true is cost record is active
         type: boolean
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
+      operating_company_id:
+        description: id of operation company for which this cost is applicable
+        type: string
 
   onboarding.cost.payment.system.create:
     properties:
@@ -2046,11 +2106,19 @@ definitions:
       fix_amount_currency:
         description: currency of fixed fee.  letters code by ISO 4217
         type: string
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
+      operating_company_id:
+        description: id of operation company for which this cost is applicable
+        type: string
     required:
       - name
       - region
       - percent
       - fix_amount_currency
+      - mcc_code
+      - operating_company_id
 
   onboarding.cost.payment.system.all:
     properties:
@@ -2118,6 +2186,9 @@ definitions:
       is_active:
         description: true is rates record active for merchant
         type: boolean
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
 
   onboarding.cost.payment.merchant.create:
     properties:
@@ -2154,6 +2225,9 @@ definitions:
       ps_fixed_fee_currency:
         description: currency of paysuper fixed fee. 3-letters code by ISO 4217
         type: string
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
     required:
       - name
       - payout_currency
@@ -2163,6 +2237,7 @@ definitions:
       - method_fix_amount_currency
       - ps_percent
       - ps_fixed_fee_currency
+      - mcc_code
 
   onboarding.cost.money_back.system:
     properties:
@@ -2205,6 +2280,12 @@ definitions:
       is_active:
         description: true is rates record is active
         type: boolean
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
+      operating_company_id:
+        description: id of operation company for which this cost is applicable
+        type: string
 
   onboarding.cost.money_back.system.create:
     properties:
@@ -2235,11 +2316,19 @@ definitions:
       fix_amount:
         description: payment method fixed fee
         type: number
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
+      operating_company_id:
+        description: id of operation company for which this cost is applicable
+        type: string
     required:
       - name
       - payout_currency
       - undo_reason
       - region
+      - mcc_code
+      - operating_company_id
 
   onboarding.cost.money_back.merchant:
     properties:
@@ -2291,6 +2380,9 @@ definitions:
       is_active:
         description: true is rates record is active
         type: boolean
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
 
   onboarding.cost.money_back.merchant.create:
     properties:
@@ -2327,6 +2419,9 @@ definitions:
       is_paid_by_merchant:
         description: if true than commission will to take from merchant when money back operation will be processing
         type: boolean
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
     required:
       - name
       - payout_currency
@@ -2334,6 +2429,7 @@ definitions:
       - region
       - percent
       - fix_amount_currency
+      - mcc_code
 
   onboarding.cost.payment.merchant.all:
     properties:
@@ -3373,6 +3469,46 @@ definitions:
     required:
       - id
       - cookie
+
+  operating_company:
+    type: object
+    properties:
+      id:
+        type: string
+        description: operating company id
+      name:
+        type: string
+        description: operating company name
+      country:
+        type: string
+        description: country
+      registration_number:
+        type: string
+        description: registration_number
+      vat_number:
+        type: string
+        description: vat_number
+      address:
+        type: string
+        description: address
+      signatory_name:
+        type: string
+        description: signatory_name
+      signatory_position:
+        type: string
+        description: signatory_position
+      banking_details:
+        type: string
+        description: banking_details
+
+  operating_company_list:
+    type: object
+    properties:
+      items:
+        description: list of operating companies
+        type: array
+        items:
+          $ref: '#/definitions/operating_company'
 
 host: p1payapi.tst.protocol.one
 info:
@@ -6301,6 +6437,11 @@ paths:
           name: max_amount
           type: number
           required: false
+        - description: "merchant operations type. possible values are low-risk, high-risk"
+          in: query
+          name: merchant_operations_type
+          type: string
+          required: true
       responses:
         "200":
           description: OK
@@ -9218,3 +9359,120 @@ paths:
             $ref: '#/definitions/model.Error'
       tags:
         - Saved Card
+
+  "/admin/api/v1/merchants/{id}/set_operating_company":
+    post:
+      summary: Set merchant operating company
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Set merchant operating company
+      parameters:
+        - description: merchant id
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: status
+          in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              operating_company_id:
+                description: id of operation company for which this cost is applicable
+                type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/operating_company":
+    get:
+      consumes:
+        - application/json
+      description: Get operating companies list
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/operating_company_list'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get data for rendering payment form
+      tags:
+        - Operating company
+    post:
+      summary: Add new operating company
+      tags:
+        - Operating company
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Add new operating company
+      parameters:
+        - description: new operating company params
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/operating_company'
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
