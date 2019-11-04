@@ -15,13 +15,11 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/google/wire v0.3.0
 	github.com/gurukami/typ/v2 v2.0.1
-	github.com/hashicorp/consul v1.4.2 // indirect
 	github.com/karlseguin/expect v1.0.1 // indirect
 	github.com/labstack/echo/v4 v4.1.11
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
-	github.com/mongodb/mongo-go-driver v0.3.0 // indirect
 	github.com/paysuper/casbin-server v0.0.0-20191031114753-f40b0e2b42ba
 	github.com/paysuper/echo-casbin-middleware v0.0.0-20191021231103-f3d820b11545
 	github.com/paysuper/paysuper-aws-manager v0.0.1
@@ -35,7 +33,6 @@ require (
 	github.com/ttacon/libphonenumber v1.0.1
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0 // indirect
 	go.uber.org/automaxprocs v1.2.0
-	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/go-playground/validator.v9 v9.29.1
 	gopkg.in/karlseguin/expect.v1 v1.0.1 // indirect
 )
