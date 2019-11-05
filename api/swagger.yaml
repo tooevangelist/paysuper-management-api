@@ -1929,6 +1929,26 @@ definitions:
         description: time of last update user profile
         $ref: '#/definitions/ProtobufTimestamp'
 
+  userCommonProfile:
+    properties:
+      user_profile:
+        description: object contain information about user
+        $ref: '#/definitions/userProfile.response'
+      user_role:
+        description: object contain information about user role
+        $ref: '#/definitions/UserRole'
+      permissions:
+        type: array
+        description: object contain list of permissions
+        $ref: '#/definitions/userRolePermission'
+
+  userRolePermission:
+    properties:
+      name:
+        type: string
+      access:
+        type: string
+
   pageReview.request:
     properties:
       review:
@@ -6013,6 +6033,84 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/userProfile.response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/profile/common":
+    get:
+      summary: Get common user profile
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get common user profile (main profile, user role, user permissions)
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userCommonProfile'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/profile/common/{merchant_id}":
+    get:
+      summary: Get common user profile
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get common user profile (main profile, user role, user permissions)
+      parameters:
+        - description: object contained confirmation token
+          in: path
+          name: merchant_id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userCommonProfile'
         "400":
           description: Invalid request data
           schema:

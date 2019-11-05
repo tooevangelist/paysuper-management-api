@@ -1097,3 +1097,7 @@ func (s *BillingServerErrorMock) GetAdminUserRole(ctx context.Context, in *grpc.
 func (s *BillingServerErrorMock) GetMerchantUserRole(ctx context.Context, in *grpc.MerchantRoleRequest, opts ...client.CallOption) (*grpc.UserRoleResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerErrorMock) GetCommonUserProfile(ctx context.Context, in *grpc.CommonUserProfileRequest, opts ...client.CallOption) (*grpc.CommonUserProfileResponse, error) {
+	panic("implement me")
+}

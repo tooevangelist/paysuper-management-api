@@ -12,10 +12,12 @@ import (
 )
 
 const (
-	userProfilePath             = "/user/profile"
-	userProfilePathId           = "/user/profile/:id"
-	userProfilePathFeedback     = "/user/feedback"
-	userProfileConfirmEmailPath = "/user/confirm_email"
+	userProfilePath               = "/user/profile"
+	userCommonProfilePath         = "/user/profile/common"
+	userCommonProfileMerchantPath = "/user/profile/common/:merchant_id"
+	userProfilePathId             = "/user/profile/:id"
+	userProfilePathFeedback       = "/user/feedback"
+	userProfileConfirmEmailPath   = "/user/confirm_email"
 )
 
 type UserProfileRoute struct {
@@ -35,6 +37,8 @@ func NewUserProfileRoute(set common.HandlerSet, cfg *common.Config) *UserProfile
 
 func (h *UserProfileRoute) Route(groups *common.Groups) {
 	groups.AuthProject.GET(userProfilePath, h.getUserProfile)
+	groups.AuthProject.GET(userCommonProfilePath, h.getUserCommonProfile)
+	groups.AuthProject.GET(userCommonProfileMerchantPath, h.getUserCommonProfile)
 	groups.SystemUser.GET(userProfilePathId, h.getUserProfile)
 	groups.AuthProject.PATCH(userProfilePath, h.setUserProfile)
 	groups.AuthProject.POST(userProfilePathFeedback, h.createFeedback)
@@ -43,7 +47,7 @@ func (h *UserProfileRoute) Route(groups *common.Groups) {
 
 // @Description Get user profile
 // @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
-//  https://api.paysuper.online/admin/api/v1/user/profile
+//  https://api.paysuper.online/api/v1/user/profile
 //
 // @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
 //  https://api.paysuper.online/admin/api/v1/user/profile/ffffffffffffffffffffffff
@@ -71,6 +75,31 @@ func (h *UserProfileRoute) getUserProfile(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res.Item)
+}
+
+// @Description Get common user profile
+// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
+//  https://api.paysuper.online/api/v1/user/profile/common
+//  https://api.paysuper.online/api/v1/user/profile/common/ffffffffffffffffffffffff
+func (h *UserProfileRoute) getUserCommonProfile(ctx echo.Context) error {
+	authUser := common.ExtractUserContext(ctx)
+	req := &grpc.CommonUserProfileRequest{UserId: authUser.Id}
+
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	res, err := h.dispatch.Services.Billing.GetCommonUserProfile(ctx.Request().Context(), req)
+
+	if err != nil {
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetCommonUserProfile")
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res.Profile)
 }
 
 func (h *UserProfileRoute) setUserProfile(ctx echo.Context) error {
