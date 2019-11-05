@@ -3361,6 +3361,19 @@ definitions:
           "$ref": "#/definitions/billingVatReport"
         description: 'reports'
 
+  saved_card.remove.request:
+    type: object
+    properties:
+      id:
+        description: saved card identifier
+        type: string
+      cookie:
+        description: customer cookie value got on payment form data
+        type: string
+    required:
+      - id
+      - cookie
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -3380,7 +3393,7 @@ securityDefinitions:
     type: apiKey
     in: header
     name: X-API-SIGNATURE
-    description: must contain sha512 hash of concationation request body and project secret key
+    description: must contain project secret key
 
 paths:
   /api/v1/country:
@@ -9172,3 +9185,36 @@ paths:
       summary: Get data for rendering payment form
       tags:
         - Order
+
+  "/api/v1/saved_card":
+    delete:
+      summary: Remove customer saved card
+      description: Remove customer saved card
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - description: Remove saved card data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/saved_card.remove.request'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      tags:
+        - Saved Card
