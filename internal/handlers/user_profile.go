@@ -12,12 +12,11 @@ import (
 )
 
 const (
-	userProfilePath               = "/user/profile"
-	userCommonProfilePath         = "/user/profile/common"
-	userCommonProfileMerchantPath = "/user/profile/common/:merchant_id"
-	userProfilePathId             = "/user/profile/:id"
-	userProfilePathFeedback       = "/user/feedback"
-	userProfileConfirmEmailPath   = "/user/confirm_email"
+	userProfilePath             = "/user/profile"
+	userCommonProfilePath       = "/user/profile/common"
+	userProfilePathId           = "/user/profile/:id"
+	userProfilePathFeedback     = "/user/feedback"
+	userProfileConfirmEmailPath = "/user/confirm_email"
 )
 
 type UserProfileRoute struct {
@@ -38,7 +37,7 @@ func NewUserProfileRoute(set common.HandlerSet, cfg *common.Config) *UserProfile
 func (h *UserProfileRoute) Route(groups *common.Groups) {
 	groups.AuthProject.GET(userProfilePath, h.getUserProfile)
 	groups.AuthProject.GET(userCommonProfilePath, h.getUserCommonProfile)
-	groups.AuthProject.GET(userCommonProfileMerchantPath, h.getUserCommonProfile)
+	groups.AuthUser.GET(userCommonProfilePath, h.getUserCommonProfile)
 	groups.SystemUser.GET(userProfilePathId, h.getUserProfile)
 	groups.AuthProject.PATCH(userProfilePath, h.setUserProfile)
 	groups.AuthProject.POST(userProfilePathFeedback, h.createFeedback)
@@ -80,7 +79,7 @@ func (h *UserProfileRoute) getUserProfile(ctx echo.Context) error {
 // @Description Get common user profile
 // @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
 //  https://api.paysuper.online/api/v1/user/profile/common
-//  https://api.paysuper.online/api/v1/user/profile/common/ffffffffffffffffffffffff
+//  https://api.paysuper.online/admin/api/v1/user/profile/common
 func (h *UserProfileRoute) getUserCommonProfile(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.CommonUserProfileRequest{UserId: authUser.Id}

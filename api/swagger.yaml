@@ -6090,16 +6090,16 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/api/v1/user/profile/common/{merchant_id}":
+  "/admin/api/v1/user/profile/common":
     get:
-      summary: Get common user profile
+      summary: Get common user profile by merchant
       tags:
         - User Profile
       consumes:
         - application/json
       produces:
         - application/json
-      description: Get common user profile (main profile, user role, user permissions)
+      description: Get common user profile by merchant (main profile, user role, user permissions)
       parameters:
         - description: object contained confirmation token
           in: path
