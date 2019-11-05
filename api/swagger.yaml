@@ -3420,14 +3420,6 @@ definitions:
         type: string
         example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
         description: "Invitation token"
-      firstName:
-        type: string
-        example: "John"
-        description: "First name of invitation user"
-      lastName:
-        type: string
-        example: "Malkovich"
-        description: "Last name of invitation user"
 
   AcceptInviteResponse:
     type: object
