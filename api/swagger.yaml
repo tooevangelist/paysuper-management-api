@@ -594,6 +594,7 @@ definitions:
           - simple
           - product
           - key
+          - virtual_currency
       products:
         description: list of products (or key products) of project which customer want to buy. if payment type is product or key this field is required.
         type: array
@@ -618,6 +619,9 @@ definitions:
       user:
         description: object may contain information about user. if project send this parameter in request than project must send authorisation header X-API-SIGNATURE
         $ref: '#/definitions/order.create.request.user'
+      is_buy_for_virtual_currency:
+        description: flag indicates that order should be processed using virtual currency
+        type: boolean
     required:
       - project
       - type
@@ -1728,6 +1732,10 @@ definitions:
       metadata:
         description: object can contain any other information about payment. object must contain only string values. this object will return in project notification about payment.
         type: object
+      is_buy_for_virtual_currency:
+        description: flag indicates that order should be processed using virtual currency
+        type: boolean
+
     required:
       - project_id
       - type
