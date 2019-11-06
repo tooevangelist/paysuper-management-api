@@ -1,16 +1,16 @@
 module github.com/paysuper/paysuper-management-api
 
-go 1.12
-
 require (
 	github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681
 	github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679
 	github.com/ProtocolONE/go-core/v2 v2.1.0
+	github.com/PuerkitoBio/purell v1.1.1
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
 	github.com/aws/aws-sdk-go v1.23.16
 	github.com/fatih/color v1.7.0
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-log/log v0.1.0
+	github.com/go-pascal/iban v0.0.0-20180529131734-f0d46003347e
 	github.com/golang/protobuf v1.3.2
 	github.com/google/uuid v1.1.1
 	github.com/google/wire v0.3.0
@@ -20,12 +20,12 @@ require (
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
-	github.com/paysuper/casbin-server v0.0.0-20191021200344-f8e360aaf04d
+	github.com/paysuper/casbin-server v0.0.0-20191031114753-f40b0e2b42ba
 	github.com/paysuper/echo-casbin-middleware v0.0.0-20191021231103-f3d820b11545
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191025154909-0c0c3d11d53f
-	github.com/paysuper/paysuper-recurring-repository v1.0.123
-	github.com/paysuper/paysuper-reporter v0.0.0-20191021130041-24bff0252418
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191105152649-45e7b4eafa39
+	github.com/paysuper/paysuper-recurring-repository v1.0.124
+	github.com/paysuper/paysuper-reporter v0.0.0-20191029094334-763f0076e220
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
@@ -49,3 +49,5 @@ replace (
 	gopkg.in/urfave/cli.v1 => github.com/urfave/cli v1.21.0
 	sourcegraph.com/sourcegraph/go-diff => github.com/sourcegraph/go-diff v0.5.1
 )
+
+go 1.12

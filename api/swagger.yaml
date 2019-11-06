@@ -40,7 +40,74 @@ definitions:
         description: error code
     type: object
 
+  model.JsonOrderCreateResponse.user.address:
+    properties:
+      country:
+        type: string
+        description: string representing the the user's country. two-letter uppercase country code in ISO 3166-1 alpha-2 format
+      city:
+        type: string
+        description: user's city
+      zip:
+        type: string
+        description: postal code
+
+  model.JsonOrderCreateResponse.item:
+    properties:
+      id:
+        description: item identifier
+        type: string
+      object:
+        description: item type
+        type: string
+      sku:
+        description: item sku identifier
+        type: string
+      name:
+        description: item name
+        type: string
+      description:
+        description: item description
+        type: string
+      amount:
+        description: item price
+        type: number
+      currency:
+        description: item price currency. three-letter ISO 4217 currency code, in uppercase.
+        type: string
+      images:
+        description: list of urls to item images
+        type: array
+        items:
+          type: string
+      url:
+        description: url to item on project site
+      metadata:
+        description: object contain item metadata
+        type: object
+      code:
+        description: item code
+        type: string
+      created_at:
+        description: object contain information about time when payment created
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: object contain information about time when payment updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+      platform_id:
+        description: item platform identifier
+        type: string
+
   model.JsonOrderCreateResponse:
+    properties:
+      id:
+        description: order unique identifier
+        type: string
+      payment_form_url:
+        description: url to payment form
+        type: string
+
+  model.PaymentFormDataResponse:
     properties:
       account:
         description: |
@@ -69,10 +136,6 @@ definitions:
         description: |
           order unique identifier
         type: string
-      inline_form_redirect_url:
-        description: |
-          url to redirect user to inline form in PSP side
-        type: string
       payment_methods:
         description: |
           contain data about payment methods
@@ -88,20 +151,34 @@ definitions:
         description: |
           access token to websocket private chanel
         type: string
-      platform_id:
-        description: |
-          id of platform for key product (steam, gog, xbox, etc.)
+      user_ip_data:
+        description: object contain information about user address get by user ip address
+        $ref: '#/definitions/model.JsonOrderCreateResponse.user.address'
+      items:
+        description: list of buyed items in order
+        type: array
+        items:
+          $ref: '#/definitions/model.JsonOrderCreateResponse.item'
+      cookie:
+        description: value to set to cookie for user identification. if user was identified by other data than value can be empty.
         type: string
-        example: steam
-      type:
-        description: |
-          type of products in order (simple, product, key)
+      email:
+        description: user email
         type: string
-        example: simple
-        enum:
-          - simple
-          - product
-          - key
+      description:
+        description: order description
+        type: string
+      country_payments_allowed:
+        description: true is payments from user country is allowed
+        type: boolean
+      country_change_allowed:
+        description: true if user can change self country if payments from his country disallow
+        type: boolean
+      platforms:
+        description: list of supported platforms if this payment with type key (for other types this field can be empty)
+        type: array
+        items:
+          type: string
     type: object
 
   model.Name:
@@ -451,79 +528,99 @@ definitions:
         type: array
     type: object
 
+  order.create.request.user:
+    properties:
+      external_id:
+        description: user identifier on project side
+        type: string
+      name:
+        description: user name
+        type: string
+      email:
+        description: user email
+        type: string
+      email_verified:
+        description: user email was verified by project
+        type: boolean
+      phone:
+        description: user phone
+        type: string
+      phone_verified:
+        description: user phone was verified by project
+        type: boolean
+      ip:
+        description: user ip address
+        type: string
+      locale:
+        description: user's locale. two-letter code in lowercase
+        type: string
+      address:
+        description: user address information
+        $ref: '#/definitions/order.BillingAddress'
+      metadata:
+        description: object can contain any other information about user. object must contain only string values.
+        type: object
+
   model.OrderScalar:
     properties:
       account:
-        description: |
-          user unique account in project
+        description: user unique account in project
         type: string
       amount:
-        description: |
-          order amount
+        description: order amount. if payment type is simple this field is required
         type: number
       currency:
-        description: |
-          order currency by ISO 4217 (3 chars). If this field send, then we're process amount in this currency
+        description: amount currency. three-letter ISO 4217 currency code, in uppercase. if payment type is simple this field is required
         type: string
       description:
-        description: |
-          order description. If this field not send in request, then we're create standard order description
+        description: order description
         type: string
       order_id:
-        description: |
-          unique order identifier in project. This field not required, BUT we're recommend send this field always
-        type: string
-      other:
-        description: |
-          object with any fields on the project side that do not match the names of the reserved fields
-        type: object
-      payer_email:
-        description: |
-          user (payer) email
-        type: string
-      payer_ip:
-        description: |
-          user (payer) ip
-        type: string
-      payer_phone:
-        description: |
-          user (payer) phone
-        type: string
-      payment_method:
-        description: |
-          payment method identifier in Protocol One payment solution
+        description: unique order identifier on project side. this field not required, BUT we're recommend send this field always
         type: string
       project:
-        description: |
-          project unique identifier in Protocol One payment solution
-        type: string
-      region:
-        description: |
-          user (payer) region code by ISO 3166-1 (2 chars) for check project packages. If this field not send, then user region will be get from user ip
-        type: string
-      signature:
-        description: |
-          signature of request to verify that the data has not been changed. This field not required, BUT we're recommend send this field always
+        description: project unique identifier in PaySuper
         type: string
       url_fail:
-        description: |
-          URL for redirect user after failed payment. This field can be send if it allowed in project admin panel
-        type: string
-      url_notify:
-        description: |
-          URL for payment notification request to project. This field can be send if it allowed in project admin panel
+        description: url for redirect user after failed payment. this field can be send if it allowed in project admin panel
         type: string
       url_success:
-        description: |
-          URL for redirect user after successfully completed payment. This field can be send if it allowed in project admin panel
+        description: url for redirect user after successfully completed payment. this field can be send if it allowed in project admin panel
         type: string
-      url_verify:
-        description: |
-          URL for payment data verification request to project. This field can be send if it allowed in project admin panel
+      type:
+        description: "order type. now available next types: simple, product and key"
         type: string
+        enum:
+          - simple
+          - product
+          - key
+      products:
+        description: list of products (or key products) of project which customer want to buy. if payment type is product or key this field is required.
+        type: array
+        items:
+          type: string
+      platform_id:
+        description: platform identifier for which customer buy key products. if payment type is key this field is required.
+        type: string
+        enum:
+          - steam
+          - gog
+          - uplay
+          - origin
+          - psn
+          - xbox
+          - nintendo
+          - itch
+          - egs
+      token:
+        description: pre-created customer payment token. if sending pre-created token other request parameters not required.
+        type: string
+      user:
+        description: object may contain information about user. if project send this parameter in request than project must send authorisation header X-API-SIGNATURE
+        $ref: '#/definitions/order.create.request.user'
     required:
       - project
-      - amount
+      - type
     type: object
 
   model.PaymentMethodJsonOrderResponse:
@@ -647,7 +744,73 @@ definitions:
       updated_at:
         description: date of update merchant in system in unix timestamp
         type: object
+      localizations:
+        description: languages for product to localize
+        type: array
+        items:
+          type: string
+      full_description:
+        description: localized full description for product
+        type: object
+        additionalProperties:
+          type: string
+      short_description:
+        description: localized short description for product
+        type: object
+        additionalProperties:
+          type: string
+      cover:
+        type: object
+        properties:
+          images:
+            type: object
+            additionalProperties:
+              type: string
+            example:
+              en: 'en_image'
+              ru: 'ru_image'
+          use_one_for_all:
+            type: boolean
+      virtual_currency:
+        $ref: '#/definitions/model.VirtualCurrency'
     type: object
+
+  model.VirtualCurrency:
+    type: object
+    properties:
+      logo:
+        type: string
+      name:
+        type: string
+        additionalProperties:
+          type: string
+        example:
+          en: "Some name"
+          ru: "Какое то имя"
+      success_message:
+        type: string
+        additionalProperties:
+          type: string
+        example:
+          en: "Thanks!"
+          ru: "Спасибо!"
+      min_purchase_value:
+        type: number
+        format: double
+      max_purchase_value:
+        type: number
+        format: double
+      sell_count_type:
+        type: string
+        enum:
+          - fractional
+          - integral
+      prices:
+        type: array
+        items:
+          $ref: '#/definitions/product.Price'
+
+
   model.ProjectJsonOrderResponse:
     properties:
       name:
@@ -985,6 +1148,21 @@ definitions:
         description: last payout amount to merchant
         type: number
 
+  onboarding.Tariff.Item:
+    properties:
+      method_percent_fee:
+        description: payment method fee in percents
+        type: number
+      method_fixed_fee:
+        description: payment method fixed fee in particular currency
+        type: number
+      method_fixed_fee_currency:
+        type: string
+        description: currency of payment method fixed fee.  letters code by ISO 4217
+      is_paid_by_merchant:
+        description: if true than commission will to take from merchant
+        type: boolean
+
   onboarding.Tariff.Payment:
     properties:
       min_amount:
@@ -1020,6 +1198,18 @@ definitions:
       payer_regions:
         description: payer region name
         type: string
+
+  onboarding.Tariff:
+    properties:
+      payment:
+        description: payment tariffs
+        $ref: '#/definitions/onboarding.Tariff.Payment'
+      chargeback:
+        description: chargeback tariff
+        $ref: '#/definitions/onboarding.Tariff.Item'
+      payout:
+        description: payout tariff
+        $ref: '#/definitions/onboarding.Tariff.Item'
 
   onboarding.Tariff.Set.Request:
     properties:
@@ -1200,6 +1390,24 @@ definitions:
       amount:
         description: recommended amount
         type: number
+
+  price_group.RecommendedPriceTableResponse:
+    properties:
+      ranges:
+        type: array
+        description: list of price
+        $ref: '#/definitions/price_group.RecommendedPriceTableItem'
+
+  price_group.RecommendedPriceTableItem:
+    properties:
+      from:
+        type: integer
+        description: start point of range
+        example: 0.99
+      to:
+        type: integer
+        description: end point of range
+        example: 1.99
 
   onboarding.Merchant.Notification.Statuses:
     properties:
@@ -1419,6 +1627,7 @@ definitions:
         description: default url to redirect user after successfully completed payment
         type: string
 
+
   order.BillingAddress:
     properties:
       country:
@@ -1479,6 +1688,8 @@ definitions:
       metadata:
         description: object can contain any other information about user. object must contain only string values.
         type: object
+    required:
+      - id
 
   token.TokenRequest.Settings.ReturnUrl:
     properties:
@@ -1489,52 +1700,37 @@ definitions:
         description: url to redirect user after payment failed
         type: string
 
-  token.TokenRequest.Settings.Item:
-    properties:
-      sku:
-        description: sku identifier
-        type: string
-      amount:
-        description: item price
-        type: number
-      currency:
-        description: item price currency. 3 characters currency code in upper registry by ISO 4217
-        type: string
-    required:
-      - sku
-      - amount
-      - currency
-
   token.TokenRequest.Settings:
     properties:
       project_id:
         description: project identifier
         type: string
       return_url:
-        description: object contain urls for redirect user after payment ended
+        description: object contain urls for redirect user after payment ended. can be set if project settings allow this.
         $ref: '#/definitions/token.TokenRequest.Settings.ReturnUrl'
       currency:
-        description: 3 characters currency code in upper registry by ISO 4217
+        description: "3 characters currency code in upper registry by ISO 4217. this field is required if payment type is simple. WARNING: this field is disallowed if creating payment token with types product or key"
         type: string
       amount:
-        description: payment amount. this field is required if project use simple checkout payment to process payments.
+        description: "payment amount. this field is required if payment type is simple. WARNING: this field is disallowed if creating payment token with types product or key"
         type: number
-      payment_method:
-        description: predefined payment method identifier
-        type: string
-      items:
-        description: object contain information about items which user want to buy. this field is required if project not use simple checkout payment to process payments.
+      products_ids:
+        description: "array of products identifiers or key products identifiers. this field is required if payment types are product or key. WARNING: this field is disallowed if creating payment token with type simple"
         type: array
         items:
-          $ref: '#/definitions/token.TokenRequest.Settings.Item'
+          type: string
       description:
         description: payment description
+        type: string
+      type:
+        description: "payment type. now available next values: simple, product, key"
         type: string
       metadata:
         description: object can contain any other information about payment. object must contain only string values. this object will return in project notification about payment.
         type: object
     required:
       - project_id
+      - type
 
   token.TokenRequest:
     properties:
@@ -1552,6 +1748,9 @@ definitions:
     properties:
       token:
         description: payment token
+        type: string
+      payment_form_url:
+        description: url to payment form
         type: string
     required:
       - token
@@ -1729,6 +1928,26 @@ definitions:
       updated_at:
         description: time of last update user profile
         $ref: '#/definitions/ProtobufTimestamp'
+
+  userCommonProfile:
+    properties:
+      user_profile:
+        description: object contain information about user
+        $ref: '#/definitions/userProfile.response'
+      user_role:
+        description: object contain information about user role
+        $ref: '#/definitions/UserRole'
+      permissions:
+        type: array
+        description: object contain list of permissions
+        $ref: '#/definitions/userRolePermission'
+
+  userRolePermission:
+    properties:
+      name:
+        type: string
+      access:
+        type: string
 
   pageReview.request:
     properties:
@@ -2384,7 +2603,11 @@ definitions:
       transaction:
         type: string
         description: transaction id
-      amount:
+      total_fees:
+        type: number
+        format: double
+        description: total_fees
+      balance:
         type: number
         format: double
         description: amount
@@ -2578,6 +2801,12 @@ definitions:
       metadata:
         description: object can contain any other information about product. object must contain only string values
         type: object
+      billing_type:
+        description: Type of billing
+        type: string
+        enum:
+          - real
+          - virtual
 
   product.create_or_update:
     properties:
@@ -2857,224 +3086,6 @@ definitions:
           "$ref": "#/definitions/billingRoyaltyReport"
         description: royalty reports
 
-  InviteUserAdmin:
-    type: object
-    properties:
-      email:
-        type: string
-        example: "test@paysuper.com"
-        description: "Email on which to send an invitation"
-      role:
-        type: string
-        example: "support"
-        description: "Role of user (system_risk_manager, system_financial, system_support, system_view_only)"
-
-  InviteUserResponse:
-    type: object
-    properties:
-      status:
-        type: number
-      message:
-        type: string
-      role:
-        type: object
-        items:
-          "$ref": "#/definitions/UserRole"
-
-  ResendInviteAdmin:
-    type: object
-    properties:
-      email:
-        type: string
-        example: "test@paysuper.com"
-        description: "Email of invite"
-
-  EmptyResponseWithStatus:
-    type: object
-    properties:
-      status:
-        type: number
-      message:
-        type: string
-
-  ListUsersResponse:
-    type: object
-    properties:
-      status:
-        type: number
-      message:
-        type: string
-      users:
-        type: array
-        items:
-          "$ref": "#/definitions/UserRole"
-
-  AcceptInvite:
-    type: object
-    properties:
-      token:
-        type: string
-        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-        description: "Invitation token"
-      firstName:
-        type: string
-        example: "John"
-        description: "First name of invitation user"
-      lastName:
-        type: string
-        example: "Malkovich"
-        description: "Last name of invitation user"
-
-  AcceptInviteResponse:
-    type: object
-    properties:
-      status:
-        type: number
-      message:
-        type: string
-      role:
-        type: object
-        description: "User role"
-        items:
-          "$ref": "#/definitions/UserRole"
-
-  CheckInviteToken:
-    type: object
-    properties:
-      token:
-        type: string
-        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-        description: "Invitation token"
-
-  CheckInviteTokenResponse:
-    type: object
-    properties:
-      status:
-        type: number
-      message:
-        type: string
-      role_id:
-        type: string
-        description: "Identifier of invitation"
-      role_type:
-        type: string
-        example: "admin"
-        description: "Type of invitation: admin or merchant"
-
-  InviteUserMerchant:
-    type: object
-    properties:
-      email:
-        type: string
-        example: "test@paysuper.com"
-        description: "Email on which to send an invitation"
-      role:
-        type: string
-        example: "support"
-        description: "Role of user (merchant_developer, merchant_accounting, merchant_support, system_view_only)"
-
-  ResendInviteMerchant:
-    type: object
-    properties:
-      email:
-        type: string
-        example: "test@paysuper.com"
-        description: "Email of invite identifier"
-
-  UserRole:
-    type: object
-    properties:
-      id:
-        type: string
-        example: "507f1f77bcf86cd799439011"
-        description: "User role identifier"
-      merchantId:
-        type: string
-        example: "507f1f77bcf86cd799439011"
-        description: "Merchant identifier (only for merchant users)"
-      role:
-        type: string
-        example: "developer"
-        description: "Role of user"
-      status:
-        type: string
-        example: "invited"
-        description: "Status of invitation: invited or approved"
-      userId:
-        type: string
-        example: "507f1f77bcf86cd799439011"
-        description: "User identifier"
-      firstName:
-        type: string
-        example: "John"
-        description: "First name of user"
-      lastName:
-        type: string
-        example: "Malkovich"
-        description: "Last name of user"
-      email:
-        type: string
-        example: "test@paysuper.com"
-        description: "Email of user"
-      createdAt:
-        type: string
-        example: "developer"
-        description: "Date of creation"
-      updatedAt:
-        type: string
-        example: "developer"
-        description: "Date of updating"
-
-  ListRoleType:
-    type: array
-    items:
-      "$ref": "#/definitions/ListRoleTypeItem"
-
-  ListRoleTypeItem:
-    type: object
-    properties:
-      id:
-        type: string
-        example: "owner"
-        description: "Role identity"
-      name:
-        type: string
-        example: "Owner"
-        description: "Role name"
-
-  UpdateUserRoleRequest:
-    type: object
-    properties:
-      email:
-        type: string
-        example: "test@paysuper.com"
-        description: "User identity"
-
-  MerchantsForUserResponse:
-    type: object
-    properties:
-      status:
-        type: number
-      message:
-        type: string
-      role:
-        type: object
-        description: "User role"
-        items:
-          "$ref": "#/definitions/MerchantsForUser"
-
-  MerchantsForUser:
-    type: object
-    properties:
-      id:
-        type: string
-        example: "507f1f77bcf86cd799439011"
-        description: "Merchant identity"
-      name:
-        type: string
-        example: "R&K"
-        description: "Merchant name"
-
   grpcPaylinksPaginate:
     type: object
     properties:
@@ -3254,19 +3265,15 @@ definitions:
     properties:
       id:
         type: string
-        description: 'paylink id, optional'
+        description: 'paylink id, optional, used only for edit existing paylink'
       products:
         type: array
         items:
           type: string
         description: 'list of products included to paylink'
       expires_at:
-        type: string
-        format: date-time
-        description: 'expiration date'
-      merchant_id:
-        type: string
-        description: 'paylink merchant id"'
+        type: number
+        description: 'expiration date as unix timestamp'
       project_id:
         type: string
         description: 'paylink project id"'
@@ -3280,6 +3287,322 @@ definitions:
       products_type:
         type: string
         description: 'products type'
+
+  billingVatReport:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 'vat report id'
+      country:
+        type: string
+        description: 'country ISO A2 code'
+      vat_rate:
+        type: number
+        format: double
+        description: 'rate value of VAT'
+      currency:
+        type: string
+        description: 'vat currency ISO code'
+      transactions_count:
+        type: integer
+        format: int32
+        description: 'total transactions count in period'
+      gross_revenue:
+        type: number
+        format: double
+        description: 'gross revenue amount in period'
+      vat_amount:
+        type: number
+        format: double
+        description: 'vat amount in period'
+      fees_amount:
+        type: number
+        format: double
+        description: 'fees amount in period'
+      deduction_amount:
+        type: number
+        format: double
+        description: 'deduction amount in period'
+      correction_amount:
+        type: number
+        format: double
+        description: 'manual correction amount in period'
+      status:
+        type: string
+        description: 'status'
+      country_annual_turnover:
+        type: number
+        format: double
+        description: 'annual turnover for country'
+      world_annual_turnover:
+        type: number
+        format: double
+        description: 'world annual turnover'
+      amounts_approximate:
+        type: boolean
+        format: boolean
+        description: 'flag of non-final amounts due to currency exchange rates delay'
+      date_from:
+        type: string
+        format: date-time
+        description: 'period start date'
+      date_to:
+        type: string
+        format: date-time
+        description: 'period end date'
+      pay_until_date:
+        type: string
+        format: date-time
+        description: 'VAT payment deadline date'
+      created_at:
+        type: string
+        format: date-time
+        description: 'report creation date'
+      updated_at:
+        type: string
+        format: date-time
+        description: 'report last update date'
+      paid_at:
+        type: string
+        format: date-time
+        description: 'date of payment'
+
+  grpcVatReportsPaginate:
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        description: 'total reports count'
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/billingVatReport"
+        description: 'reports'
+
+  InviteUserAdmin:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email on which to send an invitation"
+      role:
+        type: string
+        example: "support"
+        description: "Role of user (system_risk_manager, system_financial, system_support, system_view_only)"
+
+  InviteUserResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  ResendInviteAdmin:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email of invite"
+
+  EmptyResponseWithStatus:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+
+  ListUsersResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      users:
+        type: array
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  AcceptInvite:
+    type: object
+    properties:
+      token:
+        type: string
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        description: "Invitation token"
+
+  AcceptInviteResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        description: "User role"
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  CheckInviteToken:
+    type: object
+    properties:
+      token:
+        type: string
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        description: "Invitation token"
+
+  CheckInviteTokenResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role_id:
+        type: string
+        description: "Identifier of invitation"
+      role_type:
+        type: string
+        example: "admin"
+        description: "Type of invitation: admin or merchant"
+
+  InviteUserMerchant:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email on which to send an invitation"
+      role:
+        type: string
+        example: "support"
+        description: "Role of user (merchant_developer, merchant_accounting, merchant_support, system_view_only)"
+
+  ResendInviteMerchant:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email of invite identifier"
+
+  UserRole:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "User role identifier"
+      merchantId:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "Merchant identifier (only for merchant users)"
+      role:
+        type: string
+        example: "developer"
+        description: "Role of user"
+      status:
+        type: string
+        example: "invited"
+        description: "Status of invitation: invited or approved"
+      userId:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "User identifier"
+      firstName:
+        type: string
+        example: "John"
+        description: "First name of user"
+      lastName:
+        type: string
+        example: "Malkovich"
+        description: "Last name of user"
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email of user"
+      createdAt:
+        type: string
+        example: "developer"
+        description: "Date of creation"
+      updatedAt:
+        type: string
+        example: "developer"
+        description: "Date of updating"
+
+  UserRoleResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        description: "User role"
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  ListRoleType:
+    type: array
+    items:
+      "$ref": "#/definitions/ListRoleTypeItem"
+
+  ListRoleTypeItem:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "owner"
+        description: "Role identity"
+      name:
+        type: string
+        example: "Owner"
+        description: "Role name"
+
+  UpdateUserRoleRequest:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "User identity"
+
+  MerchantsForUserResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        description: "User role"
+        items:
+          "$ref": "#/definitions/MerchantsForUser"
+
+  MerchantsForUser:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "Merchant identity"
+      name:
+        type: string
+        example: "R&K"
+        description: "Merchant name"
 
 host: p1payapi.tst.protocol.one
 info:
@@ -4460,11 +4783,17 @@ paths:
         - application/json
       description: Calculation of recommended prices based on price ranges as in Steam, taking into account regional factors.
       parameters:
-        - description: base price in USD
-          in: query
-          name: amount
-          type: string
+        - description: Request param
+          in: body
+          name: data
           required: true
+          schema:
+            type: object
+            properties:
+              amount:
+                type: integer
+              currency:
+                type: string
       produces:
         - application/json
       responses:
@@ -4480,18 +4809,25 @@ paths:
             type: string
       summary: Get recommended prices for regions by price groups
       tags:
-        - Price group
+        - Pricing
+
   /api/v1/pricing/recommended/conversion:
     get:
       consumes:
         - application/json
       description: Calculation of recommended prices based on exchange rates.
       parameters:
-        - description: base price in USD
-          in: query
-          name: amount
-          type: string
+        - description: Request param
+          in: body
+          name: data
           required: true
+          schema:
+            type: object
+            properties:
+              amount:
+                type: integer
+              currency:
+                type: string
       produces:
         - application/json
       responses:
@@ -4507,7 +4843,39 @@ paths:
             type: string
       summary: Get recommended prices for regions by currency conversion
       tags:
-        - Price group
+        - Pricing
+
+  /api/v1/pricing/recommended/table:
+    get:
+      consumes:
+        - application/json
+      description: Get table of recommended prices for currency.
+      parameters:
+        - description: Request param
+          in: body
+          name: data
+          required: true
+          schema:
+            type: object
+            properties:
+              currency:
+                type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/price_group.RecommendedPriceTableResponse'
+            type: array
+        "400":
+          description: Error description
+          schema:
+            type: string
+      summary: Get table of recommended prices for currency
+      tags:
+        - Pricing
 
   "/admin/api/v1/merchants":
     get:
@@ -5665,6 +6033,84 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/userProfile.response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/profile/common":
+    get:
+      summary: Get common user profile
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get common user profile (main profile, user role, user permissions)
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userCommonProfile'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/user/profile/common":
+    get:
+      summary: Get common user profile by merchant
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get common user profile by merchant (main profile, user role, user permissions)
+      parameters:
+        - description: object contained confirmation token
+          in: path
+          name: merchant_id
+          type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userCommonProfile'
         "400":
           description: Invalid request data
           schema:
@@ -8262,7 +8708,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/royalty_reports/{id}/decline":
-    get:
+    post:
       summary: Start royalty report dispute
       tags:
         - Royalty reports
@@ -8329,550 +8775,6 @@ paths:
       responses:
         "204":
           description: OK
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/users/invite":
-    post:
-      summary: Send invitation for admin user
-      tags:
-        - Admin user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Send invitation to add user as administrator
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/InviteUserAdmin"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/InviteUserResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/users":
-    get:
-      summary: List of admin users
-      tags:
-        - Admin user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: List of admin users
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ListUsersResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/users/resend":
-    post:
-      summary: Resend invitation for admin user
-      tags:
-        - Admin user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Resend invitation to add user as administrator
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/ResendInviteAdmin"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/EmptyResponseWithStatus'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/users/roles":
-    get:
-      summary: List of admin role types
-      tags:
-        - Admin user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: List of admin role types
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ListRoleType'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/users/{user_id}":
-    delete:
-      summary: Delete admin user
-      tags:
-        - Admin user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Delete admin user
-      parameters:
-        - description: User identifier
-          in: path
-          name: user_id
-          required: true
-          type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/EmptyResponseWithStatus'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-    put:
-      summary: Update admin user role
-      tags:
-        - Admin user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Update admin user role
-      parameters:
-        - description: User identifier
-          in: path
-          name: user_id
-          required: true
-          type: string
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/UpdateUserRoleRequest"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/EmptyResponseWithStatus'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/merchants/invite":
-    post:
-      summary: Send invitation for merchant user
-      tags:
-        - Merchant user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Send invitation to add user as merchant user
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/InviteUserMerchant"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/InviteUserResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/merchants/users/resend":
-    post:
-      summary: Resend invitation for merchant user
-      tags:
-        - Merchant user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Resend invitation to add user as merchant user
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/ResendInviteMerchant"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/EmptyResponseWithStatus'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/merchants/users":
-    get:
-      summary: List of merchant users
-      tags:
-        - Merchant user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: List of merchant users
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ListUsersResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/merchants/users/{user_id}":
-    delete:
-      summary: Delete merchant user
-      tags:
-        - Merchant user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Delete merchant user
-      parameters:
-        - description: User identifier
-          in: path
-          name: user_id
-          required: true
-          type: string
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/EmptyResponseWithStatus'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-    put:
-      summary: Update merchant user role
-      tags:
-        - Merchant user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Update merchant user role
-      parameters:
-        - description: User identifier
-          in: path
-          name: user_id
-          required: true
-          type: string
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/UpdateUserRoleRequest"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/EmptyResponseWithStatus'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/merchants/roles":
-    get:
-      summary: List of merchant role types
-      tags:
-        - Merchant user roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: List of merchant role types
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ListRoleType'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/api/v1/user/invite/check":
-    post:
-      summary: Check invitation token
-      tags:
-        - User
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Check invitation token
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/CheckInviteToken"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/CheckInviteTokenResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/api/v1/user/invite/approve":
-    post:
-      summary: Approve of invitation for user
-      tags:
-        - User
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Approve of invitation for user
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/AcceptInvite"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/AcceptInviteResponse'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/api/v1/user/merchants":
-    get:
-      summary: Get merchants list for user
-      tags:
-        - User
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Get merchants list for user
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/AcceptInvite"
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/MerchantsForUserResponse'
         "400":
           description: Invalid request data
           schema:
@@ -8957,52 +8859,6 @@ paths:
             $ref: '#/definitions/model.Error'
         "401":
           description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/paylinks/project/{id}":
-    get:
-      summary: Get a list of payment links for current authenticated merchant, filtered by project
-      tags:
-        - Payment links
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description:  Get a list of payment links for current authenticated merchant, filtered by project
-      parameters:
-        - description: Project identifier
-          in: path
-          name: id
-          required: true
-          type: string
-        - description: maximum number of returning orders. default value is 100
-          in: query
-          name: limit
-          type: integer
-        - description: offset from which you want to return the list of orders. default value is 0
-          in: query
-          name: offset
-          type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/grpcPaylinksPaginate'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
         "500":
@@ -9174,59 +9030,6 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/paylinks/{id}/dashboard/summary":
-    get:
-      summary: Get summary stat for a payment link by id for current authenticated merchant
-      tags:
-        - Payment links
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description:  Get summary stat for a payment link by id for current authenticated merchant
-      parameters:
-        - description: Payment link identifier
-          in: path
-          name: id
-          required: true
-          type: string
-        - description: period start date in unix timestamp format
-          in: query
-          name: period_from
-          type: number
-          required: false
-        - description: period end date in unix timestamp format
-          in: query
-          name: period_to
-          type: number
-          required: false
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/paylinkStatCommon'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-
   "/admin/api/v1/paylinks/{id}/dashboard/country":
     get:
       summary: Get a grouping stat by country for a payment link by its id for current authenticated merchant
@@ -9238,9 +9041,9 @@ paths:
         - application/json
       description:  Get a grouping stat by country for a payment link by its id for current authenticated merchant
       parameters:
-        - description: Payment link identifier
+        - description: User role identifier
           in: path
-          name: id
+          name: role_id
           required: true
           type: string
         - description: period start date in unix timestamp format
@@ -9429,6 +9232,792 @@ paths:
             $ref: '#/definitions/model.Error'
         "404":
           description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/vat_reports/country/{country}":
+    get:
+      summary: Get a VAT reports list by country
+      tags:
+        - VAT Reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:   Get a VAT reports list by country
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/grpcVatReportsPaginate'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/vat_reports/details/{id}":
+    get:
+      summary: Get a VAT report transaction
+      tags:
+        - VAT Reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get a VAT report transaction
+      parameters:
+        - description: VAT report id
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/order.list.public'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/vat_reports/status/{id}":
+    post:
+      summary: Change a VAT report status
+      tags:
+        - VAT Reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Change a VAT report status
+      parameters:
+        - description: VAT report id
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: status
+          in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  /api/v1/order/{id}:
+    get:
+      consumes:
+        - application/json
+      description: Get data for rendering payment form
+      parameters:
+        - description: Order unique identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PaymentFormDataResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get data for rendering payment form
+      tags:
+        - Order
+  "/admin/api/v1/users/invite":
+    post:
+      summary: Send invitation for admin user
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Send invitation to add user as administrator
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/InviteUserAdmin"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/InviteUserResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/users":
+    get:
+      summary: List of admin users
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of admin users
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListUsersResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/users/resend":
+    post:
+      summary: Resend invitation for admin user
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Resend invitation to add user as administrator
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/ResendInviteAdmin"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/users/roles":
+    get:
+      summary: List of admin role types
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of admin role types
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListRoleType'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/users/roles/{role_id}":
+    delete:
+      summary: Delete admin user
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete admin user
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      summary: Update admin user role
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Update admin user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/UpdateUserRoleRequest"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    get:
+      summary: Get admin user role
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get admin user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UserRoleResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/invite":
+    post:
+      summary: Send invitation for merchant user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Send invitation to add user as merchant user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/InviteUserMerchant"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/InviteUserResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/users/resend":
+    post:
+      summary: Resend invitation for merchant user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Resend invitation to add user as merchant user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/ResendInviteMerchant"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/users":
+    get:
+      summary: List of merchant users
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of merchant users
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListUsersResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/users/roles/{role_id}":
+    delete:
+      summary: Delete merchant user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete merchant user
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      summary: Update merchant user role
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Update merchant user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/UpdateUserRoleRequest"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    get:
+      summary: Get merchant user role
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get merchant user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/UserRoleResponse"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/roles":
+    get:
+      summary: List of merchant role types
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of merchant role types
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListRoleType'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/invite/check":
+    post:
+      summary: Check invitation token
+      tags:
+        - User
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Check invitation token
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/CheckInviteToken"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/CheckInviteTokenResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/invite/approve":
+    post:
+      summary: Approve of invitation for user
+      tags:
+        - User
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Approve of invitation for user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/AcceptInvite"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AcceptInviteResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/merchants":
+    get:
+      summary: Get merchants list for user
+      tags:
+        - User
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get merchants list for user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/AcceptInvite"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/MerchantsForUserResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
           schema:
             $ref: '#/definitions/model.Error'
         "500":

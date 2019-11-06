@@ -487,6 +487,25 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() 
 	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
 }
 
+func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidatePageIdError() {
+
+	body := `{"review": "some review text", "url": ""}`
+
+	_, err := suite.caller.Builder().
+		Method(http.MethodPost).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
+		Init(test.ReqInitJSON()).
+		BodyString(body).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+
+	httpErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), common.ErrorMessageIncorrectPageId, httpErr.Message)
+}
+
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateReviewError() {
 
 	body := `{"review": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "url": "primary_onboarding"}`

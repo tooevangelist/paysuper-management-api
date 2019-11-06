@@ -166,10 +166,17 @@ func (b *Binder) Bind(i interface{}, ctx echo.Context) (err error) {
 type OrderFormBinder struct{}
 type OrderJsonBinder struct{}
 type PaymentCreateProcessBinder struct{}
+type OnboardingChangeMerchantStatusBinder struct{}
 type OnboardingMerchantListingBinder struct {
 	LimitDefault, OffsetDefault int32
 }
 type OnboardingNotificationsListBinder struct {
+	LimitDefault, OffsetDefault int32
+}
+type OnboardingGetPaymentMethodBinder struct{}
+type OnboardingChangePaymentMethodBinder struct{}
+type OnboardingCreateNotificationBinder struct{}
+type ProductsGetProductsListBinder struct {
 	LimitDefault, OffsetDefault int32
 }
 type ProductsCreateProductBinder struct{}
@@ -347,6 +354,94 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 }
 
 // Bind
+func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(RequestParameterMerchantId)
+	paymentMethodId := ctx.Param(RequestParameterPaymentMethodId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return ErrorIncorrectMerchantId
+	}
+
+	if paymentMethodId == "" || bson.IsObjectIdHex(paymentMethodId) == false {
+		return ErrorIncorrectPaymentMethodId
+	}
+
+	structure := i.(*grpc.GetMerchantPaymentMethodRequest)
+	structure.MerchantId = merchantId
+	structure.PaymentMethodId = paymentMethodId
+
+	return nil
+}
+
+// Bind
+func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+
+	structure := i.(*grpc.MerchantPaymentMethodRequest)
+	merchantId := ctx.Param(RequestParameterMerchantId)
+	methodId := ctx.Param(RequestParameterPaymentMethodId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return ErrorIncorrectMerchantId
+	}
+
+	if methodId == "" || bson.IsObjectIdHex(methodId) == false ||
+		structure.PaymentMethod.Id != methodId {
+		return ErrorIncorrectPaymentMethodId
+	}
+
+	structure.MerchantId = merchantId
+
+	return nil
+}
+
+// Bind
+func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Context) error {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(RequestParameterId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return ErrorIncorrectMerchantId
+	}
+
+	structure := i.(*grpc.MerchantChangeStatusRequest)
+	structure.MerchantId = merchantId
+
+	return nil
+}
+
+// Bind
+func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Context) error {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+
+	merchantId := ctx.Param(RequestParameterMerchantId)
+
+	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+		return ErrorIncorrectMerchantId
+	}
+
+	structure := i.(*grpc.NotificationRequest)
+	structure.MerchantId = merchantId
+
+	return nil
+}
+
+// Bind
 func (b *ProductsCreateProductBinder) Bind(i interface{}, ctx echo.Context) error {
 
 	if err := BinderDefault.Bind(i, ctx); err != nil {
@@ -433,8 +528,28 @@ func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) 
 func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error {
 	req := make(map[string]interface{})
 
-	if err := b.Binder.Bind(&req, ctx); err != nil {
-		return err
+	// Read the content
+	var bodyBytes []byte
+	if ctx.Request().Body != nil {
+		bodyBytes, _ = ioutil.ReadAll(ctx.Request().Body)
+	}
+
+	// Restore the io.ReadCloser to its original state
+	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	projectReq := &billing.Project{}
+	if err := ctx.Bind(projectReq); err != nil {
+		return ErrorRequestParamsIncorrect
+	}
+
+	// Restore the io.ReadCloser to its original state
+	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	db := new(echo.DefaultBinder)
+	err := db.Bind(&req, ctx)
+
+	if err != nil {
+		return ErrorRequestParamsIncorrect
 	}
 
 	projectId := ctx.Param(RequestParameterProjectId)
@@ -459,7 +574,6 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.Id = projectId
 	structure.MerchantId = pRsp.Item.MerchantId
 	structure.Name = pRsp.Item.Name
-	structure.Image = pRsp.Item.Image
 	structure.CallbackCurrency = pRsp.Item.CallbackCurrency
 	structure.CallbackProtocol = pRsp.Item.CallbackProtocol
 	structure.CreateOrderAllowedUrls = pRsp.Item.CreateOrderAllowedUrls
@@ -478,6 +592,12 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.UrlRedirectFail = pRsp.Item.UrlRedirectFail
 	structure.UrlRedirectSuccess = pRsp.Item.UrlRedirectSuccess
 	structure.Status = pRsp.Item.Status
+	structure.ShortDescription = pRsp.Item.ShortDescription
+	structure.Cover = pRsp.Item.Cover
+	structure.FullDescription = pRsp.Item.FullDescription
+	structure.Localizations = pRsp.Item.Localizations
+	structure.Currencies = pRsp.Item.Currencies
+	structure.VirtualCurrency = pRsp.Item.VirtualCurrency
 
 	if v, ok := req[RequestParameterName]; ok {
 		tv, ok := v.(map[string]interface{})
@@ -488,14 +608,6 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 		for k, tvv := range tv {
 			structure.Name[k] = tvv.(string)
-		}
-	}
-
-	if v, ok := req[RequestParameterImage]; ok {
-		if tv, ok := v.(string); !ok {
-			return ErrorMessageImageIncorrectType
-		} else {
-			structure.Image = tv
 		}
 	}
 
@@ -685,6 +797,30 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		} else {
 			structure.UrlRefundPayment = tv
 		}
+	}
+
+	if _, ok := req[RequestParameterFullDescription]; ok {
+		structure.FullDescription = projectReq.FullDescription
+	}
+
+	if _, ok := req[RequestParameterShortDescription]; ok {
+		structure.ShortDescription = projectReq.ShortDescription
+	}
+
+	if _, ok := req[RequestParameterCover]; ok {
+		structure.Cover = projectReq.Cover
+	}
+
+	if _, ok := req[RequestParameterLocalizations]; ok {
+		structure.Localizations = projectReq.Localizations
+	}
+
+	if _, ok := req[RequestParameterCurrencies]; ok {
+		structure.Currencies = projectReq.Currencies
+	}
+
+	if _, ok := req[RequestParameterVirtualCurrency]; ok {
+		structure.VirtualCurrency = projectReq.VirtualCurrency
 	}
 
 	return nil

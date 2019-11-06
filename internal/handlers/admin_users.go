@@ -21,8 +21,7 @@ const (
 	adminListRoles    = "/users/roles"
 	adminUserInvite   = "/users/invite"
 	adminResendInvite = "/users/resend"
-	adminUserRole     = "/users/:user"
-	adminUserDelete   = "/users/:user"
+	adminUserRole     = "/users/roles/:role_id"
 )
 
 func NewAdminUsersRoute(set common.HandlerSet, cfg *common.Config) *AdminUsersRoute {
@@ -40,7 +39,8 @@ func (h *AdminUsersRoute) Route(groups *common.Groups) {
 	groups.SystemUser.POST(adminUserInvite, h.sendInvite)
 	groups.SystemUser.POST(adminResendInvite, h.resendInvite)
 	groups.SystemUser.GET(adminListRoles, h.listRoles)
-	groups.SystemUser.DELETE(adminUserDelete, h.deleteUser)
+	groups.SystemUser.DELETE(adminUserRole, h.deleteUser)
+	groups.SystemUser.GET(adminUserRole, h.getUser)
 }
 
 func (h *AdminUsersRoute) changeRole(ctx echo.Context) error {
@@ -51,9 +51,9 @@ func (h *AdminUsersRoute) changeRole(ctx echo.Context) error {
 	}
 
 	res, err := h.dispatch.Services.Billing.ChangeRoleForAdminUser(ctx.Request().Context(), req)
+
 	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.PairArgs("err", err.Error()))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ChangeRoleForAdminUser")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -67,8 +67,7 @@ func (h *AdminUsersRoute) listUsers(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.GetAdminUsers(ctx.Request().Context(), &grpc.EmptyRequest{})
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetAdminUsers", &grpc.EmptyRequest{})
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(&grpc.EmptyRequest{}, err, pkg.ServiceName, "GetAdminUsers")
 	}
 
 	if res.Status != http.StatusOK {
@@ -86,9 +85,9 @@ func (h *AdminUsersRoute) sendInvite(ctx echo.Context) error {
 	}
 
 	res, err := h.dispatch.Services.Billing.InviteUserAdmin(ctx.Request().Context(), req)
+
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "InviteUserAdmin", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToSendInvite)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "InviteUserAdmin")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -102,9 +101,9 @@ func (h *AdminUsersRoute) resendInvite(ctx echo.Context) error {
 	}
 
 	res, err := h.dispatch.Services.Billing.ResendInviteAdmin(ctx.Request().Context(), req)
+
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "ResendInviteAdmin", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToSendInvite)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ResendInviteAdmin")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -115,24 +114,39 @@ func (h *AdminUsersRoute) listRoles(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.GetRoleList(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetRoleList", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageInvalidRoleType)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetRoleList")
 	}
 
 	return ctx.JSON(http.StatusOK, res)
 }
 
 func (h *AdminUsersRoute) deleteUser(ctx echo.Context) error {
-	req := &grpc.DeleteAdminUserRequest{}
+	req := &grpc.AdminRoleRequest{}
 
 	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
 		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.DeleteAdminUser(ctx.Request().Context(), req)
+
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "DeleteAdminUser", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorMessageUnableToDeleteUser)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "DeleteAdminUser")
+	}
+
+	return ctx.JSON(http.StatusOK, res)
+}
+
+func (h *AdminUsersRoute) getUser(ctx echo.Context) error {
+	req := &grpc.AdminRoleRequest{}
+
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
+	}
+
+	res, err := h.dispatch.Services.Billing.GetAdminUserRole(ctx.Request().Context(), req)
+
+	if err != nil {
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetAdminUserRole")
 	}
 
 	return ctx.JSON(http.StatusOK, res)

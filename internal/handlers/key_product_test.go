@@ -416,7 +416,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Ok() {
 			{
 				Id:   "gog",
 				Name: "Gog",
-				Prices: []*grpc.ProductPrice{
+				Prices: []*billing.ProductPrice{
 					{
 						Currency: "RUB",
 						Region:   "RUB",
@@ -453,7 +453,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Error(
 			{
 				Id:   "gog",
 				Name: "Gog",
-				Prices: []*grpc.ProductPrice{
+				Prices: []*billing.ProductPrice{
 					{
 						Currency: "RUB",
 						Region:   "TestRegion",

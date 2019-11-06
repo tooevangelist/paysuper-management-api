@@ -33,16 +33,6 @@ var payoutMock = &billing.PayoutDocument{
 	FailureMessage:     "",
 	FailureTransaction: "",
 	MerchantId:         bson.NewObjectId().Hex(),
-	SignatureData: &billing.PayoutDocumentSignatureData{
-		DetailsUrl:          "http://localhost",
-		FilesUrl:            "http://localhost",
-		SignatureRequestId:  bson.NewObjectId().Hex(),
-		MerchantSignatureId: bson.NewObjectId().Hex(),
-		PsSignatureId:       bson.NewObjectId().Hex(),
-	},
-	HasMerchantSignature:  false,
-	HasPspSignature:       false,
-	SignedDocumentFileUrl: "",
 }
 
 type PayoutDocumentsTestSuite struct {
@@ -78,6 +68,14 @@ func (suite *PayoutDocumentsTestSuite) SetupTest() {
 		Return(&grpc.PayoutDocumentResponse{
 			Status: http.StatusOK,
 			Item:   payoutMock,
+		}, nil)
+
+	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
+		Return(&grpc.GetMerchantResponse{
+			Status: http.StatusOK,
+			Item: &billing.Merchant{
+				Id: bson.NewObjectId().Hex(),
+			},
 		}, nil)
 
 	var e error

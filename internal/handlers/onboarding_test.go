@@ -1756,7 +1756,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_WithoutMerch
 		Currency:             "RUB",
 		Name:                 "Bank Name-Spb.",
 		Address:              "St.Petersburg, Nevskiy st. 1",
-		AccountNumber:        "408000000001",
+		AccountNumber:        "SE1412345678901234567890",
 		Swift:                "ALFARUMM",
 		CorrespondentAccount: "408000000001",
 	}
@@ -1785,7 +1785,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_WithMerchant
 		Currency:             "RUB",
 		Name:                 "Bank Name-Spb.",
 		Address:              "St.Petersburg, Nevskiy st. 1",
-		AccountNumber:        "408000000001",
+		AccountNumber:        "SE1412345678901234567890",
 		Swift:                "ALFARUMM",
 		CorrespondentAccount: "408000000001",
 	}
@@ -1920,7 +1920,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationEr
 		"currency": "RUB",
 		"name": "Bank Name-Spb.",
 		"address": "St.Petersburg, Nevskiy st. 1",
-		"account_number": "408000000001",
+		"account_number": "SE1412345678901234567890",
 		"correspondent_account": "408000000001"
 	}`
 
@@ -1949,7 +1949,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_ValidationEr
 		"currency": "RUB",
 		"name": "Bank Name-Spb.",
 		"address": "St.Petersburg, Nevskiy st. 1",
-		"account_number": "408000000001",
+		"account_number": "SE1412345678901234567890",
 		"swift": "ALFARUMM",
 		"correspondent_account": "408000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
 	}`
@@ -1979,7 +1979,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_BillingServe
 		"currency": "RUB",
 		"name": "Bank Name-Spb.",
 		"address": "St.Petersburg, Nevskiy st. 1",
-		"account_number": "408000000001",
+		"account_number": "SE1412345678901234567890",
 		"swift": "ALFARUMM",
 		"correspondent_account": "408000000001"
 	}`
@@ -2008,7 +2008,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_BillingServe
 		"currency": "RUB",
 		"name": "Bank Name-Spb.",
 		"address": "St.Petersburg, Nevskiy st. 1",
-		"account_number": "408000000001",
+		"account_number": "SE1412345678901234567890",
 		"swift": "ALFARUMM",
 		"correspondent_account": "408000000001"
 	}`

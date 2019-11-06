@@ -74,7 +74,7 @@ var (
 		},
 	}
 
-	ProductPrice = &grpc.ProductPrice{
+	ProductPrice = &billing.ProductPrice{
 		Currency: "USD",
 		Amount:   1010.23,
 	}
@@ -95,7 +95,7 @@ var (
 		Metadata: map[string]string{
 			"SomeKey": "SomeValue",
 		},
-		Prices: []*grpc.ProductPrice{
+		Prices: []*billing.ProductPrice{
 			ProductPrice,
 		},
 	}
@@ -118,7 +118,7 @@ var (
 			Metadata: map[string]string{
 				"SomeKey": "SomeValue",
 			},
-			Prices: []*grpc.ProductPrice{
+			Prices: []*billing.ProductPrice{
 				ProductPrice,
 			},
 		},
