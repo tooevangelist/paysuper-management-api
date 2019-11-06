@@ -1942,12 +1942,12 @@ definitions:
       review:
         description: user review about page
         type: string
-      page_id:
-        description: "page identifier. now allowed values: primary_onboarding, merchant_onboarding"
+      url:
+        description: "URL address of page"
         type: string
     required:
       - review
-      - page_id
+      - url
 
   user.confirmEmail.request:
     properties:
