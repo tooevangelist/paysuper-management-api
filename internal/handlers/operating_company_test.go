@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/globalsign/mgo/bson"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	billMock "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -72,7 +73,7 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_AddOperatingCompany
 		Return(&grpc.EmptyResponseWithStatus{Status: pkg.ResponseStatusOk}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 
-	body := `{"_id" : "5dbc50d486616113a1cefe16", "name" : "Paysuper", "country" : "CY", 
+	body := `{"name" : "Paysuper", "country" : "CY", 
 			  "registration_number" : "some number", "vat_number" : "some vat number", "address" : "Cyprus", 
 			  "signatory_name" : "Vassiliy Poupkine", "signatory_position" : "CEO", 
 			  "banking_details" : "bank details including bank, bank address, account number, swift/ bic, intermediary bank"}`
@@ -80,6 +81,30 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_AddOperatingCompany
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Path(common.AuthUserGroupPath + operatingCompanyPath).
+		Init(test.ReqInitJSON()).
+		BodyString(body).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusNoContent, res.Code)
+	assert.Empty(suite.T(), res.Body.String())
+}
+
+func (suite *OperatingCompanyTestSuite) TestOperatingCompany_UpdateOperatingCompany_Ok() {
+	billingService := &billMock.BillingService{}
+	billingService.On("AddOperatingCompany", mock2.Anything, mock2.Anything, mock2.Anything).
+		Return(&grpc.EmptyResponseWithStatus{Status: pkg.ResponseStatusOk}, nil)
+	suite.router.dispatch.Services.Billing = billingService
+
+	body := `{"name" : "Paysuper", "country" : "CY", 
+			  "registration_number" : "some number", "vat_number" : "some vat number", "address" : "Cyprus", 
+			  "signatory_name" : "Vassiliy Poupkine", "signatory_position" : "CEO", 
+			  "banking_details" : "bank details including bank, bank address, account number, swift/ bic, intermediary bank"}`
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPost).
+		Path(common.AuthUserGroupPath+operatingCompanyIdPath).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())

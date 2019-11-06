@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	operatingCompanyPath = "/operating_company"
+	operatingCompanyPath   = "/operating_company"
+	operatingCompanyIdPath = "/operating_company/:id"
 )
 
 type OperatingCompanyRoute struct {
@@ -34,6 +35,7 @@ func NewOperatingCompanyRoute(set common.HandlerSet, cfg *common.Config) *Operat
 func (h *OperatingCompanyRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(operatingCompanyPath, h.getOperatingCompanyList)
 	groups.AuthUser.POST(operatingCompanyPath, h.addOperatingCompany)
+	groups.AuthUser.POST(operatingCompanyIdPath, h.updateOperatingCompany)
 
 }
 
@@ -52,12 +54,22 @@ func (h *OperatingCompanyRoute) getOperatingCompanyList(ctx echo.Context) error 
 }
 
 func (h *OperatingCompanyRoute) addOperatingCompany(ctx echo.Context) error {
+	return h.addOrUpdateOperatingCompany(ctx, "")
+}
+
+func (h *OperatingCompanyRoute) updateOperatingCompany(ctx echo.Context) error {
+	return h.addOrUpdateOperatingCompany(ctx, ctx.Param(common.RequestParameterId))
+}
+
+func (h *OperatingCompanyRoute) addOrUpdateOperatingCompany(ctx echo.Context, operatingCompanyId string) error {
 	req := &billing.OperatingCompany{}
 	err := ctx.Bind(req)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
+
+	req.Id = operatingCompanyId
 
 	err = h.dispatch.Validate.Struct(req)
 
