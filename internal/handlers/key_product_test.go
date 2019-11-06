@@ -306,7 +306,6 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_Ok() {
 		Sku:             "some_sku",
 		Object:          "key_product",
 		Pricing:         "manual",
-		BillingType:     "real",
 	}
 
 	b, err := json.Marshal(&body)
@@ -365,7 +364,6 @@ func (suite *KeyProductTestSuite) TestProject_ChangeKeyProduct_Ok() {
 		Sku:             "some_sku",
 		Object:          "key_product",
 		Pricing:         "manual",
-		BillingType:     "real",
 	}
 
 	b, err := json.Marshal(&body)
@@ -406,7 +404,6 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Ok() {
 				}},
 		},
 		Pricing:     "manual",
-		BillingType: "real",
 	}
 
 	b, err := json.Marshal(&body)
