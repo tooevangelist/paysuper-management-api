@@ -56,6 +56,31 @@ var (
 	cityRegexp        = regexp.MustCompile("^[\\p{L}\\p{M} \\-\\.]+$")
 )
 
+// ProductPriceValidator
+func (v *ValidatorSet) ProductPriceValidator(fl validator.FieldLevel) bool {
+	value := fl.Field().Interface()
+	prices, ok := value.([]*billing.ProductPrice)
+	if !ok {
+		price, ok := value.(*billing.ProductPrice)
+		if !ok {
+			return false
+		}
+		prices = append(prices, price)
+	}
+
+	for _, price := range prices {
+		if price.IsVirtualCurrency == true {
+			continue
+		}
+
+		if len(price.Currency) == 0 || len(price.Region) == 0 {
+			return false
+		}
+	}
+
+	return true
+}
+
 // PhoneValidator
 func (v *ValidatorSet) PhoneValidator(fl validator.FieldLevel) bool {
 	_, err := libphonenumber.Parse(fl.Field().String(), "US")

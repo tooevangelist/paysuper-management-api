@@ -257,6 +257,7 @@ func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
 		Host:    ctx.Request().Host,
 		Locale:  ctx.Request().Header.Get(common.HeaderAcceptLanguage),
 		Ip:      ctx.RealIP(),
+		Referer: ctx.Request().Header.Get(common.HeaderReferer),
 	}
 
 	if err == nil && cookie != nil && cookie.Value != "" {
