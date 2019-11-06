@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	u "github.com/PuerkitoBio/purell"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -315,11 +315,14 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		return echo.NewHTTPError(int(orderResponse.Status), orderResponse.Message)
 	}
 
-	inlineFormRedirectUrl := fmt.Sprintf(h.cfg.OrderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, orderResponse.Item.Uuid)
-	qs := ctx.QueryString()
+	qParams.Set("order_id", orderResponse.Item.Uuid)
 
-	if qs != "" {
-		inlineFormRedirectUrl += "?" + qs
+	inlineFormRedirectUrl := h.cfg.OrderInlineFormUrlMask + "?" + qParams.Encode()
+
+	inlineFormRedirectUrl, err = u.NormalizeURLString(inlineFormRedirectUrl, u.FlagsUsuallySafeGreedy|u.FlagRemoveDuplicateSlashes)
+	if err != nil {
+		h.L().Error("NormalizeURLString failed", logger.PairArgs("err", err.Error()))
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
 
 	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)

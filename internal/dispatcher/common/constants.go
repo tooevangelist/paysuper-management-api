@@ -75,6 +75,7 @@ const (
 	RequestParameterCover                    = "cover"
 	RequestParameterLocalizations            = "localizations"
 	RequestParameterCurrencies               = "currencies"
+	RequestParameterVirtualCurrency          = "virtual_currency"
 
 	ImageCollectionImagesField = "images"
 	ImageCollectionUseOneForAll = "use_one_for_all"

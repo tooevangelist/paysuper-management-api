@@ -594,6 +594,7 @@ definitions:
           - simple
           - product
           - key
+          - virtual_currency
       products:
         description: list of products (or key products) of project which customer want to buy. if payment type is product or key this field is required.
         type: array
@@ -618,6 +619,9 @@ definitions:
       user:
         description: object may contain information about user. if project send this parameter in request than project must send authorisation header X-API-SIGNATURE
         $ref: '#/definitions/order.create.request.user'
+      is_buy_for_virtual_currency:
+        description: flag indicates that order should be processed using virtual currency
+        type: boolean
     required:
       - project
       - type
@@ -787,25 +791,25 @@ definitions:
         example:
           en: "Some name"
           ru: "Какое то имя"
-      SuccessMessage:
+      success_message:
         type: string
         additionalProperties:
           type: string
         example:
           en: "Thanks!"
           ru: "Спасибо!"
-      MinPurchaseValue:
+      min_purchase_value:
         type: number
         format: double
-      MaxPurchaseValue:
+      max_purchase_value:
         type: number
         format: double
-      SellCountType:
+      sell_count_type:
         type: string
         enum:
           - fractional
           - integral
-      Prices:
+      prices:
         type: array
         items:
           $ref: '#/definitions/product.Price'
@@ -1709,13 +1713,13 @@ definitions:
         description: object contain urls for redirect user after payment ended. can be set if project settings allow this.
         $ref: '#/definitions/token.TokenRequest.Settings.ReturnUrl'
       currency:
-        description: 3 characters currency code in upper registry by ISO 4217. this field is required if payment type is simple
+        description: "3 characters currency code in upper registry by ISO 4217. this field is required if payment type is simple. WARNING: this field is disallowed if creating payment token with types product or key"
         type: string
       amount:
-        description: payment amount. this field is required if payment type is simple
+        description: "payment amount. this field is required if payment type is simple. WARNING: this field is disallowed if creating payment token with types product or key"
         type: number
       products_ids:
-        description: array of products identifiers or key products identifiers. this field is required if payment type is product or simple
+        description: "array of products identifiers or key products identifiers. this field is required if payment types are product or key. WARNING: this field is disallowed if creating payment token with type simple"
         type: array
         items:
           type: string
@@ -1728,6 +1732,10 @@ definitions:
       metadata:
         description: object can contain any other information about payment. object must contain only string values. this object will return in project notification about payment.
         type: object
+      is_buy_for_virtual_currency:
+        description: flag indicates that order should be processed using virtual currency
+        type: boolean
+
     required:
       - project_id
       - type
@@ -3361,6 +3369,19 @@ definitions:
           "$ref": "#/definitions/billingVatReport"
         description: 'reports'
 
+  saved_card.remove.request:
+    type: object
+    properties:
+      id:
+        description: saved card identifier
+        type: string
+      cookie:
+        description: customer cookie value got on payment form data
+        type: string
+    required:
+      - id
+      - cookie
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -3380,7 +3401,7 @@ securityDefinitions:
     type: apiKey
     in: header
     name: X-API-SIGNATURE
-    description: must contain sha512 hash of concationation request body and project secret key
+    description: must contain project secret key
 
 paths:
   /api/v1/country:
@@ -9172,3 +9193,36 @@ paths:
       summary: Get data for rendering payment form
       tags:
         - Order
+
+  "/api/v1/saved_card":
+    delete:
+      summary: Remove customer saved card
+      description: Remove customer saved card
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - description: Remove saved card data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/saved_card.remove.request'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      tags:
+        - Saved Card

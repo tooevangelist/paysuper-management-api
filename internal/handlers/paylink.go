@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	u "github.com/PuerkitoBio/purell"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -172,6 +173,12 @@ func (h *PayLinkRoute) getPaylinkUrl(ctx echo.Context) error {
 	}
 
 	url := fmt.Sprintf(paylinkUrlMask, h.cfg.HttpScheme, ctx.Request().Host, res.Url)
+
+	url, err = u.NormalizeURLString(url, u.FlagsUsuallySafeGreedy|u.FlagRemoveDuplicateSlashes)
+	if err != nil {
+		h.L().Error("NormalizeURLString failed", logger.PairArgs("err", err.Error()))
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
 
 	return ctx.JSON(http.StatusOK, url)
 }
