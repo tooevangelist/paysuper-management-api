@@ -515,6 +515,57 @@ definitions:
       refund_fees_total_local:
         $ref: '#/definitions/order.money'
         description: object contain information about refund fees total local
+      parent:
+        $ref: '#/definitions/order.parent'
+        description: object contain information about parent order (for refunds only)
+      refund:
+        $ref: '#/definitions/order.refund'
+        description: object contain information about refund
+      cancellation:
+        $ref: '#/definitions/order.cancellation'
+        description: object contain information about order cancellation
+
+  order.parent:
+    type: object
+    properties:
+      id:
+        type: string
+        description: parent order id
+      uuid:
+        type: string
+        description: parent order uuid
+
+  order.refund:
+    type: object
+    properties:
+      amount:
+        type: number
+        description: refund amount
+      currency:
+        type: string
+        description: refund currency
+      reason:
+        type: string
+        description: refund reason
+      code:
+        type: string
+        description: refund code
+      receipt_number:
+        type: string
+        description: refund receipt_number
+      receipt_url:
+        type: string
+        description: refund receipt_url
+
+  order.cancellation:
+    type: object
+    properties:
+      reason:
+        type: string
+        description: refund reason
+      code:
+        type: string
+        description: refund code
 
   order.list.public:
     properties:
