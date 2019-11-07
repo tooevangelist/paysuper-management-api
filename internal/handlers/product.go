@@ -222,6 +222,10 @@ func (h *ProductRoute) createOrUpdateProduct(ctx echo.Context, binder echo.Binde
 
 	if err != nil {
 		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
+		hErr, ok := err.(*grpc.ResponseErrorMessage)
+		if ok {
+			return echo.NewHTTPError(http.StatusBadRequest, hErr)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
 	}
 
