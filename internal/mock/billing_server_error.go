@@ -883,7 +883,7 @@ func (s *BillingServerErrorMock) FindAllOrdersPrivate(
 	return &grpc.ListOrdersPrivateResponse{}, nil
 }
 
-func (s *BillingServerErrorMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+func (s *BillingServerErrorMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.CreatePayoutDocumentResponse, error) {
 	panic("implement me")
 }
 

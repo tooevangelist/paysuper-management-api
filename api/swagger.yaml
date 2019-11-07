@@ -2782,20 +2782,6 @@ definitions:
       merchant_id:
         type: string
         description: merchant identificator
-      signature_data:
-        $ref: '#/definitions/billingPayoutDocumentSignatureData'
-        description: hellosign signature data
-      has_merchant_signature:
-        type: boolean
-        format: boolean
-        description: is document signed by merchant
-      has_psp_signature:
-        type: boolean
-        format: boolean
-        description: is document signed by paysuper
-      signed_document_file_url:
-        type: string
-        description: url to signed file
       period_from:
         type: string
         format: date-time
@@ -2804,33 +2790,9 @@ definitions:
         type: string
         format: date-time
         description: payout period end
-
-  billingPayoutDocumentSignatureData:
-    type: object
-    properties:
-      details_url:
+      operating_company_id:
         type: string
-      files_url:
-        type: string
-      signature_request_id:
-        type: string
-      merchant_signature_id:
-        type: string
-      ps_signature_id:
-        type: string
-      merchant_sign_url:
-        $ref: '#/definitions/billingPayoutDocumentSignatureDataSignUrl'
-      ps_sign_url:
-        $ref: '#/definitions/billingPayoutDocumentSignatureDataSignUrl'
-
-  billingPayoutDocumentSignatureDataSignUrl:
-    type: object
-    properties:
-      sign_url:
-        type: string
-      expires_at:
-        type: string
-        format: date-time
+        description: operating company id
 
   payout_documents_list:
     properties:
@@ -3062,6 +3024,9 @@ definitions:
       payout_document_id:
         type: string
         description: cross-link to payout invoice, that includes this royalty report
+      operating_company_id:
+        type: string
+        description: operating company id
 
   billingRoyaltyReportCorrectionItem:
     type: object
@@ -3502,6 +3467,9 @@ definitions:
         type: string
         format: date-time
         description: 'date of payment'
+      operating_company_id:
+        type: string
+        description: operating company id
 
   grpcVatReportsPaginate:
     type: object
@@ -8011,7 +7979,9 @@ paths:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/billingPayoutDocument'
+            items:
+              $ref: '#/definitions/billingPayoutDocument'
+            type: array
         "400":
           description: Object with error message
           schema:
@@ -8090,82 +8060,6 @@ paths:
             $ref: '#/definitions/model.Error'
         "500":
           description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/payout_documents/{id}/signurl/merchant":
-    get:
-      summary: Get url for payout document signing by merchant
-      tags:
-        - Payouts
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description: Get url for payout document signing by merchant
-      parameters:
-        - description: payout document unique identifier
-          in: path
-          name: id
-          type: string
-          required: true
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/billingPayoutDocumentSignatureDataSignUrl'
-        400:
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        401:
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        403:
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        500:
-          description: Some unknown error on server side
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/payout_documents/{id}/signurl/ps":
-    get:
-      summary: Get url for payout document signing by PaySuper
-      tags:
-        - Payouts
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description: Get url for payout document signing by PaySuper
-      parameters:
-        - description: payout document unique identifier
-          in: path
-          name: id
-          type: string
-          required: true
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/billingPayoutDocumentSignatureDataSignUrl'
-        400:
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        401:
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        403:
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        500:
-          description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
 
