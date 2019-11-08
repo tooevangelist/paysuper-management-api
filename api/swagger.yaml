@@ -3564,6 +3564,31 @@ definitions:
         items:
           $ref: '#/definitions/operating_company'
 
+  payment_min_limit_system:
+    type: object
+    properties:
+      currency:
+        type: string
+        description: limit currency
+      amount:
+        type: string
+        description: limit value
+      created_at:
+        description: object contain information about time when operating company created
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: object contain information about time when operating company updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+
+  payment_min_limit_system_list:
+    type: object
+    properties:
+      items:
+        description: list of payment minimum limits system
+        type: array
+        items:
+          $ref: '#/definitions/payment_min_limit_system'
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -9415,7 +9440,7 @@ paths:
           description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
-      summary: Get data for rendering payment form
+      summary: Get operating companies list
       tags:
         - Operating company
     post:
@@ -9478,6 +9503,72 @@ paths:
           name: body
           schema:
             $ref: '#/definitions/operating_company'
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_min_limit_system":
+    get:
+      consumes:
+        - application/json
+      description: Get list of payment minimum limits system
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payment_min_limit_system_list'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get list of payment minimum limits system
+      tags:
+        - Operating company
+    post:
+      summary: Set payment minimum limits system for currency
+      tags:
+        - Limits
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Set payment minimum limits system for currency
+      parameters:
+        - description: minimum limits system for currency
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/payment_min_limit_system'
       responses:
         "204":
           description: OK

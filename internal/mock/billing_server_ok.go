@@ -1251,3 +1251,11 @@ func (s *BillingServerOkMock) GetOperatingCompaniesList(ctx context.Context, in 
 func (s *BillingServerOkMock) AddOperatingCompany(ctx context.Context, in *billing.OperatingCompany, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkMock) GetPaymentMinLimitsSystem(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetPaymentMinLimitsSystemResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) SetPaymentMinLimitSystem(ctx context.Context, in *billing.PaymentMinLimitSystem, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}

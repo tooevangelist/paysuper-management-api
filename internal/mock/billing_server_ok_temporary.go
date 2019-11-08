@@ -973,3 +973,11 @@ func (s *BillingServerOkTemporaryMock) GetOperatingCompaniesList(ctx context.Con
 func (s *BillingServerOkTemporaryMock) AddOperatingCompany(ctx context.Context, in *billing.OperatingCompany, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerOkTemporaryMock) GetPaymentMinLimitsSystem(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetPaymentMinLimitsSystemResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) SetPaymentMinLimitSystem(ctx context.Context, in *billing.PaymentMinLimitSystem, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
