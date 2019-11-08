@@ -1309,7 +1309,23 @@ definitions:
         $ref: '#/definitions/onboarding.Tariff.Item'
       payout:
         description: payout tariff
-        $ref: '#/definitions/onboarding.Tariff.Item'
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/onboarding.Tariff.Item'
+        example:
+          RUB: {method_percent_fee: 0, method_fixed_fee: 1000, method_fixed_fee_currency: "RUB", is_paid_by_merchant: true}
+          USD: {method_percent_fee: 0, method_fixed_fee: 10, method_fixed_fee_currency: "USD", is_paid_by_merchant: true}
+      minimal_payout:
+        description: minimal payout amount
+        type: object
+        additionalProperties:
+          type: number
+        example:
+          RUB: 10000
+          USD: 100
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
 
   onboarding.Tariff.Set.Request:
     properties:
@@ -6486,7 +6502,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/onboarding.Tariff.Payment'
+              $ref: '#/definitions/onboarding.Tariff'
         "400":
           description: Invalid request data
           schema:
