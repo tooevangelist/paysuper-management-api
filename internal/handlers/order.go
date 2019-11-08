@@ -260,6 +260,9 @@ func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
 		Referer: ctx.Request().Header.Get(common.HeaderReferer),
 	}
 
+	h.L().Info("debug", logger.PairArgs("X-Real-IP", ctx.Request().Header.Get(echo.HeaderXRealIP)))
+	h.L().Info("debug", logger.PairArgs("X-Forwarded-For", ctx.Request().Header.Get(echo.HeaderXForwardedFor)))
+
 	if err == nil && cookie != nil && cookie.Value != "" {
 		req.Cookie = cookie.Value
 	}
