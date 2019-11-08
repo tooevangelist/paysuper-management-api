@@ -744,6 +744,8 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20191106095117-2a8825f577ad h
 github.com/paysuper/paysuper-billing-server v0.0.0-20191106095117-2a8825f577ad/go.mod h1:4iEjRS9nOUA6OsmQZThCTHcFDtNtvrauqSRXzwFCaKE=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191106142142-18325bd96dae h1:uYpq1V2D+gHEZpGNEL9vdFd81sfL2Aw2VLlqKSLaO5Y=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191106142142-18325bd96dae/go.mod h1:4iEjRS9nOUA6OsmQZThCTHcFDtNtvrauqSRXzwFCaKE=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191107200918-2507f0c096f2 h1:L7Fk4d7DnRInEbze5b0esMg+kT8zgL9MPg+SroRr74c=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191107200918-2507f0c096f2/go.mod h1:CYx7c60OPthc8ZlTqiknrhgQwX1QzAkGEghubJP1z1E=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d h1:hoMkfdq4qEGOONvxajsZO0Mf6np++pGnrKVxegvplaw=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d/go.mod h1:C+QHdgbjIlAPxHD93/08yi+xWfUgk8maLY8FKFqNzMQ=
 github.com/paysuper/paysuper-database-mongo v0.1.0/go.mod h1:IZu996j//Qoq+uzzCBL5GEYisfF4di/fwedWHlLz7sc=
