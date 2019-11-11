@@ -3534,6 +3534,9 @@ definitions:
       address:
         type: string
         description: address
+      vat_address:
+        type: string
+        description: address for VAT purposes
       signatory_name:
         type: string
         description: signatory_name
@@ -9483,6 +9486,38 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/operating_company/{id}":
+    get:
+      consumes:
+        - application/json
+      description: Get operating company
+      parameters:
+        - description: operating company id
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/operating_company'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get operating company
+      tags:
+        - Operating company
     post:
       summary: Add new operating company
       tags:
@@ -9553,7 +9588,7 @@ paths:
             $ref: '#/definitions/model.Error'
       summary: Get list of payment minimum limits system
       tags:
-        - Operating company
+        - Limits
     post:
       summary: Set payment minimum limits system for currency
       tags:
