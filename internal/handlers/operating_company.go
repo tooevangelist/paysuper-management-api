@@ -34,6 +34,7 @@ func NewOperatingCompanyRoute(set common.HandlerSet, cfg *common.Config) *Operat
 
 func (h *OperatingCompanyRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(operatingCompanyPath, h.getOperatingCompanyList)
+	groups.AuthUser.GET(operatingCompanyIdPath, h.getOperatingCompany)
 	groups.AuthUser.POST(operatingCompanyPath, h.addOperatingCompany)
 	groups.AuthUser.POST(operatingCompanyIdPath, h.updateOperatingCompany)
 
@@ -51,6 +52,22 @@ func (h *OperatingCompanyRoute) getOperatingCompanyList(ctx echo.Context) error 
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 	return ctx.JSON(http.StatusOK, res.Items)
+}
+
+func (h *OperatingCompanyRoute) getOperatingCompany(ctx echo.Context) error {
+	req := &grpc.GetOperatingCompanyRequest{
+		Id: ctx.Param(common.RequestParameterId),
+	}
+
+	res, err := h.dispatch.Services.Billing.GetOperatingCompany(ctx.Request().Context(), req)
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetOperatingCompaniesList", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+	return ctx.JSON(http.StatusOK, res.Company)
 }
 
 func (h *OperatingCompanyRoute) addOperatingCompany(ctx echo.Context) error {

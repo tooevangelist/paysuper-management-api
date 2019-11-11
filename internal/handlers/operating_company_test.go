@@ -67,6 +67,24 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_GetOperatingCompani
 	assert.NotEmpty(suite.T(), res.Body.String())
 }
 
+func (suite *OperatingCompanyTestSuite) TestOperatingCompany_GetOperatingCompany_Ok() {
+	billingService := &billMock.BillingService{}
+	billingService.On("GetOperatingCompany", mock2.Anything, mock2.Anything, mock2.Anything).
+		Return(&grpc.GetOperatingCompanyResponse{Status: pkg.ResponseStatusOk}, nil)
+	suite.router.dispatch.Services.Billing = billingService
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodGet).
+		Path(common.AuthUserGroupPath+operatingCompanyIdPath).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, res.Code)
+	assert.NotEmpty(suite.T(), res.Body.String())
+}
+
 func (suite *OperatingCompanyTestSuite) TestOperatingCompany_AddOperatingCompany_Ok() {
 	billingService := &billMock.BillingService{}
 	billingService.On("AddOperatingCompany", mock2.Anything, mock2.Anything, mock2.Anything).
@@ -75,7 +93,7 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_AddOperatingCompany
 
 	body := `{"name" : "Paysuper", "country" : "CY", 
 			  "registration_number" : "some number", "vat_number" : "some vat number", "address" : "Cyprus", 
-			  "signatory_name" : "Vassiliy Poupkine", "signatory_position" : "CEO", 
+			   "vat_address" : "Cyprus", "signatory_name" : "Vassiliy Poupkine", "signatory_position" : "CEO", 
 			  "banking_details" : "bank details including bank, bank address, account number, swift/ bic, intermediary bank"}`
 
 	res, err := suite.caller.Builder().
@@ -98,7 +116,7 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_UpdateOperatingComp
 
 	body := `{"name" : "Paysuper", "country" : "CY", 
 			  "registration_number" : "some number", "vat_number" : "some vat number", "address" : "Cyprus", 
-			  "signatory_name" : "Vassiliy Poupkine", "signatory_position" : "CEO", 
+			  "vat_address" : "Cyprus", "signatory_name" : "Vassiliy Poupkine", "signatory_position" : "CEO", 
 			  "banking_details" : "bank details including bank, bank address, account number, swift/ bic, intermediary bank"}`
 
 	res, err := suite.caller.Builder().

@@ -925,3 +925,7 @@ func (s *BillingServerSystemErrorMock) GetPaymentMinLimitsSystem(ctx context.Con
 func (s *BillingServerSystemErrorMock) SetPaymentMinLimitSystem(ctx context.Context, in *billing.PaymentMinLimitSystem, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerSystemErrorMock) GetOperatingCompany(ctx context.Context, in *grpc.GetOperatingCompanyRequest, opts ...client.CallOption) (*grpc.GetOperatingCompanyResponse, error) {
+	panic("implement me")
+}
