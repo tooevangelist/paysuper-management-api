@@ -42,7 +42,7 @@ const (
 	merchantsIdTariffsPath             = "/merchants/:id/tariffs"
 	merchantsIdManualPayoutEnablePath  = "/merchants/:merchant_id/manual_payout/enable"
 	merchantsIdManualPayoutDisablePath = "/merchants/:merchant_id/manual_payout/disable"
-	merchantsIdSetOperatingCompanyPath = "/merchants/:id/set_operating_company"
+	merchantsIdSetOperatingCompanyPath = "/merchants/:merchant_id/set_operating_company"
 )
 
 const (
@@ -905,7 +905,7 @@ func (h *OnboardingRoute) setOperatingCompany(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
+	req.MerchantId = ctx.Param(common.RequestParameterMerchantId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
