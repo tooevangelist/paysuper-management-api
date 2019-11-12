@@ -24,7 +24,7 @@ const (
 )
 
 func NewUserRoute(set common.HandlerSet, cfg *common.Config) *UserRoute {
-	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "AdminUsersRoute"})
+	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "UsersRoute"})
 	return &UserRoute{
 		dispatch: set,
 		LMT:      &set.AwareSet,
