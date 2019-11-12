@@ -2474,7 +2474,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetOperatingCompany_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Params(":"+common.RequestParameterId, mock.SomeMerchantId1).
+		Params(":"+common.RequestParameterMerchantId, mock.SomeMerchantId1).
 		Path(common.AuthUserGroupPath + merchantsIdSetOperatingCompanyPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).

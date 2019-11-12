@@ -341,9 +341,9 @@ func (s *BillingServerOkMock) PaymentFormLanguageChanged(
 ) (*grpc.PaymentFormDataChangeResponse, error) {
 	return &grpc.PaymentFormDataChangeResponse{
 		Status: pkg.ResponseStatusOk,
-		Item: &grpc.PaymentFormDataChangeResponseItem{
+		Item: &billing.PaymentFormDataChangeResponseItem{
 			UserAddressDataRequired: true,
-			UserIpData: &grpc.UserIpData{
+			UserIpData: &billing.UserIpData{
 				Country: "RU",
 				City:    "St.Petersburg",
 				Zip:     "190000",
@@ -359,9 +359,9 @@ func (s *BillingServerOkMock) PaymentFormPaymentAccountChanged(
 ) (*grpc.PaymentFormDataChangeResponse, error) {
 	return &grpc.PaymentFormDataChangeResponse{
 		Status: pkg.ResponseStatusOk,
-		Item: &grpc.PaymentFormDataChangeResponseItem{
+		Item: &billing.PaymentFormDataChangeResponseItem{
 			UserAddressDataRequired: true,
-			UserIpData: &grpc.UserIpData{
+			UserIpData: &billing.UserIpData{
 				Country: "RU",
 				City:    "St.Petersburg",
 				Zip:     "190000",
