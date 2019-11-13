@@ -2346,6 +2346,9 @@ definitions:
       fix_amount:
         description: payment method fixed fee
         type: number
+      fix_amount_currency:
+        description: payment method fixed fee currency
+        type: string
       created_at:
         description: time when retes record was created
         $ref: '#/definitions/ProtobufTimestamp'

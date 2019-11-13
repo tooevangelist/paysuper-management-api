@@ -215,6 +215,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Get() {
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Add() {
 	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.0101, "fix_amount": 2.34, 
+				  "fix_amount_currency": "EUR",  
                   "payout_currency": "USD", "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1}`
 
 	res, err := suite.caller.Builder().
