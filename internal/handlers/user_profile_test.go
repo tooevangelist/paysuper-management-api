@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
@@ -24,8 +25,8 @@ func Test_UserProfile(t *testing.T) {
 
 func (suite *UserProfileTestSuite) SetupTest() {
 	user := &common.AuthUser{
-		Id:    "ffffffffffffffffffffffff",
-		Email: "test@unit.test",
+		Id:         "ffffffffffffffffffffffff",
+		Email:      "test@unit.test",
 		MerchantId: "ffffffffffffffffffffffff",
 	}
 
@@ -52,7 +53,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_Ok() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, "qwerty").
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -83,7 +84,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_BillingServerS
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -100,7 +101,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_GetUserProfile_BillingServerR
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -126,7 +127,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -139,7 +140,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_BindError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -162,7 +163,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationErro
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(reqInit).
 		BodyString(body).
 		Exec(suite.T())
@@ -184,7 +185,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationUser
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -206,7 +207,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationUser
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -235,7 +236,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationAnnu
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -264,7 +265,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationNumb
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -293,7 +294,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_ValidationComp
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -316,7 +317,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_BillingServerS
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -335,7 +336,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_SetUserProfile_BillingServerR
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Path(common.AuthUserGroupPath + userProfilePath).
+		Path(common.AuthProjectGroupPath + userProfilePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -353,7 +354,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		Path(userProfileConfirmEmailPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -361,13 +362,12 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_Ok() {
 	assert.NoError(suite.T(), err)
 }
 
-
 func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BadData_Error() {
 	body := `<"token": "">`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		Path(userProfileConfirmEmailPath).
 		BodyString(body).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -385,7 +385,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_EmptyToken_Error
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		Path(userProfileConfirmEmailPath).
 		BodyString(body).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -403,7 +403,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerSys
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		Path(userProfileConfirmEmailPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -413,7 +413,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerSys
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerReturnError() {
@@ -422,7 +422,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerRet
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(common.AuthProjectGroupPath + userProfileConfirmEmailPath).
+		Path(userProfileConfirmEmailPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -431,15 +431,15 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerRet
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
+	assert.Equal(suite.T(), int(pkg.ResponseStatusBadData), httpErr.Code)
 	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
 }
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Ok() {
-	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
+	body := `{"review": "some review text", "url": "primary_onboarding"}`
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -456,7 +456,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Unauthorized
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(reqInit).
 		Exec(suite.T())
 
@@ -470,11 +470,11 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_Unauthorized
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() {
 
-	body := `{"review": "some review text", "page_id": "merchant_onboarding"}`
+	body := `{"review": "some review text", "url": "merchant_onboarding"}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitXML()).
 		BodyString(body).
 		Exec(suite.T())
@@ -489,11 +489,11 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BindError() 
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidatePageIdError() {
 
-	body := `{"review": "some review text", "page_id": "unknown_page"}`
+	body := `{"review": "some review text", "url": ""}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -508,11 +508,11 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidatePage
 
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateReviewError() {
 
-	body := `{"review": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "page_id": "primary_onboarding"}`
+	body := `{"review": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "url": "primary_onboarding"}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -528,11 +528,11 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_ValidateRevi
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServerSystemError() {
 
 	suite.router.dispatch.Services.Billing = mock.NewBillingServerSystemErrorMock()
-	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
+	body := `{"review": "some review text", "url": "primary_onboarding"}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -548,11 +548,11 @@ func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServe
 func (suite *UserProfileTestSuite) TestUserProfile_CreatePageReview_BillingServerResultError() {
 
 	suite.router.dispatch.Services.Billing = mock.NewBillingServerErrorMock()
-	body := `{"review": "some review text", "page_id": "primary_onboarding"}`
+	body := `{"review": "some review text", "url": "primary_onboarding"}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + userProfilePathFeedback).
+		Path(common.AuthProjectGroupPath + userProfilePathFeedback).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())

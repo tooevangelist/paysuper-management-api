@@ -41,22 +41,23 @@ func (d *Dispatcher) GetUserDetailsMiddleware(next echo.HandlerFunc) echo.Handle
 		auth := ctx.Request().Header.Get(echo.HeaderAuthorization)
 
 		if auth == "" {
-			return common.ErrorMessageAuthorizationHeaderNotFound
+			return echo.NewHTTPError(http.StatusUnauthorized, common.ErrorMessageAuthorizationHeaderNotFound.Message)
 		}
 
 		match := common.TokenRegex.FindStringSubmatch(auth)
 
 		if len(match) < 1 {
-			return common.ErrorMessageAuthorizationTokenNotFound
+			return echo.NewHTTPError(http.StatusUnauthorized, common.ErrorMessageAuthorizationTokenNotFound.Message)
 		}
 
 		u, err := d.appSet.JwtVerifier.GetUserInfo(ctx.Request().Context(), match[1])
 
 		if err != nil {
-			return common.ErrorMessageAuthorizedUserNotFound
+			return echo.NewHTTPError(http.StatusUnauthorized, common.ErrorMessageAuthorizedUserNotFound.Message)
 		}
 
 		user := common.ExtractUserContext(ctx)
+		user.Id = u.UserID
 		user.Email = u.Email
 		common.SetUserContext(ctx, user)
 
@@ -160,7 +161,6 @@ func (d *Dispatcher) AuthOneMerchantPreMiddleware() echo.MiddlewareFunc {
 			d.appSet.JwtVerifier,
 			func(ui *jwtverifier.UserInfo) {
 				user := common.ExtractUserContext(c)
-				user.Id = ui.UserID
 				user.Name = "Merchant User"
 
 				res, err := d.appSet.Services.Billing.GetMerchantsForUser(
@@ -195,6 +195,7 @@ func (d *Dispatcher) AuthOnAdminPreMiddleware() echo.MiddlewareFunc {
 			func(ui *jwtverifier.UserInfo) {
 				user := common.ExtractUserContext(c)
 				user.Id = ui.UserID
+				user.Email = ui.Email
 				user.Name = "System User"
 				common.SetUserContext(c, user)
 			},

@@ -269,6 +269,7 @@ func DefaultSettings() map[string]interface{} {
 				"awsRegionReporter":            "eu-west-1",
 				"awsBucketReporterr":           "eu-west-1",
 				"customerTokenCookiesLifetime": "2592000s",
+				"orderInlineFormUrlMask":       "http://localhost",
 				"auth1": map[string]interface{}{
 					"clientId":     "unknown",
 					"clientSecret": "unknown",
@@ -288,6 +289,9 @@ func SetUp(settings map[string]interface{}, services common.Services, setUp func
 		services,
 		nil,
 	)
+	if e != nil {
+		return nil, e
+	}
 	d, _, e := BuildDispatcher(
 		context.Background(),
 		settings,

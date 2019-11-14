@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	u "github.com/PuerkitoBio/purell"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
@@ -12,7 +12,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"net/http"
-	"time"
 )
 
 const (
@@ -34,14 +33,37 @@ const (
 )
 
 const (
-	orderFormTemplateName = "order.html"
-	errorTemplateName     = "error.html"
+	errorTemplateName = "error.html"
 )
 
 type CreateOrderJsonProjectResponse struct {
 	Id              string                    `json:"id"`
 	PaymentFormUrl  string                    `json:"payment_form_url"`
 	PaymentFormData *grpc.PaymentFormJsonData `json:"payment_form_data,omitempty"`
+}
+
+type OrderListRefundsBinder struct {
+	dispatch common.HandlerSet
+	provider.LMT
+	cfg common.Config
+}
+
+func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
+	db := new(echo.DefaultBinder)
+	err := db.Bind(i, ctx)
+
+	if err != nil {
+		return err
+	}
+
+	structure := i.(*grpc.ListRefundsRequest)
+	structure.OrderId = ctx.Param(common.RequestParameterOrderId)
+
+	if structure.Limit <= 0 {
+		structure.Limit = b.cfg.LimitDefault
+	}
+
+	return nil
 }
 
 type OrderRoute struct {
@@ -60,8 +82,7 @@ func NewOrderRoute(set common.HandlerSet, cfg *common.Config) *OrderRoute {
 }
 
 func (h *OrderRoute) Route(groups *common.Groups) {
-
-	groups.Common.GET(orderIdPath, h.getOrderForm)
+	groups.AuthProject.GET(orderIdPath, h.getPaymentFormData)
 	groups.Common.GET(paylinkIdPath, h.getOrderForPaylink)       // TODO: Need a test
 	groups.Common.GET(orderCreatePath, h.createFromFormData)     // TODO: Need a test
 	groups.Common.POST(orderCreatePath, h.createFromFormData)    // TODO: Need a test
@@ -212,33 +233,13 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 
 	response := &CreateOrderJsonProjectResponse{
 		Id:             order.Uuid,
-		PaymentFormUrl: fmt.Sprintf(h.cfg.OrderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, order.Uuid),
-	}
-
-	if h.cfg.ReturnPaymentForm {
-		req2 := &grpc.PaymentFormJsonDataRequest{
-			OrderId: order.Uuid,
-			Scheme:  h.cfg.HttpScheme,
-			Host:    ctx.Request().Host,
-			Ip:      ctx.RealIP(),
-		}
-		rsp2, err := h.dispatch.Services.Billing.PaymentFormJsonDataProcess(ctxReq, req2)
-
-		if err != nil {
-			return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "PaymentFormJsonDataProcess")
-		}
-		if rsp2.Status != pkg.ResponseStatusOk {
-			return echo.NewHTTPError(int(rsp2.Status), rsp2.Message)
-		}
-
-		response.PaymentFormData = rsp2.Item
+		PaymentFormUrl: h.cfg.OrderInlineFormUrlMask + "?order_id=" + order.Uuid,
 	}
 
 	return ctx.JSON(http.StatusOK, response)
 }
 
-func (h *OrderRoute) getOrderForm(ctx echo.Context) error {
-
+func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
 	id := ctx.Param(common.RequestParameterOrderId)
 
 	if id == "" {
@@ -269,24 +270,7 @@ func (h *OrderRoute) getOrderForm(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	if res.Item.Cookie != "" {
-		cookie := new(http.Cookie)
-		cookie.Name = common.CustomerTokenCookiesName
-		cookie.Value = res.Item.Cookie
-		cookie.Expires = time.Now().Add(h.cfg.CustomerTokenCookiesLifetime)
-		cookie.HttpOnly = true
-		ctx.SetCookie(cookie)
-	}
-
-	return ctx.Render(
-		http.StatusOK,
-		orderFormTemplateName,
-		map[string]interface{}{
-			"Order":                   res,
-			"WebSocketUrl":            h.cfg.WebsocketUrl,
-			"PaymentFormJsLibraryUrl": h.cfg.PaymentFormJsLibraryUrl,
-		},
-	)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // Create order from payment link and redirect to order payment form
@@ -327,11 +311,14 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		return echo.NewHTTPError(int(orderResponse.Status), orderResponse.Message)
 	}
 
-	inlineFormRedirectUrl := fmt.Sprintf(h.cfg.OrderInlineFormUrlMask, h.cfg.HttpScheme, ctx.Request().Host, orderResponse.Item.Uuid)
-	qs := ctx.QueryString()
+	qParams.Set("order_id", orderResponse.Item.Uuid)
 
-	if qs != "" {
-		inlineFormRedirectUrl += "?" + qs
+	inlineFormRedirectUrl := h.cfg.OrderInlineFormUrlMask + "?" + qParams.Encode()
+
+	inlineFormRedirectUrl, err = u.NormalizeURLString(inlineFormRedirectUrl, u.FlagsUsuallySafeGreedy|u.FlagRemoveDuplicateSlashes)
+	if err != nil {
+		h.L().Error("NormalizeURLString failed", logger.PairArgs("err", err.Error()))
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
 
 	return ctx.Redirect(http.StatusFound, inlineFormRedirectUrl)

@@ -24,7 +24,7 @@ const (
 )
 
 func NewUserRoute(set common.HandlerSet, cfg *common.Config) *UserRoute {
-	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "AdminUsersRoute"})
+	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "UsersRoute"})
 	return &UserRoute{
 		dispatch: set,
 		LMT:      &set.AwareSet,
@@ -33,9 +33,9 @@ func NewUserRoute(set common.HandlerSet, cfg *common.Config) *UserRoute {
 }
 
 func (h *UserRoute) Route(groups *common.Groups) {
-	groups.AuthUser.POST(inviteCheck, h.checkInvite)
-	groups.AuthUser.POST(inviteApprove, h.approveInvite)
-	groups.AuthUser.POST(getMerchants, h.getMerchants)
+	groups.AuthProject.POST(inviteCheck, h.checkInvite)
+	groups.AuthProject.POST(inviteApprove, h.approveInvite)
+	groups.AuthProject.POST(getMerchants, h.getMerchants)
 	groups.AuthProject.GET(permissionsRoute, h.getPermissions)
 
 }

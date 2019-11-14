@@ -75,6 +75,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_Ok() {
 			Currency:    "RUB",
 			Amount:      100,
 			Description: "test payment",
+			Type:        "simple",
 		},
 	}
 
@@ -202,6 +203,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_CheckProjectRequestSignature_
 			Currency:    "RUB",
 			Amount:      100,
 			Description: "test payment",
+			Type:        "simple",
 		},
 	}
 
@@ -261,6 +263,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_CheckProjectRequestSignature_
 			Currency:    "RUB",
 			Amount:      100,
 			Description: "test payment",
+			Type:        "simple",
 		},
 	}
 
@@ -320,6 +323,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_ChangeCustomer_System_Error()
 			Currency:    "RUB",
 			Amount:      100,
 			Description: "test payment",
+			Type:        "simple",
 		},
 	}
 
@@ -379,6 +383,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_ChangeCustomer_ResultError() 
 			Currency:    "RUB",
 			Amount:      100,
 			Description: "test payment",
+			Type:        "simple",
 		},
 	}
 

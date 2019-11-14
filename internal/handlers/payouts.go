@@ -11,10 +11,9 @@ import (
 )
 
 const (
-	payoutsPath            = "/payout_documents"
-	payoutsIdPath          = "/payout_documents/:id"
-	payoutSignMerchantPath = "/payout_documents/:id/signurl/merchant"
-	payoutSignPsPath       = "/payout_documents/:id/signurl/ps"
+	payoutsPath          = "/payout_documents"
+	payoutsIdPath        = "/payout_documents/:id"
+	payoutsIdReportsPath = "/payout_documents/:id/reports"
 )
 
 type PayoutDocumentsRoute struct {
@@ -36,15 +35,14 @@ func NewPayoutDocumentsRoute(set common.HandlerSet, cfg *common.Config) *PayoutD
 func (h *PayoutDocumentsRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(payoutsPath, h.getPayoutDocumentsList)
 	groups.AuthUser.GET(payoutsIdPath, h.getPayoutDocument)
+	groups.AuthUser.GET(payoutsIdReportsPath, h.getPayoutRoyaltyReports)
 	groups.AuthUser.POST(payoutsPath, h.createPayoutDocument)
 	groups.SystemUser.POST(payoutsIdPath, h.updatePayoutDocument)
-	groups.AuthUser.GET(payoutSignMerchantPath, h.getPayoutSignUrlMerchant)
-	groups.AuthUser.GET(payoutSignPsPath, h.getPayoutSignUrlPs)
+
 }
 
 // Get payout documents list with filters and pagination
 // GET /admin/api/v1/payout_documents?payout_document_id=5ced34d689fce60bf4440829
-// GET /admin/api/v1/payout_documents?status=pending&merchant_id=5bdc39a95d1e1100019fb7df&limit=10&offset=0
 // GET /admin/api/v1/payout_documents?status=pending&limit=10&offset=0
 func (h *PayoutDocumentsRoute) getPayoutDocumentsList(ctx echo.Context) error {
 	req := &grpc.GetPayoutDocumentsRequest{}
@@ -68,15 +66,28 @@ func (h *PayoutDocumentsRoute) getPayoutDocumentsList(ctx echo.Context) error {
 // Get payout document
 // GET /admin/api/v1/payout_documents/5ced34d689fce60bf4440829
 func (h *PayoutDocumentsRoute) getPayoutDocument(ctx echo.Context) error {
-	req := &grpc.GetPayoutDocumentsRequest{}
+	req := &grpc.GetPayoutDocumentRequest{}
 	req.PayoutDocumentId = ctx.Param(common.RequestParameterId)
 
-	err := h.dispatch.Validate.Struct(req)
+	authUser := common.ExtractUserContext(ctx)
+	merchantReq := &grpc.GetMerchantByRequest{UserId: authUser.Id}
+	merchant, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), merchantReq)
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetMerchantBy", merchantReq)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+	if merchant.Status != http.StatusOK {
+		return echo.NewHTTPError(int(merchant.Status), merchant.Message)
+	}
+
+	req.MerchantId = merchant.Item.Id
+
+	err = h.dispatch.Validate.Struct(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
-	res, err := h.dispatch.Services.Billing.GetPayoutDocuments(ctx.Request().Context(), req)
+	res, err := h.dispatch.Services.Billing.GetPayoutDocument(ctx.Request().Context(), req)
 	if err != nil {
 		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetPayoutDocuments", req)
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
@@ -84,11 +95,8 @@ func (h *PayoutDocumentsRoute) getPayoutDocument(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	if len(res.Data.Items) == 0 {
-		return echo.NewHTTPError(http.StatusNotFound)
-	}
 
-	return ctx.JSON(http.StatusOK, res.Data.Items[0])
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 
 // Create payout document
@@ -107,6 +115,7 @@ func (h *PayoutDocumentsRoute) createPayoutDocument(ctx echo.Context) error {
 	}
 
 	req.Ip = ctx.RealIP()
+	req.Initiator = pkg.RoyaltyReportChangeSourceMerchant
 
 	err = h.dispatch.Validate.Struct(req)
 	if err != nil {
@@ -159,26 +168,17 @@ func (h *PayoutDocumentsRoute) updatePayoutDocument(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// Get url for payout document signing by merchant
-// GET /admin/api/v1/payout_documents/5ced34d689fce60bf4440829/signurl/merchant
-func (h *PayoutDocumentsRoute) getPayoutSignUrlMerchant(ctx echo.Context) error {
-	return h.getPayoutSignUrl(ctx, pkg.SignerTypeMerchant)
-}
-
-// Get url for payout document signing by PaySuper
-// GET /admin/api/v1/payout_documents/5ced34d689fce60bf4440829/signurl/ps
-func (h *PayoutDocumentsRoute) getPayoutSignUrlPs(ctx echo.Context) error {
-	return h.getPayoutSignUrl(ctx, pkg.SignerTypePs)
-}
-
-func (h *PayoutDocumentsRoute) getPayoutSignUrl(ctx echo.Context, signerType int32) error {
-	req := &grpc.GetPayoutDocumentSignUrlRequest{SignerType: signerType}
+// Get royalty reports included in payout document
+// GET /admin/api/v1/payout_documents/5ced34d689fce60bf4440829/reports
+func (h *PayoutDocumentsRoute) getPayoutRoyaltyReports(ctx echo.Context) error {
+	req := &grpc.GetPayoutDocumentRequest{}
+	req.PayoutDocumentId = ctx.Param(common.RequestParameterId)
 
 	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
 		return err
 	}
 
-	res, err := h.dispatch.Services.Billing.GetPayoutDocumentSignUrl(ctx.Request().Context(), req)
+	res, err := h.dispatch.Services.Billing.GetPayoutDocumentRoyaltyReports(ctx.Request().Context(), req)
 	if err != nil {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetPayoutDocumentSignUrl")
 	}
@@ -186,6 +186,9 @@ func (h *PayoutDocumentsRoute) getPayoutSignUrl(ctx echo.Context, signerType int
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+	if len(res.Data.Items) == 0 {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
 
-	return ctx.JSON(http.StatusOK, res.Item)
+	return ctx.JSON(http.StatusOK, res.Data.Items[0])
 }

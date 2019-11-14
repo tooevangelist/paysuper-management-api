@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	u "github.com/PuerkitoBio/purell"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -20,6 +22,8 @@ const (
 	paylinksIdStatReferrerPath = "/paylinks/:id/dashboard/referrer"
 	paylinksIdStatDatePath     = "/paylinks/:id/dashboard/date"
 	paylinksIdStatUtmPath      = "/paylinks/:id/dashboard/utm"
+
+	paylinkUrlMask = "%s://%s/%s"
 )
 
 type PayLinkRoute struct {
@@ -147,7 +151,15 @@ func (h *PayLinkRoute) getPaylinkUrl(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	return ctx.JSON(http.StatusOK, res.Url)
+	url := fmt.Sprintf(paylinkUrlMask, h.cfg.HttpScheme, ctx.Request().Host, res.Url)
+
+	url, err = u.NormalizeURLString(url, u.FlagsUsuallySafeGreedy|u.FlagRemoveDuplicateSlashes)
+	if err != nil {
+		h.L().Error("NormalizeURLString failed", logger.PairArgs("err", err.Error()))
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	return ctx.JSON(http.StatusOK, url)
 }
 
 // @Description Get paylink, for authenticated merchant

@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"net/http"
+	"net/url"
 	"testing"
 )
 
@@ -77,9 +78,15 @@ func (suite *PaylinkTestSuite) TestPaylink_getPaylink_Ok() {
 
 func (suite *PaylinkTestSuite) TestPaylink_getPaylinkUrl_Ok() {
 
+	q := make(url.Values)
+	q.Add("utm_source", "google")
+	q.Add("utm_medium", "cpc")
+	q.Add("utm_campaign", "someval")
+
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		SetQueryParams(q).
 		Path(common.AuthUserGroupPath + paylinksUrlPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -106,8 +113,8 @@ func (suite *PaylinkTestSuite) TestPaylink_deletePaylink_Ok() {
 }
 
 func (suite *PaylinkTestSuite) TestPaylink_createPaylink_Ok() {
-	bodyJson := `{"life_days": 7, "products": ["5c3c962781258d0001e65930"], "project_id": "5c8f6a914dad6a0001839408", 
-					"merchant_id": "5c8f6a914dad6a0001839408", "products_type": "product", "name": "unit-test"}`
+	bodyJson := `{"expires_at": 1572307200, "products": ["5c3c962781258d0001e65930"], "project_id": "5c8f6a914dad6a0001839408", 
+					"merchant_id": "5c8f6a914dad6a0001839408", "products_type": "product", "name": "unit-test", "no_expiry_date": false}`
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
@@ -124,8 +131,8 @@ func (suite *PaylinkTestSuite) TestPaylink_createPaylink_Ok() {
 }
 
 func (suite *PaylinkTestSuite) TestPaylink_updatePaylink_Ok() {
-	bodyJson := `{"life_days": 30, "products": ["5c3c962781258d0001e65930"], "project_id": "5c8f6a914dad6a0001839408", 
-			"merchant_id": "5c8f6a914dad6a0001839408", "products_type": "product", "name": "unit-test"}`
+	bodyJson := `{"expires_at": 1572307200, "products": ["5c3c962781258d0001e65930"], "project_id": "5c8f6a914dad6a0001839408", 
+			"merchant_id": "5c8f6a914dad6a0001839408", "products_type": "product", "name": "unit-test", "no_expiry_date": false}`
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).

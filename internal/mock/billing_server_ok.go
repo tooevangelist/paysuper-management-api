@@ -34,7 +34,9 @@ func (s *BillingServerOkMock) OrderCreateProcess(
 ) (*grpc.OrderCreateProcessResponse, error) {
 	return &grpc.OrderCreateProcessResponse{
 		Status: pkg.ResponseStatusOk,
-		Item:   &billing.Order{},
+		Item: &billing.Order{
+			Uuid: uuid.New().String(),
+		},
 	}, nil
 }
 
@@ -854,8 +856,15 @@ func (s *BillingServerOkMock) ConfirmUserEmail(
 	ctx context.Context,
 	in *grpc.ConfirmUserEmailRequest,
 	opts ...client.CallOption,
-) (*grpc.CheckProjectRequestSignatureResponse, error) {
-	return &grpc.CheckProjectRequestSignatureResponse{Status: pkg.ResponseStatusOk}, nil
+) (*grpc.ConfirmUserEmailResponse, error) {
+	return &grpc.ConfirmUserEmailResponse{
+		Status: pkg.ResponseStatusOk,
+		Profile: &grpc.UserProfile{
+			Id:     bson.NewObjectId().Hex(),
+			UserId: bson.NewObjectId().Hex(),
+			Email:  &grpc.UserProfileEmail{Email: "test@test.com"},
+		},
+	}, nil
 }
 
 func (s *BillingServerOkMock) CreatePageReview(
@@ -1087,10 +1096,6 @@ func (s *BillingServerOkMock) GetPayoutDocuments(ctx context.Context, in *grpc.G
 	panic("implement me")
 }
 
-func (s *BillingServerOkMock) GetPayoutDocumentSignUrl(ctx context.Context, in *grpc.GetPayoutDocumentSignUrlRequest, opts ...client.CallOption) (*grpc.GetPayoutDocumentSignUrlResponse, error) {
-	panic("implement me")
-}
-
 func (s *BillingServerOkMock) UpdatePayoutDocumentSignatures(ctx context.Context, in *grpc.UpdatePayoutDocumentSignaturesRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
 	panic("implement me")
 }
@@ -1232,11 +1237,11 @@ func (s *BillingServerOkMock) ChangeMerchantManualPayouts(ctx context.Context, i
 	panic("implement me")
 }
 
-func (s *BillingServerOkMock) DeleteMerchantUser(ctx context.Context, in *grpc.DeleteMerchantUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+func (s *BillingServerOkMock) DeleteMerchantUser(ctx context.Context, in *grpc.MerchantRoleRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
 
-func (s *BillingServerOkMock) DeleteAdminUser(ctx context.Context, in *grpc.DeleteAdminUserRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+func (s *BillingServerOkMock) DeleteAdminUser(ctx context.Context, in *grpc.AdminRoleRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
 
@@ -1290,4 +1295,36 @@ func (s *BillingServerOkMock) GetPaylinkStatByDate(ctx context.Context, in *grpc
 
 func (s *BillingServerOkMock) GetPaylinkStatByUtm(ctx context.Context, in *grpc.GetPaylinkStatCommonRequest, opts ...client.CallOption) (*grpc.GetPaylinkStatCommonGroupResponse, error) {
 	return &grpc.GetPaylinkStatCommonGroupResponse{Status: http.StatusOK, Item: &paylink.GroupStatCommon{}}, nil
+}
+
+func (s *BillingServerOkMock) GetRecommendedPriceTable(ctx context.Context, in *grpc.RecommendedPriceTableRequest, opts ...client.CallOption) (*grpc.RecommendedPriceTableResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) RoyaltyReportPdfUploaded(ctx context.Context, in *grpc.RoyaltyReportPdfUploadedRequest, opts ...client.CallOption) (*grpc.RoyaltyReportPdfUploadedResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPayoutDocument(ctx context.Context, in *grpc.GetPayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPayoutDocumentRoyaltyReports(ctx context.Context, in *grpc.GetPayoutDocumentRequest, opts ...client.CallOption) (*grpc.ListRoyaltyReportsResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) AutoCreatePayoutDocuments(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.EmptyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetAdminUserRole(ctx context.Context, in *grpc.AdminRoleRequest, opts ...client.CallOption) (*grpc.UserRoleResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetMerchantUserRole(ctx context.Context, in *grpc.MerchantRoleRequest, opts ...client.CallOption) (*grpc.UserRoleResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetCommonUserProfile(ctx context.Context, in *grpc.CommonUserProfileRequest, opts ...client.CallOption) (*grpc.CommonUserProfileResponse, error) {
+	panic("implement me")
 }

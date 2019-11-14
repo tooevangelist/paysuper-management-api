@@ -134,8 +134,11 @@ func (d *Dispatcher) commonRoutes(echoHttp *echo.Echo) {
 }
 
 func (d *Dispatcher) authProjectGroup(grp *echo.Group) {
-	// Called after routes
-	grp.Use(d.BodyDumpMiddleware()) // 1
+	// Called before routes
+	if !d.globalCfg.DisableAuthMiddleware {
+		grp.Use(d.GetUserDetailsMiddleware) // 1
+	}
+	grp.Use(d.SystemBinderPreMiddleware) // 2
 }
 
 func (d *Dispatcher) accessGroup(grp *echo.Group) {
@@ -153,7 +156,7 @@ func (d *Dispatcher) authUserGroup(grp *echo.Group) {
 			return fmt.Sprintf(pkg.CasbinMerchantUserMask, user.MerchantId, user.Id)
 		})) // 3
 	}
-	grp.Use(d.MerchantBinderPreMiddleware) // 4
+	grp.Use(d.MerchantBinderPreMiddleware) // 3
 }
 
 func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
@@ -166,7 +169,7 @@ func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
 			return user.Id
 		})) // 3
 	}
-	grp.Use(d.SystemBinderPreMiddleware) // 4
+	grp.Use(d.SystemBinderPreMiddleware) // 3
 }
 
 func (d *Dispatcher) webHookGroup(grp *echo.Group) {
