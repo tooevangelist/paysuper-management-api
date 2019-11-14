@@ -67,6 +67,12 @@ build: ## build application
     fi;
 .PHONY: build
 
+build-jenkins: build ## build application with jenkins
+.PHONY: build-jenkins
+
+docker-image-jenkins: docker-image ## build docker image with jenkins
+.PHONY: docker-image-jenkins
+
 clean: ## remove generated files, tidy vendor dependencies
 	if [ "${DIND}" = "1" ]; then \
 		$(call go_docker,"make clean") ;\
