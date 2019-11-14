@@ -35,7 +35,7 @@ func NewUserRoute(set common.HandlerSet, cfg *common.Config) *UserRoute {
 func (h *UserRoute) Route(groups *common.Groups) {
 	groups.AuthProject.POST(inviteCheck, h.checkInvite)
 	groups.AuthProject.POST(inviteApprove, h.approveInvite)
-	groups.AuthProject.POST(getMerchants, h.getMerchants)
+	groups.AuthProject.GET(getMerchants, h.getMerchants)
 	groups.AuthProject.GET(permissionsRoute, h.getPermissions)
 
 }

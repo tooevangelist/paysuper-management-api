@@ -9997,12 +9997,6 @@ paths:
       produces:
         - application/json
       description: Get merchants list for user
-      parameters:
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/AcceptInvite"
       responses:
         "200":
           description: OK
