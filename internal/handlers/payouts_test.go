@@ -59,9 +59,9 @@ func (suite *PayoutDocumentsTestSuite) SetupTest() {
 		}, nil)
 
 	billingService.On("CreatePayoutDocument", mock2.Anything, mock2.Anything).
-		Return(&grpc.PayoutDocumentResponse{
+		Return(&grpc.CreatePayoutDocumentResponse{
 			Status: http.StatusOK,
-			Item:   payoutMock,
+			Items:  []*billing.PayoutDocument{payoutMock},
 		}, nil)
 
 	billingService.On("UpdatePayoutDocument", mock2.Anything, mock2.Anything).
