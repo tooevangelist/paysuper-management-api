@@ -7728,7 +7728,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/dashboard/main":
+  "/admin/api/v1/merchants/dashboard/main":
     get:
       summary: Get main reports data for dashboard
       tags:
@@ -7776,7 +7776,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
 
-  "/admin/api/v1/merchants/{id}/dashboard/revenue_dynamics":
+  "/admin/api/v1/merchants/dashboard/revenue_dynamics":
     get:
       summary: Get revenue dynamic report for dashboard
       tags:
@@ -7823,7 +7823,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/dashboard/base":
+  "/admin/api/v1/merchants/dashboard/base":
     get:
       summary: Get base reports data for dashboard
       tags:
