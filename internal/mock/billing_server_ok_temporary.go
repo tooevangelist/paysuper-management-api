@@ -818,7 +818,7 @@ func (s *BillingServerOkTemporaryMock) FindAllOrdersPrivate(
 	return &grpc.ListOrdersPrivateResponse{}, nil
 }
 
-func (s *BillingServerOkTemporaryMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+func (s *BillingServerOkTemporaryMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.CreatePayoutDocumentResponse, error) {
 	panic("implement me")
 }
 
@@ -1035,5 +1035,33 @@ func (s *BillingServerOkTemporaryMock) GetMerchantUserRole(ctx context.Context, 
 }
 
 func (s *BillingServerOkTemporaryMock) GetCommonUserProfile(ctx context.Context, in *grpc.CommonUserProfileRequest, opts ...client.CallOption) (*grpc.CommonUserProfileResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) DeleteSavedCard(ctx context.Context, in *grpc.DeleteSavedCardRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) SetMerchantOperatingCompany(ctx context.Context, in *grpc.SetMerchantOperatingCompanyRequest, opts ...client.CallOption) (*grpc.SetMerchantOperatingCompanyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetOperatingCompaniesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetOperatingCompaniesListResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) AddOperatingCompany(ctx context.Context, in *billing.OperatingCompany, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetPaymentMinLimitsSystem(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetPaymentMinLimitsSystemResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) SetPaymentMinLimitSystem(ctx context.Context, in *billing.PaymentMinLimitSystem, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) GetOperatingCompany(ctx context.Context, in *grpc.GetOperatingCompanyRequest, opts ...client.CallOption) (*grpc.GetOperatingCompanyResponse, error) {
 	panic("implement me")
 }

@@ -69,6 +69,8 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostSystem_Get
 		SetQueryParam("name", "VISA").
 		SetQueryParam("region", "CIS").
 		SetQueryParam("country", "AZ").
+		SetQueryParam("mcc_code", "1234").
+		SetQueryParam("operating_company_id", "5dbc50d486616113a1cefe16").
 		Path(common.SystemUserGroupPath + paymentCostsChannelSystemPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -135,6 +137,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_PaymentChannelCostMerchant_G
 		SetQueryParam("country", "AZ").
 		SetQueryParam("payout_currency", "USD").
 		SetQueryParam("amount", "100").
+		SetQueryParam("mcc_code", "1234").
 		Path(common.SystemUserGroupPath + paymentCostsChannelMerchantPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -204,6 +207,8 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Get() {
 		SetQueryParam("days", "10").
 		SetQueryParam("undo_reason", "chargeback").
 		SetQueryParam("payment_stage", "1").
+		SetQueryParam("mcc_code", "1234").
+		SetQueryParam("operating_company_id", "5dbc50d486616113a1cefe16").
 		Path(common.SystemUserGroupPath + paymentCostsMoneyBackSystemPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -216,6 +221,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Get() {
 
 func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostSystem_Add() {
 	bodyJson := `{"name": "VISA", "region": "CIS", "country": "AZ", "percent": 0.0101, "fix_amount": 2.34, 
+				  "fix_amount_currency": "EUR",  
                   "payout_currency": "USD", "undo_reason": "chargeback", "days_from": 0, "payment_stage": 1}`
 
 	res, err := suite.caller.Builder().
@@ -273,6 +279,7 @@ func (suite *PaymentCostTestSuite) TestPaymentCosts_MoneyBackCostMerchant_Get() 
 		SetQueryParam("days", "10").
 		SetQueryParam("undo_reason", "chargeback").
 		SetQueryParam("payment_stage", "1").
+		SetQueryParam("mcc_code", "1234").
 		Path(common.SystemUserGroupPath + paymentCostsMoneyBackMerchantPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())

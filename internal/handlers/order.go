@@ -254,7 +254,12 @@ func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
 		Host:    ctx.Request().Host,
 		Locale:  ctx.Request().Header.Get(common.HeaderAcceptLanguage),
 		Ip:      ctx.RealIP(),
+		Referer: ctx.Request().Header.Get(common.HeaderReferer),
 	}
+
+	h.L().Info("debug", logger.PairArgs("X-Real-IP", ctx.Request().Header.Get(echo.HeaderXRealIP)))
+	h.L().Info("debug", logger.PairArgs("X-Forwarded-For", ctx.Request().Header.Get(echo.HeaderXForwardedFor)))
+	h.L().Info("debug", logger.PairArgs("IP Echo", ctx.RealIP()))
 
 	if err == nil && cookie != nil && cookie.Value != "" {
 		req.Cookie = cookie.Value

@@ -1207,6 +1207,10 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_ValidationEr
 	assert.Regexp(suite.T(), "Country", msg.Details)
 }
 
+/*
+INFO After the #192483 State field is not required in Merchant on-boarding process. So this test should be
+disabled.
+
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_ValidationError_CompanyState() {
 	b := `{"name": "123", "alternative_name": "123", "website": "http://localhost", "country": "RU"}`
 
@@ -1229,6 +1233,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_ValidationEr
 	assert.Equal(suite.T(), common.ErrorMessageIncorrectState.Message, msg.Message)
 	assert.Regexp(suite.T(), "State", msg.Details)
 }
+*/
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_ValidationError_CompanyZip() {
 	b := `{
@@ -2192,6 +2197,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_Ok() {
 	q := make(url.Values)
 	q.Set("region", "russia_and_cis")
+	q.Set("merchant_operations_type", "low-risk")
 	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantTariffRatesResponse{Status: pkg.ResponseStatusOk, Items: &grpc.GetMerchantTariffRatesResponseItems{}}, nil)
@@ -2256,6 +2262,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerErr
 	q := make(url.Values)
 	q.Set("region", "russia_and_cis")
 	q.Set("payout_currency", "USD")
+	q.Set("merchant_operations_type", "low-risk")
 	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
 	suite.router.dispatch.Services.Billing = billingService
@@ -2278,6 +2285,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerErr
 func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerResultError() {
 	q := make(url.Values)
 	q.Set("region", "russia_and_cis")
+	q.Set("merchant_operations_type", "low-risk")
 	billingService := &billMock.BillingService{}
 	billingService.On("GetMerchantTariffRates", mock2.Anything, mock2.Anything).
 		Return(&grpc.GetMerchantTariffRatesResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
@@ -2299,7 +2307,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetTariffRates_BillingServerRes
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_Ok() {
-	body := `{"home_region": "russia_and_cis"}`
+	body := `{"home_region": "russia_and_cis", "merchant_operations_type": "low-risk"}`
 
 	billingService := &billMock.BillingService{}
 	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything, mock2.Anything).
@@ -2361,7 +2369,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_ValidationError(
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerError() {
-	body := `{"home_region": "russia_and_cis"}`
+	body := `{"home_region": "russia_and_cis", "merchant_operations_type": "low-risk"}`
 
 	billingService := &billMock.BillingService{}
 	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything, mock2.Anything).
@@ -2385,7 +2393,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerErr
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerResultError() {
-	body := `{"home_region": "russia_and_cis"}`
+	body := `{"home_region": "russia_and_cis", "merchant_operations_type": "low-risk"}`
 
 	billingService := &billMock.BillingService{}
 	billingService.On("SetMerchantTariffRates", mock2.Anything, mock2.Anything, mock2.Anything).
@@ -2503,4 +2511,25 @@ func (suite *OnboardingTestSuite) TestOnboarding_disableMerchantManualPayout_Ok(
 	assert.NoError(suite.T(), err)
 
 	assert.Equal(suite.T(), http.StatusOK, res.Code)
+}
+
+func (suite *OnboardingTestSuite) TestOnboarding_SetOperatingCompany_Ok() {
+	body := `{"operating_company_id": "5dbc50d486616113a1cefe16"}`
+
+	billingService := &billMock.BillingService{}
+	billingService.On("SetMerchantOperatingCompany", mock2.Anything, mock2.Anything, mock2.Anything).
+		Return(&grpc.SetMerchantOperatingCompanyResponse{Status: pkg.ResponseStatusOk}, nil)
+	suite.router.dispatch.Services.Billing = billingService
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPost).
+		Params(":"+common.RequestParameterMerchantId, mock.SomeMerchantId1).
+		Path(common.AuthUserGroupPath + merchantsIdSetOperatingCompanyPath).
+		Init(test.ReqInitJSON()).
+		BodyString(body).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, res.Code)
+	assert.NotEmpty(suite.T(), res.Body.String())
 }
