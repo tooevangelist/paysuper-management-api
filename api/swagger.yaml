@@ -9404,7 +9404,7 @@ paths:
       summary: Get data for rendering payment form
       tags:
         - Order
-  "/admin/api/v1/users/invite":
+  "/system/api/v1/users/invite":
     post:
       summary: Send invitation for admin user
       tags:
@@ -9442,7 +9442,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users":
+  "/system/api/v1/users":
     get:
       summary: List of admin users
       tags:
@@ -9474,7 +9474,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/resend":
+  "/system/api/v1/users/resend":
     post:
       summary: Resend invitation for admin user
       tags:
@@ -9512,7 +9512,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/roles":
+  "/system/api/v1/users/roles":
     get:
       summary: List of admin role types
       tags:
@@ -9540,7 +9540,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/users/roles/{role_id}":
+  "/system/api/v1/users/roles/{role_id}":
     delete:
       summary: Delete admin user
       tags:
