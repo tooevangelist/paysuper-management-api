@@ -403,7 +403,7 @@ func (suite *KeyProductTestSuite) TestProject_CreateKeyProduct_GroupPrice_Ok() {
 					},
 				}},
 		},
-		Pricing: "manual",
+		Pricing:     "manual",
 	}
 
 	b, err := json.Marshal(&body)

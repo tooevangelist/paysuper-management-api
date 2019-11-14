@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/paysuper/paysuper-management-api/internal/test"
@@ -107,6 +108,44 @@ func (suite *ProductTestSuite) TestProduct_updateProduct_Ok() {
 
 	bodyJson := `{"object": "product", "billing_type":"real", "pricing": "manual", "type": "simple_product", "sku": "ru_0_doom_4", "name":  {"en": "Doom IV"}, 
         "default_currency": "USD", "enabled": true, "prices": [{"amount": 112.93, "currency": "USD", "region": "russia"}], 
+        "description":  {"en": "Doom IV description"}, "long_description": {}, "project_id": "5bdc39a95d1e1100019fb7df"}`
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Params(":"+common.RequestParameterId, "5c99391568add439ccf0ffaf").
+		Path(common.AuthUserGroupPath + productsIdPath).
+		BodyString(bodyJson).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), http.StatusOK, res.Code)
+	assert.NotEmpty(suite.T(), res.Body.String())
+}
+
+func (suite *ProductTestSuite) TestProduct_updateProductNonVirtualPrice_Error() {
+	bodyJson := `{"object": "product", "billing_type":"real", "pricing": "manual", "type": "simple_product", "sku": "ru_0_doom_4", "name":  {"en": "Doom IV"}, 
+        "default_currency": "USD", "enabled": true, "prices": [{"amount": 112.93, "is_virtual_currency": false}], 
+        "description":  {"en": "Doom IV description"}, "long_description": {}, "project_id": "5bdc39a95d1e1100019fb7df"}`
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPut).
+		Params(":"+common.RequestParameterId, "5c99391568add439ccf0ffaf").
+		Path(common.AuthUserGroupPath + productsIdPath).
+		BodyString(bodyJson).
+		Init(test.ReqInitJSON()).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+	hErr, ok := err.(*echo.HTTPError)
+	assert.True(suite.T(), ok)
+	assert.Equal(suite.T(), 400, hErr.Code)
+	assert.NotEmpty(suite.T(), res.Body.String())
+}
+
+func (suite *ProductTestSuite) TestProduct_updateProductVirtualPrice_Ok() {
+	bodyJson := `{"object": "product", "billing_type":"real", "pricing": "manual", "type": "simple_product", "sku": "ru_0_doom_4", "name":  {"en": "Doom IV"}, 
+        "default_currency": "USD", "enabled": true, "prices": [{"amount": 112.93, "is_virtual_currency": true}], 
         "description":  {"en": "Doom IV description"}, "long_description": {}, "project_id": "5bdc39a95d1e1100019fb7df"}`
 
 	res, err := suite.caller.Builder().

@@ -226,6 +226,18 @@ go-download-deps: ## download dependencies
     fi;
 .PHONY: go-download-deps
 
+docs-init: ## install dependencies for docs generation
+	npm install -g widdershins
+.PHONY: docs-init
+
+docs-update: ## update docs submodule
+	git submodule update --remote --init docs
+.PHONY: docs-update
+
+docs-gen: ## generate markdown files for hugo (slate) theme
+	widdershins --search false --language_tabs 'shell:cURL' --summary ${ROOT_DIR}/api/swagger.yaml -o ${ROOT_DIR}/docs/content/docs/api/v1/m-api.md
+.PHONY: docs-gen
+
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 .PHONY: help
