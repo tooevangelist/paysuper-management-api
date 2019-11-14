@@ -3487,7 +3487,7 @@ definitions:
       role:
         type: string
         example: "support"
-        description: "Role of user (merchant_developer, merchant_accounting, merchant_support, system_view_only)"
+        description: "Role of user (merchant_developer, merchant_accounting, merchant_support, merchant_view_only)"
 
   ResendInviteMerchant:
     type: object
