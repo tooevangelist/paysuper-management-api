@@ -27,8 +27,6 @@ func (m *Micro) Client() client.Client {
 // ListenAndServe
 func (m *Micro) ListenAndServe() (err error) {
 
-	m.srv.Init()
-
 	mlog.SetLogger(NewLoggerAdapter(m.L(), logger.LevelInfo))
 
 	m.L().Info("start listen and serve micro service")
@@ -85,10 +83,12 @@ func New(ctx context.Context, set provider.AwareSet, cfg *Config) *Micro {
 	if cfg.Selector == "static" {
 		options = append(options, micro.Selector(static.NewSelector()))
 	}
+	srv := micro.NewService(options...)
+	srv.Init()
 	return &Micro{
 		ctx: ctx,
 		cfg: *cfg,
 		LMT: &set,
-		srv: micro.NewService(options...),
+		srv: srv,
 	}
 }
