@@ -12,10 +12,11 @@ import (
 )
 
 const (
-	cardPayWebHookPaymentNotifyPath          = "/cardpay/payment"
-	cardPayWebHookRefundNotifyPath           = "/cardpay/refund"
-	cardPayWebHookPaymentUpperCaseNotifyPath = "/cardpay/PAYMENT"
-	cardPayWebHookRefundUpperCaseNotifyPath  = "/cardpay/REFUND"
+	cardPayWebHookPaymentNotifyPath            = "/cardpay/payment"
+	cardPayWebHookRefundNotifyPath             = "/cardpay/refund"
+	cardPayWebHookPaymentUpperCaseNotifyPath   = "/cardpay/PAYMENT"
+	cardPayWebHookRefundUpperCaseNotifyPath    = "/cardpay/REFUND"
+	cardPayWebHookRecurringUpperCaseNotifyPath = "/cardpay/RECURRING"
 )
 
 type CardPayWebHook struct {
@@ -38,6 +39,7 @@ func (h *CardPayWebHook) Route(groups *common.Groups) {
 	groups.WebHooks.POST(cardPayWebHookRefundNotifyPath, h.refundCallback)
 	groups.WebHooks.POST(cardPayWebHookPaymentUpperCaseNotifyPath, h.paymentCallback)
 	groups.WebHooks.POST(cardPayWebHookRefundUpperCaseNotifyPath, h.refundCallback)
+	groups.WebHooks.POST(cardPayWebHookRecurringUpperCaseNotifyPath, h.paymentCallback)
 }
 
 func (h *CardPayWebHook) paymentCallback(ctx echo.Context) error {

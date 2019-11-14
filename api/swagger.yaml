@@ -515,6 +515,74 @@ definitions:
       refund_fees_total_local:
         $ref: '#/definitions/order.money'
         description: object contain information about refund fees total local
+      items:
+        description: list of buyed items in order
+        type: array
+        items:
+          $ref: '#/definitions/model.JsonOrderCreateResponse.item'
+      issuer:
+        description: order issuer info
+        $ref: '#/definitions/order.issuer'
+      merchant_payout_currency:
+        type: string
+        description: merchant payout currency
+      parent:
+        $ref: '#/definitions/order.parent'
+        description: object contain information about parent order (for refunds only)
+      refund:
+        $ref: '#/definitions/order.refund'
+        description: object contain information about refund
+      cancellation:
+        $ref: '#/definitions/order.cancellation'
+        description: object contain information about order cancellation
+      operating_company_id:
+        type: string
+        description: merchant operating company id
+      refund_allowed:
+        type: string
+        description: refund allowed flag
+
+  order.parent:
+    type: object
+    properties:
+      id:
+        type: string
+        description: parent order id
+      uuid:
+        type: string
+        description: parent order uuid
+
+  order.refund:
+    type: object
+    properties:
+      amount:
+        type: number
+        description: refund amount
+      currency:
+        type: string
+        description: refund currency
+      reason:
+        type: string
+        description: refund reason
+      code:
+        type: string
+        description: refund code
+      receipt_number:
+        type: string
+        description: refund receipt_number
+      receipt_url:
+        type: string
+        description: refund receipt_url
+
+  order.cancellation:
+    type: object
+    properties:
+      reason:
+        type: string
+        description: refund reason
+      code:
+        type: string
+        description: refund code
 
   order.list.public:
     properties:
@@ -527,6 +595,34 @@ definitions:
           $ref: '#/definitions/order.public'
         type: array
     type: object
+
+  order.issuer:
+    type: object
+    properties:
+      url:
+        type: string
+        description: referrer full url
+      embedded:
+        type: boolean
+        description: flag of embedded form
+      reference:
+        type: string
+        description: reference id
+      reference_type:
+        type: string
+        description: reference type
+      utm_source:
+        type: string
+        description: 'utm_source value'
+      utm_medium:
+        type: string
+        description: 'utm_medium value'
+      utm_campaign:
+        type: string
+        description: 'utm_campaign value'
+      referrer_host:
+        type: string
+        description: 'referrer host'
 
   order.create.request.user:
     properties:
@@ -1213,13 +1309,32 @@ definitions:
         $ref: '#/definitions/onboarding.Tariff.Item'
       payout:
         description: payout tariff
-        $ref: '#/definitions/onboarding.Tariff.Item'
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/onboarding.Tariff.Item'
+        example:
+          RUB: {method_percent_fee: 0, method_fixed_fee: 1000, method_fixed_fee_currency: "RUB", is_paid_by_merchant: true}
+          USD: {method_percent_fee: 0, method_fixed_fee: 10, method_fixed_fee_currency: "USD", is_paid_by_merchant: true}
+      minimal_payout:
+        description: minimal payout amount
+        type: object
+        additionalProperties:
+          type: number
+        example:
+          RUB: 10000
+          USD: 100
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
 
   onboarding.Tariff.Set.Request:
     properties:
       home_region:
         type: string
         description: "merchant home region name. possible values: asia, europe, latin_america, russia_and_cis, worldwide"
+      merchant_operations_type:
+        description: "merchant operations type. possible values are low-risk, high-risk"
+        type: string
 
   onboarding.Merchant.user:
     properties:
@@ -1307,6 +1422,12 @@ definitions:
       user:
         description: object contain main information about merchant owner from primary onboarding profile
         $ref: '#/definitions/onboarding.Merchant.user'
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
+      operating_company_id:
+        description: id of operation company for which this cost is applicable
+        type: string
 
   onboarding.Merchant.ChangeStatus:
     properties:
@@ -1942,12 +2063,12 @@ definitions:
       review:
         description: user review about page
         type: string
-      page_id:
-        description: "page identifier. now allowed values: primary_onboarding, merchant_onboarding"
+      url:
+        description: "URL address of page"
         type: string
     required:
       - review
-      - page_id
+      - url
 
   user.confirmEmail.request:
     properties:
@@ -2033,6 +2154,12 @@ definitions:
       is_active:
         description: true is cost record is active
         type: boolean
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
+      operating_company_id:
+        description: id of operation company for which this cost is applicable
+        type: string
 
   onboarding.cost.payment.system.create:
     properties:
@@ -2054,11 +2181,19 @@ definitions:
       fix_amount_currency:
         description: currency of fixed fee.  letters code by ISO 4217
         type: string
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
+      operating_company_id:
+        description: id of operation company for which this cost is applicable
+        type: string
     required:
       - name
       - region
       - percent
       - fix_amount_currency
+      - mcc_code
+      - operating_company_id
 
   onboarding.cost.payment.system.all:
     properties:
@@ -2126,6 +2261,9 @@ definitions:
       is_active:
         description: true is rates record active for merchant
         type: boolean
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
 
   onboarding.cost.payment.merchant.create:
     properties:
@@ -2162,6 +2300,9 @@ definitions:
       ps_fixed_fee_currency:
         description: currency of paysuper fixed fee. 3-letters code by ISO 4217
         type: string
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
     required:
       - name
       - payout_currency
@@ -2171,6 +2312,7 @@ definitions:
       - method_fix_amount_currency
       - ps_percent
       - ps_fixed_fee_currency
+      - mcc_code
 
   onboarding.cost.money_back.system:
     properties:
@@ -2204,6 +2346,9 @@ definitions:
       fix_amount:
         description: payment method fixed fee
         type: number
+      fix_amount_currency:
+        description: payment method fixed fee currency
+        type: string
       created_at:
         description: time when retes record was created
         $ref: '#/definitions/ProtobufTimestamp'
@@ -2213,6 +2358,12 @@ definitions:
       is_active:
         description: true is rates record is active
         type: boolean
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
+      operating_company_id:
+        description: id of operation company for which this cost is applicable
+        type: string
 
   onboarding.cost.money_back.system.create:
     properties:
@@ -2243,11 +2394,19 @@ definitions:
       fix_amount:
         description: payment method fixed fee
         type: number
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
+      operating_company_id:
+        description: id of operation company for which this cost is applicable
+        type: string
     required:
       - name
       - payout_currency
       - undo_reason
       - region
+      - mcc_code
+      - operating_company_id
 
   onboarding.cost.money_back.merchant:
     properties:
@@ -2299,6 +2458,9 @@ definitions:
       is_active:
         description: true is rates record is active
         type: boolean
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
 
   onboarding.cost.money_back.merchant.create:
     properties:
@@ -2335,6 +2497,9 @@ definitions:
       is_paid_by_merchant:
         description: if true than commission will to take from merchant when money back operation will be processing
         type: boolean
+      mcc_code:
+        description: mcc code value, for which this cost is applicable
+        type: string
     required:
       - name
       - payout_currency
@@ -2342,6 +2507,7 @@ definitions:
       - region
       - percent
       - fix_amount_currency
+      - mcc_code
 
   onboarding.cost.payment.merchant.all:
     properties:
@@ -2635,20 +2801,6 @@ definitions:
       merchant_id:
         type: string
         description: merchant identificator
-      signature_data:
-        $ref: '#/definitions/billingPayoutDocumentSignatureData'
-        description: hellosign signature data
-      has_merchant_signature:
-        type: boolean
-        format: boolean
-        description: is document signed by merchant
-      has_psp_signature:
-        type: boolean
-        format: boolean
-        description: is document signed by paysuper
-      signed_document_file_url:
-        type: string
-        description: url to signed file
       period_from:
         type: string
         format: date-time
@@ -2657,33 +2809,9 @@ definitions:
         type: string
         format: date-time
         description: payout period end
-
-  billingPayoutDocumentSignatureData:
-    type: object
-    properties:
-      details_url:
+      operating_company_id:
         type: string
-      files_url:
-        type: string
-      signature_request_id:
-        type: string
-      merchant_signature_id:
-        type: string
-      ps_signature_id:
-        type: string
-      merchant_sign_url:
-        $ref: '#/definitions/billingPayoutDocumentSignatureDataSignUrl'
-      ps_sign_url:
-        $ref: '#/definitions/billingPayoutDocumentSignatureDataSignUrl'
-
-  billingPayoutDocumentSignatureDataSignUrl:
-    type: object
-    properties:
-      sign_url:
-        type: string
-      expires_at:
-        type: string
-        format: date-time
+        description: operating company id
 
   payout_documents_list:
     properties:
@@ -2915,6 +3043,9 @@ definitions:
       payout_document_id:
         type: string
         description: cross-link to payout invoice, that includes this royalty report
+      operating_company_id:
+        type: string
+        description: operating company id
 
   billingRoyaltyReportCorrectionItem:
     type: object
@@ -3355,6 +3486,9 @@ definitions:
         type: string
         format: date-time
         description: 'date of payment'
+      operating_company_id:
+        type: string
+        description: operating company id
 
   grpcVatReportsPaginate:
     type: object
@@ -3381,6 +3515,85 @@ definitions:
     required:
       - id
       - cookie
+
+  operating_company:
+    type: object
+    properties:
+      id:
+        type: string
+        description: operating company id
+      name:
+        type: string
+        description: operating company name
+      country:
+        type: string
+        description: country
+      registration_number:
+        type: string
+        description: registration_number
+      vat_number:
+        type: string
+        description: vat_number
+      address:
+        type: string
+        description: address
+      vat_address:
+        type: string
+        description: address for VAT purposes
+      signatory_name:
+        type: string
+        description: signatory_name
+      signatory_position:
+        type: string
+        description: signatory_position
+      banking_details:
+        type: string
+        description: banking_details
+      payment_countries:
+        description: banking_details
+        type: array
+        items:
+          type: string
+      created_at:
+        description: object contain information about time when operating company created
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: object contain information about time when operating company updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+
+  operating_company_list:
+    type: object
+    properties:
+      items:
+        description: list of operating companies
+        type: array
+        items:
+          $ref: '#/definitions/operating_company'
+
+  payment_min_limit_system:
+    type: object
+    properties:
+      currency:
+        type: string
+        description: limit currency
+      amount:
+        type: string
+        description: limit value
+      created_at:
+        description: object contain information about time when operating company created
+        $ref: '#/definitions/ProtobufTimestamp'
+      updated_at:
+        description: object contain information about time when operating company updated at last time
+        $ref: '#/definitions/ProtobufTimestamp'
+
+  payment_min_limit_system_list:
+    type: object
+    properties:
+      items:
+        description: list of payment minimum limits system
+        type: array
+        items:
+          $ref: '#/definitions/payment_min_limit_system'
 
 host: p1payapi.tst.protocol.one
 info:
@@ -6309,13 +6522,18 @@ paths:
           name: max_amount
           type: number
           required: false
+        - description: "merchant operations type. possible values are low-risk, high-risk"
+          in: query
+          name: merchant_operations_type
+          type: string
+          required: true
       responses:
         "200":
           description: OK
           schema:
             type: array
             items:
-              $ref: '#/definitions/onboarding.Tariff.Payment'
+              $ref: '#/definitions/onboarding.Tariff'
         "400":
           description: Invalid request data
           schema:
@@ -7808,7 +8026,9 @@ paths:
         200:
           description: OK
           schema:
-            $ref: '#/definitions/billingPayoutDocument'
+            items:
+              $ref: '#/definitions/billingPayoutDocument'
+            type: array
         "400":
           description: Object with error message
           schema:
@@ -7887,82 +8107,6 @@ paths:
             $ref: '#/definitions/model.Error'
         "500":
           description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/payout_documents/{id}/signurl/merchant":
-    get:
-      summary: Get url for payout document signing by merchant
-      tags:
-        - Payouts
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description: Get url for payout document signing by merchant
-      parameters:
-        - description: payout document unique identifier
-          in: path
-          name: id
-          type: string
-          required: true
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/billingPayoutDocumentSignatureDataSignUrl'
-        400:
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        401:
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        403:
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        500:
-          description: Some unknown error on server side
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/payout_documents/{id}/signurl/ps":
-    get:
-      summary: Get url for payout document signing by PaySuper
-      tags:
-        - Payouts
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description: Get url for payout document signing by PaySuper
-      parameters:
-        - description: payout document unique identifier
-          in: path
-          name: id
-          type: string
-          required: true
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: '#/definitions/billingPayoutDocumentSignatureDataSignUrl'
-        400:
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        401:
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        403:
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        500:
-          description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
 
@@ -9226,3 +9370,263 @@ paths:
             $ref: '#/definitions/model.Error'
       tags:
         - Saved Card
+
+  "/admin/api/v1/merchants/{id}/set_operating_company":
+    post:
+      summary: Set merchant operating company
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Set merchant operating company
+      parameters:
+        - description: merchant id
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: status
+          in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              operating_company_id:
+                description: id of operation company for which this cost is applicable
+                type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/operating_company":
+    get:
+      consumes:
+        - application/json
+      description: Get operating companies list
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/operating_company_list'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get operating companies list
+      tags:
+        - Operating company
+    post:
+      summary: Add new operating company
+      tags:
+        - Operating company
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Add new operating company
+      parameters:
+        - description: new operating company params
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/operating_company'
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/operating_company/{id}":
+    get:
+      consumes:
+        - application/json
+      description: Get operating company
+      parameters:
+        - description: operating company id
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/operating_company'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get operating company
+      tags:
+        - Operating company
+    post:
+      summary: Add new operating company
+      tags:
+        - Operating company
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Add new operating company
+      parameters:
+        - description: operating company id
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: updating operating company params
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/operating_company'
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payment_min_limit_system":
+    get:
+      consumes:
+        - application/json
+      description: Get list of payment minimum limits system
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payment_min_limit_system_list'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get list of payment minimum limits system
+      tags:
+        - Limits
+    post:
+      summary: Set payment minimum limits system for currency
+      tags:
+        - Limits
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Set payment minimum limits system for currency
+      parameters:
+        - description: minimum limits system for currency
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/payment_min_limit_system'
+      responses:
+        "204":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'

@@ -160,7 +160,7 @@ func (h *PayoutDocumentsRoute) createPayoutDocument(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	return ctx.JSON(http.StatusOK, res.Item)
+	return ctx.JSON(http.StatusOK, res.Items)
 }
 
 // Update payout document by admin

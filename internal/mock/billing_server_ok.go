@@ -341,9 +341,9 @@ func (s *BillingServerOkMock) PaymentFormLanguageChanged(
 ) (*grpc.PaymentFormDataChangeResponse, error) {
 	return &grpc.PaymentFormDataChangeResponse{
 		Status: pkg.ResponseStatusOk,
-		Item: &grpc.PaymentFormDataChangeResponseItem{
+		Item: &billing.PaymentFormDataChangeResponseItem{
 			UserAddressDataRequired: true,
-			UserIpData: &grpc.UserIpData{
+			UserIpData: &billing.UserIpData{
 				Country: "RU",
 				City:    "St.Petersburg",
 				Zip:     "190000",
@@ -359,9 +359,9 @@ func (s *BillingServerOkMock) PaymentFormPaymentAccountChanged(
 ) (*grpc.PaymentFormDataChangeResponse, error) {
 	return &grpc.PaymentFormDataChangeResponse{
 		Status: pkg.ResponseStatusOk,
-		Item: &grpc.PaymentFormDataChangeResponseItem{
+		Item: &billing.PaymentFormDataChangeResponseItem{
 			UserAddressDataRequired: true,
-			UserIpData: &grpc.UserIpData{
+			UserIpData: &billing.UserIpData{
 				Country: "RU",
 				City:    "St.Petersburg",
 				Zip:     "190000",
@@ -1075,7 +1075,7 @@ func (s *BillingServerOkMock) GetDashboardBaseReport(
 	return &grpc.GetDashboardBaseReportResponse{}, nil
 }
 
-func (s *BillingServerOkMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.PayoutDocumentResponse, error) {
+func (s *BillingServerOkMock) CreatePayoutDocument(ctx context.Context, in *grpc.CreatePayoutDocumentRequest, opts ...client.CallOption) (*grpc.CreatePayoutDocumentResponse, error) {
 	panic("implement me")
 }
 
@@ -1237,5 +1237,29 @@ func (s *BillingServerOkMock) AutoCreatePayoutDocuments(ctx context.Context, in 
 }
 
 func (s *BillingServerOkMock) DeleteSavedCard(ctx context.Context, in *grpc.DeleteSavedCardRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) SetMerchantOperatingCompany(ctx context.Context, in *grpc.SetMerchantOperatingCompanyRequest, opts ...client.CallOption) (*grpc.SetMerchantOperatingCompanyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetOperatingCompaniesList(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetOperatingCompaniesListResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) AddOperatingCompany(ctx context.Context, in *billing.OperatingCompany, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetPaymentMinLimitsSystem(ctx context.Context, in *grpc.EmptyRequest, opts ...client.CallOption) (*grpc.GetPaymentMinLimitsSystemResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) SetPaymentMinLimitSystem(ctx context.Context, in *billing.PaymentMinLimitSystem, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetOperatingCompany(ctx context.Context, in *grpc.GetOperatingCompanyRequest, opts ...client.CallOption) (*grpc.GetOperatingCompanyResponse, error) {
 	panic("implement me")
 }
