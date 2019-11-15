@@ -1303,9 +1303,15 @@ definitions:
     properties:
       payment:
         description: payment tariffs
+        type: array
         $ref: '#/definitions/onboarding.Tariff.Payment'
+      refund:
+        description: refund tariffs
+        type: array
+        $ref: '#/definitions/onboarding.Tariff.Item'
       chargeback:
-        description: chargeback tariff
+        description: chargeback tariffs
+        type: array
         $ref: '#/definitions/onboarding.Tariff.Item'
       payout:
         description: payout tariff
