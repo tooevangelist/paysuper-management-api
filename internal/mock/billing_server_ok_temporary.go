@@ -1022,10 +1022,6 @@ func (s *BillingServerOkTemporaryMock) DeleteAdminUser(ctx context.Context, in *
 	panic("implement me")
 }
 
-func (s *BillingServerOkTemporaryMock) GetPermissionsForUser(ctx context.Context, in *grpc.GetPermissionsForUserRequest, opts ...client.CallOption) (*grpc.GetPermissionsForUserResponse, error) {
-	panic("implement me")
-}
-
 func (s *BillingServerOkTemporaryMock) GetAdminUserRole(ctx context.Context, in *grpc.AdminRoleRequest, opts ...client.CallOption) (*grpc.UserRoleResponse, error) {
 	panic("implement me")
 }

@@ -1245,10 +1245,6 @@ func (s *BillingServerOkMock) DeleteAdminUser(ctx context.Context, in *grpc.Admi
 	panic("implement me")
 }
 
-func (s *BillingServerOkMock) GetPermissionsForUser(ctx context.Context, in *grpc.GetPermissionsForUserRequest, opts ...client.CallOption) (*grpc.GetPermissionsForUserResponse, error) {
-	panic("implement me")
-}
-
 func (s *BillingServerOkMock) OrderCreateByPaylink(ctx context.Context, in *billing.OrderCreateByPaylink, opts ...client.CallOption) (*grpc.OrderCreateProcessResponse, error) {
 	panic("implement me")
 }

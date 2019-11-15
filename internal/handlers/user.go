@@ -7,7 +7,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -18,10 +17,9 @@ type UserRoute struct {
 }
 
 const (
-	inviteCheck      = "/user/invite/check"
-	inviteApprove    = "/user/invite/approve"
-	getMerchants     = "/user/merchants"
-	permissionsRoute = "/permissions"
+	inviteCheck   = "/user/invite/check"
+	inviteApprove = "/user/invite/approve"
+	getMerchants  = "/user/merchants"
 )
 
 func NewUserRoute(set common.HandlerSet, cfg *common.Config) *UserRoute {
@@ -37,7 +35,6 @@ func (h *UserRoute) Route(groups *common.Groups) {
 	groups.AuthProject.POST(inviteCheck, h.checkInvite)
 	groups.AuthProject.POST(inviteApprove, h.approveInvite)
 	groups.AuthProject.GET(getMerchants, h.getMerchants)
-	groups.AuthProject.GET(permissionsRoute, h.getPermissions)
 
 }
 
@@ -102,26 +99,4 @@ func (h *UserRoute) getMerchants(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res)
-}
-
-func (h *UserRoute) getPermissions(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-
-	zap.S().Infow("getPermissions called", "authUser", authUser)
-
-	res, err := h.dispatch.Services.Billing.GetPermissionsForUser(ctx.Request().Context(), &grpc.GetPermissionsForUserRequest{
-		UserId:     authUser.Id,
-		MerchantId: authUser.MerchantId,
-	})
-
-	if err != nil {
-		h.L().Error(common.InternalErrorTemplate, logger.PairArgs("err", err.Error()))
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	if res.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(res.Status), res.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, res.Permissions)
 }
