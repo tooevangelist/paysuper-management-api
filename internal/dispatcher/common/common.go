@@ -4,17 +4,6 @@ import (
 	"github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
-	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
-	tax_service "github.com/paysuper/paysuper-tax-service/proto"
-	"gopkg.in/go-playground/validator.v9"
-	"net/http"
-)
-
-
-import (
-	"github.com/ProtocolONE/geoip-service/pkg/proto"
-	"github.com/ProtocolONE/go-core/v2/pkg/logger"
-	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"

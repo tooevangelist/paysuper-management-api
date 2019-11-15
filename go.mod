@@ -21,7 +21,7 @@ require (
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/casbin-server v0.0.0-20191031114753-f40b0e2b42ba
-	github.com/paysuper/echo-casbin-middleware v0.0.0-20191021231103-f3d820b11545
+	github.com/paysuper/echo-casbin-middleware v0.0.0-20191115192805-7bacfdae713b
 	github.com/paysuper/paysuper-aws-manager v0.0.1
 	github.com/paysuper/paysuper-billing-server v0.0.0-20191115105903-2ba686d1e78c
 	github.com/paysuper/paysuper-recurring-repository v1.0.126
