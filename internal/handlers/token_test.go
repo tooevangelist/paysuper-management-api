@@ -61,7 +61,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_Ok() {
 				Value: "127.0.0.1",
 			},
 			Locale: &billing.TokenUserLocaleValue{
-				Value: "ru",
+				Value: "ru-RU",
 			},
 			Address: &billing.OrderBillingAddress{
 				Country:    "RU",
@@ -189,7 +189,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_CheckProjectRequestSignature_
 				Value: "127.0.0.1",
 			},
 			Locale: &billing.TokenUserLocaleValue{
-				Value: "ru",
+				Value: "ru-RU",
 			},
 			Address: &billing.OrderBillingAddress{
 				Country:    "RU",
@@ -249,7 +249,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_CheckProjectRequestSignature_
 				Value: "127.0.0.1",
 			},
 			Locale: &billing.TokenUserLocaleValue{
-				Value: "ru",
+				Value: "ru-RU",
 			},
 			Address: &billing.OrderBillingAddress{
 				Country:    "RU",
@@ -309,7 +309,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_ChangeCustomer_System_Error()
 				Value: "127.0.0.1",
 			},
 			Locale: &billing.TokenUserLocaleValue{
-				Value: "ru",
+				Value: "ru-RU",
 			},
 			Address: &billing.OrderBillingAddress{
 				Country:    "RU",
@@ -369,7 +369,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_ChangeCustomer_ResultError() 
 				Value: "127.0.0.1",
 			},
 			Locale: &billing.TokenUserLocaleValue{
-				Value: "ru",
+				Value: "ru-RU",
 			},
 			Address: &billing.OrderBillingAddress{
 				Country:    "RU",
