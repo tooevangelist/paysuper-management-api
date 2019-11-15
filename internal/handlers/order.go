@@ -82,12 +82,21 @@ func NewOrderRoute(set common.HandlerSet, cfg *common.Config) *OrderRoute {
 }
 
 func (h *OrderRoute) Route(groups *common.Groups) {
-	groups.AuthProject.GET(orderIdPath, h.getPaymentFormData)
-	groups.Common.GET(paylinkIdPath, h.getOrderForPaylink)       // TODO: Need a test
-	groups.Common.GET(orderCreatePath, h.createFromFormData)     // TODO: Need a test
-	groups.Common.POST(orderCreatePath, h.createFromFormData)    // TODO: Need a test
-	groups.AuthProject.POST(orderPath, h.createJson)             // TODO: Need a test
-	groups.AuthProject.POST(paymentPath, h.processCreatePayment) // TODO: Need a test
+	groups.Common.GET(orderIdPath, h.getPaymentFormData)
+	groups.Common.GET(paylinkIdPath, h.getOrderForPaylink)    // TODO: Need a test
+	groups.Common.GET(orderCreatePath, h.createFromFormData)  // TODO: Need a test
+	groups.Common.POST(orderCreatePath, h.createFromFormData) // TODO: Need a test
+	groups.Common.POST(orderPath, h.createJson)               // TODO: Need a test
+	groups.Common.POST(paymentPath, h.processCreatePayment)   // TODO: Need a test
+
+	groups.Common.PATCH(orderLanguagePath, h.changeLanguage)
+	groups.Common.PATCH(orderCustomerPath, h.changeCustomer)
+	groups.Common.POST(orderBillingAddressPath, h.processBillingAddress)
+	groups.Common.POST(orderNotifySalesPath, h.notifySale)
+	groups.Common.POST(orderNotifyNewRegionPath, h.notifyNewRegion)
+	groups.Common.POST(orderPlatformPath, h.changePlatform)
+
+	groups.Common.GET(orderReceiptPath, h.getReceipt)
 
 	groups.AuthUser.GET(orderPath, h.listOrdersPublic)
 	groups.AuthUser.GET(orderIdPath, h.getOrderPublic) // TODO: Need a test
@@ -96,15 +105,6 @@ func (h *OrderRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(orderRefundsIdsPath, h.getRefund)
 	groups.AuthUser.POST(orderRefundsPath, h.createRefund)
 	groups.SystemUser.PUT(orderReplaceCodePath, h.replaceCode)
-
-	groups.AuthProject.PATCH(orderLanguagePath, h.changeLanguage)
-	groups.AuthProject.PATCH(orderCustomerPath, h.changeCustomer)
-	groups.AuthProject.POST(orderBillingAddressPath, h.processBillingAddress)
-	groups.AuthProject.POST(orderNotifySalesPath, h.notifySale)
-	groups.AuthProject.POST(orderNotifyNewRegionPath, h.notifyNewRegion)
-	groups.AuthProject.POST(orderPlatformPath, h.changePlatform)
-
-	groups.Common.GET(orderReceiptPath, h.getReceipt)
 }
 
 // @Summary Create order with HTML form

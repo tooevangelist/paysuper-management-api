@@ -30,7 +30,7 @@ func NewRecurringRoute(set common.HandlerSet, cfg *common.Config) *RecurringRout
 }
 
 func (h *RecurringRoute) Route(groups *common.Groups) {
-	groups.AuthProject.DELETE(removeSavedCardPath, h.removeSavedCard)
+	groups.Common.DELETE(removeSavedCardPath, h.removeSavedCard)
 }
 
 func (h *RecurringRoute) removeSavedCard(ctx echo.Context) error {
