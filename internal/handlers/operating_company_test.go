@@ -93,7 +93,8 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_AddOperatingCompany
 
 	body := `{"name" : "Paysuper", "country" : "CY", 
 			  "registration_number" : "some number", "vat_number" : "some vat number", "address" : "Cyprus", 
-			   "vat_address" : "Cyprus", "signatory_name" : "Vassiliy Poupkine", "signatory_position" : "CEO", 
+			  "registration_date" : "17 April 2019",
+			  "vat_address" : "Cyprus", "signatory_name" : "Vassiliy Poupkine", "signatory_position" : "CEO", 
 			  "banking_details" : "bank details including bank, bank address, account number, swift/ bic, intermediary bank"}`
 
 	res, err := suite.caller.Builder().
@@ -115,7 +116,8 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_UpdateOperatingComp
 	suite.router.dispatch.Services.Billing = billingService
 
 	body := `{"name" : "Paysuper", "country" : "CY", 
-			  "registration_number" : "some number", "vat_number" : "some vat number", "address" : "Cyprus", 
+			  "registration_number" : "some number", "vat_number" : "some vat number", "address" : "Cyprus",
+			  "registration_date" : "17 April 2019",
 			  "vat_address" : "Cyprus", "signatory_name" : "Vassiliy Poupkine", "signatory_position" : "CEO", 
 			  "banking_details" : "bank details including bank, bank address, account number, swift/ bic, intermediary bank"}`
 

@@ -3544,6 +3544,9 @@ definitions:
       registration_number:
         type: string
         description: registration_number
+      registration_date:
+        type: string
+        description: registration date
       vat_number:
         type: string
         description: vat_number
