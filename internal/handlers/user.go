@@ -7,6 +7,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -105,6 +106,8 @@ func (h *UserRoute) getMerchants(ctx echo.Context) error {
 
 func (h *UserRoute) getPermissions(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
+
+	zap.S().Infow("getPermissions called", "authUser", authUser)
 
 	res, err := h.dispatch.Services.Billing.GetPermissionsForUser(ctx.Request().Context(), &grpc.GetPermissionsForUserRequest{
 		UserId:     authUser.Id,
