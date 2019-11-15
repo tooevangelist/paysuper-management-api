@@ -188,7 +188,7 @@ func BuildDispatcher(ctx context.Context, settings config.Settings, srv common.S
 		cleanup()
 		return nil, nil, err
 	}
-	microMicro, cleanup9, err := micro.Provider(ctx, awareSet, microConfig)
+	microMicro, cleanup9, err := micro.ProviderTest(ctx, awareSet, microConfig)
 	if err != nil {
 		cleanup8()
 		cleanup7()
