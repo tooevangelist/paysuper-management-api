@@ -890,7 +890,6 @@ func (h *OnboardingRoute) changeMerchantManualPayout(ctx echo.Context, enableMan
 }
 
 func (h *OnboardingRoute) setOperatingCompany(ctx echo.Context) error {
-
 	req := &grpc.SetMerchantOperatingCompanyRequest{}
 	err := ctx.Bind(req)
 
