@@ -54,6 +54,7 @@ var (
 	zipGeneralRegexp  = regexp.MustCompile("^\\d{0,30}$")
 	swiftRegexp       = regexp.MustCompile("^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$")
 	cityRegexp        = regexp.MustCompile("^[\\p{L}\\p{M} \\-\\.]+$")
+	localeRegexp      = regexp.MustCompile("^[a-z]{2}-[A-Z]{2,10}$")
 )
 
 // ProductPriceValidator
@@ -202,6 +203,11 @@ func (v *ValidatorSet) TariffRegionValidator(fl validator.FieldLevel) bool {
 func (v *ValidatorSet) IBANValidator(fl validator.FieldLevel) bool {
 	_, err := iban.NewIBAN(fl.Field().String())
 	return err == nil
+}
+
+// User locale validator
+func (v *ValidatorSet) UserLocaleValidator(fl validator.FieldLevel) bool {
+	return localeRegexp.MatchString(fl.Field().String())
 }
 
 // New

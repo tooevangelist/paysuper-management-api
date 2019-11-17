@@ -1303,9 +1303,15 @@ definitions:
     properties:
       payment:
         description: payment tariffs
+        type: array
         $ref: '#/definitions/onboarding.Tariff.Payment'
+      refund:
+        description: refund tariffs
+        type: array
+        $ref: '#/definitions/onboarding.Tariff.Item'
       chargeback:
-        description: chargeback tariff
+        description: chargeback tariffs
+        type: array
         $ref: '#/definitions/onboarding.Tariff.Item'
       payout:
         description: payout tariff
@@ -1357,6 +1363,18 @@ definitions:
         description: time when user email was confirm
         $ref: '#/definitions/ProtobufTimestamp'
 
+  onboarding.Merchant.tariffs:
+    properties:
+      home_region:
+        description: merchant tariff home region
+        type: string
+        enum:
+          - asia
+          - europe
+          - latin_america
+          - russia_and_cis
+          - worldwide
+
   onboarding.Merchant:
     properties:
       id:
@@ -1404,9 +1422,6 @@ definitions:
       signature_request:
         description: object contained signatire request data
         $ref: '#/definitions/onboarding.merchant.signatureRequest'
-      tariff:
-        description: tariff identifier
-        type: string
       agreement_template:
         description: license agreement template identifier in hellosign
         type: string
@@ -1428,6 +1443,9 @@ definitions:
       operating_company_id:
         description: id of operation company for which this cost is applicable
         type: string
+      tariff:
+        description: merchant tariff information
+        $ref: '#/definitions/onboarding.Merchant.tariffs'
 
   onboarding.Merchant.ChangeStatus:
     properties:
@@ -1805,8 +1823,9 @@ definitions:
         description: object which contain information about user ip
         $ref: '#/definitions/token.TokenRequest.Value'
       locale:
-        description: object which contain information about user locale. value in this object must contain 2 characters language code in lower registry by ISO 639-1
+        description: object which contain information about user locale. value in this object must contain locale code by ISO 639
         $ref: '#/definitions/token.TokenRequest.Value'
+        example: "ru-RU, en-US and etc"
       address:
         description: object which contain information about user address
         $ref: '#/definitions/order.BillingAddress'
@@ -3551,6 +3570,9 @@ definitions:
       registration_number:
         type: string
         description: registration_number
+      registration_date:
+        type: string
+        description: registration date
       vat_number:
         type: string
         description: vat_number
