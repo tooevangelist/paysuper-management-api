@@ -44,8 +44,8 @@ func Test_Onboarding(t *testing.T) {
 
 func (suite *OnboardingTestSuite) SetupTest() {
 	user := &common.AuthUser{
-		Id:    "ffffffffffffffffffffffff",
-		Email: "test@unit.test",
+		Id:         "ffffffffffffffffffffffff",
+		Email:      "test@unit.test",
 		MerchantId: "ffffffffffffffffffffffff",
 	}
 
@@ -663,7 +663,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerSy
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
 		Status:  pkg.ResponseStatusOk,
 		Message: &grpc.ResponseErrorMessage{},
-		Item:    &billing.Merchant{
+		Item: &billing.Merchant{
 			Id: "ffffffffffffffffffffffff",
 		},
 	}, nil)
@@ -790,8 +790,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_AgreementN
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
 		Status:  pkg.ResponseStatusOk,
 		Message: &grpc.ResponseErrorMessage{},
-		Item:    &billing.Merchant{
-			Id: "ffffffffffffffffffffffff",
+		Item: &billing.Merchant{
+			Id:              "ffffffffffffffffffffffff",
 			S3AgreementName: "",
 		},
 	}, nil)
@@ -817,8 +817,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_AgreementF
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
 		Status:  pkg.ResponseStatusOk,
 		Message: &grpc.ResponseErrorMessage{},
-		Item:    &billing.Merchant{
-			Id: "ffffffffffffffffffffffff",
+		Item: &billing.Merchant{
+			Id:              "ffffffffffffffffffffffff",
 			S3AgreementName: mock.SomeAgreementName,
 		},
 	}, nil)
@@ -989,7 +989,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_SetMerc
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
 		Status:  pkg.ResponseStatusOk,
 		Message: &grpc.ResponseErrorMessage{},
-		Item:    &billing.Merchant{
+		Item: &billing.Merchant{
 			Id: "ffffffffffffffffffffffff",
 		},
 	}, nil)
@@ -2421,8 +2421,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementData_Ok() {
 	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
 		Status:  pkg.ResponseStatusOk,
 		Message: &grpc.ResponseErrorMessage{},
-		Item:    &billing.Merchant{
-			Id: "ffffffffffffffffffffffff",
+		Item: &billing.Merchant{
+			Id:              "ffffffffffffffffffffffff",
 			S3AgreementName: mock.SomeAgreementName,
 		},
 	}, nil)
@@ -2521,10 +2521,19 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetOperatingCompany_Ok() {
 		Return(&grpc.SetMerchantOperatingCompanyResponse{Status: pkg.ResponseStatusOk}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 
+	userOK := &common.AuthUser{
+		MerchantId: mock.SomeMerchantId1,
+	}
+
+	customInit := func(request *http.Request, middleware test.Middleware) {
+		middleware.Pre(test.PreAuthUserMiddleware(userOK))
+	}
+
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterMerchantId, mock.SomeMerchantId1).
 		Path(common.AuthUserGroupPath + merchantsIdSetOperatingCompanyPath).
+		Init(customInit).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())

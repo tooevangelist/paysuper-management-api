@@ -7,6 +7,7 @@ require (
 	github.com/PuerkitoBio/purell v1.1.1
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
 	github.com/aws/aws-sdk-go v1.23.16
+	github.com/davecgh/go-spew v1.1.1
 	github.com/fatih/color v1.7.0
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-log/log v0.1.0

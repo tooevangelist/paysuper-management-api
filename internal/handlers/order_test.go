@@ -306,7 +306,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderLanguagePath).
+		Path(orderLanguagePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -322,7 +322,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_OrderIdEmpty_Error() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", "").
-		Path(common.AuthProjectGroupPath + orderLanguagePath).
+		Path(orderLanguagePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -342,7 +342,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BindError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderLanguagePath).
+		Path(orderLanguagePath).
 		BodyString(data).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -361,7 +361,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_ValidationError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", "some_value").
-		Path(common.AuthProjectGroupPath + orderLanguagePath).
+		Path(orderLanguagePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -382,7 +382,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BillingServerSystemError()
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderLanguagePath).
+		Path(orderLanguagePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -403,7 +403,7 @@ func (suite *OrderTestSuite) TestOrder_ChangeLanguage_BillingServerErrorResult_E
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderLanguagePath).
+		Path(orderLanguagePath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -422,7 +422,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderCustomerPath).
+		Path(orderCustomerPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -438,7 +438,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_OrderIdEmpty_Error()
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", "").
-		Path(common.AuthProjectGroupPath + orderCustomerPath).
+		Path(orderCustomerPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -457,7 +457,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BindError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderCustomerPath).
+		Path(orderCustomerPath).
 		BodyString(data).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -476,7 +476,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_ValidationError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderCustomerPath).
+		Path(orderCustomerPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -497,7 +497,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BillingServerSystemE
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderCustomerPath).
+		Path(orderCustomerPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -518,7 +518,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePaymentAccount_BillingServerErrorRe
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderCustomerPath).
+		Path(orderCustomerPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -537,7 +537,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderBillingAddressPath).
+		Path(orderBillingAddressPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -553,7 +553,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_NoUSA_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderBillingAddressPath).
+		Path(orderBillingAddressPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -569,7 +569,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_OrderIdEmpty_Error() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", "").
-		Path(common.AuthProjectGroupPath + orderBillingAddressPath).
+		Path(orderBillingAddressPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -588,7 +588,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BindError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderBillingAddressPath).
+		Path(orderBillingAddressPath).
 		BodyString(body).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -607,7 +607,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderBillingAddressPath).
+		Path(orderBillingAddressPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -626,7 +626,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_ValidationZipError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderBillingAddressPath).
+		Path(orderBillingAddressPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -651,7 +651,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerSystemError
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderBillingAddressPath).
+		Path(orderBillingAddressPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -672,7 +672,7 @@ func (suite *OrderTestSuite) TestOrder_CalculateAmounts_BillingServerErrorResult
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderBillingAddressPath).
+		Path(orderBillingAddressPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -700,7 +700,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -745,7 +745,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(reqInit).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -760,7 +760,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_BindError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -797,7 +797,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_EmptyRequestSignature
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -841,7 +841,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_BillingServerSystemEr
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(reqInit).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -885,7 +885,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithUser_BillingServerResultFa
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(reqInit).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -903,7 +903,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_ValidationError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -933,7 +933,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_OrderCreateError() {
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -963,7 +963,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_PaymentFormJsonDataProcessErro
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -992,7 +992,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_ProductionEnvironment_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1011,7 +1011,7 @@ func (suite *OrderTestSuite) TestOrder_GetPaymentFormData_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterOrderId, uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderIdPath).
+		Path(orderIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -1037,7 +1037,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_TokenCookieExist_Ok() {
 		Method(http.MethodGet).
 		AddCookie(cookie).
 		Params(":"+common.RequestParameterOrderId, mock.SomeMerchantId1).
-		Path(common.AuthProjectGroupPath + orderIdPath).
+		Path(orderIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -1076,7 +1076,7 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_BillingServerSystemError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterOrderId, bson.NewObjectId().Hex()).
-		Path(common.AuthProjectGroupPath + orderIdPath).
+		Path(orderIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -1185,7 +1185,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithPreparedOrderId_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1208,7 +1208,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithPreparedOrderId_BillingSer
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1234,7 +1234,7 @@ func (suite *OrderTestSuite) TestOrder_CreateJson_WithPreparedOrderId_BillingSer
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + orderPath).
+		Path(orderPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1352,7 +1352,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePlatformPayment_InternalError() {
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderPlatformPath).
+		Path(orderPlatformPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1379,7 +1379,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePlatformPayment_Error() {
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderPlatformPath).
+		Path(orderPlatformPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1405,7 +1405,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePlatformPayment_Ok() {
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":order_id", uuid.New().String()).
-		Path(common.AuthProjectGroupPath + orderPlatformPath).
+		Path(orderPlatformPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
