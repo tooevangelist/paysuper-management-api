@@ -26,8 +26,8 @@ func NewCountryApiV1(set common.HandlerSet, cfg *common.Config) *CountryApiV1 {
 }
 
 func (h *CountryApiV1) Route(groups *common.Groups) {
-	groups.AuthProject.GET("/country", h.get)
-	groups.AuthProject.GET("/country/:code", h.getById)
+	groups.Common.GET("/country", h.get)
+	groups.Common.GET("/country/:code", h.getById)
 }
 
 // Get full list of currencies

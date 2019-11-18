@@ -3882,7 +3882,7 @@ securityDefinitions:
     description: must contain project secret key
 
 paths:
-  /api/v1/country:
+  /country:
     get:
       consumes:
         - application/json
@@ -3909,7 +3909,7 @@ paths:
       summary: Get list of countries
       tags:
         - Country
-  /api/v1/country/{id}:
+  /country/{id}:
     get:
       consumes:
         - application/json
