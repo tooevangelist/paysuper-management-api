@@ -929,3 +929,12 @@ func (s *BillingServerSystemErrorMock) SetPaymentMinLimitSystem(ctx context.Cont
 func (s *BillingServerSystemErrorMock) GetOperatingCompany(ctx context.Context, in *grpc.GetOperatingCompanyRequest, opts ...client.CallOption) (*grpc.GetOperatingCompanyResponse, error) {
 	panic("implement me")
 }
+
+
+func (s *BillingServerSystemErrorMock) SendWebhookToMerchant(ctx context.Context, in *billing.OrderCreateRequest, opts ...client.CallOption) (*grpc.SendWebhookToMerchantResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerSystemErrorMock) NotifyWebhookTestResults(ctx context.Context, in *grpc.NotifyWebhookTestResultsRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
+	panic("implement me")
+}

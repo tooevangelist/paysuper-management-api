@@ -12,6 +12,7 @@ import (
 
 type BillingServerOkTemporaryMock struct{}
 
+
 func NewBillingServerOkTemporaryMock() grpc.BillingService {
 	return &BillingServerOkTemporaryMock{}
 }
@@ -983,5 +984,13 @@ func (s *BillingServerOkTemporaryMock) SetPaymentMinLimitSystem(ctx context.Cont
 }
 
 func (s *BillingServerOkTemporaryMock) GetOperatingCompany(ctx context.Context, in *grpc.GetOperatingCompanyRequest, opts ...client.CallOption) (*grpc.GetOperatingCompanyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) SendWebhookToMerchant(ctx context.Context, in *billing.OrderCreateRequest, opts ...client.CallOption) (*grpc.SendWebhookToMerchantResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkTemporaryMock) NotifyWebhookTestResults(ctx context.Context, in *grpc.NotifyWebhookTestResultsRequest, opts ...client.CallOption) (*grpc.EmptyResponseWithStatus, error) {
 	panic("implement me")
 }
