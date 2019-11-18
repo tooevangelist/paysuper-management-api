@@ -145,6 +145,7 @@ const (
 	ErrorFieldRequest = "request"
 
 	InternalErrorTemplate = "internal error"
+	ServiceErrorTemplate = "service error"
 )
 
 var (
