@@ -20,9 +20,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"image"
-	"image/color"
-	"image/png"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -726,22 +723,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
 	assert.Equal(suite.T(), agreementContentType, res.Header().Get(echo.HeaderContentType))
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_MerchantIdIncorrect_Error() {
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Path(common.AuthUserGroupPath + merchantsAgreementDocumentPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorRequestDataInvalid, httpErr.Message)
-}
-
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_BillingServerSystemError() {
 
 	billingService := &billMock.BillingService{}
@@ -750,7 +731,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_BillingSer
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsAgreementDocumentPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -760,7 +740,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_BillingSer
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_BillingServerReturnError() {
@@ -843,192 +823,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_AgreementF
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
 	assert.Equal(suite.T(), common.ErrorAgreementFileNotExist, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_Ok() {
-
-	filePath := os.TempDir() + string(os.PathSeparator) + mock.SomeAgreementName1
-	err := ioutil.WriteFile(filePath, suite.somePDF, 0666)
-	assert.NoError(suite.T(), err)
-
-	res, err := suite.caller.Builder().
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath+merchantsAgreementDocumentPath).
-		ExecFileUpload(suite.T(), nil, common.RequestParameterFile, filePath)
-
-	assert.NoError(suite.T(), err)
-	assert.NotEmpty(suite.T(), res.Body.String())
-
-	fData := &OnboardingFileData{}
-	err = json.Unmarshal(res.Body.Bytes(), fData)
-	assert.NoError(suite.T(), err)
-
-	assert.NotEmpty(suite.T(), fData.Url)
-	assert.NotNil(suite.T(), fData.Metadata)
-	assert.NotEmpty(suite.T(), fData.Metadata.Name)
-	assert.NotEmpty(suite.T(), fData.Metadata.Extension)
-	assert.NotEmpty(suite.T(), fData.Metadata.ContentType)
-	assert.True(suite.T(), fData.Metadata.Size > 0)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_MerchantIdInvalid_Error() {
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + merchantsAgreementDocumentPath).
-		Init(test.ReqInitMultipartForm()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorRequestDataInvalid, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_BillingServerSystemError() {
-
-	billingService := &billMock.BillingService{}
-	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(nil, mock.SomeError)
-	suite.router.dispatch.Services.Billing = billingService
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodPost).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsAgreementDocumentPath).
-		Init(test.ReqInitMultipartForm()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_BillingServerResultError() {
-
-	billingService := &billMock.BillingService{}
-	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(&grpc.GetMerchantResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
-	suite.router.dispatch.Services.Billing = billingService
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodPost).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsAgreementDocumentPath).
-		Init(test.ReqInitMultipartForm()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_NotMultipartForm_Error() {
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodPost).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsAgreementDocumentPath).
-		Init(test.ReqInitMultipartForm()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorNotMultipartForm, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_UploadFileValidationError() {
-	img := image.NewRGBA(image.Rect(0, 0, 100, 50))
-	img.Set(2, 3, color.RGBA{R: 255, G: 0, B: 0, A: 255})
-
-	fPath := os.TempDir() + string(os.PathSeparator) + "out.png"
-	f, err := os.OpenFile(fPath, os.O_WRONLY|os.O_CREATE, 0600)
-	assert.NoError(suite.T(), err)
-
-	defer func() {
-		if err := f.Close(); err != nil {
-			return
-		}
-	}()
-
-	err = png.Encode(f, img)
-	assert.NoError(suite.T(), err)
-
-	_, err = suite.caller.Builder().
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath+merchantsAgreementDocumentPath).
-		ExecFileUpload(suite.T(), nil, common.RequestParameterFile, fPath)
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorMessageAgreementContentType, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_SetMerchantS3AgreementRequest_Error() {
-
-	filePath := os.TempDir() + string(os.PathSeparator) + mock.SomeAgreementName1
-	err := ioutil.WriteFile(filePath, suite.somePDF, 0666)
-	assert.NoError(suite.T(), err)
-
-	billingService := &billMock.BillingService{}
-	billingService.On("SetMerchantS3Agreement", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
-	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
-		Status:  pkg.ResponseStatusOk,
-		Message: &grpc.ResponseErrorMessage{},
-		Item: &billing.Merchant{
-			Id: "ffffffffffffffffffffffff",
-		},
-	}, nil)
-	suite.router.dispatch.Services.Billing = billingService
-
-	_, err = suite.caller.Builder().
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath+merchantsAgreementDocumentPath).
-		ExecFileUpload(suite.T(), nil, common.RequestParameterFile, filePath)
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_UploadAgreementDocument_S3UploadError() {
-
-	filePath := os.TempDir() + string(os.PathSeparator) + mock.SomeAgreementName1
-	err := ioutil.WriteFile(filePath, suite.somePDF, 0666)
-	assert.NoError(suite.T(), err)
-
-	awsManagerMock := &awsWrapperMocks.AwsManagerInterface{}
-	awsManagerMock.On("Upload", mock2.Anything, mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
-	suite.router.awsManager = awsManagerMock
-
-	_, err = suite.caller.Builder().
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath+merchantsAgreementDocumentPath).
-		ExecFileUpload(suite.T(), nil, common.RequestParameterFile, filePath)
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUploadFailed, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_WithoutMerchantId_Ok() {
