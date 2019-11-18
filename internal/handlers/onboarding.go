@@ -13,7 +13,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -34,7 +33,7 @@ const (
 	merchantsIdChangeStatusCompanyPath = "/merchants/:merchant_id/change-status"
 	merchantsNotificationsPath         = "/merchants/:merchant_id/notifications"
 	merchantsIdAgreementPath           = "/merchants/:merchant_id/agreement"
-	merchantsAgreementDocumentPath     = "/merchants/:merchant_id/agreement/document"
+	merchantsAgreementDocumentPath     = "/merchants/agreement/document"
 	merchantsAgreementSignaturePath    = "/merchants/:merchant_id/agreement/signature"
 	merchantsNotificationsIdPath       = "/merchants/:merchant_id/notifications/:notification_id"
 	merchantsNotificationsMarkReadPath = "/merchants/:merchant_id/notifications/:notification_id/mark-as-read"
@@ -100,7 +99,6 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 
 	groups.AuthUser.GET(merchantsIdAgreementPath, h.getAgreementData)
 	groups.AuthUser.GET(merchantsAgreementDocumentPath, h.getAgreementDocument)
-	groups.AuthUser.POST(merchantsAgreementDocumentPath, h.uploadAgreementDocument)
 	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createAgreementSignature)
 
 	groups.SystemUser.POST(merchantsNotificationsPath, h.createNotification)
@@ -353,19 +351,16 @@ func (h *OnboardingRoute) changeAgreement(ctx echo.Context) error {
 }
 
 func (h *OnboardingRoute) getAgreementDocument(ctx echo.Context) error {
-	merchantId := ctx.Param(common.RequestParameterMerchantId)
+	req := &grpc.GetMerchantByRequest{}
 
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	ctxReq := ctx.Request().Context()
-	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
-	res, err := h.dispatch.Services.Billing.GetMerchantBy(ctxReq, req)
+	res, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), req)
 
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetMerchantBy", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetMerchantBy")
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
@@ -377,7 +372,7 @@ func (h *OnboardingRoute) getAgreementDocument(ctx echo.Context) error {
 	}
 
 	filePath := os.TempDir() + string(os.PathSeparator) + res.Item.S3AgreementName
-	_, err = h.awsManager.Download(ctxReq, filePath, &awsWrapper.DownloadInput{FileName: res.Item.S3AgreementName})
+	_, err = h.awsManager.Download(ctx.Request().Context(), filePath, &awsWrapper.DownloadInput{FileName: res.Item.S3AgreementName})
 
 	if err != nil {
 		h.L().Error("AWS api call to download file failed", logger.PairArgs("err", err.Error(), "file_name", res.Item.S3AgreementName))
@@ -386,85 +381,6 @@ func (h *OnboardingRoute) getAgreementDocument(ctx echo.Context) error {
 	}
 
 	return ctx.File(filePath)
-}
-
-func (h *OnboardingRoute) uploadAgreementDocument(ctx echo.Context) error {
-	merchantId := ctx.Param(common.RequestParameterMerchantId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
-	}
-
-	ctxReq := ctx.Request().Context()
-	req := &grpc.GetMerchantByRequest{MerchantId: merchantId}
-	res, err := h.dispatch.Services.Billing.GetMerchantBy(ctxReq, req)
-
-	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetMerchantBy", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-	}
-
-	if res.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(res.Status), res.Message)
-	}
-
-	file, err := ctx.FormFile(common.RequestParameterFile)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorNotMultipartForm)
-	}
-
-	src, err := h.validateUpload(file)
-
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	defer src.Close()
-
-	fileName := fmt.Sprintf(agreementFileMask, res.Item.Id)
-	filePath := os.TempDir() + string(os.PathSeparator) + fileName
-	dst, err := os.Create(filePath)
-
-	if err != nil {
-		h.L().Error("Upload new version of agreement failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-	defer dst.Close()
-
-	_, err = io.Copy(dst, src)
-
-	if err != nil {
-		h.L().Error("Upload new version of agreement failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	_, err = h.awsManager.Upload(ctxReq, &awsWrapper.UploadInput{Body: dst, FileName: fileName})
-
-	if err != nil {
-		h.L().Error("AWS api call to upload file failed", logger.PairArgs("err", err.Error(), "file_name", res.Item.S3AgreementName))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUploadFailed)
-	}
-
-	req1 := &grpc.SetMerchantS3AgreementRequest{MerchantId: merchantId, S3AgreementName: fileName}
-	_, err = h.dispatch.Services.Billing.SetMerchantS3Agreement(ctx.Request().Context(), req1)
-
-	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "SetMerchantS3Agreement", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-	}
-
-	fData, err := h.getAgreementStructure(ctx, merchantId, agreementExtension, agreementContentType, filePath)
-
-	if err != nil {
-		h.L().Error("Get agreement structure failed", logger.PairArgs("err", err.Error(), "merchant_id", merchantId))
-
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorInternal)
-	}
-
-	return ctx.JSON(http.StatusOK, fData)
 }
 
 func (h *OnboardingRoute) getAgreementStructure(
