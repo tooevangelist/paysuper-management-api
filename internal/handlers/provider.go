@@ -68,5 +68,6 @@ func ProviderHandlers(initial config.Initial, srv common.Services, validator *va
 		NewRecurringRoute(hSet, &copyCfg),
 		NewOperatingCompanyRoute(hSet, &copyCfg),
 		NewPaymentMinLimitSystemRoute(hSet, &copyCfg),
+		NewWebHookRoute(hSet, &copyCfg),
 	}, func() {}, nil
 }
