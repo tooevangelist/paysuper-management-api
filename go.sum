@@ -751,6 +751,9 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20191118130954-9ae3be71810f h
 github.com/paysuper/paysuper-billing-server v0.0.0-20191118130954-9ae3be71810f/go.mod h1:3c5/3HJrvOgeSk+CfaSuApoLuRRKn3mdIdkgK+3lm4c=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191118134149-cb8ccfcb43a3 h1:b+46g41oU5iE4ld17g1iPOZV4v6eDKUCct/5EOTXZBA=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191118134149-cb8ccfcb43a3/go.mod h1:ZvxARPtPqXZ+mlZNrpbk5/XztTLF1Mv+n14BPiISMHs=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191119073629-e20c72d4e035/go.mod h1:ZvxARPtPqXZ+mlZNrpbk5/XztTLF1Mv+n14BPiISMHs=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191119084605-a4dc10204b87 h1:77Wkd2HeyN8L8KihgYhbZ6A1MRApGGPt5Ztj61bq/cA=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191119084605-a4dc10204b87/go.mod h1:wp6VGvf/li8zz8RKXk8dK2IVArgD5gnz78Uw8sx0rNU=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d h1:hoMkfdq4qEGOONvxajsZO0Mf6np++pGnrKVxegvplaw=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d/go.mod h1:C+QHdgbjIlAPxHD93/08yi+xWfUgk8maLY8FKFqNzMQ=
 github.com/paysuper/paysuper-database-mongo v0.1.0/go.mod h1:IZu996j//Qoq+uzzCBL5GEYisfF4di/fwedWHlLz7sc=
@@ -782,6 +785,8 @@ github.com/paysuper/paysuper-webhook-notifier v0.0.0-20191118104145-628f70d6ad6a
 github.com/paysuper/paysuper-webhook-notifier v0.0.0-20191118104145-628f70d6ad6a/go.mod h1:Qlb+Mz7i8oSSeJ/t+CZffcC4haNOn9fB9HeWWBeJiJI=
 github.com/paysuper/paysuper-webhook-notifier v0.0.0-20191118130656-224b50046f34 h1:iDJDF5hD0rHpBxugEhiz9HyLDcPjlUEfnczslMrIxMQ=
 github.com/paysuper/paysuper-webhook-notifier v0.0.0-20191118130656-224b50046f34/go.mod h1:Vw+l9M8sX3eJ22BZoixuK0RhxJC6hL5yLnSQIrWjp8c=
+github.com/paysuper/paysuper-webhook-notifier v0.0.0-20191119084505-cfe05dc17508 h1:cFkF+wO0D5OGppZuqb1912kNHA5YjFwz44rlVOM8bO0=
+github.com/paysuper/paysuper-webhook-notifier v0.0.0-20191119084505-cfe05dc17508/go.mod h1:6zhiOKSbc/pJb9m5KMVG8PhCjiWeTaZ/gug8xAlY0s4=
 github.com/paysuper/postmark-sender v0.0.0-20190903075212-a210e35789fc/go.mod h1:uUqo1eEOgjNFl9JaCrkbZNl5MYFMi6i0arXcptMEDUo=
 github.com/paysuper/postmark-sender v0.0.0-20190926173213-1b6244122c49 h1:nUPxqp4LmKgcQzwAUkpzSIMe48cloz53f/zBqoaXV/s=
 github.com/paysuper/postmark-sender v0.0.0-20190926173213-1b6244122c49/go.mod h1:uySKCRnArgTq+mivEN/Gdcxri2lyN2PEOfibHOob4DA=
