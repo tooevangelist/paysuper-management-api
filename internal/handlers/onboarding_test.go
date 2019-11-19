@@ -119,7 +119,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchant_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdPath).
+		Path(common.SystemUserGroupPath + merchantsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -144,7 +144,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchant_BillingServiceUnava
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdPath).
+		Path(common.SystemUserGroupPath + merchantsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -166,7 +166,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchant_LogicError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdPath).
+		Path(common.SystemUserGroupPath + merchantsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 

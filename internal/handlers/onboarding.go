@@ -83,7 +83,7 @@ func NewOnboardingRoute(set common.HandlerSet, initial config.Initial, awsManage
 
 func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.SystemUser.GET(merchantsPath, h.listMerchants)
-	groups.AuthUser.GET(merchantsIdPath, h.getMerchant)
+	groups.SystemUser.GET(merchantsIdPath, h.getMerchant)
 	groups.AuthUser.GET(merchantsUserPath, h.getMerchantByUser)
 
 	groups.AuthUser.PUT(merchantsCompanyPath, h.setMerchantCompany)

@@ -37,7 +37,6 @@ func NewUserProfileRoute(set common.HandlerSet, cfg *common.Config) *UserProfile
 func (h *UserProfileRoute) Route(groups *common.Groups) {
 	groups.AuthProject.GET(userProfilePath, h.getUserProfile)
 	groups.AuthProject.GET(userCommonProfilePath, h.getUserCommonProfile)
-	groups.AuthUser.GET(userCommonProfilePath, h.getUserCommonProfile)
 	groups.SystemUser.GET(userProfilePathId, h.getUserProfile)
 	groups.AuthProject.PATCH(userProfilePath, h.setUserProfile)
 	groups.AuthProject.POST(userProfilePathFeedback, h.createFeedback)
@@ -79,7 +78,6 @@ func (h *UserProfileRoute) getUserProfile(ctx echo.Context) error {
 // @Description Get common user profile
 // @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
 //  https://api.paysuper.online/api/v1/user/profile/common
-//  https://api.paysuper.online/admin/api/v1/user/profile/common
 func (h *UserProfileRoute) getUserCommonProfile(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.CommonUserProfileRequest{UserId: authUser.Id}
