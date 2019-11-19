@@ -96,6 +96,10 @@ func (h *MerchantUsersRoute) sendInvite(ctx echo.Context) error {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "InviteUserMerchant")
 	}
 
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
 	return ctx.JSON(http.StatusOK, res)
 }
 
@@ -110,6 +114,10 @@ func (h *MerchantUsersRoute) resendInvite(ctx echo.Context) error {
 
 	if err != nil {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ResendInviteMerchant")
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -139,6 +147,10 @@ func (h *MerchantUsersRoute) deleteUser(ctx echo.Context) error {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "DeleteMerchantUser")
 	}
 
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
 	return ctx.JSON(http.StatusOK, res)
 }
 
@@ -153,6 +165,10 @@ func (h *MerchantUsersRoute) getUser(ctx echo.Context) error {
 
 	if err != nil {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetMerchantUserRole")
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
 	return ctx.JSON(http.StatusOK, res)

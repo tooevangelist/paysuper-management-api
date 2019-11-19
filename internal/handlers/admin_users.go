@@ -90,6 +90,10 @@ func (h *AdminUsersRoute) sendInvite(ctx echo.Context) error {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "InviteUserAdmin")
 	}
 
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
 	return ctx.JSON(http.StatusOK, res)
 }
 
@@ -104,6 +108,10 @@ func (h *AdminUsersRoute) resendInvite(ctx echo.Context) error {
 
 	if err != nil {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ResendInviteAdmin")
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
@@ -133,6 +141,10 @@ func (h *AdminUsersRoute) deleteUser(ctx echo.Context) error {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "DeleteAdminUser")
 	}
 
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
 	return ctx.JSON(http.StatusOK, res)
 }
 
@@ -147,6 +159,10 @@ func (h *AdminUsersRoute) getUser(ctx echo.Context) error {
 
 	if err != nil {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetAdminUserRole")
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
 	return ctx.JSON(http.StatusOK, res)
