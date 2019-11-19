@@ -873,7 +873,39 @@ definitions:
             type: boolean
       virtual_currency:
         $ref: '#/definitions/model.VirtualCurrency'
+      webhook_mode:
+        type: string
+        enum:
+          - default
+          - pre_approval
+      webhook_testing:
+        $ref: '#/definitions/model.ProjectWebHookTesting'
     type: object
+
+  model.ProjectWebHookTesting:
+    type: object
+    properties:
+      products:
+        $ref: '#/definitions/model.ProductsTesting'
+      virtual_currency:
+        $ref: '#/definitions/model.ProductsTesting'
+      keys:
+        type: object
+        properties:
+          is_passed:
+            type: boolean
+
+  model.ProductsTesting:
+    type: object
+    properties:
+      non_existing_user:
+        type: boolean
+      existing_user:
+        type: boolean
+      correct_payment:
+        type: boolean
+      incorrect_payment:
+        type: boolean
 
   model.VirtualCurrency:
     type: object
