@@ -50,7 +50,7 @@ func (suite *PriceGroupTestSuite) TestPriceGroup_getPriceGroupByCountry_BindErro
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupCountryPath).
+		Path(priceGroupCountryPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -75,7 +75,7 @@ func (suite *PriceGroupTestSuite) TestPriceGroup_getPriceGroupByCountry_Error_Bi
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupCountryPath).
+		Path(priceGroupCountryPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -95,7 +95,7 @@ func (suite *PriceGroupTestSuite) TestPriceGroup_getPriceGroupByCountry_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupCountryPath).
+		Path(priceGroupCountryPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -111,7 +111,7 @@ func (suite *PriceGroupTestSuite) TestPriceGroup_getCurrencyList_Error_BillingSe
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupCurrenciesPath).
+		Path(priceGroupCurrenciesPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -129,7 +129,7 @@ func (suite *PriceGroupTestSuite) TestPriceGroup_getCurrencyList_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupCurrenciesPath).
+		Path(priceGroupCurrenciesPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -141,7 +141,7 @@ func (suite *PriceGroupTestSuite) TestPriceGroup_getCurrencyByRegion_BindError_R
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupRegionPath).
+		Path(priceGroupRegionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -166,7 +166,7 @@ func (suite *PriceGroupTestSuite) TestPriceGroup_getCurrencyByRegion_Error_Billi
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupRegionPath).
+		Path(priceGroupRegionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -186,7 +186,7 @@ func (suite *PriceGroupTestSuite) TestPriceGroup_getCurrencyByRegion_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + priceGroupRegionPath).
+		Path(priceGroupRegionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
