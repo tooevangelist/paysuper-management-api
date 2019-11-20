@@ -3556,6 +3556,9 @@ definitions:
       vat_number:
         type: string
         description: vat_number
+      email:
+        type: string
+        description: company email
       address:
         type: string
         description: address
