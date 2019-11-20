@@ -33,6 +33,7 @@ const (
 	merchantsIdNotificationsPath       = "/merchants/:merchant_id/notifications"
 	merchantsAgreementPath             = "/merchants/agreement"
 	merchantsAgreementDocumentPath     = "/merchants/agreement/document"
+	merchantsIdAgreementDocumentPath   = "/merchants/:merchant_id/agreement/document"
 	merchantsAgreementSignaturePath    = "/merchants/agreement/signature"
 	merchantsNotificationsIdPath       = "/merchants/notifications/:notification_id"
 	merchantsNotificationsMarkReadPath = "/merchants/notifications/:notification_id/mark-as-read"
@@ -97,6 +98,7 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 
 	groups.AuthUser.GET(merchantsAgreementPath, h.getAgreementData)
 	groups.AuthUser.GET(merchantsAgreementDocumentPath, h.getAgreementDocument)
+	groups.SystemUser.GET(merchantsIdAgreementDocumentPath, h.getAgreementDocument)
 	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createAgreementSignature)
 
 	groups.SystemUser.POST(merchantsIdNotificationsPath, h.createNotification)
