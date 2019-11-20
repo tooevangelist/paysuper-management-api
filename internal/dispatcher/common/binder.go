@@ -182,22 +182,6 @@ type ProductsGetProductsListBinder struct {
 type ProductsCreateProductBinder struct{}
 type ProductsUpdateProductBinder struct{}
 
-// ChangeMerchantDataRequestBinder
-type ChangeMerchantDataRequestBinder struct {
-	dispatch HandlerSet
-	provider.LMT
-	cfg Config
-}
-
-// NewChangeMerchantDataRequestBinder
-func NewChangeMerchantDataRequestBinder(set HandlerSet, cfg Config) *ChangeMerchantDataRequestBinder {
-	return &ChangeMerchantDataRequestBinder{
-		dispatch: set,
-		LMT:      &set.AwareSet,
-		cfg:      cfg,
-	}
-}
-
 // ChangeProjectRequestBinder
 type ChangeProjectRequestBinder struct {
 	dispatch HandlerSet
@@ -467,59 +451,6 @@ func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) erro
 
 	structure := i.(*grpc.Product)
 	structure.Id = id
-
-	return nil
-}
-
-// Bind
-func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) error {
-
-	// TODO: to remove  a whole method, need make check in billing
-
-	req := make(map[string]interface{})
-
-	if err := BinderDefault.Bind(&req, ctx); err != nil {
-		return err
-	}
-
-	merchantId := ctx.Param(RequestParameterMerchantId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return ErrorIncorrectMerchantId
-	}
-
-	mReq := &grpc.GetMerchantByRequest{MerchantId: merchantId}
-	mRsp, err := b.dispatch.Services.Billing.GetMerchantBy(context.Background(), mReq)
-
-	if err != nil {
-		b.L().Error(`Call billing server method "GetMerchantBy" failed`, logger.Args("error", err.Error(), "request", mReq))
-		return ErrorUnknown
-	}
-
-	if mRsp.Status != pkg.ResponseStatusOk {
-		return mRsp.Message
-	}
-
-	structure := i.(*grpc.ChangeMerchantDataRequest)
-	structure.MerchantId = merchantId
-	structure.HasMerchantSignature = mRsp.Item.HasMerchantSignature
-	structure.HasPspSignature = mRsp.Item.HasPspSignature
-
-	if v, ok := req[RequestParameterHasMerchantSignature]; ok {
-		if tv, ok := v.(bool); !ok {
-			return ErrorMessageHasMerchantSignatureIncorrectType
-		} else {
-			structure.HasMerchantSignature = tv
-		}
-	}
-
-	if v, ok := req[RequestParameterHasPspSignature]; ok {
-		if tv, ok := v.(bool); !ok {
-			return ErrorMessageHasPspSignatureIncorrectType
-		} else {
-			structure.HasPspSignature = tv
-		}
-	}
 
 	return nil
 }

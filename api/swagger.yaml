@@ -5137,7 +5137,7 @@ paths:
       tags:
         - Pricing
 
-  "/admin/api/v1/merchants":
+  "/system/api/v1/merchants":
     get:
       summary: Get list of merchants
       tags:
@@ -5230,7 +5230,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}":
+  "/system/api/v1/merchants/{id}":
     get:
       summary: Get merchant by identifier
       tags:
@@ -5271,6 +5271,8 @@ paths:
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants":
     patch:
       summary: Change merchant information
       tags:
@@ -5368,7 +5370,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/manual_payout/enable":
+  "/admin/api/v1/merchants/manual_payout/enable":
     put:
       summary: Enable merchant manual payouts
       tags:
@@ -5378,12 +5380,6 @@ paths:
       produces:
         - application/json
       description: Enable merchant manual payouts
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          type: string
-          required: true
       responses:
         "200":
           description: OK
@@ -5410,7 +5406,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/manual_payout/disable":
+  "/admin/api/v1/merchants/manual_payout/disable":
     put:
       summary: Disable merchant manual payouts
       tags:
@@ -5420,12 +5416,6 @@ paths:
       produces:
         - application/json
       description: Disable merchant manual payouts
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          type: string
-          required: true
       responses:
         "200":
           description: OK
@@ -5452,7 +5442,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{merchant_id}/notifications":
+  "/admin/api/v1/merchants/notifications":
     get:
       summary: Get list of notifications to merchant
       tags:
@@ -5463,11 +5453,6 @@ paths:
         - application/json
       description: Get list of notifications to merchant
       parameters:
-        - description: merchant identifier
-          in: path
-          name: merchant_id
-          type: string
-          required: true
         - description: user who sent notification
           in: query
           name: user
@@ -5511,6 +5496,8 @@ paths:
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
+
+  "/system/api/v1/merchants/{merchant_id}/notifications":
     post:
       summary: Create new notification
       tags:
@@ -5555,7 +5542,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{merchant_id}/notifications/{notification_id}":
+  "/admin/api/v1/merchants/notifications/{notification_id}":
     get:
       summary: Get notification by identifier
       tags:
@@ -5566,11 +5553,6 @@ paths:
         - application/json
       description: Get notification by identifier
       parameters:
-        - description: merchant identifier
-          in: path
-          name: merchant_id
-          type: string
-          required: true
         - description: notification identifier
           in: path
           name: notification_id
@@ -5602,7 +5584,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{merchant_id}/notifications/{notification_id}/mark-as-read":
+  "/admin/api/v1/merchants/notifications/{notification_id}/mark-as-read":
     put:
       summary: Mark notification as readed
       tags:
@@ -5613,11 +5595,6 @@ paths:
         - application/json
       description: Mark notification as readed
       parameters:
-        - description: merchant identifier
-          in: path
-          name: merchant_id
-          type: string
-          required: true
         - description: notification identifier
           in: path
           name: notification_id
@@ -5973,7 +5950,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/agreement":
+  "/admin/api/v1/merchants/agreement":
     get:
       summary: Generate agreement
       tags:
@@ -5983,12 +5960,6 @@ paths:
       produces:
         - application/json
       description: Generate agreement for merchant and return data about printable agreement
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          type: string
-          required: true
       responses:
         "200":
           description: OK
@@ -6386,7 +6357,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/agreement/signature":
+  "/admin/api/v1/merchants/agreement/signature":
     put:
       summary: Get data to sign agreement
       tags:
@@ -6397,11 +6368,6 @@ paths:
         - application/json
       description: Get data to sign license agreement with hellosign api
       parameters:
-        - description: merchant identifier for which creating signature request
-          in: path
-          name: id
-          required: true
-          type: string
         - description: body
           in: body
           name: data
@@ -6479,7 +6445,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/company":
+  "/system/api/v1/merchants/{id}/company":
     put:
       summary: Set company information
       tags:
@@ -6572,7 +6538,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/contacts":
+  "/system/api/v1/merchants/{id}/contacts":
     put:
       summary: Set contacts information
       tags:
@@ -6665,7 +6631,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/banking":
+  "/system/api/v1/merchants/{id}/banking":
     put:
       summary: Set banking information
       tags:
@@ -6778,7 +6744,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/tariffs":
+  "/system/api/v1/merchant/{id}/tariffs":
     post:
       summary: Set tariff rates to merchant
       tags:
@@ -6825,7 +6791,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/status":
+  "/admin/api/v1/merchants/status":
     get:
       summary: Get data fill status
       tags:
@@ -6835,12 +6801,6 @@ paths:
       produces:
         - application/json
       description: Get data fill status
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          required: true
-          type: string
       responses:
         "200":
           description: OK
@@ -10055,7 +10015,7 @@ paths:
       tags:
         - Saved Card
 
-  "/admin/api/v1/merchants/{id}/set_operating_company":
+  "/system/api/v1/merchants/{id}/set_operating_company":
     post:
       summary: Set merchant operating company
       tags:

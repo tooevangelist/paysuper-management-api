@@ -287,7 +287,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.SystemUserGroupPath + merchantsNotificationsPath).
+		Path(common.SystemUserGroupPath + merchantsIdNotificationsPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -311,7 +311,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_ValidationEr
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.SystemUserGroupPath + merchantsNotificationsPath).
+		Path(common.SystemUserGroupPath + merchantsIdNotificationsPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -343,7 +343,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_BillingServe
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.SystemUserGroupPath + merchantsNotificationsPath).
+		Path(common.SystemUserGroupPath + merchantsIdNotificationsPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -360,7 +360,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Params(":"+common.RequestParameterNotificationId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + merchantsNotificationsIdPath).
 		Init(test.ReqInitJSON()).
@@ -375,7 +374,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_EmptyId_Error()
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsNotificationsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -385,7 +383,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_EmptyId_Error()
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorIncorrectNotificationId, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorValidationFailed, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_BillingServerUnavailable_Error() {
@@ -397,7 +395,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_BillingServerUn
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Params(":"+common.RequestParameterNotificationId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + merchantsNotificationsIdPath).
 		Init(test.ReqInitJSON()).
@@ -407,8 +404,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_BillingServerUn
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorNotificationNotFound, httpErr.Message)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_Ok() {
@@ -418,7 +415,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		SetQueryParams(q).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsNotificationsPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -436,7 +432,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BindError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		SetQueryParams(q).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsNotificationsPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -456,7 +451,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_ValidationErr
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		SetQueryParams(q).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsNotificationsPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -480,7 +474,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListNotifications_BillingServer
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		SetQueryParams(q).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsNotificationsPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -497,7 +490,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Params(":"+common.RequestParameterNotificationId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + merchantsNotificationsMarkReadPath).
 		Init(test.ReqInitJSON()).
@@ -513,7 +505,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_EmptyId_
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsNotificationsMarkReadPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -523,7 +514,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_EmptyId_
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorIncorrectNotificationId, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorValidationFailed, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_BillingServer_Error() {
@@ -534,7 +525,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_BillingS
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Params(":"+common.RequestParameterNotificationId, bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + merchantsNotificationsMarkReadPath).
 		Init(test.ReqInitJSON()).
@@ -544,8 +534,8 @@ func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_BillingS
 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeMerchantStatus_BindError() {
@@ -571,7 +561,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_BindError() 
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.SystemUserGroupPath + merchantsNotificationsPath).
+		Path(common.SystemUserGroupPath + merchantsIdNotificationsPath).
 		BodyString(data).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -584,48 +574,13 @@ func (suite *OnboardingTestSuite) TestOnboarding_CreateNotification_BindError() 
 	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_GetNotification_IncorrectMerchant_Error() {
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterNotificationId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + merchantsNotificationsIdPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorRequestDataInvalid, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_MarkAsReadNotification_IncorrectMerchant_Error() {
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodPut).
-		Params(":"+common.RequestParameterNotificationId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + merchantsNotificationsMarkReadPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorRequestDataInvalid, httpErr.Message)
-}
-
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_Ok() {
 
 	body := `{"has_merchant_signature": true, "agreement_sent_via_mail": true}`
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdPath).
+		Path(common.AuthUserGroupPath + merchantsPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -636,12 +591,13 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_Ok() {
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BindError() {
+	body := `{"has_merchant_signature": "test", "agreement_sent_via_mail": 123}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdPath).
+		Path(common.AuthUserGroupPath + merchantsPath).
 		Init(test.ReqInitJSON()).
+		BodyString(body).
 		Exec(suite.T())
 
 	assert.Error(suite.T(), err)
@@ -657,19 +613,11 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerSy
 
 	billingService := &billMock.BillingService{}
 	billingService.On("ChangeMerchantData", mock2.Anything, mock2.Anything).Return(nil, errors.New("some error"))
-	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).Return(&grpc.GetMerchantResponse{
-		Status:  pkg.ResponseStatusOk,
-		Message: &grpc.ResponseErrorMessage{},
-		Item: &billing.Merchant{
-			Id: "ffffffffffffffffffffffff",
-		},
-	}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdPath).
+		Path(common.AuthUserGroupPath + merchantsPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -679,33 +627,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerSy
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_ChangeAgreement_BillingServerReturnError() {
-	body := `{"has_merchant_signature": true, "agreement_sent_via_mail": true}`
-
-	billingService := &billMock.BillingService{}
-	billingService.On("GetMerchantBy", mock2.Anything, mock2.Anything).
-		Return(nil, mock.SomeError)
-	billingService.On("ChangeMerchantData", mock2.Anything, mock2.Anything).
-		Return(&grpc.ChangeMerchantDataResponse{Status: pkg.ResponseStatusBadData, Message: mock.SomeError}, nil)
-	suite.router.dispatch.Services.Billing = billingService
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodPatch).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdPath).
-		Init(test.ReqInitJSON()).
-		BodyString(body).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementDocument_Ok() {
@@ -876,7 +798,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantCompany_WithMerchant
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdCompanyPath).
+		Path(common.SystemUserGroupPath + merchantsIdCompanyPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1238,7 +1160,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantContacts_WithMerchan
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdContactsPath).
+		Path(common.SystemUserGroupPath + merchantsIdContactsPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1594,7 +1516,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetMerchantBanking_WithMerchant
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdBankingPath).
+		Path(common.SystemUserGroupPath + merchantsIdBankingPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -1836,30 +1758,13 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdStatusCompanyPath).
+		Path(common.AuthUserGroupPath + merchantsStatusCompanyPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), http.StatusOK, res.Code)
 	assert.NotEmpty(suite.T(), res.Body.String())
-}
-
-func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_ValidateError() {
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "not_hex_string").
-		Path(common.AuthUserGroupPath + merchantsIdStatusCompanyPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServerSystemError() {
@@ -1870,8 +1775,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServer
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdStatusCompanyPath).
+		Path(common.AuthUserGroupPath + merchantsStatusCompanyPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -1880,7 +1784,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServer
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Equal(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServerResultError() {
@@ -1892,8 +1796,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetMerchantStatus_BillingServer
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdStatusCompanyPath).
+		Path(common.AuthUserGroupPath + merchantsStatusCompanyPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -1914,7 +1817,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsAgreementSignaturePath).
 		Init(test.ReqInitJSON()).
 		BodyString(b).
@@ -1926,12 +1828,13 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_Ok() {
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_ValidateError() {
+	b := `{"signer_type": 3}`
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, "incorrect_merchant_id").
 		Path(common.AuthUserGroupPath + merchantsAgreementSignaturePath).
 		Init(test.ReqInitJSON()).
+		BodyString(b).
 		Exec(suite.T())
 
 	assert.Error(suite.T(), err)
@@ -1950,7 +1853,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsAgreementSignaturePath).
 		Init(test.ReqInitJSON()).
 		BodyString(b).
@@ -1961,7 +1863,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Regexp(suite.T(), common.ErrorUnknown, httpErr.Message)
+	assert.Regexp(suite.T(), common.ErrorInternal, httpErr.Message)
 }
 
 func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingServerResultError() {
@@ -1974,7 +1876,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementSignature_BillingSe
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsAgreementSignaturePath).
 		Init(test.ReqInitJSON()).
 		BodyString(b).
@@ -2111,7 +2012,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdTariffsPath).
+		Path(common.SystemUserGroupPath + merchantsIdTariffsPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -2127,7 +2028,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BindError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdTariffsPath).
+		Path(common.SystemUserGroupPath + merchantsIdTariffsPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -2146,7 +2047,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_ValidationError(
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdTariffsPath).
+		Path(common.SystemUserGroupPath + merchantsIdTariffsPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -2173,7 +2074,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerErr
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdTariffsPath).
+		Path(common.SystemUserGroupPath + merchantsIdTariffsPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -2197,7 +2098,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetTariffRates_BillingServerRes
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdTariffsPath).
+		Path(common.SystemUserGroupPath + merchantsIdTariffsPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -2224,8 +2125,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementData_Ok() {
 
 	rsp, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
-		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
+		Path(common.AuthUserGroupPath + merchantsAgreementPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -2245,22 +2145,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_GetAgreementData_Ok() {
 	assert.True(suite.T(), data.Metadata.Size > 0)
 }
 
-func (suite *OnboardingTestSuite) TestOnboarding_GenerateAgreement_MerchantIdInvalid_Error() {
-	_, err := suite.caller.Builder().
-		Method(http.MethodGet).
-		Params(":"+common.RequestParameterMerchantId, "").
-		Path(common.AuthUserGroupPath + merchantsIdAgreementPath).
-		Init(test.ReqInitJSON()).
-		Exec(suite.T())
-
-	assert.Error(suite.T(), err)
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusBadRequest, httpErr.Code)
-	assert.Equal(suite.T(), common.ErrorRequestParamsIncorrect, httpErr.Message)
-}
-
 func (suite *OnboardingTestSuite) TestOnboarding_enableMerchantManualPayout_Ok() {
 	billingService := &billingMocks.BillingService{}
 	billingService.
@@ -2270,7 +2154,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_enableMerchantManualPayout_Ok()
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsIdManualPayoutEnablePath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -2293,7 +2176,6 @@ func (suite *OnboardingTestSuite) TestOnboarding_disableMerchantManualPayout_Ok(
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterMerchantId, "ffffffffffffffffffffffff").
 		Path(common.AuthUserGroupPath + merchantsIdManualPayoutDisablePath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -2326,7 +2208,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_SetOperatingCompany_Ok() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterMerchantId, mock.SomeMerchantId1).
-		Path(common.AuthUserGroupPath + merchantsIdSetOperatingCompanyPath).
+		Path(common.SystemUserGroupPath + merchantsIdSetOperatingCompanyPath).
 		Init(customInit).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
