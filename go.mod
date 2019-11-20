@@ -16,10 +16,12 @@ require (
 	github.com/google/wire v0.3.0
 	github.com/gurukami/typ/v2 v2.0.1
 	github.com/labstack/echo/v4 v4.1.6
+	github.com/mattn/go-colorable v0.1.4 // indirect
+	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/micro/go-micro v1.8.0
 	github.com/micro/go-plugins v1.2.0
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191119091147-804121c4b9f1
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191120105109-d5998e88e328
 	github.com/paysuper/paysuper-recurring-repository v1.0.126
 	github.com/paysuper/paysuper-reporter v0.0.0-20191113111020-e3a5369c6d6a
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
