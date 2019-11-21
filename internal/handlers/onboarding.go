@@ -104,6 +104,7 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createAgreementSignature)
 
 	groups.SystemUser.POST(merchantsIdNotificationsPath, h.createNotification)
+	groups.SystemUser.GET(merchantsIdNotificationsPath, h.listNotifications)
 	groups.AuthUser.GET(merchantsNotificationsIdPath, h.getNotification)
 	groups.AuthUser.GET(merchantsNotificationsPath, h.listNotifications)
 	groups.AuthUser.PUT(merchantsNotificationsMarkReadPath, h.markAsReadNotification)
