@@ -185,14 +185,14 @@ func (h *OrderRoute) recreateOrder(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
 
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
 	order := res.Item
 	response := &CreateOrderJsonProjectResponse{
 		Id:             order.Uuid,
 		PaymentFormUrl: h.cfg.OrderInlineFormUrlMask + "?order_id=" + order.Uuid,
-	}
-
-	if res.Status != http.StatusOK {
-		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
 	return ctx.JSON(http.StatusOK, response)
