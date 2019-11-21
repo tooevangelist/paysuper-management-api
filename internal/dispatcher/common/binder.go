@@ -491,7 +491,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	pReq := &grpc.GetProjectRequest{ProjectId: projectId}
 	pRsp, err := b.dispatch.Services.Billing.GetProject(context.Background(), pReq)
-
+	b.L().Error(`Get project for update`, logger.Args("projectId", projectId, "pRsp", pRsp))
 	if err != nil {
 		b.L().Error(`Call billing server method "GetProject" failed`, logger.Args("error", err.Error(), "request", pReq))
 		return err
