@@ -107,6 +107,7 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.AuthUser.PUT(merchantsNotificationsMarkReadPath, h.markAsReadNotification)
 
 	groups.AuthUser.GET(merchantsTariffsPath, h.getTariffRates)
+	groups.AuthUser.POST(merchantsTariffsPath, h.setTariffRates)
 	groups.SystemUser.POST(merchantsIdTariffsPath, h.setTariffRates)
 
 	groups.AuthUser.PUT(merchantsIdManualPayoutEnablePath, h.enableMerchantManualPayout)
