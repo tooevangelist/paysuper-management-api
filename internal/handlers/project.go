@@ -76,6 +76,7 @@ func (h *ProjectRoute) updateProject(ctx echo.Context) error {
 	binder := common.NewChangeProjectRequestBinder(h.dispatch, h.cfg)
 
 	if err := binder.Bind(req, ctx); err != nil {
+		h.L().Error(common.ErrorRequestParamsIncorrect.Message, logger.WithFields(logger.Fields{"err": err.Error()}))
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
