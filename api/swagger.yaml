@@ -10148,7 +10148,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/operating_company":
+  "/system/api/v1/operating_company":
     get:
       consumes:
         - application/json
@@ -10214,7 +10214,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/operating_company/{id}":
+  "/system/api/v1/operating_company/{id}":
     get:
       consumes:
         - application/json
