@@ -38,6 +38,7 @@ const (
 	paymentCostsMoneyBackMerchantAllPath = "/payment_costs/money_back/merchant/:id/all"
 	paymentCostsMoneyBackSystemPath      = "/payment_costs/money_back/system"
 	paymentCostsMoneyBackSystemIdPath    = "/payment_costs/money_back/system/:id"
+	paymentCostsMoneyBackMerchantIdsPath = "/payment_costs/money_back/merchant/:merchant_id/:rate_id"
 )
 
 func (h *PaymentCostRoute) Route(groups *common.Groups) {
@@ -64,7 +65,7 @@ func (h *PaymentCostRoute) Route(groups *common.Groups) {
 	groups.AuthUser.PUT(paymentCostsChannelSystemIdPath, h.setPaymentChannelCostSystem)
 	groups.AuthUser.PUT(paymentCostsChannelMerchantIdsPath, h.setPaymentChannelCostMerchant)
 	groups.AuthUser.PUT(paymentCostsMoneyBackSystemIdPath, h.setMoneyBackCostSystem)
-	groups.AuthUser.PUT(paymentCostsChannelMerchantIdsPath, h.setMoneyBackCostMerchant)
+	groups.AuthUser.PUT(paymentCostsMoneyBackMerchantIdsPath, h.setMoneyBackCostMerchant)
 }
 
 // @Description Get system costs for payments operations

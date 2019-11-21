@@ -107,6 +107,9 @@ func ProviderValidators(v *validators.ValidatorSet) (validate *validator.Validat
 	if err = validate.RegisterValidation("iban", v.IBANValidator); err != nil {
 		return
 	}
+	if err = validate.RegisterValidation("locale", v.UserLocaleValidator); err != nil {
+		return
+	}
 	return validate, func() {}, nil
 }
 
