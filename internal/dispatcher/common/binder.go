@@ -470,7 +470,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	projectReq := &billing.Project{}
 	if err := ctx.Bind(projectReq); err != nil {
-		return ErrorRequestParamsIncorrect
+		return err
 	}
 
 	// Restore the io.ReadCloser to its original state
@@ -480,7 +480,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	err := db.Bind(&req, ctx)
 
 	if err != nil {
-		return ErrorRequestParamsIncorrect
+		return err
 	}
 
 	projectId := ctx.Param(RequestParameterProjectId)
@@ -494,7 +494,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if err != nil {
 		b.L().Error(`Call billing server method "GetProject" failed`, logger.Args("error", err.Error(), "request", pReq))
-		return ErrorUnknown
+		return err
 	}
 
 	if pRsp.Status != pkg.ResponseStatusOk {
