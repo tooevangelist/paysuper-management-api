@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-const testMerchantWebhook = "/webhook/testing"
+const testMerchantWebhook = "/projects/:id/webhook/testing"
 
 type WebHookRoute struct {
 	dispatch common.HandlerSet
