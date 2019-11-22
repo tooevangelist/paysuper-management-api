@@ -491,7 +491,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 		return ErrorIncorrectProjectId
 	}
 	b.L().Error("[update project] project id", logger.WithFields(logger.Fields{"project id": projectId}))
-	pReq := &grpc.GetProjectRequest{ProjectId: projectId}
+	pReq := &grpc.GetProjectRequest{ProjectId: projectId, MerchantId: projectReq.MerchantId}
 	pRsp, err := b.dispatch.Services.Billing.GetProject(context.Background(), pReq)
 
 	if err != nil {
