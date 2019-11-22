@@ -3580,6 +3580,9 @@ definitions:
       vat_number:
         type: string
         description: vat_number
+      email:
+        type: string
+        description: company email
       address:
         type: string
         description: address
@@ -4453,6 +4456,39 @@ paths:
       summary: Check sku+project unique
       tags:
         - Project
+
+  /order/recreate:
+    post:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Recreate a payment order use order uuid for old order
+      parameters:
+        - description: product method properties
+          in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              order_id:
+                type: string
+      responses:
+        "200":
+          description: Object which contain data to render payment form
+          schema:
+            $ref: '#/definitions/model.JsonOrderCreateResponse'
+        "400":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Create a payment method for payment system
+      tags:
+        - Payment Method
 
   /order/create:
     get:
@@ -10280,7 +10316,7 @@ paths:
       tags:
         - Operating company
       consumes:
-        - application/x-www-form-urlencoded
+        - application/json
       produces:
         - application/json
       description: Add new operating company
@@ -10352,7 +10388,7 @@ paths:
       tags:
         - Operating company
       consumes:
-        - application/x-www-form-urlencoded
+        - application/json
       produces:
         - application/json
       description: Add new operating company

@@ -15,6 +15,10 @@ import (
 
 type BillingServerOkMock struct{}
 
+func (s *BillingServerOkMock) OrderReCreateProcess(ctx context.Context, in *grpc.OrderReCreateProcessRequest, opts ...client.CallOption) (*grpc.OrderCreateProcessResponse, error) {
+	panic("implement me")
+}
+
 func NewBillingServerOkMock() grpc.BillingService {
 	return &BillingServerOkMock{}
 }

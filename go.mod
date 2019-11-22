@@ -45,7 +45,6 @@ replace (
 	github.com/lucas-clemente/quic-go => github.com/lucas-clemente/quic-go v0.12.0
 	github.com/marten-seemann/qtls => github.com/marten-seemann/qtls v0.3.2
 	golang.org/x/sys => golang.org/x/sys v0.0.0-20190927073244-c990c680b611
-	gopkg.in/DATA-DOG/go-sqlmock.v1 => github.com/DATA-DOG/go-sqlmock v1.3.3
 	gopkg.in/urfave/cli.v1 => github.com/urfave/cli v1.21.0
 	sourcegraph.com/sourcegraph/go-diff => github.com/sourcegraph/go-diff v0.5.1
 )
