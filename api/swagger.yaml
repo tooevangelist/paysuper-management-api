@@ -9512,7 +9512,7 @@ paths:
       tags:
         - Operating company
       consumes:
-        - application/x-www-form-urlencoded
+        - application/json
       produces:
         - application/json
       description: Add new operating company
@@ -9584,7 +9584,7 @@ paths:
       tags:
         - Operating company
       consumes:
-        - application/x-www-form-urlencoded
+        - application/json
       produces:
         - application/json
       description: Add new operating company
