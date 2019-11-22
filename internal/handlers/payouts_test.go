@@ -83,7 +83,13 @@ func (suite *PayoutDocumentsTestSuite) SetupTest() {
 	srv := common.Services{
 		Billing: billingService,
 	}
+	user := &common.AuthUser{
+		Id:    "ffffffffffffffffffffffff",
+		Email: "test@unit.test",
+		MerchantId: "ffffffffffffffffffffffff",
+	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewPayoutDocumentsRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
@@ -238,7 +244,7 @@ func (suite *PayoutDocumentsTestSuite) TestPayoutDocuments_Ok_updatePayoutDocume
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthUserGroupPath + payoutsIdPath).
+		Path(common.SystemUserGroupPath + payoutsIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
 		Exec(suite.T())

@@ -16,6 +16,7 @@ import (
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/validators"
+	"github.com/paysuper/paysuper-management-api/pkg/micro"
 	"gopkg.in/go-playground/validator.v9"
 	"os"
 )
@@ -176,7 +177,7 @@ func BuildDispatcher(ctx context.Context, settings config.Settings, srv common.S
 		cleanup()
 		return nil, nil, err
 	}
-	dispatcherDispatcher, cleanup8, err := dispatcher.ProviderDispatcher(ctx, awareSet, appSet, dispatcherConfig, commonConfig)
+	microConfig, cleanup8, err := micro.CfgTest()
 	if err != nil {
 		cleanup7()
 		cleanup6()
@@ -187,7 +188,34 @@ func BuildDispatcher(ctx context.Context, settings config.Settings, srv common.S
 		cleanup()
 		return nil, nil, err
 	}
+	microMicro, cleanup9, err := micro.ProviderTest(ctx, awareSet, microConfig)
+	if err != nil {
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	dispatcherDispatcher, cleanup10, err := dispatcher.ProviderDispatcher(ctx, awareSet, appSet, dispatcherConfig, commonConfig, microMicro)
+	if err != nil {
+		cleanup9()
+		cleanup8()
+		cleanup7()
+		cleanup6()
+		cleanup5()
+		cleanup4()
+		cleanup3()
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return dispatcherDispatcher, func() {
+		cleanup10()
+		cleanup9()
 		cleanup8()
 		cleanup7()
 		cleanup6()

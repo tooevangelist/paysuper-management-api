@@ -27,5 +27,6 @@ services:
       AWS_REGION_REPORTER: "unknown"
       AWS_BUCKET_REPORTER: "unknown"
       PAYMENT_FORM_JS_LIBRARY_URL: "unknown"
+      ORDER_INLINE_FORM_URL_MASK: "unknown"
 volumes:
   payone-mongo:

@@ -5,6 +5,7 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
+	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 
 const (
 	userProfilePath             = "/user/profile"
+	userCommonProfilePath       = "/user/profile/common"
 	userProfilePathId           = "/user/profile/:id"
 	userProfilePathFeedback     = "/user/feedback"
 	userProfileConfirmEmailPath = "/user/confirm_email"
@@ -33,16 +35,17 @@ func NewUserProfileRoute(set common.HandlerSet, cfg *common.Config) *UserProfile
 }
 
 func (h *UserProfileRoute) Route(groups *common.Groups) {
-	groups.AuthUser.GET(userProfilePath, h.getUserProfile)
-	groups.AuthUser.GET(userProfilePathId, h.getUserProfile)
-	groups.AuthUser.PATCH(userProfilePath, h.setUserProfile)
-	groups.AuthUser.POST(userProfilePathFeedback, h.createFeedback)
-	groups.AuthProject.PUT(userProfileConfirmEmailPath, h.confirmEmail)
+	groups.AuthProject.GET(userProfilePath, h.getUserProfile)
+	groups.AuthProject.GET(userCommonProfilePath, h.getUserCommonProfile)
+	groups.SystemUser.GET(userProfilePathId, h.getUserProfile)
+	groups.AuthProject.PATCH(userProfilePath, h.setUserProfile)
+	groups.AuthProject.POST(userProfilePathFeedback, h.createFeedback)
+	groups.Common.PUT(userProfileConfirmEmailPath, h.confirmEmail)
 }
 
 // @Description Get user profile
 // @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
-//  https://api.paysuper.online/admin/api/v1/user/profile
+//  https://api.paysuper.online/api/v1/user/profile
 //
 // @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
 //  https://api.paysuper.online/admin/api/v1/user/profile/ffffffffffffffffffffffff
@@ -70,6 +73,30 @@ func (h *UserProfileRoute) getUserProfile(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res.Item)
+}
+
+// @Description Get common user profile
+// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
+//  https://api.paysuper.online/api/v1/user/profile/common
+func (h *UserProfileRoute) getUserCommonProfile(ctx echo.Context) error {
+	authUser := common.ExtractUserContext(ctx)
+	req := &grpc.CommonUserProfileRequest{UserId: authUser.Id}
+
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	res, err := h.dispatch.Services.Billing.GetCommonUserProfile(ctx.Request().Context(), req)
+
+	if err != nil {
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetCommonUserProfile")
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res.Profile)
 }
 
 func (h *UserProfileRoute) setUserProfile(ctx echo.Context) error {
@@ -108,19 +135,41 @@ func (h *UserProfileRoute) setUserProfile(ctx echo.Context) error {
 
 func (h *UserProfileRoute) confirmEmail(ctx echo.Context) error {
 	req := &grpc.ConfirmUserEmailRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
 	res, err := h.dispatch.Services.Billing.ConfirmUserEmail(ctx.Request().Context(), req)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ConfirmUserEmail")
 	}
 
 	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	req2 := &grpc.OnboardingRequest{
+		User: &billing.MerchantUser{
+			ProfileId:        res.Profile.Id,
+			Id:               res.Profile.UserId,
+			Email:            res.Profile.Email.Email,
+			RegistrationDate: res.Profile.CreatedAt,
+		},
+	}
+
+	if err = h.dispatch.Validate.Struct(req2); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res2, err := h.dispatch.Services.Billing.ChangeMerchant(ctx.Request().Context(), req2)
+
+	if err != nil {
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "ChangeMerchant")
+	}
+
+	if res2.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 

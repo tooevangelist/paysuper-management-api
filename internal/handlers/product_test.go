@@ -24,6 +24,8 @@ func Test_Product(t *testing.T) {
 func (suite *ProductTestSuite) SetupTest() {
 	user := &common.AuthUser{
 		Id: "ffffffffffffffffffffffff",
+		MerchantId: "ffffffffffffffffffffffff",
+		Role: "owner",
 	}
 
 	var e error
@@ -50,6 +52,7 @@ func (suite *ProductTestSuite) TestProduct_getProductsList_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
+		SetQueryParam("limit", "100").
 		Path(common.AuthUserGroupPath + productsPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -63,7 +66,7 @@ func (suite *ProductTestSuite) TestProduct_getProduct_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Params(":"+common.RequestParameterId, "5c99391568add439ccf0ffaf").
+		Params(":"+common.RequestProductId, "5c99391568add439ccf0ffaf").
 		Path(common.AuthUserGroupPath + productsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -77,7 +80,7 @@ func (suite *ProductTestSuite) TestProduct_deleteProduct_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Params(":"+common.RequestParameterId, "5c99391568add439ccf0ffaf").
+		Params(":"+common.RequestProductId, "5c99391568add439ccf0ffaf").
 		Path(common.AuthUserGroupPath + productsIdPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -112,7 +115,7 @@ func (suite *ProductTestSuite) TestProduct_updateProduct_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Params(":"+common.RequestParameterId, "5c99391568add439ccf0ffaf").
+		Params(":"+common.RequestProductId, "5c99391568add439ccf0ffaf").
 		Path(common.AuthUserGroupPath + productsIdPath).
 		BodyString(bodyJson).
 		Init(test.ReqInitJSON()).

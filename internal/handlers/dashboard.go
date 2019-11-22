@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	dashboardMainPath            = "/merchants/:id/dashboard/main"
-	dashboardRevenueDynamicsPath = "/merchants/:id/dashboard/revenue_dynamics"
-	dashboardBasePath            = "/merchants/:id/dashboard/base"
+	dashboardMainPath            = "/merchants/dashboard/main"
+	dashboardRevenueDynamicsPath = "/merchants/dashboard/revenue_dynamics"
+	dashboardBasePath            = "/merchants/dashboard/base"
 )
 
 type DashboardRoute struct {
@@ -39,7 +39,7 @@ func (h *DashboardRoute) Route(groups *common.Groups) {
 
 // @Description get main reports data for dashboard
 // @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' \
-//  https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/dashboard/main?period=previous_month
+//  https://api.paysuper.online/admin/api/v1/merchants/dashboard/main?period=previous_month
 func (h *DashboardRoute) getMainReports(ctx echo.Context) error {
 	req := &grpc.GetDashboardMainRequest{}
 	err := ctx.Bind(req)
@@ -48,7 +48,6 @@ func (h *DashboardRoute) getMainReports(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -71,7 +70,7 @@ func (h *DashboardRoute) getMainReports(ctx echo.Context) error {
 
 // @Description get revenue dynamics report data for dashboard
 // @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' \
-//  'http://127.0.0.1:3001/admin/api/v1/merchants/ffffffffffffffffffffffff/dashboard/revenue_dynamics?period=previous_month'
+//  'http://127.0.0.1:3001/admin/api/v1/merchants/dashboard/revenue_dynamics?period=previous_month'
 func (h *DashboardRoute) getRevenueDynamicsReport(ctx echo.Context) error {
 	req := &grpc.GetDashboardMainRequest{}
 	err := ctx.Bind(req)
@@ -80,7 +79,6 @@ func (h *DashboardRoute) getRevenueDynamicsReport(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
@@ -103,7 +101,7 @@ func (h *DashboardRoute) getRevenueDynamicsReport(ctx echo.Context) error {
 
 // @Description get base reports data for dashboard
 // @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' \
-//  https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/dashboard/base?period=previous_month
+//  https://api.paysuper.online/admin/api/v1/merchants/dashboard/base?period=previous_month
 func (h *DashboardRoute) getBaseReports(ctx echo.Context) error {
 	req := &grpc.GetDashboardBaseReportRequest{}
 	err := ctx.Bind(req)
@@ -112,7 +110,6 @@ func (h *DashboardRoute) getBaseReports(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	req.MerchantId = ctx.Param(common.RequestParameterId)
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {

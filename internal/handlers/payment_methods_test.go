@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	billingMocks "github.com/paysuper/paysuper-billing-server/pkg/mocks"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
@@ -31,7 +32,13 @@ func (suite *PaymentMethodTestSuite) SetupTest() {
 	srv := common.Services{
 		Billing: mock.NewBillingServerOkMock(),
 	}
+	user := &common.AuthUser{
+		Id:         "ffffffffffffffffffffffff",
+		Email:      "test@unit.test",
+		MerchantId: "ffffffffffffffffffffffff",
+	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewPaymentMethodApiV1(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
@@ -171,6 +178,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_update_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
+		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
 		Path(common.AuthProjectGroupPath + paymentMethodIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).

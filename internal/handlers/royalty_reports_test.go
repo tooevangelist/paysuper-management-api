@@ -23,12 +23,18 @@ func Test_RoyaltyReports(t *testing.T) {
 }
 
 func (suite *RoyaltyReportsTestSuite) SetupTest() {
+	user := &common.AuthUser{
+		Id:         "ffffffffffffffffffffffff",
+		Email:      "test@unit.test",
+		MerchantId: "ffffffffffffffffffffffff",
+	}
 	var e error
 	settings := test.DefaultSettings()
 	srv := common.Services{
 		Billing: mock.NewBillingServerOkMock(),
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewRoyaltyReportsRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
@@ -82,7 +88,7 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_getRoyaltyReportsList_V
 func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_getRoyaltyReport() {
 
 	res, err := suite.caller.Builder().
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterReportId, bson.NewObjectId().Hex()).
 		Method(http.MethodGet).
 		Path(common.AuthUserGroupPath + royaltyReportsIdPath).
 		Init(test.ReqInitJSON()).
@@ -99,7 +105,7 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_listRoyaltyReportOrders
 	res, err := suite.caller.Builder().
 		SetQueryParam("limit", "100").
 		SetQueryParam("offset", "200").
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterReportId, bson.NewObjectId().Hex()).
 		Method(http.MethodGet).
 		Path(common.AuthUserGroupPath + royaltyReportsTransactionsPath).
 		Init(test.ReqInitJSON()).
@@ -114,7 +120,7 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_listRoyaltyReportOrders
 func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_MerchantReviewRoyaltyReport() {
 
 	res, err := suite.caller.Builder().
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterReportId, bson.NewObjectId().Hex()).
 		Method(http.MethodPost).
 		Path(common.AuthUserGroupPath + royaltyReportsAcceptPath).
 		Init(test.ReqInitJSON()).
@@ -130,7 +136,7 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_merchantDeclineRoyaltyR
 	bodyJson := `{"dispute_reason": "accepted"}`
 
 	res, err := suite.caller.Builder().
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterReportId, bson.NewObjectId().Hex()).
 		Method(http.MethodPost).
 		Path(common.AuthUserGroupPath + royaltyReportsDeclinePath).
 		Init(test.ReqInitJSON()).
@@ -144,12 +150,12 @@ func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_merchantDeclineRoyaltyR
 
 func (suite *RoyaltyReportsTestSuite) TestRoyaltyReports_changeRoyaltyReport() {
 
-	bodyJson := `{"status": "accepted", "correction": {"amount": 100500, "reason": "just for fun :)"}, "payout_id": "5bdc39a95d1e1100019fb7df"}`
+	bodyJson := `{"merchant_id": "5bdc39a95d1e1100019fb7df", "status": "accepted", "correction": {"amount": 100500, "reason": "just for fun :)"}, "payout_id": "5bdc39a95d1e1100019fb7df"}`
 
 	res, err := suite.caller.Builder().
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
+		Params(":"+common.RequestParameterReportId, bson.NewObjectId().Hex()).
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + royaltyReportsChangePath).
+		Path(common.SystemUserGroupPath + royaltyReportsChangePath).
 		Init(test.ReqInitJSON()).
 		BodyString(bodyJson).
 		Exec(suite.T())

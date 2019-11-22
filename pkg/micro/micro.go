@@ -24,6 +24,11 @@ func (m *Micro) Client() client.Client {
 	return m.srv.Client()
 }
 
+// Init
+func (m *Micro) Init() {
+	m.srv.Init()
+}
+
 // ListenAndServe
 func (m *Micro) ListenAndServe() (err error) {
 
@@ -83,12 +88,10 @@ func New(ctx context.Context, set provider.AwareSet, cfg *Config) *Micro {
 	if cfg.Selector == "static" {
 		options = append(options, micro.Selector(static.NewSelector()))
 	}
-	srv := micro.NewService(options...)
-	srv.Init()
 	return &Micro{
 		ctx: ctx,
 		cfg: *cfg,
 		LMT: &set,
-		srv: srv,
+		srv: micro.NewService(options...),
 	}
 }

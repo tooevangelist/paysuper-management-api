@@ -7,23 +7,169 @@ import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/globalsign/mgo/bson"
+	"github.com/gurukami/typ/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"io/ioutil"
-	"strconv"
+	"reflect"
+	"strings"
 )
+
+var (
+	SystemBinderDefault   = &SystemBinder{}
+	MerchantBinderDefault = &MerchantBinder{}
+	BinderDefault         = &Binder{}
+	EchoBinderDefault     = &echo.DefaultBinder{}
+)
+
+const (
+	MerchantIdField    = "MerchantId"
+	MerchantSliceField = "Merchant"
+	ParamTag           = "param"
+)
+
+type SystemBinder struct{}
+
+func (b *SystemBinder) Bind(i interface{}, ctx echo.Context) (err error) {
+	rv := reflect.ValueOf(i)
+
+	if rv.Type().Kind() != reflect.Ptr || rv.IsNil() {
+		return ErrorInternal
+	}
+
+	irv := rv.Elem()
+	irt := irv.Type()
+
+	if irt.Kind() != reflect.Struct {
+		return nil
+	}
+
+	for i := 0; i < irv.NumField(); i++ {
+
+		rv := irv.Field(i)
+		tf := irt.Field(i)
+
+		if v, ok := tf.Tag.Lookup(ParamTag); ok {
+			rv.Set(reflect.ValueOf(ctx.Param(v)))
+		}
+
+		if strings.EqualFold(tf.Name, MerchantIdField) {
+			if tf.Type.Kind() != reflect.String {
+				return ErrorInternal
+			}
+			mId := ctx.Param(RequestParameterMerchantId)
+			if mId != "" {
+				rv.Set(reflect.ValueOf(mId))
+			}
+		}
+
+		if strings.EqualFold(tf.Name, MerchantSliceField) {
+			if tf.Type.Kind() != reflect.Slice {
+				return ErrorInternal
+			}
+			if rv.Type().Elem().Kind() == reflect.String {
+				mId := ctx.Param(RequestParameterMerchantId)
+				if mId != "" {
+					rv.Set(reflect.ValueOf([]string{mId}))
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+type MerchantBinder struct{}
+
+func (b *MerchantBinder) Bind(bindInterface interface{}, ctx echo.Context) (err error) {
+
+	rv := reflect.ValueOf(bindInterface)
+
+	if rv.Type().Kind() != reflect.Ptr || rv.IsNil() {
+		return ErrorInternal
+	}
+
+	irv := rv.Elem()
+	irt := irv.Type()
+
+	if irt.Kind() != reflect.Struct {
+		return nil
+	}
+
+	u := ExtractUserContext(ctx)
+
+	for i := 0; i < irv.NumField(); i++ {
+
+		rv := irv.Field(i)
+		tf := irt.Field(i)
+
+		if v, ok := tf.Tag.Lookup(ParamTag); ok {
+			rv.Set(reflect.ValueOf(ctx.Param(v)))
+		}
+
+		if strings.EqualFold(tf.Name, MerchantIdField) {
+			if tf.Type.Kind() != reflect.String {
+				return ErrorInternal
+			}
+			rv.Set(reflect.ValueOf(u.MerchantId))
+		}
+
+		if strings.EqualFold(tf.Name, MerchantSliceField) {
+			if tf.Type.Kind() != reflect.Slice {
+				return ErrorInternal
+			}
+			if rv.Type().Elem().Kind() == reflect.String {
+				rv.Set(reflect.ValueOf([]string{u.MerchantId}))
+			}
+		}
+	}
+
+	return nil
+}
+
+type Binder struct {
+	LimitDefault, OffsetDefault, LimitMax int32
+}
+
+func (b *Binder) Bind(i interface{}, ctx echo.Context) (err error) {
+	if err := EchoBinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+	//
+	params := ctx.QueryParams()
+	limit := params.Get(RequestParameterLimit)
+	if len(limit) > 0 {
+		if ta := typ.StringInt32(limit); ta.Err() != nil {
+			return ta.Err()
+		} else if ta.V() < 0 {
+			ta.Set(b.LimitDefault)
+		} else if ta.V() > b.LimitMax {
+			ta.Set(b.LimitMax)
+		}
+	}
+
+	offset := params.Get(RequestParameterOffset)
+	if len(offset) > 0 {
+		if ta := typ.StringInt32(offset); ta.Err() != nil {
+			return ta.Err()
+		}
+	}
+	//
+	if binder := ExtractBinderContext(ctx); binder != nil {
+		return binder.Bind(i, ctx)
+	}
+	return nil
+}
 
 type OrderFormBinder struct{}
 type OrderJsonBinder struct{}
-type OrderRevenueDynamicRequestBinder struct{}
-type OrderAccountingPaymentRequestBinder struct{}
 type PaymentCreateProcessBinder struct{}
+type OnboardingChangeMerchantStatusBinder struct{}
 type OnboardingMerchantListingBinder struct {
 	LimitDefault, OffsetDefault int32
 }
-type OnboardingChangeMerchantStatusBinder struct{}
 type OnboardingNotificationsListBinder struct {
 	LimitDefault, OffsetDefault int32
 }
@@ -36,27 +182,12 @@ type ProductsGetProductsListBinder struct {
 type ProductsCreateProductBinder struct{}
 type ProductsUpdateProductBinder struct{}
 
-// ChangeMerchantDataRequestBinder
-type ChangeMerchantDataRequestBinder struct {
-	dispatch HandlerSet
-	provider.LMT
-	cfg Config
-}
-
-// NewChangeMerchantDataRequestBinder
-func NewChangeMerchantDataRequestBinder(set HandlerSet, cfg Config) *ChangeMerchantDataRequestBinder {
-	return &ChangeMerchantDataRequestBinder{
-		dispatch: set,
-		LMT:      &set.AwareSet,
-		cfg:      cfg,
-	}
-}
-
 // ChangeProjectRequestBinder
 type ChangeProjectRequestBinder struct {
 	dispatch HandlerSet
 	provider.LMT
 	cfg Config
+	Binder
 }
 
 // NewChangeProjectRequestBinder
@@ -70,9 +201,8 @@ func NewChangeProjectRequestBinder(set HandlerSet, cfg Config) *ChangeProjectReq
 
 // Bind
 func (cb *OrderFormBinder) Bind(i interface{}, ctx echo.Context) (err error) {
-	db := new(echo.DefaultBinder)
 
-	if err = db.Bind(i, ctx); err != nil {
+	if err = BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -115,8 +245,7 @@ func (cb *OrderJsonBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 		ctx.Request().Body = rdr
 	}
 
-	db := new(echo.DefaultBinder)
-	if err = db.Bind(i, ctx); err != nil {
+	if err = BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -128,10 +257,9 @@ func (cb *OrderJsonBinder) Bind(i interface{}, ctx echo.Context) (err error) {
 
 // Bind
 func (cb *PaymentCreateProcessBinder) Bind(i interface{}, ctx echo.Context) (err error) {
-	db := new(echo.DefaultBinder)
 	untypedData := make(map[string]interface{})
 
-	if err = db.Bind(&untypedData, ctx); err != nil {
+	if err = BinderDefault.Bind(&untypedData, ctx); err != nil {
 		return
 	}
 
@@ -156,10 +284,8 @@ func (cb *PaymentCreateProcessBinder) Bind(i interface{}, ctx echo.Context) (err
 
 // Bind
 func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context) (err error) {
-	db := new(echo.DefaultBinder)
-	err = db.Bind(i, ctx)
 
-	if err != nil {
+	if err = BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -187,21 +313,19 @@ func (cb *OnboardingMerchantListingBinder) Bind(i interface{}, ctx echo.Context)
 
 // Bind
 func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
 
-	if err != nil {
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
 	params := ctx.QueryParams()
 	structure := i.(*grpc.ListingNotificationRequest)
-	structure.MerchantId = ctx.Param(RequestParameterMerchantId)
 
 	if structure.Limit <= 0 {
 		structure.Limit = cb.LimitDefault
 	}
 
+	// TODO: to remove
 	if v, ok := params[RequestParameterIsSystem]; ok {
 		if v[0] == "0" || v[0] == "false" {
 			structure.IsSystem = 1
@@ -215,6 +339,11 @@ func (cb *OnboardingNotificationsListBinder) Bind(i interface{}, ctx echo.Contex
 
 // Bind
 func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
+		return err
+	}
+
 	merchantId := ctx.Param(RequestParameterMerchantId)
 	paymentMethodId := ctx.Param(RequestParameterPaymentMethodId)
 
@@ -235,10 +364,8 @@ func (cb *OnboardingGetPaymentMethodBinder) Bind(i interface{}, ctx echo.Context
 
 // Bind
 func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
 
-	if err != nil {
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -262,10 +389,8 @@ func (cb *OnboardingChangePaymentMethodBinder) Bind(i interface{}, ctx echo.Cont
 
 // Bind
 func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
 
-	if err != nil {
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -283,10 +408,8 @@ func (b *OnboardingChangeMerchantStatusBinder) Bind(i interface{}, ctx echo.Cont
 
 // Bind
 func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
 
-	if err != nil {
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -303,58 +426,9 @@ func (b *OnboardingCreateNotificationBinder) Bind(i interface{}, ctx echo.Contex
 }
 
 // Bind
-func (b *ProductsGetProductsListBinder) Bind(i interface{}, ctx echo.Context) error {
-	limit := int32(b.LimitDefault)
-	offset := int32(b.OffsetDefault)
-
-	params := ctx.QueryParams()
-
-	if v, ok := params[RequestParameterLimit]; ok {
-		i, err := strconv.ParseInt(v[0], 10, 32)
-		if err != nil {
-			return err
-		}
-		limit = int32(i)
-	}
-
-	if v, ok := params[RequestParameterOffset]; ok {
-		i, err := strconv.ParseInt(v[0], 10, 32)
-		if err != nil {
-			return err
-		}
-		offset = int32(i)
-	}
-
-	structure := i.(*grpc.ListProductsRequest)
-	structure.Limit = limit
-	structure.Offset = offset
-
-	if v, ok := params[RequestParameterName]; ok {
-		if v[0] != "" {
-			structure.Name = v[0]
-		}
-	}
-
-	if v, ok := params[RequestParameterSku]; ok {
-		if v[0] != "" {
-			structure.Sku = v[0]
-		}
-	}
-
-	if v, ok := params[RequestParameterProjectId]; ok {
-		if v[0] != "" {
-			structure.ProjectId = v[0]
-		}
-	}
-
-	return nil
-}
-
-// Bind
 func (b *ProductsCreateProductBinder) Bind(i interface{}, ctx echo.Context) error {
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-	if err != nil {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
@@ -370,67 +444,13 @@ func (b *ProductsUpdateProductBinder) Bind(i interface{}, ctx echo.Context) erro
 	if id == "" || bson.IsObjectIdHex(id) == false {
 		return ErrorIncorrectProductId
 	}
-	db := new(echo.DefaultBinder)
-	err := db.Bind(i, ctx)
-	if err != nil {
+
+	if err := BinderDefault.Bind(i, ctx); err != nil {
 		return err
 	}
 
 	structure := i.(*grpc.Product)
 	structure.Id = id
-
-	return nil
-}
-
-// Bind
-func (b *ChangeMerchantDataRequestBinder) Bind(i interface{}, ctx echo.Context) error {
-	req := make(map[string]interface{})
-
-	db := new(echo.DefaultBinder)
-	err := db.Bind(&req, ctx)
-
-	if err != nil {
-		return ErrorRequestParamsIncorrect
-	}
-
-	merchantId := ctx.Param(RequestParameterId)
-
-	if merchantId == "" || bson.IsObjectIdHex(merchantId) == false {
-		return ErrorIncorrectMerchantId
-	}
-
-	mReq := &grpc.GetMerchantByRequest{MerchantId: merchantId}
-	mRsp, err := b.dispatch.Services.Billing.GetMerchantBy(context.Background(), mReq)
-
-	if err != nil {
-		b.L().Error(`Call billing server method "GetMerchantBy" failed`, logger.Args("error", err.Error(), "request", mReq))
-		return ErrorUnknown
-	}
-
-	if mRsp.Status != pkg.ResponseStatusOk {
-		return mRsp.Message
-	}
-
-	structure := i.(*grpc.ChangeMerchantDataRequest)
-	structure.MerchantId = merchantId
-	structure.HasMerchantSignature = mRsp.Item.HasMerchantSignature
-	structure.HasPspSignature = mRsp.Item.HasPspSignature
-
-	if v, ok := req[RequestParameterHasMerchantSignature]; ok {
-		if tv, ok := v.(bool); !ok {
-			return ErrorMessageHasMerchantSignatureIncorrectType
-		} else {
-			structure.HasMerchantSignature = tv
-		}
-	}
-
-	if v, ok := req[RequestParameterHasPspSignature]; ok {
-		if tv, ok := v.(bool); !ok {
-			return ErrorMessageHasPspSignatureIncorrectType
-		} else {
-			structure.HasPspSignature = tv
-		}
-	}
 
 	return nil
 }
@@ -450,7 +470,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	projectReq := &billing.Project{}
 	if err := ctx.Bind(projectReq); err != nil {
-		return ErrorRequestParamsIncorrect
+		return err
 	}
 
 	// Restore the io.ReadCloser to its original state
@@ -460,21 +480,21 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	err := db.Bind(&req, ctx)
 
 	if err != nil {
-		return ErrorRequestParamsIncorrect
+		return err
 	}
 
-	projectId := ctx.Param(RequestParameterId)
+	projectId := ctx.Param(RequestParameterProjectId)
 
 	if projectId == "" || bson.IsObjectIdHex(projectId) == false {
 		return ErrorIncorrectProjectId
 	}
 
-	pReq := &grpc.GetProjectRequest{ProjectId: projectId}
+	pReq := &grpc.GetProjectRequest{ProjectId: projectId, MerchantId: projectReq.MerchantId}
 	pRsp, err := b.dispatch.Services.Billing.GetProject(context.Background(), pReq)
 
 	if err != nil {
 		b.L().Error(`Call billing server method "GetProject" failed`, logger.Args("error", err.Error(), "request", pReq))
-		return ErrorUnknown
+		return err
 	}
 
 	if pRsp.Status != pkg.ResponseStatusOk {

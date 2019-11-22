@@ -60,7 +60,14 @@ func (suite *KeyProductTestSuite) SetupTestForTestProject_CreateKeyProduct_Group
 		Billing: billingService,
 		Geo:     mock.NewGeoIpServiceTestOk(),
 	}
+	user := &common.AuthUser{
+		Id: "ffffffffffffffffffffffff",
+		MerchantId: "ffffffffffffffffffffffff",
+		Role: "owner",
+	}
+
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewKeyProductRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
@@ -82,7 +89,11 @@ func (suite *KeyProductTestSuite) SetupTestForTestProject_CreateKeyProduct_Group
 	}, nil)
 
 	billingService.On("GetPriceGroupByRegion", mock2.Anything, mock2.Anything).Return(&grpc.GetPriceGroupByRegionResponse{Status: 400, Group: nil, Message: &grpc.ResponseErrorMessage{Message: "some error"}}, nil)
-
+	user := &common.AuthUser{
+		Id: "ffffffffffffffffffffffff",
+		MerchantId: "ffffffffffffffffffffffff",
+		Role: "owner",
+	}
 	var e error
 	settings := test.DefaultSettings()
 	srv := common.Services{
@@ -90,6 +101,7 @@ func (suite *KeyProductTestSuite) SetupTestForTestProject_CreateKeyProduct_Group
 		Geo:     mock.NewGeoIpServiceTestOk(),
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewKeyProductRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
@@ -107,7 +119,15 @@ func (suite *KeyProductTestSuite) SetupTest() {
 		Billing: mock.NewBillingServerOkMock(),
 		Geo:     mock.NewGeoIpServiceTestOk(),
 	}
+
+	user := &common.AuthUser{
+		Id: "ffffffffffffffffffffffff",
+		MerchantId: "ffffffffffffffffffffffff",
+		Role: "owner",
+	}
+
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewKeyProductRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
@@ -127,6 +147,7 @@ func (suite *KeyProductTestSuite) TestProject_PublishKeyProduct_Ok() {
 		Params(":key_product_id", bson.NewObjectId().Hex()).
 		Path(common.AuthUserGroupPath + keyProductsPublishPath).
 		Init(test.ReqInitJSON()).
+		BodyString("{}").
 		Exec(suite.T())
 
 	assert.NoError(suite.T(), err)

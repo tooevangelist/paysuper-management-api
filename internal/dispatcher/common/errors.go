@@ -153,8 +153,13 @@ var (
 	ErrorMessageMerchantNotFound                  = NewManagementApiResponseError("ma000100", "merchant not found")
 	ErrorMessageCreateReportFile                  = NewManagementApiResponseError("ma000101", "unable to create report file")
 	ErrorMessageDownloadReportFile                = NewManagementApiResponseError("ma000102", "unable to download report file")
-	ErrorMessageLocalizedFieldIncorrectType                = NewManagementApiResponseError("ma000103", "localized field has invalid type")
-	ErrorMessageCoverFieldIncorrectType                = NewManagementApiResponseError("ma000104", "cover field has invalid type")
+	ErrorMessageLocalizedFieldIncorrectType       = NewManagementApiResponseError("ma000103", "localized field has invalid type")
+	ErrorMessageCoverFieldIncorrectType           = NewManagementApiResponseError("ma000104", "cover field has invalid type")
+	ErrorMessageUnableToSendInvite                = NewManagementApiResponseError("ma000105", "unable to send invite")
+	ErrorMessageUnableToAcceptInvite              = NewManagementApiResponseError("ma000106", "unable to accept invite")
+	ErrorMessageUnableToCheckInviteToken          = NewManagementApiResponseError("ma000107", "unable to check invite token")
+	ErrorMessageInvalidRoleType                   = NewManagementApiResponseError("ma000108", "invalid role type")
+	ErrorMessageUnableToDeleteUser                = NewManagementApiResponseError("ma000109", "unable to delete user")
 
 	ValidationErrors = map[string]*grpc.ResponseErrorMessage{
 		UserProfileFieldNumberOfEmployees: ErrorMessageIncorrectNumberOfEmployees,

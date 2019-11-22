@@ -2,7 +2,7 @@
 
 p1pipeline("p1payapi",
            "p1payapi",
-           "casbin_middleware", // development branch for test releases
-           "casbinmw", // kubernetes namespace for test releases
-           "cmw-" // domain name prefix in kubernetes for test releases
+           "190482", // development branch for test releases
+           "190482", // kubernetes namespace for test releases
+           "190482-" // domain name prefix in kubernetes for test releases
 )

@@ -28,6 +28,13 @@ func CfgTest() (*Config, func(), error) {
 // Provider
 func Provider(ctx context.Context, set provider.AwareSet, cfg *Config) (*Micro, func(), error) {
 	micro := New(ctx, set, cfg)
+	micro.Init()
+	return micro, func() {}, nil
+}
+
+// ProviderTest
+func ProviderTest(ctx context.Context, set provider.AwareSet, cfg *Config) (*Micro, func(), error) {
+	micro := New(ctx, set, cfg)
 	return micro, func() {}, nil
 }
 
@@ -37,7 +44,7 @@ var (
 		Cfg,
 	)
 	WireTestSet = wire.NewSet(
-		Provider,
+		ProviderTest,
 		CfgTest,
 	)
 )

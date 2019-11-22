@@ -114,8 +114,8 @@ func ProviderValidators(v *validators.ValidatorSet) (validate *validator.Validat
 }
 
 // ProviderDispatcher
-func ProviderDispatcher(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, globalCfg *common.Config) (*Dispatcher, func(), error) {
-	d := New(ctx, set, appSet, cfg, globalCfg)
+func ProviderDispatcher(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, globalCfg *common.Config, ms *micro.Micro) (*Dispatcher, func(), error) {
+	d := New(ctx, set, appSet, cfg, globalCfg, ms)
 	return d, func() {}, nil
 }
 

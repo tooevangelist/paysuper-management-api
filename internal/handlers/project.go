@@ -13,8 +13,8 @@ import (
 
 const (
 	projectsPath    = "/projects"
-	projectsIdPath  = "/projects/:id"
-	projectsSkuPath = "/projects/:id/sku"
+	projectsIdPath  = "/projects/:project_id"
+	projectsSkuPath = "/projects/:project_id/sku"
 )
 
 type ProjectRoute struct {
@@ -43,15 +43,17 @@ func (h *ProjectRoute) Route(groups *common.Groups) {
 
 func (h *ProjectRoute) createProject(ctx echo.Context) error {
 	req := &billing.Project{}
-	err := ctx.Bind(req)
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest /*ErrorRequestParamsIncorrect*/, err)
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	err = h.dispatch.Validate.Struct(req)
+	authUser := common.ExtractUserContext(ctx)
+	if req.MerchantId != authUser.MerchantId {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectMerchantId)
+	}
 
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -72,15 +74,17 @@ func (h *ProjectRoute) createProject(ctx echo.Context) error {
 func (h *ProjectRoute) updateProject(ctx echo.Context) error {
 	req := &billing.Project{}
 	binder := common.NewChangeProjectRequestBinder(h.dispatch, h.cfg)
-	err := binder.Bind(req, ctx)
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest /*ErrorRequestParamsIncorrect*/, err)
+	if err := binder.Bind(req, ctx); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	err = h.dispatch.Validate.Struct(req)
+	authUser := common.ExtractUserContext(ctx)
+	if req.MerchantId != authUser.MerchantId {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectMerchantId)
+	}
 
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -99,13 +103,13 @@ func (h *ProjectRoute) updateProject(ctx echo.Context) error {
 }
 
 func (h *ProjectRoute) getProject(ctx echo.Context) error {
-	req := &grpc.GetProjectRequest{
-		ProjectId: ctx.Param(common.RequestParameterId),
+	req := &grpc.GetProjectRequest{}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	err := h.dispatch.Validate.Struct(req)
-
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -125,9 +129,8 @@ func (h *ProjectRoute) getProject(ctx echo.Context) error {
 
 func (h *ProjectRoute) listProjects(ctx echo.Context) error {
 	req := &grpc.ListProjectsRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
+	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
@@ -135,9 +138,7 @@ func (h *ProjectRoute) listProjects(ctx echo.Context) error {
 		req.Limit = h.cfg.LimitDefault
 	}
 
-	err = h.dispatch.Validate.Struct(req)
-
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -152,13 +153,13 @@ func (h *ProjectRoute) listProjects(ctx echo.Context) error {
 }
 
 func (h *ProjectRoute) deleteProject(ctx echo.Context) error {
-	req := &grpc.GetProjectRequest{
-		ProjectId: ctx.Param(common.RequestParameterId),
+	req := &grpc.GetProjectRequest{}
+
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	err := h.dispatch.Validate.Struct(req)
-
-	if err != nil {
+	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
@@ -181,8 +182,6 @@ func (h *ProjectRoute) checkSku(ctx echo.Context) error {
 	if err := ctx.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
-
-	req.ProjectId = ctx.Param(common.RequestParameterId)
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))

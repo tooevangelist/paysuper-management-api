@@ -33,10 +33,10 @@ func NewOperatingCompanyRoute(set common.HandlerSet, cfg *common.Config) *Operat
 }
 
 func (h *OperatingCompanyRoute) Route(groups *common.Groups) {
-	groups.AuthUser.GET(operatingCompanyPath, h.getOperatingCompanyList)
-	groups.AuthUser.GET(operatingCompanyIdPath, h.getOperatingCompany)
-	groups.AuthUser.POST(operatingCompanyPath, h.addOperatingCompany)
-	groups.AuthUser.POST(operatingCompanyIdPath, h.updateOperatingCompany)
+	groups.SystemUser.GET(operatingCompanyPath, h.getOperatingCompanyList)
+	groups.SystemUser.GET(operatingCompanyIdPath, h.getOperatingCompany)
+	groups.SystemUser.POST(operatingCompanyPath, h.addOperatingCompany)
+	groups.SystemUser.POST(operatingCompanyIdPath, h.updateOperatingCompany)
 
 }
 

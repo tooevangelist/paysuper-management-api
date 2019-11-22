@@ -250,7 +250,7 @@ func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BillingServer_Error() 
 	httpErr, ok := err.(*echo.HTTPError)
 	assert.True(suite.T(), ok)
 	assert.Equal(suite.T(), http.StatusNotFound, httpErr.Code)
-	assert.Equal(suite.T(), mock.SomeError.Message, httpErr.Message)
+	assert.Equal(suite.T(), echo.Map{"message" : mock.SomeError.Message}, httpErr.Message)
 }
 
 func (suite *CardPayTestSuite) TestCardPay_RefundCallback_BillingServerTemporary_Ok() {

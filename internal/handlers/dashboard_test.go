@@ -28,6 +28,11 @@ func Test_Dashboard(t *testing.T) {
 }
 
 func (suite *DashboardTestSuite) SetupTest() {
+	user := &common.AuthUser{
+		Id:         "ffffffffffffffffffffffff",
+		MerchantId: "ffffffffffffffffffffffff",
+		Role:       "owner",
+	}
 	bs := &billingMocks.BillingService{}
 	bs.On("GetDashboardMainReport", mock.Anything, mock.Anything, mock.Anything).
 		Return(&grpc.GetDashboardMainResponse{Status: pkg.ResponseStatusOk, Item: &grpc.DashboardMainReport{}}, nil)
@@ -54,6 +59,7 @@ func (suite *DashboardTestSuite) SetupTest() {
 		Billing: bs,
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewDashboardRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
@@ -305,9 +311,8 @@ func (suite *DashboardTestSuite) TestDashboard_GetBaseReports_BillingServerRetur
 	suite.router.dispatch.Services.Billing = bs
 
 	_, err := suite.caller.Builder().
-		Path(common.AuthUserGroupPath+dashboardBasePath).
+		Path(common.AuthUserGroupPath + dashboardBasePath).
 		SetQueryParams(q).
-		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
 		Exec(suite.T())
 
 	assert.Error(suite.T(), err)

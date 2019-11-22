@@ -39,7 +39,7 @@ spec:
       containers:
         - name: {{ $deployment.name }}
           image: {{ $deployment.image }}:{{ $deployment.imageTag }}
-          args: ["http","-c","configs/local.yaml","-b",":{{$deployment.ingressPort}}","-d"]
+          args: ["http","-c","configs/local.yaml","-b",":{{$deployment.ingressPort}}","--casbin"]
           env:
             - name: MICRO_SERVER_ADDRESS
               value: "0.0.0.0:{{ $deployment.port }}"

@@ -40,7 +40,13 @@ func (suite *TaxesTestSuite) SetupTest() {
 		Billing: mock.NewBillingServerOkMock(),
 		Tax:     createNewTaxServiceMock(),
 	}
+	user := &common.AuthUser{
+		Id:    "ffffffffffffffffffffffff",
+		Email: "test@unit.test",
+		MerchantId: "ffffffffffffffffffffffff",
+	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
+		mw.Pre(test.PreAuthUserMiddleware(user))
 		suite.router = NewTaxesRoute(set.HandlerSet, set.GlobalConfig)
 		return common.Handlers{
 			suite.router,
@@ -95,7 +101,7 @@ func getRates(t *testing.T, suite *TaxesTestSuite, country, city, zip, state str
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthUserGroupPath + taxesPath).
+		Path(common.SystemUserGroupPath + taxesPath).
 		SetQueryParams(q).
 		Exec(suite.T())
 
@@ -113,7 +119,7 @@ func (suite *TaxesTestSuite) Test_GetRatesError() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthUserGroupPath + taxesPath).
+		Path(common.SystemUserGroupPath + taxesPath).
 		SetQueryParams(q).
 		Exec(suite.T())
 
@@ -131,7 +137,7 @@ func (suite *TaxesTestSuite) Test_CreateTax() {
 	b, _ := json.Marshal(obj)
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + taxesPath).
+		Path(common.SystemUserGroupPath + taxesPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -162,8 +168,7 @@ func testCreateTaxWithError(t *testing.T, suite *TaxesTestSuite, obj *tax_servic
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Params(":"+common.RequestParameterId, "1").
-		Path(common.AuthUserGroupPath + taxesPath).
+		Path(common.SystemUserGroupPath + taxesPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(body).
 		Exec(suite.T())
@@ -177,7 +182,7 @@ func (suite *TaxesTestSuite) Test_DeleteTax() {
 	res, err := suite.caller.Builder().
 		Method(http.MethodDelete).
 		Params(":"+common.RequestParameterId, "1").
-		Path(common.AuthUserGroupPath + taxesIDPath).
+		Path(common.SystemUserGroupPath + taxesIDPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -198,7 +203,7 @@ func testDeleteTaxWithError(t *testing.T, suite *TaxesTestSuite, id string, code
 	_, err := suite.caller.Builder().
 		Method(http.MethodDelete).
 		Params(":"+common.RequestParameterId, id).
-		Path(common.AuthUserGroupPath + taxesIDPath).
+		Path(common.SystemUserGroupPath + taxesIDPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 

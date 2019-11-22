@@ -59,25 +59,24 @@ func (h *ReportFileRoute) Route(groups *common.Groups) {
 //      https://api.paysuper.online/admin/api/v1/report_file
 //
 func (h *ReportFileRoute) create(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
-
 	data := &reportFileRequest{}
+
 	if err := ctx.Bind(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestDataInvalid)
 	}
 
 	params, err := json.Marshal(data.Params)
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorRequestDataInvalid)
 	}
 
-	err = h.dispatch.Validate.Struct(data)
-	if err != nil {
+	if err = h.dispatch.Validate.Struct(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
 	req := &reporterProto.ReportFile{
-		UserId:           authUser.Id,
+		UserId:           common.ExtractUserContext(ctx).Id,
 		MerchantId:       data.MerchantId,
 		ReportType:       data.ReportType,
 		FileType:         data.FileType,
@@ -103,8 +102,8 @@ func (h *ReportFileRoute) create(ctx echo.Context) error {
 //      https://api.paysuper.online/admin/api/v1/report_file/download/5ced34d689fce60bf4440829.csv
 //
 func (h *ReportFileRoute) download(ctx echo.Context) error {
-	authUser := common.ExtractUserContext(ctx)
 	file := ctx.Param("file")
+
 	if file == "" {
 		h.L().Error("unable to find the file")
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
@@ -117,7 +116,7 @@ func (h *ReportFileRoute) download(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	fileName := fmt.Sprintf(reporterPkg.FileMask, authUser.Id, params[0], params[1])
+	fileName := fmt.Sprintf(reporterPkg.FileMask, common.ExtractUserContext(ctx).Id, params[0], params[1])
 	filePath := os.TempDir() + string(os.PathSeparator) + fileName
 	_, err := h.awsManager.Download(ctx.Request().Context(), filePath, &awsWrapper.DownloadInput{FileName: fileName})
 

@@ -2077,6 +2077,30 @@ definitions:
         description: time of last update user profile
         $ref: '#/definitions/ProtobufTimestamp'
 
+  userCommonProfile:
+    properties:
+      user_profile:
+        description: object contain information about user
+        $ref: '#/definitions/userProfile.response'
+      user_role:
+        description: object contain information about user role
+        $ref: '#/definitions/UserRole'
+      permissions:
+        type: array
+        description: object contain list of permissions
+        $ref: '#/definitions/userRolePermission'
+      merchant:
+        type: array
+        description: object contain information about merchant (full for owner, simple for others)
+        $ref: '#/definitions/onboarding.Merchant'
+
+  userRolePermission:
+    properties:
+      name:
+        type: string
+      access:
+        type: string
+
   pageReview.request:
     properties:
       review:
@@ -3620,6 +3644,229 @@ definitions:
         items:
           $ref: '#/definitions/payment_min_limit_system'
 
+  InviteUserAdmin:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email on which to send an invitation"
+      role:
+        type: string
+        example: "support"
+        description: "Role of user (system_risk_manager, system_financial, system_support, system_view_only)"
+
+  InviteUserResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  ResendInviteAdmin:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email of invite"
+
+  EmptyResponseWithStatus:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+
+  ListUsersResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      users:
+        type: array
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  AcceptInvite:
+    type: object
+    properties:
+      token:
+        type: string
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        description: "Invitation token"
+
+  AcceptInviteResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        description: "User role"
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  CheckInviteToken:
+    type: object
+    properties:
+      token:
+        type: string
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        description: "Invitation token"
+
+  CheckInviteTokenResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role_id:
+        type: string
+        description: "Identifier of invitation"
+      role_type:
+        type: string
+        example: "admin"
+        description: "Type of invitation: admin or merchant"
+
+  InviteUserMerchant:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email on which to send an invitation"
+      role:
+        type: string
+        example: "support"
+        description: "Role of user (merchant_developer, merchant_accounting, merchant_support, merchant_view_only)"
+
+  ResendInviteMerchant:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email of invite identifier"
+
+  UserRole:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "User role identifier"
+      merchantId:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "Merchant identifier (only for merchant users)"
+      role:
+        type: string
+        example: "developer"
+        description: "Role of user"
+      status:
+        type: string
+        example: "invited"
+        description: "Status of invitation: invited or approved"
+      userId:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "User identifier"
+      firstName:
+        type: string
+        example: "John"
+        description: "First name of user"
+      lastName:
+        type: string
+        example: "Malkovich"
+        description: "Last name of user"
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "Email of user"
+      createdAt:
+        type: string
+        example: "developer"
+        description: "Date of creation"
+      updatedAt:
+        type: string
+        example: "developer"
+        description: "Date of updating"
+
+  UserRoleResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        description: "User role"
+        items:
+          "$ref": "#/definitions/UserRole"
+
+  ListRoleType:
+    type: array
+    items:
+      "$ref": "#/definitions/ListRoleTypeItem"
+
+  ListRoleTypeItem:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "owner"
+        description: "Role identity"
+      name:
+        type: string
+        example: "Owner"
+        description: "Role name"
+
+  UpdateUserRoleRequest:
+    type: object
+    properties:
+      email:
+        type: string
+        example: "test@paysuper.com"
+        description: "User identity"
+
+  MerchantsForUserResponse:
+    type: object
+    properties:
+      status:
+        type: number
+      message:
+        type: string
+      role:
+        type: object
+        description: "User role"
+        items:
+          "$ref": "#/definitions/MerchantsForUser"
+
+  MerchantsForUser:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "Merchant identity"
+      name:
+        type: string
+        example: "R&K"
+        description: "Merchant name"
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -3642,7 +3889,7 @@ securityDefinitions:
     description: must contain project secret key
 
 paths:
-  /api/v1/country:
+  /country:
     get:
       consumes:
         - application/json
@@ -3669,7 +3916,7 @@ paths:
       summary: Get list of countries
       tags:
         - Country
-  /api/v1/country/{id}:
+  /country/{id}:
     get:
       consumes:
         - application/json
@@ -4753,7 +5000,7 @@ paths:
       summary: Delete test settings to the payment method
       tags:
         - Payment Method
-  /api/v1/price_group/country:
+  /price_group/country:
     get:
       consumes:
         - application/json
@@ -4780,7 +5027,7 @@ paths:
       summary: Get region and currency by country
       tags:
         - Price group
-  /api/v1/price_group/currencies:
+  /price_group/currencies:
     get:
       description: Get a list of all currencies with regions and countries in them
       produces:
@@ -4799,7 +5046,7 @@ paths:
       summary: Get a list of all currencies with regions and countries in them
       tags:
         - Price group
-  /api/v1/price_group/region:
+  /price_group/region:
     get:
       consumes:
         - application/json
@@ -4926,7 +5173,7 @@ paths:
       tags:
         - Pricing
 
-  "/admin/api/v1/merchants":
+  "/system/api/v1/merchants":
     get:
       summary: Get list of merchants
       tags:
@@ -5019,7 +5266,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}":
+  "/system/api/v1/merchants/{id}":
     get:
       summary: Get merchant by identifier
       tags:
@@ -5060,6 +5307,8 @@ paths:
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants":
     patch:
       summary: Change merchant information
       tags:
@@ -5082,42 +5331,6 @@ paths:
             $ref: '#/definitions/onboarding.Merchant.ChangeAgreementDataRequest'
             type: object
           required: true
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/onboarding.Merchant'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Object not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error on server side
-          schema:
-            $ref: '#/definitions/model.Error'
-
-  "/admin/api/v1/merchants/user":
-    get:
-      summary: Get user merchant
-      tags:
-        - Onboarding
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description: Get user merchant
       responses:
         "200":
           description: OK
@@ -5193,7 +5406,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/manual_payout/enable":
+  "/admin/api/v1/merchants/manual_payout/enable":
     put:
       summary: Enable merchant manual payouts
       tags:
@@ -5203,12 +5416,6 @@ paths:
       produces:
         - application/json
       description: Enable merchant manual payouts
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          type: string
-          required: true
       responses:
         "200":
           description: OK
@@ -5235,7 +5442,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/manual_payout/disable":
+  "/admin/api/v1/merchants/manual_payout/disable":
     put:
       summary: Disable merchant manual payouts
       tags:
@@ -5245,12 +5452,6 @@ paths:
       produces:
         - application/json
       description: Disable merchant manual payouts
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          type: string
-          required: true
       responses:
         "200":
           description: OK
@@ -5277,7 +5478,62 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{merchant_id}/notifications":
+  "/admin/api/v1/merchants/notifications":
+    get:
+      summary: Get list of notifications to merchant
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get list of notifications to merchant
+      parameters:
+        - description: user who sent notification
+          in: query
+          name: user
+          type: string
+        - description: "flag to filter return notification: 0 - return only notification; 1 - return only history"
+          in: query
+          name: is_system
+          type: integer
+        - description: limit of returning records
+          in: query
+          name: limit
+          type: integer
+        - description: offset of returning records
+          in: query
+          name: offset
+          type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/onboarding.Merchant.Notifications'
+            type: array
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/system/api/v1/merchants/{merchant_id}/notifications":
     get:
       summary: Get list of notifications to merchant
       tags:
@@ -5380,7 +5636,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{merchant_id}/notifications/{notification_id}":
+  "/admin/api/v1/merchants/notifications/{notification_id}":
     get:
       summary: Get notification by identifier
       tags:
@@ -5391,11 +5647,6 @@ paths:
         - application/json
       description: Get notification by identifier
       parameters:
-        - description: merchant identifier
-          in: path
-          name: merchant_id
-          type: string
-          required: true
         - description: notification identifier
           in: path
           name: notification_id
@@ -5427,7 +5678,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{merchant_id}/notifications/{notification_id}/mark-as-read":
+  "/admin/api/v1/merchants/notifications/{notification_id}/mark-as-read":
     put:
       summary: Mark notification as readed
       tags:
@@ -5438,11 +5689,6 @@ paths:
         - application/json
       description: Mark notification as readed
       parameters:
-        - description: merchant identifier
-          in: path
-          name: merchant_id
-          type: string
-          required: true
         - description: notification identifier
           in: path
           name: notification_id
@@ -5798,7 +6044,43 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/agreement":
+  "/admin/api/v1/merchants/agreement":
+    get:
+      summary: Generate agreement
+      tags:
+        - Onboarding
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Generate agreement for merchant and return data about printable agreement
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/onboarding.Merchant.PrintableAgreementData.Response'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/system/api/v1/merchants/{merchant_id}/agreement":
     get:
       summary: Generate agreement
       tags:
@@ -5811,7 +6093,7 @@ paths:
       parameters:
         - description: merchant identifier
           in: path
-          name: id
+          name: merchant_id
           type: string
           required: true
       responses:
@@ -5840,7 +6122,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/agreement/document":
+  "/admin/api/v1/merchants/agreement/document":
     get:
       summary: Download merchant agreement
       tags:
@@ -5850,12 +6132,6 @@ paths:
       produces:
         - application/pdf
       description: Download merchant agreement
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          type: string
-          required: true
       responses:
         "200":
           description: OK
@@ -5881,26 +6157,28 @@ paths:
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
-    post:
-      summary: Upload merchant agreement
+
+  "/system/api/v1/merchants/{merchant_id}/agreement/document":
+    get:
+      summary: Download merchant agreement
       tags:
         - Onboarding
       consumes:
-        - multipart/form-data
+        - application/x-www-form-urlencoded
       produces:
-        - application/json
-      description: Upload new version of merchant agreement
+        - application/pdf
+      description: Download merchant agreement
       parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          type: string
-          required: true
+          - description: merchant identifier
+            in: path
+            name: merchant_id
+            type: string
+            required: true
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/onboarding.Merchant.PrintableAgreementData.Response'
+            type: file
         "400":
           description: Invalid request data
           schema:
@@ -6025,7 +6303,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user/profile":
+  "/api/v1/user/profile":
     get:
       summary: Get user profile
       tags:
@@ -6103,7 +6381,43 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/api/v1/user/confirm_email":
+  "/api/v1/user/profile/common":
+    get:
+      summary: Get common user profile
+      tags:
+        - User Profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get common user profile (main profile, user role, user permissions)
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userCommonProfile'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/user/confirm_email":
     put:
       summary: Confirm user email
       tags:
@@ -6137,7 +6451,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user/profile/{id}":
+  "/system/api/v1/user/profile/{id}":
     get:
       summary: Get user profile by proifile identifier
       tags:
@@ -6179,7 +6493,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/user/feedback":
+  "/api/v1/user/feedback":
     post:
       summary: Create page review
       tags:
@@ -6221,7 +6535,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/agreement/signature":
+  "/admin/api/v1/merchants/agreement/signature":
     put:
       summary: Get data to sign agreement
       tags:
@@ -6232,11 +6546,6 @@ paths:
         - application/json
       description: Get data to sign license agreement with hellosign api
       parameters:
-        - description: merchant identifier for which creating signature request
-          in: path
-          name: id
-          required: true
-          type: string
         - description: body
           in: body
           name: data
@@ -6314,7 +6623,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/company":
+  "/system/api/v1/merchants/{id}/company":
     put:
       summary: Set company information
       tags:
@@ -6407,7 +6716,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/contacts":
+  "/system/api/v1/merchants/{id}/contacts":
     put:
       summary: Set contacts information
       tags:
@@ -6500,7 +6809,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/banking":
+  "/system/api/v1/merchants/{id}/banking":
     put:
       summary: Set banking information
       tags:
@@ -6612,8 +6921,48 @@ paths:
           description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
+    post:
+      summary: Set tariff rates to merchant
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Set tariff rates to merchant
+      parameters:
+        - description: request body
+          in: body
+          schema:
+            $ref: '#/definitions/onboarding.Tariff.Set.Request'
+            type: object
+          name: data
+          required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/tariffs":
+  "/system/api/v1/merchant/{id}/tariffs":
     post:
       summary: Set tariff rates to merchant
       tags:
@@ -6660,7 +7009,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/status":
+  "/admin/api/v1/merchants/status":
     get:
       summary: Get data fill status
       tags:
@@ -6670,12 +7019,6 @@ paths:
       produces:
         - application/json
       description: Get data fill status
-      parameters:
-        - description: merchant identifier
-          in: path
-          name: id
-          required: true
-          type: string
       responses:
         "200":
           description: OK
@@ -7704,7 +8047,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/dashboard/main":
+  "/admin/api/v1/merchants/dashboard/main":
     get:
       summary: Get main reports data for dashboard
       tags:
@@ -7752,7 +8095,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
 
-  "/admin/api/v1/merchants/{id}/dashboard/revenue_dynamics":
+  "/admin/api/v1/merchants/dashboard/revenue_dynamics":
     get:
       summary: Get revenue dynamic report for dashboard
       tags:
@@ -7799,7 +8142,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/merchants/{id}/dashboard/base":
+  "/admin/api/v1/merchants/dashboard/base":
     get:
       summary: Get base reports data for dashboard
       tags:
@@ -8932,59 +9275,6 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/paylinks/{id}/dashboard/summary":
-    get:
-      summary: Get summary stat for a payment link by id for current authenticated merchant
-      tags:
-        - Payment links
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description:  Get summary stat for a payment link by id for current authenticated merchant
-      parameters:
-        - description: Payment link identifier
-          in: path
-          name: id
-          required: true
-          type: string
-        - description: period start date in unix timestamp format
-          in: query
-          name: period_from
-          type: number
-          required: false
-        - description: period end date in unix timestamp format
-          in: query
-          name: period_to
-          type: number
-          required: false
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/paylinkStatCommon'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
-
   "/admin/api/v1/paylinks/{id}/dashboard/country":
     get:
       summary: Get a grouping stat by country for a payment link by its id for current authenticated merchant
@@ -8996,9 +9286,9 @@ paths:
         - application/json
       description:  Get a grouping stat by country for a payment link by its id for current authenticated merchant
       parameters:
-        - description: Payment link identifier
+        - description: User role identifier
           in: path
-          name: id
+          name: role_id
           required: true
           type: string
         - description: period start date in unix timestamp format
@@ -9194,42 +9484,6 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/vat_reports":
-    get:
-      summary: Get a VAT reports dashboard
-      tags:
-        - VAT Reports
-      consumes:
-        - application/x-www-form-urlencoded
-      produces:
-        - application/json
-      description:   Get a VAT reports dashboard
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/grpcVatReportsPaginate'
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Object with error message
-          schema:
-            $ref: '#/definitions/model.Error'
-
   "/admin/api/v1/vat_reports/country/{country}":
     get:
       summary: Get a VAT reports list by country
@@ -9241,9 +9495,9 @@ paths:
         - application/json
       description:   Get a VAT reports list by country
       parameters:
-        - description: country code ISO A2
+        - description: User role identifier
           in: path
-          name: country
+          name: role_id
           required: true
           type: string
       responses:
@@ -9395,6 +9649,556 @@ paths:
       summary: Get data for rendering payment form
       tags:
         - Order
+  "/system/api/v1/users/invite":
+    post:
+      summary: Send invitation for admin user
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Send invitation to add user as administrator
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/InviteUserAdmin"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/InviteUserResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/system/api/v1/users":
+    get:
+      summary: List of admin users
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of admin users
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListUsersResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/system/api/v1/users/resend":
+    post:
+      summary: Resend invitation for admin user
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Resend invitation to add user as administrator
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/ResendInviteAdmin"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/system/api/v1/users/roles":
+    get:
+      summary: List of admin role types
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of admin role types
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListRoleType'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/system/api/v1/users/roles/{role_id}":
+    delete:
+      summary: Delete admin user
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete admin user
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      summary: Update admin user role
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Update admin user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/UpdateUserRoleRequest"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    get:
+      summary: Get admin user role
+      tags:
+        - Admin user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get admin user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UserRoleResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/invite":
+    post:
+      summary: Send invitation for merchant user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Send invitation to add user as merchant user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/InviteUserMerchant"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/InviteUserResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/users/resend":
+    post:
+      summary: Resend invitation for merchant user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Resend invitation to add user as merchant user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/ResendInviteMerchant"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/users":
+    get:
+      summary: List of merchant users
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of merchant users
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListUsersResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/users/roles/{role_id}":
+    delete:
+      summary: Delete merchant user
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Delete merchant user
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    put:
+      summary: Update merchant user role
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Update merchant user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/UpdateUserRoleRequest"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+    get:
+      summary: Get merchant user role
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get merchant user role
+      parameters:
+        - description: User role identifier
+          in: path
+          name: role_id
+          required: true
+          type: string
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/UserRoleResponse"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/EmptyResponseWithStatus'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/merchants/roles":
+    get:
+      summary: List of merchant role types
+      tags:
+        - Merchant user roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: List of merchant role types
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListRoleType'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/invite/check":
+    post:
+      summary: Check invitation token
+      tags:
+        - User
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Check invitation token
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/CheckInviteToken"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/CheckInviteTokenResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/invite/approve":
+    post:
+      summary: Approve of invitation for user
+      tags:
+        - Order
 
   "/api/v1/saved_card":
     delete:
@@ -9429,7 +10233,7 @@ paths:
       tags:
         - Saved Card
 
-  "/admin/api/v1/merchants/{id}/set_operating_company":
+  "/system/api/v1/merchants/{id}/set_operating_company":
     post:
       summary: Set merchant operating company
       tags:
@@ -9480,7 +10284,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/operating_company":
+  "/system/api/v1/operating_company":
     get:
       consumes:
         - application/json
@@ -9546,7 +10350,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/operating_company/{id}":
+  "/system/api/v1/operating_company/{id}":
     get:
       consumes:
         - application/json
@@ -9686,5 +10490,37 @@ paths:
             $ref: '#/definitions/model.Error'
         "500":
           description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/api/v1/user/merchants":
+    get:
+      summary: Get merchants list for user
+      tags:
+        - User
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get merchants list for user
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/MerchantsForUserResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'

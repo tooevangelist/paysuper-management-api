@@ -2,15 +2,17 @@ package dispatcher
 
 import (
 	"context"
+	"fmt"
 	jwtverifier "github.com/ProtocolONE/authone-jwt-verifier-golang"
-	jwtMiddleware "github.com/ProtocolONE/authone-jwt-verifier-golang/middleware/echo"
 	"github.com/ProtocolONE/go-core/v2/pkg/invoker"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/alexeyco/simpletable"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
+	"github.com/paysuper/paysuper-management-api/pkg/micro"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -25,17 +27,21 @@ type Dispatcher struct {
 	appSet AppSet
 	provider.LMT
 	globalCfg *common.Config
+	ms        *micro.Micro
 }
 
 // dispatch
 func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
-
 	t, e := template.New("").Funcs(common.FuncMap).ParseGlob(d.cfg.WorkDir + "/assets/web/template/*.html")
 	if e != nil {
 		return e
 	}
 	echoHttp.Renderer = common.NewTemplate(t)
-
+	echoHttp.Binder = &common.Binder{
+		LimitDefault:  d.globalCfg.LimitDefault,
+		OffsetDefault: d.globalCfg.OffsetDefault,
+		LimitMax:      d.globalCfg.LimitMax,
+	}
 	// Called after routes
 	echoHttp.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Output: logger.NewLevelWriter(d.L(), logger.LevelInfo),
@@ -43,11 +49,11 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			`"host":"${host}","method":"${method}","uri":"${uri}","user_agent":"${user_agent}",` +
 			`"status":${status},"error":"${error}","latency":${latency},"latency_human":"${latency_human}"` +
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}}`,
-	}))                                 // 3
+	})) // 3
 	echoHttp.Use(d.RecoverMiddleware()) // 2
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowHeaders: []string{"authorization", "content-type"},
-	}))                                 // 1
+	})) // 1
 	// Called before routes
 	echoHttp.Use(d.RawBodyPreMiddleware)         // 2
 	echoHttp.Use(d.LimitOffsetSortPreMiddleware) // 1
@@ -57,9 +63,11 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AuthUser:    echoHttp.Group(common.AuthUserGroupPath),
 		WebHooks:    echoHttp.Group(common.WebHookGroupPath),
 		Common:      echoHttp,
+		SystemUser:  echoHttp.Group(common.SystemUserGroupPath),
 	}
 	d.authProjectGroup(grp.AuthProject)
 	d.authUserGroup(grp.AuthUser)
+	d.systemUserGroup(grp.SystemUser)
 	d.webHookGroup(grp.WebHooks)
 	// init routes
 	for _, handler := range d.appSet.Handlers {
@@ -126,8 +134,11 @@ func (d *Dispatcher) commonRoutes(echoHttp *echo.Echo) {
 }
 
 func (d *Dispatcher) authProjectGroup(grp *echo.Group) {
-	// Called after routes
-	grp.Use(d.BodyDumpMiddleware()) // 1
+	// Called before routes
+	if !d.globalCfg.DisableAuthMiddleware {
+		grp.Use(d.GetUserDetailsMiddleware) // 1
+	}
+	grp.Use(d.SystemBinderPreMiddleware) // 2
 }
 
 func (d *Dispatcher) accessGroup(grp *echo.Group) {
@@ -136,27 +147,29 @@ func (d *Dispatcher) accessGroup(grp *echo.Group) {
 }
 
 func (d *Dispatcher) authUserGroup(grp *echo.Group) {
-	// Called after routes
+	// Called before routes
 	if !d.globalCfg.DisableAuthMiddleware {
-		grp.Use(
-			common.ContextWrapperCallback(func(c echo.Context, next echo.HandlerFunc) error {
-				handleFn := jwtMiddleware.AuthOneJwtCallableWithConfig(
-					d.appSet.JwtVerifier,
-					func(ui *jwtverifier.UserInfo) {
-						user := common.ExtractUserContext(c)
-						user.Id = ui.UserID
-						user.Name = "System User"
-						user.Merchants = make(map[string]bool)
-						user.Roles = make(map[string]bool)
-						common.SetUserContext(c, user)
-					},
-				)(next)
-				return handleFn(c)
-			}),
-		) // 1
-		// Called before routes
-		grp.Use(d.GetUserDetailsMiddleware) // 1
+		grp.Use(d.GetUserDetailsMiddleware)       // 1
+		grp.Use(d.AuthOneMerchantPreMiddleware()) // 2
+		grp.Use(d.CasbinMiddleware(func(c echo.Context) string {
+			user := common.ExtractUserContext(c)
+			return fmt.Sprintf(pkg.CasbinMerchantUserMask, user.MerchantId, user.Id)
+		})) // 3
 	}
+	grp.Use(d.MerchantBinderPreMiddleware) // 3
+}
+
+func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
+	// Called before routes
+	if !d.globalCfg.DisableAuthMiddleware {
+		grp.Use(d.GetUserDetailsMiddleware)   // 1
+		grp.Use(d.AuthOnAdminPreMiddleware()) // 2
+		grp.Use(d.CasbinMiddleware(func(c echo.Context) string {
+			user := common.ExtractUserContext(c)
+			return user.Id
+		})) // 3
+	}
+	grp.Use(d.SystemBinderPreMiddleware) // 3
 }
 
 func (d *Dispatcher) webHookGroup(grp *echo.Group) {
@@ -190,7 +203,7 @@ type AppSet struct {
 }
 
 // New
-func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, globalCfg *common.Config) *Dispatcher {
+func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config, globalCfg *common.Config, ms *micro.Micro) *Dispatcher {
 	set.Logger = set.Logger.WithFields(logger.Fields{"service": common.Prefix})
 	return &Dispatcher{
 		ctx:       ctx,
@@ -198,5 +211,6 @@ func New(ctx context.Context, set provider.AwareSet, appSet AppSet, cfg *Config,
 		appSet:    appSet,
 		LMT:       &set,
 		globalCfg: globalCfg,
+		ms:        ms,
 	}
 }

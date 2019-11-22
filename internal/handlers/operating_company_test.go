@@ -58,7 +58,7 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_GetOperatingCompani
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthUserGroupPath + operatingCompanyPath).
+		Path(common.SystemUserGroupPath + operatingCompanyPath).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
 
@@ -75,7 +75,7 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_GetOperatingCompany
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthUserGroupPath+operatingCompanyIdPath).
+		Path(common.SystemUserGroupPath+operatingCompanyIdPath).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -99,7 +99,7 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_AddOperatingCompany
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + operatingCompanyPath).
+		Path(common.SystemUserGroupPath + operatingCompanyPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -123,7 +123,7 @@ func (suite *OperatingCompanyTestSuite) TestOperatingCompany_UpdateOperatingComp
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath+operatingCompanyIdPath).
+		Path(common.SystemUserGroupPath+operatingCompanyIdPath).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
