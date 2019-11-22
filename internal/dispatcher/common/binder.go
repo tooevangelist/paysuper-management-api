@@ -480,28 +480,24 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	err := db.Bind(&req, ctx)
 
 	if err != nil {
-		b.L().Error("[update project] default binder error", logger.WithFields(logger.Fields{"err": err.Error()}))
 		return err
 	}
 
 	projectId := ctx.Param(RequestParameterProjectId)
 
 	if projectId == "" || bson.IsObjectIdHex(projectId) == false {
-		b.L().Error("[update project] project invalid")
 		return ErrorIncorrectProjectId
 	}
-	b.L().Error("[update project] project id", logger.WithFields(logger.Fields{"project id": projectId}))
+
 	pReq := &grpc.GetProjectRequest{ProjectId: projectId, MerchantId: projectReq.MerchantId}
 	pRsp, err := b.dispatch.Services.Billing.GetProject(context.Background(), pReq)
 
 	if err != nil {
-		b.L().Error("[update project] Binding billing error", logger.WithFields(logger.Fields{"err": err.Error()}))
 		b.L().Error(`Call billing server method "GetProject" failed`, logger.Args("error", err.Error(), "request", pReq))
 		return err
 	}
 
 	if pRsp.Status != pkg.ResponseStatusOk {
-		b.L().Error("[update project] billing response status")
 		return pRsp.Message
 	}
 
@@ -533,7 +529,7 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 	structure.Localizations = pRsp.Item.Localizations
 	structure.Currencies = pRsp.Item.Currencies
 	structure.VirtualCurrency = pRsp.Item.VirtualCurrency
-	b.L().Error("[update project] map other")
+
 	if v, ok := req[RequestParameterName]; ok {
 		tv, ok := v.(map[string]interface{})
 

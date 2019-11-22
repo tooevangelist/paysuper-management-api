@@ -76,7 +76,6 @@ func (h *ProjectRoute) updateProject(ctx echo.Context) error {
 	binder := common.NewChangeProjectRequestBinder(h.dispatch, h.cfg)
 
 	if err := binder.Bind(req, ctx); err != nil {
-		h.L().Error("[update project] Binding error", logger.WithFields(logger.Fields{"err": err.Error()}))
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
@@ -84,16 +83,14 @@ func (h *ProjectRoute) updateProject(ctx echo.Context) error {
 	if req.MerchantId != authUser.MerchantId {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectMerchantId)
 	}
-	h.L().Error("[update project] run validate")
+
 	if err := h.dispatch.Validate.Struct(req); err != nil {
-		h.L().Error("[update project] validate error", logger.WithFields(logger.Fields{"err": err.Error()}))
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
-	h.L().Error("[update project] change project in billing")
+
 	res, err := h.dispatch.Services.Billing.ChangeProject(ctx.Request().Context(), req)
 
 	if err != nil {
-		h.L().Error("[update project] cannot change on billing", logger.WithFields(logger.Fields{"err": err.Error()}))
 		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
