@@ -18,6 +18,7 @@ const (
 	orderIdPath              = "/order/:id"
 	paylinkIdPath            = "/paylink/:id"
 	orderCreatePath          = "/order/create"
+	orderReCreatePath          = "/order/recreate"
 	orderPath                = "/order"
 	paymentPath              = "/payment"
 	orderRefundsPath         = "/order/:order_id/refunds"
@@ -88,6 +89,7 @@ func (h *OrderRoute) Route(groups *common.Groups) {
 	groups.Common.POST(orderCreatePath, h.createFromFormData)    // TODO: Need a test
 	groups.AuthProject.POST(orderPath, h.createJson)             // TODO: Need a test
 	groups.AuthProject.POST(paymentPath, h.processCreatePayment) // TODO: Need a test
+	groups.AuthProject.POST(orderReCreatePath, h.recreateOrder)
 
 	groups.AuthUser.GET(orderPath, h.listOrdersPublic)
 	groups.AuthUser.GET(orderIdPath, h.getOrderPublic) // TODO: Need a test
@@ -164,6 +166,38 @@ func (h *OrderRoute) createFromFormData(ctx echo.Context) error {
 
 	return ctx.Redirect(http.StatusFound, rUrl)
 }
+
+
+func (h *OrderRoute) recreateOrder(ctx echo.Context) error {
+	req := &grpc.OrderReCreateProcessRequest{}
+	if err := ctx.Bind(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	err := h.dispatch.Validate.Struct(req)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	res, err := h.dispatch.Services.Billing.OrderReCreateProcess(ctx.Request().Context(), req)
+	if err != nil {
+		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "OrderReCreateProcess", req)
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	order := res.Item
+	response := &CreateOrderJsonProjectResponse{
+		Id:             order.Uuid,
+		PaymentFormUrl: h.cfg.OrderInlineFormUrlMask + "?order_id=" + order.Uuid,
+	}
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
 
 // Create order from json request.
 // Order can be create:
