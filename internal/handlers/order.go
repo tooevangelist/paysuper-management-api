@@ -12,13 +12,14 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"net/http"
+	"time"
 )
 
 const (
 	orderIdPath              = "/order/:order_id"
 	paylinkIdPath            = "/paylink/:id"
 	orderCreatePath          = "/order/create"
-	orderReCreatePath          = "/order/recreate"
+	orderReCreatePath        = "/order/recreate"
 	orderPath                = "/order"
 	paymentPath              = "/payment"
 	orderRefundsPath         = "/order/:order_id/refunds"
@@ -137,8 +138,10 @@ func (h *OrderRoute) Route(groups *common.Groups) {
 // @Router /order/create [post]
 func (h *OrderRoute) createFromFormData(ctx echo.Context) error {
 	req := &billing.OrderCreateRequest{
-		PayerIp: ctx.RealIP(),
-		IsJson:  false,
+		User: &billing.OrderUser{
+			Ip: ctx.RealIP(),
+		},
+		IsJson: false,
 	}
 
 	if err := (&common.OrderFormBinder{}).Bind(req, ctx); err != nil {
@@ -146,6 +149,11 @@ func (h *OrderRoute) createFromFormData(ctx echo.Context) error {
 	}
 
 	req.IssuerUrl = ctx.Request().Header.Get(common.HeaderReferer)
+
+	cookie, err := ctx.Cookie(common.CustomerTokenCookiesName)
+	if err == nil && cookie != nil && cookie.Value != "" {
+		req.Cookie = cookie.Value
+	}
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
@@ -165,7 +173,6 @@ func (h *OrderRoute) createFromFormData(ctx echo.Context) error {
 
 	return ctx.Redirect(http.StatusFound, rUrl)
 }
-
 
 func (h *OrderRoute) recreateOrder(ctx echo.Context) error {
 	req := &grpc.OrderReCreateProcessRequest{}
@@ -196,7 +203,6 @@ func (h *OrderRoute) recreateOrder(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, response)
 }
-
 
 // Create order from json request.
 // Order can be create:
@@ -641,6 +647,11 @@ func (h *OrderRoute) processBillingAddress(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
+	cookie, err := ctx.Cookie(common.CustomerTokenCookiesName)
+	if err == nil && cookie != nil && cookie.Value != "" {
+		req.Cookie = cookie.Value
+	}
+
 	req.OrderId = orderId
 	err = h.dispatch.Validate.Struct(req)
 
@@ -656,6 +667,14 @@ func (h *OrderRoute) processBillingAddress(ctx echo.Context) error {
 
 	if res.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	if res.Item.Cookie != "" {
+		cookie := new(http.Cookie)
+		cookie.Name = common.CustomerTokenCookiesName
+		cookie.Value = res.Item.Cookie
+		cookie.Expires = time.Now().Add(30 * 24 * time.Hour)
+		ctx.SetCookie(cookie)
 	}
 
 	return ctx.JSON(http.StatusOK, res.Item)
