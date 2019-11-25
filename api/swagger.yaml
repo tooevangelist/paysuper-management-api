@@ -1419,9 +1419,6 @@ definitions:
       mail_tracking_link:
         description: "link to tracking package with agreement in post"
         type: string
-      signature_request:
-        description: object contained signatire request data
-        $ref: '#/definitions/onboarding.merchant.signatureRequest'
       agreement_template:
         description: license agreement template identifier in hellosign
         type: string
@@ -2147,14 +2144,6 @@ definitions:
       complete_steps_count:
         type: integer
         description: count of complete steps
-
-  onboarding.merchant.signatureRequest:
-    properties:
-      signer_type:
-        type: integer
-        description: "type of signer which request a signing license agreement. possible values: 0 - merchant owner; 1 - paysuper admin"
-    required:
-      - signer_type
 
   onboarding.merchant.signatureResponse:
     properties:
@@ -6545,14 +6534,6 @@ paths:
       produces:
         - application/json
       description: Get data to sign license agreement with hellosign api
-      parameters:
-        - description: body
-          in: body
-          name: data
-          schema:
-            $ref: '#/definitions/onboarding.merchant.signatureRequest'
-            type: object
-          required: true
       responses:
         "200":
           description: OK
@@ -6595,13 +6576,6 @@ paths:
           name: merchant_id
           required: true
           type: string
-        - description: body
-          in: body
-          name: data
-          schema:
-            $ref: '#/definitions/onboarding.merchant.signatureRequest'
-            type: object
-          required: true
       responses:
         "200":
           description: OK

@@ -102,8 +102,8 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.SystemUser.GET(merchantsIdAgreementPath, h.getAgreementData)
 	groups.AuthUser.GET(merchantsAgreementDocumentPath, h.getAgreementDocument)
 	groups.SystemUser.GET(merchantsIdAgreementDocumentPath, h.getAgreementDocument)
-	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createAgreementSignature)
-	groups.SystemUser.PUT(merchantsIdAgreementSignaturePath, h.createAgreementSignature)
+	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createMerchantAgreementSignature)
+	groups.SystemUser.PUT(merchantsIdAgreementSignaturePath, h.createSystemAgreementSignature)
 
 	groups.SystemUser.POST(merchantsIdNotificationsPath, h.createNotification)
 	groups.SystemUser.GET(merchantsIdNotificationsPath, h.listNotifications)
@@ -594,9 +594,20 @@ func (h *OnboardingRoute) getMerchantStatus(ctx echo.Context) error {
 
 // @Description get hellosign (https://www.hellosign.com) signature to sign license agreement
 // @Example @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-// 		https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/agreement/signature
-func (h *OnboardingRoute) createAgreementSignature(ctx echo.Context) error {
-	req := &grpc.GetMerchantAgreementSignUrlRequest{}
+// 		https://api.paysuper.online/admin/api/v1/merchants/agreement/signature
+func (h *OnboardingRoute) createMerchantAgreementSignature(ctx echo.Context) error {
+	return h.createAgreementSignature(ctx, pkg.SignerTypeMerchant)
+}
+
+// @Description get hellosign (https://www.hellosign.com) signature to sign license agreement
+// @Example @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
+// 		https://api.paysuper.online/system/api/v1/merchants/ffffffffffffffffffffffff/agreement/signature
+func (h *OnboardingRoute) createSystemAgreementSignature(ctx echo.Context) error {
+	return h.createAgreementSignature(ctx, pkg.SignerTypePs)
+}
+
+func (h *OnboardingRoute) createAgreementSignature(ctx echo.Context, signerType int32) error {
+	req := &grpc.GetMerchantAgreementSignUrlRequest{SignerType: signerType}
 
 	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
 		return err
@@ -605,8 +616,6 @@ func (h *OnboardingRoute) createAgreementSignature(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.GetMerchantAgreementSignUrl(ctx.Request().Context(), req)
 
 	if err != nil {
-		fmt.Println(res)
-		fmt.Println(err)
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetMerchantAgreementSignUrl")
 	}
 
