@@ -674,6 +674,7 @@ func (h *OrderRoute) processBillingAddress(ctx echo.Context) error {
 		cookie.Name = common.CustomerTokenCookiesName
 		cookie.Value = res.Item.Cookie
 		cookie.Expires = time.Now().Add(30 * 24 * time.Hour)
+		cookie.HttpOnly = true
 		ctx.SetCookie(cookie)
 	}
 
