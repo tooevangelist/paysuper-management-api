@@ -354,7 +354,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(userProfileConfirmEmailPath).
+		Path(common.NoAuthGroupPath + userProfileConfirmEmailPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -367,7 +367,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BadData_Error() 
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(userProfileConfirmEmailPath).
+		Path(common.NoAuthGroupPath + userProfileConfirmEmailPath).
 		BodyString(body).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -385,7 +385,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_EmptyToken_Error
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(userProfileConfirmEmailPath).
+		Path(common.NoAuthGroupPath + userProfileConfirmEmailPath).
 		BodyString(body).
 		Init(test.ReqInitJSON()).
 		Exec(suite.T())
@@ -403,7 +403,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerSys
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(userProfileConfirmEmailPath).
+		Path(common.NoAuthGroupPath + userProfileConfirmEmailPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -422,7 +422,7 @@ func (suite *UserProfileTestSuite) TestUserProfile_ConfirmEmail_BillingServerRet
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
-		Path(userProfileConfirmEmailPath).
+		Path(common.NoAuthGroupPath + userProfileConfirmEmailPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
