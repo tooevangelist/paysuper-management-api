@@ -4695,7 +4695,7 @@ paths:
       summary: Create order with HTML form
       tags:
         - Payment Order
-  /api/v1/payment_method:
+  /system/api/v1/payment_method:
     post:
       consumes:
         - application/json
@@ -4723,7 +4723,7 @@ paths:
       summary: Create a payment method for payment system
       tags:
         - Payment Method
-  /api/v1/payment_method/{id}:
+  /system/api/v1/payment_method/{id}:
     put:
       consumes:
         - application/json
@@ -4756,7 +4756,7 @@ paths:
       summary: Update a payment method for payment system
       tags:
         - Payment Method
-  /api/v1/payment_method/{id}/production:
+  /system/api/v1/payment_method/{id}/production:
     post:
       consumes:
         - application/json
