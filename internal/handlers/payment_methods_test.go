@@ -56,7 +56,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_Required
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + paymentMethodPath).
+		Path(common.SystemUserGroupPath + paymentMethodPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -77,7 +77,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_Required
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + paymentMethodPath).
+		Path(common.SystemUserGroupPath + paymentMethodPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -98,7 +98,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_Name() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + paymentMethodPath).
+		Path(common.SystemUserGroupPath + paymentMethodPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -119,7 +119,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_BindError_PaymentS
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + paymentMethodPath).
+		Path(common.SystemUserGroupPath + paymentMethodPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -144,7 +144,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_Error_BillingServer() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + paymentMethodPath).
+		Path(common.SystemUserGroupPath + paymentMethodPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -161,7 +161,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_create_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + paymentMethodPath).
+		Path(common.SystemUserGroupPath + paymentMethodPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -179,7 +179,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_update_Ok() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":"+common.RequestParameterId, bson.NewObjectId().Hex()).
-		Path(common.AuthProjectGroupPath + paymentMethodIdPath).
+		Path(common.SystemUserGroupPath + paymentMethodIdPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -193,7 +193,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getProductionSettings_Bin
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -218,7 +218,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getProductionSettings_Err
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -240,7 +240,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getProductionSettings_Ok(
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -254,7 +254,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getTestSettings_BindError
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodTestPath).
+		Path(common.SystemUserGroupPath + paymentMethodTestPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -280,7 +280,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getTestSettings_Error_Bil
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodTestPath).
+		Path(common.SystemUserGroupPath + paymentMethodTestPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -302,7 +302,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_getTestSettings_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + paymentMethodTestPath).
+		Path(common.SystemUserGroupPath + paymentMethodTestPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -316,7 +316,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_createProductionSettings_
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -338,7 +338,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_createProductionSettings_
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -360,7 +360,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateProductionSettings_
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -381,7 +381,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateProductionSettings_
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -403,7 +403,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_createTestSettings_BindEr
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -425,7 +425,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_createTestSettings_BindEr
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -447,7 +447,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateTestSettings_BindEr
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -469,7 +469,7 @@ func (suite *PaymentMethodTestSuite) TestPaymentMethod_updateTestSettings_BindEr
 	_, err := suite.caller.Builder().
 		Method(http.MethodPut).
 		Params(":"+common.RequestParameterId, "").
-		Path(common.AuthProjectGroupPath + paymentMethodProductionPath).
+		Path(common.SystemUserGroupPath + paymentMethodProductionPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())

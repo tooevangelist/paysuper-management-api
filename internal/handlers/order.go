@@ -18,7 +18,7 @@ const (
 	orderIdPath              = "/order/:order_id"
 	paylinkIdPath            = "/paylink/:id"
 	orderCreatePath          = "/order/create"
-	orderReCreatePath          = "/order/recreate"
+	orderReCreatePath        = "/order/recreate"
 	orderPath                = "/order"
 	paymentPath              = "/payment"
 	orderRefundsPath         = "/order/:order_id/refunds"
@@ -166,7 +166,6 @@ func (h *OrderRoute) createFromFormData(ctx echo.Context) error {
 	return ctx.Redirect(http.StatusFound, rUrl)
 }
 
-
 func (h *OrderRoute) recreateOrder(ctx echo.Context) error {
 	req := &grpc.OrderReCreateProcessRequest{}
 	if err := ctx.Bind(req); err != nil {
@@ -196,7 +195,6 @@ func (h *OrderRoute) recreateOrder(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, response)
 }
-
 
 // Create order from json request.
 // Order can be create:

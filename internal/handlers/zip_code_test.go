@@ -49,7 +49,7 @@ func (suite *ZipCodeTestSuite) TestCheckZip_Ok() {
 	q.Set("zip", "98")
 
 	res, err := suite.caller.Builder().
-		Path(common.AuthProjectGroupPath + zipCodePath).
+		Path(common.NoAuthGroupPath + zipCodePath).
 		SetQueryParams(q).
 		Exec(suite.T())
 
@@ -71,7 +71,7 @@ func (suite *ZipCodeTestSuite) TestCheckZip_BindError() {
 	q.Set("limit", "qwerty")
 
 	_, err := suite.caller.Builder().
-		Path(common.AuthProjectGroupPath + zipCodePath).
+		Path(common.NoAuthGroupPath + zipCodePath).
 		SetQueryParams(q).
 		Exec(suite.T())
 	assert.Error(suite.T(), err)
@@ -87,7 +87,7 @@ func (suite *ZipCodeTestSuite) TestCheckZip_ValidateError() {
 	q.Set("zip", "98")
 
 	_, err := suite.caller.Builder().
-		Path(common.AuthProjectGroupPath + zipCodePath).
+		Path(common.NoAuthGroupPath + zipCodePath).
 		SetQueryParams(q).
 		Exec(suite.T())
 	assert.Error(suite.T(), err)
@@ -105,7 +105,7 @@ func (suite *ZipCodeTestSuite) TestCheckZip_BillingServerError() {
 
 	suite.router.dispatch.Services.Billing = mock.NewBillingServerErrorMock()
 	_, err := suite.caller.Builder().
-		Path(common.AuthProjectGroupPath + zipCodePath).
+		Path(common.NoAuthGroupPath + zipCodePath).
 		SetQueryParams(q).
 		Exec(suite.T())
 	assert.Error(suite.T(), err)
