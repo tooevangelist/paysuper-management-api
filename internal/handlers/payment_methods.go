@@ -45,14 +45,10 @@ func (h *PaymentMethodApiV1) Route(groups *common.Groups) {
 	groups.AuthProject.DELETE(paymentMethodTestPath, h.deleteTestSettings)
 }
 
-// Create new payment method
-// POST /api/v1/payment_method/:id
 func (h *PaymentMethodApiV1) create(ctx echo.Context) error {
 	return h.createOrUpdatePaymentMethod(ctx)
 }
 
-// Update exists payment method
-// PUT /api/v1/payment_method/:id
 func (h *PaymentMethodApiV1) update(ctx echo.Context) error {
 	return h.createOrUpdatePaymentMethod(ctx)
 }
@@ -80,8 +76,6 @@ func (h *PaymentMethodApiV1) createOrUpdatePaymentMethod(ctx echo.Context) error
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Get production settings for payment method
-// GET /api/v1/payment_method/:id/production
 func (h *PaymentMethodApiV1) getProductionSettings(ctx echo.Context) error {
 	req := &grpc.GetPaymentMethodSettingsRequest{
 		PaymentMethodId: ctx.Param("id"),
@@ -107,14 +101,10 @@ func (h *PaymentMethodApiV1) getProductionSettings(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Create new production settings for payment method
-// POST /payment_method/:id/production
 func (h *PaymentMethodApiV1) createProductionSettings(ctx echo.Context) error {
 	return h.createOrUpdateProductionSettings(ctx)
 }
 
-// Update exists production settings for payment method
-// PUT /api/v1/payment_method/:id/production
 func (h *PaymentMethodApiV1) updateProductionSettings(ctx echo.Context) error {
 	return h.createOrUpdateProductionSettings(ctx)
 }
@@ -145,8 +135,6 @@ func (h *PaymentMethodApiV1) createOrUpdateProductionSettings(ctx echo.Context) 
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Delete production settings for payment method
-// DELETE /api/v1/payment_method/:id/production
 func (h *PaymentMethodApiV1) deleteProductionSettings(ctx echo.Context) error {
 	req := &grpc.GetPaymentMethodSettingsRequest{
 		PaymentMethodId: ctx.Param("id"),
@@ -172,8 +160,6 @@ func (h *PaymentMethodApiV1) deleteProductionSettings(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Get test settings for payment method
-// GET /api/v1/payment_method/:id/test
 func (h *PaymentMethodApiV1) getTestSettings(ctx echo.Context) error {
 	req := &grpc.GetPaymentMethodSettingsRequest{
 		PaymentMethodId: ctx.Param("id"),
@@ -199,14 +185,10 @@ func (h *PaymentMethodApiV1) getTestSettings(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Create new test settings for payment method
-// POST /payment_method/:id/test
 func (h *PaymentMethodApiV1) createTestSettings(ctx echo.Context) error {
 	return h.createOrUpdateTestSettings(ctx)
 }
 
-// Update exists test settings for payment method
-// PUT /api/v1/payment_method/:id/test
 func (h *PaymentMethodApiV1) updateTestSettings(ctx echo.Context) error {
 	return h.createOrUpdateTestSettings(ctx)
 }
@@ -236,8 +218,6 @@ func (h *PaymentMethodApiV1) createOrUpdateTestSettings(ctx echo.Context) error 
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Delete test settings for payment method
-// DELETE /api/v1/payment_method/:id/test
 func (h *PaymentMethodApiV1) deleteTestSettings(ctx echo.Context) error {
 	req := &grpc.GetPaymentMethodSettingsRequest{
 		PaymentMethodId: ctx.Param("id"),
