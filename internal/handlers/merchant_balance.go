@@ -21,7 +21,6 @@ type BalanceRoute struct {
 	provider.LMT
 }
 
-// NewBalanceRoute
 func NewBalanceRoute(set common.HandlerSet, cfg *common.Config) *BalanceRoute {
 	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "BalanceRoute"})
 	return &BalanceRoute{

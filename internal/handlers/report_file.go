@@ -50,14 +50,6 @@ func (h *ReportFileRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(reportFileDownloadPath, h.download)
 }
 
-// Send a request to create a report for download.
-// POST /admin/api/v1/report_file
-//
-// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
-//      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{"file_type": "pdf", "period_from": 1566727410, "period_to": "1566736763"}' \
-//      https://api.paysuper.online/admin/api/v1/report_file
-//
 func (h *ReportFileRoute) create(ctx echo.Context) error {
 	data := &reportFileRequest{}
 
@@ -94,13 +86,6 @@ func (h *ReportFileRoute) create(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Send a request to create a report for download.
-// GET /admin/api/v1/report_file/download/5ced34d689fce60bf4440829.csv
-//
-// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
-//      -H "Authorization: Bearer %access_token_here%" \
-//      https://api.paysuper.online/admin/api/v1/report_file/download/5ced34d689fce60bf4440829.csv
-//
 func (h *ReportFileRoute) download(ctx echo.Context) error {
 	file := ctx.Param("file")
 

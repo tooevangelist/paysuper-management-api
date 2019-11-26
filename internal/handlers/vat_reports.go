@@ -39,8 +39,6 @@ func (h *VatReportsRoute) Route(groups *common.Groups) {
 	groups.SystemUser.POST(vatReportsStatusPath, h.updateVatReportStatus)
 }
 
-// Get vat reports dashboard
-// GET /admin/api/v1/vat_reports
 func (h *VatReportsRoute) getVatReportsDashboard(ctx echo.Context) error {
 
 	res, err := h.dispatch.Services.Billing.GetVatReportsDashboard(ctx.Request().Context(), &grpc.EmptyRequest{})
@@ -53,8 +51,6 @@ func (h *VatReportsRoute) getVatReportsDashboard(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Data)
 }
 
-// Get vat reports for country
-// GET /admin/api/v1/vat_reports/country/ru
 func (h *VatReportsRoute) getVatReportsForCountry(ctx echo.Context) error {
 	req := &grpc.VatReportsRequest{}
 	err := ctx.Bind(req)
@@ -80,8 +76,6 @@ func (h *VatReportsRoute) getVatReportsForCountry(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Data)
 }
 
-// Get transactions for vat report
-// GET /admin/api/v1/vat_reports/details/5ced34d689fce60bf4440829
 func (h *VatReportsRoute) getVatReportTransactions(ctx echo.Context) error {
 	req := &grpc.VatTransactionsRequest{}
 	err := ctx.Bind(req)
@@ -107,15 +101,6 @@ func (h *VatReportsRoute) getVatReportTransactions(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Data)
 }
 
-// Manually change status for vat report
-// (only "paid" and "canceled" values are accepted as correct status)
-// POST /admin/api/v1/vat_reports/status/5ced34d689fce60bf4440829
-//
-// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
-//      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{"status": "paid"}' \
-//      https://api.paysuper.online/admin/api/v1/vat_reports/status/5ced34d689fce60bf4440829
-//
 func (h *VatReportsRoute) updateVatReportStatus(ctx echo.Context) error {
 
 	req := &grpc.UpdateVatReportStatusRequest{}

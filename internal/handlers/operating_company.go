@@ -22,7 +22,6 @@ type OperatingCompanyRoute struct {
 	provider.LMT
 }
 
-// NewOperatingCompanyRoute
 func NewOperatingCompanyRoute(set common.HandlerSet, cfg *common.Config) *OperatingCompanyRoute {
 	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "OperatingCompanyRoute"})
 	return &OperatingCompanyRoute{

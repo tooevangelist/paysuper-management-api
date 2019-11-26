@@ -22,7 +22,6 @@ type PayoutDocumentsRoute struct {
 	provider.LMT
 }
 
-// NewPayoutDocumentsRoute
 func NewPayoutDocumentsRoute(set common.HandlerSet, cfg *common.Config) *PayoutDocumentsRoute {
 	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "PayoutDocumentsRoute"})
 	return &PayoutDocumentsRoute{
@@ -41,9 +40,6 @@ func (h *PayoutDocumentsRoute) Route(groups *common.Groups) {
 
 }
 
-// Get payout documents list with filters and pagination
-// GET /admin/api/v1/payout_documents?payout_document_id=5ced34d689fce60bf4440829
-// GET /admin/api/v1/payout_documents?status=pending&limit=10&offset=0
 func (h *PayoutDocumentsRoute) getPayoutDocumentsList(ctx echo.Context) error {
 	req := &grpc.GetPayoutDocumentsRequest{}
 
@@ -63,8 +59,6 @@ func (h *PayoutDocumentsRoute) getPayoutDocumentsList(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Data)
 }
 
-// Get payout document
-// GET /admin/api/v1/payout_documents/5ced34d689fce60bf4440829
 func (h *PayoutDocumentsRoute) getPayoutDocument(ctx echo.Context) error {
 	req := &grpc.GetPayoutDocumentRequest{}
 	req.PayoutDocumentId = ctx.Param(common.RequestParameterId)
@@ -99,13 +93,6 @@ func (h *PayoutDocumentsRoute) getPayoutDocument(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// Create payout document
-// POST /admin/api/v1/payout_documents
-//
-// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
-//      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{ "description": "royalty for june-july 2019", "merchant_id": "5bdc39a95d1e1100019fb7df" }' \
-//      https://api.paysuper.online/admin/api/v1/payout_documents
 func (h *PayoutDocumentsRoute) createPayoutDocument(ctx echo.Context) error {
 	req := &grpc.CreatePayoutDocumentRequest{}
 	err := ctx.Bind(req)
@@ -134,13 +121,6 @@ func (h *PayoutDocumentsRoute) createPayoutDocument(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Items)
 }
 
-// Update payout document by admin
-// POST /admin/api/v1/payout_documents/5ced34d689fce60bf4440829
-//
-// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
-//      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{"status": "failed", "failure_code": "account_closed"}' \
-//      https://api.paysuper.online/admin/api/v1/payout_documents/5ced34d689fce60bf4440829
 func (h *PayoutDocumentsRoute) updatePayoutDocument(ctx echo.Context) error {
 
 	req := &grpc.UpdatePayoutDocumentRequest{}
@@ -168,8 +148,6 @@ func (h *PayoutDocumentsRoute) updatePayoutDocument(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// Get royalty reports included in payout document
-// GET /admin/api/v1/payout_documents/5ced34d689fce60bf4440829/reports
 func (h *PayoutDocumentsRoute) getPayoutRoyaltyReports(ctx echo.Context) error {
 	req := &grpc.GetPayoutDocumentRequest{}
 	req.PayoutDocumentId = ctx.Param(common.RequestParameterId)

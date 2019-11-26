@@ -30,8 +30,6 @@ func (h *CountryApiV1) Route(groups *common.Groups) {
 	groups.Common.GET("/country/:code", h.getById)
 }
 
-// Get full list of currencies
-// GET /api/v1/country
 func (h *CountryApiV1) get(ctx echo.Context) error {
 
 	res, err := h.dispatch.Services.Billing.GetCountriesList(ctx.Request().Context(), &grpc.EmptyRequest{})
@@ -42,8 +40,6 @@ func (h *CountryApiV1) get(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// Get country by ISO 3166-1 alpha 2 country code
-// GET /api/v1/country/{code}
 func (h *CountryApiV1) getById(ctx echo.Context) error {
 	code := ctx.Param("code")
 

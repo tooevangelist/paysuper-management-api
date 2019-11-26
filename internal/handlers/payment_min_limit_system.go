@@ -21,7 +21,6 @@ type PaymentMinLimitSystemRoute struct {
 	provider.LMT
 }
 
-// NewPaymentMinLimitSystemRoute
 func NewPaymentMinLimitSystemRoute(set common.HandlerSet, cfg *common.Config) *PaymentMinLimitSystemRoute {
 	set.AwareSet.Logger = set.AwareSet.Logger.WithFields(logger.Fields{"router": "PaymentMinLimitSystemRoute"})
 	return &PaymentMinLimitSystemRoute{
