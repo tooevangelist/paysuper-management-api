@@ -1419,9 +1419,6 @@ definitions:
       mail_tracking_link:
         description: "link to tracking package with agreement in post"
         type: string
-      signature_request:
-        description: object contained signatire request data
-        $ref: '#/definitions/onboarding.merchant.signatureRequest'
       agreement_template:
         description: license agreement template identifier in hellosign
         type: string
@@ -2147,14 +2144,6 @@ definitions:
       complete_steps_count:
         type: integer
         description: count of complete steps
-
-  onboarding.merchant.signatureRequest:
-    properties:
-      signer_type:
-        type: integer
-        description: "type of signer which request a signing license agreement. possible values: 0 - merchant owner; 1 - paysuper admin"
-    required:
-      - signer_type
 
   onboarding.merchant.signatureResponse:
     properties:
@@ -6545,14 +6534,48 @@ paths:
       produces:
         - application/json
       description: Get data to sign license agreement with hellosign api
-      parameters:
-        - description: body
-          in: body
-          name: data
+      responses:
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/onboarding.merchant.signatureRequest'
-            type: object
+            $ref: '#/definitions/onboarding.merchant.signatureResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Object not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/system/api/v1/merchants/{merchant_id}/agreement/signature":
+    put:
+      summary: Get data to sign agreement
+      tags:
+        - Onboarding
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Get data to sign license agreement with hellosign api
+      parameters:
+        - description: merchant identifier
+          in: path
+          name: merchant_id
           required: true
+          type: string
       responses:
         "200":
           description: OK
