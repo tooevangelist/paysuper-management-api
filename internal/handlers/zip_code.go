@@ -29,7 +29,7 @@ func NewZipCodeRoute(set common.HandlerSet, cfg *common.Config) *ZipCodeRoute {
 }
 
 func (h *ZipCodeRoute) Route(groups *common.Groups) {
-	groups.Common.GET(zipCodePath, h.checkZip)
+	groups.AuthProject.GET(zipCodePath, h.checkZip)
 }
 
 func (h *ZipCodeRoute) checkZip(ctx echo.Context) error {

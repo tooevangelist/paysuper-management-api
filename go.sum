@@ -67,7 +67,6 @@ github.com/NYTimes/gziphandler v0.0.0-20170623195520-56545f4a5d46/go.mod h1:3wb0
 github.com/NYTimes/gziphandler v1.0.1/go.mod h1:3wb06e3pkSAbeQ52E9H9iFoQsEEwGN64994WTCIhntQ=
 github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5/go.mod h1:lmUJ/7eu/Q8D7ML55dXQrVaamCz2vxCfdQBasLZfHKk=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
-github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681 h1:mZHDYdTUCFvoiOo0qy4Bw6vxW9M7V23Mu1jGju8ENy4=
 github.com/ProtocolONE/authone-jwt-verifier-golang v0.0.0-20190327070329-4dd563b01681/go.mod h1:8hKJwhygAIt08kuhd1yioYH4B8t7HTsMbRHwoe05k3A=
 github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679 h1:1peWmGLPEZJ4mz4dA3GjVgieON+HvPqP+1EwMcvXXJk=
 github.com/ProtocolONE/geoip-service v0.0.0-20190903084234-1d5ae6b96679/go.mod h1:VwtmyyuVrzBuh5O9ENzV4/H/B6zBzs7vpCRR6MNnjNc=
@@ -135,7 +134,6 @@ github.com/aws/aws-sdk-go v1.19.16/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpi
 github.com/aws/aws-sdk-go v1.21.0/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.21.7/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go v1.23.8/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
-github.com/aws/aws-sdk-go v1.23.16 h1:cMEmZoIeno2dgz3grc4vUQ33ZJh32d/4C67tNDxOERw=
 github.com/aws/aws-sdk-go v1.23.16/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/beevik/ntp v0.2.0/go.mod h1:hIHWr+l3+/clUnF44zdK+CWW7fO8dR5cIylAQ76NRpg=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
@@ -300,11 +298,8 @@ github.com/go-openapi/jsonpointer v0.0.0-20160704185906-46af16f9f7b1/go.mod h1:+
 github.com/go-openapi/jsonreference v0.0.0-20160704190145-13c6e3589ad9/go.mod h1:W3Z9FmVs9qj+KR4zFKmDPGiLdk1D9Rlm7cyMvf57TTg=
 github.com/go-openapi/spec v0.0.0-20160808142527-6aced65f8501/go.mod h1:J8+jY1nAiCcj+friV/PDoE1/3eeccG9LYBs0tYvLOWc=
 github.com/go-openapi/swag v0.0.0-20160704191624-1d0bd113de87/go.mod h1:DXUve3Dpr1UfpPtxFw+EFuQ41HhCWZfha5jSVRG7C7I=
-github.com/go-pascal/iban v0.0.0-20180529131734-f0d46003347e h1:9ReJDiZvKNQMQUfp6ehX0MK6O3nwnq1jZzKeOCR1yxY=
 github.com/go-pascal/iban v0.0.0-20180529131734-f0d46003347e/go.mod h1:wb99pV466VbmycGns6f90Vklv2OgWiVamEt4MqhZnDw=
-github.com/go-playground/locales v0.12.1 h1:2FITxuFt/xuCNP1Acdhv62OzaCiviiE4kotfhkmOqEc=
 github.com/go-playground/locales v0.12.1/go.mod h1:IUMDtCfWo/w/mtMfIE/IG2K+Ey3ygWanZIBtBW0W2TM=
-github.com/go-playground/universal-translator v0.16.0 h1:X++omBR/4cE2MNg91AoC3rmGrCjJ8eAeUP/K/EKx4DM=
 github.com/go-playground/universal-translator v0.16.0/go.mod h1:1AnU7NaIRDWWzGEKwgtJRd2xk99HeFyHw3yid4rvQIY=
 github.com/go-redis/redis v6.15.1+incompatible/go.mod h1:NAIEuMOZ/fxfXJIrKDQDz8wamY7mA7PouImQ2Jvg6kA=
 github.com/go-redis/redis v6.15.2+incompatible h1:9SpNVG76gr6InJGxoZ6IuuxaCOQwDAhzyXg+Bs+0Sb4=
@@ -516,7 +511,6 @@ github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkr
 github.com/jinzhu/now v1.0.1 h1:HjfetcXq097iXP0uoPCdnM4Efp5/9MsM0/M+XOTeR3M=
 github.com/jinzhu/now v1.0.1/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=
 github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
-github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
 github.com/jonboulle/clockwork v0.1.0/go.mod h1:Ii8DK3G1RaLaWxj9trq07+26W01tbo22gdxWY5EU2bo=
@@ -533,7 +527,6 @@ github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfV
 github.com/juju/ratelimit v1.0.1/go.mod h1:qapgC/Gy+xNh9UxzV13HGGl/6UXNN+ct+vwSgWNm/qk=
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
 github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0/go.mod h1:1NbS8ALrpOvjt0rHPNLyCIeMtbizbir8U//inJ+zuB8=
-github.com/karlseguin/ccache v2.0.2+incompatible h1:MpSlLlHgG3vPWTAIJsSYlyAQsHwfQ2HzgUlbJFh9Ufk=
 github.com/karlseguin/ccache v2.0.2+incompatible/go.mod h1:CM9tNPzT6EdRh14+jiW8mEF9mkNZuuE51qmgGYUB93w=
 github.com/karlseguin/expect v1.0.1/go.mod h1:zNBxMY8P21owkeogJELCLeHIt+voOSduHYTFUbwRAV8=
 github.com/kelseyhightower/envconfig v1.3.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
@@ -564,11 +557,8 @@ github.com/labstack/gommon v0.2.8/go.mod h1:/tj9csK2iPSBvn+3NLM9e52usepMtrd5ilFY
 github.com/labstack/gommon v0.2.9/go.mod h1:E8ZTmW9vw5az5/ZyHWCp0Lw4OH2ecsaBP1C/NKavGG4=
 github.com/labstack/gommon v0.3.0 h1:JEeO0bvc78PKdyHxloTKiF8BD5iGrH8T6MSeGvSgob0=
 github.com/labstack/gommon v0.3.0/go.mod h1:MULnywXg0yavhxWKc+lOruYdAhDwPK9wf0OL7NoOu+k=
-github.com/leodido/go-urn v1.1.0 h1:Sm1gr51B1kKyfD2BlRcLSiEkffoG96g6TPv6eRoEiB8=
 github.com/leodido/go-urn v1.1.0/go.mod h1:+cyI34gQWZcE1eQU7NVgKkkzdXDQHr1dBMtdAPozLkw=
-github.com/lestrrat-go/jwx v0.0.0-20180928232350-0d477e6a1f0e h1:BsBWIgqA7BFb5sdQeFVQqXYL0P9ZwiNYvL3nywtEmnY=
 github.com/lestrrat-go/jwx v0.0.0-20180928232350-0d477e6a1f0e/go.mod h1:iEoxlYfZjvoGpuWwxUz+eR5e6KTJGsaRcy/YNA/UnBk=
-github.com/lestrrat-go/pdebug v0.0.0-20180220043849-39f9a71bcabe h1:S7XSBlgc/eI2v47LkPPVa+infH3FuTS4tPJbqCtJovo=
 github.com/lestrrat-go/pdebug v0.0.0-20180220043849-39f9a71bcabe/go.mod h1:zvUY6gZZVL2nu7NM+/3b51Z/hxyFZCZxV0hvfZ3NJlg=
 github.com/lib/pq v0.0.0-20180523175426-90697d60dd84/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/lib/pq v1.0.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
@@ -731,7 +721,6 @@ github.com/paysuper/document-signer v0.0.0-20190930091754-a3f6474309f3/go.mod h1
 github.com/paysuper/echo-casbin-middleware v0.0.0-20191122143444-a32c083dc118 h1:9AccpCXHnO5/PF32ifKp7FhzuWi2eDzs9KfWgIbMEf0=
 github.com/paysuper/echo-casbin-middleware v0.0.0-20191122143444-a32c083dc118/go.mod h1:OHB53OzQbybAx3r+3QidGNx+QoVLtb0jyTm21jgSz1k=
 github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82/go.mod h1:TjXLdcbFp4VeSvZK3+sKv61uRS1tH0mtrEEqziaJ/+E=
-github.com/paysuper/paysuper-aws-manager v0.0.1 h1:792ZR+2Pva93ziJbV8zTxjod9gbx4jBlZ1ZUZpN/8Ts=
 github.com/paysuper/paysuper-aws-manager v0.0.1/go.mod h1:TjXLdcbFp4VeSvZK3+sKv61uRS1tH0mtrEEqziaJ/+E=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190903132256-814645b104e6/go.mod h1:0oiTCZU+Qp+Nhgj/kI7vCWJb13qSYkcQ/arq5TFsvgA=
 github.com/paysuper/paysuper-billing-server v0.0.0-20190916111306-1178abb7a20f/go.mod h1:ZwR/bn4gQxv9h4CiVzZY+GZf6ri57oIIFQtb549Jodw=
@@ -746,18 +735,10 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20191031115520-5d2419c5f2cf/g
 github.com/paysuper/paysuper-billing-server v0.0.0-20191111090538-4a75afd2a960/go.mod h1:CYx7c60OPthc8ZlTqiknrhgQwX1QzAkGEghubJP1z1E=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191122133332-7eeb932f976b h1:ENS5c1ebDTkxUKg7iIRNQkVjKK3rrDIfiXQ9daHx+2w=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191122133332-7eeb932f976b/go.mod h1:sVnHFv2yfvj4mRwOFpFUw5iTcpmAdCsLRowsNtPNX+g=
-github.com/paysuper/paysuper-billing-server v0.0.0-20191122154344-52ce6e8bdc20 h1:po2xmzTmOEANZ7d57okyvRqmAuuYPjX954NweXnQavo=
-github.com/paysuper/paysuper-billing-server v0.0.0-20191122154344-52ce6e8bdc20/go.mod h1:sVnHFv2yfvj4mRwOFpFUw5iTcpmAdCsLRowsNtPNX+g=
-github.com/paysuper/paysuper-billing-server v0.0.0-20191125094757-106771ad9699 h1:zZMJgZdlQiotALG2U9bwOyPwZfK2sKEQ4BgB2gVepAc=
-github.com/paysuper/paysuper-billing-server v0.0.0-20191125094757-106771ad9699/go.mod h1:kQmB1eE7q1Zq1qhIJHXMbzS2KnHBiax9SZo33sAHTFk=
-github.com/paysuper/paysuper-billing-server v0.0.0-20191126121718-0653643d849d h1:NfBCOiT6Cbr9HR59lKfKv29GuFO1wWhiAnicE0or4uw=
-github.com/paysuper/paysuper-billing-server v0.0.0-20191126121718-0653643d849d/go.mod h1:pBOL2j3mg/wJaGIZykQ93ddh1nm3kSaAhLsWUJ0r5Tc=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191126124106-1809ec752154 h1:z1H4mZ4j8YM+GpSNf4284Fb9dR1D/DIa81rYbrE1Mfg=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191126124106-1809ec752154/go.mod h1:LnhAH6Yr34cGFpngtlFwvJPu9zoP8cVX75FwtHTEzck=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d h1:hoMkfdq4qEGOONvxajsZO0Mf6np++pGnrKVxegvplaw=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d/go.mod h1:C+QHdgbjIlAPxHD93/08yi+xWfUgk8maLY8FKFqNzMQ=
-github.com/paysuper/paysuper-currencies v0.0.0-20191121131020-65fd9220f98f h1:Y/BG9D86Kr06yaIA0327fIfEtcBq2vSG+Q7vEcK8sB0=
-github.com/paysuper/paysuper-currencies v0.0.0-20191121131020-65fd9220f98f/go.mod h1:Ll2/XKTtyRPUUci4hyYSp8Ip+N6MpUrBBOh6MbZhQOU=
 github.com/paysuper/paysuper-currencies v0.0.0-20191126123753-5139d3b5c8d2 h1:pDMgavqw+g/PAE8nRo6T2njno0FgsJzrLZjABkwtp+0=
 github.com/paysuper/paysuper-currencies v0.0.0-20191126123753-5139d3b5c8d2/go.mod h1:E4w9GTFf1OFe2tCPxIUJR3EW3M8UqwxpRzxMS5aymc4=
 github.com/paysuper/paysuper-database-mongo v0.1.0/go.mod h1:IZu996j//Qoq+uzzCBL5GEYisfF4di/fwedWHlLz7sc=
@@ -1068,7 +1049,6 @@ golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890/go.mod h1:N/0e6XlmueqKjAG
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190319182350-c85d3e98c914/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
-golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 h1:SVwTIAaPC2U/AvvLNZ2a7OVsmBpC8L5BlwK1whH3hm0=
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20181108010431-42b317875d0f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
@@ -1130,7 +1110,6 @@ google.golang.org/appengine v1.3.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7
 google.golang.org/appengine v1.4.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=
 google.golang.org/appengine v1.5.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=
 google.golang.org/appengine v1.6.0/go.mod h1:xpcJRLb0r/rnEns0DIKYYv+WjYCduHsrkT7/EB5XEv4=
-google.golang.org/appengine v1.6.1 h1:QzqyMA1tlu6CgqCDUtU9V+ZKhLFT2dkJuANu5QaxI3I=
 google.golang.org/appengine v1.6.1/go.mod h1:i06prIuMbXzDqacNJfV5OdTW448YApPu5ww/cMBSeb0=
 google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8/go.mod h1:JiN7NxoALGmiZfu7CAH4rXhgtRTLTxftemlI0sWmxmc=
 google.golang.org/genproto v0.0.0-20180831171423-11092d34479b/go.mod h1:JiN7NxoALGmiZfu7CAH4rXhgtRTLTxftemlI0sWmxmc=
@@ -1179,7 +1158,6 @@ gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2/go.mod h1:Xk6kEKp8OKb+X14hQBKW
 gopkg.in/go-playground/assert.v1 v1.2.1/go.mod h1:9RXL0bg/zibRAgZUYszZSwO/z8Y/a8bDuhia5mkpMnE=
 gopkg.in/go-playground/validator.v9 v9.26.0/go.mod h1:+c9/zcJMFNgbLvly1L1V+PpxWdVbfP1avr/N00E2vyQ=
 gopkg.in/go-playground/validator.v9 v9.29.0/go.mod h1:+c9/zcJMFNgbLvly1L1V+PpxWdVbfP1avr/N00E2vyQ=
-gopkg.in/go-playground/validator.v9 v9.29.1 h1:SvGtYmN60a5CVKTOzMSyfzWDeZRxRuGvRQyEAKbw1xc=
 gopkg.in/go-playground/validator.v9 v9.29.1/go.mod h1:+c9/zcJMFNgbLvly1L1V+PpxWdVbfP1avr/N00E2vyQ=
 gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df h1:n7WqCuqOuCbNr617RXOY0AWRXxgwEyPp2z+p0+hgMuE=
 gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df/go.mod h1:LRQQ+SO6ZHR7tOkpBDuZnXENFzX8qRjMDMyPD6BRkCw=

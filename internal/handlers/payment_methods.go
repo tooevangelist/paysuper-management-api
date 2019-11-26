@@ -33,16 +33,16 @@ func NewPaymentMethodApiV1(set common.HandlerSet, cfg *common.Config) *PaymentMe
 }
 
 func (h *PaymentMethodApiV1) Route(groups *common.Groups) {
-	groups.SystemUser.POST(paymentMethodPath, h.create)
-	groups.SystemUser.PUT(paymentMethodIdPath, h.update)
-	groups.SystemUser.POST(paymentMethodProductionPath, h.createProductionSettings)
-	groups.SystemUser.PUT(paymentMethodProductionPath, h.updateProductionSettings)
-	groups.SystemUser.GET(paymentMethodProductionPath, h.getProductionSettings)
-	groups.SystemUser.DELETE(paymentMethodProductionPath, h.deleteProductionSettings)
-	groups.SystemUser.POST(paymentMethodTestPath, h.createTestSettings)
-	groups.SystemUser.PUT(paymentMethodTestPath, h.updateTestSettings)
-	groups.SystemUser.GET(paymentMethodTestPath, h.getTestSettings)
-	groups.SystemUser.DELETE(paymentMethodTestPath, h.deleteTestSettings)
+	groups.AuthProject.POST(paymentMethodPath, h.create)
+	groups.AuthProject.PUT(paymentMethodIdPath, h.update)
+	groups.AuthProject.POST(paymentMethodProductionPath, h.createProductionSettings)
+	groups.AuthProject.PUT(paymentMethodProductionPath, h.updateProductionSettings)
+	groups.AuthProject.GET(paymentMethodProductionPath, h.getProductionSettings)
+	groups.AuthProject.DELETE(paymentMethodProductionPath, h.deleteProductionSettings)
+	groups.AuthProject.POST(paymentMethodTestPath, h.createTestSettings)
+	groups.AuthProject.PUT(paymentMethodTestPath, h.updateTestSettings)
+	groups.AuthProject.GET(paymentMethodTestPath, h.getTestSettings)
+	groups.AuthProject.DELETE(paymentMethodTestPath, h.deleteTestSettings)
 }
 
 func (h *PaymentMethodApiV1) create(ctx echo.Context) error {
