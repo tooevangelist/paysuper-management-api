@@ -236,8 +236,8 @@ docs-update: ## update docs submodule
 
 docs-gen: ## generate markdown files for hugo (slate) theme
 	mkdir -p ${ROOT_DIR}/docs/api-reference/content/ ;\
-	widdershins --search false --language_tabs 'shell:cURL' --summary ${ROOT_DIR}/api/swagger.yaml \
-		-u ${ROOT_DIR}/docs/api-reference/widdershins/templates/openapi3 -o ${ROOT_DIR}/docs/api-reference/content/m-api.md
+	widdershins --expandBody true --resolve true --shallowSchemas false --search false --language_tabs 'shell:cURL' --summary ${ROOT_DIR}/api/swagger.yaml \
+		-u ${ROOT_DIR}/docs/api-reference/widdershins/templates/openapi3 -o ${ROOT_DIR}/docs/api-reference/content/api.md
 .PHONY: docs-gen
 
 help:
