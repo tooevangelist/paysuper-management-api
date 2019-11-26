@@ -8,7 +8,6 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// ProviderHandlers
 func ProviderHandlers(initial config.Initial, srv common.Services, validator *validator.Validate, set provider.AwareSet, cfg *common.Config) (common.Handlers, func(), error) {
 	hSet := common.HandlerSet{
 		Services: srv,

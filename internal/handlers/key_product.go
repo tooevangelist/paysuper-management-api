@@ -56,8 +56,6 @@ func (h *KeyProductRoute) Route(groups *common.Groups) {
 	groups.AuthProject.GET(keyProductsIdPath, h.getKeyProduct)
 }
 
-// @Description Set product inactive
-// @Example POST /admin/api/v1/key-products/:key_product_id/unpublish
 func (h *KeyProductRoute) unpublishKeyProduct(ctx echo.Context) error {
 	req := &grpc.UnPublishKeyProductRequest{}
 	if err := ctx.Bind(req); err != nil {
@@ -83,8 +81,6 @@ func (h *KeyProductRoute) unpublishKeyProduct(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Product)
 }
 
-// @Description Publishes product
-// @Example POST /admin/api/v1/key-products/:key_product_id/publish
 func (h *KeyProductRoute) publishKeyProduct(ctx echo.Context) error {
 	req := &grpc.PublishKeyProductRequest{}
 	if err := ctx.Bind(req); err != nil {
@@ -110,8 +106,6 @@ func (h *KeyProductRoute) publishKeyProduct(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Product)
 }
 
-// @Description Get available platform list
-// @Example GET /admin/api/v1/platforms
 func (h *KeyProductRoute) getPlatformsList(ctx echo.Context) error {
 	req := &grpc.ListPlatformsRequest{}
 
@@ -169,8 +163,6 @@ func (h *KeyProductRoute) deleteKeyProductById(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-// @Description Create new key product for authenticated merchant
-// @Example PUT /admin/api/v1/key-products/:key_product_id
 func (h *KeyProductRoute) changeKeyProduct(ctx echo.Context) error {
 	req := &grpc.CreateOrUpdateKeyProductRequest{}
 	if err := ctx.Bind(req); err != nil {
@@ -196,8 +188,6 @@ func (h *KeyProductRoute) changeKeyProduct(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Product)
 }
 
-// @Description Gets key product by id
-// @Example POST /admin/api/v1/key-products/:key_product_id
 func (h *KeyProductRoute) getKeyProductById(ctx echo.Context) error {
 	req := &grpc.RequestKeyProductMerchant{}
 	if err := ctx.Bind(req); err != nil {
@@ -223,8 +213,6 @@ func (h *KeyProductRoute) getKeyProductById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Product)
 }
 
-// @Description Create new key product for authenticated merchant
-// @Example POST /admin/api/v1/key-products
 func (h *KeyProductRoute) createKeyProduct(ctx echo.Context) error {
 	req := &grpc.CreateOrUpdateKeyProductRequest{}
 	if err := ctx.Bind(req); err != nil {
@@ -250,8 +238,6 @@ func (h *KeyProductRoute) createKeyProduct(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, res.Product)
 }
 
-// @Description Get list of key products for authenticated merchant
-// @Example GET /admin/api/v1/key-products?name=car&project_id=5bdc39a95d1e1100019fb7df&offset=0&limit=10
 func (h *KeyProductRoute) getKeyProductList(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.ListKeyProductsRequest{}
@@ -286,8 +272,6 @@ func (h *KeyProductRoute) getKeyProductList(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res)
 }
 
-// @Description Get product with platforms list and their prices
-// @Example GET /api/v1/key-products/:key_product_id?country=RUS&currency=EUR
 func (h *KeyProductRoute) getKeyProduct(ctx echo.Context) error {
 	req := &grpc.GetKeyProductInfoRequest{}
 

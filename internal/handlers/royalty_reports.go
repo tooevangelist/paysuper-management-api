@@ -43,8 +43,6 @@ func (h *RoyaltyReportsRoute) Route(groups *common.Groups) {
 	groups.SystemUser.POST(royaltyReportsChangePath, h.changeRoyaltyReport)
 }
 
-// Get royalty reports list by params (by merchant, for period) with pagination
-// GET /admin/api/v1/royalty_reports
 func (h *RoyaltyReportsRoute) getRoyaltyReportsList(ctx echo.Context) error {
 	req := &grpc.ListRoyaltyReportsRequest{}
 
@@ -70,8 +68,6 @@ func (h *RoyaltyReportsRoute) getRoyaltyReportsList(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Data)
 }
 
-// Get royalty report by id
-// GET /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829
 func (h *RoyaltyReportsRoute) getRoyaltyReport(ctx echo.Context) error {
 	req := &grpc.GetRoyaltyReportRequest{}
 
@@ -92,8 +88,6 @@ func (h *RoyaltyReportsRoute) getRoyaltyReport(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// Get transactions for royalty report
-// GET /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/transactions
 func (h *RoyaltyReportsRoute) listRoyaltyReportOrders(ctx echo.Context) error {
 	req := &grpc.ListRoyaltyReportOrdersRequest{}
 
@@ -119,8 +113,6 @@ func (h *RoyaltyReportsRoute) listRoyaltyReportOrders(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Data)
 }
 
-// Accept royalty report by merchant
-// POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/accept
 func (h *RoyaltyReportsRoute) merchantReviewRoyaltyReport(ctx echo.Context) error {
 	req := &grpc.MerchantReviewRoyaltyReportRequest{}
 
@@ -144,13 +136,6 @@ func (h *RoyaltyReportsRoute) merchantReviewRoyaltyReport(ctx echo.Context) erro
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-// Decline royalty report by merchant and start a dispute
-// POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/decline
-//
-// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
-//      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{"dispute_reason": "bla-bla-bla"}' \
-//      https://api.paysuper.online/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/decline
 func (h *RoyaltyReportsRoute) merchantDeclineRoyaltyReport(ctx echo.Context) error {
 	req := &grpc.MerchantReviewRoyaltyReportRequest{}
 
@@ -174,13 +159,6 @@ func (h *RoyaltyReportsRoute) merchantDeclineRoyaltyReport(ctx echo.Context) err
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-// Change royalty report by admin
-// POST /admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/change
-//
-// @Example curl -X POST -H "Accept: application/json" -H "Content-Type: application/json" \
-//      -H "Authorization: Bearer %access_token_here%" \
-//      -d '{"status": "Accepted", "correction": {"amount": 100500, "reason": "just for fun :)"}, payout_id: "5bdc39a95d1e1100019fb7df"}' \
-//      https://api.paysuper.online/admin/api/v1/royalty_reports/5ced34d689fce60bf4440829/change
 func (h *RoyaltyReportsRoute) changeRoyaltyReport(ctx echo.Context) error {
 	req := &grpc.ChangeRoyaltyReportRequest{}
 

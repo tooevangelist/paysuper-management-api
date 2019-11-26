@@ -55,8 +55,6 @@ func (h *PayLinkRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(paylinksIdStatUtmPath, h.getPaylinkStatByUtm)
 }
 
-// @Description Get list of paylinks for authenticated merchant
-// @Example GET /admin/api/v1/paylinks?offset=0&limit=10
 func (h *PayLinkRoute) getPaylinksList(ctx echo.Context) error {
 	req := &grpc.GetPaylinksRequest{}
 	err := ctx.Bind(req)
@@ -87,8 +85,6 @@ func (h *PayLinkRoute) getPaylinksList(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Data)
 }
 
-// @Description Get paylink, for authenticated merchant
-// @Example GET /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22
 func (h *PayLinkRoute) getPaylink(ctx echo.Context) error {
 	req := &grpc.PaylinkRequest{}
 
@@ -113,8 +109,6 @@ func (h *PayLinkRoute) getPaylink(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description paylink public url
-// @Example GET /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22/url?utm_source=3wefwe&utm_medium=njytrn&utm_campaign=bdfbh5
 func (h *PayLinkRoute) getPaylinkUrl(ctx echo.Context) error {
 	req := &grpc.GetPaylinkURLRequest{}
 	err := ctx.Bind(req)
@@ -162,8 +156,6 @@ func (h *PayLinkRoute) getPaylinkUrl(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, url)
 }
 
-// @Description Get paylink, for authenticated merchant
-// @Example DELETE /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22
 func (h *PayLinkRoute) deletePaylink(ctx echo.Context) error {
 	req := &grpc.PaylinkRequest{}
 
@@ -187,14 +179,10 @@ func (h *PayLinkRoute) deletePaylink(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-// @Description Create paylink, for authenticated merchant
-// @Example POST /admin/api/v1/paylinks
 func (h *PayLinkRoute) createPaylink(ctx echo.Context) error {
 	return h.createOrUpdatePaylink(ctx, "")
 }
 
-// @Description Update paylink, for authenticated merchant
-// @Example PUT /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22
 func (h *PayLinkRoute) updatePaylink(ctx echo.Context) error {
 	return h.createOrUpdatePaylink(ctx, ctx.Param(common.RequestParameterId))
 }
@@ -225,8 +213,6 @@ func (h *PayLinkRoute) createOrUpdatePaylink(ctx echo.Context, paylinkId string)
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description paylink stat summary
-// @Example GET /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22/stat/summary?period_from=1571671243&period_to=1571673643
 func (h *PayLinkRoute) getPaylinkStatSummary(ctx echo.Context) error {
 	req := &grpc.GetPaylinkStatCommonRequest{}
 	err := ctx.Bind(req)
@@ -251,8 +237,6 @@ func (h *PayLinkRoute) getPaylinkStatSummary(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description paylink stat by country
-// @Example GET /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22/stat/by/country?period_from=1571671243&period_to=1571673643
 func (h *PayLinkRoute) getPaylinkStatByCountry(ctx echo.Context) error {
 	req := &grpc.GetPaylinkStatCommonRequest{}
 	err := ctx.Bind(req)
@@ -277,8 +261,6 @@ func (h *PayLinkRoute) getPaylinkStatByCountry(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description paylink stat by referrer
-// @Example GET /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22/stat/by/referrer?period_from=1571671243&period_to=1571673643
 func (h *PayLinkRoute) getPaylinkStatByReferrer(ctx echo.Context) error {
 	req := &grpc.GetPaylinkStatCommonRequest{}
 	err := ctx.Bind(req)
@@ -303,8 +285,6 @@ func (h *PayLinkRoute) getPaylinkStatByReferrer(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description paylink stat by date
-// @Example GET /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22/stat/by/date?period_from=1571671243&period_to=1571673643
 func (h *PayLinkRoute) getPaylinkStatByDate(ctx echo.Context) error {
 	req := &grpc.GetPaylinkStatCommonRequest{}
 	err := ctx.Bind(req)
@@ -329,8 +309,6 @@ func (h *PayLinkRoute) getPaylinkStatByDate(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description paylink stat by utm
-// @Example GET /admin/api/v1/paylinks/21784001599a47e5a69ac28f7af2ec22/stat/by/utm?period_from=1571671243&period_to=1571673643
 func (h *PayLinkRoute) getPaylinkStatByUtm(ctx echo.Context) error {
 	req := &grpc.GetPaylinkStatCommonRequest{}
 	err := ctx.Bind(req)

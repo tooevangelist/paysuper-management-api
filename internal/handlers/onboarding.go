@@ -36,6 +36,7 @@ const (
 	merchantsAgreementDocumentPath     = "/merchants/agreement/document"
 	merchantsIdAgreementDocumentPath   = "/merchants/:merchant_id/agreement/document"
 	merchantsAgreementSignaturePath    = "/merchants/agreement/signature"
+	merchantsIdAgreementSignaturePath  = "/merchants/:merchant_id/agreement/signature"
 	merchantsNotificationsIdPath       = "/merchants/notifications/:notification_id"
 	merchantsNotificationsMarkReadPath = "/merchants/notifications/:notification_id/mark-as-read"
 	merchantsTariffsPath               = "/merchants/tariffs"
@@ -101,7 +102,8 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.SystemUser.GET(merchantsIdAgreementPath, h.getAgreementData)
 	groups.AuthUser.GET(merchantsAgreementDocumentPath, h.getAgreementDocument)
 	groups.SystemUser.GET(merchantsIdAgreementDocumentPath, h.getAgreementDocument)
-	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createAgreementSignature)
+	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createMerchantAgreementSignature)
+	groups.SystemUser.PUT(merchantsIdAgreementSignaturePath, h.createSystemAgreementSignature)
 
 	groups.SystemUser.POST(merchantsIdNotificationsPath, h.createNotification)
 	groups.SystemUser.GET(merchantsIdNotificationsPath, h.listNotifications)
@@ -158,9 +160,6 @@ func (h *OnboardingRoute) getMerchantByUser(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description List merchants by conditions
-// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
-//  'https://api.paysuper.online/admin/api/v1/merchants?received_date_from=1568332800'
 func (h *OnboardingRoute) listMerchants(ctx echo.Context) error {
 	req := &grpc.MerchantListingRequest{}
 	err := (&common.OnboardingMerchantListingBinder{
@@ -425,16 +424,6 @@ func (h *OnboardingRoute) validateUpload(file *multipart.FileHeader) (multipart.
 	return src, nil
 }
 
-// @Description Set company information in merchant onboarding process
-// @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"name": "Roga and Copita LLC", "alternative_name": "Apple Inc", "website": "http://localhost", "country": "RU",
-//    	"state": "St.Petersburg", "zip": "190000", "city": "St.Petersburg", "address": "Nevskiy st. 1"}' \
-//  https://api.paysuper.online/admin/api/v1/merchants/company
-//
-// @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"name": "Roga and Copita LLC", "alternative_name": "Apple Inc", "website": "http://localhost", "country": "RU",
-//    	"state": "St.Petersburg", "zip": "190000", "city": "St.Petersburg", "address": "Nevskiy st. 2"}' \
-//  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/company
 func (h *OnboardingRoute) setMerchantCompany(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	in := &billing.MerchantCompanyInfo{}
@@ -472,16 +461,6 @@ func (h *OnboardingRoute) setMerchantCompany(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description Set company contact information in merchant onboarding process
-// @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"authorized": {"name": "Unit Test", "email": "test@unit.test", "phone": "1234567890", "position": "CEO"},
-//    	"technical": {"name": "Unit Test", "email": "test@unit.test", "phone": "1234567890"}}' \
-//  https://api.paysuper.online/admin/api/v1/merchants/contacts
-//
-// @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"authorized": {"name": "Unit Test", "email": "test@unit.test", "phone": "1234567891", "position": "CEO"},
-//    	"technical": {"name": "Unit Test", "email": "test@unit.test", "phone": "1234567890"}}' \
-//  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/contacts
 func (h *OnboardingRoute) setMerchantContacts(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	in := &billing.MerchantContact{}
@@ -519,16 +498,6 @@ func (h *OnboardingRoute) setMerchantContacts(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description Set company banking information in merchant onboarding process
-// @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
-//  	"account_number": "408000000001", "swift": "ALFARUMM", "correspondent_account": "408000000001"}' \
-//  https://api.paysuper.online/admin/api/v1/merchants/banking
-//
-// @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//  -d '{"name": "Bank Name-Spb.", "address": "St.Petersburg, Nevskiy st. 1",
-//  	"account_number": "408000000001", "swift": "ALFARUMM", "correspondent_account": "408000000002"}' \
-//  https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/banking
 func (h *OnboardingRoute) setMerchantBanking(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	in := &billing.MerchantBanking{}
@@ -566,10 +535,6 @@ func (h *OnboardingRoute) setMerchantBanking(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description Get merchant completion information
-// @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//	-d '{"signer_type": 0}'
-// https://api.paysuper.online/admin/api/v1/merchants/5d4847f61986ee46ec581e26/status
 func (h *OnboardingRoute) getMerchantStatus(ctx echo.Context) error {
 	req := &grpc.SetMerchantS3AgreementRequest{}
 
@@ -590,11 +555,16 @@ func (h *OnboardingRoute) getMerchantStatus(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description get hellosign (https://www.hellosign.com) signature to sign license agreement
-// @Example @Example curl -X PUT -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-// 		https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/agreement/signature
-func (h *OnboardingRoute) createAgreementSignature(ctx echo.Context) error {
-	req := &grpc.GetMerchantAgreementSignUrlRequest{}
+func (h *OnboardingRoute) createMerchantAgreementSignature(ctx echo.Context) error {
+	return h.createAgreementSignature(ctx, pkg.SignerTypeMerchant)
+}
+
+func (h *OnboardingRoute) createSystemAgreementSignature(ctx echo.Context) error {
+	return h.createAgreementSignature(ctx, pkg.SignerTypePs)
+}
+
+func (h *OnboardingRoute) createAgreementSignature(ctx echo.Context, signerType int32) error {
+	req := &grpc.GetMerchantAgreementSignUrlRequest{SignerType: signerType}
 
 	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
 		return err
@@ -603,8 +573,6 @@ func (h *OnboardingRoute) createAgreementSignature(ctx echo.Context) error {
 	res, err := h.dispatch.Services.Billing.GetMerchantAgreementSignUrl(ctx.Request().Context(), req)
 
 	if err != nil {
-		fmt.Println(res)
-		fmt.Println(err)
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetMerchantAgreementSignUrl")
 	}
 
@@ -616,9 +584,6 @@ func (h *OnboardingRoute) createAgreementSignature(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description get list of merchants tariffs rates by conditions
-// @Example @Example curl -X GET -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-// 		https://api.paysuper.online/admin/api/v1/merchants/tariffs?region=CIS&payout_currency=USD
 func (h *OnboardingRoute) getTariffRates(ctx echo.Context) error {
 	req := &grpc.GetMerchantTariffRatesRequest{}
 	err := ctx.Bind(req)
@@ -647,10 +612,6 @@ func (h *OnboardingRoute) getTariffRates(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Items)
 }
 
-// @Description set tariff to merchant
-// @Example @Example curl -X POST -H 'Authorization: Bearer %access_token_here%' -H 'Content-Type: application/json' \
-//		-d '{"region": "CIS", "payout_currency": "USD", "amount_from": 0.75, "amount_to": 5}'
-// 		https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/tariffs
 func (h *OnboardingRoute) setTariffRates(ctx echo.Context) error {
 	req := &grpc.SetMerchantTariffRatesRequest{}
 	err := ctx.Bind(req)
@@ -724,16 +685,10 @@ func (h *OnboardingRoute) getAgreementData(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, fData)
 }
 
-// @Description Enable merchant manual payouts
-// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
-//  'https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/manual_payout/enable'
 func (h *OnboardingRoute) enableMerchantManualPayout(ctx echo.Context) error {
 	return h.changeMerchantManualPayout(ctx, true)
 }
 
-// @Description Disable merchant manual payouts
-// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
-//  'https://api.paysuper.online/admin/api/v1/merchants/ffffffffffffffffffffffff/manual_payout/disable'
 func (h *OnboardingRoute) disableMerchantManualPayout(ctx echo.Context) error {
 	return h.changeMerchantManualPayout(ctx, false)
 }
