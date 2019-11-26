@@ -43,12 +43,6 @@ func (h *UserProfileRoute) Route(groups *common.Groups) {
 	groups.Common.PUT(userProfileConfirmEmailPath, h.confirmEmail)
 }
 
-// @Description Get user profile
-// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
-//  https://api.paysuper.online/api/v1/user/profile
-//
-// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
-//  https://api.paysuper.online/admin/api/v1/user/profile/ffffffffffffffffffffffff
 func (h *UserProfileRoute) getUserProfile(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.GetUserProfileRequest{
@@ -75,9 +69,6 @@ func (h *UserProfileRoute) getUserProfile(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
-// @Description Get common user profile
-// @Example curl -X GET 'Authorization: Bearer %access_token_here%' \
-//  https://api.paysuper.online/api/v1/user/profile/common
 func (h *UserProfileRoute) getUserCommonProfile(ctx echo.Context) error {
 	authUser := common.ExtractUserContext(ctx)
 	req := &grpc.CommonUserProfileRequest{UserId: authUser.Id}
