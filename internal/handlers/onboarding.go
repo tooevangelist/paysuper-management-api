@@ -47,11 +47,12 @@ const (
 )
 
 const (
-	agreementFileMask      = "agreement_%s.pdf"
-	agreementContentType   = "application/pdf"
-	agreementExtension     = "pdf"
-	agreementUrlMask       = "%s://%s/admin/api/v1/merchants/%s/agreement/document"
-	agreementUploadMaxSize = 3145728
+	agreementFileMask        = "agreement_%s.pdf"
+	agreementContentType     = "application/pdf"
+	agreementExtension       = "pdf"
+	merchantAgreementUrlMask = "%s://%s/admin/api/v1/merchants/agreement/document"
+	systemAgreementUrlMask   = "%s://%s/system/api/v1/merchants/%s/agreement/document"
+	agreementUploadMaxSize   = 3145728
 )
 
 type OnboardingFileMetadata struct {
@@ -98,8 +99,8 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.SystemUser.PUT(merchantsIdChangeStatusCompanyPath, h.changeMerchantStatus)
 	groups.AuthUser.PATCH(merchantsPath, h.changeAgreement)
 
-	groups.AuthUser.GET(merchantsAgreementPath, h.getAgreementData)
-	groups.SystemUser.GET(merchantsIdAgreementPath, h.getAgreementData)
+	groups.AuthUser.GET(merchantsAgreementPath, h.getMerchantAgreementData)
+	groups.SystemUser.GET(merchantsIdAgreementPath, h.getSystemAgreementData)
 	groups.AuthUser.GET(merchantsAgreementDocumentPath, h.getAgreementDocument)
 	groups.SystemUser.GET(merchantsIdAgreementDocumentPath, h.getAgreementDocument)
 	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createMerchantAgreementSignature)
@@ -356,6 +357,7 @@ func (h *OnboardingRoute) getAgreementDocument(ctx echo.Context) error {
 func (h *OnboardingRoute) getAgreementStructure(
 	ctx echo.Context,
 	merchantId, ext, ct, fPath string,
+	signerType int32,
 ) (interface{}, error) {
 	file, err := os.Open(fPath)
 
@@ -375,8 +377,14 @@ func (h *OnboardingRoute) getAgreementStructure(
 		return nil, common.ErrorMessageAgreementNotFound
 	}
 
+	url := fmt.Sprintf(systemAgreementUrlMask, h.cfg.HttpScheme, ctx.Request().Host, merchantId)
+
+	if signerType == pkg.SignerTypeMerchant {
+		url = fmt.Sprintf(merchantAgreementUrlMask, h.cfg.HttpScheme, ctx.Request().Host)
+	}
+
 	data := &OnboardingFileData{
-		Url: fmt.Sprintf(agreementUrlMask, h.cfg.HttpScheme, ctx.Request().Host, merchantId),
+		Url: url,
 		Metadata: &OnboardingFileMetadata{
 			Name:        fi.Name(),
 			Extension:   ext,
@@ -644,7 +652,15 @@ func (h *OnboardingRoute) setTariffRates(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (h *OnboardingRoute) getAgreementData(ctx echo.Context) error {
+func (h *OnboardingRoute) getMerchantAgreementData(ctx echo.Context) error {
+	return h.getAgreementData(ctx, pkg.SignerTypeMerchant)
+}
+
+func (h *OnboardingRoute) getSystemAgreementData(ctx echo.Context) error {
+	return h.getAgreementData(ctx, pkg.SignerTypePs)
+}
+
+func (h *OnboardingRoute) getAgreementData(ctx echo.Context, signerType int32) error {
 	req := &grpc.GetMerchantByRequest{}
 
 	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
@@ -674,7 +690,7 @@ func (h *OnboardingRoute) getAgreementData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
 	}
 
-	fData, err := h.getAgreementStructure(ctx, req.MerchantId, agreementExtension, agreementContentType, filePath)
+	fData, err := h.getAgreementStructure(ctx, req.MerchantId, agreementExtension, agreementContentType, filePath, signerType)
 
 	if err != nil {
 		h.L().Error("Get agreement structure failed", logger.PairArgs("err", err.Error(), "merchant_id", req.MerchantId))
