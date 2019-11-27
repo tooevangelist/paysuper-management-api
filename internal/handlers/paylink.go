@@ -65,7 +65,7 @@ func (h *PayLinkRoute) getPaylinksList(ctx echo.Context) error {
 	req.ProjectId = ""
 
 	if req.Limit == 0 {
-		req.Limit = h.cfg.LimitDefault
+		req.Limit = int64(h.cfg.LimitDefault)
 	}
 
 	err = h.dispatch.Validate.Struct(req)

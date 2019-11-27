@@ -29,7 +29,7 @@ func NewZipCodeRoute(set common.HandlerSet, cfg *common.Config) *ZipCodeRoute {
 }
 
 func (h *ZipCodeRoute) Route(groups *common.Groups) {
-	groups.AuthProject.GET(zipCodePath, h.checkZip)
+	groups.Common.GET(zipCodePath, h.checkZip)
 }
 
 func (h *ZipCodeRoute) checkZip(ctx echo.Context) error {
@@ -40,7 +40,7 @@ func (h *ZipCodeRoute) checkZip(ctx echo.Context) error {
 	}
 
 	if req.Limit <= 0 {
-		req.Limit = h.cfg.LimitDefault
+		req.Limit = int64(h.cfg.LimitDefault)
 	}
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {

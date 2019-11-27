@@ -38,9 +38,9 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	}
 	echoHttp.Renderer = common.NewTemplate(t)
 	echoHttp.Binder = &common.Binder{
-		LimitDefault:  d.globalCfg.LimitDefault,
-		OffsetDefault: d.globalCfg.OffsetDefault,
-		LimitMax:      d.globalCfg.LimitMax,
+		LimitDefault:  int64(d.globalCfg.LimitDefault),
+		OffsetDefault: int64(d.globalCfg.OffsetDefault),
+		LimitMax:      int64(d.globalCfg.LimitMax),
 	}
 	// Called after routes
 	echoHttp.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -62,7 +62,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AuthProject: echoHttp.Group(common.AuthProjectGroupPath),
 		AuthUser:    echoHttp.Group(common.AuthUserGroupPath),
 		WebHooks:    echoHttp.Group(common.WebHookGroupPath),
-		Common:      echoHttp,
+		Common:      echoHttp.Group(common.NoAuthGroupPath),
 		SystemUser:  echoHttp.Group(common.SystemUserGroupPath),
 	}
 	d.authProjectGroup(grp.AuthProject)

@@ -3878,7 +3878,7 @@ securityDefinitions:
     description: must contain project secret key
 
 paths:
-  /country:
+  /api/v1/country:
     get:
       consumes:
         - application/json
@@ -3905,7 +3905,7 @@ paths:
       summary: Get list of countries
       tags:
         - Country
-  /country/{id}:
+  /api/v1/country/{id}:
     get:
       consumes:
         - application/json
@@ -4446,7 +4446,7 @@ paths:
       tags:
         - Project
 
-  /order/recreate:
+  /api/v1/order/recreate:
     post:
       consumes:
         - application/json
@@ -4479,7 +4479,7 @@ paths:
       tags:
         - Payment Method
 
-  /order/create:
+  /api/v1/order/create:
     get:
       consumes:
         - multipart/form-data
@@ -4684,7 +4684,7 @@ paths:
       summary: Create order with HTML form
       tags:
         - Payment Order
-  /api/v1/payment_method:
+  /system/api/v1/payment_method:
     post:
       consumes:
         - application/json
@@ -4712,7 +4712,7 @@ paths:
       summary: Create a payment method for payment system
       tags:
         - Payment Method
-  /api/v1/payment_method/{id}:
+  /system/api/v1/payment_method/{id}:
     put:
       consumes:
         - application/json
@@ -4745,7 +4745,7 @@ paths:
       summary: Update a payment method for payment system
       tags:
         - Payment Method
-  /api/v1/payment_method/{id}/production:
+  /system/api/v1/payment_method/{id}/production:
     post:
       consumes:
         - application/json
@@ -4989,7 +4989,7 @@ paths:
       summary: Delete test settings to the payment method
       tags:
         - Payment Method
-  /price_group/country:
+  /api/v1/price_group/country:
     get:
       consumes:
         - application/json
@@ -5016,7 +5016,7 @@ paths:
       summary: Get region and currency by country
       tags:
         - Price group
-  /price_group/currencies:
+  /api/v1/price_group/currencies:
     get:
       description: Get a list of all currencies with regions and countries in them
       produces:
@@ -5035,7 +5035,7 @@ paths:
       summary: Get a list of all currencies with regions and countries in them
       tags:
         - Price group
-  /price_group/region:
+  /api/v1/price_group/region:
     get:
       consumes:
         - application/json
@@ -6406,7 +6406,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/user/confirm_email":
+  "/api/v1/user/confirm_email":
     put:
       summary: Confirm user email
       tags:
@@ -9672,6 +9672,7 @@ paths:
       summary: Get data for rendering payment form
       tags:
         - Order
+
   "/system/api/v1/users/invite":
     post:
       summary: Send invitation for admin user
@@ -10221,7 +10222,39 @@ paths:
     post:
       summary: Approve of invitation for user
       tags:
-        - Order
+        - User
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Approve of invitation for user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/AcceptInvite"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AcceptInviteResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
 
   "/api/v1/saved_card":
     delete:
@@ -10262,7 +10295,7 @@ paths:
       tags:
         - Onboarding
       consumes:
-        - application/x-www-form-urlencoded
+        - application/json
       produces:
         - application/json
       description: Set merchant operating company
