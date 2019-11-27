@@ -10262,7 +10262,7 @@ paths:
       tags:
         - Onboarding
       consumes:
-        - application/x-www-form-urlencoded
+        - application/json
       produces:
         - application/json
       description: Set merchant operating company
