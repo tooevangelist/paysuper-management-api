@@ -26,9 +26,9 @@ type Config struct {
 	AwsRegionReporter          string `envconfig:"AWS_REGION_REPORTER" default:"eu-west-1"`
 	AwsBucketReporter          string `envconfig:"AWS_BUCKET_REPORTER" required:"true"`
 
-	LimitDefault                 int64 `default:"100"`
-	OffsetDefault                int64 `default:"0"`
-	LimitMax                     int64 `default:"1000"`
+	LimitDefault                 int32 `default:"100"`
+	OffsetDefault                int32 `default:"0"`
+	LimitMax                     int32 `default:"1000"`
 	DisableAuthMiddleware        bool
 	CustomerTokenCookiesLifetime time.Duration // CustomerTokenCookiesLifetime = 2592000
 

@@ -40,7 +40,7 @@ func (h *ZipCodeRoute) checkZip(ctx echo.Context) error {
 	}
 
 	if req.Limit <= 0 {
-		req.Limit = h.cfg.LimitDefault
+		req.Limit = int64(h.cfg.LimitDefault)
 	}
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {
