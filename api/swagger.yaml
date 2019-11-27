@@ -10221,7 +10221,39 @@ paths:
     post:
       summary: Approve of invitation for user
       tags:
-        - Order
+        - User
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Approve of invitation for user
+      parameters:
+        - description: JSON request body
+          in: body
+          name: body
+          schema:
+            "$ref": "#/definitions/AcceptInvite"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/AcceptInviteResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
 
   "/api/v1/saved_card":
     delete:
