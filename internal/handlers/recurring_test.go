@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	billMock "github.com/paysuper/paysuper-billing-server/pkg/mocks"
@@ -13,6 +14,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"testing"
+	"time"
 )
 
 type RecurringTestSuite struct {
@@ -49,10 +51,17 @@ func (suite *RecurringTestSuite) SetupTest() {
 func (suite *RecurringTestSuite) TearDownTest() {}
 
 func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_Ok() {
-	body := []byte(`{"id": "ffffffffffffffffffffffff", "cookie": "ffffffffffffffffffffffff"}`)
+	cookie := new(http.Cookie)
+	cookie.Name = common.CustomerTokenCookiesName
+	cookie.Value = bson.NewObjectId().Hex()
+	cookie.Expires = time.Now().Add(suite.router.cfg.CustomerTokenCookiesLifetime)
+	cookie.HttpOnly = true
+
+	body := []byte(`{"id": "ffffffffffffffffffffffff"}`)
 	rsp, err := suite.caller.Builder().
 		Method(http.MethodDelete).
 		Path(removeSavedCardPath).
+		AddCookie(cookie).
 		Init(test.ReqInitJSON()).
 		BodyBytes(body).
 		Exec(suite.T())
@@ -97,15 +106,22 @@ func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_ValidateError() {
 }
 
 func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_BillingServerSystemError() {
+	cookie := new(http.Cookie)
+	cookie.Name = common.CustomerTokenCookiesName
+	cookie.Value = bson.NewObjectId().Hex()
+	cookie.Expires = time.Now().Add(suite.router.cfg.CustomerTokenCookiesLifetime)
+	cookie.HttpOnly = true
+
 	bs := &billMock.BillingService{}
 	bs.On("DeleteSavedCard", mock2.Anything, mock2.Anything, mock2.Anything).
 		Return(nil, errors.New("some error"))
 	suite.router.dispatch.Services.Billing = bs
 
-	body := []byte(`{"id": "ffffffffffffffffffffffff", "cookie": "ffffffffffffffffffffffff"}`)
+	body := []byte(`{"id": "ffffffffffffffffffffffff"}`)
 	_, err := suite.caller.Builder().
 		Method(http.MethodDelete).
 		Path(removeSavedCardPath).
+		AddCookie(cookie).
 		Init(test.ReqInitJSON()).
 		BodyBytes(body).
 		Exec(suite.T())
@@ -118,6 +134,12 @@ func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_BillingServerSyst
 }
 
 func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_BillingServerResultError() {
+	cookie := new(http.Cookie)
+	cookie.Name = common.CustomerTokenCookiesName
+	cookie.Value = bson.NewObjectId().Hex()
+	cookie.Expires = time.Now().Add(suite.router.cfg.CustomerTokenCookiesLifetime)
+	cookie.HttpOnly = true
+
 	errMsg := &grpc.ResponseErrorMessage{
 		Code:    "000001",
 		Message: "some error",
@@ -134,10 +156,11 @@ func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_BillingServerResu
 		)
 	suite.router.dispatch.Services.Billing = bs
 
-	body := []byte(`{"id": "ffffffffffffffffffffffff", "cookie": "ffffffffffffffffffffffff"}`)
+	body := []byte(`{"id": "ffffffffffffffffffffffff"}`)
 	_, err := suite.caller.Builder().
 		Method(http.MethodDelete).
 		Path(removeSavedCardPath).
+		AddCookie(cookie).
 		Init(test.ReqInitJSON()).
 		BodyBytes(body).
 		Exec(suite.T())

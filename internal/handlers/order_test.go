@@ -36,7 +36,7 @@ func Test_Order(t *testing.T) {
 
 func (suite *OrderTestSuite) SetupTest() {
 	user := &common.AuthUser{
-		Id: "ffffffffffffffffffffffff",
+		Id:         "ffffffffffffffffffffffff",
 		MerchantId: "ffffffffffffffffffffffff",
 	}
 
@@ -1023,7 +1023,7 @@ func (suite *OrderTestSuite) TestOrder_GetPaymentFormData_Ok() {
 	data := new(grpc.PaymentFormJsonData)
 	err = json.Unmarshal(res.Body.Bytes(), data)
 	assert.NoError(suite.T(), err)
-	assert.NotEmpty(suite.T(), data.Cookie)
+	assert.NotEmpty(suite.T(), res.Header().Get(echo.HeaderSetCookie))
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrderForm_TokenCookieExist_Ok() {
@@ -1046,11 +1046,13 @@ func (suite *OrderTestSuite) TestOrder_GetOrderForm_TokenCookieExist_Ok() {
 	assert.NotEmpty(suite.T(), res.Body.String())
 	assert.Equal(suite.T(), echo.MIMEApplicationJSONCharsetUTF8, res.Header().Get(echo.HeaderContentType))
 
+	cookiesRes := res.Result().Cookies()
+
 	data := new(grpc.PaymentFormJsonData)
 	err = json.Unmarshal(res.Body.Bytes(), data)
 	assert.NoError(suite.T(), err)
-	assert.NotEmpty(suite.T(), data.Cookie)
-	assert.Equal(suite.T(), cookie.Value, data.Cookie)
+	assert.NotEmpty(suite.T(), cookiesRes[0])
+	assert.Equal(suite.T(), cookie.Value, cookiesRes[0].Value)
 }
 
 func (suite *OrderTestSuite) TestOrder_GetOrderForm_ParameterIdNotFound_Error() {

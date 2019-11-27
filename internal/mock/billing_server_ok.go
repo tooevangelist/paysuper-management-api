@@ -55,9 +55,8 @@ func (s *BillingServerOkMock) PaymentFormJsonDataProcess(
 	}
 	return &grpc.PaymentFormJsonDataResponse{
 		Status: pkg.ResponseStatusOk,
-		Item: &grpc.PaymentFormJsonData{
-			Cookie: cookie,
-		},
+		Cookie: cookie,
+		Item:   &grpc.PaymentFormJsonData{},
 	}, nil
 }
 
