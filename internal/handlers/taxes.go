@@ -74,7 +74,7 @@ func (h *TaxesRoute) bindGetTaxes(ctx echo.Context) *tax_service.GetRatesRequest
 			structure.Limit = int32(i)
 		}
 	} else {
-		structure.Limit = h.cfg.LimitDefault
+		structure.Limit = int32(h.cfg.LimitDefault)
 	}
 
 	if v, ok := params[common.RequestParameterOffset]; ok {
@@ -82,7 +82,7 @@ func (h *TaxesRoute) bindGetTaxes(ctx echo.Context) *tax_service.GetRatesRequest
 			structure.Offset = int32(i)
 		}
 	} else {
-		structure.Offset = h.cfg.OffsetDefault
+		structure.Offset = int32(h.cfg.OffsetDefault)
 	}
 
 	return structure
