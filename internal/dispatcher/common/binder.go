@@ -168,17 +168,14 @@ type OrderJsonBinder struct{}
 type PaymentCreateProcessBinder struct{}
 type OnboardingChangeMerchantStatusBinder struct{}
 type OnboardingMerchantListingBinder struct {
-	LimitDefault, OffsetDefault int32
+	LimitDefault, OffsetDefault int64
 }
 type OnboardingNotificationsListBinder struct {
-	LimitDefault, OffsetDefault int32
+	LimitDefault, OffsetDefault int64
 }
 type OnboardingGetPaymentMethodBinder struct{}
 type OnboardingChangePaymentMethodBinder struct{}
 type OnboardingCreateNotificationBinder struct{}
-type ProductsGetProductsListBinder struct {
-	LimitDefault, OffsetDefault int32
-}
 type ProductsCreateProductBinder struct{}
 type ProductsUpdateProductBinder struct{}
 
