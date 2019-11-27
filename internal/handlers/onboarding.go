@@ -164,8 +164,8 @@ func (h *OnboardingRoute) getMerchantByUser(ctx echo.Context) error {
 func (h *OnboardingRoute) listMerchants(ctx echo.Context) error {
 	req := &grpc.MerchantListingRequest{}
 	err := (&common.OnboardingMerchantListingBinder{
-		LimitDefault:  h.cfg.LimitDefault,
-		OffsetDefault: h.cfg.OffsetDefault,
+		LimitDefault:  int64(h.cfg.LimitDefault),
+		OffsetDefault: int64(h.cfg.OffsetDefault),
 	}).Bind(req, ctx)
 
 	if err != nil {
@@ -261,8 +261,8 @@ func (h *OnboardingRoute) getNotification(ctx echo.Context) error {
 func (h *OnboardingRoute) listNotifications(ctx echo.Context) error {
 	req := &grpc.ListingNotificationRequest{}
 	err := (&common.OnboardingNotificationsListBinder{
-		LimitDefault:  h.cfg.LimitDefault,
-		OffsetDefault: h.cfg.OffsetDefault,
+		LimitDefault:  int64(h.cfg.LimitDefault),
+		OffsetDefault: int64(h.cfg.OffsetDefault),
 	}).Bind(req, ctx)
 
 	if err != nil {

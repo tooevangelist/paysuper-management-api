@@ -245,12 +245,12 @@ func (h *KeyProductRoute) getKeyProductList(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	if req.Limit > h.cfg.LimitMax {
-		req.Limit = h.cfg.LimitMax
+	if req.Limit > int64(h.cfg.LimitMax) {
+		req.Limit = int64(h.cfg.LimitMax)
 	}
 
 	if req.Limit <= 0 {
-		req.Limit = h.cfg.LimitDefault
+		req.Limit = int64(h.cfg.LimitDefault)
 	}
 
 	req.MerchantId = authUser.MerchantId

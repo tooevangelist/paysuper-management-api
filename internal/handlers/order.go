@@ -61,7 +61,7 @@ func (b *OrderListRefundsBinder) Bind(i interface{}, ctx echo.Context) error {
 	structure.OrderId = ctx.Param(common.RequestParameterOrderId)
 
 	if structure.Limit <= 0 {
-		structure.Limit = b.cfg.LimitDefault
+		structure.Limit = int64(b.cfg.LimitDefault)
 	}
 
 	return nil
@@ -363,11 +363,11 @@ func (h *OrderRoute) listOrdersPublic(ctx echo.Context) error {
 	}
 
 	if req.Limit <= 0 {
-		req.Limit = h.cfg.LimitDefault
+		req.Limit = int64(h.cfg.LimitDefault)
 	}
 
 	if req.Offset <= 0 {
-		req.Offset = h.cfg.OffsetDefault
+		req.Offset = int64(h.cfg.OffsetDefault)
 	}
 
 	err = h.dispatch.Validate.Struct(req)

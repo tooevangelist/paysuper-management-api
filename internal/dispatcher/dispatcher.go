@@ -38,9 +38,9 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	}
 	echoHttp.Renderer = common.NewTemplate(t)
 	echoHttp.Binder = &common.Binder{
-		LimitDefault:  d.globalCfg.LimitDefault,
-		OffsetDefault: d.globalCfg.OffsetDefault,
-		LimitMax:      d.globalCfg.LimitMax,
+		LimitDefault:  int64(d.globalCfg.LimitDefault),
+		OffsetDefault: int64(d.globalCfg.OffsetDefault),
+		LimitMax:      int64(d.globalCfg.LimitMax),
 	}
 	// Called after routes
 	echoHttp.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
