@@ -1,15 +1,10 @@
 openapi: 3.0.1
 info:
-  title: Protocol One payment solution swagger documentation
-  description: This is a Protocol One payment solution service.
-  termsOfService: http://swagger.io/terms/
-  contact:
-    name: API Support
-    url: http://www.swagger.io/support
-    email: support@swagger.io
+  title: PaySuper API documentation
+  description: PaySuper API documentation
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    name: GPL v3
+    url: https://www.gnu.org/licenses/gpl-3.0
   version: "1.0"
 servers:
   - url: //p1payapi.tst.protocol.one/
@@ -6395,7 +6390,7 @@ paths:
       description: Get a grouping stat by country for a payment link by its id for
         current authenticated merchant
       parameters:
-        - name: role_id
+        - name: id
           in: path
           description: User role identifier
           required: true
@@ -7480,6 +7475,10 @@ paths:
       tags:
         - Order
       summary: Approve of invitation for user
+      responses:
+        200:
+          description: OK
+          content: {}
   /api/v1/saved_card:
     delete:
       tags:
@@ -9335,6 +9334,8 @@ components:
           description: name of region
         country:
           type: array
+          items:
+            type: string
           description: list of countries
     price_group.RecommendedPriceResponse:
       type: object
