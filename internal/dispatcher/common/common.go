@@ -18,9 +18,10 @@ const (
 	Prefix                   = "internal.dispatcher"
 	UnmarshalKey             = "dispatcher"
 	UnmarshalGlobalConfigKey = "dispatcher.global"
-	AuthProjectGroupPath     = "/api/v1"
+	AuthProjectGroupPath     = "/auth/api/v1"
 	AuthUserGroupPath        = "/admin/api/v1"
 	SystemUserGroupPath      = "/system/api/v1"
+	NoAuthGroupPath          = "/api/v1"
 	WebHookGroupPath         = "/webhook"
 )
 
@@ -88,7 +89,7 @@ type Groups struct {
 	Access      *echo.Group
 	AuthUser    *echo.Group
 	WebHooks    *echo.Group
-	Common      *echo.Echo
+	Common      *echo.Group
 	SystemUser  *echo.Group
 }
 

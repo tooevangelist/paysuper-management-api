@@ -176,9 +176,6 @@ type OnboardingNotificationsListBinder struct {
 type OnboardingGetPaymentMethodBinder struct{}
 type OnboardingChangePaymentMethodBinder struct{}
 type OnboardingCreateNotificationBinder struct{}
-type ProductsGetProductsListBinder struct {
-	LimitDefault, OffsetDefault int32
-}
 type ProductsCreateProductBinder struct{}
 type ProductsUpdateProductBinder struct{}
 
