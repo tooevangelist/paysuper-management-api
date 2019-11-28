@@ -60,7 +60,7 @@ func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_Ok() {
 	body := []byte(`{"id": "ffffffffffffffffffffffff"}`)
 	rsp, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Path(removeSavedCardPath).
+		Path(common.NoAuthGroupPath + removeSavedCardPath).
 		AddCookie(cookie).
 		Init(test.ReqInitJSON()).
 		BodyBytes(body).
@@ -74,7 +74,7 @@ func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_RequestBindingErr
 	body := []byte(`{"id": "ffffffffffffffffffffffff", "cookie": 123}`)
 	_, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Path(removeSavedCardPath).
+		Path(common.NoAuthGroupPath + removeSavedCardPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(body).
 		Exec(suite.T())
@@ -90,7 +90,7 @@ func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_ValidateError() {
 	body := []byte(`{"id": "ffffffffffffffffffffffff"}`)
 	_, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Path(removeSavedCardPath).
+		Path(common.NoAuthGroupPath + removeSavedCardPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(body).
 		Exec(suite.T())
@@ -120,7 +120,7 @@ func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_BillingServerSyst
 	body := []byte(`{"id": "ffffffffffffffffffffffff"}`)
 	_, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Path(removeSavedCardPath).
+		Path(common.NoAuthGroupPath + removeSavedCardPath).
 		AddCookie(cookie).
 		Init(test.ReqInitJSON()).
 		BodyBytes(body).
@@ -159,7 +159,7 @@ func (suite *RecurringTestSuite) TestRecurring_RemoveSavedCard_BillingServerResu
 	body := []byte(`{"id": "ffffffffffffffffffffffff"}`)
 	_, err := suite.caller.Builder().
 		Method(http.MethodDelete).
-		Path(removeSavedCardPath).
+		Path(common.NoAuthGroupPath + removeSavedCardPath).
 		AddCookie(cookie).
 		Init(test.ReqInitJSON()).
 		BodyBytes(body).

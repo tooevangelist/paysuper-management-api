@@ -214,7 +214,7 @@ func (suite *OnboardingTestSuite) TestOnboarding_ListMerchants_Ok() {
 	var m *grpc.MerchantListingResponse
 	err = json.Unmarshal(res.Body.Bytes(), &m)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), int32(3), m.Count)
+	assert.EqualValues(suite.T(), 3, m.Count)
 	assert.Equal(suite.T(), mock.OnboardingMerchantMock.Id, m.Items[0].Id)
 }
 

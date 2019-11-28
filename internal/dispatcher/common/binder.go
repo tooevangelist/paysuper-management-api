@@ -130,7 +130,7 @@ func (b *MerchantBinder) Bind(bindInterface interface{}, ctx echo.Context) (err 
 }
 
 type Binder struct {
-	LimitDefault, OffsetDefault, LimitMax int32
+	LimitDefault, OffsetDefault, LimitMax int64
 }
 
 func (b *Binder) Bind(i interface{}, ctx echo.Context) (err error) {
@@ -141,7 +141,7 @@ func (b *Binder) Bind(i interface{}, ctx echo.Context) (err error) {
 	params := ctx.QueryParams()
 	limit := params.Get(RequestParameterLimit)
 	if len(limit) > 0 {
-		if ta := typ.StringInt32(limit); ta.Err() != nil {
+		if ta := typ.StringInt64(limit); ta.Err() != nil {
 			return ta.Err()
 		} else if ta.V() < 0 {
 			ta.Set(b.LimitDefault)
@@ -168,16 +168,16 @@ type OrderJsonBinder struct{}
 type PaymentCreateProcessBinder struct{}
 type OnboardingChangeMerchantStatusBinder struct{}
 type OnboardingMerchantListingBinder struct {
-	LimitDefault, OffsetDefault int32
+	LimitDefault, OffsetDefault int64
 }
 type OnboardingNotificationsListBinder struct {
-	LimitDefault, OffsetDefault int32
+	LimitDefault, OffsetDefault int64
 }
 type OnboardingGetPaymentMethodBinder struct{}
 type OnboardingChangePaymentMethodBinder struct{}
 type OnboardingCreateNotificationBinder struct{}
 type ProductsGetProductsListBinder struct {
-	LimitDefault, OffsetDefault int32
+	LimitDefault, OffsetDefault int64
 }
 type ProductsCreateProductBinder struct{}
 type ProductsUpdateProductBinder struct{}
