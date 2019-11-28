@@ -1,0 +1,23 @@
+openapi: 3.0.1
+info:
+  $ref: ./info/public.yaml
+servers:
+  $ref: ./servers.yaml
+tags:
+  $ref: ./tags.yaml
+x-tagGroups:
+  - name: Payments
+    tags:
+      - Order
+      - Token
+paths:
+  $ref: ./paths/public.yaml
+components:
+  securitySchemes:
+    XAPISignatureHeader:
+      type: apiKey
+      in: header
+      name: X-API-SIGNATURE
+      description: The Header **X-API-SIGNATURE** with the Project's Secret key found on the Project webhooks page.
+  schemas:
+    $ref: ./schemas.yaml

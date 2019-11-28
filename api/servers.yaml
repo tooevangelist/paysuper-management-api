@@ -1,0 +1,4 @@
+- url: https://api.pay.super.com
+  description: Production server (uses live data)
+- url: https://p1payapi.tst.protocol.one
+  description: Sandbox server (uses test data)

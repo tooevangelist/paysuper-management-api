@@ -1,0 +1,21 @@
+openapi: 3.0.1
+info:
+  $ref: ./info/internal.yaml
+servers:
+  $ref: ./servers.yaml
+tags:
+  $ref: ./tags.yaml
+paths:
+  $ref: ./paths/internal.yaml
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    $ref: ./parameters/internal.yaml
+  responses:
+    $ref: ./responses/internal.yaml
+  schemas:
+    $ref: ./schemas.yaml

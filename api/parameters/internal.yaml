@@ -1,0 +1,15 @@
+KeyProduct:
+  name: key_product_id
+  in: path
+  description: "Key Product ID"
+  required: true
+  schema:
+    type: string
+Platform:
+  name: platform_id
+  in: path
+  description: "Platform id"
+  required: true
+  example: steam
+  schema:
+    type: string

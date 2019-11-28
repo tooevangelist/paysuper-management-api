@@ -1,0 +1,1239 @@
+/api/v1/country:
+  get:
+    tags:
+      - Country
+    summary: Get list of countries
+    description: Get full list of currencies or get list of currencies filtered
+      by name
+    parameters:
+      - name: name
+        in: query
+        description: name or symbolic ISO 3166-1 code of country
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/model.Country'
+      500:
+        description: Some unknown error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/api/v1/country/{id}:
+  get:
+    tags:
+      - Country
+    summary: Get country by numeric ISO 3166-1 code
+    description: Get country object by numeric ISO 3166-1 code
+    parameters:
+      - name: id
+        in: path
+        description: numeric ISO 3166-1 country code
+        required: true
+        schema:
+          type: integer
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Country'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/api/v1/order/create:
+    get:
+      tags:
+        - Payment Order
+      summary: Create order with HTML form
+      description: Create a payment order use GET or POST HTML form
+      parameters:
+        - name: PP_PROJECT_ID
+          in: query
+          description: Project unique identifier in Protocol One payment solution
+          required: true
+          schema:
+            type: string
+        - name: PP_AMOUNT
+          in: query
+          description: Order amount
+          required: true
+          schema:
+            type: number
+        - name: PP_ACCOUNT
+          in: query
+          description: User unique account in project
+          required: true
+          schema:
+            type: string
+        - name: PP_ORDER_ID
+          in: query
+          description: Unique order identifier in project. This field not required,
+            BUT we're recommend send this field always
+          schema:
+            type: string
+        - name: PP_PAYMENT_METHOD
+          in: query
+          description: Payment method identifier in Protocol One payment solution
+          schema:
+            type: string
+        - name: PP_DESCRIPTION
+          in: query
+          description: Order description. If this field not send in request, then we're
+            create standard order description
+          schema:
+            type: string
+        - name: PP_CURRENCY
+          in: query
+          description: Order currency by ISO 4217 (3 chars). If this field send, then
+            we're process amount in this currency
+          schema:
+            type: string
+        - name: PP_REGION
+          in: query
+          description: User (payer) region code by ISO 3166-1 (2 chars) for check project
+            packages. If this field not send, then user region will be get from user
+            ip
+          schema:
+            type: string
+        - name: PP_PAYER_EMAIL
+          in: query
+          description: User (payer) email
+          schema:
+            type: string
+        - name: PP_PAYER_PHONE
+          in: query
+          description: User (payer) phone
+          schema:
+            type: string
+        - name: PP_URL_VERIFY
+          in: query
+          description: URL for payment data verification request to project. This field
+            can be send if it allowed in project admin panel
+          schema:
+            type: string
+        - name: PP_URL_NOTIFY
+          in: query
+          description: URL for payment notification request to project. This field can
+            be send if it allowed in project admin panel
+          schema:
+            type: string
+        - name: PP_URL_SUCCESS
+          in: query
+          description: URL for redirect user after successfully completed payment. This
+            field can be send if it allowed in project admin panel
+          schema:
+            type: string
+        - name: PP_URL_FAIL
+          in: query
+          description: URL for redirect user after failed payment. This field can be
+            send if it allowed in project admin panel
+          schema:
+            type: string
+        - name: PP_SIGNATURE
+          in: query
+          description: Signature of request to verify that the data has not been changed.
+            This field not required, BUT we're recommend send this field always
+          schema:
+            type: string
+        - name: Other
+          in: query
+          description: Any fields on the project side that do not match the names of
+            the reserved fields
+          schema:
+            type: string
+      responses:
+        302:
+          description: Redirect user to form entering payment requisites
+          content:
+            text/html:
+              schema:
+                type: string
+        400:
+          description: Redirect user to page with error description
+          content:
+            text/html:
+              schema:
+                type: string
+        500:
+          description: Redirect user to page with error description
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags:
+        - Payment Order
+      summary: Create order with HTML form
+      description: Create a payment order use GET or POST HTML form
+      parameters:
+        - name: PP_PROJECT_ID
+          in: query
+          description: Project unique identifier in Protocol One payment solution
+          required: true
+          schema:
+            type: string
+        - name: PP_AMOUNT
+          in: query
+          description: Order amount
+          required: true
+          schema:
+            type: number
+        - name: PP_ACCOUNT
+          in: query
+          description: User unique account in project
+          required: true
+          schema:
+            type: string
+        - name: PP_ORDER_ID
+          in: query
+          description: Unique order identifier in project. This field not required,
+            BUT we're recommend send this field always
+          schema:
+            type: string
+        - name: PP_PAYMENT_METHOD
+          in: query
+          description: Payment method identifier in Protocol One payment solution
+          schema:
+            type: string
+        - name: PP_DESCRIPTION
+          in: query
+          description: Order description. If this field not send in request, then we're
+            create standard order description
+          schema:
+            type: string
+        - name: PP_CURRENCY
+          in: query
+          description: Order currency by ISO 4217 (3 chars). If this field send, then
+            we're process amount in this currency
+          schema:
+            type: string
+        - name: PP_REGION
+          in: query
+          description: User (payer) region code by ISO 3166-1 (2 chars) for check project
+            packages. If this field not send, then user region will be get from user
+            ip
+          schema:
+            type: string
+        - name: PP_PAYER_EMAIL
+          in: query
+          description: User (payer) email
+          schema:
+            type: string
+        - name: PP_PAYER_PHONE
+          in: query
+          description: User (payer) phone
+          schema:
+            type: string
+        - name: PP_URL_VERIFY
+          in: query
+          description: URL for payment data verification request to project. This field
+            can be send if it allowed in project admin panel
+          schema:
+            type: string
+        - name: PP_URL_NOTIFY
+          in: query
+          description: URL for payment notification request to project. This field can
+            be send if it allowed in project admin panel
+          schema:
+            type: string
+        - name: PP_URL_SUCCESS
+          in: query
+          description: URL for redirect user after successfully completed payment. This
+            field can be send if it allowed in project admin panel
+          schema:
+            type: string
+        - name: PP_URL_FAIL
+          in: query
+          description: URL for redirect user after failed payment. This field can be
+            send if it allowed in project admin panel
+          schema:
+            type: string
+        - name: PP_SIGNATURE
+          in: query
+          description: Signature of request to verify that the data has not been changed.
+            This field not required, BUT we're recommend send this field always
+          schema:
+            type: string
+        - name: Other
+          in: query
+          description: Any fields on the project side that do not match the names of
+            the reserved fields
+          schema:
+            type: string
+      responses:
+        302:
+          description: Redirect user to form entering payment requisites
+          content:
+            text/html:
+              schema:
+                type: string
+        400:
+          description: Redirect user to page with error description
+          content:
+            text/html:
+              schema:
+                type: string
+        500:
+          description: Redirect user to page with error description
+          content:
+            text/html:
+              schema:
+                type: string
+/api/v1/order/recreate:
+      post:
+        tags:
+          - Payment Method
+        summary: Create a payment method for payment system
+        description: Recreate a payment order use order uuid for old order
+        requestBody:
+          description: product method properties
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order_id:
+                    type: string
+          required: false
+        responses:
+          200:
+            description: Object which contain data to render payment form
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/model.JsonOrderCreateResponse'
+          400:
+            description: Object with error message
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/model.Error'
+          500:
+            description: Object with error message
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/model.Error'
+        x-codegen-request-body-name: body
+/api/v1/price_group/currencies:
+  get:
+    tags:
+      - Price group
+    summary: Get a list of all currencies with regions and countries in them
+    description: Get a list of all currencies with regions and countries in them
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/price_group.CurrencyListResponse'
+      400:
+        description: Error description
+        content:
+          application/json:
+            schema:
+              type: string
+/api/v1/price_group/country:
+  get:
+    tags:
+      - Price group
+    summary: Get region and currency by country
+    description: Get region and currency by country
+    parameters:
+      - name: country
+        in: query
+        description: two-letter code of country
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/price_group.CurrencyRegion'
+      400:
+        description: Error description
+        content:
+          application/json:
+            schema:
+              type: string
+/api/v1/price_group/region:
+  get:
+    tags:
+      - Price group
+    summary: Get currency for a region and a list of countries in it
+    description: Get currency for a region and a list of countries in it
+    parameters:
+      - name: region
+        in: query
+        description: name of region
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/price_group.CurrencyListResponse'
+      400:
+        description: Error description
+        content:
+          application/json:
+            schema:
+              type: string
+/api/v1/user/confirm_email:
+  put:
+    tags:
+      - User Profile
+    summary: Confirm user email
+    description: Confirm user email by token
+    requestBody:
+      description: object contained confirmation token
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/user.confirmEmail.request'
+      required: true
+    responses:
+      200:
+        description: OK
+        content: {}
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Object not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: data
+/api/v1/key-products/:key_product_id:
+  get:
+    tags:
+      - product
+    summary: "Get product with platforms list and their prices"
+    parameters:
+      - name: key_product_id
+        in: path
+        description: "Key Product ID"
+        required: true
+        schema:
+          type: string
+      - name: country
+        in: query
+        description: ISO code of country for that price shoul be calculated
+        required: false
+        example: RUS
+        schema:
+          type: string
+      - name: currency
+        in: query
+        description: Currency of price that should be calculated
+        example: RUB
+        required: false
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyProductInfo'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Internal Error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/api/v1/order:
+  post:
+    tags:
+      - Payment Order
+    summary: Create order with json request
+    description: Create a payment order use POST JSON request
+    requestBody:
+      description: Order create data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/model.OrderScalar'
+      required: true
+    responses:
+      200:
+        description: Object which contain data to render payment form
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.JsonOrderCreateResponse'
+      400:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: data
+/api/v1/order/{id}:
+  get:
+    tags:
+      - Order
+    summary: Get data for rendering payment form
+    description: Get data for rendering payment form
+    parameters:
+      - name: id
+        in: path
+        description: Order unique identifier
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.PaymentFormDataResponse'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/api/v1/orders/{id}/platform:
+  post:
+    tags:
+      - Order
+    summary: Change platform for order
+    description: Change platform for order
+    parameters:
+      - name: id
+        in: path
+        description: Order unique identifier
+        required: true
+        schema:
+          type: string
+    requestBody:
+      description: platform change request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              platform:
+                type: string
+      required: false
+    responses:
+      204:
+        description: OK
+        content: {}
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: body
+/api/v1/payment:
+  post:
+    tags:
+      - Payment Order
+    summary: Create payment
+    description: Create payment by order
+    requestBody:
+      description: data to create payment
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/model.OrderCreatePaymentRequest'
+      required: true
+    responses:
+      200:
+        description: contain url to redirect user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/payment_system.PaymentResponse'
+      400:
+        description: contain error description about data validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/payment_system.PaymentResponse'
+      402:
+        description: contain error description about error on payment system side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/payment_system.PaymentResponse'
+      500:
+        description: contain error description about error on PSP (P1) side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/payment_system.PaymentResponse'
+    x-codegen-request-body-name: data
+/api/v1/payment_method/{id}/test:
+  get:
+    tags:
+      - Payment Method
+    summary: Get test settings to the payment method
+    description: Get test settings to the payment method
+    parameters:
+      - name: id
+        in: path
+        description: payment method identifier
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          text/html:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/payment_method.PaymentMethodParams'
+      400:
+        description: Error description
+        content:
+          text/html:
+            schema:
+              type: string
+  put:
+    tags:
+      - Payment Method
+    summary: Update test settings to the payment method
+    description: Update test settings to the payment method
+    parameters:
+      - name: id
+        in: path
+        description: paymentmethod identifier
+        required: true
+        schema:
+          type: string
+    requestBody:
+      description: payment method params
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/payment_method.UpdatePaymentMethodParams'
+      required: false
+    responses:
+      200:
+        description: OK
+        content:
+          text/html:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/payment_method.ChangePaymentMethodParamsResponse'
+      400:
+        description: Error description
+        content:
+          text/html:
+            schema:
+              type: string
+    x-codegen-request-body-name: body
+  post:
+    tags:
+      - Payment Method
+    summary: Add test settings to the payment method
+    description: Add test settings to the payment method
+    parameters:
+      - name: id
+        in: path
+        description: paymentmethod identifier
+        required: true
+        schema:
+          type: string
+    requestBody:
+      description: payment method params
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/payment_method.UpdatePaymentMethodParams'
+      required: false
+    responses:
+      200:
+        description: OK
+        content:
+          text/html:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/payment_method.ChangePaymentMethodParamsResponse'
+      400:
+        description: Error description
+        content:
+          text/html:
+            schema:
+              type: string
+    x-codegen-request-body-name: body
+  delete:
+    tags:
+      - Payment Method
+    summary: Delete test settings to the payment method
+    description: Delete test settings to the payment method
+    parameters:
+      - name: id
+        in: path
+        description: payment method identifier
+        required: true
+        schema:
+          type: string
+      - name: currency_a3
+        in: query
+        description: code of currency
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          text/html:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/payment_method.ChangePaymentMethodParamsResponse'
+      400:
+        description: Error description
+        content:
+          text/html:
+            schema:
+              type: string
+/api/v1/pricing/recommended/steam:
+  get:
+    tags:
+      - Pricing
+    summary: Get recommended prices for regions by price groups
+    description: Calculation of recommended prices based on price ranges as in Steam,
+      taking into account regional factors.
+    parameters:
+      - in: query
+        name: amount
+        schema:
+          type: number
+          format: double
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/price_group.RecommendedPriceResponse'
+      400:
+        description: Error description
+        content:
+          application/json:
+            schema:
+              type: string
+    x-codegen-request-body-name: data
+/api/v1/pricing/recommended/conversion:
+  get:
+    tags:
+      - Pricing
+    summary: Get recommended prices for regions by currency conversion
+    description: Calculation of recommended prices based on exchange rates.
+    parameters:
+      - in: query
+        name: amount
+        schema:
+          type: number
+          format: double
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/price_group.RecommendedPriceResponse'
+      400:
+        description: Error description
+        content:
+          application/json:
+            schema:
+              type: string
+    x-codegen-request-body-name: data
+/api/v1/pricing/recommended/table:
+  get:
+    tags:
+      - Pricing
+    summary: Get table of recommended prices for currency
+    description: Get table of recommended prices for currency.
+    requestBody:
+      description: Request param
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              currency:
+                type: string
+      required: true
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/price_group.RecommendedPriceTableResponse'
+      400:
+        description: Error description
+        content:
+          application/json:
+            schema:
+              type: string
+    x-codegen-request-body-name: data
+/api/v1/saved_card:
+  delete:
+    tags:
+      - Saved Card
+    summary: Remove customer saved card
+    description: Remove customer saved card
+    requestBody:
+      description: Remove saved card data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/saved_card.remove.request'
+      required: true
+    responses:
+      200:
+        description: OK
+        content: {}
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: data
+/api/v1/tokens:
+  post:
+    tags:
+      - Token
+    summary: Create token
+    description: Create token for process payment token create
+    requestBody:
+      description: Data to process payment
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/token.TokenRequest'
+      required: true
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/token.TokenResponse'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Object not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    security:
+      - XAPISignatureHeader: []
+    x-codegen-request-body-name: data
+/api/v1/user/feedback:
+  post:
+    tags:
+      - User Profile
+    summary: Create page review
+    description: Create page feedback
+    requestBody:
+      description: review body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/pageReview.request'
+      required: true
+    responses:
+      200:
+        description: OK
+        content: {}
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Object not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: data
+/api/v1/user/invite/check:
+  post:
+    tags:
+      - User
+    summary: Check invitation token
+    description: Check invitation token
+    requestBody:
+      description: JSON request body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CheckInviteToken'
+      required: false
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckInviteTokenResponse'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: body
+/api/v1/user/invite/approve:
+  post:
+    tags:
+      - Order
+    summary: Approve of invitation for user
+    responses:
+      200:
+        description: OK
+        content: {}
+/api/v1/user/merchants:
+  get:
+    tags:
+      - User
+    summary: Get merchants list for user
+    description: Get merchants list for user
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MerchantsForUserResponse'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/api/v1/user/profile:
+  get:
+    tags:
+      - User Profile
+    summary: Get user profile
+    description: Get user profile
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userProfile.response'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Object not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+  patch:
+    tags:
+      - User Profile
+    summary: Create or update user profile
+    description: Create or update user profile
+    requestBody:
+      description: User profile information
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/userProfile.request'
+      required: true
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userProfile.response'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Object not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: data
+/api/v1/user/profile/common:
+  get:
+    tags:
+      - User Profile
+    summary: Get common user profile
+    description: Get common user profile (main profile, user role, user permissions)
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userCommonProfile'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Object not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
