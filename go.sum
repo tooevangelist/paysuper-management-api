@@ -748,6 +748,8 @@ github.com/patrickmn/go-cache v0.0.0-20180527043350-9f6ff22cfff8/go.mod h1:3Qf8k
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
 github.com/paysuper/casbin-server v0.0.0-20191122132246-d8ec49ebf099 h1:Oyb+/qmUSSGb9k8FyuO9hymZXysigphA6OALjFhrHE0=
 github.com/paysuper/casbin-server v0.0.0-20191122132246-d8ec49ebf099/go.mod h1:2Jdkjg2fQ2echfcyS4xZDM04uBxfr3bfk8bAT+iJSGA=
+github.com/paysuper/casbin-server v0.0.0-20191128090724-930a08d68cec h1:lwjofa1ELNtdtXF/qMGje8VL+tMcRN2bJf0LGVGwM20=
+github.com/paysuper/casbin-server v0.0.0-20191128090724-930a08d68cec/go.mod h1:2Jdkjg2fQ2echfcyS4xZDM04uBxfr3bfk8bAT+iJSGA=
 github.com/paysuper/document-signer v0.0.0-20190903102235-df82efbb7d26/go.mod h1:39VQOEQm+WdUrGOAHDGnE8ks86mAPEKpgBwxP9mQfSA=
 github.com/paysuper/document-signer v0.0.0-20190906075749-af06b306ee92/go.mod h1:gqEKigUzMNjJ9P+OYeKCu+wOA17/Q2EElpJnd6O3Zr4=
 github.com/paysuper/document-signer v0.0.0-20190923080905-cb9cc2665d8b/go.mod h1:3yaO+xYLvqjkj7mJqNKuzp8ncd7gj75jud4KIkiLMzc=
@@ -783,6 +785,8 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20191128110316-e5dcd6e3ff0f h
 github.com/paysuper/paysuper-billing-server v0.0.0-20191128110316-e5dcd6e3ff0f/go.mod h1:wU0LSsB3H78GGsL/pi7qcfxEUKI7/z4qXXKoPn35lII=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191128124523-7148a971c30d h1:GO+gBwdN8PXadLKeQ9k+1yck903B8LzLbxKg2NlkdhE=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191128124523-7148a971c30d/go.mod h1:4OsS24sSecofebTHsoGShAibet1rYZwiIHDUdl2CAyE=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191128210733-44e73983efef h1:pJA8f/YwDSWAo3ns0vWL2mZZx1qIM/S327iotcKocbA=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191128210733-44e73983efef/go.mod h1:SN/Rir1cYfCauMK39YQ+gHhdJb3JhrpKkiUT/E6+cqQ=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d h1:hoMkfdq4qEGOONvxajsZO0Mf6np++pGnrKVxegvplaw=
 github.com/paysuper/paysuper-currencies v0.0.0-20190903083641-668b8b2b997d/go.mod h1:C+QHdgbjIlAPxHD93/08yi+xWfUgk8maLY8FKFqNzMQ=
 github.com/paysuper/paysuper-currencies v0.0.0-20191126123753-5139d3b5c8d2 h1:pDMgavqw+g/PAE8nRo6T2njno0FgsJzrLZjABkwtp+0=
@@ -992,6 +996,8 @@ github.com/xlab/treeprint v0.0.0-20181112141820-a009c3971eca/go.mod h1:ce1O1j6Ut
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/yuin/gopher-lua v0.0.0-20190514113301-1cd887cd7036 h1:1b6PAtenNyhsmo/NKXVe34h7JEZKva1YB/ne7K7mqKM=
 github.com/yuin/gopher-lua v0.0.0-20190514113301-1cd887cd7036/go.mod h1:gqRgreBUhTSL0GeU64rtZ3Uq3wtjOa/TB2YfrtkCbVQ=
+github.com/yuin/gopher-lua v0.0.0-20191128022950-c6266f4fe8d7 h1:Y17pEjKgx2X0A69WQPGa8hx/Myzu+4NdUxlkZpbAYio=
+github.com/yuin/gopher-lua v0.0.0-20191128022950-c6266f4fe8d7/go.mod h1:gqRgreBUhTSL0GeU64rtZ3Uq3wtjOa/TB2YfrtkCbVQ=
 github.com/ziutek/mymysql v1.5.4 h1:GB0qdRGsTwQSBVYuVShFBKaXSnSnYYC2d9knnE1LHFs=
 github.com/ziutek/mymysql v1.5.4/go.mod h1:LMSpPZ6DbqWFxNCHW77HeMg9I646SAhApZ/wKdgO/C0=
 gitlab.com/nyarla/go-crypt v0.0.0-20160106005555-d9a5dc2b789b/go.mod h1:T3BPAOm2cqquPa0MKWeNkmOM5RQsRhkrwMWonFMN7fE=
