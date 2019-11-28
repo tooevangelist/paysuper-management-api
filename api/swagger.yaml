@@ -8570,6 +8570,11 @@ paths:
           name: project_id
           type: string
           required: false
+        - description: enabled status (all, true, false)
+          in: query
+          name: enabled
+          type: string
+          required: false
       responses:
         200:
           description: OK
