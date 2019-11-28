@@ -9020,7 +9020,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/royalty_reports/{id}/change":
-    get:
+    post:
       summary: Change royalty report
       tags:
         - Royalty reports
