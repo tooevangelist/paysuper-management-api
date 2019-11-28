@@ -30,7 +30,7 @@ func NewTokenRoute(set common.HandlerSet, cfg *common.Config) *TokenRoute {
 }
 
 func (h *TokenRoute) Route(groups *common.Groups) {
-	groups.AuthProject.POST(tokenPath, h.createToken)
+	groups.Common.POST(tokenPath, h.createToken)
 }
 
 func (h *TokenRoute) createToken(ctx echo.Context) error {
