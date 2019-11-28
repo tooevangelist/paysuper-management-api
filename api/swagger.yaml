@@ -8570,6 +8570,11 @@ paths:
           name: project_id
           type: string
           required: false
+        - description: enabled status (all, true, false)
+          in: query
+          name: enabled
+          type: string
+          required: false
       responses:
         200:
           description: OK
@@ -9020,7 +9025,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/royalty_reports/{id}/change":
-    get:
+    post:
       summary: Change royalty report
       tags:
         - Royalty reports
