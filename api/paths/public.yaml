@@ -67,7 +67,7 @@
 /api/v1/key-products/:key_product_id:
   get:
     tags:
-      - product
+      - Product
     summary: "Get product with platforms list and their prices"
     parameters:
       - name: key_product_id
@@ -104,7 +104,7 @@
 /api/v1/order/create:
   get:
     tags:
-      - Payment Order
+      - Payment order
     summary: Create order with HTML form
     description: Create a payment order use GET or POST HTML form
     parameters:
@@ -223,7 +223,7 @@
               type: string
   post:
     tags:
-      - Payment Order
+      - Payment order
     summary: Create order with HTML form
     description: Create a payment order use GET or POST HTML form
     parameters:
@@ -343,7 +343,7 @@
 /api/v1/order/recreate:
   post:
     tags:
-      - Payment Method
+      - Payment method
     summary: Create a payment method for payment system
     description: Recreate a payment order use order uuid for old order
     requestBody:
@@ -379,7 +379,7 @@
 /api/v1/order:
   post:
     tags:
-      - Payment Order
+      - Payment order
     summary: Create order with json request
     description: Create a payment order use POST JSON request
     requestBody:
@@ -508,7 +508,7 @@
 /api/v1/payment:
   post:
     tags:
-      - Payment Order
+      - Payment order
     summary: Create payment
     description: Create payment by order
     requestBody:
@@ -547,7 +547,7 @@
 /api/v1/payment_method/{id}/test:
   get:
     tags:
-      - Payment Method
+      - Payment method
     summary: Get test settings to the payment method
     description: Get test settings to the payment method
     parameters:
@@ -574,7 +574,7 @@
               type: string
   put:
     tags:
-      - Payment Method
+      - Payment method
     summary: Update test settings to the payment method
     description: Update test settings to the payment method
     parameters:
@@ -609,7 +609,7 @@
     x-codegen-request-body-name: body
   post:
     tags:
-      - Payment Method
+      - Payment method
     summary: Add test settings to the payment method
     description: Add test settings to the payment method
     parameters:
@@ -644,7 +644,7 @@
     x-codegen-request-body-name: body
   delete:
     tags:
-      - Payment Method
+      - Payment method
     summary: Delete test settings to the payment method
     description: Delete test settings to the payment method
     parameters:
@@ -856,7 +856,7 @@
 /api/v1/saved_card:
   delete:
     tags:
-      - Saved Card
+      - Saved card
     summary: Remove customer saved card
     description: Remove customer saved card
     requestBody:
@@ -933,7 +933,7 @@
 /api/v1/user/confirm_email:
   put:
     tags:
-      - User Profile
+      - User profile
     summary: Confirm user email
     description: Confirm user email by token
     requestBody:
@@ -969,7 +969,7 @@
 /api/v1/user/feedback:
   post:
     tags:
-      - User Profile
+      - User profile
     summary: Create page review
     description: Create page feedback
     requestBody:
@@ -1144,7 +1144,7 @@
 /api/v1/user/profile:
   get:
     tags:
-      - User Profile
+      - User profile
     summary: Get user profile
     description: Get user profile
     responses:
@@ -1186,7 +1186,7 @@
               $ref: '#/components/schemas/model.Error'
   patch:
     tags:
-      - User Profile
+      - User profile
     summary: Create or update user profile
     description: Create or update user profile
     requestBody:
@@ -1237,7 +1237,7 @@
 /api/v1/user/profile/common:
   get:
     tags:
-      - User Profile
+      - User profile
     summary: Get common user profile
     description: Get common user profile (main profile, user role, user permissions)
     responses:

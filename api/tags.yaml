@@ -1,5 +1,12 @@
+- name: Admin user roles
+- name: Balance
+- name: Country
+- name: Dashboard
 - name: Key
+- name: Limits
+- name: Merchant user roles
 - name: Onboarding
+- name: Operating company
 - name: Order
   description: |
       You can create a payment order with details about your customer and sales option data.
@@ -220,9 +227,23 @@
       |`receipt_id`|string|The receipt unique identifier .|
       |`virtual_currency_amount`|float|The virtual currancy amount for the order.|
       |`is_buy_for_virtual_currency`|boolean|Has a value `true` if the order createc for a virtual currency.|
-- name: Public
+- name: Report file
+- name: Royalty reports
+- name: Payment links
+- name: Payment method
+- name: Payment order
+- name: Payouts
+- name: Pricing
+- name: Price group
+- name: Project
 - name: Product
 - name: Products
+- name: Public
+- name: Saved card
 - name: Token
   description: |
       A token is an encrypted string that represents certain details of your customer (such as the user ID, email and others), a game and purchase parameters.
+- name: Tax
+- name: VAT reports
+- name: User
+- name: User profile
