@@ -116,7 +116,7 @@
 /admin/api/v1/key-products:
   get:
     tags:
-      - Product
+      - product
     summary: "Get list of key products"
     parameters:
       - name: project_id
@@ -167,7 +167,7 @@
         $ref: '#/components/responses/InternalError'
   post:
     tags:
-      - Product
+      - product
     summary: "Create new key product"
     requestBody:
       content:
@@ -192,7 +192,7 @@
 /admin/api/v1/key-products/:key_product_id/publish:
   post:
     tags:
-      - Product
+      - product
     summary: Publishes product
     parameters:
       - name: key_product_id
@@ -221,7 +221,7 @@
 /admin/api/v1/key-products/:key_product_id/unpublish:
   post:
     tags:
-      - Product
+      - product
     summary: Set key product inactive
     parameters:
       - name: key_product_id
@@ -250,7 +250,7 @@
 /admin/api/v1/key-products/:key_product_id:
   delete:
     tags:
-      - Product
+      - product
     summary: "Change product"
     parameters:
       - name: key_product_id
@@ -278,7 +278,7 @@
         $ref: '#/components/responses/InternalError'
   put:
     tags:
-      - Product
+      - product
     summary: "Change product"
     parameters:
       - name: key_product_id
@@ -311,7 +311,7 @@
         $ref: '#/components/responses/InternalError'
   get:
     tags:
-      - Product
+      - product
     summary: "Get product by id"
     parameters:
       - name: key_product_id
@@ -1277,7 +1277,7 @@
       - Dashboard
     summary: Get main reports data for dashboard
     description: 'Get main reports dashboard block data, ie. next reports: gross
-    revenue, total transactions, VAT, ARPU'
+      revenue, total transactions, VAT, ARPU'
     parameters:
       - name: id
         in: path
@@ -1288,7 +1288,7 @@
       - name: period
         in: query
         description: 'period name. now possible next values: current_month, previous_month,
-      current_quarter, previous_quarter, current_year, previous_year'
+        current_quarter, previous_quarter, current_year, previous_year'
         required: true
         schema:
           type: string
@@ -1345,7 +1345,7 @@
       - name: period
         in: query
         description: 'period name. now possible next values: current_month, previous_month,
-      current_quarter, previous_quarter, current_year, previous_year'
+        current_quarter, previous_quarter, current_year, previous_year'
         required: true
         schema:
           type: string
@@ -1392,7 +1392,7 @@
       - Dashboard
     summary: Get base reports data for dashboard
     description: 'Get base reports dashboard block data, ie. next reports: revenue
-    by country, sales today, sources'
+      by country, sales today, sources'
     parameters:
       - name: id
         in: path
@@ -1403,8 +1403,8 @@
       - name: period
         in: query
         description: 'period name. now possible next values: current_day, previous_day,
-      current_week, previous_week, current_month, previous_month, current_quarter,
-      previous_quarter, current_year, previous_year'
+        current_week, previous_week, current_month, previous_month, current_quarter,
+        previous_quarter, current_year, previous_year'
         required: true
         schema:
           type: string
@@ -2159,6 +2159,610 @@
             schema:
               $ref: '#/components/schemas/model.Error'
     x-codegen-request-body-name: data
+/admin/api/v1/paylinks:
+  get:
+    tags:
+      - Payment links
+    summary: Get a list of payment links for current authenticated merchant
+    description: Get a list of payment links for current authenticated merchant
+    parameters:
+      - name: limit
+        in: query
+        description: maximum number of returning orders. default value is 100
+        schema:
+          type: integer
+      - name: offset
+        in: query
+        description: offset from which you want to return the list of orders. default
+          value is 0
+        schema:
+          type: integer
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/grpcPaylinksPaginate'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+  post:
+    tags:
+      - Payment links
+    summary: Create payment link with json request
+    description: Create payment link use POST JSON request
+    requestBody:
+      description: Payment link create data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/createPaylinkRequest'
+      required: true
+    responses:
+      200:
+        description: Object which contain created payment link
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/paylinkPaylink'
+      400:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: data
+/admin/api/v1/paylinks/{id}:
+  get:
+    tags:
+      - Payment links
+    summary: Get a payment link by id for current authenticated merchant
+    description: Get a payment link by id for current authenticated merchant
+    parameters:
+      - name: id
+        in: path
+        description: Payment link identifier
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/paylinkPaylink'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+  put:
+    tags:
+      - Payment links
+    summary: Create payment link with json request
+    description: Create payment link use POST JSON request
+    parameters:
+      - name: id
+        in: path
+        description: Payment link identifier
+        required: true
+        schema:
+          type: string
+    requestBody:
+      description: Payment link create data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/createPaylinkRequest'
+      required: true
+    responses:
+      200:
+        description: Object which contain created payment link
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/paylinkPaylink'
+      400:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: data
+  delete:
+    tags:
+      - Payment links
+    summary: Delete a payment link by id for current authenticated merchant
+    description: Delete a payment link by id for current authenticated merchant
+    parameters:
+      - name: id
+        in: path
+        description: Payment link identifier
+        required: true
+        schema:
+          type: string
+    responses:
+      204:
+        description: OK
+        content: {}
+      400:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/admin/api/v1/paylinks/{id}/url:
+  get:
+    tags:
+      - Payment links
+    summary: Get a payment link url by id for current authenticated merchant
+    description: Get a payment link url by id for current authenticated merchant
+    parameters:
+      - name: id
+        in: path
+        description: Payment link identifier
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/admin/api/v1/paylinks/{id}/dashboard/country:
+  get:
+    tags:
+      - Payment links
+    summary: Get a grouping stat by country for a payment link by its id for current
+      authenticated merchant
+    description: Get a grouping stat by country for a payment link by its id for
+      current authenticated merchant
+    parameters:
+      - name: role_id
+        in: path
+        description: User role identifier
+        required: true
+        schema:
+          type: string
+      - name: period_from
+        in: query
+        description: period start date in unix timestamp format
+        schema:
+          type: number
+      - name: period_to
+        in: query
+        description: period end date in unix timestamp format
+        schema:
+          type: number
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/paylinkGroupStatCommon'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/admin/api/v1/paylinks/{id}/dashboard/referrer:
+  get:
+    tags:
+      - Payment links
+    summary: Get a grouping stat by referrer for a payment link by its id for current
+      authenticated merchant
+    description: Get a grouping stat by referrer for a payment link by its id for
+      current authenticated merchant
+    parameters:
+      - name: id
+        in: path
+        description: Payment link identifier
+        required: true
+        schema:
+          type: string
+      - name: period_from
+        in: query
+        description: period start date in unix timestamp format
+        schema:
+          type: number
+      - name: period_to
+        in: query
+        description: period end date in unix timestamp format
+        schema:
+          type: number
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/paylinkGroupStatCommon'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/admin/api/v1/paylinks/{id}/dashboard/date:
+  get:
+    tags:
+      - Payment links
+    summary: Get a grouping stat by date for a payment link by its id for current
+      authenticated merchant
+    description: Get a grouping stat by date for a payment link by its id for current
+      authenticated merchant
+    parameters:
+      - name: id
+        in: path
+        description: Payment link identifier
+        required: true
+        schema:
+          type: string
+      - name: period_from
+        in: query
+        description: period start date in unix timestamp format
+        schema:
+          type: number
+      - name: period_to
+        in: query
+        description: period end date in unix timestamp format
+        schema:
+          type: number
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/paylinkGroupStatCommon'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/admin/api/v1/paylinks/{id}/dashboard/utm:
+  get:
+    tags:
+      - Payment links
+    summary: Get a grouping stat by utm for a payment link by its id for current
+      authenticated merchant
+    description: Get a grouping stat by utm for a payment link by its id for current
+      authenticated merchant
+    parameters:
+      - name: id
+        in: path
+        description: Payment link identifier
+        required: true
+        schema:
+          type: string
+      - name: period_from
+        in: query
+        description: period start date in unix timestamp format
+        schema:
+          type: number
+      - name: period_to
+        in: query
+        description: period end date in unix timestamp format
+        schema:
+          type: number
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/paylinkGroupStatCommon'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+/admin/api/v1/payment_min_limit_system:
+  get:
+    tags:
+      - Limits
+    summary: Get list of payment minimum limits system
+    description: Get list of payment minimum limits system
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/payment_min_limit_system_list'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+  post:
+    tags:
+      - Limits
+    summary: Set payment minimum limits system for currency
+    description: Set payment minimum limits system for currency
+    requestBody:
+      description: minimum limits system for currency
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/payment_min_limit_system'
+      required: false
+    responses:
+      204:
+        description: OK
+        content: {}
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Object not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: body
 /admin/api/v1/payment_costs/channel/system/all:
   get:
     tags:
@@ -2360,8 +2964,8 @@
       - name: region
         in: query
         description: 'region name. possible values: CIS, Russia, West Asia, EU, North
-      America, Central America, South America, United Kingdom, Worldwide, South
-      Pacific'
+        America, Central America, South America, United Kingdom, Worldwide, South
+        Pacific'
         required: true
         schema:
           type: string
@@ -2479,8 +3083,8 @@
       - name: region
         in: query
         description: 'region name. possible regions: CIS, Russia, West Asia, EU, North
-      America, Central America, South America, United Kingdom, Worldwide, South
-      Pacific'
+        America, Central America, South America, United Kingdom, Worldwide, South
+        Pacific'
         required: true
         schema:
           type: string
@@ -3304,660 +3908,6 @@
             schema:
               $ref: '#/components/schemas/model.Error'
     x-codegen-request-body-name: data
-/admin/api/v1/report_file:
-  post:
-    tags:
-      - ReportFile
-    summary: Create report file
-    description: Create report file
-    requestBody:
-      description: report file params
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/report_file.CreateReportFileParams'
-      required: false
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              type: object
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      403:
-        description: Access denied
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Some unknown error on server side
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-    x-codegen-request-body-name: body
-/admin/api/v1/report_file/download/{file}:
-  get:
-    tags:
-      - ReportFile
-    summary: Download report file
-    description: Download report file
-    parameters:
-      - name: file
-        in: path
-        description: filename
-        required: true
-        schema:
-          type: string
-      - name: file
-        in: query
-        description: identity of file and file type
-        required: true
-        schema:
-          type: string
-    responses:
-      200:
-        description: OK
-        content:
-          application/pdf:
-            schema:
-              type: string
-              format: binary
-          text/csv:
-            schema:
-              type: string
-              format: binary
-          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
-            schema:
-              type: string
-              format: binary
-      400:
-        description: Invalid request data
-        content:
-          application/pdf:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-          text/csv:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/pdf:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-          text/csv:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      403:
-        description: Access denied
-        content:
-          application/pdf:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-          text/csv:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Some unknown error on server side
-        content:
-          application/pdf:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-          text/csv:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-/admin/api/v1/paylinks:
-  get:
-    tags:
-      - Payment links
-    summary: Get a list of payment links for current authenticated merchant
-    description: Get a list of payment links for current authenticated merchant
-    parameters:
-      - name: limit
-        in: query
-        description: maximum number of returning orders. default value is 100
-        schema:
-          type: integer
-      - name: offset
-        in: query
-        description: offset from which you want to return the list of orders. default
-          value is 0
-        schema:
-          type: integer
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/grpcPaylinksPaginate'
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      403:
-        description: Access denied
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-  post:
-    tags:
-      - Payment links
-    summary: Create payment link with json request
-    description: Create payment link use POST JSON request
-    requestBody:
-      description: Payment link create data
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/createPaylinkRequest'
-      required: true
-    responses:
-      200:
-        description: Object which contain created payment link
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/paylinkPaylink'
-      400:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-    x-codegen-request-body-name: data
-/admin/api/v1/paylinks/{id}:
-  get:
-    tags:
-      - Payment links
-    summary: Get a payment link by id for current authenticated merchant
-    description: Get a payment link by id for current authenticated merchant
-    parameters:
-      - name: id
-        in: path
-        description: Payment link identifier
-        required: true
-        schema:
-          type: string
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/paylinkPaylink'
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      403:
-        description: Access denied
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      404:
-        description: Not found
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-  put:
-    tags:
-      - Payment links
-    summary: Create payment link with json request
-    description: Create payment link use POST JSON request
-    parameters:
-      - name: id
-        in: path
-        description: Payment link identifier
-        required: true
-        schema:
-          type: string
-    requestBody:
-      description: Payment link create data
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/createPaylinkRequest'
-      required: true
-    responses:
-      200:
-        description: Object which contain created payment link
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/paylinkPaylink'
-      400:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      404:
-        description: Not found
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-    x-codegen-request-body-name: data
-  delete:
-    tags:
-      - Payment links
-    summary: Delete a payment link by id for current authenticated merchant
-    description: Delete a payment link by id for current authenticated merchant
-    parameters:
-      - name: id
-        in: path
-        description: Payment link identifier
-        required: true
-        schema:
-          type: string
-    responses:
-      204:
-        description: OK
-        content: {}
-      400:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      404:
-        description: Not found
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-/admin/api/v1/paylinks/{id}/url:
-  get:
-    tags:
-      - Payment links
-    summary: Get a payment link url by id for current authenticated merchant
-    description: Get a payment link url by id for current authenticated merchant
-    parameters:
-      - name: id
-        in: path
-        description: Payment link identifier
-        required: true
-        schema:
-          type: string
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              type: object
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      403:
-        description: Access denied
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      404:
-        description: Not found
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-/admin/api/v1/paylinks/{id}/dashboard/country:
-  get:
-    tags:
-      - Payment links
-    summary: Get a grouping stat by country for a payment link by its id for current
-      authenticated merchant
-    description: Get a grouping stat by country for a payment link by its id for
-      current authenticated merchant
-    parameters:
-      - name: id
-        in: path
-        description: User role identifier
-        required: true
-        schema:
-          type: string
-      - name: period_from
-        in: query
-        description: period start date in unix timestamp format
-        schema:
-          type: number
-      - name: period_to
-        in: query
-        description: period end date in unix timestamp format
-        schema:
-          type: number
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/paylinkGroupStatCommon'
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      403:
-        description: Access denied
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      404:
-        description: Not found
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-/admin/api/v1/paylinks/{id}/dashboard/referrer:
-  get:
-    tags:
-      - Payment links
-    summary: Get a grouping stat by referrer for a payment link by its id for current
-      authenticated merchant
-    description: Get a grouping stat by referrer for a payment link by its id for
-      current authenticated merchant
-    parameters:
-      - name: id
-        in: path
-        description: Payment link identifier
-        required: true
-        schema:
-          type: string
-      - name: period_from
-        in: query
-        description: period start date in unix timestamp format
-        schema:
-          type: number
-      - name: period_to
-        in: query
-        description: period end date in unix timestamp format
-        schema:
-          type: number
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/paylinkGroupStatCommon'
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      403:
-        description: Access denied
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      404:
-        description: Not found
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-/admin/api/v1/paylinks/{id}/dashboard/date:
-  get:
-    tags:
-      - Payment links
-    summary: Get a grouping stat by date for a payment link by its id for current
-      authenticated merchant
-    description: Get a grouping stat by date for a payment link by its id for current
-      authenticated merchant
-    parameters:
-      - name: id
-        in: path
-        description: Payment link identifier
-        required: true
-        schema:
-          type: string
-      - name: period_from
-        in: query
-        description: period start date in unix timestamp format
-        schema:
-          type: number
-      - name: period_to
-        in: query
-        description: period end date in unix timestamp format
-        schema:
-          type: number
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/paylinkGroupStatCommon'
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      403:
-        description: Access denied
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      404:
-        description: Not found
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-/admin/api/v1/paylinks/{id}/dashboard/utm:
-  get:
-    tags:
-      - Payment links
-    summary: Get a grouping stat by utm for a payment link by its id for current
-      authenticated merchant
-    description: Get a grouping stat by utm for a payment link by its id for current
-      authenticated merchant
-    parameters:
-      - name: id
-        in: path
-        description: Payment link identifier
-        required: true
-        schema:
-          type: string
-      - name: period_from
-        in: query
-        description: period start date in unix timestamp format
-        schema:
-          type: number
-      - name: period_to
-        in: query
-        description: period end date in unix timestamp format
-        schema:
-          type: number
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/paylinkGroupStatCommon'
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      401:
-        description: Unauthorized
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      403:
-        description: Access denied
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      404:
-        description: Not found
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Object with error message
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
 /admin/api/v1/payout_documents:
   get:
     tags:
@@ -4147,31 +4097,76 @@
             schema:
               $ref: '#/components/schemas/model.Error'
     x-codegen-request-body-name: body
-/admin/api/v1/platforms:
+/admin/api/v1/products/:id/prices:
   get:
     tags:
-      - Product
-    summary: "Get available platform list"
+      - Products
+    summary: Get product prices
+    description: Get product prices
+    parameters:
+      - name: id
+        in: query
+        description: id of product
+        required: true
+        schema:
+          type: string
     responses:
       200:
         description: OK
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                count:
-                  type: integer
-                platforms:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Platform'
-      401:
-        $ref: '#/components/responses/Unauthorized'
-      403:
-        $ref: '#/components/responses/Forbidden'
+              type: array
+              items:
+                $ref: '#/components/schemas/product.Price'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
       500:
-        $ref: '#/components/responses/InternalError'
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    security:
+      - XAPISignatureHeader: []
+  put:
+    tags:
+      - Products
+    summary: Set product prices
+    description: Set product prices
+    requestBody:
+      description: price properties
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/product.PutPrice'
+      required: false
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    security:
+      - XAPISignatureHeader: []
+    x-codegen-request-body-name: body
 /admin/api/v1/products:
   get:
     tags:
@@ -4203,6 +4198,11 @@
       - name: project_id
         in: query
         description: project identifier for which need get products list
+        schema:
+          type: string
+      - name: enabled
+        in: query
+        description: enabled status (all, true, false)
         schema:
           type: string
     responses:
@@ -4464,76 +4464,6 @@
           application/json:
             schema:
               $ref: '#/components/schemas/model.Error'
-/admin/api/v1/products/:id/prices:
-  get:
-    tags:
-      - Products
-    summary: Get product prices
-    description: Get product prices
-    parameters:
-      - name: id
-        in: query
-        description: id of product
-        required: true
-        schema:
-          type: string
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/product.Price'
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Some unknown error on server side
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-    security:
-      - XAPISignatureHeader: []
-  put:
-    tags:
-      - Products
-    summary: Set product prices
-    description: Set product prices
-    requestBody:
-      description: price properties
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/product.PutPrice'
-      required: false
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Some unknown error on server side
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-    security:
-      - XAPISignatureHeader: []
-    x-codegen-request-body-name: body
 /admin/api/v1/projects:
   get:
     tags:
@@ -4836,6 +4766,159 @@
             schema:
               $ref: '#/components/schemas/model.Error'
     x-codegen-request-body-name: data
+/admin/api/v1/platforms:
+  get:
+    tags:
+      - product
+    summary: "Get available platform list"
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                platforms:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Platform'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      500:
+        $ref: '#/components/responses/InternalError'
+/admin/api/v1/report_file:
+  post:
+    tags:
+      - ReportFile
+    summary: Create report file
+    description: Create report file
+    requestBody:
+      description: report file params
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/report_file.CreateReportFileParams'
+      required: false
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: body
+/admin/api/v1/report_file/download/{file}:
+  get:
+    tags:
+      - ReportFile
+    summary: Download report file
+    description: Download report file
+    parameters:
+      - name: file
+        in: path
+        description: filename
+        required: true
+        schema:
+          type: string
+      - name: file
+        in: query
+        description: identity of file and file type
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+          text/csv:
+            schema:
+              type: string
+              format: binary
+          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            schema:
+              type: string
+              format: binary
+      400:
+        description: Invalid request data
+        content:
+          application/pdf:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+          text/csv:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/pdf:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+          text/csv:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/pdf:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+          text/csv:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/pdf:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+          text/csv:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            schema:
+              $ref: '#/components/schemas/model.Error'
 /admin/api/v1/royalty_reports:
   get:
     tags:
@@ -5095,7 +5178,7 @@
               $ref: '#/components/schemas/model.Error'
     x-codegen-request-body-name: body
 /admin/api/v1/royalty_reports/{id}/change:
-  get:
+  post:
     tags:
       - Royalty reports
     summary: Change royalty report
@@ -5303,12 +5386,12 @@
     summary: Get a VAT reports list by country
     description: Get a VAT reports list by country
     parameters:
-      - name: country
+      - name: role_id
         in: path
-        description: The two-letters country code by ISO 3166-1.
+        description: User role identifier
+        required: true
         schema:
           type: string
-        required: true
     responses:
       200:
         description: OK
@@ -5454,84 +5537,6 @@
             schema:
               $ref: '#/components/schemas/model.Error'
     x-codegen-request-body-name: body
-/admin/api/v1/payment_min_limit_system:
-    get:
-      tags:
-        - Limits
-      summary: Get list of payment minimum limits system
-      description: Get list of payment minimum limits system
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/payment_min_limit_system_list'
-        400:
-          description: Invalid request data
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/model.Error'
-        404:
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/model.Error'
-        500:
-          description: Object with error message
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/model.Error'
-    post:
-      tags:
-        - Limits
-      summary: Set payment minimum limits system for currency
-      description: Set payment minimum limits system for currency
-      requestBody:
-        description: minimum limits system for currency
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/payment_min_limit_system'
-        required: false
-      responses:
-        204:
-          description: OK
-          content: {}
-        400:
-          description: Invalid request data
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/model.Error'
-        401:
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/model.Error'
-        403:
-          description: Access denied
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/model.Error'
-        404:
-          description: Object not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/model.Error'
-        500:
-          description: Some unknown error on server side
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/model.Error'
-      x-codegen-request-body-name: body
 /system/api/v1/merchant/{id}/tariffs:
   post:
     tags:
@@ -5779,7 +5784,7 @@
       - name: is_system
         in: query
         description: 'flag to filter return notification: 0 - return only notification;
-          1 - return only history'
+        1 - return only history'
         schema:
           type: integer
       - name: limit
@@ -6224,7 +6229,7 @@
     requestBody:
       description: status
       content:
-        application/x-www-form-urlencoded:
+        application/json:
           schema:
             type: object
             properties:
