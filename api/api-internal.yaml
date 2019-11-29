@@ -1854,20 +1854,13 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        description: JSON request body
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserRoleResponse'
-        required: false
       responses:
         200:
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmptyResponseWithStatus'
+                $ref: '#/components/schemas/UserRoleResponse'
         400:
           description: Invalid request data
           content:
@@ -1892,7 +1885,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/model.Error'
-      x-codegen-request-body-name: body
     put:
       tags:
         - Merchant user roles
