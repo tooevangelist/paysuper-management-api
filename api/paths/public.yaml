@@ -759,18 +759,17 @@
     summary: Get recommended prices for regions by price groups
     description: Calculation of recommended prices based on price ranges as in Steam,
       taking into account regional factors.
-    requestBody:
-      description: Request param
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              amount:
-                type: integer
-              currency:
-                type: string
-      required: true
+    parameters:
+      - name: amount
+        in: query
+        description: Amount in the currency for calculation recommended prices
+        schema:
+          type: integer
+      - name: currency
+        in: query
+        description: Based currency
+        schema:
+          type: string
     responses:
       200:
         description: OK
@@ -786,25 +785,23 @@
           application/json:
             schema:
               type: string
-    x-codegen-request-body-name: data
 /api/v1/pricing/recommended/conversion:
   get:
     tags:
       - Pricing
     summary: Get recommended prices for regions by currency conversion
     description: Calculation of recommended prices based on exchange rates.
-    requestBody:
-      description: Request param
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              amount:
-                type: integer
-              currency:
-                type: string
-      required: true
+    parameters:
+      - name: amount
+        in: query
+        description: Amount in the currency for calculation recommended prices
+        schema:
+          type: integer
+      - name: currency
+        in: query
+        description: Based currency
+        schema:
+          type: string
     responses:
       200:
         description: OK
@@ -820,23 +817,18 @@
           application/json:
             schema:
               type: string
-    x-codegen-request-body-name: data
 /api/v1/pricing/recommended/table:
   get:
     tags:
       - Pricing
     summary: Get table of recommended prices for currency
     description: Get table of recommended prices for currency.
-    requestBody:
-      description: Request param
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              currency:
-                type: string
-      required: true
+    parameters:
+      - name: currency
+        in: query
+        description: Based currency
+        schema:
+          type: string
     responses:
       200:
         description: OK
@@ -852,7 +844,6 @@
           application/json:
             schema:
               type: string
-    x-codegen-request-body-name: data
 /api/v1/saved_card:
   delete:
     tags:
