@@ -65,280 +65,280 @@
             schema:
               $ref: '#/components/schemas/model.Error'
 /api/v1/order/create:
-    get:
-      tags:
-        - Payment Order
-      summary: Create order with HTML form
-      description: Create a payment order use GET or POST HTML form
-      parameters:
-        - name: PP_PROJECT_ID
-          in: query
-          description: Project unique identifier in Protocol One payment solution
-          required: true
-          schema:
-            type: string
-        - name: PP_AMOUNT
-          in: query
-          description: Order amount
-          required: true
-          schema:
-            type: number
-        - name: PP_ACCOUNT
-          in: query
-          description: User unique account in project
-          required: true
-          schema:
-            type: string
-        - name: PP_ORDER_ID
-          in: query
-          description: Unique order identifier in project. This field not required,
-            BUT we're recommend send this field always
-          schema:
-            type: string
-        - name: PP_PAYMENT_METHOD
-          in: query
-          description: Payment method identifier in Protocol One payment solution
-          schema:
-            type: string
-        - name: PP_DESCRIPTION
-          in: query
-          description: Order description. If this field not send in request, then we're
-            create standard order description
-          schema:
-            type: string
-        - name: PP_CURRENCY
-          in: query
-          description: Order currency by ISO 4217 (3 chars). If this field send, then
-            we're process amount in this currency
-          schema:
-            type: string
-        - name: PP_REGION
-          in: query
-          description: User (payer) region code by ISO 3166-1 (2 chars) for check project
-            packages. If this field not send, then user region will be get from user
-            ip
-          schema:
-            type: string
-        - name: PP_PAYER_EMAIL
-          in: query
-          description: User (payer) email
-          schema:
-            type: string
-        - name: PP_PAYER_PHONE
-          in: query
-          description: User (payer) phone
-          schema:
-            type: string
-        - name: PP_URL_VERIFY
-          in: query
-          description: URL for payment data verification request to project. This field
-            can be send if it allowed in project admin panel
-          schema:
-            type: string
-        - name: PP_URL_NOTIFY
-          in: query
-          description: URL for payment notification request to project. This field can
-            be send if it allowed in project admin panel
-          schema:
-            type: string
-        - name: PP_URL_SUCCESS
-          in: query
-          description: URL for redirect user after successfully completed payment. This
-            field can be send if it allowed in project admin panel
-          schema:
-            type: string
-        - name: PP_URL_FAIL
-          in: query
-          description: URL for redirect user after failed payment. This field can be
-            send if it allowed in project admin panel
-          schema:
-            type: string
-        - name: PP_SIGNATURE
-          in: query
-          description: Signature of request to verify that the data has not been changed.
-            This field not required, BUT we're recommend send this field always
-          schema:
-            type: string
-        - name: Other
-          in: query
-          description: Any fields on the project side that do not match the names of
-            the reserved fields
-          schema:
-            type: string
-      responses:
-        302:
-          description: Redirect user to form entering payment requisites
-          content:
-            text/html:
-              schema:
-                type: string
-        400:
-          description: Redirect user to page with error description
-          content:
-            text/html:
-              schema:
-                type: string
-        500:
-          description: Redirect user to page with error description
-          content:
-            text/html:
-              schema:
-                type: string
-    post:
-      tags:
-        - Payment Order
-      summary: Create order with HTML form
-      description: Create a payment order use GET or POST HTML form
-      parameters:
-        - name: PP_PROJECT_ID
-          in: query
-          description: Project unique identifier in Protocol One payment solution
-          required: true
-          schema:
-            type: string
-        - name: PP_AMOUNT
-          in: query
-          description: Order amount
-          required: true
-          schema:
-            type: number
-        - name: PP_ACCOUNT
-          in: query
-          description: User unique account in project
-          required: true
-          schema:
-            type: string
-        - name: PP_ORDER_ID
-          in: query
-          description: Unique order identifier in project. This field not required,
-            BUT we're recommend send this field always
-          schema:
-            type: string
-        - name: PP_PAYMENT_METHOD
-          in: query
-          description: Payment method identifier in Protocol One payment solution
-          schema:
-            type: string
-        - name: PP_DESCRIPTION
-          in: query
-          description: Order description. If this field not send in request, then we're
-            create standard order description
-          schema:
-            type: string
-        - name: PP_CURRENCY
-          in: query
-          description: Order currency by ISO 4217 (3 chars). If this field send, then
-            we're process amount in this currency
-          schema:
-            type: string
-        - name: PP_REGION
-          in: query
-          description: User (payer) region code by ISO 3166-1 (2 chars) for check project
-            packages. If this field not send, then user region will be get from user
-            ip
-          schema:
-            type: string
-        - name: PP_PAYER_EMAIL
-          in: query
-          description: User (payer) email
-          schema:
-            type: string
-        - name: PP_PAYER_PHONE
-          in: query
-          description: User (payer) phone
-          schema:
-            type: string
-        - name: PP_URL_VERIFY
-          in: query
-          description: URL for payment data verification request to project. This field
-            can be send if it allowed in project admin panel
-          schema:
-            type: string
-        - name: PP_URL_NOTIFY
-          in: query
-          description: URL for payment notification request to project. This field can
-            be send if it allowed in project admin panel
-          schema:
-            type: string
-        - name: PP_URL_SUCCESS
-          in: query
-          description: URL for redirect user after successfully completed payment. This
-            field can be send if it allowed in project admin panel
-          schema:
-            type: string
-        - name: PP_URL_FAIL
-          in: query
-          description: URL for redirect user after failed payment. This field can be
-            send if it allowed in project admin panel
-          schema:
-            type: string
-        - name: PP_SIGNATURE
-          in: query
-          description: Signature of request to verify that the data has not been changed.
-            This field not required, BUT we're recommend send this field always
-          schema:
-            type: string
-        - name: Other
-          in: query
-          description: Any fields on the project side that do not match the names of
-            the reserved fields
-          schema:
-            type: string
-      responses:
-        302:
-          description: Redirect user to form entering payment requisites
-          content:
-            text/html:
-              schema:
-                type: string
-        400:
-          description: Redirect user to page with error description
-          content:
-            text/html:
-              schema:
-                type: string
-        500:
-          description: Redirect user to page with error description
-          content:
-            text/html:
-              schema:
-                type: string
+  get:
+    tags:
+      - Payment Order
+    summary: Create order with HTML form
+    description: Create a payment order use GET or POST HTML form
+    parameters:
+      - name: PP_PROJECT_ID
+        in: query
+        description: Project unique identifier in Protocol One payment solution
+        required: true
+        schema:
+          type: string
+      - name: PP_AMOUNT
+        in: query
+        description: Order amount
+        required: true
+        schema:
+          type: number
+      - name: PP_ACCOUNT
+        in: query
+        description: User unique account in project
+        required: true
+        schema:
+          type: string
+      - name: PP_ORDER_ID
+        in: query
+        description: Unique order identifier in project. This field not required,
+          BUT we're recommend send this field always
+        schema:
+          type: string
+      - name: PP_PAYMENT_METHOD
+        in: query
+        description: Payment method identifier in Protocol One payment solution
+        schema:
+          type: string
+      - name: PP_DESCRIPTION
+        in: query
+        description: Order description. If this field not send in request, then we're
+          create standard order description
+        schema:
+          type: string
+      - name: PP_CURRENCY
+        in: query
+        description: Order currency by ISO 4217 (3 chars). If this field send, then
+          we're process amount in this currency
+        schema:
+          type: string
+      - name: PP_REGION
+        in: query
+        description: User (payer) region code by ISO 3166-1 (2 chars) for check project
+          packages. If this field not send, then user region will be get from user
+          ip
+        schema:
+          type: string
+      - name: PP_PAYER_EMAIL
+        in: query
+        description: User (payer) email
+        schema:
+          type: string
+      - name: PP_PAYER_PHONE
+        in: query
+        description: User (payer) phone
+        schema:
+          type: string
+      - name: PP_URL_VERIFY
+        in: query
+        description: URL for payment data verification request to project. This field
+          can be send if it allowed in project admin panel
+        schema:
+          type: string
+      - name: PP_URL_NOTIFY
+        in: query
+        description: URL for payment notification request to project. This field can
+          be send if it allowed in project admin panel
+        schema:
+          type: string
+      - name: PP_URL_SUCCESS
+        in: query
+        description: URL for redirect user after successfully completed payment. This
+          field can be send if it allowed in project admin panel
+        schema:
+          type: string
+      - name: PP_URL_FAIL
+        in: query
+        description: URL for redirect user after failed payment. This field can be
+          send if it allowed in project admin panel
+        schema:
+          type: string
+      - name: PP_SIGNATURE
+        in: query
+        description: Signature of request to verify that the data has not been changed.
+          This field not required, BUT we're recommend send this field always
+        schema:
+          type: string
+      - name: Other
+        in: query
+        description: Any fields on the project side that do not match the names of
+          the reserved fields
+        schema:
+          type: string
+    responses:
+      302:
+        description: Redirect user to form entering payment requisites
+        content:
+          text/html:
+            schema:
+              type: string
+      400:
+        description: Redirect user to page with error description
+        content:
+          text/html:
+            schema:
+              type: string
+      500:
+        description: Redirect user to page with error description
+        content:
+          text/html:
+            schema:
+              type: string
+  post:
+    tags:
+      - Payment Order
+    summary: Create order with HTML form
+    description: Create a payment order use GET or POST HTML form
+    parameters:
+      - name: PP_PROJECT_ID
+        in: query
+        description: Project unique identifier in Protocol One payment solution
+        required: true
+        schema:
+          type: string
+      - name: PP_AMOUNT
+        in: query
+        description: Order amount
+        required: true
+        schema:
+          type: number
+      - name: PP_ACCOUNT
+        in: query
+        description: User unique account in project
+        required: true
+        schema:
+          type: string
+      - name: PP_ORDER_ID
+        in: query
+        description: Unique order identifier in project. This field not required,
+          BUT we're recommend send this field always
+        schema:
+          type: string
+      - name: PP_PAYMENT_METHOD
+        in: query
+        description: Payment method identifier in Protocol One payment solution
+        schema:
+          type: string
+      - name: PP_DESCRIPTION
+        in: query
+        description: Order description. If this field not send in request, then we're
+          create standard order description
+        schema:
+          type: string
+      - name: PP_CURRENCY
+        in: query
+        description: Order currency by ISO 4217 (3 chars). If this field send, then
+          we're process amount in this currency
+        schema:
+          type: string
+      - name: PP_REGION
+        in: query
+        description: User (payer) region code by ISO 3166-1 (2 chars) for check project
+          packages. If this field not send, then user region will be get from user
+          ip
+        schema:
+          type: string
+      - name: PP_PAYER_EMAIL
+        in: query
+        description: User (payer) email
+        schema:
+          type: string
+      - name: PP_PAYER_PHONE
+        in: query
+        description: User (payer) phone
+        schema:
+          type: string
+      - name: PP_URL_VERIFY
+        in: query
+        description: URL for payment data verification request to project. This field
+          can be send if it allowed in project admin panel
+        schema:
+          type: string
+      - name: PP_URL_NOTIFY
+        in: query
+        description: URL for payment notification request to project. This field can
+          be send if it allowed in project admin panel
+        schema:
+          type: string
+      - name: PP_URL_SUCCESS
+        in: query
+        description: URL for redirect user after successfully completed payment. This
+          field can be send if it allowed in project admin panel
+        schema:
+          type: string
+      - name: PP_URL_FAIL
+        in: query
+        description: URL for redirect user after failed payment. This field can be
+          send if it allowed in project admin panel
+        schema:
+          type: string
+      - name: PP_SIGNATURE
+        in: query
+        description: Signature of request to verify that the data has not been changed.
+          This field not required, BUT we're recommend send this field always
+        schema:
+          type: string
+      - name: Other
+        in: query
+        description: Any fields on the project side that do not match the names of
+          the reserved fields
+        schema:
+          type: string
+    responses:
+      302:
+        description: Redirect user to form entering payment requisites
+        content:
+          text/html:
+            schema:
+              type: string
+      400:
+        description: Redirect user to page with error description
+        content:
+          text/html:
+            schema:
+              type: string
+      500:
+        description: Redirect user to page with error description
+        content:
+          text/html:
+            schema:
+              type: string
 /api/v1/order/recreate:
-      post:
-        tags:
-          - Payment Method
-        summary: Create a payment method for payment system
-        description: Recreate a payment order use order uuid for old order
-        requestBody:
-          description: product method properties
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  order_id:
-                    type: string
-          required: false
-        responses:
-          200:
-            description: Object which contain data to render payment form
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/model.JsonOrderCreateResponse'
-          400:
-            description: Object with error message
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/model.Error'
-          500:
-            description: Object with error message
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/model.Error'
-        x-codegen-request-body-name: body
+  post:
+    tags:
+      - Payment Method
+    summary: Create a payment method for payment system
+    description: Recreate a payment order use order uuid for old order
+    requestBody:
+      description: product method properties
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              order_id:
+                type: string
+      required: false
+    responses:
+      200:
+        description: Object which contain data to render payment form
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.JsonOrderCreateResponse'
+      400:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: body
 /api/v1/price_group/currencies:
   get:
     tags:
@@ -486,17 +486,9 @@
             schema:
               $ref: '#/components/schemas/KeyProductInfo'
       400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
+        $ref: '#/components/responses/BadRequest'
       500:
-        description: Internal Error
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
+        $ref: '#/components/responses/InternalError'
 /api/v1/order:
   post:
     tags:
@@ -803,12 +795,18 @@
     summary: Get recommended prices for regions by price groups
     description: Calculation of recommended prices based on price ranges as in Steam,
       taking into account regional factors.
-    parameters:
-      - in: query
-        name: amount
-        schema:
-          type: number
-          format: double
+    requestBody:
+      description: Request param
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              amount:
+                type: integer
+              currency:
+                type: string
+      required: true
     responses:
       200:
         description: OK
@@ -831,12 +829,18 @@
       - Pricing
     summary: Get recommended prices for regions by currency conversion
     description: Calculation of recommended prices based on exchange rates.
-    parameters:
-      - in: query
-        name: amount
-        schema:
-          type: number
-          format: double
+    requestBody:
+      description: Request param
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              amount:
+                type: integer
+              currency:
+                type: string
+      required: true
     responses:
       200:
         description: OK
@@ -1058,12 +1062,48 @@
 /api/v1/user/invite/approve:
   post:
     tags:
-      - Order
+      - User
     summary: Approve of invitation for user
+    description: Approve of invitation for user
+    requestBody:
+      description: JSON request body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AcceptInvite'
+      required: false
     responses:
       200:
         description: OK
-        content: {}
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptInviteResponse'
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      403:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Object with error message
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+    x-codegen-request-body-name: body
 /api/v1/user/merchants:
   get:
     tags:
