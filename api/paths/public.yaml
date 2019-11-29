@@ -64,6 +64,43 @@
           application/json:
             schema:
               $ref: '#/components/schemas/model.Error'
+/api/v1/key-products/:key_product_id:
+  get:
+    tags:
+      - product
+    summary: "Get product with platforms list and their prices"
+    parameters:
+      - name: key_product_id
+        in: path
+        description: "Key Product ID"
+        required: true
+        schema:
+          type: string
+      - name: country
+        in: query
+        description: ISO code of country for that price shoul be calculated
+        required: false
+        example: RUS
+        schema:
+          type: string
+      - name: currency
+        in: query
+        description: Currency of price that should be calculated
+        example: RUB
+        required: false
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyProductInfo'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      500:
+        $ref: '#/components/responses/InternalError'
 /api/v1/order/create:
   get:
     tags:
@@ -339,156 +376,6 @@
             schema:
               $ref: '#/components/schemas/model.Error'
     x-codegen-request-body-name: body
-/api/v1/price_group/currencies:
-  get:
-    tags:
-      - Price group
-    summary: Get a list of all currencies with regions and countries in them
-    description: Get a list of all currencies with regions and countries in them
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/price_group.CurrencyListResponse'
-      400:
-        description: Error description
-        content:
-          application/json:
-            schema:
-              type: string
-/api/v1/price_group/country:
-  get:
-    tags:
-      - Price group
-    summary: Get region and currency by country
-    description: Get region and currency by country
-    parameters:
-      - name: country
-        in: query
-        description: two-letter code of country
-        required: true
-        schema:
-          type: string
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/price_group.CurrencyRegion'
-      400:
-        description: Error description
-        content:
-          application/json:
-            schema:
-              type: string
-/api/v1/price_group/region:
-  get:
-    tags:
-      - Price group
-    summary: Get currency for a region and a list of countries in it
-    description: Get currency for a region and a list of countries in it
-    parameters:
-      - name: region
-        in: query
-        description: name of region
-        required: true
-        schema:
-          type: string
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/price_group.CurrencyListResponse'
-      400:
-        description: Error description
-        content:
-          application/json:
-            schema:
-              type: string
-/api/v1/user/confirm_email:
-  put:
-    tags:
-      - User Profile
-    summary: Confirm user email
-    description: Confirm user email by token
-    requestBody:
-      description: object contained confirmation token
-      content:
-        application/x-www-form-urlencoded:
-          schema:
-            $ref: '#/components/schemas/user.confirmEmail.request'
-      required: true
-    responses:
-      200:
-        description: OK
-        content: {}
-      400:
-        description: Invalid request data
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      404:
-        description: Object not found
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-      500:
-        description: Some unknown error on server side
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/model.Error'
-    x-codegen-request-body-name: data
-/api/v1/key-products/:key_product_id:
-  get:
-    tags:
-      - product
-    summary: "Get product with platforms list and their prices"
-    parameters:
-      - name: key_product_id
-        in: path
-        description: "Key Product ID"
-        required: true
-        schema:
-          type: string
-      - name: country
-        in: query
-        description: ISO code of country for that price shoul be calculated
-        required: false
-        example: RUS
-        schema:
-          type: string
-      - name: currency
-        in: query
-        description: Currency of price that should be calculated
-        example: RUB
-        required: false
-        schema:
-          type: string
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/KeyProductInfo'
-      400:
-        $ref: '#/components/responses/BadRequest'
-      500:
-        $ref: '#/components/responses/InternalError'
 /api/v1/order:
   post:
     tags:
@@ -788,6 +675,83 @@
           text/html:
             schema:
               type: string
+/api/v1/price_group/currencies:
+  get:
+    tags:
+      - Price group
+    summary: Get a list of all currencies with regions and countries in them
+    description: Get a list of all currencies with regions and countries in them
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/price_group.CurrencyListResponse'
+      400:
+        description: Error description
+        content:
+          application/json:
+            schema:
+              type: string
+/api/v1/price_group/country:
+  get:
+    tags:
+      - Price group
+    summary: Get region and currency by country
+    description: Get region and currency by country
+    parameters:
+      - name: country
+        in: query
+        description: two-letter code of country
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/price_group.CurrencyRegion'
+      400:
+        description: Error description
+        content:
+          application/json:
+            schema:
+              type: string
+/api/v1/price_group/region:
+  get:
+    tags:
+      - Price group
+    summary: Get currency for a region and a list of countries in it
+    description: Get currency for a region and a list of countries in it
+    parameters:
+      - name: region
+        in: query
+        description: name of region
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/price_group.CurrencyListResponse'
+      400:
+        description: Error description
+        content:
+          application/json:
+            schema:
+              type: string
 /api/v1/pricing/recommended/steam:
   get:
     tags:
@@ -965,6 +929,42 @@
               $ref: '#/components/schemas/model.Error'
     security:
       - XAPISignatureHeader: []
+    x-codegen-request-body-name: data
+/api/v1/user/confirm_email:
+  put:
+    tags:
+      - User Profile
+    summary: Confirm user email
+    description: Confirm user email by token
+    requestBody:
+      description: object contained confirmation token
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/user.confirmEmail.request'
+      required: true
+    responses:
+      200:
+        description: OK
+        content: {}
+      400:
+        description: Invalid request data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      404:
+        description: Object not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
+      500:
+        description: Some unknown error on server side
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/model.Error'
     x-codegen-request-body-name: data
 /api/v1/user/feedback:
   post:
