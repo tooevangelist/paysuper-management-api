@@ -89,7 +89,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_Ok() {
 
 	res, err := suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + tokenPath).
+		Path(common.NoAuthGroupPath + tokenPath).
 		Init(reqInit).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -106,7 +106,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_BindError() {
 	_, err := suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, "1").
-		Path(common.AuthProjectGroupPath + tokenPath).
+		Path(common.NoAuthGroupPath + tokenPath).
 		Init(test.ReqInitJSON()).
 		BodyString(body).
 		Exec(suite.T())
@@ -159,7 +159,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_ValidationError() {
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
 		Params(":"+common.RequestParameterId, "1").
-		Path(common.AuthProjectGroupPath + tokenPath).
+		Path(common.NoAuthGroupPath + tokenPath).
 		Init(test.ReqInitJSON()).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -219,7 +219,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_CheckProjectRequestSignature_
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + tokenPath).
+		Path(common.NoAuthGroupPath + tokenPath).
 		Init(reqInit).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -279,7 +279,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_CheckProjectRequestSignature_
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + tokenPath).
+		Path(common.NoAuthGroupPath + tokenPath).
 		Init(reqInit).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -339,7 +339,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_ChangeCustomer_System_Error()
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + tokenPath).
+		Path(common.NoAuthGroupPath + tokenPath).
 		Init(reqInit).
 		BodyBytes(b).
 		Exec(suite.T())
@@ -399,7 +399,7 @@ func (suite *TokenTestSuite) TestToken_CreateToken_ChangeCustomer_ResultError() 
 
 	_, err = suite.caller.Builder().
 		Method(http.MethodPost).
-		Path(common.AuthProjectGroupPath + tokenPath).
+		Path(common.NoAuthGroupPath + tokenPath).
 		Init(reqInit).
 		BodyBytes(b).
 		Exec(suite.T())

@@ -112,7 +112,7 @@ func (d *Dispatcher) RawBodyPreMiddleware(next echo.HandlerFunc) echo.HandlerFun
 func (d *Dispatcher) CasbinMiddleware(fn func(c echo.Context) string) echo.MiddlewareFunc {
 	cfg := casbinMiddleware.Config{
 		Skipper:          middleware.DefaultSkipper,
-		Mode:             casbinMiddleware.EnforceModeEnforcing,
+		Mode:             casbinMiddleware.EnforceModeDisabled,
 		Logger:           d.L(),
 		CtxUserExtractor: fn,
 	}
@@ -177,7 +177,7 @@ func (d *Dispatcher) AuthOneMerchantPreMiddleware() echo.MiddlewareFunc {
 					d.L().Error(c.Path(), logger.Args("user_id", user.Id))
 					return
 				}
-
+				d.L().Info("[PermissionDebug] user merchants", logger.Args(res.Merchants[0].Role, res.Merchants[0].Id))
 				user.Role = res.Merchants[0].Role
 				user.MerchantId = res.Merchants[0].Id
 				common.SetUserContext(c, user)
