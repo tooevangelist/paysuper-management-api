@@ -86,8 +86,8 @@
 /admin/api/v1/keys/:key_id:
   get:
     tags:
-      - key
-      - onboarding
+      - Key
+      - Onboarding
     summary: Get info about key by ID
     parameters:
       - name: key_id
@@ -116,7 +116,7 @@
 /admin/api/v1/key-products:
   get:
     tags:
-      - product
+      - Product
     summary: "Get list of key products"
     parameters:
       - name: project_id
@@ -167,7 +167,7 @@
         $ref: '#/components/responses/InternalError'
   post:
     tags:
-      - product
+      - Product
     summary: "Create new key product"
     requestBody:
       content:
@@ -192,7 +192,7 @@
 /admin/api/v1/key-products/:key_product_id/publish:
   post:
     tags:
-      - product
+      - Product
     summary: Publishes product
     parameters:
       - name: key_product_id
@@ -221,7 +221,7 @@
 /admin/api/v1/key-products/:key_product_id/unpublish:
   post:
     tags:
-      - product
+      - Product
     summary: Set key product inactive
     parameters:
       - name: key_product_id
@@ -250,7 +250,7 @@
 /admin/api/v1/key-products/:key_product_id:
   delete:
     tags:
-      - product
+      - Product
     summary: "Change product"
     parameters:
       - name: key_product_id
@@ -278,7 +278,7 @@
         $ref: '#/components/responses/InternalError'
   put:
     tags:
-      - product
+      - Product
     summary: "Change product"
     parameters:
       - name: key_product_id
@@ -340,8 +340,8 @@
 /admin/api/v1/key-products/:key_product_id/platforms/:platform_id/count:
   get:
     tags:
-      - key
-      - onboarding
+      - Key
+      - Onboarding
     summary: Gets count of keys for specified platform and product
     parameters:
       - $ref: '#/components/parameters/KeyProduct'
@@ -366,8 +366,8 @@
 /admin/api/v1/key-products/:key_product_id/platforms/:platform_id/file:
   post:
     tags:
-      - key
-      - onboarding
+      - Key
+      - Onboarding
     summary: Send file with keys to process
     parameters:
       - $ref: '#/components/parameters/KeyProduct'
@@ -4769,7 +4769,7 @@
 /admin/api/v1/platforms:
   get:
     tags:
-      - product
+      - Product
     summary: "Get available platform list"
     responses:
       200:
@@ -4794,7 +4794,7 @@
 /admin/api/v1/report_file:
   post:
     tags:
-      - ReportFile
+      - Report file
     summary: Create report file
     description: Create report file
     requestBody:
@@ -4839,7 +4839,7 @@
 /admin/api/v1/report_file/download/{file}:
   get:
     tags:
-      - ReportFile
+      - Report file
     summary: Download report file
     description: Download report file
     parameters:
@@ -5382,7 +5382,7 @@
 /admin/api/v1/vat_reports/country/{country}:
   get:
     tags:
-      - VAT Reports
+      - VAT reports
     summary: Get a VAT reports list by country
     description: Get a VAT reports list by country
     parameters:
@@ -5432,7 +5432,7 @@
 /admin/api/v1/vat_reports/details/{id}:
   get:
     tags:
-      - VAT Reports
+      - VAT reports
     summary: Get a VAT report transaction
     description: Get a VAT report transaction
     parameters:
@@ -5482,7 +5482,7 @@
 /admin/api/v1/vat_reports/status/{id}:
   post:
     tags:
-      - VAT Reports
+      - VAT reports
     summary: Change a VAT report status
     description: Change a VAT report status
     parameters:
@@ -6278,7 +6278,7 @@
 /system/api/v1/payment_method:
   post:
     tags:
-      - Payment Method
+      - Payment method
     summary: Create a payment method for payment system
     description: Create a payment method for payment system
     requestBody:
@@ -6307,7 +6307,7 @@
 /system/api/v1/payment_method/{id}:
   put:
     tags:
-      - Payment Method
+      - Payment method
     summary: Update a payment method for payment system
     description: Update a payment method for payment system
     parameters:
@@ -6343,7 +6343,7 @@
 /system/api/v1/payment_method/{id}/production:
   get:
     tags:
-      - Payment Method
+      - Payment method
     summary: Get production settings to the payment method
     description: Get production settings to the payment method
     parameters:
@@ -6370,7 +6370,7 @@
               type: string
   put:
     tags:
-      - Payment Method
+      - Payment method
     summary: Update production settings to the payment method
     description: Update production settings to the payment method
     parameters:
@@ -6405,7 +6405,7 @@
     x-codegen-request-body-name: body
   post:
     tags:
-      - Payment Method
+      - Payment method
     summary: Add production settings to the payment method
     description: Add production settings to the payment method
     parameters:
@@ -6440,7 +6440,7 @@
     x-codegen-request-body-name: body
   delete:
     tags:
-      - Payment Method
+      - Payment method
     summary: Delete production settings to the payment method
     description: Delete production settings to the payment method
     parameters:
@@ -6644,7 +6644,7 @@
 /system/api/v1/user/profile/{id}:
   get:
     tags:
-      - User Profile
+      - User profile
     summary: Get user profile by proifile identifier
     description: Get user profile by profile identifier
     parameters:
