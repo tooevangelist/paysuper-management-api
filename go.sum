@@ -759,6 +759,8 @@ github.com/paysuper/echo-casbin-middleware v0.0.0-20191128095749-fbe24a87bc70 h1
 github.com/paysuper/echo-casbin-middleware v0.0.0-20191128095749-fbe24a87bc70/go.mod h1:2CTRpE/RJouV6MfHsY4SpfRS+G7Ig0mvUBJXk/wPrPs=
 github.com/paysuper/echo-casbin-middleware v0.0.0-20191128100103-07e8b217879a h1:JtD5+8x1IvBDfcBY+50MgOPAl2K3jJ2zCpUu9C0e/lk=
 github.com/paysuper/echo-casbin-middleware v0.0.0-20191128100103-07e8b217879a/go.mod h1:2CTRpE/RJouV6MfHsY4SpfRS+G7Ig0mvUBJXk/wPrPs=
+github.com/paysuper/echo-casbin-middleware v0.0.0-20191129193149-5d1bc6ea6150 h1:uJwKUorcgZli3mPx5LRhzkaiL452aUuPv6A6Kex/oQU=
+github.com/paysuper/echo-casbin-middleware v0.0.0-20191129193149-5d1bc6ea6150/go.mod h1:2CTRpE/RJouV6MfHsY4SpfRS+G7Ig0mvUBJXk/wPrPs=
 github.com/paysuper/paysuper-aws-manager v0.0.0-20190827071211-4aff35ed4d82/go.mod h1:TjXLdcbFp4VeSvZK3+sKv61uRS1tH0mtrEEqziaJ/+E=
 github.com/paysuper/paysuper-aws-manager v0.0.1 h1:792ZR+2Pva93ziJbV8zTxjod9gbx4jBlZ1ZUZpN/8Ts=
 github.com/paysuper/paysuper-aws-manager v0.0.1/go.mod h1:TjXLdcbFp4VeSvZK3+sKv61uRS1tH0mtrEEqziaJ/+E=
