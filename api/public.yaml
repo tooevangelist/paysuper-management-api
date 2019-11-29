@@ -19,5 +19,7 @@ components:
       in: header
       name: X-API-SIGNATURE
       description: The Header **X-API-SIGNATURE** with the Project's Secret key found on the Project webhooks page.
+  responses:
+    $ref: ./responses/internal.yaml
   schemas:
     $ref: ./schemas.yaml

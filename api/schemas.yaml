@@ -1471,6 +1471,8 @@ price_group.Region:
       description: name of region
     country:
       type: array
+      items:
+        type: string
       description: list of countries
 price_group.RecommendedPriceResponse:
   type: object
