@@ -5068,17 +5068,14 @@ paths:
         - application/json
       description: Calculation of recommended prices based on price ranges as in Steam, taking into account regional factors.
       parameters:
-        - description: Request param
-          in: body
-          name: data
-          required: true
-          schema:
-            type: object
-            properties:
-              amount:
-                type: integer
-              currency:
-                type: string
+        - description: Amount in the currency for calculation recommended prices
+          in: query
+          name: amount
+          type: integer
+        - description: Based currency
+          in: query
+          name: currency
+          type: string
       produces:
         - application/json
       responses:
@@ -5102,17 +5099,14 @@ paths:
         - application/json
       description: Calculation of recommended prices based on exchange rates.
       parameters:
-        - description: Request param
-          in: body
-          name: data
-          required: true
-          schema:
-            type: object
-            properties:
-              amount:
-                type: integer
-              currency:
-                type: string
+        - description: Amount in the currency for calculation recommended prices
+          in: query
+          name: amount
+          type: integer
+        - description: Based currency
+          in: query
+          name: currency
+          type: string
       produces:
         - application/json
       responses:
@@ -5136,15 +5130,10 @@ paths:
         - application/json
       description: Get table of recommended prices for currency.
       parameters:
-        - description: Request param
-          in: body
-          name: data
-          required: true
-          schema:
-            type: object
-            properties:
-              currency:
-                type: string
+        - description: Based currency
+          in: query
+          name: currency
+          type: string
       produces:
         - application/json
       responses:
@@ -8570,6 +8559,11 @@ paths:
           name: project_id
           type: string
           required: false
+        - description: enabled status (all, true, false)
+          in: query
+          name: enabled
+          type: string
+          required: false
       responses:
         200:
           description: OK
@@ -9020,7 +9014,7 @@ paths:
             $ref: '#/definitions/model.Error'
 
   "/admin/api/v1/royalty_reports/{id}/change":
-    get:
+    post:
       summary: Change royalty report
       tags:
         - Royalty reports
@@ -10125,16 +10119,11 @@ paths:
           name: role_id
           required: true
           type: string
-        - description: JSON request body
-          in: body
-          name: body
-          schema:
-            "$ref": "#/definitions/UserRoleResponse"
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/EmptyResponseWithStatus'
+            $ref: '#/definitions/UserRoleResponse'
         "400":
           description: Invalid request data
           schema:
