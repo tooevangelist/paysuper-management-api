@@ -2446,7 +2446,7 @@
     description: Get a grouping stat by country for a payment link by its id for
       current authenticated merchant
     parameters:
-      - name: role_id
+      - name: id
         in: path
         description: User role identifier
         required: true
@@ -5386,9 +5386,9 @@
     summary: Get a VAT reports list by country
     description: Get a VAT reports list by country
     parameters:
-      - name: role_id
+      - name: country
         in: path
-        description: User role identifier
+        description: Country
         required: true
         schema:
           type: string
