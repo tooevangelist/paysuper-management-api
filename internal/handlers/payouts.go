@@ -158,15 +158,12 @@ func (h *PayoutDocumentsRoute) getPayoutRoyaltyReports(ctx echo.Context) error {
 
 	res, err := h.dispatch.Services.Billing.GetPayoutDocumentRoyaltyReports(ctx.Request().Context(), req)
 	if err != nil {
-		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetPayoutDocumentSignUrl")
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetPayoutDocumentRoyaltyReports")
 	}
 
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
-	if len(res.Data.Items) == 0 {
-		return echo.NewHTTPError(http.StatusNotFound)
-	}
 
-	return ctx.JSON(http.StatusOK, res.Data.Items[0])
+	return ctx.JSON(http.StatusOK, res.Data.Items)
 }
