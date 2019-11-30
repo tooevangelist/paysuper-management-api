@@ -112,7 +112,7 @@ func (d *Dispatcher) RawBodyPreMiddleware(next echo.HandlerFunc) echo.HandlerFun
 func (d *Dispatcher) CasbinMiddleware(fn func(c echo.Context) string) echo.MiddlewareFunc {
 	cfg := casbinMiddleware.Config{
 		Skipper:          middleware.DefaultSkipper,
-		Mode:             casbinMiddleware.EnforceModeDisabled,
+		Mode:             casbinMiddleware.EnforceModeEnforcing,
 		Logger:           d.L(),
 		CtxUserExtractor: fn,
 	}
