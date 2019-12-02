@@ -49,7 +49,7 @@ func (suite *PricingTestSuite) TestPricing_getRecommendedPrice_BindError_Require
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + pricingRecommendedSteamPath).
+		Path(common.NoAuthGroupPath + pricingRecommendedSteamPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -74,7 +74,7 @@ func (suite *PricingTestSuite) TestPricing_getRecommendedPrice_Error_BillingServ
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + pricingRecommendedSteamPath).
+		Path(common.NoAuthGroupPath + pricingRecommendedSteamPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
@@ -94,7 +94,7 @@ func (suite *PricingTestSuite) TestPricing_getRecommendedPrice_Ok() {
 
 	_, err := suite.caller.Builder().
 		Method(http.MethodGet).
-		Path(common.AuthProjectGroupPath + pricingRecommendedSteamPath).
+		Path(common.NoAuthGroupPath + pricingRecommendedSteamPath).
 		Init(test.ReqInitJSON()).
 		BodyString(data).
 		Exec(suite.T())
