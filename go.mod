@@ -24,7 +24,7 @@ require (
 	github.com/paysuper/casbin-server v0.0.0-20191128090724-930a08d68cec
 	github.com/paysuper/echo-casbin-middleware v0.0.0-20191130123809-c22823c1f289
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191129085920-72fb6ad85dad
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191129111458-44c63ea14475
 	github.com/paysuper/paysuper-recurring-repository v1.0.126
 	github.com/paysuper/paysuper-reporter v0.0.0-20191113111020-e3a5369c6d6a
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
