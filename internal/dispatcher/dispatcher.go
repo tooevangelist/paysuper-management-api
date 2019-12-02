@@ -153,7 +153,6 @@ func (d *Dispatcher) authUserGroup(grp *echo.Group) {
 		grp.Use(d.AuthOneMerchantPreMiddleware()) // 2
 		grp.Use(d.CasbinMiddleware(func(c echo.Context) string {
 			user := common.ExtractUserContext(c)
-			d.L().Info("[PermissionDebug] user merchants", logger.Args(fmt.Sprintf(pkg.CasbinMerchantUserMask, user.MerchantId, user.Id)))
 			return fmt.Sprintf(pkg.CasbinMerchantUserMask, user.MerchantId, user.Id)
 		})) // 3
 	}
