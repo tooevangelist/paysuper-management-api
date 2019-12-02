@@ -186,20 +186,3 @@ func (d *Dispatcher) AuthOneMerchantPreMiddleware() echo.MiddlewareFunc {
 		return handleFn(c)
 	})
 }
-
-// AuthOnAdminPreMiddleware
-func (d *Dispatcher) AuthOnAdminPreMiddleware() echo.MiddlewareFunc {
-	return common.ContextWrapperCallback(func(c echo.Context, next echo.HandlerFunc) error {
-		handleFn := jwtMiddleware.AuthOneJwtCallableWithConfig(
-			d.appSet.JwtVerifier,
-			func(ui *jwtverifier.UserInfo) {
-				user := common.ExtractUserContext(c)
-				user.Id = ui.UserID
-				user.Email = ui.Email
-				user.Name = "System User"
-				common.SetUserContext(c, user)
-			},
-		)(next)
-		return handleFn(c)
-	})
-}

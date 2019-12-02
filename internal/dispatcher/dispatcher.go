@@ -162,12 +162,11 @@ func (d *Dispatcher) authUserGroup(grp *echo.Group) {
 func (d *Dispatcher) systemUserGroup(grp *echo.Group) {
 	// Called before routes
 	if !d.globalCfg.DisableAuthMiddleware {
-		grp.Use(d.GetUserDetailsMiddleware)   // 1
-		grp.Use(d.AuthOnAdminPreMiddleware()) // 2
+		grp.Use(d.GetUserDetailsMiddleware) // 1
 		grp.Use(d.CasbinMiddleware(func(c echo.Context) string {
 			user := common.ExtractUserContext(c)
 			return user.Id
-		})) // 3
+		})) // 2
 	}
 	grp.Use(d.SystemBinderPreMiddleware) // 3
 }
