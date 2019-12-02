@@ -31,9 +31,9 @@ func NewPricingRoute(set common.HandlerSet, cfg *common.Config) *Pricing {
 }
 
 func (h *Pricing) Route(groups *common.Groups) {
-	groups.AuthProject.GET(pricingRecommendedConversionPath, h.getRecommendedByConversion)
-	groups.AuthProject.GET(pricingRecommendedSteamPath, h.getRecommendedBySteam)
-	groups.AuthProject.GET(pricingRecommendedTablePath, h.getRecommendedTable)
+	groups.Common.GET(pricingRecommendedConversionPath, h.getRecommendedByConversion)
+	groups.Common.GET(pricingRecommendedSteamPath, h.getRecommendedBySteam)
+	groups.Common.GET(pricingRecommendedTablePath, h.getRecommendedTable)
 }
 
 func (h *Pricing) getRecommendedByConversion(ctx echo.Context) error {
