@@ -13,7 +13,7 @@ services:
 stages:
 - test
 - name: deploy
-  if: branch IN (develop)
+  if: branch IN (develop, 192585-user-country-and-currency)
 env:
   global:
   - GO111MODULE=on

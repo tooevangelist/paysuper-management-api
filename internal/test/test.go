@@ -3,7 +3,6 @@ package test
 import (
 	"bytes"
 	"context"
-	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	httpEcho "github.com/paysuper/paysuper-management-api/pkg/http"
@@ -17,10 +16,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-)
-
-var (
-	HexId = bson.NewObjectId().Hex()
 )
 
 // EchoReqResCaller
@@ -269,6 +264,7 @@ func DefaultSettings() map[string]interface{} {
 				"awsRegionReporter":            "eu-west-1",
 				"awsBucketReporterr":           "eu-west-1",
 				"customerTokenCookiesLifetime": "2592000s",
+				"CookieDomain":                 "localhost",
 				"orderInlineFormUrlMask":       "http://localhost",
 				"auth1": map[string]interface{}{
 					"clientId":     "unknown",
