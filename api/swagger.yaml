@@ -235,21 +235,8 @@ definitions:
 
   OrderListRequest:
     properties:
-      id:
-        description: order unique identifier
-        type: string
-      project:
-        description: query array of list of projects to get orders filtered by they
-        type: array
-        items:
-          type: string
       payment_method:
         description: query array of list of payment methods to get orders filtered by they
-        type: array
-        items:
-          type: string
-      country:
-        description: query array of list of payer countries to get orders filtered by they
         type: array
         items:
           type: string
@@ -258,37 +245,12 @@ definitions:
         type: array
         items:
           type: integer
-      account:
-        description: payer account on the any side of payment process. for example it may be account in project,
-          account in payment system, payer email and etc
-        type: string
       pm_date_from:
         description: start date when payment was closed to get orders filtered by they
         type: integer
       pm_date_to:
         description: end date when payment was closed to get orders filtered by they
         type: integer
-      project_date_from:
-        description: start date when payment was created to get orders filtered by they
-        type: integer
-      project_date_to:
-        description: end date when payment was closed in project to get orders filtered by they
-        type: integer
-      limit:
-        description: maximum number of returning orders. default value is 100
-        type: integer
-      offset:
-        description: offset from which you want to return the list of orders. default value is 0
-        type: integer
-      sort:
-        description: query array of fields list for sorting
-        type: array
-        items:
-          type: string
-      quick_search:
-        description: multiple field search string - order unique identifier, user external identifier,
-          project order identifier, project name, payment method name
-        type: string
 
   order.project:
     properties:
