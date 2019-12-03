@@ -400,9 +400,6 @@ func (h *OrderRoute) downloadOrdersPublic(ctx echo.Context) error {
 	}
 
 	req.ReportType = reporterPkg.ReportTypeTransactions
-	req.Params = map[string]interface{}{
-		reporterPkg.ParamsFieldId: ctx.Param(common.RequestParameterId),
-	}
 
 	return h.dispatch.RequestReportFile(ctx, req)
 }
