@@ -1,5 +1,5 @@
 {{- $endpoint := .Values.backend -}}
-  {{- $endpointSvc := printf "%s" .Release.Name}}
+  {{- $endpointSvc := printf "%s" $endpoint.service.name}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:

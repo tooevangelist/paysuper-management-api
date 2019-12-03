@@ -598,6 +598,15 @@ definitions:
       refund_allowed:
         type: string
         description: refund allowed flag
+      payment_ip_country:
+        type: string
+        description: contains ip from payment was made
+      is_ip_country_mismatch_bin:
+        type: boolean
+        description: flag for card payments that country form card's BIN not matched to country defined by IP
+      order_charge:
+        $ref: '#/definitions/order.money'
+        description: object contain information about amount and currency that was charged from user while payment
 
   order.parent:
     type: object
@@ -1027,6 +1036,7 @@ definitions:
       - file_type
       - report_type
       - params
+
   CreateReportFileResponse:
     properties:
       status:
@@ -3913,17 +3923,115 @@ definitions:
         example: "R&K"
         description: "Merchant name"
 
-  CreateFileResponse:
+  changeCustomerRequest:
     type: object
     properties:
-      id:
+      order_id:
         type: string
-        example: "507f1f77bcf86cd799439011"
-        description: "Merchant identity"
-      name:
+        description: order uuid
+      method_id:
         type: string
-        example: "R&K"
-        description: "Merchant name"
+        description: payment method id
+      account:
+        type: string
+        description: payment account
+
+  changeCustomerResponse:
+    type: object
+    properties:
+      user_address_data_required:
+        type: boolean
+        description: flag that additional user address data is required
+      user_ip_data:
+        type: object
+        properties:
+          country:
+            type: string
+            description: country
+          city:
+            type: string
+            description: city
+          zip:
+            type: string
+            description: zip
+      string:
+        type: string
+        description: bank card brand (if it is card payment)
+      country_payments_allowed:
+        type: boolean
+        description: flag that paymnets allowed in selected country
+      country_change_allowed:
+        type: boolean
+        description: flag that user country select allowed
+      has_vat:
+        type: boolean
+        description: flag that payment has vat
+      amount:
+        type: number
+        description: order amount before vat
+      total_amount:
+        type: number
+        description: order amount with vat
+      currency:
+        type: string
+        description: order currency
+      charge_currency:
+        type: string
+        description: order charge currency
+      charge_amount:
+        type: number
+        description: order charge amount
+      vat_in_charge_currency:
+        type: number
+        description: order vat in charge currency
+      items:
+        description: list of buyed items in order
+        type: array
+        items:
+          $ref: '#/definitions/model.JsonOrderCreateResponse.item'
+
+  changeBillingAddressRequest:
+    type: object
+    properties:
+      order_id:
+        type: string
+        description: order uuid
+      country:
+        type: string
+        description: country
+      zip:
+        type: string
+        description: zip
+
+  changeBillingAddressResponse:
+    type: object
+    properties:
+      has_vat:
+        type: boolean
+        description: flag that payment has vat
+      amount:
+        type: number
+        description: order amount before vat
+      total_amount:
+        type: number
+        description: order amount with vat
+      currency:
+        type: string
+        description: order currency
+      charge_currency:
+        type: string
+        description: order charge currency
+      charge_amount:
+        type: number
+        description: order charge amount
+      vat_in_charge_currency:
+        type: number
+        description: order vat in charge currency
+      items:
+        description: list of buyed items in order
+        type: array
+        items:
+          $ref: '#/definitions/model.JsonOrderCreateResponse.item'
 
 host: p1payapi.tst.protocol.one
 info:
@@ -3991,7 +4099,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Country'
+            items:
+              $ref: '#/definitions/model.Country'
+            type: array
         "400":
           description: Invalid request data
           schema:
@@ -4005,6 +4115,39 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
       summary: Get country by numeric ISO 3166-1 code
+      tags:
+        - Country
+  /api/v1/payment_countries/{order_id}:
+    get:
+      consumes:
+        - application/json
+      description: Get list of countries, that allowed to make payment for passed order
+      parameters:
+        - description: order id
+          in: path
+          name: order_id
+          required: true
+          type: integer
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Country'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get list of countries, that allowed to make payment for passed order
       tags:
         - Country
   /api/v1/order:
@@ -4080,10 +4223,75 @@ paths:
         - application/json
       description: Get orders list
       parameters:
-        - in: query
-          name: data
-          schema:
-            $ref: '#/definitions/OrderListRequest'
+        - description: order unique identifier
+          in: query
+          name: id
+          type: string
+        - description: query array of list of projects to get orders filtered by they
+          in: query
+          name: project[]
+          type: string
+        - description: query array of list of payment methods to get orders filtered by they
+          in: query
+          name: payment_method[]
+          type: string
+        - description: query array of list of payer countries to get orders filtered by they
+          in: query
+          name: country[]
+          type: string
+        - description: query array of list of orders statuses to get orders filtered by they
+          in: query
+          name: status[]
+          type: integer
+        - description: payer account on the any side of payment process. for example
+            it may be account in project, account in payment system, payer email and
+            etc
+          in: query
+          name: account
+          type: string
+        - description: start date when payment was closed to get orders filtered by
+            they
+          in: query
+          name: pm_date_from
+          type: integer
+        - description: end date when payment was closed to get orders filtered by they
+          in: query
+          name: pm_date_to
+          type: integer
+        - description: start date when payment was created to get orders filtered by
+            they
+          in: query
+          name: project_date_from
+          type: integer
+        - description: end date when payment was closed in project to get orders filtered
+            by they
+          in: query
+          name: project_date_to
+          type: integer
+        - description: maximum number of returning orders. default value is 100
+          in: query
+          name: limit
+          type: integer
+        - description: offset from which you want to return the list of orders. default
+            value is 0
+          in: query
+          name: offset
+          type: integer
+        - description: query array of fields list for sorting
+          in: query
+          name: sort[]
+          type: string
+        - description: multiple field search string - order unique identifier, user external identifier,
+            project order identifier, project name, payment method name
+          in: query
+          name: quick_search
+          type: string
+        - description: query array of merchant identifier list
+          in: query
+          name: merchant
+          type: array
+          items:
+            type: string
       responses:
         "200":
           description: OK
@@ -4110,7 +4318,7 @@ paths:
         - Order
 
   /admin/api/v1/order/download:
-    get:
+    post:
       consumes:
         - application/json
       produces:
@@ -4236,6 +4444,7 @@ paths:
       summary: Change platform for order
       tags:
         - Order
+
   /admin/api/v1/projects:
     get:
       consumes:
@@ -10835,3 +11044,97 @@ paths:
           description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
+
+  "/api/v1/orders/{id}/billing_address":
+    post:
+      consumes:
+        - application/json
+      description: Change billing address for order
+      parameters:
+        - description: Order unique identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: Change billing address for order request
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/changeBillingAddressRequest'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/changeBillingAddressResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Change billing address for order
+      tags:
+        - Order
+
+  "/api/v1/orders/{id}/customer":
+    post:
+      consumes:
+        - application/json
+      description: Change customer for order
+      parameters:
+        - description: Order unique identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: customer change request
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/changeCustomerRequest'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/changeCustomerResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Change customer for order
+      tags:
+        - Order
