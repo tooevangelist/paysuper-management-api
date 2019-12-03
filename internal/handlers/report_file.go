@@ -16,17 +16,8 @@ import (
 )
 
 const (
-	reportFilePath         = "/report_file"
 	reportFileDownloadPath = "/report_file/download/:file"
 )
-
-type reportFileRequest struct {
-	MerchantId string                 `json:"merchant_id" form:"merchant_id" bson:"merchant_id" validate:"required,hexadecimal,len=24"`
-	FileType   string                 `json:"file_type" form:"file_type" bson:"file_type" validate:"required"`
-	ReportType string                 `json:"report_type" form:"report_type" bson:"report_type" validate:"required"`
-	Template   string                 `json:"template" form:"template" bson:"template"`
-	Params     map[string]interface{} `json:"params" form:"params" bson:"params"`
-}
 
 type ReportFileRoute struct {
 	dispatch   common.HandlerSet

@@ -11,6 +11,7 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
+	reporterPkg "github.com/paysuper/paysuper-reporter/pkg"
 	"net/http"
 )
 
@@ -20,6 +21,7 @@ const (
 	orderCreatePath          = "/order/create"
 	orderReCreatePath        = "/order/recreate"
 	orderPath                = "/order"
+	orderDownloadPath        = "/order/download"
 	paymentPath              = "/payment"
 	orderRefundsPath         = "/order/:order_id/refunds"
 	orderRefundsIdsPath      = "/order/:order_id/refunds/:refund_id"
@@ -101,6 +103,7 @@ func (h *OrderRoute) Route(groups *common.Groups) {
 	groups.Common.GET(orderReceiptPath, h.getReceipt)
 
 	groups.AuthUser.GET(orderPath, h.listOrdersPublic)
+	groups.AuthUser.GET(orderDownloadPath, h.downloadOrdersPublic)
 	groups.AuthUser.GET(orderIdPath, h.getOrderPublic) // TODO: Need a test
 
 	groups.AuthUser.GET(orderRefundsPath, h.listRefunds)
@@ -387,6 +390,21 @@ func (h *OrderRoute) listOrdersPublic(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res.Item)
+}
+
+func (h *OrderRoute) downloadOrdersPublic(ctx echo.Context) error {
+	req := &common.ReportFileRequest{}
+
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
+	}
+
+	req.ReportType = reporterPkg.ReportTypeTransactions
+	req.Params = map[string]interface{}{
+		reporterPkg.ParamsFieldId: ctx.Param(common.RequestParameterId),
+	}
+
+	return h.dispatch.RequestReportFile(ctx, req)
 }
 
 func (h *OrderRoute) processCreatePayment(ctx echo.Context) error {

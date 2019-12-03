@@ -1,15 +1,18 @@
 package common
 
 import (
-	"github.com/ProtocolONE/geoip-service/pkg/proto"
+	"encoding/json"
+	geoService "github.com/ProtocolONE/geoip-service/pkg/proto"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
-	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
-	"github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
+	billingService "github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
+	recurringService "github.com/paysuper/paysuper-recurring-repository/pkg/proto/repository"
+	reporterPkg "github.com/paysuper/paysuper-reporter/pkg"
 	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
-	tax_service "github.com/paysuper/paysuper-tax-service/proto"
+	reporterService "github.com/paysuper/paysuper-reporter/pkg/proto"
+	taxService "github.com/paysuper/paysuper-tax-service/proto"
 	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 )
@@ -105,11 +108,11 @@ type Validator interface {
 
 // Services
 type Services struct {
-	Repository repository.RepositoryService
-	Geo        proto.GeoIpService
-	Billing    grpc.BillingService
-	Tax        tax_service.TaxService
-	Reporter   reporterProto.ReporterService
+	Repository recurringService.RepositoryService
+	Geo        geoService.GeoIpService
+	Billing    billingService.BillingService
+	Tax        taxService.TaxService
+	Reporter   reporterService.ReporterService
 }
 
 // Handlers
@@ -152,4 +155,46 @@ type AuthUser struct {
 	Email      string
 	Role       string
 	MerchantId string
+}
+
+type ReportFileRequest struct {
+	MerchantId string                 `json:"merchant_id" validate:"required,hexadecimal,len=24"`
+	FileType   string                 `json:"file_type" validate:"required"`
+	ReportType string                 `json:"report_type" validate:"required"`
+	Template   string                 `json:"template"`
+	Params     map[string]interface{} `json:"params"`
+}
+
+func (h *HandlerSet) RequestReportFile(ctx echo.Context, data *ReportFileRequest) error {
+	params, err := json.Marshal(data.Params)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, ErrorRequestDataInvalid)
+	}
+
+	if err = h.Validate.Struct(data); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, GetValidationError(err))
+	}
+
+	req := &reporterProto.ReportFile{
+		UserId:           ExtractUserContext(ctx).Id,
+		MerchantId:       data.MerchantId,
+		ReportType:       data.ReportType,
+		FileType:         data.FileType,
+		Template:         data.Template,
+		Params:           params,
+		SendNotification: true,
+	}
+
+	res, err := h.Services.Reporter.CreateFile(ctx.Request().Context(), req)
+
+	if err != nil {
+		return h.SrvCallHandler(req, err, reporterPkg.ServiceName, "CreateFile")
+	}
+
+	if res.Status != http.StatusOK {
+		return echo.NewHTTPError(int(res.Status), res.Message)
+	}
+
+	return ctx.JSON(http.StatusOK, res)
 }

@@ -7,13 +7,15 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
+	reporterPkg "github.com/paysuper/paysuper-reporter/pkg"
 	"net/http"
 )
 
 const (
-	payoutsPath          = "/payout_documents"
-	payoutsIdPath        = "/payout_documents/:payout_document_id"
-	payoutsIdReportsPath = "/payout_documents/:payout_document_id/reports"
+	payoutsPath           = "/payout_documents"
+	payoutsIdPath         = "/payout_documents/:payout_document_id"
+	payoutsIdDownloadPath = "/payout_documents/:payout_document_id/download"
+	payoutsIdReportsPath  = "/payout_documents/:payout_document_id/reports"
 )
 
 type PayoutDocumentsRoute struct {
@@ -34,6 +36,7 @@ func NewPayoutDocumentsRoute(set common.HandlerSet, cfg *common.Config) *PayoutD
 func (h *PayoutDocumentsRoute) Route(groups *common.Groups) {
 	groups.AuthUser.GET(payoutsPath, h.getPayoutDocumentsList)
 	groups.AuthUser.GET(payoutsIdPath, h.getPayoutDocument)
+	groups.AuthUser.GET(payoutsIdDownloadPath, h.downloadPayoutDocument)
 	groups.AuthUser.GET(payoutsIdReportsPath, h.getPayoutRoyaltyReports)
 	groups.AuthUser.POST(payoutsPath, h.createPayoutDocument)
 	groups.SystemUser.POST(payoutsIdPath, h.updatePayoutDocument)
@@ -77,6 +80,21 @@ func (h *PayoutDocumentsRoute) getPayoutDocument(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, res.Item)
+}
+
+func (h *PayoutDocumentsRoute) downloadPayoutDocument(ctx echo.Context) error {
+	req := &common.ReportFileRequest{}
+
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
+	}
+
+	req.ReportType = reporterPkg.ReportTypePayout
+	req.Params = map[string]interface{}{
+		reporterPkg.ParamsFieldId: ctx.Param(common.RequestParameterId),
+	}
+
+	return h.dispatch.RequestReportFile(ctx, req)
 }
 
 func (h *PayoutDocumentsRoute) createPayoutDocument(ctx echo.Context) error {

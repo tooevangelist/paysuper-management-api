@@ -233,6 +233,63 @@ definitions:
         type: integer
     type: object
 
+  OrderListRequest:
+    properties:
+      id:
+        description: order unique identifier
+        type: string
+      project:
+        description: query array of list of projects to get orders filtered by they
+        type: array
+        items:
+          type: string
+      payment_method:
+        description: query array of list of payment methods to get orders filtered by they
+        type: array
+        items:
+          type: string
+      country:
+        description: query array of list of payer countries to get orders filtered by they
+        type: array
+        items:
+          type: string
+      status:
+        description: query array of list of orders statuses to get orders filtered by they
+        type: array
+        items:
+          type: integer
+      account:
+        description: payer account on the any side of payment process. for example it may be account in project,
+          account in payment system, payer email and etc
+        type: string
+      pm_date_from:
+        description: start date when payment was closed to get orders filtered by they
+        type: integer
+      pm_date_to:
+        description: end date when payment was closed to get orders filtered by they
+        type: integer
+      project_date_from:
+        description: start date when payment was created to get orders filtered by they
+        type: integer
+      project_date_to:
+        description: end date when payment was closed in project to get orders filtered by they
+        type: integer
+      limit:
+        description: maximum number of returning orders. default value is 100
+        type: integer
+      offset:
+        description: offset from which you want to return the list of orders. default value is 0
+        type: integer
+      sort:
+        description: query array of fields list for sorting
+        type: array
+        items:
+          type: string
+      quick_search:
+        description: multiple field search string - order unique identifier, user external identifier,
+          project order identifier, project name, payment method name
+        type: string
+
   order.project:
     properties:
       id:
@@ -970,7 +1027,7 @@ definitions:
       - file_type
       - report_type
       - params
-  report_file.CreateReportFileResponse:
+  CreateReportFileResponse:
     properties:
       status:
         type: number
@@ -3856,6 +3913,18 @@ definitions:
         example: "R&K"
         description: "Merchant name"
 
+  CreateFileResponse:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "507f1f77bcf86cd799439011"
+        description: "Merchant identity"
+      name:
+        type: string
+        example: "R&K"
+        description: "Merchant name"
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -4002,6 +4071,7 @@ paths:
       summary: Create payment
       tags:
         - Payment Order
+
   /admin/api/v1/order:
     get:
       consumes:
@@ -4010,75 +4080,10 @@ paths:
         - application/json
       description: Get orders list
       parameters:
-        - description: order unique identifier
-          in: query
-          name: id
-          type: string
-        - description: query array of list of projects to get orders filtered by they
-          in: query
-          name: project[]
-          type: string
-        - description: query array of list of payment methods to get orders filtered by they
-          in: query
-          name: payment_method[]
-          type: string
-        - description: query array of list of payer countries to get orders filtered by they
-          in: query
-          name: country[]
-          type: string
-        - description: query array of list of orders statuses to get orders filtered by they
-          in: query
-          name: status[]
-          type: integer
-        - description: payer account on the any side of payment process. for example
-            it may be account in project, account in payment system, payer email and
-            etc
-          in: query
-          name: account
-          type: string
-        - description: start date when payment was closed to get orders filtered by
-            they
-          in: query
-          name: pm_date_from
-          type: integer
-        - description: end date when payment was closed to get orders filtered by they
-          in: query
-          name: pm_date_to
-          type: integer
-        - description: start date when payment was created to get orders filtered by
-            they
-          in: query
-          name: project_date_from
-          type: integer
-        - description: end date when payment was closed in project to get orders filtered
-            by they
-          in: query
-          name: project_date_to
-          type: integer
-        - description: maximum number of returning orders. default value is 100
-          in: query
-          name: limit
-          type: integer
-        - description: offset from which you want to return the list of orders. default
-            value is 0
-          in: query
-          name: offset
-          type: integer
-        - description: query array of fields list for sorting
-          in: query
-          name: sort[]
-          type: string
-        - description: multiple field search string - order unique identifier, user external identifier,
-            project order identifier, project name, payment method name
-          in: query
-          name: quick_search
-          type: string
-        - description: query array of merchant identifier list
-          in: query
-          name: merchant
-          type: array
-          items:
-            type: string
+        - in: query
+          name: data
+          schema:
+            $ref: '#/definitions/OrderListRequest'
       responses:
         "200":
           description: OK
@@ -4103,6 +4108,46 @@ paths:
       summary: Get orders
       tags:
         - Order
+
+  /admin/api/v1/order/download:
+    get:
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Download orders list
+      parameters:
+        - in: query
+          name: data
+          schema:
+            $ref: '#/definitions/OrderListRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/CreateReportFileResponse'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Download orders
+      tags:
+        - Order
+
   /admin/api/v1/order/{id}:
     get:
       consumes:
@@ -8212,47 +8257,6 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/report_file":
-    post:
-      summary: Create report file
-      tags:
-        - ReportFile
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      description: Create report file
-      parameters:
-        - description: report file params
-          in: body
-          name: body
-          schema:
-            $ref: '#/definitions/report_file.CreateReportFileParams'
-            type: object
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/report_file.CreateReportFileResponse'
-            type: object
-        "400":
-          description: Invalid request data
-          schema:
-            $ref: '#/definitions/model.Error'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/model.Error'
-        "403":
-          description: Access denied
-          schema:
-            $ref: '#/definitions/model.Error'
-        "500":
-          description: Some unknown error on server side
-          schema:
-            $ref: '#/definitions/model.Error'
-
   "/admin/api/v1/report_file/download/{file}":
     get:
       summary: Download report file
@@ -8531,6 +8535,84 @@ paths:
             $ref: '#/definitions/model.Error'
         "500":
           description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payout_documents/{id}/download":
+    get:
+      summary: Download payout document by id
+      tags:
+        - Payouts
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Download payout document by id
+      parameters:
+        - description: payout document unique identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        200:
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/CreateReportFileResponse'
+            type: object
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/payout_documents/{id}/reports":
+    get:
+      summary: Get royalty reports in a payout document
+      tags:
+        - Payouts
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Get royalty reports in a payout document
+      parameters:
+        - description: payout document unique identifier
+          in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/billingPayoutDocument'
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
           schema:
             $ref: '#/definitions/model.Error'
 
@@ -8906,6 +8988,46 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
+  "/admin/api/v1/royalty_reports/{id}/download":
+    get:
+      summary: Download an royalty reports by it's id
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Download an royalty reports by it's id
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/CreateReportFileResponse'
+            type: object
+        400:
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        403:
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        500:
+          description: Some unknown error on server side
+          schema:
+            $ref: '#/definitions/model.Error'
+
   "/admin/api/v1/royalty_reports/{id}/transactions":
     get:
       summary: Get a list of transactions, included in royalty report
@@ -8927,6 +9049,46 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/order.list.public'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/admin/api/v1/royalty_reports/{id}/transactions/download":
+    get:
+      summary: Download a list of transactions, included in royalty report
+      tags:
+        - Royalty reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description:  Download a list of transactions, included in royalty report
+      parameters:
+        - description: Report identifier
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/CreateReportFileResponse'
+            type: object
         "400":
           description: Invalid request data
           schema:
@@ -9314,9 +9476,9 @@ paths:
         - application/json
       description:  Get a grouping stat by country for a payment link by its id for current authenticated merchant
       parameters:
-        - description: User role identifier
+        - description: Paylink identifier
           in: path
-          name: role_id
+          name: id
           required: true
           type: string
         - description: period start date in unix timestamp format
@@ -9512,7 +9674,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/vat_reports/country/{country}":
+  "/system/api/v1/vat_reports/country/{country}":
     get:
       summary: Get a VAT reports list by country
       tags:
@@ -9521,11 +9683,11 @@ paths:
         - application/x-www-form-urlencoded
       produces:
         - application/json
-      description:   Get a VAT reports list by country
+      description: Get a VAT reports list by country
       parameters:
-        - description: User role identifier
+        - description: Code of country
           in: path
-          name: role_id
+          name: country
           required: true
           type: string
       responses:
@@ -9554,7 +9716,51 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/vat_reports/details/{id}":
+  "/system/api/v1/vat_reports/country/{country}/download":
+    get:
+      summary: Download a VAT reports list by country
+      tags:
+        - VAT Reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Download a VAT reports list by country
+      parameters:
+        - description: Code of country
+          in: path
+          name: country
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/CreateReportFileResponse'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/system/api/v1/vat_reports/details/{id}":
     get:
       summary: Get a VAT report transaction
       tags:
@@ -9596,7 +9802,51 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
 
-  "/admin/api/v1/vat_reports/status/{id}":
+  "/system/api/v1/vat_reports/details/{id}/download":
+    get:
+      summary: Download a VAT report transaction
+      tags:
+        - VAT Reports
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      description: Download a VAT report transaction
+      parameters:
+        - description: VAT report id
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/CreateReportFileResponse'
+            type: object
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+
+  "/system/api/v1/vat_reports/status/{id}":
     post:
       summary: Change a VAT report status
       tags:
