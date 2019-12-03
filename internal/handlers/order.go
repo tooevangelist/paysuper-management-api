@@ -610,6 +610,7 @@ func (h *OrderRoute) processBillingAddress(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
+	req.Ip = ctx.RealIP()
 	req.Cookie = helpers.GetRequestCookie(ctx, common.CustomerTokenCookiesName)
 
 	req.OrderId = orderId
