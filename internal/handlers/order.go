@@ -105,7 +105,7 @@ func (h *OrderRoute) Route(groups *common.Groups) {
 	groups.Common.GET(orderReceiptPath, h.getReceipt)
 
 	groups.AuthUser.GET(orderPath, h.listOrdersPublic)
-	groups.AuthUser.GET(orderDownloadPath, h.downloadOrdersPublic)
+	groups.AuthUser.POST(orderDownloadPath, h.downloadOrdersPublic)
 	groups.AuthUser.GET(orderIdPath, h.getOrderPublic) // TODO: Need a test
 
 	groups.AuthUser.GET(orderRefundsPath, h.listRefunds)
