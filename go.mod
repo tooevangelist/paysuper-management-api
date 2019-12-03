@@ -26,7 +26,7 @@ require (
 	github.com/paysuper/paysuper-aws-manager v0.0.1
 	github.com/paysuper/paysuper-billing-server v0.0.0-20191202154534-3c4998951b9e
 	github.com/paysuper/paysuper-recurring-repository v1.0.126
-	github.com/paysuper/paysuper-reporter v0.0.0-20191113111020-e3a5369c6d6a
+	github.com/paysuper/paysuper-reporter v0.0.0-20191203194948-36a2d983f406
 	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5

@@ -783,6 +783,7 @@ github.com/paysuper/paysuper-billing-server v0.0.0-20191020124804-ebda379fcb1a/g
 github.com/paysuper/paysuper-billing-server v0.0.0-20191021125729-7bb90fb336aa/go.mod h1:epJRI1WusRkEkd5cR3f295XQTcianRZCLWNiaHF/s1Q=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191031115520-5d2419c5f2cf/go.mod h1:gOX3JQfEkB6vdnQPmS5fH/Z2voMn+goLES5C2XnGb2I=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191111090538-4a75afd2a960/go.mod h1:CYx7c60OPthc8ZlTqiknrhgQwX1QzAkGEghubJP1z1E=
+github.com/paysuper/paysuper-billing-server v0.0.0-20191114134535-c158b5075a9a/go.mod h1:DlSbiED5VwRXe72v/abBJ7VlazD8yM45r+NcutFMAPU=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191127102244-c9719406802e h1:r8s+mkR2L96MCd9x2/FfshCi6nwI0niw+jW5KM8IkNw=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191127102244-c9719406802e h1:r8s+mkR2L96MCd9x2/FfshCi6nwI0niw+jW5KM8IkNw=
 github.com/paysuper/paysuper-billing-server v0.0.0-20191127102244-c9719406802e/go.mod h1:8IwjxNCAkSI+/KlUuXuHCoyKmHZvCyVsgBfF4wgNOA4=
@@ -827,6 +828,8 @@ github.com/paysuper/paysuper-reporter v0.0.0-20191021125507-8d7a093b7c6d/go.mod 
 github.com/paysuper/paysuper-reporter v0.0.0-20191021130041-24bff0252418/go.mod h1:2T0VQoiOlB9PaGasKPJV8s9tZ53nNipEujRGxoDoe18=
 github.com/paysuper/paysuper-reporter v0.0.0-20191113111020-e3a5369c6d6a h1:DnWgjK8+wgrdFEAIwrXoMxjqb+gcz0PU8lbIsoxw16w=
 github.com/paysuper/paysuper-reporter v0.0.0-20191113111020-e3a5369c6d6a/go.mod h1:l8OVGqlyyxePTFh4n0qz9Pra9+EskkSX02byt7WNJdU=
+github.com/paysuper/paysuper-reporter v0.0.0-20191203194948-36a2d983f406 h1:BB3MB+TtvhVZq4NjT3VNHh8pv+PQG8eMDQS8yAw5oas=
+github.com/paysuper/paysuper-reporter v0.0.0-20191203194948-36a2d983f406/go.mod h1:frcjxgAN0l47PYAk03fL3YsbFZl4NfXtSFD+SdhOsPo=
 github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122 h1:46e+iUwsIwyRqININIIQNooTU8KCwcQw7AVnaTpTizg=
 github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122/go.mod h1:QK6czJ8ge3pF/QbFlRXuYfPRrm/90qubdWQ9OWKfeUs=
 github.com/paysuper/postmark-sender v0.0.0-20190903075212-a210e35789fc/go.mod h1:uUqo1eEOgjNFl9JaCrkbZNl5MYFMi6i0arXcptMEDUo=
@@ -1224,6 +1227,8 @@ gopkg.in/Clever/pathio.v3 v3.7.1/go.mod h1:RKnXQ6Qmr/SRuZ4xXMNhlAoTKjW5A93AP7EC+
 gopkg.in/DataDog/dd-trace-go.v1 v1.16.1/go.mod h1:DVp8HmDh8PuTu2Z0fVVlBsyWaC++fzwVCaGWylTe3tg=
 gopkg.in/ProtocolONE/rabbitmq.v1 v1.0.0-20190719062839-9858d727f3ef h1:yksV6h53P/OsGMQ2LA2Yx8Ys4vCqyUcrMXOq4x0UXfs=
 gopkg.in/ProtocolONE/rabbitmq.v1 v1.0.0-20190719062839-9858d727f3ef/go.mod h1:rD6KjYTsLgxc51iWPhuInSeZ1HyrNdE/sxco/tz/sXs=
+gopkg.in/ProtocolONE/rabbitmq.v1 v1.0.0-20191130200733-22b27ffa73aa h1:1ceRPE3gs5hMbFR+6cliYrkNt7xfiAv9oPGgNOK2LYw=
+gopkg.in/ProtocolONE/rabbitmq.v1 v1.0.0-20191130200733-22b27ffa73aa/go.mod h1:rD6KjYTsLgxc51iWPhuInSeZ1HyrNdE/sxco/tz/sXs=
 gopkg.in/airbrake/gobrake.v2 v2.0.9/go.mod h1:/h5ZAUhDkGaJfjzjKLSjv6zCL6O0LLBxU4K+aSYdM/U=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
 gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc h1:2gGKlE2+asNV9m7xrywl36YYNnBG5ZQ0r/BOOxqPpmk=
