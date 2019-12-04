@@ -631,6 +631,6 @@ func (suite *ProjectTestSuite) TestProject_CreateProjectWithoutCallbackProtocol_
 		BodyBytes(b).
 		Exec(suite.T())
 
-	assert.Error(suite.T(), err)
+	assert.NoError(suite.T(), err)
 	assert.NotEmpty(suite.T(), res.Body.String())
 }
