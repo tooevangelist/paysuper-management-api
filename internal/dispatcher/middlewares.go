@@ -177,26 +177,9 @@ func (d *Dispatcher) AuthOneMerchantPreMiddleware() echo.MiddlewareFunc {
 					d.L().Error(c.Path(), logger.Args("user_id", user.Id))
 					return
 				}
-				d.L().Info("[PermissionDebug] user merchants", logger.Args(res.Merchants[0].Role, res.Merchants[0].Id))
+
 				user.Role = res.Merchants[0].Role
 				user.MerchantId = res.Merchants[0].Id
-				common.SetUserContext(c, user)
-			},
-		)(next)
-		return handleFn(c)
-	})
-}
-
-// AuthOnAdminPreMiddleware
-func (d *Dispatcher) AuthOnAdminPreMiddleware() echo.MiddlewareFunc {
-	return common.ContextWrapperCallback(func(c echo.Context, next echo.HandlerFunc) error {
-		handleFn := jwtMiddleware.AuthOneJwtCallableWithConfig(
-			d.appSet.JwtVerifier,
-			func(ui *jwtverifier.UserInfo) {
-				user := common.ExtractUserContext(c)
-				user.Id = ui.UserID
-				user.Email = ui.Email
-				user.Name = "System User"
 				common.SetUserContext(c, user)
 			},
 		)(next)

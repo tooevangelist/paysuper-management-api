@@ -80,8 +80,9 @@ const (
 	RequestParameterReportId                 = "report_id"
 	RequestProductId                         = "product_id"
 	RequestRoleId                            = "role_id"
+	RequestPayoutDocumentId                  = "payout_document_id"
 
-	ImageCollectionImagesField = "images"
+	ImageCollectionImagesField  = "images"
 	ImageCollectionUseOneForAll = "use_one_for_all"
 
 	UserProfileFieldNumberOfEmployees = "NumberOfEmployees"

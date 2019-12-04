@@ -541,6 +541,15 @@ definitions:
       refund_allowed:
         type: string
         description: refund allowed flag
+      payment_ip_country:
+        type: string
+        description: contains ip from payment was made
+      is_ip_country_mismatch_bin:
+        type: boolean
+        description: flag for card payments that country form card's BIN not matched to country defined by IP
+      order_charge:
+        $ref: '#/definitions/order.money'
+        description: object contain information about amount and currency that was charged from user while payment
 
   order.parent:
     type: object
@@ -3856,6 +3865,116 @@ definitions:
         example: "R&K"
         description: "Merchant name"
 
+  changeCustomerRequest:
+    type: object
+    properties:
+      order_id:
+        type: string
+        description: order uuid
+      method_id:
+        type: string
+        description: payment method id
+      account:
+        type: string
+        description: payment account
+
+  changeCustomerResponse:
+    type: object
+    properties:
+      user_address_data_required:
+        type: boolean
+        description: flag that additional user address data is required
+      user_ip_data:
+        type: object
+        properties:
+          country:
+            type: string
+            description: country
+          city:
+            type: string
+            description: city
+          zip:
+            type: string
+            description: zip
+      string:
+        type: string
+        description: bank card brand (if it is card payment)
+      country_payments_allowed:
+        type: boolean
+        description: flag that paymnets allowed in selected country
+      country_change_allowed:
+        type: boolean
+        description: flag that user country select allowed
+      has_vat:
+        type: boolean
+        description: flag that payment has vat
+      amount:
+        type: number
+        description: order amount before vat
+      total_amount:
+        type: number
+        description: order amount with vat
+      currency:
+        type: string
+        description: order currency
+      charge_currency:
+        type: string
+        description: order charge currency
+      charge_amount:
+        type: number
+        description: order charge amount
+      vat_in_charge_currency:
+        type: number
+        description: order vat in charge currency
+      items:
+        description: list of buyed items in order
+        type: array
+        items:
+          $ref: '#/definitions/model.JsonOrderCreateResponse.item'
+
+  changeBillingAddressRequest:
+    type: object
+    properties:
+      order_id:
+        type: string
+        description: order uuid
+      country:
+        type: string
+        description: country
+      zip:
+        type: string
+        description: zip
+
+  changeBillingAddressResponse:
+    type: object
+    properties:
+      has_vat:
+        type: boolean
+        description: flag that payment has vat
+      amount:
+        type: number
+        description: order amount before vat
+      total_amount:
+        type: number
+        description: order amount with vat
+      currency:
+        type: string
+        description: order currency
+      charge_currency:
+        type: string
+        description: order charge currency
+      charge_amount:
+        type: number
+        description: order charge amount
+      vat_in_charge_currency:
+        type: number
+        description: order vat in charge currency
+      items:
+        description: list of buyed items in order
+        type: array
+        items:
+          $ref: '#/definitions/model.JsonOrderCreateResponse.item'
+
 host: p1payapi.tst.protocol.one
 info:
   contact:
@@ -3922,7 +4041,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Country'
+            items:
+              $ref: '#/definitions/model.Country'
+            type: array
         "400":
           description: Invalid request data
           schema:
@@ -3936,6 +4057,39 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
       summary: Get country by numeric ISO 3166-1 code
+      tags:
+        - Country
+  /api/v1/payment_countries/{order_id}:
+    get:
+      consumes:
+        - application/json
+      description: Get list of countries, that allowed to make payment for passed order
+      parameters:
+        - description: order id
+          in: path
+          name: order_id
+          required: true
+          type: integer
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Country'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Some unknown error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Get list of countries, that allowed to make payment for passed order
       tags:
         - Country
   /api/v1/order:
@@ -4191,6 +4345,7 @@ paths:
       summary: Change platform for order
       tags:
         - Order
+
   /admin/api/v1/projects:
     get:
       consumes:
@@ -10585,3 +10740,97 @@ paths:
           description: Object with error message
           schema:
             $ref: '#/definitions/model.Error'
+
+  "/api/v1/orders/{id}/billing_address":
+    post:
+      consumes:
+        - application/json
+      description: Change billing address for order
+      parameters:
+        - description: Order unique identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: Change billing address for order request
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/changeBillingAddressRequest'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/changeBillingAddressResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Change billing address for order
+      tags:
+        - Order
+
+  "/api/v1/orders/{id}/customer":
+    post:
+      consumes:
+        - application/json
+      description: Change customer for order
+      parameters:
+        - description: Order unique identifier
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: customer change request
+          in: body
+          name: body
+          schema:
+            $ref: '#/definitions/changeCustomerRequest'
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/changeCustomerResponse'
+        "400":
+          description: Invalid request data
+          schema:
+            $ref: '#/definitions/model.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.Error'
+        "403":
+          description: Access denied
+          schema:
+            $ref: '#/definitions/model.Error'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Object with error message
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Change customer for order
+      tags:
+        - Order

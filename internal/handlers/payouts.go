@@ -12,8 +12,8 @@ import (
 
 const (
 	payoutsPath          = "/payout_documents"
-	payoutsIdPath        = "/payout_documents/:id"
-	payoutsIdReportsPath = "/payout_documents/:id/reports"
+	payoutsIdPath        = "/payout_documents/:payout_document_id"
+	payoutsIdReportsPath = "/payout_documents/:payout_document_id/reports"
 )
 
 type PayoutDocumentsRoute struct {
@@ -61,31 +61,17 @@ func (h *PayoutDocumentsRoute) getPayoutDocumentsList(ctx echo.Context) error {
 
 func (h *PayoutDocumentsRoute) getPayoutDocument(ctx echo.Context) error {
 	req := &grpc.GetPayoutDocumentRequest{}
-	req.PayoutDocumentId = ctx.Param(common.RequestParameterId)
 
-	authUser := common.ExtractUserContext(ctx)
-	merchantReq := &grpc.GetMerchantByRequest{UserId: authUser.Id}
-	merchant, err := h.dispatch.Services.Billing.GetMerchantBy(ctx.Request().Context(), merchantReq)
-	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetMerchantBy", merchantReq)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
-	}
-	if merchant.Status != http.StatusOK {
-		return echo.NewHTTPError(int(merchant.Status), merchant.Message)
-	}
-
-	req.MerchantId = merchant.Item.Id
-
-	err = h.dispatch.Validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
 
 	res, err := h.dispatch.Services.Billing.GetPayoutDocument(ctx.Request().Context(), req)
+
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "GetPayoutDocuments", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetPayoutDocument")
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
@@ -122,29 +108,22 @@ func (h *PayoutDocumentsRoute) createPayoutDocument(ctx echo.Context) error {
 }
 
 func (h *PayoutDocumentsRoute) updatePayoutDocument(ctx echo.Context) error {
-
 	req := &grpc.UpdatePayoutDocumentRequest{}
-	err := ctx.Bind(req)
 
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
+		return err
 	}
-	req.PayoutDocumentId = ctx.Param(common.RequestParameterId)
 	req.Ip = ctx.RealIP()
-
-	err = h.dispatch.Validate.Struct(req)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
-	}
 
 	res, err := h.dispatch.Services.Billing.UpdatePayoutDocument(ctx.Request().Context(), req)
 	if err != nil {
-		common.LogSrvCallFailedGRPC(h.L(), err, pkg.ServiceName, "UpdatePayoutDocument", req)
-		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "UpdatePayoutDocument")
 	}
+
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
 	return ctx.JSON(http.StatusOK, res.Item)
 }
 
@@ -157,6 +136,7 @@ func (h *PayoutDocumentsRoute) getPayoutRoyaltyReports(ctx echo.Context) error {
 	}
 
 	res, err := h.dispatch.Services.Billing.GetPayoutDocumentRoyaltyReports(ctx.Request().Context(), req)
+
 	if err != nil {
 		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetPayoutDocumentRoyaltyReports")
 	}
