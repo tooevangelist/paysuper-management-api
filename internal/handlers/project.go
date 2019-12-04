@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
-	"github.com/forestgiant/sliceutil"
 	"github.com/labstack/echo/v4"
 	"github.com/paysuper/paysuper-billing-server/pkg"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
@@ -54,12 +53,12 @@ func (h *ProjectRoute) createProject(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectMerchantId)
 	}
 
-	if err := h.dispatch.Validate.Struct(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	if len(req.CallbackProtocol) == 0 {
+		req.CallbackProtocol = pkg.ProjectCallbackProtocolEmpty
 	}
 
-	if len(req.CallbackProtocol) == 0 || !sliceutil.Contains(common.AvailableProtocolTypes, req.CallbackProtocol) {
-		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	if err := h.dispatch.Validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}
 
 	res, err := h.dispatch.Services.Billing.ChangeProject(ctx.Request().Context(), req)
