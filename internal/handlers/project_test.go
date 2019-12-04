@@ -580,3 +580,57 @@ func (suite *ProjectTestSuite) TestProjectCheckSku_Ok() {
 
 	shouldBe.NoError(err)
 }
+
+func (suite *ProjectTestSuite) TestProject_UpdateProjectWrongCallback_Error() {
+	body := `{"callback_protocol": ""}`
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPatch).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + projectsIdPath).
+		Init(test.ReqInitJSON()).
+		BodyString(body).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+	assert.NotEmpty(suite.T(), res.Body.String())
+
+	body = `{"callback_protocol": "some_bad_value"}`
+
+	res, err = suite.caller.Builder().
+		Method(http.MethodPatch).
+		Params(":"+common.RequestParameterProjectId, bson.NewObjectId().Hex()).
+		Path(common.AuthUserGroupPath + projectsIdPath).
+		Init(test.ReqInitJSON()).
+		BodyString(body).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+	assert.NotEmpty(suite.T(), res.Body.String())
+}
+
+
+func (suite *ProjectTestSuite) TestProject_CreateProjectWithoutCallbackProtocol_Error() {
+	body := &billing.Project{
+		MerchantId:         bson.NewObjectId().Hex(),
+		Name:               map[string]string{"en": "A", "ru": "А"},
+		CallbackCurrency:   "RUB",
+		LimitsCurrency:     "RUB",
+		MinPaymentAmount:   0,
+		MaxPaymentAmount:   15000,
+		IsProductsCheckout: false,
+	}
+
+	b, err := json.Marshal(&body)
+	assert.NoError(suite.T(), err)
+
+	res, err := suite.caller.Builder().
+		Method(http.MethodPost).
+		Path(common.AuthUserGroupPath + projectsPath).
+		Init(test.ReqInitJSON()).
+		BodyBytes(b).
+		Exec(suite.T())
+
+	assert.Error(suite.T(), err)
+	assert.NotEmpty(suite.T(), res.Body.String())
+}
