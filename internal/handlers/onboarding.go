@@ -35,8 +35,6 @@ const (
 	merchantsIdAgreementPath           = "/merchants/:merchant_id/agreement"
 	merchantsAgreementDocumentPath     = "/merchants/agreement/document"
 	merchantsIdAgreementDocumentPath   = "/merchants/:merchant_id/agreement/document"
-	merchantsAgreementSignaturePath    = "/merchants/agreement/signature"
-	merchantsIdAgreementSignaturePath  = "/merchants/:merchant_id/agreement/signature"
 	merchantsNotificationsIdPath       = "/merchants/notifications/:notification_id"
 	merchantsNotificationsMarkReadPath = "/merchants/notifications/:notification_id/mark-as-read"
 	merchantsTariffsPath               = "/merchants/tariffs"
@@ -103,8 +101,6 @@ func (h *OnboardingRoute) Route(groups *common.Groups) {
 	groups.SystemUser.GET(merchantsIdAgreementPath, h.getSystemAgreementData)
 	groups.AuthUser.GET(merchantsAgreementDocumentPath, h.getAgreementDocument)
 	groups.SystemUser.GET(merchantsIdAgreementDocumentPath, h.getAgreementDocument)
-	groups.AuthUser.PUT(merchantsAgreementSignaturePath, h.createMerchantAgreementSignature)
-	groups.SystemUser.PUT(merchantsIdAgreementSignaturePath, h.createSystemAgreementSignature)
 
 	groups.SystemUser.POST(merchantsIdNotificationsPath, h.createNotification)
 	groups.SystemUser.GET(merchantsIdNotificationsPath, h.listNotifications)
@@ -557,35 +553,6 @@ func (h *OnboardingRoute) getMerchantStatus(ctx echo.Context) error {
 	}
 
 	if res.Status != pkg.ResponseStatusOk {
-		return echo.NewHTTPError(int(res.Status), res.Message)
-	}
-
-	return ctx.JSON(http.StatusOK, res.Item)
-}
-
-func (h *OnboardingRoute) createMerchantAgreementSignature(ctx echo.Context) error {
-	return h.createAgreementSignature(ctx, pkg.SignerTypeMerchant)
-}
-
-func (h *OnboardingRoute) createSystemAgreementSignature(ctx echo.Context) error {
-	return h.createAgreementSignature(ctx, pkg.SignerTypePs)
-}
-
-func (h *OnboardingRoute) createAgreementSignature(ctx echo.Context, signerType int32) error {
-	req := &grpc.GetMerchantAgreementSignUrlRequest{SignerType: signerType}
-
-	if err := h.dispatch.BindAndValidate(req, ctx); err != nil {
-		return err
-	}
-
-	res, err := h.dispatch.Services.Billing.GetMerchantAgreementSignUrl(ctx.Request().Context(), req)
-
-	if err != nil {
-		return h.dispatch.SrvCallHandler(req, err, pkg.ServiceName, "GetMerchantAgreementSignUrl")
-	}
-
-	if res.Status != pkg.ResponseStatusOk {
-		fmt.Println(res.Message)
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
