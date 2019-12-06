@@ -1004,3 +1004,7 @@ func (s *BillingServerSystemErrorMock) GetOperatingCompany(ctx context.Context, 
 func (s *BillingServerSystemErrorMock) GetCountriesListForOrder(ctx context.Context, in *grpc.GetCountriesListForOrderRequest, opts ...client.CallOption) (*grpc.GetCountriesListForOrderResponse, error) {
 	panic("implement me")
 }
+
+func (s *BillingServerSystemErrorMock) ProcessChargebackCallback(ctx context.Context, in *grpc.CallbackRequest, opts ...client.CallOption) (*grpc.PaymentNotifyResponse, error) {
+	panic("implement me")
+}

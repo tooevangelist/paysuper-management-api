@@ -12,11 +12,12 @@ import (
 )
 
 const (
-	cardPayWebHookPaymentNotifyPath            = "/cardpay/payment"
-	cardPayWebHookRefundNotifyPath             = "/cardpay/refund"
-	cardPayWebHookPaymentUpperCaseNotifyPath   = "/cardpay/PAYMENT"
-	cardPayWebHookRefundUpperCaseNotifyPath    = "/cardpay/REFUND"
-	cardPayWebHookRecurringUpperCaseNotifyPath = "/cardpay/RECURRING"
+	cardPayWebHookPaymentNotifyPath              = "/cardpay/payment"
+	cardPayWebHookRefundNotifyPath               = "/cardpay/refund"
+	cardPayWebHookPaymentUpperCaseNotifyPath     = "/cardpay/PAYMENT"
+	cardPayWebHookRefundUpperCaseNotifyPath      = "/cardpay/REFUND"
+	cardPayWebHookRecurringUpperCaseNotifyPath   = "/cardpay/RECURRING"
+	cardPayWebHookChargedBackUpperCaseNotifyPath = "/cardpay/CHARGED_BACK"
 )
 
 type CardPayWebHook struct {
@@ -40,6 +41,7 @@ func (h *CardPayWebHook) Route(groups *common.Groups) {
 	groups.WebHooks.POST(cardPayWebHookPaymentUpperCaseNotifyPath, h.paymentCallback)
 	groups.WebHooks.POST(cardPayWebHookRefundUpperCaseNotifyPath, h.refundCallback)
 	groups.WebHooks.POST(cardPayWebHookRecurringUpperCaseNotifyPath, h.paymentCallback)
+	groups.WebHooks.POST(cardPayWebHookChargedBackUpperCaseNotifyPath, h.chargebackCallback)
 }
 
 func (h *CardPayWebHook) paymentCallback(ctx echo.Context) error {
@@ -110,6 +112,45 @@ func (h *CardPayWebHook) refundCallback(ctx echo.Context) error {
 	}
 
 	res, err := h.dispatch.Services.Billing.ProcessRefundCallback(ctx.Request().Context(), req)
+
+	if err != nil {
+		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
+		return echo.NewHTTPError(http.StatusInternalServerError, common.ErrorUnknown)
+	}
+
+	if res.Status != pkg.ResponseStatusOk {
+		return echo.NewHTTPError(int(res.Status), res.Error)
+	}
+
+	if res.Error != "" {
+		return ctx.JSON(http.StatusOK, map[string]string{"message": res.Error})
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}
+
+func (h *CardPayWebHook) chargebackCallback(ctx echo.Context) error {
+
+	st := &billing.CardPayRefundCallback{}
+	err := ctx.Bind(st)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
+	}
+
+	err = h.dispatch.Validate.Struct(st)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
+	}
+
+	req := &grpc.CallbackRequest{
+		Handler:   pkg.PaymentSystemHandlerCardPay,
+		Body:      common.ExtractRawBodyContext(ctx),
+		Signature: ctx.Request().Header.Get(common.CardPayPaymentResponseHeaderSignature),
+	}
+
+	res, err := h.dispatch.Services.Billing.ProcessChargebackCallback(ctx.Request().Context(), req)
 
 	if err != nil {
 		h.L().Error(common.InternalErrorTemplate, logger.WithFields(logger.Fields{"err": err.Error()}))
