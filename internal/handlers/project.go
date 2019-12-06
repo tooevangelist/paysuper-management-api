@@ -53,6 +53,10 @@ func (h *ProjectRoute) createProject(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorIncorrectMerchantId)
 	}
 
+	if len(req.CallbackProtocol) == 0 {
+		req.CallbackProtocol = pkg.ProjectCallbackProtocolEmpty
+	}
+
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
 	}

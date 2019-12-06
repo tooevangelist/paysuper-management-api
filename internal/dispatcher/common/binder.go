@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ProtocolONE/go-core/v2/pkg/logger"
 	"github.com/ProtocolONE/go-core/v2/pkg/provider"
+	"github.com/forestgiant/sliceutil"
 	"github.com/globalsign/mgo/bson"
 	"github.com/gurukami/typ/v2"
 	"github.com/labstack/echo/v4"
@@ -18,10 +19,11 @@ import (
 )
 
 var (
-	SystemBinderDefault   = &SystemBinder{}
-	MerchantBinderDefault = &MerchantBinder{}
-	BinderDefault         = &Binder{}
-	EchoBinderDefault     = &echo.DefaultBinder{}
+	SystemBinderDefault    = &SystemBinder{}
+	MerchantBinderDefault  = &MerchantBinder{}
+	BinderDefault          = &Binder{}
+	EchoBinderDefault      = &echo.DefaultBinder{}
+	AvailableProtocolTypes = []string{pkg.ProjectCallbackProtocolEmpty, pkg.ProjectCallbackProtocolDefault}
 )
 
 const (
@@ -552,6 +554,8 @@ func (b *ChangeProjectRequestBinder) Bind(i interface{}, ctx echo.Context) error
 
 	if v, ok := req[RequestParameterCallbackProtocol]; ok {
 		if tv, ok := v.(string); !ok {
+			return ErrorMessageCallbackProtocolIncorrectType
+		} else if len(tv) == 0 || !sliceutil.Contains(AvailableProtocolTypes, tv) {
 			return ErrorMessageCallbackProtocolIncorrectType
 		} else {
 			structure.CallbackProtocol = tv

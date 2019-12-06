@@ -41,8 +41,8 @@ func (suite *TaxesTestSuite) SetupTest() {
 		Tax:     createNewTaxServiceMock(),
 	}
 	user := &common.AuthUser{
-		Id:    "ffffffffffffffffffffffff",
-		Email: "test@unit.test",
+		Id:         "ffffffffffffffffffffffff",
+		Email:      "test@unit.test",
 		MerchantId: "ffffffffffffffffffffffff",
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
@@ -216,7 +216,7 @@ func createNewTaxServiceMock() tax_service.TaxService {
 	return &TaxServiceMock{}
 }
 
-func (ts *TaxServiceMock) GetRate(ctx context.Context, in *tax_service.GetRateRequest, opts ...client.CallOption) (*tax_service.GetRateResponse, error) {
+func (ts *TaxServiceMock) GetRate(ctx context.Context, in *tax_service.GeoIdentity, opts ...client.CallOption) (*tax_service.TaxRate, error) {
 	panic("this method is not implemented in mock")
 }
 

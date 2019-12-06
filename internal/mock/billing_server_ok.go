@@ -55,9 +55,8 @@ func (s *BillingServerOkMock) PaymentFormJsonDataProcess(
 	}
 	return &grpc.PaymentFormJsonDataResponse{
 		Status: pkg.ResponseStatusOk,
-		Item: &grpc.PaymentFormJsonData{
-			Cookie: cookie,
-		},
+		Cookie: cookie,
+		Item:   &grpc.PaymentFormJsonData{},
 	}, nil
 }
 
@@ -883,14 +882,6 @@ func (s *BillingServerOkMock) MerchantReviewRoyaltyReport(ctx context.Context, i
 	return &grpc.ResponseError{Status: pkg.ResponseStatusOk}, nil
 }
 
-func (s *BillingServerOkMock) GetMerchantAgreementSignUrl(
-	ctx context.Context,
-	in *grpc.GetMerchantAgreementSignUrlRequest,
-	opts ...client.CallOption,
-) (*grpc.GetMerchantAgreementSignUrlResponse, error) {
-	return &grpc.GetMerchantAgreementSignUrlResponse{Status: pkg.ResponseStatusOk}, nil
-}
-
 func (s *BillingServerOkMock) GetMerchantOnboardingCompleteData(
 	ctx context.Context,
 	in *grpc.SetMerchantS3AgreementRequest,
@@ -1354,5 +1345,9 @@ func (s *BillingServerOkMock) SetPaymentMinLimitSystem(ctx context.Context, in *
 }
 
 func (s *BillingServerOkMock) GetOperatingCompany(ctx context.Context, in *grpc.GetOperatingCompanyRequest, opts ...client.CallOption) (*grpc.GetOperatingCompanyResponse, error) {
+	panic("implement me")
+}
+
+func (s *BillingServerOkMock) GetCountriesListForOrder(ctx context.Context, in *grpc.GetCountriesListForOrderRequest, opts ...client.CallOption) (*grpc.GetCountriesListForOrderResponse, error) {
 	panic("implement me")
 }

@@ -6,9 +6,9 @@ require (
 	github.com/ProtocolONE/go-core/v2 v2.1.0
 	github.com/PuerkitoBio/purell v1.1.1
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
-	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/aws/aws-sdk-go v1.23.16
 	github.com/fatih/color v1.7.0
+	github.com/forestgiant/sliceutil v0.0.0-20160425183142-94783f95db6c
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-log/log v0.1.0
 	github.com/go-pascal/iban v0.0.0-20180529131734-f0d46003347e
@@ -24,10 +24,10 @@ require (
 	github.com/paysuper/casbin-server v0.0.0-20191128090724-930a08d68cec
 	github.com/paysuper/echo-casbin-middleware v0.0.0-20191201120027-e10b488ca709
 	github.com/paysuper/paysuper-aws-manager v0.0.1
-	github.com/paysuper/paysuper-billing-server v0.0.0-20191202154534-3c4998951b9e
-	github.com/paysuper/paysuper-recurring-repository v1.0.126
+	github.com/paysuper/paysuper-billing-server v0.0.0-20191206121804-299a15cfcb15
+	github.com/paysuper/paysuper-recurring-repository v1.0.127
 	github.com/paysuper/paysuper-reporter v0.0.0-20191113111020-e3a5369c6d6a
-	github.com/paysuper/paysuper-tax-service v0.0.0-20190903084038-7849f394f122
+	github.com/paysuper/paysuper-tax-service v0.0.0-20191203095739-78a9b3c20e88
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0

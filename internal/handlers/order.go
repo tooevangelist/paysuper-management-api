@@ -11,8 +11,10 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/billing"
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
+	"github.com/paysuper/paysuper-management-api/internal/helpers"
 	reporterPkg "github.com/paysuper/paysuper-reporter/pkg"
 	"net/http"
+	"time"
 )
 
 const (
@@ -114,8 +116,10 @@ func (h *OrderRoute) Route(groups *common.Groups) {
 
 func (h *OrderRoute) createFromFormData(ctx echo.Context) error {
 	req := &billing.OrderCreateRequest{
-		PayerIp: ctx.RealIP(),
-		IsJson:  false,
+		User: &billing.OrderUser{
+			Ip: ctx.RealIP(),
+		},
+		IsJson: false,
 	}
 
 	if err := (&common.OrderFormBinder{}).Bind(req, ctx); err != nil {
@@ -123,6 +127,8 @@ func (h *OrderRoute) createFromFormData(ctx echo.Context) error {
 	}
 
 	req.IssuerUrl = ctx.Request().Header.Get(common.HeaderReferer)
+
+	req.Cookie = helpers.GetRequestCookie(ctx, common.CustomerTokenCookiesName)
 
 	if err := h.dispatch.Validate.Struct(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.GetValidationError(err))
@@ -185,6 +191,8 @@ func (h *OrderRoute) createJson(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
+
+	req.Cookie = helpers.GetRequestCookie(ctx, common.CustomerTokenCookiesName)
 
 	err = h.dispatch.Validate.Struct(req)
 
@@ -255,8 +263,6 @@ func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
-	cookie, err := ctx.Cookie(common.CustomerTokenCookiesName)
-
 	req := &grpc.PaymentFormJsonDataRequest{
 		OrderId: id,
 		Scheme:  h.cfg.HttpScheme,
@@ -264,15 +270,12 @@ func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
 		Locale:  ctx.Request().Header.Get(common.HeaderAcceptLanguage),
 		Ip:      ctx.RealIP(),
 		Referer: ctx.Request().Header.Get(common.HeaderReferer),
+		Cookie:  helpers.GetRequestCookie(ctx, common.CustomerTokenCookiesName),
 	}
 
 	h.L().Info("debug", logger.PairArgs("X-Real-IP", ctx.Request().Header.Get(echo.HeaderXRealIP)))
 	h.L().Info("debug", logger.PairArgs("X-Forwarded-For", ctx.Request().Header.Get(echo.HeaderXForwardedFor)))
 	h.L().Info("debug", logger.PairArgs("IP Echo", ctx.RealIP()))
-
-	if err == nil && cookie != nil && cookie.Value != "" {
-		req.Cookie = cookie.Value
-	}
 
 	res, err := h.dispatch.Services.Billing.PaymentFormJsonDataProcess(ctx.Request().Context(), req)
 
@@ -283,6 +286,8 @@ func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
 	if res.Status != http.StatusOK {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
+	helpers.SetResponseCookie(ctx, common.CustomerTokenCookiesName, res.Cookie, h.cfg.CookieDomain, time.Now().Add(h.cfg.CustomerTokenCookiesLifetime))
 
 	return ctx.JSON(http.StatusOK, res.Item)
 }
@@ -311,6 +316,7 @@ func (h *OrderRoute) getOrderForPaylink(ctx echo.Context) error {
 		UtmMedium:   qParams.Get(common.QueryParameterNameUtmMedium),
 		UtmCampaign: qParams.Get(common.QueryParameterNameUtmCampaign),
 		IsEmbedded:  false,
+		Cookie:      helpers.GetRequestCookie(ctx, common.CustomerTokenCookiesName),
 	}
 
 	orderResponse, err := h.dispatch.Services.Billing.OrderCreateByPaylink(ctxReq, oReq)
@@ -622,6 +628,9 @@ func (h *OrderRoute) processBillingAddress(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, common.ErrorRequestParamsIncorrect)
 	}
 
+	req.Ip = ctx.RealIP()
+	req.Cookie = helpers.GetRequestCookie(ctx, common.CustomerTokenCookiesName)
+
 	req.OrderId = orderId
 	err = h.dispatch.Validate.Struct(req)
 
@@ -638,6 +647,8 @@ func (h *OrderRoute) processBillingAddress(ctx echo.Context) error {
 	if res.Status != pkg.ResponseStatusOk {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
+
+	helpers.SetResponseCookie(ctx, common.CustomerTokenCookiesName, res.Cookie, h.cfg.CookieDomain, time.Now().Add(h.cfg.CustomerTokenCookiesLifetime))
 
 	return ctx.JSON(http.StatusOK, res.Item)
 }
