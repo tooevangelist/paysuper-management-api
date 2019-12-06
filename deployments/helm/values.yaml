@@ -48,6 +48,7 @@ backend:
     - AWS_BUCKET_REPORTER
     - ORDER_INLINE_FORM_URL_MASK
     - COOKIE_DOMAIN
+    - ALLOW_ORIGIN
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

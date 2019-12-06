@@ -51,7 +51,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}}`,
 	})) // 3
 
-	allowOrigins := strings.Split(d.cfg.AllowOrigin, ",")
+	allowOrigins := strings.Split(d.globalCfg.AllowOrigin, ",")
 
 	echoHttp.Use(d.RecoverMiddleware()) // 2
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -187,7 +187,6 @@ type Config struct {
 	WorkDir       string
 	PathRouteDump string
 	invoker       *invoker.Invoker
-	AllowOrigin   string `default:"*"`
 }
 
 // OnReload
