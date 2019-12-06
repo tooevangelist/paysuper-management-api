@@ -23,7 +23,7 @@ PaySuper Management API is a REST API backend for the [Dashboard](https://github
 - [API Reference](#api-reference)
 - [Developing](#developing)
     - [Branches](#branches)
-- [Versioning](#versioning)
+    - [Versioning](#versioning)
 - [Tests](#tests)
 - [Terms](#terms)
 - [Contributing](#contributing)
@@ -41,7 +41,7 @@ This project also contains internal API methods which paths start with `/system/
 
 We use the [GitFlow](https://nvie.com/posts/a-successful-git-branching-model) as a branching model for Git.
 
-## Versioning
+### Versioning
 
 PaySuper Management API uses the endpoint versioning. The current version is `/v1`.
 
