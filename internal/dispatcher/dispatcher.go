@@ -50,11 +50,14 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			`"status":${status},"error":"${error}","latency":${latency},"latency_human":"${latency_human}"` +
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}}`,
 	})) // 3
+
+	allowOrigins := strings.Split(d.cfg.AllowOrigin, ",")
+
 	echoHttp.Use(d.RecoverMiddleware()) // 2
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		//TODO: FOR TEST.
-		AllowOrigins: []string{"https://paysupermgmt.tst.protocol.one", "https://dashboard.pay.super.com"},
-		AllowHeaders: []string{"authorization", "content-type"},
+		AllowOrigins:     allowOrigins,
+		AllowCredentials: true,
+		AllowHeaders:     []string{"authorization", "content-type"},
 	})) // 1
 	// Called before routes
 	echoHttp.Use(d.RawBodyPreMiddleware)         // 2
@@ -184,6 +187,7 @@ type Config struct {
 	WorkDir       string
 	PathRouteDump string
 	invoker       *invoker.Invoker
+	AllowOrigin   string `default:"*"`
 }
 
 // OnReload
