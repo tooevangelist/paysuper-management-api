@@ -105,7 +105,7 @@ func (h *OrderRoute) Route(groups *common.Groups) {
 	groups.Common.GET(orderReceiptPath, h.getReceipt)
 
 	groups.AuthUser.GET(orderPath, h.listOrdersPublic)
-	groups.AuthUser.GET(orderDownloadPath, h.downloadOrdersPublic)
+	groups.AuthUser.POST(orderDownloadPath, h.downloadOrdersPublic)
 	groups.AuthUser.GET(orderIdPath, h.getOrderPublic) // TODO: Need a test
 
 	groups.AuthUser.GET(orderRefundsPath, h.listRefunds)
@@ -406,9 +406,6 @@ func (h *OrderRoute) downloadOrdersPublic(ctx echo.Context) error {
 	}
 
 	req.ReportType = reporterPkg.ReportTypeTransactions
-	req.Params = map[string]interface{}{
-		reporterPkg.ParamsFieldId: ctx.Param(common.RequestParameterId),
-	}
 
 	return h.dispatch.RequestReportFile(ctx, req)
 }

@@ -158,9 +158,9 @@ type AuthUser struct {
 }
 
 type ReportFileRequest struct {
-	MerchantId string                 `json:"merchant_id" validate:"required,hexadecimal,len=24"`
+	MerchantId string                 `json:"merchant_id" validate:"required"`
 	FileType   string                 `json:"file_type" validate:"required"`
-	ReportType string                 `json:"report_type" validate:"required"`
+	ReportType string                 `json:"report_type"`
 	Template   string                 `json:"template"`
 	Params     map[string]interface{} `json:"params"`
 }
@@ -172,10 +172,6 @@ func (h *HandlerSet) RequestReportFile(ctx echo.Context, data *ReportFileRequest
 		return echo.NewHTTPError(http.StatusInternalServerError, ErrorRequestDataInvalid)
 	}
 
-	if err = h.Validate.Struct(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, GetValidationError(err))
-	}
-
 	req := &reporterProto.ReportFile{
 		UserId:           ExtractUserContext(ctx).Id,
 		MerchantId:       data.MerchantId,
@@ -184,6 +180,10 @@ func (h *HandlerSet) RequestReportFile(ctx echo.Context, data *ReportFileRequest
 		Template:         data.Template,
 		Params:           params,
 		SendNotification: true,
+	}
+
+	if err = h.Validate.Struct(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, GetValidationError(err))
 	}
 
 	res, err := h.Services.Reporter.CreateFile(ctx.Request().Context(), req)

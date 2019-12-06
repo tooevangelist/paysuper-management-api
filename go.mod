@@ -6,6 +6,7 @@ require (
 	github.com/ProtocolONE/go-core/v2 v2.1.0
 	github.com/PuerkitoBio/purell v1.1.1
 	github.com/alexeyco/simpletable v0.0.0-20190222165044-2eb48bcee7cf
+	github.com/alicebob/gopher-json v0.0.0-20180125190556-5a6b3ba71ee6 // indirect
 	github.com/aws/aws-sdk-go v1.23.16
 	github.com/fatih/color v1.7.0
 	github.com/forestgiant/sliceutil v0.0.0-20160425183142-94783f95db6c
@@ -16,6 +17,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/google/wire v0.3.0
 	github.com/gurukami/typ/v2 v2.0.1
+	github.com/hashicorp/consul v1.4.2 // indirect
 	github.com/karlseguin/expect v1.0.1 // indirect
 	github.com/labstack/echo/v4 v4.1.11
 	github.com/mattn/go-colorable v0.1.4 // indirect
@@ -26,7 +28,7 @@ require (
 	github.com/paysuper/paysuper-aws-manager v0.0.1
 	github.com/paysuper/paysuper-billing-server v0.0.0-20191206121804-299a15cfcb15
 	github.com/paysuper/paysuper-recurring-repository v1.0.127
-	github.com/paysuper/paysuper-reporter v0.0.0-20191113111020-e3a5369c6d6a
+	github.com/paysuper/paysuper-reporter v0.0.0-20191203194948-36a2d983f406
 	github.com/paysuper/paysuper-tax-service v0.0.0-20191203095739-78a9b3c20e88
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5

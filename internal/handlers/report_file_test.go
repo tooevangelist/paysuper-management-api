@@ -2,17 +2,13 @@ package handlers
 
 import (
 	"context"
-	"errors"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/globalsign/mgo/bson"
 	"github.com/labstack/echo/v4"
 	awsWrapper "github.com/paysuper/paysuper-aws-manager"
 	awsWrapperMocks "github.com/paysuper/paysuper-aws-manager/pkg/mocks"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/mock"
 	"github.com/paysuper/paysuper-management-api/internal/test"
-	reporterMocks "github.com/paysuper/paysuper-reporter/pkg/mocks"
-	reporterProto "github.com/paysuper/paysuper-reporter/pkg/proto"
 	"github.com/stretchr/testify/assert"
 	mock2 "github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -40,8 +36,8 @@ func (suite *ReportFileTestSuite) SetupTest() {
 	}
 	suite.caller, e = test.SetUp(settings, srv, func(set *test.TestSet, mw test.Middleware) common.Handlers {
 		mw.Pre(test.PreAuthUserMiddleware(&common.AuthUser{
-			Id:    "ffffffffffffffffffffffff",
-			Email: "test@unit.test",
+			Id:         "ffffffffffffffffffffffff",
+			Email:      "test@unit.test",
 			MerchantId: "ffffffffffffffffffffffff",
 		}))
 		downloadMockResultFn := func(
@@ -94,47 +90,6 @@ func (suite *ReportFileTestSuite) SetupTest() {
 	if e != nil {
 		panic(e)
 	}
-}
-
-func (suite *ReportFileTestSuite) TestReportFile_create_Error_CreateFile() {
-	data := `{"merchant_id": "507f1f77bcf86cd799439011", "file_type": "pdf", "report_type": "vat"}`
-
-	reporterService := &reporterMocks.ReporterService{}
-	reporterService.
-		On("CreateFile", mock2.Anything, mock2.Anything).
-		Return(nil, errors.New("error"))
-	suite.router.dispatch.Services.Reporter = reporterService
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + reportFilePath).
-		Init(test.ReqInitJSON()).
-		BodyString(data).
-		Exec(suite.T())
-
-	httpErr, ok := err.(*echo.HTTPError)
-	assert.True(suite.T(), ok)
-	assert.Equal(suite.T(), http.StatusInternalServerError, httpErr.Code)
-	assert.Regexp(suite.T(), common.ErrorMessageCreateReportFile.Message, httpErr.Message)
-}
-
-func (suite *ReportFileTestSuite) TestReportFile_create_Ok() {
-	data := `{"merchant_id": "507f1f77bcf86cd799439011", "file_type": "pdf", "report_type": "vat"}`
-
-	reporterService := &reporterMocks.ReporterService{}
-	reporterService.
-		On("CreateFile", mock2.Anything, mock2.Anything).
-		Return(&reporterProto.CreateFileResponse{FileId: bson.NewObjectId().Hex()}, nil)
-	suite.router.dispatch.Services.Reporter = reporterService
-
-	_, err := suite.caller.Builder().
-		Method(http.MethodPost).
-		Path(common.AuthUserGroupPath + reportFilePath).
-		Init(test.ReqInitJSON()).
-		BodyString(data).
-		Exec(suite.T())
-
-	assert.NoError(suite.T(), err)
 }
 
 func (suite *ReportFileTestSuite) TestReportFile_download_Error_EmptyId() {
