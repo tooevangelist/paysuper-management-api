@@ -52,6 +52,8 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 	})) // 3
 	echoHttp.Use(d.RecoverMiddleware()) // 2
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		//TODO: FOR TEST.
+		AllowOrigins: []string{"https://paysupermgmt.tst.protocol.one", "https://dashboard.pay.super.com"},
 		AllowHeaders: []string{"authorization", "content-type"},
 	})) // 1
 	// Called before routes
