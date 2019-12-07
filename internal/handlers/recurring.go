@@ -44,6 +44,9 @@ func (h *RecurringRoute) removeSavedCard(ctx echo.Context) error {
 
 	req.Cookie = helpers.GetRequestCookie(ctx, common.CustomerTokenCookiesName)
 
+	h.L().Info("debug", logger.PairArgs("req", req))
+	h.L().Info("debug", logger.PairArgs("cookie", ctx.Cookies()))
+
 	err = h.dispatch.Validate.Struct(req)
 
 	if err != nil {
