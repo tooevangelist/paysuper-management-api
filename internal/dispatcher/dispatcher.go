@@ -58,6 +58,7 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 		AllowOrigins:     allowOrigins,
 		AllowCredentials: true,
 		AllowHeaders:     []string{"authorization", "content-type"},
+		ExposeHeaders:    []string{"authorization", "content-type", "set-cookie", "cookie"},
 	})) // 1
 	// Called before routes
 	echoHttp.Use(d.RawBodyPreMiddleware)         // 2
