@@ -12,7 +12,6 @@ import (
 	"github.com/paysuper/paysuper-billing-server/pkg/proto/grpc"
 	"github.com/paysuper/paysuper-management-api/internal/dispatcher/common"
 	"github.com/paysuper/paysuper-management-api/internal/helpers"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -285,8 +284,9 @@ func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	zap.S().Infow("Before set cookie", "lifetime", h.cfg.CustomerTokenCookiesLifetime)
-	helpers.SetResponseCookie(ctx, common.CustomerTokenCookiesName, res.Cookie, h.cfg.CookieDomain, time.Now().Add(h.cfg.CustomerTokenCookiesLifetime))
+	expire := time.Now().AddDate(0, 0, 30)
+	h.dispatch.AwareSet.L().Info("Before set cookie", logger.WithPrettyFields(logger.Fields{"lifetime": h.cfg.CustomerTokenCookiesLifetime, "expire": expire}))
+	helpers.SetResponseCookie(ctx, common.CustomerTokenCookiesName, res.Cookie, h.cfg.CookieDomain, expire)
 
 	return ctx.JSON(http.StatusOK, res.Item)
 }
@@ -632,8 +632,9 @@ func (h *OrderRoute) processBillingAddress(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	zap.S().Infow("Before set cookie", "lifetime", h.cfg.CustomerTokenCookiesLifetime)
-	helpers.SetResponseCookie(ctx, common.CustomerTokenCookiesName, res.Cookie, h.cfg.CookieDomain, time.Now().Add(h.cfg.CustomerTokenCookiesLifetime))
+	expire := time.Now().AddDate(0, 0, 30)
+	h.dispatch.AwareSet.L().Info("Before set cookie", logger.WithPrettyFields(logger.Fields{"lifetime": h.cfg.CustomerTokenCookiesLifetime, "expire": expire}))
+	helpers.SetResponseCookie(ctx, common.CustomerTokenCookiesName, res.Cookie, h.cfg.CookieDomain, expire)
 
 	return ctx.JSON(http.StatusOK, res.Item)
 }
