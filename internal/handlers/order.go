@@ -270,9 +270,8 @@ func (h *OrderRoute) getPaymentFormData(ctx echo.Context) error {
 		Cookie:  helpers.GetRequestCookie(ctx, common.CustomerTokenCookiesName),
 	}
 
-	h.L().Info("debug", logger.PairArgs("X-Real-IP", ctx.Request().Header.Get(echo.HeaderXRealIP)))
-	h.L().Info("debug", logger.PairArgs("X-Forwarded-For", ctx.Request().Header.Get(echo.HeaderXForwardedFor)))
-	h.L().Info("debug", logger.PairArgs("IP Echo", ctx.RealIP()))
+	h.L().Info("debug", logger.PairArgs("req", req))
+	h.L().Info("debug", logger.PairArgs("cookie", ctx.Cookies()))
 
 	res, err := h.dispatch.Services.Billing.PaymentFormJsonDataProcess(ctx.Request().Context(), req)
 
