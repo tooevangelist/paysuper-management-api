@@ -50,9 +50,15 @@ func (d *Dispatcher) Dispatch(echoHttp *echo.Echo) error {
 			`"status":${status},"error":"${error}","latency":${latency},"latency_human":"${latency_human}"` +
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}}`,
 	})) // 3
+
+	allowOrigins := strings.Split(d.globalCfg.AllowOrigin, ",")
+
 	echoHttp.Use(d.RecoverMiddleware()) // 2
 	echoHttp.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowHeaders: []string{"authorization", "content-type"},
+		AllowOrigins:     allowOrigins,
+		AllowCredentials: true,
+		AllowHeaders:     []string{"authorization", "content-type"},
+		ExposeHeaders:    []string{"authorization", "content-type", "set-cookie", "cookie"},
 	})) // 1
 	// Called before routes
 	echoHttp.Use(d.RawBodyPreMiddleware)         // 2
