@@ -4311,8 +4311,10 @@ paths:
       produces:
         - application/json
       responses:
-        "204":
+        "200":
           description: OK
+          schema:
+            $ref: '#/definitions/changeCustomerResponse'
         "400":
           description: Invalid request data
           schema:
