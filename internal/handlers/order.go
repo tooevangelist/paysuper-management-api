@@ -733,7 +733,7 @@ func (h *OrderRoute) changePlatform(ctx echo.Context) error {
 		return echo.NewHTTPError(int(res.Status), res.Message)
 	}
 
-	return ctx.NoContent(http.StatusOK)
+	return ctx.JSON(http.StatusOK, res.Item)
 }
 func (h *OrderRoute) getReceipt(ctx echo.Context) error {
 	orderId := ctx.Param(common.RequestParameterOrderId)

@@ -793,7 +793,7 @@ func (s *BillingServerSystemErrorMock) PaymentFormPlatformChanged(
 	ctx context.Context,
 	in *grpc.PaymentFormUserChangePlatformRequest,
 	opts ...client.CallOption,
-) (*grpc.EmptyResponseWithStatus, error) {
+) (*grpc.PaymentFormDataChangeResponse, error) {
 	panic("implement me")
 }
 
