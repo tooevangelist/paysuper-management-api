@@ -1366,7 +1366,7 @@ func (suite *OrderTestSuite) TestOrder_ChangePlatformPayment_InternalError() {
 func (suite *OrderTestSuite) TestOrder_ChangePlatformPayment_Error() {
 	shouldBe := require.New(suite.T())
 	billingService := &billMock.BillingService{}
-	billingService.On("PaymentFormPlatformChanged", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
+	billingService.On("PaymentFormPlatformChanged", mock2.Anything, mock2.Anything).Return(&grpc.PaymentFormDataChangeResponse{
 		Status:  400,
 		Message: &grpc.ResponseErrorMessage{Message: "Some error"},
 	}, nil)
@@ -1393,8 +1393,11 @@ func (suite *OrderTestSuite) TestOrder_ChangePlatformPayment_Error() {
 func (suite *OrderTestSuite) TestOrder_ChangePlatformPayment_Ok() {
 	shouldBe := require.New(suite.T())
 	billingService := &billMock.BillingService{}
-	billingService.On("PaymentFormPlatformChanged", mock2.Anything, mock2.Anything).Return(&grpc.EmptyResponseWithStatus{
+	billingService.On("PaymentFormPlatformChanged", mock2.Anything, mock2.Anything).Return(&grpc.PaymentFormDataChangeResponse{
 		Status: 200,
+		Item: &billing.PaymentFormDataChangeResponseItem{
+			Amount: 10,
+		},
 	}, nil)
 	suite.router.dispatch.Services.Billing = billingService
 
